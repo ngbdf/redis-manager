@@ -47,3 +47,5 @@ RedisManager 是 newegg bigdata 部门研发的 redis 一站式管理平台,用�
 ## Design Docs
 > 设计文档主要介绍 redisMangaer 架构设计、框架设计
 
+1. [代码结构介绍](/docs/frame-design.md)
+
