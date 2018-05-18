@@ -8,6 +8,8 @@ RedisManager 是 newegg bigdata 部门研发的 redis 一站式管理平台,用�
 集群的管理支持 slot迁移、master slave 角色的选举、动态配置的修改
 监控部分有 redis info、 slow log 等。
 
+[快速开始](/docs/README.md)
+
 ## 产品截图
 > 截图部分包含了 创建模块、管理模块、以及监控模块、详情如下:
 ### 1 创建集群
@@ -37,6 +39,7 @@ RedisManager 是 newegg bigdata 部门研发的 redis 一站式管理平台,用�
 ## 用户手册
 > 用户手册主要介绍如何使用 redisManager
 
+0. [如何启动项目](/docs/README.md)
 1. [如何创建集群](/docs/README.md)
 2. [如何管理或监控一个已存在的集群](/docs/README.md)
 3. [如何管理集群](/docs/README.md)
@@ -49,3 +52,5 @@ RedisManager 是 newegg bigdata 部门研发的 redis 一站式管理平台,用�
 
 1. [代码结构介绍](/docs/frame-design.md)
 
+## License
+RedisManager is Open Source software released under the  [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
