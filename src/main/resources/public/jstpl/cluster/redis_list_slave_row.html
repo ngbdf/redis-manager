@@ -1,0 +1,11 @@
+<td style="border-top:0px"></td>
+<td>{{node_status_tag status=$slave.status index=$index }}</td>
+<td>{{$slave.role}}</td>
+<td>{{$slave.host}}</td>
+<td><a href="javascript:void(0)" class="node-info" id="{{$slave.nodeId}}" data-ip="{{$slave.ip}}" data-port="{{$slave.port}}">{{$slave.nodeId}}</a></td>
+<td></td>
+<td style="text-align:right">
+    <button class="option-button forget-node btn btn-default btn-xs" data-nodeid="{{$slave.nodeId}}" data-masterid="{{$slave.masterId}}" data-ip="{{$slave.ip}}" data-port="{{$slave.port}}" >Forget Node</button>
+    <button class="option-button be-master btn btn-default second-selected btn-xs" data-nodeid="{{$slave.nodeId}}" data-ip="{{$slave.ip}}" data-port="{{$slave.port}}" >Be Maser</button>
+    <button class="option-button be-slave btn btn-default second-selected btn-xs" data-nodeid="{{$slave.nodeId}}" data-masterid="{{$slave.masterId}}" data-ip="{{$slave.ip}}" data-port="{{$slave.port}}">Be Slave</button>
+</td>

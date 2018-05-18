@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="keyword" content="redis, cluster, cache, platform" />
+        <!--<link rel="shortcut icon" href="img/favicon.html">-->
+
+        <title>Redis Manager</title>
+
+        <link rel="stylesheet" href="../vender/bootstrap-3.3.7/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="../css/bootstrap-reset.css" />
+        <link rel="stylesheet" href="../font-awesome/css/font-awesome.css" />
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/style-responsive.css"  />
+        <link rel="stylesheet" href="../css/dashboard.css" />
+    </head>
+    <body>
+
+        <section id="container" class="">
+          <!--header start-->
+            <header class="header white-bg">
+                <div class="sidebar-toggle-box">
+                    <div data-original-title="Toggle Navigation" data-placement="right" class="icon-reorder tooltips"></div>
+                </div>
+                <!--logo start-->
+                <a href="#" class="logo"><span>Redis</span>&nbsp;Manager</a>
+                <!--logo end-->
+
+                <div class="top-nav ">
+                    <ul class="nav pull-right top-menu">
+                    <!-- user login dropdown start-->
+                        <li class="dropdown">
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                                <img alt="" src="../img/G.png" class="head-pic" />
+                                <span class="username">Admin</span>
+                                <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu extended logout">
+                                <div class="log-arrow-up"></div>
+                                <li><a href="#"><i class="icon-suitcase"></i>Profile</a></li>
+                                <li><a href="#"><i class="icon-cog"></i> Settings</a></li>
+                                <li><a href="#"><i class="icon-bell-alt"></i> Notification</a></li>
+                                <li><a href="#"><i class="icon-key"></i> Log Out</a></li>
+                            </ul>
+                        </li>
+                    <!-- user login dropdown end -->
+                    </ul>
+                </div>
+            </header>
+            <!--header end-->
+            <!--sidebar start-->
+            <aside>
+                <div id="sidebar"  class="nav-collapse ">
+                    <!-- sidebar menu start-->
+                    <ul class="sidebar-menu">
+                        <li class="active">
+                            <a class="dashboard" href="/monitor/clusterMonitorList" target="change-page">
+                            <i class="icon-dashboard"></i>
+                            <span>Cluster Monitor</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="" href="/cluster/clusterListManager" target="change-page">
+                                <i class=" icon-cog"></i>
+                                <span>Cluster Manager</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="" href="/node/selectClusterType" target="change-page">
+                                <i class="icon-plus-sign-alt"></i>
+                                <span>Cluster Create</span>
+                            </a>
+                        </li>
+                        <!--<li>
+                            <a class="" href="/monitor/clusterMonitor" target="change-page">
+                                <i class="icon-plus-sign-alt"></i>
+                                <span>Monitor Statistics</span>
+                            </a>
+                        </li>-->
+                    </ul>
+                    <!-- sidebar menu end-->
+                </div>
+            </aside>
+            <!--sidebar end-->
+            <!--main content start-->
+            <section id="main-content">
+                <section class="wrapper">
+                    <iframe src="/monitor/clusterMonitorList" name="change-page" class="content-page" scrolling="no"  frameborder="0" ></iframe>
+                </section>
+            </section>
+            <!--main content end-->
+        </section>
+
+        <script src="../vender/jquery/jquery-3.3.1.min.js"></script>
+        <script src="../js/dashboard.js"></script>
+        <script src="../vender/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+        <script src="../js/jquery.scrollTo.min.js"></script>
+        <script src="../js/jquery.nicescroll.js" type="text/javascript"></script>
+        <script src="../js/common-scripts.js"></script>
+    </body>
+</html>

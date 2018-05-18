@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.newegg.ec.cache.app.dao.INodeInfoDao">
+    <select id="getGroupNodeInfo" resultType="com.newegg.ec.cache.app.model.NodeInfo" statementType="STATEMENT">
+        select
+            <if test="date == 'day'">
+                day as date,
+            </if>
+            <if test="date == 'hour'">
+                concat(CAST(day AS CHAR), ':', CAST(hour AS CHAR)) as date,
+            </if>
+            <if test="date == 'minute'">
+                concat(CAST(hour AS CHAR), ':', CAST(minute AS CHAR)) as date,
+            </if>
+            cast(${type}(connected_clients) as decimal(20,2)) as connectedClients,
+            cast(${type}(blocked_clients) as decimal(20,2)) as blockedClients,
+            cast(${type}(used_memory) as decimal(20,2)) as usedMemory,
+            cast(${type}(used_memory_rss) as decimal(20,2)) as usedMemoryRss,
+            cast(${type}(used_memory_peak) as decimal(20,2)) as usedMemoryPeak,
+            cast(${type}(mem_fragmentation_ratio) as decimal(20,2)) as memFragmentationRatio,
+            cast(${type}(aof_enabled) as decimal(20,2)) as aofEnabled,
+            cast(${type}(total_connections_received) as decimal(20,2)) as totalConnectionsReceived,
+            cast(${type}(total_commands_processed) as decimal(20,2)) as totalCommandsProcessed,
+            cast(${type}(instantaneous_ops_per_sec) as decimal(20,2)) as instantaneousOpsPerSec,
+            cast(${type}(total_net_input_bytes) as decimal(20,2)) as totalNetInputBytes,
+            cast(${type}(total_net_output_bytes) as decimal(20,2)) as totalNetOutputBytes,
+            cast(${type}(instantaneous_input_kbps) as decimal(20,2)) as instantaneousInputKbps,
+            cast(${type}(instantaneous_output_kbps) as decimal(20,2)) as instantaneousOutputKbps,
+            cast(${type}(rejected_connections) as decimal(20,2)) as rejectedConnections,
+            cast(${type}(sync_full) as decimal(20,2)) as syncFull,
+            cast(${type}(sync_partial_ok) as decimal(20,2)) as syncPartialOk,
+            cast(${type}(sync_partial_err) as decimal(20,2)) as syncPartialErr,
+            cast(${type}(expired_keys) as decimal(20,2)) as expiredKeys,
+            cast(${type}(evicted_keys) as decimal(20,2)) as evictedKeys,
+            cast(${type}(keyspace_hits) as decimal(20,2)) as keyspaceHits,
+            cast(${type}(keyspace_misses) as decimal(20,2)) as keyspaceMisses,
+            cast(${type}(pubsub_channels) as decimal(20,2)) as pubsubChannels,
+            cast(${type}(pubsub_patterns) as decimal(20,2)) as pubsubPatterns,
+            cast(${type}(latest_fork_usec) as decimal(20,2)) as latestForkUsec,
+            cast(${type}(migrate_cached_sockets) as decimal(20,2)) as migrateCachedSockets,
+            cast(${type}(used_cpu_sys) as decimal(20,2)) as usedCpuSys,
+            cast(${type}(used_cpu_user) as decimal(20,2)) as usedCpuUser,
+            cast(${type}(used_cpu_sys_children) as decimal(20,2)) as usedCpuSysChildren,
+            cast(${type}(used_cpu_user_children) as decimal(20,2)) as usedCpuUserChildren,
+            cast(${type}(total_keys) as decimal(20,2)) as totalKeys,
+            cast(${type}(expires) as decimal(20,2)) as expires,
+            cast(${type}(avg_ttl) as decimal(20,2)) as avgTtl,
+            cast(${type}(response_time) as decimal(20,2)) as responseTime
+        from ${tableName}
+        where
+            add_time &gt; ${startTime} and add_time &lt; ${endTime}
+            <if test="host != 'all'">
+                and host='${host}'
+            </if>
+            group by
+            <if test="date == 'day'">
+                day order by day
+            </if>
+            <if test="date == 'hour'">
+                day,hour order by day,hour
+            </if>
+            <if test="date == 'minute'">
+                day,hour,minute order by day,hour,minute
+            </if>
+
+    </select>
+    <select id="getMaxField" resultType="hashmap" statementType="STATEMENT">
+        select host,${key} from ${tableName}
+        where
+        add_time &gt; ${startTime} and add_time &lt; ${endTime}
+        order by ${key} desc limit ${limit}
+    </select>
+    <select id="getMinField" resultType="hashmap" statementType="STATEMENT">
+        select host,${key} from ${tableName}
+        where
+        add_time &gt; ${startTime} and add_time &lt; ${endTime}
+        order by ${key} limit ${limit}
+    </select>
+    <select id="getAvgField" resultType="String" statementType="STATEMENT">
+        select cast(avg(${key}) as decimal(20,2)) from ${tableName}
+        where
+        add_time &gt; ${startTime} and add_time &lt; ${endTime}
+        <if test="host != 'all'">
+            and host='${host}'
+        </if>
+    </select>
+    <select id="getAllField" resultType="String" statementType="STATEMENT">
+        select sum(total) as total from
+        (select max(add_time), ${key} as total, host from ${tableName}
+        where
+        host != "" and
+        add_time &gt; ${startTime} and add_time &lt; ${endTime}
+        group by host) as aliasTable
+    </select>
+    <select id="getLastNodeInfo" resultType="com.newegg.ec.cache.app.model.NodeInfo" statementType="STATEMENT">
+        select * from ${tableName}
+        where
+        add_time &gt; ${startTime} and add_time &lt; ${endTime}
+        <if test="host != ''">
+            and host='${host}'
+        </if>
+        order by id desc limit 1
+    </select>
+    <insert id="addNodeInfo" parameterType="com.newegg.ec.cache.app.model.NodeInfo" statementType="STATEMENT">
+        insert into
+        ${tableName}
+        (
+            connected_clients,
+            blocked_clients,
+            used_memory,
+            used_memory_rss,
+            used_memory_peak,
+            mem_fragmentation_ratio,
+            aof_enabled,
+            total_connections_received,
+            total_commands_processed,
+            instantaneous_ops_per_sec,
+            total_net_input_bytes,
+            total_net_output_bytes,
+            instantaneous_input_kbps,
+            instantaneous_output_kbps,
+            rejected_connections,
+            sync_full,
+            sync_partial_ok,
+            sync_partial_err,
+            expired_keys,
+            evicted_keys,
+            keyspace_hits,
+            keyspace_misses,
+            pubsub_channels,
+            pubsub_patterns,
+            latest_fork_usec,
+            migrate_cached_sockets,
+            used_cpu_sys,
+            used_cpu_user,
+            used_cpu_sys_children,
+            used_cpu_user_children,
+            total_keys,
+            expires,
+            avg_ttl,
+            response_time,
+            host,
+            ip,
+            port,
+            day,
+            hour,
+            minute,
+            add_time
+        )
+        values
+        (
+            ${q.connectedClients},
+            ${q.blockedClients},
+            ${q.usedMemory},
+            ${q.usedMemoryRss},
+            ${q.usedMemoryPeak},
+            ${q.memFragmentationRatio},
+            ${q.aofEnabled},
+            ${q.totalConnectionsReceived},
+            ${q.totalCommandsProcessed},
+            ${q.instantaneousOpsPerSec},
+            ${q.totalNetInputBytes},
+            ${q.totalNetOutputBytes},
+            ${q.instantaneousInputKbps},
+            ${q.instantaneousOutputKbps},
+            ${q.rejectedConnections},
+            ${q.syncFull},
+            ${q.syncPartialOk},
+            ${q.syncPartialErr},
+            ${q.expiredKeys},
+            ${q.evictedKeys},
+            ${q.keyspaceHits},
+            ${q.keyspaceMisses},
+            ${q.pubsubChannels},
+            ${q.pubsubPatterns},
+            ${q.latestForkUsec},
+            ${q.migrateCachedSockets},
+            ${q.usedCpuSys},
+            ${q.usedCpuUser},
+            ${q.usedCpuSysChildren},
+            ${q.usedCpuUserChildren},
+            ${q.totalKeys},
+            ${q.expires},
+            ${q.avgTtl},
+            ${q.responseTime},
+            '${q.host}',
+            '${q.ip}',
+            ${q.port},
+            ${q.day},
+            ${q.hour},
+            ${q.minute},
+            ${q.addTime}
+        )
+    </insert>
+</mapper>

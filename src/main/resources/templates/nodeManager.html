@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
+<head>
+    <meta charset="UTF-8" />
+    <title>Node Manager</title>
+    <link href="../vender/datatables/dataTables.bootstrap.css" rel="stylesheet" charset="utf-8" />
+    <link rel="stylesheet" href="../vender/bootstrap-3.3.7/css/bootstrap.css"/>
+    <link href="../vender/sparrow/sparrow.css" rel="stylesheet" charset="utf-8" />
+    <link rel="stylesheet" href="../css/common.css"/>
+    <link rel="stylesheet" href="../css/manager-cluster.css"/>
+    <script type="text/javascript" src="../vender/jquery/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="../vender/bootstrap-3.3.7/js/bootstrap.js"></script>
+    <script src="../vender/sparrow/layer/layer.js"></script>
+    <script src="../vender/sparrow/ajax.js"></script>
+    <script src="../core/userApi.js"></script>
+    <script src="../vender/sparrow/util.js"></script>
+    <script src="../vender/sparrow/smarty.js"></script>
+    <script src="../vender/sparrow/validate.js"></script>
+    <script src="../vender/datatables/jquery.dataTables.js"></script>
+    <script src="../vender/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/plugin-common.js"></script>
+    <link rel="stylesheet" href="../css/common.css"/>
+    <link rel="stylesheet" href="../css/plugin-common.css"/>
+</head>
+<body>
+<div class="body-container container-color">
+    <div class="main-swapper">
+        <div class="cluster-header">
+            <ul class="nav nav-tabs">
+                <li class="active navbar-right">
+                    <a href="#node-list" data-toggle="tab">Node List</a>
+                </li>
+                <li class="navbar-right">
+                    <a href="#add-node" target="node-manager" data-toggle="tab">Add node</a>
+                </li>
+            </ul>
+        </div>
+        <div class="base-info-operation">
+
+        </div>
+        <div id="clsuter-content" class="tab-content" >
+            <div role="tabpanel" class="tab-pane active" id="node-list">Node list</div>
+            <div role="tabpanel" class="tab-pane" id="add-node">
+                <iframe src="/user/login" name="node-install-manager" class="content-page manager-create-iframe" scrolling="no"  frameborder="0" ></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script src="../js/node-manager.js"></script>
+</html>

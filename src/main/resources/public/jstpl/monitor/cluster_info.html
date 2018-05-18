@@ -1,0 +1,74 @@
+<div class="summary">
+    <div class="one-data">
+        <i class="fa fa-heartbeat"></i>
+        <div class="data-item">
+            <span class="one-data-name">Cluster State:</span>
+            <span class="state-{{$res.cluster_state}}">{{$res.cluster_state}}</span>
+        </div>
+    </div>
+    <div class="one-data">
+        <i class="material-icons">record_voice_over</i>
+        <div class="data-item">
+            <span class="one-data-name">Cluster Master:</span>
+            <span><b>{{$res.cluster_size}}</b></span>
+        </div>
+    </div>
+    <div class="one-data">
+        <i class="material-icons">flip_to_back</i>
+        <div class="data-item">
+            <span class="one-data-name">All Keys:</span>
+            <span><b id="all-keys"></b></span>
+        </div>
+    </div>
+    <!--<div class="one-data">
+        <i class="material-icons">dashboard</i>
+        <div class="data-item">
+            <span class="one-data-name">Cluster Nodes:</span>
+            <span><b>{{$res.cluster_known_nodes}}</b></span>
+        </div>
+    </div>
+    <div class="one-data">
+        <i class="material-icons">flip_to_back</i>
+        <div class="data-item">
+            <span class="one-data-name">Slots Assigned(ok/all):
+            <span><b>{{$res.cluster_slots_ok}}/{{$res.cluster_slots_assigned}}</b></span>
+        </span>
+        </div>
+    </div>-->
+    <!--<div class="one-data">
+        <i class="material-icons">settings_input_component</i>
+        <div class="one-data-name">
+            <span class="one-data-name">Slots Pfail:</span>
+            <span><b>{{$res.cluster_slots_pfail}}</b></span>
+        </div>
+    </div>
+    <div class="one-data">
+        <i class="material-icons">settings_input_component</i>
+        <div>
+            <span class="one-data-name">Slots Fail:</span>
+            <span><b>{{$res.cluster_slots_fail}}</b></span>
+        </div>
+    </div>
+    <div class="one-data">
+        <i class="material-icons">label</i>
+        <div>
+            <span class="one-data-name">Current Epoch:</span>
+            <span><b>{{$res.cluster_current_epoch}}</b></span>
+        </div>
+    </div>
+    <div class="one-data">
+        <i class="material-icons">label_outline</i>
+        <div>
+            <span class="one-data-name">My Epoch:</span>
+            <span><b>{{$res.cluster_my_epoch}}</b></span>
+        </div>
+    </div>-->
+    <div class="one-data">
+        <i class="material-icons">settings_ethernet</i>
+        <div class="data-item">
+            <span class="one-data-name">Stats Messages Sent/Received:
+                <span><b>{{$res.cluster_stats_messages_sent}}/{{$res.cluster_stats_messages_received}}</b></span>
+            </span>
+        </div>
+    </div>
+</div>

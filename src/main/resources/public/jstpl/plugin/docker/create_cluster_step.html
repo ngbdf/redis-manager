@@ -1,0 +1,71 @@
+<div class="col-md-6">
+    <table class="table" id="create-cluster-form">
+        <tbody>
+        <tr class="input-tip-tr">
+            <td class="field-name">ClusterName</td>
+            <td class="field-value">
+                <input name="clusterName" data-alias="clusterId" type="text" class="no-border-input form-control" data-ajax-type="get"  placeholder="cluster-name"  data-require="1" data-len="5-20" data-len-msg="length range 5-20" data-format="[a-zA-Z0-9_\-]+" data-format-msg="format letter,number,- or _"  data-server-check="/check/checkClusterName"  >
+            </td>
+            <td class="field-name">ContainerName </td>
+            <td class="field-value">
+                <input name="containerName" data-check-fields="iplist" type="text" class="form-control" data-require="1" data-len="5-20" data-len-msg="length range 5-20"  data-format="[a-zA-Z0-9_\-]+" data-format-msg="format letter,number,- or _"  placeholder="redis">
+            </td>
+        </tr>
+        <tr class="error-input-tip-tr">
+            <td></td>
+            <td><div id="clusterName_tip"></div></td>
+            <td></td>
+            <td><div id="containerName_tip"></div></td>
+        </tr>
+        <tr class="input-tip-tr">
+            <td class="field-name">Image</td>
+            <td class="field-value">
+                <select name="image" class="form-control"  data-require="1">
+                    {{foreach from=$res item=image}}
+                    <option>{{$image}}</option>
+                    {{/foreach}}
+                </select>
+            </td>
+            <td class="field-name">Group</td>
+            <td class="field-value">
+                <select name="userGroup" class="form-control table-select">
+                    {{foreach from=$groups item=group}}
+                    <option>{{$group}}</option>
+                    {{/foreach}}
+                </select>
+            </td>
+        </tr>
+        <tr class="error-input-tip-tr"><td></td></tr>
+        <tr class="input-tip-tr">
+            <td class="field-name" >
+                Batch IP List
+                <pre class="ip-list-tip">
+                    format:<br/>
+                    127.0.0.1:8054 master<br/>
+                    127.0.0.1:8053<br/>
+                    127.0.0.1:8056 master<br/>
+                    127.0.0.1:8057
+                </pre>
+            </td>
+            <td colspan="3">
+                <div>
+                    <textarea class="host-list form-control" rows="6" name="iplist" data-relation="containerName"  data-require="1" data-server-check="/check/checkBatchHostNotPass,/node/dockernodeCheckAccess"  placeholder="example 127.0.0.1:8008" ></textarea>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <button class="btn btn-default create-cluster-button" id="start-install-cluster">CreateCluster</button>
+            </td>
+            <td colspan="3"><div id="iplist_tip"></div></td>
+        </tr>
+        </tbody>
+    </table>
+</div><!-- .col-md-6 -->
+<div class="col-md-6">
+    <div class="panel panel-default">
+        <div>
+            {{include file="plugin/redis_console.html"}}
+        </div>
+    </div>
+</div>
