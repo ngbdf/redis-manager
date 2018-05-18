@@ -39,18 +39,19 @@ RedisManager 是 newegg bigdata 部门研发的 redis 一站式管理平台,用�
 ## 用户手册
 > 用户手册主要介绍如何使用 redisManager
 
-0. [如何启动项目](/docs/README.md)
-1. [如何创建集群](/docs/README.md)
-2. [如何管理或监控一个已存在的集群](/docs/README.md)
-3. [如何管理集群](/docs/README.md)
-4. [如何管理节点](/docs/README.md)
-5. [如何查看监控](/docs/README.md)
-6. [query功能介绍](/docs/README.md)
+0. [如何启动项目](https://github.com/ngbdf/redis-manager/wiki/如何启动项目)
+1. [如何创建集群](https://github.com/ngbdf/redis-manager/wiki/如何创建集群)
+2. [如何管理或监控一个已存在的集群](https://github.com/ngbdf/redis-manager/wiki/如何管理或监控一个已存在的集群)
+3. [如何管理集群](https://github.com/ngbdf/redis-manager/wiki/如何管理集群)
+4. [如何管理节点](https://github.com/ngbdf/redis-manager/wiki/如何管理节点)
+5. [如何查看监控](https://github.com/ngbdf/redis-manager/wiki/如何查看监控)
+6. [query功能介绍](https://github.com/ngbdf/redis-manager/wiki/query功能介绍)
 
 ## 产品设计
 > 设计文档主要介绍 redisMangaer 架构设计、框架设计
 
-1. [代码结构介绍](/docs/frame-design.md)
+1. [代码结构介绍](https://github.com/ngbdf/redis-manager/wiki/代码结构介绍)
+2. [监控数据的采集](https://github.com/ngbdf/redis-manager/wiki/监控数据的采集)
 
 ## License
 RedisManager is Open Source software released under the  [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
