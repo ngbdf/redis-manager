@@ -1,5 +1,4 @@
 # RedisManager
-================
 
 [![Build Status](https://travis-ci.org/ngbdf/redis-manager.svg?branch=master)](https://travis-ci.org/ngbdf/redis-manager)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
@@ -48,4 +47,3 @@ RedisManager 是 newegg bigdata 部门研发的 redis 一站式管理平台,用�
 ## Design Docs
 > 设计文档主要介绍 redisMangaer 架构设计、框架设计
 
-1. [框架介绍](/docs/frame-design.md)
