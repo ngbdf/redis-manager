@@ -2,14 +2,14 @@
 
 [![Build Status](https://travis-ci.org/ngbdf/redis-manager.svg?branch=master)](https://travis-ci.org/ngbdf/redis-manager)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Join the chat at https://gitter.im/dianping/cat](https://badges.gitter.im/dianping/cat.svg)](https://gitter.im/redis-manager/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
 
 RedisManager 是 newegg bigdata 部门研发的 redis 一站式管理平台,用于管理 newegg 内部 redis cluster 集群，支持集群的创建、管理、监控。
 集群的创建包含了三种方式 docker、machine、humpback
 集群的管理支持 slot迁移、master slave 角色的选举、动态配置的修改
 监控部分有 redis info、 slow log 等。
 
-[快速开始](https://github.com/ngbdf/redis-manager/wiki/)
+[快速开始](https://github.com/ngbdf/redis-manager/wiki/)     
+您在使用产品的过程中如果遇到问题或者需要改进的地方可以点击 [![Join the chat at https://gitter.im/dianping/cat](https://badges.gitter.im/dianping/cat.svg)](https://gitter.im/redis-manager/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link) 来联系我们
 
 ## 产品截图
 > 截图部分包含了 创建模块、管理模块、以及监控模块、详情如下:
