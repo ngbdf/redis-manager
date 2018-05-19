@@ -210,7 +210,7 @@ public class JedisUtil {
      * @param port
      * @return
      */
-    private static List<Map<String, String>> getNodeList (String ip, int port, boolean filterMaster) {
+    public static List<Map<String, String>> getNodeList(String ip, int port, boolean filterMaster) {
         Map<String, Map> result = new HashMap<>();
         if( filterMaster ){
             result = JedisUtil.getMasterNodes(ip, port);

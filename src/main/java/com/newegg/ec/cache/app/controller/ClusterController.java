@@ -175,6 +175,13 @@ public class ClusterController {
         return Response.Result(0, res);
     }
 
+    @RequestMapping(value = "/initSlot", method = RequestMethod.GET)
+    @ResponseBody
+    public Response initSlot(@RequestParam String address){
+        boolean res = logic.initSlot(address);
+        return Response.Result(0, res);
+    }
+
     @RequestMapping(value = "/forgetNode", method = RequestMethod.GET)
     @ResponseBody
     public Response forgetNode(@RequestParam String ip, @RequestParam int port, @RequestParam String masterId){

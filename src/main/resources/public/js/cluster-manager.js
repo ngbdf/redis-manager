@@ -3,13 +3,19 @@ $(document).ready(function(){
     window.clusterId = getQueryString("clusterId");
     getCluster(window.clusterId, function(obj){
         window.cluster = obj.res;
+        getClusterInfoByAddress( window.cluster.address, function(obj){
+            console.log( obj.res );
+            if( obj.res.cluster_slots_ok == 0 ){
+                sparrow_win.confirm("the cluster is not slot can you init it", function(){
+                    initSlot( window.cluster.address, function( obj ){
+                        console.log( obj );
+                    });
+                });
+            }
+        });
         checkRedisVersion(window.cluster.address,function(obj){
             if( obj.res  == 2 ){
-                layer.alert( "redis version only support monitor", {
-                  icon: 1,
-                  skin: 'layer-ext-moon',
-                  title: 'redis version'
-                },function(){
+                sparrow_win.confirm("redis version only support monitor", function(){
                     window.location.href = "/monitor/clusterMonitorList";
                 });
             }

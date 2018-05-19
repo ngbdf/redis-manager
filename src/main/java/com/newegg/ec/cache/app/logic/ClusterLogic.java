@@ -7,6 +7,7 @@ import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
+import com.newegg.ec.cache.app.util.SlotBalanceUtil;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -217,6 +218,50 @@ public class ClusterLogic {
                 logger.error("", e );
             }finally {
                 jedis.close();
+            }
+        }
+        return res;
+    }
+
+    public boolean initSlot(String address) {
+        boolean res = true;
+        Host host = NetUtil.getHost( address );
+        String ip = host.getIp();
+        int port = host.getPort();
+        List<Map<String, String>> masterList = JedisUtil.getNodeList (ip, port, true);
+        int masterSize = masterList.size();
+        List<SlotBalanceUtil.Shade> balanceSlots = SlotBalanceUtil.balanceSlot( masterSize );
+        for( int i = 0; i < balanceSlots.size(); i++ ){
+            try {
+                SlotBalanceUtil.Shade shade = balanceSlots.get(i);
+                int start = shade.getStartSlot();
+                int end = shade.getEndSlot();
+                Map<String, String> hostMap = masterList.get(i);
+                String itemIp = hostMap.get("ip");
+                String itemPort = hostMap.get("port");
+                int intItemPort = Integer.parseInt(itemPort);
+                Jedis jedis = new Jedis( itemIp, intItemPort);
+                try {
+                    for(int slot = start; slot <= end; slot++ ){
+                        try {
+                            String resstr = jedis.clusterAddSlots( slot );
+                            if( !resstr.equals("OK") ){
+                                jedis.clusterAddSlots( slot );
+                            }
+                        }catch (Exception e){
+                            logger.error("", e );
+                            res = false;
+                        }
+                    }
+                }catch (Exception e){
+                    res = false;
+                    logger.error("", e );
+                }finally {
+                    jedis.close();
+                }
+            }catch (Exception e){
+                res = false;
+                logger.error("", e );
             }
         }
         return res;
