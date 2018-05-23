@@ -13,9 +13,10 @@ RedisManager 是 newegg bigdata 部门研发的 redis 一站式管理平台,用�
 ## 联系方式
 > 您在使用产品的过程中如果遇到问题或者需要改进的地方可以通过以下两种方式直接联系我们
 
-1. RedisManager讨论群 [![Join the chat at https://gitter.im/dianping/cat](https://badges.gitter.im/dianping/cat.svg)](https://gitter.im/redis-manager/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
+1. RedisManager讨论群      
+[![Join the chat at https://gitter.im/dianping/cat](https://badges.gitter.im/dianping/cat.svg)](https://gitter.im/redis-manager/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
 2. RedisManager微信群     
-    <img src="./docs/images/wechat.jpg" width="200px"/>
+ <img src="./docs/images/wechat.jpg" width="200px"/>
 
 ## 产品截图
 > 截图部分包含了 创建模块、管理模块、以及监控模块、详情如下:
