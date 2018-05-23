@@ -33,7 +33,13 @@ $(document).on("click", "#start-install-cluster", function(obj){
         nodePullImage( param, function(obj){
             if( obj.code ==  0 ){
                 nodeInstall( param, function(obj){
-                    console.log( obj.res );
+                    if( obj.code == 0 ){
+                        sparrow_win.confirm("success, skip to cluster manager?", function(){
+                            window.location.href = "/cluster/clusterListManager";
+                        });
+                    }else{
+                        sparrow_win.msg("all node install fail");
+                    }
                 });
             }
         });

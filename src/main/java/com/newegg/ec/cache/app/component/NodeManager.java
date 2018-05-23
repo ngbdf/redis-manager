@@ -1,11 +1,12 @@
 package com.newegg.ec.cache.app.component;
 
 import com.newegg.ec.cache.plugin.INodeOperate;
-import com.newegg.ec.cache.plugin.basemodel.PluginParent;
 import com.newegg.ec.cache.plugin.basemodel.PluginType;
 import com.newegg.ec.cache.plugin.docker.DockerManager;
 import com.newegg.ec.cache.plugin.humpback.HumpbackManager;
 import com.newegg.ec.cache.plugin.machine.MachineManager;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -15,6 +16,9 @@ import javax.annotation.Resource;
  */
 @Component
 public class NodeManager {
+    @Value("${cache.plugin}")
+    private String pluginList;
+
     @Resource
     public MachineManager machineManager;
     @Resource
@@ -24,6 +28,14 @@ public class NodeManager {
 
     public NodeManager(){
 
+    }
+
+    public String[] pluginList(){
+        if( StringUtils.isBlank( pluginList ) ){
+            return new String[0];
+        }else{
+            return pluginList.split(",");
+        }
     }
 
     public INodeOperate factoryOperate(PluginType pluginType){

@@ -5,6 +5,11 @@
     <title>install select</title>
     <link rel="stylesheet" href="../vender/bootstrap-3.3.7/css/bootstrap.css"/>
     <link rel="stylesheet" href="../css/common.css"/>
+    <script type="text/javascript" src="../vender/jquery/jquery-3.3.1.min.js"></script>
+    <script src="../vender/sparrow/layer/layer.js"></script>
+    <script src="../vender/sparrow/ajax.js"></script>
+    <script src="../vender/sparrow/util.js"></script>
+    <script src="../core/userApi.js"></script>
 </head>
 <body>
 <div class="body-container">
@@ -15,7 +20,7 @@
                     <h3> machine </h3>
                     <p> 通过 ssl 远程安装节点 </p>
                     <p>
-                        <a href="/node/install?pluginType=machine" class="btn btn-default" role="button">Create</a>
+                        <a href="javascript:void(0)" data-target="/node/install?pluginType=machine" data-type="machine" class="btn btn-default create-cluster-link" role="button">Create</a>
                     </p>
                 </div>
             </div>
@@ -26,7 +31,7 @@
                     <h3> docker </h3>
                     <p> 通过 docker 提供的 api 操作 redis </p>
                     <p>
-                        <a href="/node/install?pluginType=docker" class="btn btn-default" role="button">Create</a>
+                        <a href="javascript:void(0)" data-target="/node/install?pluginType=docker" data-type="docker" class="btn btn-default create-cluster-link" role="button">Create</a>
                     </p>
                 </div>
             </div>
@@ -37,13 +42,13 @@
                     <h3> humpback </h3>
                     <p> 通过 humpback 提供的 api 操作 redis</p>
                     <p>
-                        <a href="/node/install?pluginType=humpback" class="btn btn-default" role="button">Create</a>
+                        <a href="javascript:void(0)" data-target="/node/install?pluginType=humpback" data-type="humpback" class="btn btn-default create-cluster-link" role="button">Create</a>
                     </p>
                 </div>
             </div>
         </div><!-- .col-md-4 -->
     </div><!-- .row -->
 </div><!-- .container-fluid -->
-
+<script src="../js/select-cluster-type.js"></script>
 </body>
 </html>

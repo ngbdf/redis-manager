@@ -45,6 +45,13 @@ public class NodeController {
         return "nodeManager";
     }
 
+    @RequestMapping(value = "/getPluginList", method = RequestMethod.GET)
+    @ResponseBody
+    public Response getPluginList(){
+        String[] pluginList = nodeManager.pluginList();
+        return Response.Result(Response.DEFAULT, pluginList);
+    }
+
     @RequestMapping(value = "/getImageList", method = RequestMethod.GET)
     @ResponseBody
     public Response getImageList(@RequestParam PluginType pluginType){
