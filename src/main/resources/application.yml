@@ -10,12 +10,13 @@ spring:
         enabled: true
         force: true
         charset: UTF-8
+  # 改成自己的数据库，仅需自己创建数据库即可，相关表会自动生成
   datasource:
       name: serverbase
       driver-class-name: com.mysql.jdbc.Driver
       url: jdbc:mysql://localhost/redis_manager_new?useUnicode=true&characterEncoding=utf-8
-      username: root
-      password: root
+      username: test
+      password: test
 
 mybatis:
   mapper-locations: classpath*:mappers/*
@@ -23,19 +24,33 @@ mybatis:
       mapUnderscoreToCamelCase: true
 
 cache:
+    # userapi 自动生成 restful 接口
     user.api.path: ../redis-manager/target/classes/public/core/userApi.js
+    # 自动生成 mysql 表
     mysql.scan.package: com.newegg.ec.cache
+    # 支持的插件
     plugin: humpback,docker,machine
+    # humpback 相关配置
     humpback:
+        # 镜像列表
         image: humpback-hub.newegg.org/shec/redis3.0.6:v3,docker.neg/shec/redis-4.0.8:v1
+        # humpback 操作的 api 接口 %s 是占位符
         api.format: http://%s:8500/dockerapi/v2/
+    # docker 相关配置
     docker:
+        # docker 镜像需要自己 build
         image: ssecbigdata02:5000/redis4.0.1
+        # docker api 格式
         api.format: http://%s:2375/
+    # 物理机相关配置
     machine:
         install:
+            # 安装脚本的路径
             shell: /shell/redis_install.sh
+            # 安装包路径
             package: /package
+            # 安装的基础路径
             basepath: redis-cluster/
+        # 可以安装的 tar 包
         image: redis3.0.6.tar
 
