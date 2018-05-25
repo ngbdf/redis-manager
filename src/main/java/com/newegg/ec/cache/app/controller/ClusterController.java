@@ -138,7 +138,6 @@ public class ClusterController {
     @ResponseBody
     public Response getRedisConfig(@RequestParam String address){
         Map<String, String> res = logic.getRedisConfig(address);
-        System.out.println(res);
         return Response.Result(0, res);
     }
 
@@ -186,6 +185,13 @@ public class ClusterController {
     @ResponseBody
     public Response forgetNode(@RequestParam String ip, @RequestParam int port, @RequestParam String masterId){
         boolean res = logic.forgetNode(ip, port, masterId);
+        return Response.Result(0, res);
+    }
+
+    @RequestMapping(value = "/moveSlot", method = RequestMethod.GET)
+    @ResponseBody
+    public Response moveSlot(@RequestParam String ip, @RequestParam int port, @RequestParam int startKey, @RequestParam int endKey){
+        boolean res = logic.reShard(ip, port, startKey, endKey);
         return Response.Result(0, res);
     }
 

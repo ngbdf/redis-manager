@@ -305,7 +305,7 @@ public class JedisUtil {
         return result;
     }
 
-    private static Map<String,Map> getMasterNodes (String ip, int port) {
+    public static Map<String,Map> getMasterNodes (String ip, int port) {
         Jedis jedis = new Jedis( ip, port);
         Map<String, Map> result = new HashMap<>();
         try {

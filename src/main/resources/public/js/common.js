@@ -59,6 +59,14 @@ smarty.register_function( 'format_time', function( params ){
     return timestampToDate( time );
 });
 
+smarty.register_function( 'format_redis_info', function( params ){
+    var content = params['content'];
+    return syntaxHighlightRedisResult( content );
+});
+smarty.register_function( 'format_redis_config', function( params ){
+    var content = params['content'];
+    return syntaxHighlightRedisResult( content );
+});
 
 function syntaxHighlightRedisResult(content){
     if( !content ){
@@ -132,8 +140,6 @@ function syntaxHighlight(json) {
 
 
 $(function(){
-
-	
 	$("#redisIp").on("blur", function(){
 		var obj = $("#redisIp");
 		var ip = obj.val().trim();

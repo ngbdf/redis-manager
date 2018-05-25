@@ -278,6 +278,7 @@ $(document).on("click", "#import-node", function(){
                 console.log(data);
                 return false;
             }
+            layer.closeAll();
             var address =  window.cluster.address;
             var hostArr = address.split(",");
             var tmps = hostArr[0].split(":");
@@ -299,6 +300,7 @@ $(document).on("click", "#batch-config", function(){
                 console.log(data);
                 return false;
             }
+            layer.closeAll();
             var address =  window.cluster.address;
             var hostArr = address.split(",");
             var tmps = hostArr[0].split(":");
@@ -312,14 +314,36 @@ $(document).on("click", "#batch-config", function(){
 });
 
 $(document).on("click", ".be-master", function(){
-    var data = {};
-    data["ip"] = $(this).data("ip");
-    data["port"] = $(this).data("port");
+    var ip = $(this).data("ip");
+    var port = $(this).data("port");
     sparrow_win.confirm('Confirm set the node master',function(){
         beMaster(ip,port,function(){
             sparrow_win.msg("be master");
         });
      });
+});
+
+$(document).on("click", ".move-slot", function(){
+    var ip = $(this).data("ip");
+    var port = $(this).data("port");
+    smarty.open( "cluster/move_slot", {}, { title: "Move Slot",  width:330, height:270},function(){
+        $("#move-slot-confirm").click(function(){
+            var data = sparrow_form.encode( "move-slot-form",0 );
+            if ( sparrow.empty( data ) ){
+                return false;
+            }
+            layer.closeAll();
+            var startKey = data["startKey"];
+            var endKey = data["endKey"];
+            moveSlot(ip,port,startKey,endKey,function(obj){
+                if( obj.code == 0 ){
+                    sparrow_win.msg("success!");
+                }else{
+                    sparrow_win.msg("fail!");
+                }
+            });
+        });
+    });
 });
 
 $(document).on("click", ".forget-node", function(){
@@ -347,10 +371,36 @@ $(document).on("click", ".be-slave", function(){
     var address = ip + ":" + port;
     smarty.fopen( "/cluster/detailNodeList?address=" + address, "cluster/be_slave", true, { title: "Select master for move slave " + ip + ":" + port, width:1000, height:580}, function(){
         $(".move-slave-confirm").click(function(){
+            layer.closeAll();
             var masterId = $(this).data("nodeid");
             beSlave(ip,port,masterId, function(){
-                sparrow_win.msg("import to...");
+                sparrow_win.msg("move slave ...");
             });
         });
     });
+});
+
+$(document).on("click", ".node-info", function(){
+    var host = $(this).data("ip") + ":" + $(this).data("port");
+    getNodeInfo(host, function(obj){
+        var info = obj.res;
+
+        layer.open({
+            title: 'Info',
+            type: 1,
+            area: '800px',
+            skin: 'layui-layer-demo', //样式类名
+            closeBtn: 1, //显示关闭按钮
+            anim: 2,
+            shadeClose: true, //开启遮罩关闭
+            content: '<pre style="padding: 20px; border: none;">'+ syntaxHighlightRedisResult( obj.res ) +'</pre>'
+        });
+    })
+});
+
+$(document).on("click", ".view-config", function(){
+    var host = $(this).data("ip") + ":" + $(this).data("port");
+    smarty.fopen( "/cluster/getRedisConfig?address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
+        console.log(obj)
+    } );
 });

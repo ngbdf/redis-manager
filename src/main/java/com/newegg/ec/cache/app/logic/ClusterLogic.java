@@ -9,16 +9,17 @@ import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
 import com.newegg.ec.cache.app.util.SlotBalanceUtil;
 import com.newegg.ec.cache.core.logger.CommonLogger;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.DecimalFormat;
+import java.util.*;
 
 /**
  * Created by gl49 on 2018/4/21.
@@ -266,4 +267,125 @@ public class ClusterLogic {
         }
         return res;
     }
+
+    public boolean reShard(String ip, int port, int startKey, int endKey) {
+        boolean res = false;
+        String temMyselfId = "";
+        String temSourceId = "";
+        Map<String,Map> masterNodes =  JedisUtil.getMasterNodes(ip, port);
+        try {
+            // 迁移必须要知道自己的 nodeid 和 source 的ip port nodeid
+            for(int slot = startKey; slot <= endKey; slot++){
+                Map<String, String> slotObjmap = fillMoveSlotObject(masterNodes, ip, port, slot );
+                String myselfId = slotObjmap.get("myselfId");
+                String sourceId = slotObjmap.get("sourceId");
+                String sourceIP = slotObjmap.get("sourceIP");
+                String strSourcePort = slotObjmap.get("sourcePort");
+                int  sourcePort = Integer.parseInt(strSourcePort);
+                try {
+                    moveSlot(myselfId, ip, port, sourceId, sourceIP, sourcePort, slot);
+                }catch ( Exception e ){
+                    logger.error("", e );
+                }
+            }
+            res = true;
+        }catch (Exception e){
+            logger.error("move slot ", e);
+        }
+        return res;
+    }
+
+    /**
+     * 移动 slot
+     * @param myselfId
+     * @param ip
+     * @param port
+     * @param sourceId
+     * @param sourceIP
+     * @param sourcePort
+     * @param slot
+     */
+    private void moveSlot (String myselfId, String ip, int port, String sourceId, String sourceIP, int sourcePort, int slot) {
+        Jedis myself = new Jedis( ip, port);
+        Jedis source = new Jedis( sourceIP, sourcePort );
+        try {
+            // 设置导入导出状态
+            myself.clusterSetSlotImporting(slot, sourceId);
+            source.clusterSetSlotMigrating( slot, myselfId);
+            List<String> keys;
+            // 真正迁移
+            do {
+                keys = source.clusterGetKeysInSlot(slot, 100);
+                for (String key : keys) {
+                    source.migrate( ip, port, key, 0, 600000);
+                }
+            } while(keys.size() > 0);
+        }catch ( Exception e ){
+            logger.error("", e );
+            // 出现异常就恢复 slot
+            myself.clusterSetSlotStable( slot );
+            source.clusterSetSlotStable( slot );
+        }finally {
+            // 设置 slot 给 myself 节点
+            myself.clusterSetSlotNode( slot, myselfId );
+            //？ 这个很奇怪如果没有设置 stable 它的迁移状态会一直在的
+            source.clusterSetSlotStable( slot );
+            source.close();
+            myself.close();
+        }
+    }
+
+    /**
+     * 返回 slot
+     * @param
+     * @param port
+     */
+    private Map<String, String> fillMoveSlotObject (Map<String,Map> masterNodes, String ip, int port, int slot) {
+        Map<String, String> resultMap = new HashMap<>();
+        String myselfId = "";
+        String sourceIP = "";
+        String sourcePort = "";
+        String sourceId = "";
+        for(Map.Entry<String, Map> masterNode : masterNodes.entrySet()){
+            Map<String, Object> master = masterNode.getValue();
+            String masterHost = master.get("ip") + ":" + master.get("port");
+            String nodeHost = ip + ":" + port;
+            if( masterHost.equals( nodeHost ) ){
+                myselfId = (String) master.get("nodeId");
+            }
+            if( slotInMaster(master, slot ) ){
+                sourceId = (String) master.get("nodeId");
+                sourceIP = (String) master.get("ip");
+                sourcePort = (String) master.get("port");
+            }
+            if( !"".equals(myselfId) && !"".equals(sourceIP) && "".equals(sourcePort) && !"".equals(sourceId) ){
+                break;
+            }
+        }
+
+        resultMap.put("myselfId", myselfId);
+        resultMap.put("sourceIP", sourceIP);
+        resultMap.put("sourcePort", sourcePort);
+        resultMap.put("sourceId", sourceId);
+        return resultMap;
+    }
+
+    private boolean slotInMaster (Map<String, Object> master, int slot) {
+        String[] slots = (String[]) master.get("slot");
+        for(Object itemSlot : slots){
+            String slotRange = (String) itemSlot;
+            String[] slotArr = slotRange.split("-");
+            if( 2 == slotArr.length ){
+                if( slot >= Integer.parseInt(slotArr[0]) && slot <= Integer.parseInt(slotArr[1]) ){
+                    return true;
+                }
+            }else if ( 1 == slotArr.length ){
+                if( slot == Integer.parseInt(slotArr[0]) ){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

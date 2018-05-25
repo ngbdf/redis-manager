@@ -110,6 +110,7 @@ $("#info").on("click", function(){
     if(host != "all" && host != "" && host != null){
         getNodeInfo(host, function(obj){
             var info = obj.res;
+
             layer.open({
                 title: 'Info',
                 type: 1,
@@ -137,11 +138,6 @@ $("#config").on("click", function(){
         layer.msg("Please select one node");
     }
 })
-
-smarty.register_function( 'format_redis_result', function( params ){
-    var content = params['content'];
-    return syntaxHighlightRedisResult( content );
-});
 
 function reloadMonitor(){
     window.location.href = "/monitor/clusterMonitor?clusterId="+window.clusterId +"&startTime=" + window.startTime + "&endTime="+window.endTime + "&host=" + window.host + "&type=" + window.type + "&date=" + window.date;
