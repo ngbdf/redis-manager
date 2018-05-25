@@ -14,7 +14,7 @@ spring:
   datasource:
       name: serverbase
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://localhost/redis_manager_new?useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://10.16.46.170:3306/redis_manager_new?useUnicode=true&characterEncoding=utf-8
       username: test
       password: test
 
@@ -25,11 +25,11 @@ mybatis:
 
 cache:
     # userapi 自动生成 restful 接口
-    user.api.path: ../redis-manager/target/classes/public/core/userApi.js
+    user.api.path: ../redis-manager/src/main/resources/public/core/userApi.js
     # 自动生成 mysql 表
     mysql.scan.package: com.newegg.ec.cache
     # 支持的插件
-    plugin: humpback,docker,machine
+    plugin: machine
     # humpback 相关配置
     humpback:
         # 镜像列表

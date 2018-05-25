@@ -18,7 +18,7 @@ smarty.register_function( 'cluster_state', function( params ){
 });
 
 $(document).on("click", "#add-cluster", function(){
-    smarty.open( "cluster/add_cluster_model", {}, { title: "Add New Cluster", width:400, height:305},function(){
+    smarty.open( "cluster/add_cluster_model", {}, { title: "Add New Cluster", width:400, height:345},function(){
 
     });
 });

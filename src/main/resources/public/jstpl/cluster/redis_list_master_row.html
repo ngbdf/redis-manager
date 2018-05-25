@@ -6,7 +6,7 @@
     {{else}}
         <td></td>
     {{/if}}
-    <td>{{node_status_tag status=$clusterNodes.status index=$index}}</td>
+    <td class="status-td">{{node_status_tag status=$clusterNodes.status index=$index}}</td>
     <td>{{$clusterNodes.role}}
         <span class="badge hidden" id="expand-slave-{{$index}}">
             slave:{{if !empty($clusterNodes.slaveList)}}{{$clusterNodes.slaveList.length}}{{/if}}

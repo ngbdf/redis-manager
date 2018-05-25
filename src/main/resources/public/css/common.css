@@ -276,3 +276,11 @@ textarea{
 .icon-margin {
     margin-right: 8px;
 }
+
+.sparrow-tip{
+    height:20px;
+}
+.sparrow-input-placeholder{
+    margin-left:15px;
+    color:#a69bb4;
+}

@@ -1,7 +1,7 @@
 $(document).ready(function(){
     window.pluginType = getQueryString("pluginType");
     window.clusterId = getQueryString("clusterId");
-    $("#plugin-name").text( window.pluginType );
+    $("#plugin-name").text( firstUpperCase(window.pluginType) );
     init_install_ui(window.clusterId);
 });
 
