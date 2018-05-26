@@ -25,7 +25,7 @@ mybatis:
 
 cache:
     # userapi 自动生成 restful 接口
-    user.api.path: ../redis-manager/src/main/resources/public/core/userApi.js
+    user.api.path: ../redis-manager-master/src/main/resources/public/core/userApi.js
     # 自动生成 mysql 表
     mysql.scan.package: com.newegg.ec.cache
     # 支持的插件

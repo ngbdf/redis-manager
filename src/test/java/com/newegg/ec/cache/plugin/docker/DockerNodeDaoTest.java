@@ -38,7 +38,7 @@ public class DockerNodeDaoTest {
         dockerNode.setContainerName("redis8008");
         dockerNode.setUserGroup("admin");
         dockerNode.setImage("redis3.0.6:v3");
-        dockerNode.setIp("10.16.46.192");
+        dockerNode.setIp("localhost");
         dockerNode.setPort(8008);
         System.out.println(dockerNodeDao.addDockerNode(dockerNode));
     }

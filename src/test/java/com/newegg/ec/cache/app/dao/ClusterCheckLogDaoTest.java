@@ -28,7 +28,7 @@ public class ClusterCheckLogDaoTest {
         ClusterCheckLog log = new ClusterCheckLog();
         log.setId(CommonUtil.getUuid());
         log.setClusterId("ssecbigdata");
-        log.setNodeId("10.16.46.192:8018");
+        log.setNodeId("localhost:8018");
         log.setFormula("@{mem_fragmentation_ratio}>2.2");
         log.setLogInfo("mem_fragmentation_ratio = 5.0 !!!");
         log.setDescription("Redis节点磁盘碎片率");
@@ -41,7 +41,7 @@ public class ClusterCheckLogDaoTest {
     public void getLogsTest(){
         Map<String,Object> param = new HashMap();
         param.put("clusterId", "ssecbigdata");
-        param.put("nodeId", "10.16.46.192:8008");
+        param.put("nodeId", "localhost:8008");
         param.put("formula", "@{mem_fragmentation_ratio}>2.2");
         param.put("logType", ClusterCheckLog.LogType.warnlog.toString());
         //param.put("limit",1);
@@ -52,7 +52,7 @@ public class ClusterCheckLogDaoTest {
     public void delLogsTest(){
         Map<String,Object> param = new HashMap();
         param.put("clusterId","ssecbigdata");
-        param.put("nodeId","10.16.46.192:8008");
+        param.put("nodeId","localhost:8008");
         param.put("logType",ClusterCheckLog.LogType.warnlog.toString());
         System.out.println(logDao.delLogs(param));
     }
