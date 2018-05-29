@@ -31,6 +31,6 @@ public class ClusterLogicTest {
         hostList.add( host3 );
 
         //List<Host> hostList, String username, String password, String filePathFormat, String field, String value)
-        clusterLogic.changeConfigFile(hostList, "gl49", "Lzz363219", "/home/ABS_CORP/gl49/redis-cluster/{port}/conf/redis.conf", "timeout", "864000");
+        clusterLogic.changeConfigFile(hostList, "gl49", "Lzz363219", "/home/ABS_CORP/gl49/redis-cluster/test-8008.conf", "timeout", "864001");
     }
 }

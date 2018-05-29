@@ -27,7 +27,12 @@ cache:
     # userapi 自动生成 restful 接口
     user.api.path: ../redis-manager/src/main/resources/public/core/userApi.js
     # 自动生成 mysql 表
-    mysql.scan.package: com.newegg.ec.cache
+    mysql:
+        scan.package: com.newegg.ec.cache
+        # 配置成跟 jdbc 连接的信息一样
+        database.name: redis_manager_new
+        # 用于删除 7 天的后的数据
+        clearn.day: 7
     # 支持的插件
     plugin: machine
     # humpback 相关配置
