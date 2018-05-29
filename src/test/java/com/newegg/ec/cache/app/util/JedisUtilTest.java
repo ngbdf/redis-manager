@@ -13,8 +13,8 @@ import java.util.Set;
 public class JedisUtilTest {
     @Test
     public void test(){
-        Map<String, Map> res = JedisUtil.getClusterNodes("172.16.35.75", 8028);
-        List<Map<String, String>> ress = JedisUtil.dbInfo("172.16.35.75", 8028);
+        Map<String, Map> res = JedisUtil.getClusterNodes("localhost", 8028);
+        List<Map<String, String>> ress = JedisUtil.dbInfo("localhost", 8028);
         System.out.println( ress );
     }
 
@@ -77,8 +77,10 @@ public class JedisUtilTest {
     }
 
     @Test
-    public void testIplist3(){
-        String ipListStr = "127.0.0.1:8080";
-        System.out.println( JedisUtil.getInstallNodeMap(ipListStr) );
+    public void testIplist3() {
+        String filePathFormat = "/opt/aa/{port}/fdafd.conf";
+        String[] filePaths = filePathFormat.split("\\{port\\}");
+        System.out.println( filePaths[0] );
+        System.out.println( filePaths[1] );
     }
 }

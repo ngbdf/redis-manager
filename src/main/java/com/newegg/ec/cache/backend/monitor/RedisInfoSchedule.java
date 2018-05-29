@@ -4,6 +4,7 @@ import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.INodeInfoDao;
 import com.newegg.ec.cache.app.model.Cluster;
 import com.newegg.ec.cache.app.model.Common;
+import com.newegg.ec.cache.app.model.Host;
 import com.newegg.ec.cache.app.model.NodeInfo;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
@@ -32,39 +33,34 @@ import java.util.concurrent.Executors;
  */
 @Component
 public class RedisInfoSchedule{
+    public static CommonLogger logger = new CommonLogger( RedisInfoSchedule.class );
+    private static final int JEDIS_TIMEOUT = 1000;
+    private static ExecutorService threadPool = Executors.newFixedThreadPool(200);
+
     @Resource
     private IClusterDao clusterDao;
     @Resource
     private INodeInfoDao infoDao;
 
-    @Scheduled(fixedRate = 1000 * 20)
+    @Scheduled(fixedRate = 1000 * 120 * 3)
     public void reportCurrentTime() {
         List<Cluster>  clusterList = clusterDao.getClusterList(null);
         for (Cluster cluster: clusterList) {
             try {
                 String address = cluster.getAddress();
                 int clusterId = cluster.getId();
-                String[] hostArr = StringUtils.split(address, ",");
-                if( null != hostArr && hostArr.length >=0 ){
-                    String host = hostArr[0];
-                    String[] tmpArr = host.split(":");
-                    String ip = tmpArr[0];
-                    String port = tmpArr[1];
-                    infoProducer(clusterId, ip, Integer.parseInt(port));
-                }
+                Host host = NetUtil.getHostPassAddress( address );
+                threadPool.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        infoProducer(clusterId, host.getIp(), host.getPort());
+                    }
+                });
             }catch (Exception e){
                 //
             }
-
         }
-
-
     }
-
-    public static CommonLogger logger = new CommonLogger( RedisInfoSchedule.class );
-    private static final int JEDIS_TIMEOUT = 1000;
-    private static ExecutorService threadPool = Executors.newFixedThreadPool(200);
-
 
     public static NodeInfo getNodeMonitorInfo(String strInfo) {
         NodeInfo o = null;

@@ -5,6 +5,7 @@ import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.INodeInfoDao;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
+import com.newegg.ec.cache.app.util.FileUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
 import com.newegg.ec.cache.app.util.SlotBalanceUtil;
@@ -224,6 +225,22 @@ public class ClusterLogic {
         return res;
     }
 
+    public boolean batchModfifyConfigFile(String myip, int myPort, String userName, String password, String fileFormat, String configName, String configValue){
+        if( StringUtils.isBlank( userName ) || StringUtils.isBlank( fileFormat ) ){
+            return true;
+        }
+        List<Host> hostList = new ArrayList<>();
+        List<Map<String, String>> nodeList = JedisUtil.getNodeList(myip, myPort);
+        for(Map<String, String> node : nodeList){
+            String ip = node.get("ip");
+            int port = Integer.parseInt(node.get("port"));
+            Host host = new Host(ip, port);
+            hostList.add( host );
+        }
+        return changeConfigFile( hostList, userName, password, fileFormat, configName, configValue );
+    }
+
+
     public boolean initSlot(String address) {
         boolean res = true;
         Host host = NetUtil.getHost( address );
@@ -388,4 +405,15 @@ public class ClusterLogic {
         return false;
     }
 
+    public boolean changeConfigFile(List<Host> hostList, String username, String password, String filePathFormat, String field, String value){
+        boolean res = true;
+        for(Host host : hostList){
+            String ip = host.getIp();
+            int port = host.getPort();
+            String filePath = filePathFormat.replaceAll("\\{port\\}", String.valueOf(port));
+            System.out.println( filePath );
+            res = res & FileUtil.modifyFileContent(ip, port, username, password, filePath, field, value);
+        }
+        return res;
+    }
 }

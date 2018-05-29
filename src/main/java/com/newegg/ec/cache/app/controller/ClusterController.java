@@ -202,12 +202,15 @@ public class ClusterController {
         return Response.Result(0, res);
     }
 
-    @RequestMapping(value = "/batchConfig", method = RequestMethod.GET)
+    @RequestMapping(value = "/batchConfig", method = RequestMethod.POST)
     @ResponseBody
-    public Response batchConfig(@RequestParam String ip, @RequestParam int port, @RequestParam String configName, @RequestParam String configValue){
-        boolean res = logic.batchConfig(ip, port, configName, configValue);
+    public Response batchConfig(@RequestBody BatchConfigParam batchConfigParam){
+        boolean res = logic.batchConfig(batchConfigParam.getIp(), batchConfigParam.getPort(), batchConfigParam.getConfigName(), batchConfigParam.getConfigValue());
         if( res ){
-            return Response.Success();
+            res = logic.batchModfifyConfigFile(batchConfigParam.getIp(), batchConfigParam.getPort(), batchConfigParam.getUserName(), batchConfigParam.getPassword(), batchConfigParam.getFileFormat(), batchConfigParam.getConfigName(), batchConfigParam.getConfigValue());
+        }
+        if( res ){
+            return Response.Info("modify config is sucess");
         }
         return Response.Warn("modify config is fail");
     }

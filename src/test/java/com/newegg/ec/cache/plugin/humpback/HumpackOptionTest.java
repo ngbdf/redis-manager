@@ -23,17 +23,17 @@ public class HumpackOptionTest {
 
     @Test
     public void testoptionContainer() {
-        boolean result = humpback.optionContainer("172.16.35.219", "itemService_test_Log", StartType.start);
+        boolean result = humpback.optionContainer("localhost", "itemService_test_Log", StartType.start);
         System.out.println("result "+result);
     }
 
 
     @Test
     public void testDelContainer() {
-        boolean stop = humpback.optionContainer("172.16.35.219", "itemservicespring_E4_leotest", StartType.stop);
+        boolean stop = humpback.optionContainer("localhost", "itemservicespring_E4_leotest", StartType.stop);
         if(stop){
             JSONObject param = new JSONObject();
-            param.put("ip","172.16.35.219");
+            param.put("ip","localhost");
             param.put("containerId","itemservicespring_E4_leotest");
             System.out.println(humpback.remove(param));
         }
@@ -41,9 +41,9 @@ public class HumpackOptionTest {
 
     @Test
     public void testpullImage() {
-        String ipListStr = "172.16.35.219:8008 master\n" +
-                "172.16.35.219:8009\n" +
-                "172.16.35.219:8010";
+        String ipListStr = "localhost:8008 master\n" +
+                "localhost:8009\n" +
+                "localhost:8010";
         JSONObject param = new JSONObject();
         param.put("iplist",ipListStr);
         param.put("imageUrl", "humpback-hub.newegg.org/shec/redis3.0.6:v3");
@@ -69,12 +69,12 @@ public class HumpackOptionTest {
                 "        \"Dns\": [],\n" +
                 "        \"RestartPolicy\": \"always\",\n" +
                 "            \"NetworkMode\": \"host\",\n" +
-                "            \"Image\": \"humpback-hub.newegg.org/shec/itemservice-autodeploy:v0.2\",\n" +
+                "            \"Image\": \"localhost/shec/itemservice-autodeploy:v0.2\",\n" +
                 "            \"Env\": [\n" +
                 "        \"JAVA_HOME=/usr/local/jdk1.8.0_60\",\n" +
                 "                \"PATH=$PATH:$JAVA_HOME/bin\",\n" +
                 "                \"port=8361\",\n" +
-                "                \"zk_address=172.16.35.75:8181,172.16.35.76:8181,172.16.35.77:8181,172.16.35.87:8181,172.16.35.88:8181\",\n" +
+                "                \"zk_address=localhost:8181,localhost:8181,1localhost:8181,localhost:8181,localhost:8181\",\n" +
                 "                \"zk_conf_path=/opt/app/baseservice/bdservice-redis-landingpage-new/conf/service-configuration-dynamic.xml\",\n" +
                 "                \"zk_listen_path=/zkconf/itemservice-spring \",\n" +
                 "                \"JVM_OPTS=-Xms4096M -Xmx4096M -Xmn1536M -Xss512K -XX:ParallelGCThreads=20 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSConcurrentMTEnabled -XX:+DisableExplicitGC -XX:CMSInitiatingOccupancyFraction=70 \",\n" +
@@ -94,14 +94,14 @@ public class HumpackOptionTest {
                 "            \"SHMSize\": 67108864\n" +
                 "    }";
 
-        System.out.println(humpback.createContainer("172.16.35.219",JSONObject.fromObject(param)));
+        System.out.println(humpback.createContainer("localhost",JSONObject.fromObject(param)));
 
 
     }
 
     @Test
     public void testgetContainerInfo() {
-        System.out.println(humpback.getContainerInfo("172.16.35.219", "itemserviceSSL"));
+        System.out.println(humpback.getContainerInfo("localhost", "itemserviceSSL"));
     }
 
     @Test

@@ -22,7 +22,7 @@ import javax.servlet.http.HttpSession;
 @Aspect
 @Component
 public class LogAdvice {
-    public static final CommonLogger logger = new CommonLogger( RequestUtil.class );
+    public static final CommonLogger logger = new CommonLogger( LogAdvice.class );
     private static final String LOG_SEPARATOR = ",";
     /**
      * 用于记录 access log

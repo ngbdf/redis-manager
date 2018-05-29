@@ -35,7 +35,7 @@ public class NodeInfoDaoTest {
         nodeInfo.setConnectedClients(1100);
         nodeInfo.setBlockedClients(10100);
         nodeInfo.setAddTime(130);
-        nodeInfo.setHost("10.16.46.192:8018");
+        nodeInfo.setHost("localhost:8018");
         nodeInfoDao.addNodeInfo("node_info_5", nodeInfo);
     }
 
@@ -71,7 +71,7 @@ public class NodeInfoDaoTest {
 
     @Test
     public void testGetLastField(){
-        NodeInfo nodeInfo = nodeInfoDao.getLastNodeInfo("hello", 0, DateUtil.getTime(), "10.16.46.192:8008");
+        NodeInfo nodeInfo = nodeInfoDao.getLastNodeInfo("hello", 0, DateUtil.getTime(), "localhost:8008");
         System.out.println( nodeInfo );
 
     }

@@ -1,4 +1,4 @@
-package com.newegg.ec.cache.app.util;
+package com.newegg.ec.cache.app.util.httpclient;
 
 
 import net.sf.json.JSONObject;
@@ -242,5 +242,17 @@ public class HttpClientUtil {
         httpDelete.setHeader("Content-Type","application/json");
         return httpDelete;
     }
+
+    /**
+     * 通过回调的方式用户自己扩展HttpClientUtil中未实现的API：如OPTIONS TRACE HEAD等不常用的操作
+     * @param requestHandler
+     * @param <T>
+     * @return
+     * @throws Exception
+     */
+    public static <T> T request(RequestHandler<T> requestHandler) throws Exception {
+        return requestHandler.callback(httpclient);
+    }
+
 
 }

@@ -26,7 +26,7 @@ public class ClusterDaoTest {
     @Test
     public void addTest(){
         Cluster cluster = new Cluster();
-        cluster.setAddress("172.16.35.44:8379");
+        cluster.setAddress("localhost:8379");
         cluster.setUserGroup("admin");
         cluster.setClusterType("humpback");
         cluster.setClusterName("redis_3");
@@ -59,7 +59,7 @@ public class ClusterDaoTest {
 
     @Test
     public void updateCluster(){
-        boolean res = clusterDao.updateClusterAddress(1, "10.16.46.192:8018");
+        boolean res = clusterDao.updateClusterAddress(1, "localhost:8018");
         System.out.println( res );
     }
 
