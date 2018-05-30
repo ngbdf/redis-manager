@@ -108,20 +108,9 @@ $(".cluster-info").on("click", function(){
 $("#info").on("click", function(){
     var host = window.host;
     if(host != "all" && host != "" && host != null){
-        getNodeInfo(host, function(obj){
-            var info = obj.res;
-
-            layer.open({
-                title: 'Info',
-                type: 1,
-                area: '800px',
-                skin: 'layui-layer-demo', //样式类名
-                closeBtn: 1, //显示关闭按钮
-                anim: 2,
-                shadeClose: true, //开启遮罩关闭
-                content: '<pre style="padding: 20px; border: none;">'+ syntaxHighlightRedisResult( obj.res ) +'</pre>'
-            });
-        })
+        smarty.fopen( "/cluster/getNodeInfo?address="+ host, "cluster/info_format", true, { title: "Info", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
+            console.log(obj)
+        } );
     } else {
         layer.msg("Please select one node");
     }
@@ -131,8 +120,8 @@ $("#info").on("click", function(){
 $("#config").on("click", function(){
     var host = window.host;
     if(host != "all" && host != "" && host != null){
-        smarty.fopen( "/cluster/getRedisConfig?address="+window.address, "cluster/redis_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
-        console.log(obj)
+        smarty.fopen( "/cluster/getRedisConfig?address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
+            console.log(obj)
         } );
     } else {
         layer.msg("Please select one node");
