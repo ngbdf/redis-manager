@@ -384,20 +384,9 @@ $(document).on("click", ".be-slave", function(){
 
 $(document).on("click", ".node-info", function(){
     var host = $(this).data("ip") + ":" + $(this).data("port");
-    getNodeInfo(host, function(obj){
-        var info = obj.res;
-
-        layer.open({
-            title: 'Info',
-            type: 1,
-            area: '800px',
-            skin: 'layui-layer-demo', //样式类名
-            closeBtn: 1, //显示关闭按钮
-            anim: 2,
-            shadeClose: true, //开启遮罩关闭
-            content: '<pre style="padding: 20px; border: none;">'+ syntaxHighlightRedisResult( obj.res ) +'</pre>'
-        });
-    })
+    smarty.fopen( "/cluster/getNodeInfo?address="+ host, "cluster/info_format", true, { title: "Info", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
+        console.log(obj)
+    } );
 });
 
 $(document).on("click", ".view-config", function(){

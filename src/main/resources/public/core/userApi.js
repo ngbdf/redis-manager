@@ -17,15 +17,8 @@ function  checkBatchUserPermisson(req,callback){
  * @type POST 
  * @param  String
  */
-function  checkBatchDirPermission(req,callback){
-   ajax.async_post("/check/checkBatchDirPermission",req,callback);
-}
-/**
- * @type POST 
- * @param  String
- */
-function  checkBatchWgetPermission(req,callback){
-   ajax.async_post("/check/checkBatchWgetPermission",req,callback);
+function  checkBatchHumpbackContainerName(req,callback){
+   ajax.async_post("/check/checkBatchHumpbackContainerName",req,callback);
 }
 /**
  * @type GET 
@@ -40,8 +33,8 @@ function  checkUserPermisson(ip,userName,password,callback){
  * @type POST 
  * @param  String
  */
-function  checkBatchHumpbackContainerName(req,callback){
-   ajax.async_post("/check/checkBatchHumpbackContainerName",req,callback);
+function  checkBatchDirPermission(req,callback){
+   ajax.async_post("/check/checkBatchDirPermission",req,callback);
 }
 /**
  * @type POST 
@@ -49,6 +42,13 @@ function  checkBatchHumpbackContainerName(req,callback){
  */
 function  checkBatchHostNotPass(req,callback){
    ajax.async_post("/check/checkBatchHostNotPass",req,callback);
+}
+/**
+ * @type POST 
+ * @param  String
+ */
+function  checkBatchWgetPermission(req,callback){
+   ajax.async_post("/check/checkBatchWgetPermission",req,callback);
 }
 /**
  * @type GET 
@@ -77,8 +77,8 @@ function  checkPortNotPass(ip,port,callback){
  * @type GET 
  * @param  String
  */
-function  checkIp(ip,callback){
-   ajax.async_get("/check/checkIp?ip="+ip+"",callback);
+function  checkClusterName(clusterId,callback){
+   ajax.async_get("/check/checkClusterName?clusterId="+clusterId+"",callback);
 }
 /**
  * @type POST 
@@ -91,8 +91,8 @@ function  checkRule(req,callback){
  * @type GET 
  * @param  String
  */
-function  checkClusterName(clusterId,callback){
-   ajax.async_get("/check/checkClusterName?clusterId="+clusterId+"",callback);
+function  checkIp(ip,callback){
+   ajax.async_get("/check/checkIp?ip="+ip+"",callback);
 }
 /******************************** com.newegg.ec.cache.app.controller.UserController ********************************/
 /**
@@ -132,20 +132,6 @@ function  removeUser(id,callback){
 /******************************** com.newegg.ec.cache.app.controller.ClusterController ********************************/
 /**
  * @type GET 
- * @param  int
- */
-function  getCluster(id,callback){
-   ajax.async_get("/cluster/getCluster?id="+id+"",callback);
-}
-/**
- * @type GET 
- * @param  User{id=0, username='null', password='null', userGroup='null'}
- */
-function  getClusterListInfo(callback){
-   ajax.async_get("/cluster/getClusterListInfo",callback);
-}
-/**
- * @type GET 
  * @param  User{id=0, username='null', password='null', userGroup='null'}
  */
 function  listClusterByUser(callback){
@@ -153,10 +139,10 @@ function  listClusterByUser(callback){
 }
 /**
  * @type GET 
- * @param  String
+ * @param  User{id=0, username='null', password='null', userGroup='null'}
  */
-function  getClusterInfoByAddress(address,callback){
-   ajax.async_get("/cluster/getClusterInfoByAddress?address="+address+"",callback);
+function  getClusterListInfo(callback){
+   ajax.async_get("/cluster/getClusterListInfo",callback);
 }
 /**
  * @type GET 
@@ -169,8 +155,23 @@ function  clusterExistAddress(address,callback){
  * @type GET 
  * @param  String
  */
-function  getRedisConfig(address,callback){
-   ajax.async_get("/cluster/getRedisConfig?address="+address+"",callback);
+function  getClusterInfoByAddress(address,callback){
+   ajax.async_get("/cluster/getClusterInfoByAddress?address="+address+"",callback);
+}
+/**
+ * @type GET 
+ * @param  int
+ */
+function  getCluster(id,callback){
+   ajax.async_get("/cluster/getCluster?id="+id+"",callback);
+}
+/**
+ * @type GET 
+ * @param  String 
+ * @param  int
+ */
+function  getClusterInfo(ip,port,callback){
+   ajax.async_get("/cluster/getClusterInfo?ip="+ip+"&port="+port+"",callback);
 }
 /**
  * @type GET 
@@ -181,11 +182,10 @@ function  nodeList(address,callback){
 }
 /**
  * @type GET 
- * @param  String 
- * @param  int
+ * @param  String
  */
-function  getClusterInfo(ip,port,callback){
-   ajax.async_get("/cluster/getClusterInfo?ip="+ip+"&port="+port+"",callback);
+function  getRedisConfig(address,callback){
+   ajax.async_get("/cluster/getRedisConfig?address="+address+"",callback);
 }
 /**
  * @type GET 
@@ -206,6 +206,29 @@ function  beMaster(ip,port,callback){
 }
 /**
  * @type GET 
+ * @param  String
+ */
+function  detailNodeList(address,callback){
+   ajax.async_get("/cluster/detailNodeList?address="+address+"",callback);
+}
+/**
+ * @type GET 
+ * @param  String 
+ * @param  int 
+ * @param  String
+ */
+function  forgetNode(ip,port,masterId,callback){
+   ajax.async_get("/cluster/forgetNode?ip="+ip+"&port="+port+"&masterId="+masterId+"",callback);
+}
+/**
+ * @type POST 
+ * @param  com.newegg.ec.cache.app.model.RedisQueryParam@3f63a513
+ */
+function  redisQuery(redisQueryParam,callback){
+   ajax.async_post("/cluster/redisQuery",redisQueryParam,callback);
+}
+/**
+ * @type GET 
  * @param  String 
  * @param  int 
  * @param  int 
@@ -218,17 +241,18 @@ function  moveSlot(ip,port,startKey,endKey,callback){
  * @type GET 
  * @param  String 
  * @param  int 
- * @param  String
+ * @param  String 
+ * @param  int
  */
-function  forgetNode(ip,port,masterId,callback){
-   ajax.async_get("/cluster/forgetNode?ip="+ip+"&port="+port+"&masterId="+masterId+"",callback);
+function  importNode(ip,port,masterIP,masterPort,callback){
+   ajax.async_get("/cluster/importNode?ip="+ip+"&port="+port+"&masterIP="+masterIP+"&masterPort="+masterPort+"",callback);
 }
 /**
  * @type GET 
- * @param  int
+ * @param  String
  */
-function  getClusterHost(id,callback){
-   ajax.async_get("/cluster/getClusterHost?id="+id+"",callback);
+function  listCluster(group,callback){
+   ajax.async_get("/cluster/listCluster?group="+group+"",callback);
 }
 /**
  * @type POST 
@@ -241,29 +265,8 @@ function  addCluster(cluster,callback){
  * @type GET 
  * @param  String
  */
-function  removeCluster(clusterId,callback){
-   ajax.async_get("/cluster/removeCluster?clusterId="+clusterId+"",callback);
-}
-/**
- * @type GET 
- * @param  String
- */
-function  getNodeInfo(address,callback){
-   ajax.async_get("/cluster/getNodeInfo?address="+address+"",callback);
-}
-/**
- * @type POST 
- * @param  com.newegg.ec.cache.app.model.RedisQueryParam@43cb5f38
- */
-function  redisQuery(redisQueryParam,callback){
-   ajax.async_post("/cluster/redisQuery",redisQueryParam,callback);
-}
-/**
- * @type GET 
- * @param  String
- */
-function  detailNodeList(address,callback){
-   ajax.async_get("/cluster/detailNodeList?address="+address+"",callback);
+function  redisDbList(address,callback){
+   ajax.async_get("/cluster/redisDbList?address="+address+"",callback);
 }
 /**
  * @type GET 
@@ -274,27 +277,24 @@ function  initSlot(address,callback){
 }
 /**
  * @type GET 
- * @param  String
- */
-function  redisDbList(address,callback){
-   ajax.async_get("/cluster/redisDbList?address="+address+"",callback);
-}
-/**
- * @type GET 
- * @param  String
- */
-function  listCluster(group,callback){
-   ajax.async_get("/cluster/listCluster?group="+group+"",callback);
-}
-/**
- * @type GET 
- * @param  String 
- * @param  int 
- * @param  String 
  * @param  int
  */
-function  importNode(ip,port,masterIP,masterPort,callback){
-   ajax.async_get("/cluster/importNode?ip="+ip+"&port="+port+"&masterIP="+masterIP+"&masterPort="+masterPort+"",callback);
+function  getClusterHost(id,callback){
+   ajax.async_get("/cluster/getClusterHost?id="+id+"",callback);
+}
+/**
+ * @type GET 
+ * @param  String
+ */
+function  getNodeInfo(address,callback){
+   ajax.async_get("/cluster/getNodeInfo?address="+address+"",callback);
+}
+/**
+ * @type GET 
+ * @param  String
+ */
+function  removeCluster(clusterId,callback){
+   ajax.async_get("/cluster/removeCluster?clusterId="+clusterId+"",callback);
 }
 /**
  * @type POST 
@@ -320,10 +320,11 @@ function  monitorGetAllField(clusterId,startTime,endTime,key,callback){
  * @param  int 
  * @param  int 
  * @param  String 
- * @param  int
+ * @param  String 
+ * @param  String
  */
-function  monitorGetMaxField(clusterId,startTime,endTime,key,limit,callback){
-   ajax.async_get("/monitor/getMaxField?clusterId="+clusterId+"&startTime="+startTime+"&endTime="+endTime+"&key="+key+"&limit="+limit+"",callback);
+function  monitorGetGroupNodeInfo(clusterId,startTime,endTime,host,type,date,callback){
+   ajax.async_get("/monitor/getGroupNodeInfo?clusterId="+clusterId+"&startTime="+startTime+"&endTime="+endTime+"&host="+host+"&type="+type+"&date="+date+"",callback);
 }
 /**
  * @type GET 
@@ -334,6 +335,17 @@ function  monitorGetMaxField(clusterId,startTime,endTime,key,limit,callback){
  */
 function  monitorGetLastNodeInfo(clusterId,startTime,endTime,host,callback){
    ajax.async_get("/monitor/getLastNodeInfo?clusterId="+clusterId+"&startTime="+startTime+"&endTime="+endTime+"&host="+host+"",callback);
+}
+/**
+ * @type GET 
+ * @param  int 
+ * @param  int 
+ * @param  int 
+ * @param  String 
+ * @param  String
+ */
+function  monitorGetAvgField(clusterId,startTime,endTime,host,key,callback){
+   ajax.async_get("/monitor/getAvgField?clusterId="+clusterId+"&startTime="+startTime+"&endTime="+endTime+"&host="+host+"&key="+key+"",callback);
 }
 /**
  * @type POST 
@@ -359,22 +371,10 @@ function  monitorGetMinField(clusterId,startTime,endTime,key,limit,callback){
  * @param  int 
  * @param  int 
  * @param  String 
- * @param  String 
- * @param  String
+ * @param  int
  */
-function  monitorGetGroupNodeInfo(clusterId,startTime,endTime,host,type,date,callback){
-   ajax.async_get("/monitor/getGroupNodeInfo?clusterId="+clusterId+"&startTime="+startTime+"&endTime="+endTime+"&host="+host+"&type="+type+"&date="+date+"",callback);
-}
-/**
- * @type GET 
- * @param  int 
- * @param  int 
- * @param  int 
- * @param  String 
- * @param  String
- */
-function  monitorGetAvgField(clusterId,startTime,endTime,host,key,callback){
-   ajax.async_get("/monitor/getAvgField?clusterId="+clusterId+"&startTime="+startTime+"&endTime="+endTime+"&host="+host+"&key="+key+"",callback);
+function  monitorGetMaxField(clusterId,startTime,endTime,key,limit,callback){
+   ajax.async_get("/monitor/getMaxField?clusterId="+clusterId+"&startTime="+startTime+"&endTime="+endTime+"&key="+key+"&limit="+limit+"",callback);
 }
 /******************************** com.newegg.ec.cache.app.controller.AlarmController ********************************/
 /**
@@ -395,8 +395,22 @@ function  countWarningLogByClusterId(clusterId,callback){
  * @type GET 
  * @param  String
  */
-function  getCaseList(clusterId,callback){
-   ajax.async_get("/alarm/getCaseLogs?clusterId="+clusterId+"",callback);
+function  deleteCaseLog(logId,callback){
+   ajax.async_get("/alarm/deleteCaseLog?logId="+logId+"",callback);
+}
+/**
+ * @type GET 
+ * @param  String
+ */
+function  getRuleList(clusterId,callback){
+   ajax.async_get("/alarm/getRuleList?clusterId="+clusterId+"",callback);
+}
+/**
+ * @type POST 
+ * @param  ClusterCheckRule{id=null, clusterId='null', limitName='null', formula='null', description='null', updateTime='0'}
+ */
+function  checkAlarmRule(rule,callback){
+   ajax.async_post("/alarm/checkAlarmRule",rule,callback);
 }
 /**
  * @type POST 
@@ -409,29 +423,15 @@ function  countTotalAlarm(clusterIds,callback){
  * @type GET 
  * @param  String
  */
-function  getRuleList(clusterId,callback){
-   ajax.async_get("/alarm/getRuleList?clusterId="+clusterId+"",callback);
-}
-/**
- * @type GET 
- * @param  String
- */
 function  deleteRule(ruleId,callback){
    ajax.async_get("/alarm/deleteRule?ruleId="+ruleId+"",callback);
 }
 /**
- * @type POST 
- * @param  ClusterCheckRule{id=null, clusterId='null', limitName='null', formula='null', description='null', updateTime='0'}
- */
-function  checkAlarmRule(rule,callback){
-   ajax.async_post("/alarm/checkAlarmRule",rule,callback);
-}
-/**
  * @type GET 
  * @param  String
  */
-function  deleteCaseLog(logId,callback){
-   ajax.async_get("/alarm/deleteCaseLog?logId="+logId+"",callback);
+function  getCaseList(clusterId,callback){
+   ajax.async_get("/alarm/getCaseLogs?clusterId="+clusterId+"",callback);
 }
 /******************************** com.newegg.ec.cache.app.controller.NodeController ********************************/
 /**
@@ -457,13 +457,6 @@ function  getNodeList(pluginType,clusterId,callback){
    ajax.async_get("/node/getNodeList?pluginType="+pluginType+"&clusterId="+clusterId+"",callback);
 }
 /**
- * @type POST 
- * @param  OperatePram{pluginType=null, req=null}
- */
-function  nodeStart(nodeRequestPram,callback){
-   ajax.async_post("/node/nodeStart",nodeRequestPram,callback);
-}
-/**
  * @type GET
  */
 function  getPluginList(callback){
@@ -475,6 +468,20 @@ function  getPluginList(callback){
  */
 function  getImageList(pluginType,callback){
    ajax.async_get("/node/getImageList?pluginType="+pluginType+"",callback);
+}
+/**
+ * @type POST 
+ * @param  OperatePram{pluginType=null, req=null}
+ */
+function  nodeStart(nodeRequestPram,callback){
+   ajax.async_post("/node/nodeStart",nodeRequestPram,callback);
+}
+/**
+ * @type POST 
+ * @param  OperatePram{pluginType=null, req=null}
+ */
+function  nodeRestart(nodeRequestPram,callback){
+   ajax.async_post("/node/nodeRestart",nodeRequestPram,callback);
 }
 /**
  * @type POST 
@@ -496,13 +503,6 @@ function  nodeInstall(nodeRequestPram,callback){
  */
 function  nodePullImage(nodeRequestPram,callback){
    ajax.async_post("/node/nodePullImage",nodeRequestPram,callback);
-}
-/**
- * @type POST 
- * @param  OperatePram{pluginType=null, req=null}
- */
-function  nodeRestart(nodeRequestPram,callback){
-   ajax.async_post("/node/nodeRestart",nodeRequestPram,callback);
 }
 /**
  * @type POST 

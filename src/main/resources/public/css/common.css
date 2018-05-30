@@ -284,3 +284,19 @@ textarea{
     margin-left:15px;
     color:#a69bb4;
 }
+
+.key-note{
+    width:700px;
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+td>a.redis-meta {
+    color: #26928b;
+    text-decoration: none;
+}
+.view-config{
+    margin-left:15px;
+}

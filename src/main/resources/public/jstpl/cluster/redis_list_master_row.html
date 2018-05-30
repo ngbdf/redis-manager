@@ -14,18 +14,16 @@
     </td>
     <td>{{$clusterNodes.host}}</td>
     <td>
-        <a href="javascript:void(0)" id="{{$clusterNodes.nodeId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}" class="node-info">{{$clusterNodes.nodeId}}</a>
+    {{$clusterNodes.slot}}{{slot_num slots=$clusterNodes.slot size=$res.clusterInfo.cluster_size index=$index}}
     </td>
     <td>
-    {{$clusterNodes.slot}}{{slot_num slots=$clusterNodes.slot size=$res.clusterInfo.cluster_size index=$index}}
+        <a href="javascript:void(0)" id="{{$clusterNodes.nodeId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}" class="redis-meta node-info"><span class="glyphicon glyphicon-search"></span> Info</a>
+        <a href="javascript:void(0)" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}"  class="redis-meta view-config">Config</a>
     </td>
     <td style="text-align:right">
         {{if $move_slave == 1}}
             <button class="btn move-slave-confirm btn-info btn-xs" data-nodeid="{{$clusterNodes.nodeId}}" >To Master</button>
         {{else}}
-            <button class="option-button view-config btn btn-default btn-xs" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}" >
-                <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-            </button>
             {{if empty($clusterNodes.slaveList) }}
             <button class="option-button forget-node btn btn-default btn-xs" data-nodeid="{{$clusterNodes.nodeId}}" data-masterid="{{$clusterNodes.masterId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}" >Forget Node</button>
             {{/if}}

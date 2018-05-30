@@ -60,12 +60,28 @@ smarty.register_function( 'format_time', function( params ){
 });
 
 smarty.register_function( 'format_redis_info', function( params ){
-    var content = params['content'];
-    return syntaxHighlightRedisResult( content );
+    var obj = params['content'];
+    var res = "";
+    for(var key in obj){
+        if( key != "detail" ){
+            res += '<span class="string key-note"># ' + window.redisInfo[key] + '</span>';
+            res += '<span class="key">' + key + '</span>';
+            res += ':';
+            res += '<span class="string">' + obj[key] + '</span><br>';
+        }
+    }
+    return res;
 });
 smarty.register_function( 'format_redis_config', function( params ){
-    var content = params['content'];
-    return syntaxHighlightRedisResult( content );
+    var obj = params['content'];
+    var res = "";
+    for(var key in obj){
+        res += '<span class="string key-note"># ' + window.redisConfig[key] + '</span>';
+        res += '<span class="key">' + key + '</span>';
+        res += ':';
+        res += '<span class="string">' + obj[key] + '</span><br>';
+    }
+    return res;
 });
 
 function syntaxHighlightRedisResult(content){
