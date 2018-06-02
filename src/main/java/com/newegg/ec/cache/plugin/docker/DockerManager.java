@@ -102,7 +102,7 @@ public class DockerManager extends PluginParent implements INodeOperate {
             String port = String.valueOf(node.getPort());
             String image = reqParam.getString("image");
             String name = reqParam.getString("containerName");
-            String command = port + " "+ ip;
+            String command = ip + " "+ port;
             JSONObject installObject = generateInstallObject(image,name,command);
             futureList.add(executorService.submit(new RedisInstallTask(ip,installObject)));
         });
