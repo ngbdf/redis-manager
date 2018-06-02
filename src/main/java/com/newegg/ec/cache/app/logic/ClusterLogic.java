@@ -5,15 +5,13 @@ import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.INodeInfoDao;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
-import com.newegg.ec.cache.app.util.FileUtil;
-import com.newegg.ec.cache.app.util.JedisUtil;
-import com.newegg.ec.cache.app.util.NetUtil;
-import com.newegg.ec.cache.app.util.SlotBalanceUtil;
+import com.newegg.ec.cache.app.util.*;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
@@ -28,6 +26,9 @@ import java.util.*;
 @Component
 public class ClusterLogic {
     private static CommonLogger logger = new CommonLogger( ClusterLogic.class );
+
+    @Value("${cache.redis.client}")
+    private String redisClient;
 
     @Autowired
     private IClusterDao clusterDao;
@@ -210,11 +211,12 @@ public class ClusterLogic {
                 if( configList.size() != 2 ){
                     break;
                 }
-                String oldValue = configList.get(1).toString();
-                if( !oldValue.equals( configValue ) ){
-                    jedis.configSet(configName, configValue);
-                    jedis.clusterSaveConfig();
-                }
+                jedis.configSet(configName, configValue);
+                jedis.clusterSaveConfig();
+                // 同步一下配置文件
+                String configCmd = redisClient + " -h " + ip + " -p " + port + " config rewrite";
+                System.out.println( configCmd );
+                RemoteShellUtil.localExec( configCmd );
             }catch (Exception e){
                 res = false;
                 logger.error("", e );

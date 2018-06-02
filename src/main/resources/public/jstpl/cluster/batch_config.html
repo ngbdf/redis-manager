@@ -1,7 +1,5 @@
 <div class="row" style="margin: 10px">
     <div class="col-sm-12" id="batch-config-form">
-        <input type="text" name="ip" value="{{$masterIp}}" class="form-control input-sm hide"  >
-        <input type="text" name="port" value="{{$masterPort}}" class="form-control input-sm hide">
         <div class="form-group">
             <label>Config Name</label>
             <input type="text" name="configName" class="form-control input-sm"  placeholder="config_name" data-require="1" >
@@ -11,24 +9,6 @@
             <label>Config Value</label>
             <input name="configValue" type="text" class="form-control input-sm"  placeholder="config_value" data-require="1" >
             <div id="configValue_tip"></div>
-        </div>
-
-        <div class="form-group">
-            <label>SSH UserName</label>
-            <input name="userName" type="text" class="form-control input-sm" data-check-fields="password"  data-len="3-20" placeholder="ssh username" data-len-msg="length range 3-20" data-require="1" >
-            <div id="userName_tip"></div>
-        </div>
-
-        <div class="form-group">
-            <label>SSH Password</label>
-            <input name="password" type="password" class="form-control input-sm" data-relation="ip,userName" data-ajax-type="get" data-server-check="/check/checkUserPermisson"  placeholder="ssh password" data-require="1" data-len="3-20" data-len-msg="length range 3-20"  >
-            <div id="password_tip"></div>
-        </div>
-
-        <div class="form-group">
-            <label>Format Path</label>
-            <input name="fileFormat" type="text" class="form-control input-sm"  placeholder="/opt/app/resis-clsuter/{port}/redis.conf" data-require="1" data-len="4-255" data-len-msg="length range 4-255" data-format="^\/[a-zA-Z0-9_\-\/\{\}\.]+" data-format-msg="format error start /">
-            <div id="fileFormat_tip"></div>
         </div>
         <button id="batch-config-confirm" class="btn btn-primary form-control">Submit</button>
     </div>

@@ -24,6 +24,8 @@ mybatis:
       mapUnderscoreToCamelCase: true
 
 cache:
+    # redis 客户端用于配置修改什么的,记得安装部署的时候要修改一下权限 chmod 777 redis-cli
+    redis.client: ../redis-manager/src/main/resources/public/shell/redis-cli
     # userapi 自动生成 restful 接口
     user.api.path: ../redis-manager/src/main/resources/public/core/userApi.js
     # 自动生成 mysql 表
