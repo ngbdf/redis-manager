@@ -34,7 +34,8 @@ $('[href="#clusterManager"]').click(function () {
 
 function show_cluster_node_list(address){
     smarty.get( "/cluster/detailNodeList?address=" + address, "cluster/cluster_manager_content", "clusterManager", function(){
-            $(".expand-all").trigger("click");
+        // 默认展开
+        //$(".expand-all").trigger("click");
     }, true );
 }
 

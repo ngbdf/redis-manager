@@ -291,6 +291,7 @@ textarea{
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
+    color: #908c8c;
 }
 
 td>a.redis-meta {

@@ -33,7 +33,7 @@ $(document).on("click", ".start-node", function(){
         sparrow_win.alert("The node already start");
         return;
     }
-    layer.alert("Confirm start the node", {icon: 6, time: 1000},function(){
+    sparrow_win.confirm("Confirm start the node", function(){
         nodeStart(reqParam, function(obj){
             console.log(obj);
         });

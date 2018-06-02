@@ -4,15 +4,11 @@
         <div>
             {{cluster_status state=$res.clusterInfo.cluster_state}}
             <!--<a tabindex="0" style="color:#5bc0de" data-placement="bottom" class="detail-button" role="button" data-toggle="popover" data-trigger="focus" data-content="{{$res.clusterInfo}}"> [ detail ] </a>-->
-            Cluster Nodes: <span class="label-info">{{$res.clusterInfo.cluster_known_nodes}}</span> | Master Size: <span class="label-info">{{$res.clusterInfo.cluster_size}}</span>
+            Cluster Nodes: <span class="label-info" id="cluster-known-nodes" data-size="{{$res.clusterInfo.cluster_known_nodes}}">{{$res.clusterInfo.cluster_known_nodes}}</span> | Master Size: <span class="label-info" id="cluster_size" data-size="{{$res.clusterInfo.cluster_size}}">{{$res.clusterInfo.cluster_size}}</span>
         </div>
         <div class="panel-heading-right">
             <div class="pointer node-operation"><a id="import-node">[Import Node]</a></div>
             <div class="pointer"><a id="batch-config">[Batch Config]</a></div>
-            {{if $res.clusterInfo.cluster_slots_assigned != "16384" }}
-            <div class="pointer">
-                <a id="init-cluster" data-trigger="focus" data-placement="left" data-toggle="popover" data-content="cluster bad status please init slot">[Init Slot]</a>
-            </div>{{/if}}
             <!--<button type="button" id="query-db" class="btn btn-info"><span class="glyphicon glyphicon-search"></span> Query</button>-->
         </div>
 

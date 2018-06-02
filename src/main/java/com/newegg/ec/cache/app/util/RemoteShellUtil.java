@@ -72,7 +72,7 @@ public class RemoteShellUtil {
         try {
             if (this.login()) {
                 Session session = conn.openSession(); // 打开一个会话
-                session.requestPTY("redis-manager");
+                //session.requestPTY("redis-manager");
                 session.execCommand(cmds);
                 InputStream in = session.getStdout();
                 result = processStdout(in);

@@ -9,12 +9,11 @@ import com.newegg.ec.cache.app.util.CommonUtil;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.MathExpressionCalculateUtil;
-import org.apache.log4j.Logger;
+import com.newegg.ec.cache.core.logger.CommonLogger;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import redis.clients.util.Slowlog;
-
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +29,7 @@ import java.util.concurrent.Executors;
 @PropertySource("classpath:config/schedule.properties")
 public class RedisInfoChecker {
 
-    private static final Logger logger = Logger.getLogger(RedisInfoChecker.class);
+    private static final CommonLogger logger = new CommonLogger( RedisInfoChecker.class );
     private static ExecutorService pool = Executors.newFixedThreadPool(200);
 
     @Resource
@@ -104,7 +103,7 @@ public class RedisInfoChecker {
             try {
                  nodeList = JedisUtil.nodeList(ip, port);
             }catch(Exception e){
-                logger.error("Node " + host + " can not get nodelist");
+                logger.error("Node " + host + " can not get nodelist", e);
             }
             for(ClusterCheckRule rule : ruleList){
                 String formula = rule.getFormula();
@@ -127,7 +126,7 @@ public class RedisInfoChecker {
                                 checkLogDao.addClusterCheckLog(log);
                             }
                         } catch (Exception e){
-                            logger.error(rule.getClusterId() + "\t" + formula + "\t规则出错");
+                            logger.error(rule.getClusterId() + "\t" + formula + "\t规则出错", e);
                             continue;
                         }
                     }
@@ -174,7 +173,7 @@ public class RedisInfoChecker {
                     checkLogDao.addClusterCheckLog(log);
                 }
             }catch(Exception e){
-                logger.error("Node " + host + " check slow log error");
+                logger.error("Node " + host + " check slow log error", e);
             }
 
         }

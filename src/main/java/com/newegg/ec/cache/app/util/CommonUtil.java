@@ -1,6 +1,6 @@
 package com.newegg.ec.cache.app.util;
 
-import org.apache.log4j.Logger;
+import com.newegg.ec.cache.core.logger.CommonLogger;
 
 import java.util.UUID;
 
@@ -9,11 +9,10 @@ import java.util.UUID;
  */
 public class CommonUtil {
 
-    private static Logger logger= Logger.getLogger(CommonUtil.class);
+    private static CommonLogger logger= new CommonLogger( CommonUtil.class );
 
     public static String getUuid(){
         return UUID.randomUUID().toString();
     }
-
 
 }

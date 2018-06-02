@@ -190,9 +190,10 @@ public class MachineManager extends PluginParent implements INodeOperate {
     private void operateNode(JSONObject startParam, StartType startType) {
         MachineNode machineNode = (MachineNode) JSONObject.toBean( startParam, MachineNode.class );
         int port = machineNode.getPort();
+        System.out.println( machineNode.getIp() + " -- " + machineNode.getUsername() + " --- " + machineNode.getPassword() );
         RemoteShellUtil rms = new RemoteShellUtil(machineNode.getIp(), machineNode.getUsername(), machineNode.getPassword());
         String cmd = "cd " + getPortPath(machineNode.getInstallPath(), port );
-        cmd +=  "; bash "  + startType + ".sh " + port;
+        cmd +=  ";bash "  + startType + ".sh " + port;
         System.out.println( cmd );
         rms.exec( cmd );
     }

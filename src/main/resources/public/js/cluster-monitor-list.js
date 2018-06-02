@@ -1,11 +1,15 @@
 $(function(){
+    smarty.get( "/user/listGroup", "monitor/monitor_list", "group-classify", function(){
+       // 默认展开第一项
+       $('.my-list-panel-header').eq(0).find("a").trigger("click");
+    }, true );
+
     getClusterListInfo(function(obj){
         var clusterListInfo = obj.res;
         $("#cluster-number").text(clusterListInfo.clusterNumber);
         $("#cluster-ok-number").text(clusterListInfo.clusterOkNumber);
         $("#cluster-fail-number").text(clusterListInfo.clusterFailNumber);
         updateWarningCount();
-        $('.my-list-panel-header').eq(0).find("a").trigger("click");;
     })
 
 })
@@ -22,10 +26,6 @@ function updateWarningCount(){
         });
     });
 }
-
-smarty.get( "/user/listGroup", "monitor/monitor_list", "group-classify", function(){
-   /* console.log("get...");*/
-}, true );
 
 $(document).on("click", ".list-active", function(res){
     var group = $(this).data("group");
