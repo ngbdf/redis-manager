@@ -1,7 +1,9 @@
 package com.newegg.ec.cache.app.util;
 
+import com.newegg.ec.cache.app.component.redis.JedisClusterClient;
 import com.newegg.ec.cache.app.model.RedisNode;
 import org.junit.Test;
+import redis.clients.jedis.*;
 
 import java.util.List;
 import java.util.Map;
@@ -82,5 +84,45 @@ public class JedisUtilTest {
         String[] filePaths = filePathFormat.split("\\{port\\}");
         System.out.println( filePaths[0] );
         System.out.println( filePaths[1] );
+    }
+
+    @Test
+    public void testSet(){
+        HostAndPort hostAndPort = new HostAndPort("10.16.46.170", 8052);
+        JedisCluster jedis =  new JedisCluster(hostAndPort);
+        for(int i = 0; i < 10000; i++){
+            jedis.set( "key-test" + i, String.valueOf(i));
+            jedis.expire("key-test" + i, 500);
+        }
+
+    }
+
+    @Test
+    public void testConfig2(){
+        Jedis jedis = new Jedis("10.16.46.170", 8052);
+        jedis.configSet("slowlog-max-len", "200");
+        jedis.configResetStat();
+        jedis.clusterSaveConfig();
+    }
+
+    @Test
+    public void testScan(){
+        //HostAndPort hostAndPort = new HostAndPort("10.16.46.170", 8052);
+        //JedisCluster jedis =  new JedisCluster(hostAndPort);
+        Jedis jedis = new Jedis("10.16.46.170", 8051); //72788
+        int count = 0;
+        ScanParams scanParams = new ScanParams();
+        scanParams.match("key-test*");
+        scanParams.count(1000);
+        ScanResult<String> scanResult =  jedis.scan( "0", scanParams );
+        count += scanResult.getResult().size();
+        System.out.println( count + "----");
+        while ( !scanResult.getStringCursor().equals("0") ){
+            System.out.println( scanResult.getStringCursor() );
+            scanResult = jedis.scan( scanResult.getStringCursor(), scanParams );
+            count += scanResult.getResult().size();
+            System.out.println( scanResult.getStringCursor() + " scan cursor");
+            System.out.println( count + "------------ size");
+        }
     }
 }

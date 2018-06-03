@@ -1,10 +1,8 @@
 package com.newegg.ec.cache.app.component;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
 import com.newegg.ec.cache.app.component.redis.IRedis;
 import com.newegg.ec.cache.app.component.redis.JedisClusterClient;
 import com.newegg.ec.cache.app.component.redis.JedisMasterSlaveClient;
-import com.newegg.ec.cache.app.component.redis.RedisClientBase;
 import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.Cluster;
 import com.newegg.ec.cache.app.model.Host;

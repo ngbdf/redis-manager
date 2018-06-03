@@ -1,7 +1,7 @@
 <td style="border-top:0px"></td>
 <td class="status-td">{{node_status_tag status=$slave.status index=$index }}</td>
 <td>{{$slave.role}}</td>
-<td>{{$slave.host}}</td>
+<td data-toggle="tooltip" data-placement="bottom" title="{{$slave.nodeId}}" >{{$slave.host}}</td>
 <td></td>
 <td>
     <a href="javascript:void(0)" id="{{$clusterNodes.nodeId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}" class="redis-meta node-info"><span class="glyphicon glyphicon-search"></span> Info</a>

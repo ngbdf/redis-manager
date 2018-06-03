@@ -21,7 +21,9 @@ public class CommonLogger {
     public void error(String msg, Throwable e){
         this.logger.error( msg, e );
     }
-
+    public void info(String msg){
+        this.logger.info( msg );
+    }
     public String websocket(String msg){
         User user = RequestUtil.getUser();
         if( null == user ){

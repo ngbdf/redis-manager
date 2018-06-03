@@ -34,7 +34,8 @@ $('[href="#clusterManager"]').click(function () {
 
 function show_cluster_node_list(address){
     smarty.get( "/cluster/detailNodeList?address=" + address, "cluster/cluster_manager_content", "clusterManager", function(){
-            $(".expand-all").trigger("click");
+        // 默认展开
+        //$(".expand-all").trigger("click");
     }, true );
 }
 
@@ -292,13 +293,7 @@ $(document).on("click", "#import-node", function(){
 });
 
 $(document).on("click", "#batch-config", function(){
-    var address =  window.cluster.address;
-    var hostArr = address.split(",");
-    var tmps = hostArr[0].split(":");
-    var master = {};
-    master.masterIp = tmps[0];
-    master.masterPort = tmps[1];
-    smarty.open( "cluster/batch_config", master, { title: "Batch Config",  width:330, height:490},function(){
+    smarty.open( "cluster/batch_config", {}, { title: "Batch Config",  width:330, height:270},function(){
         $("#batch-config-confirm").click(function(){
             var data = sparrow_form.encode( "batch-config-form",0 ); //0 表示所有字段都提交， 2 表示有改变的才提交
             if ( sparrow.empty( data ) )
@@ -306,10 +301,14 @@ $(document).on("click", "#batch-config", function(){
                 console.log(data);
                 return false;
             }
-            data.ip = master.masterIp;
-            data.port = master.masterPort;
             layer.closeAll();
-            batchConfig(data,function(obj){
+            var address =  window.cluster.address;
+            var hostArr = address.split(",");
+            var tmps = hostArr[0].split(":");
+            var masterIp = tmps[0];
+            var masterPort = tmps[1];
+            batchConfig(masterIp, masterPort,data.configName, data.configValue, function(){
+
             });
         });
     } );

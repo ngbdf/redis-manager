@@ -6,8 +6,13 @@ $(document).ready(function(){
         console.log(cluster)
         nodeList(cluster.address, function(obj){
             window.nodeList = obj.res;
-            console.log(nodeList)
-            rebuildNodeListTable( clusterId );
+            console.log(window.nodeList)
+            rebuildNodeListTable( window.clusterId );
+        });
+
+        getNodeList(window.pluginType, window.clusterId, function(obj){
+            console.log( obj );
+            window.nodeListDBSize = obj.res.length;
         });
     });
 });
@@ -33,7 +38,7 @@ $(document).on("click", ".start-node", function(){
         sparrow_win.alert("The node already start");
         return;
     }
-    layer.alert("Confirm start the node", {icon: 6, time: 1000},function(){
+    sparrow_win.confirm("Confirm start the node", function(){
         nodeStart(reqParam, function(obj){
             console.log(obj);
         });
@@ -42,7 +47,7 @@ $(document).on("click", ".start-node", function(){
 
 $(document).on("click", ".stop-node", function(){
     var reqParam = getReqParam( this );
-    if( reqParam.inCluster == "YES" && window.nodeList.length != 1 ){
+    if( reqParam.inCluster == "YES" && window.nodeListDBSize != 1 ){
         sparrow_win.alert("The node is in cluster please forget it then retry");
         return;
     }

@@ -14,7 +14,7 @@ spring:
   datasource:
       name: serverbase
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/redis_manager_new?useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://10.16.46.170:3306/redis_manager_new?useUnicode=true&characterEncoding=utf-8
       username: test
       password: test
 
@@ -24,6 +24,8 @@ mybatis:
       mapUnderscoreToCamelCase: true
 
 cache:
+    # redis 客户端用于配置修改什么的,记得安装部署的时候要修改一下权限 chmod 777 redis-cli
+    redis.client: ../redis-manager/src/main/resources/public/shell/redis-cli
     # userapi 自动生成 restful 接口
     user.api.path: ../redis-manager/src/main/resources/public/core/userApi.js
     # 自动生成 mysql 表
@@ -33,7 +35,7 @@ cache:
         database.name: redis_manager_new
         # 用于删除 7 天的后的数据
         clearn.day: 7
-    # 支持的插件
+    # 支持的插件多个可以用逗号隔开
     plugin: machine
     # humpback 相关配置
     humpback:

@@ -1,6 +1,7 @@
 package com.newegg.ec.cache.app.util.httpclient;
 
 
+import com.newegg.ec.cache.core.logger.CommonLogger;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HeaderElement;
@@ -23,7 +24,6 @@ import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class HttpClientUtil {
 
-    private static Logger logger= Logger.getLogger(HttpClientUtil.class);
+    private static CommonLogger logger= new CommonLogger(HttpClientUtil.class);
     private static HttpClient httpclient;
 
     static{

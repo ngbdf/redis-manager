@@ -12,7 +12,7 @@
             slave:{{if !empty($clusterNodes.slaveList)}}{{$clusterNodes.slaveList.length}}{{/if}}
         </span>
     </td>
-    <td>{{$clusterNodes.host}}</td>
+    <td data-toggle="tooltip" data-placement="bottom" title="{{$clusterNodes.nodeId}}">{{$clusterNodes.host}}</td>
     <td>
     {{$clusterNodes.slot}}{{slot_num slots=$clusterNodes.slot size=$res.clusterInfo.cluster_size index=$index}}
     </td>
