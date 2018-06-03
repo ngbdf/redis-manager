@@ -16,7 +16,7 @@ RedisManager 是  redis 一站式管理平台。 支持集群的创建、管理�
 1. RedisManager讨论群      
 [![Join the chat at https://gitter.im/dianping/cat](https://badges.gitter.im/dianping/cat.svg)](https://gitter.im/redis-manager/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
 2. RedisManager微信群     
- <img src="./docs/images/wechat.jpg" width="200px"/>
+ <img src="./docs/images/wechat.png" width="200px"/>
 
 ## 产品截图
 > 截图部分包含了 创建模块、管理模块、以及监控模块、详情如下:
