@@ -63,3 +63,4 @@ RedisManager 是  redis 一站式管理平台。 支持集群的创建、管理�
 
 ## License
 RedisManager is Open Source software released under the  [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+
