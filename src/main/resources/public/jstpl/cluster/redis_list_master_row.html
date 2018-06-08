@@ -6,18 +6,19 @@
     {{else}}
         <td></td>
     {{/if}}
-    <td>{{node_status_tag status=$clusterNodes.status index=$index}}</td>
+    <td class="status-td">{{node_status_tag status=$clusterNodes.status index=$index}}</td>
     <td>{{$clusterNodes.role}}
         <span class="badge hidden" id="expand-slave-{{$index}}">
             slave:{{if !empty($clusterNodes.slaveList)}}{{$clusterNodes.slaveList.length}}{{/if}}
         </span>
     </td>
-    <td>{{$clusterNodes.host}}</td>
-    <td>
-        <a href="javascript:void(0)" id="{{$clusterNodes.nodeId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}" class="node-info">{{$clusterNodes.nodeId}}</a>
-    </td>
+    <td data-toggle="tooltip" data-placement="bottom" title="{{$clusterNodes.nodeId}}">{{$clusterNodes.host}}</td>
     <td>
     {{$clusterNodes.slot}}{{slot_num slots=$clusterNodes.slot size=$res.clusterInfo.cluster_size index=$index}}
+    </td>
+    <td>
+        <a href="javascript:void(0)" id="{{$clusterNodes.nodeId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}" class="redis-meta node-info"><span class="glyphicon glyphicon-search"></span> Info</a>
+        <a href="javascript:void(0)" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}"  class="redis-meta view-config">Config</a>
     </td>
     <td style="text-align:right">
         {{if $move_slave == 1}}

@@ -50,9 +50,9 @@ public abstract class PluginParent {
             if(clusterId != -1){
                 pluginParent.addNodeList(reqParam, clusterId);
             }
+            // 建立集群
+            pluginParent.buildRedisCluster( clusterId, ipMap );
         }
-        // 建立集群
-        pluginParent.buildRedisCluster( clusterId, ipMap );
         return checkRes;
     }
 

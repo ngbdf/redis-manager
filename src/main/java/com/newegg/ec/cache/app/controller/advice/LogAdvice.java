@@ -6,6 +6,8 @@ import com.newegg.ec.cache.app.model.User;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.RequestUtil;
 import com.newegg.ec.cache.core.logger.CommonLogger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -22,7 +24,7 @@ import javax.servlet.http.HttpSession;
 @Aspect
 @Component
 public class LogAdvice {
-    public static final CommonLogger logger = new CommonLogger( RequestUtil.class );
+    private static final Log logger = LogFactory.getLog("access");
     private static final String LOG_SEPARATOR = ",";
     /**
      * 用于记录 access log
@@ -78,7 +80,7 @@ public class LogAdvice {
                 logger.error( "", e );
             }
             String msg = currentDate + LOG_SEPARATOR + msgType + LOG_SEPARATOR + clientIp + LOG_SEPARATOR + userid + LOG_SEPARATOR + groups + LOG_SEPARATOR + path + LOG_SEPARATOR + param + LOG_SEPARATOR + stopWatch.getTotalTimeMillis();
-            System.out.println( msg );
+            logger.info( msg );
             stopWatch.stop();
         } catch (Throwable e) {
             logger.error( "", e );

@@ -276,3 +276,28 @@ textarea{
 .icon-margin {
     margin-right: 8px;
 }
+
+.sparrow-tip{
+    height:20px;
+}
+.sparrow-input-placeholder{
+    margin-left:15px;
+    color:#a69bb4;
+}
+
+.key-note{
+    width:700px;
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color: #908c8c;
+}
+
+td>a.redis-meta {
+    color: #26928b;
+    text-decoration: none;
+}
+.view-config{
+    margin-left:15px;
+}

@@ -85,9 +85,4 @@ public class MysqlUtil {
         return createTable;
     }
 
-    public static String insertSql(Class claz, String tableName, Object obj) {
-
-        MysqlTable mysqlTable = (MysqlTable) claz.getAnnotation( MysqlTable.class );
-        return "";
-    }
 }

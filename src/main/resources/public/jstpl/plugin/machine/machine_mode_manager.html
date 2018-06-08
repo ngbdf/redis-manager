@@ -6,7 +6,6 @@
         <th>InCluster</th>
         <th>Image</th>
         <th>Username</th>
-        <th>Password</th>
         <th>Ip</th>
         <th>Port</th>
         <th>Group</th>
@@ -22,8 +21,7 @@
              <td id="status-{{$node.id}}">{{service_status  ip=$node.ip port=$node.port id=$node.id}}</td>
              <td id="in-cluster-{{$node.id}}">{{in_cluster ip=$node.ip port=$node.port id=$node.id}}</td>
              <td>{{$node.image}}</td>
-             <td>{{$node.username}}</td>
-             <td>{{$node.password}}</td>
+             <td data-toggle="tooltip" data-placement="bottom" title="{{$node.password}}">{{$node.username}}</td>
              <td>{{$node.ip}}</td>
              <td>{{$node.port}}</td>
              <td>{{$node.userGroup}}</td>

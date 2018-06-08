@@ -24,27 +24,27 @@ public class DockerOptionTest {
 
     @Test
     public void testgetContainerInfo() {
-        System.out.println(docker.getContainerInfo("10.16.46.170", "aaaaa_8512"));
+        System.out.println(docker.getContainerInfo("localhost", "aaaaa_8512"));
     }
 
     @Test
     public void testcreateContainer() {
-        JSONObject installObject = generateInstallObject("ssecbigdata02:5000/redis4.0.1","leoredistest","/redis/redis-4.0.1/start.sh 7001 10.16.46.170");
-        System.out.println(docker.createContainer("10.16.46.170", installObject));
+        JSONObject installObject = generateInstallObject("ssecbigdata02:5000/redis4.0.1","leoredistest","/redis/redis-4.0.1/start.sh 7001 localhost");
+        System.out.println(docker.createContainer("localhost", installObject));
     }
     @Test
     public void testoptionContainer() {
-        System.out.println(docker.optionContainer("10.16.46.170", "leoredistest", StartType.stop));
+        System.out.println(docker.optionContainer("localhost", "leoredistest", StartType.stop));
     }
 
     @Test
     public void testremoveContainer() {
-        System.out.println(docker.deleteContainer("10.16.46.170", "leoredistest"));
+        System.out.println(docker.deleteContainer("localhost", "leoredistest"));
     }
 
     @Test
     public void testimagePull() throws IOException {
-        System.out.println(docker.imagePull("10.16.46.171", "shec/itemserviceprd:v1.2.3.4.2"));
+        System.out.println(docker.imagePull("localhost", "shec/itemserviceprd:v1.2.3.4.2"));
     }
 
     private JSONObject generateInstallObject(String image, String name, String command){

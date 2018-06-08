@@ -1,7 +1,7 @@
 $(document).ready(function(){
     window.pluginType = getQueryString("pluginType");
     window.clusterId = getQueryString("clusterId");
-    $("#plugin-name").text( window.pluginType );
+    $("#plugin-name").text( firstUpperCase(window.pluginType) );
     init_install_ui(window.clusterId);
 });
 
@@ -22,7 +22,7 @@ $(document).on("click", "#start-install-cluster", function(obj){
     var installParam = sparrow_form.encode( "create-cluster-form", 1 );
     if ( !sparrow.empty( installParam )  ){
         installParam.pluginType = window.pluginType;
-        if( clusterId ){
+        if( window.clusterId ){
             installParam.clusterId = clusterId;
         }
         var param = {
@@ -33,7 +33,17 @@ $(document).on("click", "#start-install-cluster", function(obj){
         nodePullImage( param, function(obj){
             if( obj.code ==  0 ){
                 nodeInstall( param, function(obj){
-                    console.log( obj.res );
+                    if( obj.code == 0 ){
+                        if( window.clusterId ){
+                            sparrow_win.msg("success install");
+                        }else{
+                            sparrow_win.confirm("success, skip to cluster manager?", function(){
+                                window.location.href = "/cluster/clusterListManager";
+                            });
+                        }
+                    }else{
+                        sparrow_win.msg("all node install fail");
+                    }
                 });
             }
         });
@@ -50,6 +60,26 @@ function  createClusterStep( data, clusterId){
                 $("[name='clusterName']").val( cluster.clusterName );
                 $("[name='clusterName']").attr("disabled","disabled");
                 console.log( cluster );
+            });
+            getNodeByClusterId(window.pluginType, clusterId, function(obj){
+                console.log( obj );
+                var node = obj.res;
+                $("[name='image']").selectpicker("val", node.image);
+                $("[name='image']").attr("disabled","disabled");
+                $('[name="userGroup"]').selectpicker("val", node.userGroup);
+                $('[name="userGroup"]').attr("disabled","disabled");
+                if( node.username ){
+                    $('[name="username"]').val(node.username);
+                    $('[name="username"]').attr("disabled","disabled");
+                }
+                if( node.password ){
+                    $('[name="password"]').val(node.password);
+                    $('[name="password"]').attr("disabled","disabled");
+                }
+                if( node.installPath ){
+                    $('[name="installPath"]').val( node.installPath );
+                    $('[name="installPath"]').attr("disabled","disabled");
+                }
             });
         }
         autosize(document.querySelectorAll('textarea'));

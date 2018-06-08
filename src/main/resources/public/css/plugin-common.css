@@ -93,6 +93,7 @@
 
 .field-value{
     width: auto;
+    max-width: 130px;
 }
 
 .no-border-input{

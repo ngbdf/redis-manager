@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <link rel="shortcut icon" type="image/x-icon" href="../img/favicon.ico" />
     <title>Title</title>
     <link href="../vender/datatables/dataTables.bootstrap.css" rel="stylesheet" charset="utf-8" />
     <link rel="stylesheet" href="../vender/bootstrap-3.3.7/css/bootstrap.css"/>
@@ -26,16 +27,10 @@
     <script src="../core/userApi.js"></script>
     <script src="../vender/sparrow/util.js"></script>
     <script src="../vender/sparrow/smarty.js"></script>
+    <script src="../js/redis-meta.js"></script>
     <script src="../js/common.js"></script>
     <script type="text/javascript" src="../vender/echarts/echarts.js"></script>
 
-    <style type="text/css">
-        .chart-sm{
-            height: 200px;
-            width: 450px;
-            margin: 10px 0px;
-        }
-    </style>
 </head>
 <body>
 <div class="body-container container-color scrollbar-div scrollbar-div-1">
@@ -160,7 +155,7 @@
                                 <li>
                                     <span class="info-header-container">
                                         <i class="glyphicon glyphicon-transfer info"></i>
-                                        <span class="title">连接数 : <span id="avg-connection"></span></span>
+                                        <span class="title">平均连接数 : <span id="avg-connection"></span></span>
                                     </span>
                                     <div  id="top-avg-connection">
                                     </div>
@@ -190,41 +185,35 @@
                             </div>
                         </div>
                         <div class="panel-body" >
-                            <div id="charts-cpu" class="col-md-4 chart-sm" >
-                            </div>
-                            <div id="charts-memory" class="col-md-4 chart-sm" >
-                            </div>
-                            <div id="charts-client" class="col-md-4 chart-sm" >
-                            </div>
-                            <div id="charts-ops" class="col-md-4 chart-sm" >
-                            </div>
-                            <div id="charts-commands" class="col-md-4 chart-sm" >
-                            </div>
-                            <div id="charts-expireKeys" class="col-md-4 chart-sm" >
-                            </div>
-                            <div id="charts-hitRate" class="col-md-4 chart-sm" >
-                            </div>
+                            <div class="row">
+                                <div id="charts-cpu" class="col-xs-4 chart-sm" ></div>
+                                <div id="charts-memory" class="col-xs-4 chart-sm" ></div>
+                                <div id="charts-client" class="col-xs-4 chart-sm" ></div>
+                                <div id="charts-ops" class="col-xs-4 chart-sm" ></div>
+                                <div id="charts-commands" class="col-xs-4 chart-sm" ></div>
+                                <div id="charts-expireKeys" class="col-xs-4 chart-sm" ></div>
+                                <div id="charts-hitRate" class="col-xs-4 chart-sm" ></div>
+                            </div><!-- .row -->
                         </div>
                         <div class="panel-body   scrollbar-div-1" >
                             <div class="slow-log-container">
                                 <select id="logNodeList" class="selectpicker show-tick form-control" title="Slow Log" data-live-search="true" data-width="250px">
                                 </select>
-                                <!--<button  class="btn btn-default" data-loading-text="loading..." type="button" autocomplete="off" id="slow_log">
-                                    <span class="glyphicon" aria-hidden="true">slow-log</span>
-                                </button>-->
                             </div>
-                            <table class="table table-bordered scrollbar" id="slow-log-table">
-                                <thead>
-                                <tr>
-                                    <th>Host</th>
-                                    <th>Slow Date</th>
-                                    <th>Run Time</th>
-                                    <th>Type</th>
-                                    <th>command</th>
-                                </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div id="slow-log-table">
+                                <table class="table table-bordered scrollbar">
+                                    <thead>
+                                    <tr>
+                                        <th>Host</th>
+                                        <th>Slow Date</th>
+                                        <th>Run Time</th>
+                                        <th>Type</th>
+                                        <th>command</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div><!-- .row -->

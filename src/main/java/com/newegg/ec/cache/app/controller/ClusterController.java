@@ -138,7 +138,6 @@ public class ClusterController {
     @ResponseBody
     public Response getRedisConfig(@RequestParam String address){
         Map<String, String> res = logic.getRedisConfig(address);
-        System.out.println(res);
         return Response.Result(0, res);
     }
 
@@ -189,6 +188,13 @@ public class ClusterController {
         return Response.Result(0, res);
     }
 
+    @RequestMapping(value = "/moveSlot", method = RequestMethod.GET)
+    @ResponseBody
+    public Response moveSlot(@RequestParam String ip, @RequestParam int port, @RequestParam int startKey, @RequestParam int endKey){
+        boolean res = logic.reShard(ip, port, startKey, endKey);
+        return Response.Result(0, res);
+    }
+
     @RequestMapping(value = "/importNode", method = RequestMethod.GET)
     @ResponseBody
     public Response importNode(@RequestParam String ip, @RequestParam int port, @RequestParam String masterIP, @RequestParam int masterPort){
@@ -201,7 +207,7 @@ public class ClusterController {
     public Response batchConfig(@RequestParam String ip, @RequestParam int port, @RequestParam String configName, @RequestParam String configValue){
         boolean res = logic.batchConfig(ip, port, configName, configValue);
         if( res ){
-            return Response.Success();
+            return Response.Info("modify config is sucess");
         }
         return Response.Warn("modify config is fail");
     }

@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-
+		<link rel="shortcut icon" type="image/x-icon" href="../img/favicon.ico" />
 		<title>Manager Cluster</title>
 
 		<link rel="stylesheet" href="../vender/bootstrap-3.3.7/css/bootstrap.min.css" />
@@ -10,7 +10,8 @@
 		<link rel="stylesheet" href="../vender/bootstrap-select-1.12.4/dist/css/bootstrap-select.css" />
 		<link rel="stylesheet" href="../css/common.css"/>
 		<link rel="stylesheet" href="../css/manager-cluster.css"/>
-		
+		<link href="../vender/sparrow/sparrow.css" rel="stylesheet" charset="utf-8" />
+
 		<script type="text/javascript" src="../vender/jquery/jquery-3.3.1.min.js"></script>
 		<script type="text/javascript" src="../vender/bootstrap-3.3.7/js/bootstrap.js"></script>
 		<script type="text/javascript" src="../vender/bootstrap-select-1.12.4/dist/js/bootstrap-select.js"></script>
@@ -21,6 +22,7 @@
 		<script src="../vender/sparrow/smarty.js"></script>
 		<script src="../vender/sparrow/validate.js"></script>
 		<script src="../js/common.js"></script>
+		<script src="../js/redis-meta.js"></script>
 	</head>
 	<body>
 		<div class="body-container container-color">
@@ -28,10 +30,10 @@
 	        	<div class="cluster-header">
 		        	<ul class="nav nav-tabs">
 		        		<li class="active">
-							<a href="#clusterManager" data-toggle="tab">Cluster Manager</a>
+							<a href="#clusterManager" data-toggle="tab"><span class="glyphicon glyphicon-euro"></span> Cluster Manager</a>
 						</li>
 						<li >
-							<a href="#nodeManager" target="node-manager" data-toggle="tab">Node Manager</a>
+							<a href="#nodeManager" target="node-manager" data-toggle="tab"><span class="glyphicon glyphicon-wrench"></span> Node Manager</a>
 						</li>
 					</ul>
 		        </div>
@@ -49,5 +51,4 @@
        </div>
 	</body>
 	<script src="../js/cluster-manager.js"></script>
-	<script src="../js/redis-query.js"></script>
 </html>

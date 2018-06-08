@@ -59,6 +59,30 @@ smarty.register_function( 'format_time', function( params ){
     return timestampToDate( time );
 });
 
+smarty.register_function( 'format_redis_info', function( params ){
+    var obj = params['content'];
+    var res = "";
+    for(var key in obj){
+        if( key != "detail" ){
+            res += '<span class="string key-note"># ' + window.redisInfo[key] + '</span>';
+            res += '<span class="key">' + key + '</span>';
+            res += ':';
+            res += '<span class="string">' + obj[key] + '</span><br>';
+        }
+    }
+    return res;
+});
+smarty.register_function( 'format_redis_config', function( params ){
+    var obj = params['content'];
+    var res = "";
+    for(var key in obj){
+        res += '<span class="string key-note"># ' + window.redisConfig[key] + '</span>';
+        res += '<span class="key">' + key + '</span>';
+        res += ':';
+        res += '<span class="string">' + obj[key] + '</span><br>';
+    }
+    return res;
+});
 
 function syntaxHighlightRedisResult(content){
     if( !content ){
@@ -132,8 +156,6 @@ function syntaxHighlight(json) {
 
 
 $(function(){
-
-	
 	$("#redisIp").on("blur", function(){
 		var obj = $("#redisIp");
 		var ip = obj.val().trim();
@@ -181,3 +203,6 @@ function enterNumber(){
 }
 
 
+function firstUpperCase(str) {
+    return str.toLowerCase().replace(/\b[a-z]/g,function(s){return s.toUpperCase();});
+}

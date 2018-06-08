@@ -1,19 +1,18 @@
 <div class="modal-body" id="add-cluster-form">
     <div class="input-group item">
         <span class="input-group-addon input-title" >Cluster Name</span>
-        <input name="clusterName" data-alias="clusterId" type="text" class="form-control" placeholder="cluster name" data-ajax-type="get"  data-len="3-20" data-len-msg="length range 3-20" data-format="[a-zA-Z0-9_]+" data-format-msg="only support letter and number or _"  data-require="1" data-server-check="/check/checkClusterName"/>
+        <input name="clusterName" data-alias="clusterId" type="text" class="form-control" placeholder="cluster name" data-ajax-type="get"  data-len="3-20" data-len-msg="length range 3-20" data-format="[a-zA-Z0-9_\-]+" data-format-msg="format letter,number,- or _"  data-require="1" data-server-check="/check/checkClusterName"/>
     </div>
-    <div id="clusterName_tip"></div>
+    <div id="clusterName_tip" class="sparrow-tip cluster-form-input-tip"></div>
     <div class="input-group item">
         <span class="input-group-addon input-title" >Address</span>
         <input name="address" type="text" class="form-control" placeholder="127.0.0.1:6380" data-len="10-250" data-len-msg="length range > 10" data-ajax-type="get"  data-require="1" data-server-check="/check/checkAddress"/>
     </div>
-    <div id="address_tip"></div>
+    <div id="address_tip" class="sparrow-tip cluster-form-input-tip"><span class="sparrow-input-placeholder">format: 127.0.0.1:6380,127.0.0.1:6381</span></div>
     <div class="input-group item">
         <span class="input-group-addon input-title">Group</span>
         <select name="userGroup" class="form-control">
-            <option disabled="disabled" selected="selected" value="0"></option>
-            <option value="admin">admin</option>
+            <option value="admin" class="sparrow-tip">admin</option>
         </select>
     </div>
     <div class="input-group item">
@@ -41,6 +40,6 @@
         </div>
     </span>
     <div class="input-group item btn-container">
-        <button id="save-cluster" type="button" class="btn btn-primary">Save</button>
+        <button id="save-cluster" type="button" class="btn btn-primary">Add Cluster</button>
     </div>
 </div>

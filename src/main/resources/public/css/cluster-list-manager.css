@@ -20,7 +20,7 @@
 }
 
 .cluster-list-container ul li{
-	width: 19%;
+	width: 24%;
 	height: 200px;
 	float: left;
 	padding: 0.5%;
@@ -68,6 +68,7 @@
 } 
 
 .add-btn {
+    cursor: pointer;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -111,4 +112,14 @@
 
 .btn-container button{
     width: 300px;00px;
+}
+.cluster-form-input-tip{
+    margin-left: 22px;
+    margin-top: -10px;
+    margin-bottom: 9px;
+}
+.cluster-item{
+    display: block;
+    text-decoration: none;
+    color: #666666;
 }

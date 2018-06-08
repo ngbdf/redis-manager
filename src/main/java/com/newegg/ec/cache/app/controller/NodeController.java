@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,6 +46,13 @@ public class NodeController {
         return "nodeManager";
     }
 
+    @RequestMapping(value = "/getPluginList", method = RequestMethod.GET)
+    @ResponseBody
+    public Response getPluginList(){
+        String[] pluginList = nodeManager.pluginList();
+        return Response.Result(Response.DEFAULT, pluginList);
+    }
+
     @RequestMapping(value = "/getImageList", method = RequestMethod.GET)
     @ResponseBody
     public Response getImageList(@RequestParam PluginType pluginType){
@@ -59,6 +67,20 @@ public class NodeController {
         nodeOperate = nodeManager.factoryOperate(pluginType);
         List<Node> nodeList = nodeOperate.getNodeList(clusterId);
         return Response.Result(Response.DEFAULT, nodeList);
+    }
+
+    @RequestMapping(value = "/getNodeByClusterId", method = RequestMethod.GET)
+    @ResponseBody
+    public Response getNodeByClusterId(@RequestParam PluginType pluginType,@RequestParam int clusterId){
+        nodeOperate = nodeManager.factoryOperate(pluginType);
+        Node node = null;
+        try {
+            List<Node> nodeList = nodeOperate.getNodeList(clusterId);
+            node = nodeList.get(0);
+        }catch (Exception ignore){
+
+        }
+        return Response.Result(Response.DEFAULT, node);
     }
 
     @RequestMapping(value = "/nodeStart", method = RequestMethod.POST)

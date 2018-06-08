@@ -3,9 +3,8 @@ package com.newegg.ec.cache.plugin.humpback;
 import com.google.common.collect.Lists;
 import com.newegg.ec.cache.app.controller.check.CheckLogic;
 import com.newegg.ec.cache.app.model.RedisNode;
-import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.util.DateUtil;
-import com.newegg.ec.cache.app.util.HttpClientUtil;
+import com.newegg.ec.cache.app.util.httpclient.HttpClientUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import com.newegg.ec.cache.plugin.INodeOperate;
@@ -18,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -141,7 +141,6 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
      */
     @Override
     public boolean remove(JSONObject removePram) {
-        System.out.println(removePram);
         logger.websocket( removePram.toString() );
         int id = removePram.getInt("id");
         String ip = removePram.getString("ip");
@@ -383,6 +382,9 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
         }
     }
 
+    /**
+     * redis humpback install task
+     */
     class RedisInstallTask implements Callable<Boolean> {
 
         private String ip;

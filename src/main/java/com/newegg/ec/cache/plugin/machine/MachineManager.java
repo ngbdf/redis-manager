@@ -174,7 +174,12 @@ public class MachineManager extends PluginParent implements INodeOperate {
                 cmds[1] = "/usr/bin/wget http://"+ localIp + ":" + servicePort + installShell + " -O " + REDIS_INSTALL_FILE;
                 cmds[2] = "bash " + REDIS_INSTALL_FILE + " " + packageUrl + " " + imagePackage + " " +  port + " " + installBasePath;
                 String cmd = StringUtils.join( cmds, ";");
-                String installRes = rms.exec( cmd );
+                String installRes;
+                if( ip.equals( localIp ) ){ // 如果是要安装到本地机器就不要调用ssh api
+                    installRes = RemoteShellUtil.localExec( cmd );
+                }else{
+                    installRes = rms.exec( cmd );
+                }
                 logger.websocket( installRes );
             }catch (Exception e){
                 logger.websocket( e.getMessage() );
@@ -185,9 +190,10 @@ public class MachineManager extends PluginParent implements INodeOperate {
     private void operateNode(JSONObject startParam, StartType startType) {
         MachineNode machineNode = (MachineNode) JSONObject.toBean( startParam, MachineNode.class );
         int port = machineNode.getPort();
+        System.out.println( machineNode.getIp() + " -- " + machineNode.getUsername() + " --- " + machineNode.getPassword() );
         RemoteShellUtil rms = new RemoteShellUtil(machineNode.getIp(), machineNode.getUsername(), machineNode.getPassword());
         String cmd = "cd " + getPortPath(machineNode.getInstallPath(), port );
-        cmd +=  "; bash "  + startType + ".sh " + port;
+        cmd +=  ";bash "  + startType + ".sh " + port;
         System.out.println( cmd );
         rms.exec( cmd );
     }

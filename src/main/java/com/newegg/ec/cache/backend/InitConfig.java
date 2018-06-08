@@ -19,6 +19,8 @@ public class InitConfig implements ApplicationListener<ContextRefreshedEvent> {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Value("${cache.mysql.database.name}")
+    private String databaseName;
     @Value("${cache.user.api.path}")
     private String userApiPath;
     @Value("${cache.mysql.scan.package}")

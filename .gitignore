@@ -1,3 +1,4 @@
 .idea/*
 redis-manager.iml
 target/*
+logs/*

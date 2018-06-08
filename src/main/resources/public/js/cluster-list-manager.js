@@ -18,7 +18,7 @@ smarty.register_function( 'cluster_state', function( params ){
 });
 
 $(document).on("click", "#add-cluster", function(){
-    smarty.open( "cluster/add_cluster_model", {}, { title: "Add New Cluster", width:400, height:305},function(){
+    smarty.open( "cluster/add_cluster_model", {}, { title: "Add New Cluster", width:400, height:345},function(){
 
     });
 });
@@ -47,10 +47,12 @@ $("#save").on("click", function(){
     var clusterNameObj = $("#clusterName");
     var addressObj = $("#address");
     var groupIdObj = $("#group");
+    var redisPasswordObj = $("#redisPassword");
 
     var clusterName = clusterNameObj.val().trim();
     var address = addressObj.val().trim();
     var userGroup = $("#group option:selected").val().trim();
+    var redisPassword = redisPasswordObj.val().trim();
 
     if(clusterName == null || clusterName == ""){
         clusterNameObj.addClass("input-error");
@@ -77,6 +79,7 @@ $("#save").on("click", function(){
     cluster.address = address;
     cluster.userGroup =  userGroup;
     cluster.clusterType = "machine";
+    cluster.redisPassword = redisPassword;
     addCluster(cluster, function(obj){
         location.reload();
     });

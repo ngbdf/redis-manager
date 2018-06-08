@@ -162,7 +162,9 @@
 
 /*slow log*/
 .slow-log-container{
+    padding: 5px;
 	margin: 20px 0 10px;
+	background-color: #f5f5f5;
 }
 
 .log-table-wrapper {
@@ -197,4 +199,9 @@
     height: auto;
     margin: 10px auto;
     padding: 10px;
+}
+
+.chart-sm{
+    height:220px;
+    margin: 10px 0px;
 }

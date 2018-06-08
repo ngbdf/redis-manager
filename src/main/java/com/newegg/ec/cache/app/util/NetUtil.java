@@ -143,6 +143,5 @@ public class NetUtil {
             }
         }
         return listHost;
-
     }
 }

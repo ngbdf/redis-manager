@@ -52,6 +52,11 @@ public class CheckController {
         return logic.checkAddress(address);
     }
 
+    @RequestMapping("/checkUserPermisson")
+    @ResponseBody
+    public Response checkUserPermisson(@RequestParam String ip,@RequestParam String userName,@RequestParam String password){
+        return logic.checkUserPermisson(ip, userName, password);
+    }
 
     @RequestMapping(value = "/checkClusterName", method = RequestMethod.GET)
     @ResponseBody

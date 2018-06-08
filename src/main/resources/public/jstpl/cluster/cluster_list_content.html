@@ -7,7 +7,7 @@
                             <i class="material-icons">close</i>
                             <!--<i class="icon-remove"></i>-->
                         </div>
-                        <a href="/cluster/clusterManager?clusterId={{$cluster.id}}&pluginType={{$cluster.clusterType}}"  title="manager cluster">
+                        <div class="cluster-item">
                             <div class="one-data">
                                 <span><b>{{$cluster.clusterName}}</b></span>
                             </div>
@@ -26,10 +26,10 @@
                                 <span>Type:&nbsp</span>
                                 <span>{{$cluster.clusterType}}</span>
                             </div>
-                        </a>
+                        </div>
                         <div class="operation-btn-swapper">
-                            <a href="/cluster/clusterManager?clusterId={{$cluster.id}}&pluginType={{$cluster.clusterType}}" class="operation-btn">
-                                <span data-cluster-id="{{$cluster.id}}">Manager</span>
+                            <a href="/cluster/clusterManager?clusterId={{$cluster.id}}&pluginType={{$cluster.clusterType}}" class="btn btn-default">
+                                <span data-cluster-id="{{$cluster.id}}">Manager Cluster</span>
                             </a>
                         </div>
                     </div>

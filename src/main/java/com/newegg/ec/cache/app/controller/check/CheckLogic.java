@@ -174,6 +174,14 @@ public class CheckLogic {
         return  Response.Success();
     }
 
+    public Response checkUserPermisson(String ip, String username, String password){
+        boolean res = NetUtil.checkIpAnduserAccess(ip, username, password);
+        if( res ){
+            return Response.Success();
+        }
+        return Response.Error("username or password is error");
+    }
+
     public  Response checkBatchUserPermisson(JSONObject req){
         String iplist = req.getString("iplist");
         Set<String> ipSet = JedisUtil.getIPList( iplist );
