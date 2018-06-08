@@ -58,7 +58,7 @@ RedisManager 是  redis 一站式管理平台。 支持集群的创建、管理�
 ## 产品设计
 > 设计文档主要介绍 redisMangaer 架构设计、框架设计
 
-1. [代码结构介绍](https://github.com/ngbdf/redis-manager/wiki/代码结构介绍)
+1. [代码结构介绍](https://github.com/ngbdf/redis-manager/wiki/代码结构介绍) 
 2. [监控数据的采集](https://github.com/ngbdf/redis-manager/wiki/监控数据的采集)
 
 ## License
