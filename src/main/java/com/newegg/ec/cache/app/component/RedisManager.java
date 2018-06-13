@@ -4,10 +4,7 @@ import com.newegg.ec.cache.app.component.redis.IRedis;
 import com.newegg.ec.cache.app.component.redis.JedisClusterClient;
 import com.newegg.ec.cache.app.component.redis.JedisMasterSlaveClient;
 import com.newegg.ec.cache.app.logic.ClusterLogic;
-import com.newegg.ec.cache.app.model.Cluster;
-import com.newegg.ec.cache.app.model.Host;
-import com.newegg.ec.cache.app.model.RedisNode;
-import com.newegg.ec.cache.app.model.RedisQueryParam;
+import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
 import com.newegg.ec.cache.core.logger.CommonLogger;
@@ -44,11 +41,20 @@ public class RedisManager {
         return redis;
     }
 
+    public boolean importDataToCluster(String address, String targetIp, int targetPort, String keyFormat) throws InterruptedException {
+        IRedis redis = factory( address );
+        if( StringUtils.isBlank(keyFormat ) ){
+            keyFormat = "*";
+        }
+        return redis.importDataToCluster(targetIp, targetPort, keyFormat);
+    }
+
     public Object query(RedisQueryParam redisQueryParam) {
         Object res = null;
         IRedis redis = factory( redisQueryParam.getAddress() );
         if( !redisQueryParam.getKey().equals("*") ){
-            res = redis.getRedisValue( redisQueryParam.getDb(), redisQueryParam.getKey());
+            RedisValue redisValue = redis.getRedisValue( redisQueryParam.getDb(), redisQueryParam.getKey());
+            res = redisValue.getResult();
         }
         if( null == res ){
             res = redis.scanRedis( redisQueryParam.getDb(), redisQueryParam.getKey() );

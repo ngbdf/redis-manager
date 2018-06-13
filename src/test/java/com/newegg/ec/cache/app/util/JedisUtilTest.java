@@ -106,23 +106,29 @@ public class JedisUtilTest {
     }
 
     @Test
-    public void testScan(){
-        //HostAndPort hostAndPort = new HostAndPort("10.16.46.170", 8052);
-        //JedisCluster jedis =  new JedisCluster(hostAndPort);
-        Jedis jedis = new Jedis("10.16.46.170", 8051); //72788
-        int count = 0;
-        ScanParams scanParams = new ScanParams();
-        scanParams.match("key-test*");
-        scanParams.count(1000);
-        ScanResult<String> scanResult =  jedis.scan( "0", scanParams );
-        count += scanResult.getResult().size();
-        System.out.println( count + "----");
-        while ( !scanResult.getStringCursor().equals("0") ){
-            System.out.println( scanResult.getStringCursor() );
-            scanResult = jedis.scan( scanResult.getStringCursor(), scanParams );
-            count += scanResult.getResult().size();
-            System.out.println( scanResult.getStringCursor() + " scan cursor");
-            System.out.println( count + "------------ size");
+    public void testInsertData(){
+        HostAndPort hostAndPort = new HostAndPort("10.16.46.192", 8018);
+        JedisCluster jedisCluster = new JedisCluster(hostAndPort);
+        for(int i = 0; i < 10000; i++ ){
+            jedisCluster.hset("test_key_map_" + i, "fdas", "fff" + i);
+            jedisCluster.expire("test_key_map_" + i, 600);
         }
+        System.out.println("finish");
+    }
+
+    @Test
+    public void testTtl(){
+        HostAndPort hostAndPort = new HostAndPort("10.16.46.192", 8018);
+        JedisCluster jedisCluster = new JedisCluster(hostAndPort);
+        //jedisCluster.set("123456", "23423");
+        //jedisCluster.expire("123456", 100);
+        System.out.println( jedisCluster.ttl("123456"));
+    }
+
+    @Test
+    public void testImportData() throws InterruptedException {
+        JedisClusterClient jedisClusterClient = new JedisClusterClient("10.16.46.192", 8018);
+        jedisClusterClient.importDataToCluster("10.16.46.172", 8008, "test_key_map_*");
+        Thread.sleep(300000);
     }
 }

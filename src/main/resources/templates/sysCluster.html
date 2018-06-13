@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="shortcut icon" type="image/x-icon" href="../img/favicon.ico" />
+    <title>sync cluster</title>
+    <link rel="stylesheet" href="../vender/bootstrap-3.3.7/css/bootstrap.css"/>
+    <link rel="stylesheet" href="../css/common.css"/>
+    <script type="text/javascript" src="../vender/jquery/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="../vender/bootstrap-3.3.7/js/bootstrap.js"></script>
+    <script src="../vender/sparrow/layer/layer.js"></script>
+    <script src="../vender/sparrow/ajax.js"></script>
+    <script src="../vender/sparrow/util.js"></script>
+    <script src="../core/userApi.js"></script>
+</head>
+<body>
+<div class="body-container">
+    <h1>集群同步</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="input-group">
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        From Cluster
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                    </ul>
+                </div>
+                <input type="text" class="form-control" aria-label="Text input with segmented button dropdown" placeholder="test_key*" />
+                <div class="input-group-btn">
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                    </ul>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        To Cluster
+                        <span class="caret"></span>
+                    </button>
+                    <button type="button" class="btn btn-info">SynCluster</button>
+                </div>
+            </div>
+        </div><!-- col-md-12 -->
+    </div><!-- .row-->
+</div><!-- .container-fluid -->
+<script src="../js/sys-cluster.js"></script>
+</body>
+</html>

@@ -35,6 +35,11 @@ public class ClusterController {
         return "clusterManager";
     }
 
+    @RequestMapping("/sysCluster")
+    public String sysCluster(Model model){
+        return "sysCluster";
+    }
+
     @RequestMapping(value = "/redisQuery", method = RequestMethod.POST)
     @ResponseBody
     public Response redisQuery(@RequestBody RedisQueryParam redisQueryParam){
