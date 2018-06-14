@@ -109,8 +109,9 @@ public class JedisUtilTest {
     public void testInsertData(){
         HostAndPort hostAndPort = new HostAndPort("10.16.46.192", 8018);
         JedisCluster jedisCluster = new JedisCluster(hostAndPort);
-        for(int i = 0; i < 10000; i++ ){
+        for(int i = 0; i < 15000; i++ ){
             jedisCluster.hset("test_key_map_" + i, "fdas", "fff" + i);
+            jedisCluster.hset("test_key_map_" + i, "fdas2", "fff" + i);
             jedisCluster.expire("test_key_map_" + i, 600);
         }
         System.out.println("finish");

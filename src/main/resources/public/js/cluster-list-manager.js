@@ -1,4 +1,4 @@
-smarty.get( "/cluster/listCluster?group=admin", "cluster/cluster_list_content", "cluster-list-content", function(){
+smarty.get( "/cluster/listCluster", "cluster/cluster_list_content", "cluster-list-content", function(){
        /* console.log("get...");*/
 }, true );
 

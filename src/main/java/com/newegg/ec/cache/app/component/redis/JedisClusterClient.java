@@ -1,5 +1,8 @@
 package com.newegg.ec.cache.app.component.redis;
 
+import com.newegg.ec.cache.app.component.RedisManager;
+import com.newegg.ec.cache.app.model.Cluster;
+import com.newegg.ec.cache.app.model.ClusterImportResult;
 import com.newegg.ec.cache.app.model.RedisValue;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import redis.clients.jedis.*;
@@ -14,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class JedisClusterClient extends JedisSingleClient implements IRedis {
     private static ExecutorService executorPool = Executors.newFixedThreadPool(200);
-    private static Map<String, AtomicInteger> importMap = new HashMap<>(); // 用于统计已经倒入多少数据
 
     private JedisCluster jedis;
     public JedisClusterClient(String ip, int port){
@@ -59,9 +61,9 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
 
     @Override
     public boolean importDataToCluster(String targetIp, int targetPort, String keyFormat) throws InterruptedException {
-        String importKey = getImportKey(this.ip, this.port, targetIp, targetPort, keyFormat);
-        if( null == importMap.get(importKey) ){
-            importMap.put(importKey, new AtomicInteger(0));
+        String importKey = RedisManager.getImportKey(this.ip, this.port, targetIp, targetPort, keyFormat);
+        if( null == RedisManager.importMap.get(importKey) ){
+            RedisManager.importMap.put(importKey, new AtomicInteger(0));
         }
         Map<String,Map> masterNodes = JedisUtil.getMasterNodes(this.ip, this.port);
         CountDownLatch countDownLatch = new CountDownLatch( masterNodes.size() );
@@ -80,13 +82,13 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
                         scanParams.match( keyFormat );
                         scanParams.count(1500);
                         ScanResult<String> scanResult =  jedis.scan( "0", scanParams );
-                        importMap.get( importKey ).getAndAdd( scanResult.getResult().size() ); //统计scan的次数
+                        RedisManager.importMap.get( importKey ).addAndGet( scanResult.getResult().size() ); //统计scan的次数
                         importScanResult( scanResult.getResult().iterator(), targetIp, targetPort );
                         while ( !scanResult.getStringCursor().equals("0") ){
-                            System.out.println( scanResult.getStringCursor() );
                             scanResult = jedis.scan( scanResult.getStringCursor(), scanParams );
-                            importMap.get( importKey ).getAndAdd(scanResult.getResult().size()); //统计scan的次数
+                            RedisManager.importMap.get( importKey ).addAndGet(scanResult.getResult().size()); //统计scan的次数
                             importScanResult( scanResult.getResult().iterator(), targetIp, targetPort );
+                            System.out.println( scanResult.getStringCursor() + "---" + RedisManager.importMap.get( importKey ).get() );
                         }
                     }catch (Exception e){
                         e.printStackTrace();
@@ -98,53 +100,54 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
             });
         }
         countDownLatch.await();
-        importMap.remove( importKey );
+        RedisManager.importMap.remove( importKey );
         return true;
     }
 
     private void importScanResult(Iterator<String> resultIterator, String targetIp, int targetPort){
         HostAndPort targetHostAndPort = new HostAndPort(targetIp, targetPort);
         JedisCluster targetCluster = new JedisCluster( targetHostAndPort );
-        while ( resultIterator.hasNext() ){
-            String key = resultIterator.next();
-            RedisValue redisValue = getRedisValue(this, 0, key );
-            try {
-                switch ( redisValue.getType() ){
-                    case "string":
-                        targetCluster.set(key, String.valueOf(redisValue.getResult()));
-                        break;
-                    case "hash":
-                        Map<String, String> hashRes = (Map<String, String>) redisValue.getResult();
-                        for(Map.Entry<String, String> resItem: hashRes.entrySet()){
-                            targetCluster.hset(key, resItem.getKey(), resItem.getValue());
-                        }
-                        break;
-                    case "list":
-                        List<String> listRes = (List<String>) redisValue.getResult();
-                        for(int i = 0; i < listRes.size(); i++){
-                            targetCluster.lpush(key, listRes.get(i));
-                        }
-                        break;
-                    case "set":
-                        Set<String> setRes  = (Set<String>) redisValue.getResult();
-                        Iterator<String> setIterator = setRes.iterator();
-                        while (setIterator.hasNext()){
-                            targetCluster.sadd( key, setIterator.next() );
-                        }
-                        break;
-                }
-            }finally {
-                targetCluster.expire(key, (int) redisValue.getTtl());
+        try {
+            while ( resultIterator.hasNext() ){
+                String key = resultIterator.next();
+                RedisValue redisValue = getRedisValue(this, 0, key );
                 try {
-                    targetCluster.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    switch ( redisValue.getType() ){
+                        case "string":
+                            targetCluster.set(key, String.valueOf(redisValue.getResult()));
+                            break;
+                        case "hash":
+                            Map<String, String> hashRes = (Map<String, String>) redisValue.getResult();
+                            for(Map.Entry<String, String> resItem: hashRes.entrySet()){
+                                targetCluster.hset(key, resItem.getKey(), resItem.getValue());
+                            }
+                            break;
+                        case "list":
+                            List<String> listRes = (List<String>) redisValue.getResult();
+                            for(int i = 0; i < listRes.size(); i++){
+                                targetCluster.lpush(key, listRes.get(i));
+                            }
+                            break;
+                        case "set":
+                            Set<String> setRes  = (Set<String>) redisValue.getResult();
+                            Iterator<String> setIterator = setRes.iterator();
+                            while (setIterator.hasNext()){
+                                targetCluster.sadd( key, setIterator.next() );
+                            }
+                            break;
+                    }
+                }finally {
+                    targetCluster.expire(key, (int) redisValue.getTtl());
                 }
             }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            try {
+                targetCluster.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-    }
-
-    private String getImportKey(String ownerIp, int ownerPort, String targetIp, int targetPort, String formatKey){
-        return ownerIp + "-" + port + "-" + targetIp + "-" + targetPort + "-" + formatKey;
     }
 }

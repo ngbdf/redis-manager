@@ -15,8 +15,11 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by lzz on 2018/4/20.
@@ -24,6 +27,8 @@ import java.util.Map;
 @Component
 public class RedisManager {
     public static CommonLogger logger = new CommonLogger(RedisManager.class);
+    public static Map<String, AtomicInteger> importMap = new HashMap<>(); // 用于统计已经倒入多少数据
+
     @Resource
     private ClusterLogic clusterLogic;
 
@@ -41,12 +46,26 @@ public class RedisManager {
         return redis;
     }
 
-    public boolean importDataToCluster(String address, String targetIp, int targetPort, String keyFormat) throws InterruptedException {
+    public boolean importDataToCluster(String address, String targetAddress, String keyFormat) throws InterruptedException {
+        Host host = NetUtil.getHostPassAddress( targetAddress );
+        String targetIp = host.getIp();
+        int targetPort = host.getPort();
         IRedis redis = factory( address );
         if( StringUtils.isBlank(keyFormat ) ){
             keyFormat = "*";
         }
         return redis.importDataToCluster(targetIp, targetPort, keyFormat);
+    }
+
+    public List<ClusterImportResult> getClusterImportResult(){
+        List<ClusterImportResult> clusterImportResultList = new ArrayList<>();
+        for(Map.Entry<String, AtomicInteger> item : importMap.entrySet()){
+            String key = item.getKey();
+            String[] fields = key.split("-");
+            AtomicInteger importCount = item.getValue();
+            clusterImportResultList.add(new ClusterImportResult(fields[0], Integer.parseInt(fields[1]), fields[2], Integer.parseInt(fields[3]), fields[4], importCount));
+        }
+        return clusterImportResultList;
     }
 
     public Object query(RedisQueryParam redisQueryParam) {
@@ -226,5 +245,7 @@ public class RedisManager {
         return true;
     }
 
-
+    public static String getImportKey(String ownerIp, int ownerPort, String targetIp, int targetPort, String formatKey){
+        return ownerIp + "-" + ownerPort + "-" + targetIp + "-" + targetPort + "-" + formatKey;
+    }
 }

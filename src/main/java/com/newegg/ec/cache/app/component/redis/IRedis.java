@@ -1,6 +1,9 @@
 package com.newegg.ec.cache.app.component.redis;
 
+import com.newegg.ec.cache.app.model.ClusterImportResult;
 import com.newegg.ec.cache.app.model.RedisValue;
+
+import java.util.List;
 
 /**
  * Created by lzz on 2018/3/19.
