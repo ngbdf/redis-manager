@@ -1,5 +1,6 @@
 package com.newegg.ec.cache.app.component.redis;
 
+import com.newegg.ec.cache.app.model.RedisValue;
 import redis.clients.jedis.*;
 
 /**
@@ -16,7 +17,7 @@ public class JedisMasterSlaveClient extends RedisClientBase implements IRedis {
     }
 
     @Override
-    public Object getRedisValue(int db, String key) {
+    public RedisValue getRedisValue(int db, String key) {
         jedis.select( db );
         return super.getRedisValue(this, db, key);
     }
@@ -25,6 +26,11 @@ public class JedisMasterSlaveClient extends RedisClientBase implements IRedis {
     public Object scanRedis(int db, String key) {
         jedis.select( db );
         return super.scanRedis(this, key);
+    }
+
+    @Override
+    public boolean importDataToCluster(String targetIp, int targetPort, String keyFormat) {
+        throw new RuntimeException("not support");
     }
 
     @Override

@@ -31,7 +31,7 @@ $(document).on("click", ".list-active", function(res){
     var group = $(this).data("group");
     var isGetData = $(this).attr("aria-expanded");
     console.log( group );
-    smarty.get( "/cluster/listCluster?group=" + group, "monitor/cluster_info_list", "group-id-" + group, function(obj){
+    smarty.get( "/cluster/listCluster", "monitor/cluster_info_list", "group-id-" + group, function(obj){
         $(".cluster-info-detail-" + group).click();
     }, true );
 });

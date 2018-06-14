@@ -23,7 +23,7 @@ import javax.servlet.http.HttpSession;
  */
 @Aspect
 @Component
-public class LogAdvice {
+public class ControllerAdvice {
     private static final Log logger = LogFactory.getLog("access");
     private static final String LOG_SEPARATOR = ",";
     /**
