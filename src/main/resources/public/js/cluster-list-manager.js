@@ -144,7 +144,7 @@ $("body").delegate(".delete-container","click", function(){
                             if(code == 0) {
                                  deleteObj.remove();
                                  layer.msg("delete " + clusterName + " successfully")
-                                 /*setTimeout("location.reload()", 1000);*/
+                                 /* test pull request conflict*/
                             } else {
                                 layer.msg("delete " + clusterName + " failed")
                             }
