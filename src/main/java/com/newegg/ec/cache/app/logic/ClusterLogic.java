@@ -2,22 +2,17 @@ package com.newegg.ec.cache.app.logic;
 
 import com.newegg.ec.cache.app.component.RedisManager;
 import com.newegg.ec.cache.app.dao.IClusterDao;
-import com.newegg.ec.cache.app.dao.INodeInfoDao;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.util.*;
 import com.newegg.ec.cache.core.logger.CommonLogger;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -417,5 +412,20 @@ public class ClusterLogic {
             res = res & FileUtil.modifyFileContent(ip, port, username, password, filePath, field, value);
         }
         return res;
+    }
+
+    public boolean importDataToCluster(String address, String targetAddress, String keyFormat){
+        boolean res = false;
+        try {
+            redisManager.importDataToCluster(address, targetAddress, keyFormat);
+            res = true;
+        }catch (Exception e){
+            logger.error("import to cluster", e);
+        }
+        return res;
+    }
+
+    public List<ClusterImportResult> getImportCountList() {
+        return redisManager.getClusterImportResult();
     }
 }

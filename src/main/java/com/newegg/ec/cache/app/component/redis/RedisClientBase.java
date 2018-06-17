@@ -1,5 +1,6 @@
 package com.newegg.ec.cache.app.component.redis;
 
+import com.newegg.ec.cache.app.model.RedisValue;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisCommands;
 import redis.clients.jedis.MultiKeyCommands;
@@ -15,11 +16,12 @@ public abstract class RedisClientBase{
     public abstract JedisCommands getRedisCommands();
     public abstract MultiKeyCommands redisMultiKeyCommands();
 
-    public Object getRedisValue(RedisClientBase redisClient, int db, String key) {
+    public RedisValue getRedisValue(RedisClientBase redisClient, int db, String key) {
         JedisCommands jedisCommands =redisClient.getRedisCommands();
         Object res = null;
+        String type = jedisCommands.type( key );
+        long ttl = jedisCommands.ttl( key );
         try {
-            String type = jedisCommands.type( key );
             switch ( type ){
                 case "none":
                     break;
@@ -43,7 +45,7 @@ public abstract class RedisClientBase{
         }catch (Exception e){
 
         }
-        return res;
+        return new RedisValue(ttl, type, res);
     }
 
     public List<String> scanRedis(RedisClientBase redisClient, String key) {
@@ -74,4 +76,5 @@ public abstract class RedisClientBase{
         }
         return resList;
     }
+
 }

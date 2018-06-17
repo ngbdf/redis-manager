@@ -1,4 +1,4 @@
-smarty.get( "/cluster/listCluster?group=admin", "cluster/cluster_list_content", "cluster-list-content", function(){
+smarty.get( "/cluster/listCluster", "cluster/cluster_list_content", "cluster-list-content", function(){
        /* console.log("get...");*/
 }, true );
 
@@ -143,8 +143,7 @@ $("body").delegate(".delete-container","click", function(){
                             var code = parseInt(result.code);
                             if(code == 0) {
                                  deleteObj.remove();
-                                 layer.msg("delete " + clusterName + " successfully")
-                                 /* test pull request conflict*/
+                                 layer.msg("delete " + clusterName + " successfully") 
                             } else {
                                 layer.msg("delete " + clusterName + " failed")
                             }

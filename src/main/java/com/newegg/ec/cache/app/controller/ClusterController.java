@@ -3,6 +3,7 @@ package com.newegg.ec.cache.app.controller;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.*;
+import com.newegg.ec.cache.app.util.RequestUtil;
 import com.newegg.ec.cache.core.userapi.UserAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,6 +36,11 @@ public class ClusterController {
         return "clusterManager";
     }
 
+    @RequestMapping("/synCluster")
+    public String synCluster(Model model){
+        return "synCluster";
+    }
+
     @RequestMapping(value = "/redisQuery", method = RequestMethod.POST)
     @ResponseBody
     public Response redisQuery(@RequestBody RedisQueryParam redisQueryParam){
@@ -51,9 +57,10 @@ public class ClusterController {
 
     @RequestMapping(value = "/listCluster", method = RequestMethod.GET)
     @ResponseBody
-    public Response listCluster(@RequestParam String group){
+    public Response listCluster(){
         List<Cluster> listCluster = null;
-        listCluster = logic.getClusterList( group );
+        String userGroup = RequestUtil.getUser().getUserGroup();
+        listCluster = logic.getClusterList( userGroup );
         return Response.Result(0, listCluster);
     }
 
@@ -62,6 +69,23 @@ public class ClusterController {
     public Response clusterExistAddress(@RequestParam String address){
         boolean isexist = logic.clusterExistAddress( address );
         return Response.Result(Response.DEFAULT, isexist);
+    }
+
+    @RequestMapping(value = "/importDataToCluster", method = RequestMethod.GET)
+    @ResponseBody
+    public Response importDataToCluster(@RequestParam String address,@RequestParam  String targetAddress,@RequestParam  String keyFormat){
+        boolean res = logic.importDataToCluster(address, targetAddress, keyFormat);
+        if(res){
+            return Response.Success();
+        }
+        return Response.Error("import is error!");
+    }
+
+    @RequestMapping(value = "/getImportCountList", method = RequestMethod.GET)
+    @ResponseBody
+    public Response getImportCountList(){
+        List<ClusterImportResult> clusterImportResultList = logic.getImportCountList();
+        return Response.Result(0, clusterImportResultList);
     }
 
 
