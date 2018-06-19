@@ -4,7 +4,7 @@ package com.newegg.ec.cache.app.model;
  * @author: Jay.H.Zou
  * @date: 2018/5/29
  */
-public class RedisAuth {
+public class RedisConnection {
     private String ip;
     private Integer port;
     private String password;
@@ -35,7 +35,7 @@ public class RedisAuth {
 
     @Override
     public String toString() {
-        return "RedisAuth{" +
+        return "RedisConnection{" +
                 "ip='" + ip + '\'' +
                 ", port=" + port +
                 ", password='" + password + '\'' +

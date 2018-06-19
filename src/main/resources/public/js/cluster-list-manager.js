@@ -143,7 +143,7 @@ $("body").delegate(".delete-container","click", function(){
                             var code = parseInt(result.code);
                             if(code == 0) {
                                  deleteObj.remove();
-                                 layer.msg("delete " + clusterName + " successfully")
+                                 layer.msg("delete " + clusterName + " successfully") 
                             } else {
                                 layer.msg("delete " + clusterName + " failed")
                             }
