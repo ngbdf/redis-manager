@@ -73,6 +73,13 @@ public class MonitorController {
         return Response.Result(0, res);
     }
 
+    @RequestMapping(value = "/getDbSize", method = RequestMethod.GET)
+    @ResponseBody
+    public Response getDbSize(@RequestParam String host){
+        int dbsize = logic.getDbSize(host);
+        return Response.Result(0, dbsize);
+    }
+
     @RequestMapping(value = "/getLastNodeInfo", method = RequestMethod.GET)
     @ResponseBody
     public Response getLastNodeInfo(@RequestParam int clusterId,@RequestParam  int startTime,@RequestParam  int endTime, @RequestParam String host){

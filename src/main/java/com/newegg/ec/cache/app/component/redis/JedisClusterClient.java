@@ -59,6 +59,14 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
         return jedis;
     }
 
+    /**
+     * 可以考虑用 migrate 实现，但是 migrate 是在服务端建立 socket 链接到目标机器上发送命令
+     * @param targetIp
+     * @param targetPort
+     * @param keyFormat
+     * @return
+     * @throws InterruptedException
+     */
     @Override
     public boolean importDataToCluster(String targetIp, int targetPort, String keyFormat) throws InterruptedException {
         String importKey = RedisManager.getImportKey(this.ip, this.port, targetIp, targetPort, keyFormat);
@@ -118,9 +126,7 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
                             break;
                         case "hash":
                             Map<String, String> hashRes = (Map<String, String>) redisValue.getResult();
-                            for(Map.Entry<String, String> resItem: hashRes.entrySet()){
-                                targetCluster.hset(key, resItem.getKey(), resItem.getValue());
-                            }
+                            targetCluster.hmset(key, hashRes);
                             break;
                         case "list":
                             List<String> listRes = (List<String>) redisValue.getResult();

@@ -2,12 +2,14 @@ package com.newegg.ec.cache.app.util;
 
 import com.newegg.ec.cache.app.component.redis.JedisClusterClient;
 import com.newegg.ec.cache.app.model.RedisNode;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.Test;
 import redis.clients.jedis.*;
+import redis.clients.util.JedisClusterCRC16;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by gl49 on 2018/4/21.
@@ -109,7 +111,7 @@ public class JedisUtilTest {
     public void testInsertData(){
         HostAndPort hostAndPort = new HostAndPort("10.16.46.192", 8018);
         JedisCluster jedisCluster = new JedisCluster(hostAndPort);
-        for(int i = 0; i < 15000; i++ ){
+        for(int i = 0; i < 100; i++ ){
             jedisCluster.hset("test_key_map_" + i, "fdas", "fff" + i);
             jedisCluster.hset("test_key_map_" + i, "fdas2", "fff" + i);
             jedisCluster.expire("test_key_map_" + i, 600);
@@ -118,18 +120,76 @@ public class JedisUtilTest {
     }
 
     @Test
-    public void testTtl(){
+    public void testMigrate(){
+        Jedis jedis = new Jedis("10.16.46.192", 8018);
+        for(int i = 0; i < 100; i++){
+            jedis.migrate("10.16.46.172", 8008, "test_key_map_" + i, 0, 5000);
+        }
+    }
+
+    @Test
+    public void testStringByte(){
         HostAndPort hostAndPort = new HostAndPort("10.16.46.192", 8018);
         JedisCluster jedisCluster = new JedisCluster(hostAndPort);
+        jedisCluster.get("das");
+        jedisCluster.set("fcdsa", "fdas");
+        //jedisCluster.set("aaa","bbb");
+        //jedisCluster.set("aaa1".getBytes(), "ccc".getBytes());
+        //System.out.println( jedisCluster.get("aaa1"));
+        String aa = "aaaa";
+        byte[] bb = aa.getBytes();
+        System.out.println( bb );
+    }
+
+    @Test
+    public void testTtl(){
+
+        HostAndPort hostAndPort = new HostAndPort("10.16.46.192", 8018);
+        Set<HostAndPort> hostAndPortSet = new HashSet<>();
+        hostAndPortSet.add( hostAndPort );
+        JedisCluster jedisCluster = new JedisCluster(hostAndPort);
+        jedisCluster.get("dfsa");
         //jedisCluster.set("123456", "23423");
         //jedisCluster.expire("123456", 100);
         System.out.println( jedisCluster.ttl("123456"));
+
+        JedisSlotBasedConnectionHandler jedisSlotBasedConnectionHandler = new JedisSlotBasedConnectionHandler(hostAndPortSet, new GenericObjectPoolConfig(), 10000);
+        Jedis jedis = jedisSlotBasedConnectionHandler.getConnectionFromSlot( JedisClusterCRC16.getSlot("dsaf") );
+
+        jedis.pipelined().set("","");
+        Pipeline pipeline = new Pipeline();
+        //pipeline.exec()
+        pipeline.set("", "");
+        pipeline.set("","");
+        pipeline.sync();
+        //jedis.migrate();
+        System.out.println("fdsa");
     }
+
+    @Test
+    public void testPipeline() throws IOException {
+        Jedis jedis = new Jedis("10.16.46.172", 8008);
+        JedisCluster jedisCluster = null;
+        Pipeline pipeline = jedis.pipelined();
+        pipeline.set("cdfas","ccc");
+        pipeline.lpush("list-test34","fdsa","fdas","fdas");
+        pipeline.sync();
+        pipeline.close();
+    }
+
 
     @Test
     public void testImportData() throws InterruptedException {
         JedisClusterClient jedisClusterClient = new JedisClusterClient("10.16.46.192", 8018);
         jedisClusterClient.importDataToCluster("10.16.46.172", 8008, "test_key_map_*");
         Thread.sleep(300000);
+    }
+
+    @Test
+    public void testHashMap(){
+        Map<String, String> map1 = new HashMap<>();
+        AtomicInteger atomicInteger = new AtomicInteger(0);
+        atomicInteger.incrementAndGet();
+        //map1.put()
     }
 }

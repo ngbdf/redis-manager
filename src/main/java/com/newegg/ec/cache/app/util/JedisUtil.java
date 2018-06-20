@@ -153,7 +153,13 @@ public class JedisUtil {
 
 
     public static int getDbIndex(String db) {
-        int index = Integer.parseInt(db);
+        int index = 0;
+        if( db.contains("db") ){
+            String tmp = db.substring(2);
+            index = Integer.parseInt(tmp);
+        }else{
+            index = Integer.parseInt(db);
+        }
         return index;
     }
 
