@@ -230,11 +230,11 @@ var ajax = {
 		var tmp_req = new sparrow_ajax( url, callback, JSON.stringify(data), true, null );
 		tmp_req.set_data_type( 'json' );
 		tmp_req.set_type( 'POST' );
-		ajax_push_pool( tmp_req );
+		tmp_req.send();
 	},
 	async_get: function( url, callback){
 		var tmp_req = new sparrow_ajax( url, callback, null, true, null );
 		tmp_req.set_data_type( 'json' );
-		ajax_push_pool( tmp_req );
+		tmp_req.send();
 	}
 };

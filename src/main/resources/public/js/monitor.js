@@ -157,7 +157,7 @@ function init(){
         $("#avg-response").html( obj.res );
     });
 
-    monitorGetAvgField(window.clusterId ,window.startTime,window.endTime,window.host, "total_keys",function(obj){
+    monitorGetDbSize(window.address,function(obj){
         if( obj.res ){
             $("#all-key").html( Math.round(obj.res) );
         }

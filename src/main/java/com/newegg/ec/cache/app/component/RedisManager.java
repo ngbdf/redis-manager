@@ -87,6 +87,18 @@ public class RedisManager {
         return res;
     }
 
+    public int getDbSize(String ip, int port){
+        int allCount = 0;
+        Map<String,Map> masterNodes = JedisUtil.getMasterNodes(ip, port);
+        for(Map.Entry<String, Map> nodeItem : masterNodes.entrySet()){
+            Map node = nodeItem.getValue();
+            String itemIp = (String) node.get("ip");
+            String itemPort = (String) node.get("port");
+            allCount += JedisUtil.dbSize(itemIp, Integer.parseInt(itemPort));
+        }
+        return allCount;
+    }
+
     public Map<String,Map> getClusterNodes (String ip, int port) {
         return JedisUtil.getClusterNodes(ip, port);
     }
