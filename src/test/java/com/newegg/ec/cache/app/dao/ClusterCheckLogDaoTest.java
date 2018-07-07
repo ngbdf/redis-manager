@@ -53,8 +53,8 @@ public class ClusterCheckLogDaoTest {
         Map<String,Object> param = new HashMap();
         param.put("clusterId","ssecbigdata");
         param.put("nodeId","localhost:8008");
-        param.put("logType",ClusterCheckLog.LogType.warnlog.toString());*/
-       logDao.delLogs(param);
+        param.put("logType",ClusterCheckLog.LogType.warnlog.toString());
+        logDao.delLogs(param);
     }
 
     @Test

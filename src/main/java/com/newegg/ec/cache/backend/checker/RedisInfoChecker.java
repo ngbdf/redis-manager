@@ -108,7 +108,7 @@ public class RedisInfoChecker {
             for(ClusterCheckRule rule : ruleList){
                 String formula = rule.getFormula();
                 for(Map<String, String> node : nodeList){
-                    NodeInfo nodeInfo = infoDao.getLastNodeInfo(Common.NODE_INFO_TABLE_FORMAT + cluster_id, 0, DateUtil.getTime(), host);
+                    NodeInfo nodeInfo = infoDao.getLastNodeInfo(Common.NODE_INFO_TABLE_FORMAT + cluster_id, 0, DateUtil.getTime(), node.get("ip") + ":" + node.get("port"));
                     if(nodeInfo != null){
                         Map<String, Object> nodeInfoMap = formatNodeInfo(nodeInfo);
                         try {
