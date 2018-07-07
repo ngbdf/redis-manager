@@ -62,4 +62,11 @@
     margin: 10px 0px;
 }
 
+.operation-all {
+    margin: 0 10px 10px 0;
+    width: 100%;
+    display: inline-flex;
+    justify-content: flex-end;
+}
+
 
