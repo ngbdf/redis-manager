@@ -31,7 +31,7 @@ public interface IClusterCheckLogDao {
      * @param params
      * @return
      */
-    Boolean delLogs(@Param("params")Map<String,Object> params);
+    void delLogs(@Param("params")Map<String,Object> params);
 
     /**
      * 将日志的isChecked置为true

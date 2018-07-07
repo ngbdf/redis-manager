@@ -73,12 +73,16 @@ public class AlarmController {
     @RequestMapping(value = "/deleteCaseLog", method = RequestMethod.GET)
     @ResponseBody
     public Response deleteCaseLog(@RequestParam String logId){
-        Boolean boo = logic.deleteCaseLog(logId);
-        if(boo){
-            return Response.Info("success!");
-        }else {
-            return Response.Warn("you are fail");
-        }
+        logic.deleteCaseLog(logId);
+        return Response.Info("success!");
+    }
+
+    @RequestMapping(value = "/deleteAllLog", method = RequestMethod.GET)
+    @ResponseBody
+    public Response deleteAllLog(@RequestParam String cluster){
+        logic.deleteAllLog(cluster);
+        return Response.Info("success!");
+
     }
 
     @RequestMapping(value = "/countTotal", method = RequestMethod.POST)

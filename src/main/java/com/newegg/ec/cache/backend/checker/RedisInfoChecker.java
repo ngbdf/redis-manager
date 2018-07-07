@@ -73,7 +73,7 @@ public class RedisInfoChecker {
         long time = DateUtil.getBeforeHourTime(12);
         Map<String,Object> param = new HashMap();
         param.put("updateTime",time);
-        logger.info(" log delete : " + checkLogDao.delLogs(param));
+        checkLogDao.delLogs(param);
     }
 
 

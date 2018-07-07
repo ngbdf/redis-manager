@@ -27,7 +27,7 @@ public class ClusterCheckLogDaoTest {
     public void addTest(){
         ClusterCheckLog log = new ClusterCheckLog();
         log.setId(CommonUtil.getUuid());
-        log.setClusterId("ssecbigdata");
+        log.setClusterId("2");
         log.setNodeId("localhost:8018");
         log.setFormula("@{mem_fragmentation_ratio}>2.2");
         log.setLogInfo("mem_fragmentation_ratio = 5.0 !!!");
@@ -53,8 +53,8 @@ public class ClusterCheckLogDaoTest {
         Map<String,Object> param = new HashMap();
         param.put("clusterId","ssecbigdata");
         param.put("nodeId","localhost:8008");
-        param.put("logType",ClusterCheckLog.LogType.warnlog.toString());
-        System.out.println(logDao.delLogs(param));
+        param.put("logType",ClusterCheckLog.LogType.warnlog.toString());*/
+       logDao.delLogs(param);
     }
 
     @Test

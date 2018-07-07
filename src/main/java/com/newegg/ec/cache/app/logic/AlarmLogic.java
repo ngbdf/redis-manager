@@ -47,21 +47,26 @@ public class AlarmLogic {
     public Boolean deleteRule(String ruleId){
         Map<String,Object> params = new HashMap<>();
         params.put("id",ruleId);
-        return clusterCheckRuleDao.delClusterCheckRule( params );
+        return clusterCheckRuleDao.delClusterCheckRule(params);
     }
 
     public List<ClusterCheckLog> getCaseList(String clusterId){
         Map<String,Object> params = new HashMap<>();
         params.put("clusterId", clusterId);
-        return clusterCheckLogDao.getClusterCheckLogs( params );
+        return clusterCheckLogDao.getClusterCheckLogs(params);
     }
 
-    public Boolean deleteCaseLog(String logId){
+    public void deleteCaseLog(String logId){
         Map<String,Object> params = new HashMap<>();
         params.put("id",logId);
-        return clusterCheckLogDao.delLogs( params );
+        clusterCheckLogDao.delLogs(params);
     }
 
+    public void deleteAllLog(String clusterId){
+        Map<String,Object> params = new HashMap<>();
+        params.put("clusterId",clusterId);
+        clusterCheckLogDao.delLogs( params );
+    }
     public Integer countTotalLog(List<String> clusterIds){
         System.out.println( StringUtils.join(clusterIds, ",") );
         Integer count = 0;
