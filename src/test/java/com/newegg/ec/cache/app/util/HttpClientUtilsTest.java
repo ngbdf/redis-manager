@@ -2,6 +2,7 @@ package com.newegg.ec.cache.app.util;
 
 import com.newegg.ec.cache.app.util.httpclient.HttpClientUtil;
 import com.newegg.ec.cache.app.util.httpclient.RequestHandler;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -75,5 +76,28 @@ public class HttpClientUtilsTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void testWeChat(){
+        JSONObject params = new JSONObject();
+
+       /* params.put("ClusterName","ssecbigdata");
+        params.put("ClusterId","10");
+        params.put("WarnningNum",3);*/
+        params.put("errorMessage","Hello All, "+ "ssecbigdata" + " Redis In The Bad Health,Please Check !");
+        params.put("metric","1");
+        params.put("roleId","2");
+        params.put("clientId","redismanager");
+        params.put("roleName","redis alarm");
+        params.put("metricValue","2");
+        try {
+            String response = HttpClientUtil.getPostResponse("http://10.1.44.25:8583/mosquito",params);
+            System.out.println(response);
+        } catch (IOException e) {
+            //logger.error("Send Alarm Info To WeChat Error ", e);
+            e.printStackTrace();
+        }
+    }
+
 
 }
