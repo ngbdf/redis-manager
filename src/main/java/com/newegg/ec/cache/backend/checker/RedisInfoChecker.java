@@ -9,12 +9,16 @@ import com.newegg.ec.cache.app.util.CommonUtil;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.MathExpressionCalculateUtil;
+import com.newegg.ec.cache.app.util.httpclient.HttpClientUtil;
 import com.newegg.ec.cache.core.logger.CommonLogger;
+import net.sf.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import redis.clients.util.Slowlog;
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +45,25 @@ public class RedisInfoChecker {
     @Resource
     private IClusterDao clusterDao;
 
+    @Value("${spring.wechat.alarm.url}")
+    private String wechatUrl;
+
+    @Value("${spring.wechat.alarm.roleId}")
+    private String roleId;
+
+
+    /**
+     * 分析10分钟内的warninglog，每个集群超过总共超过3封就发送微信alarm消息
+     */
+    @Scheduled(fixedRateString = "${schedule.wechat.alarm}")
+    public void WeChatEarlyWarning() {
+        List<Cluster> clusterList =  clusterDao.getClusterList(null);
+        long time = DateUtil.getBeforeMinutesTime(10);
+        for(Cluster cluster: clusterList){
+            pool.execute(new WeChatEarlyWarningTask(cluster,time));
+        }
+
+    }
 
     /**
      * 2min按配置规则检查一次cluster情况
@@ -73,7 +96,7 @@ public class RedisInfoChecker {
         long time = DateUtil.getBeforeHourTime(12);
         Map<String,Object> param = new HashMap();
         param.put("updateTime",time);
-        logger.info(" log delete : " + checkLogDao.delLogs(param));
+        checkLogDao.delLogs(param);
     }
 
 
@@ -108,7 +131,7 @@ public class RedisInfoChecker {
             for(ClusterCheckRule rule : ruleList){
                 String formula = rule.getFormula();
                 for(Map<String, String> node : nodeList){
-                    NodeInfo nodeInfo = infoDao.getLastNodeInfo(Common.NODE_INFO_TABLE_FORMAT + cluster_id, 0, DateUtil.getTime(), host);
+                    NodeInfo nodeInfo = infoDao.getLastNodeInfo(Common.NODE_INFO_TABLE_FORMAT + cluster_id, 0, DateUtil.getTime(), node.get("ip") + ":" + node.get("port"));
                     if(nodeInfo != null){
                         Map<String, Object> nodeInfoMap = formatNodeInfo(nodeInfo);
                         try {
@@ -179,6 +202,46 @@ public class RedisInfoChecker {
         }
     }
 
+    class WeChatEarlyWarningTask implements Runnable {
+        private Cluster cluster;
+        private long updateTime;
+        public WeChatEarlyWarningTask(Cluster cluster, long updateTime) {
+            this.cluster = cluster;
+            this.updateTime = updateTime;
+        }
+
+        @Override
+        public void run() {
+
+            //按规则检查日志
+            List<ClusterCheckRule> ruleList = checkRuleDao.getClusterRuleList(cluster.getId()+"");
+            for(ClusterCheckRule rule : ruleList){
+                String formula = rule.getFormula();
+                Map<String,Object> param = new HashMap();
+                param.put("clusterId", cluster.getId());
+                param.put("updateTime", updateTime);
+                param.put("formula", formula);
+                int warnsize = checkLogDao.getClusterCheckLogs(param).size();
+                if( warnsize > 0 ){
+                    //发微信
+                    JSONObject params = new JSONObject();
+                    params.put("metric","1");
+                    params.put("metricValue","2");
+                    params.put("roleId",roleId);
+                    params.put("clientId",cluster.getClusterName());
+                    params.put("roleName",cluster.getClusterName()+":"+formula);
+                    params.put("errorMessage","Hello All, "+ cluster.getClusterName() + ":" + formula + " Redis Cluster Alarm Log In Last 10 Mins,Please Check !");
+                    try {
+                        String response = HttpClientUtil.getPostResponse(wechatUrl,params);
+                        logger.info("wechat response: " + response);
+                    } catch (IOException e) {
+                        logger.error("Send Alarm Info To WeChat Error ", e);
+                    }
+                }
+            };
+        }
+    }
+
     /**
      * 格式化NodeInfo数据
      * @param nodeInfo
@@ -199,5 +262,6 @@ public class RedisInfoChecker {
         map.put("responseTime", nodeInfo.getResponseTime());
         return map;
     }
+
 
 }

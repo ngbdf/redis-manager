@@ -68,4 +68,15 @@ public class DateUtil {
         return calendar.getTimeInMillis();
     }
 
+    /**
+     * 获取当前某分钟的时间戳
+     * @param num
+     * @return
+     */
+    public static long getBeforeMinutesTime(int num){
+        Calendar beforeTime = Calendar.getInstance();
+        beforeTime.add(Calendar.MINUTE, -num);
+        Date beforeD = beforeTime.getTime();
+        return beforeD.getTime();
+    }
 }

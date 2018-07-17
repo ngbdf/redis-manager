@@ -17,6 +17,11 @@ spring:
       url: jdbc:mysql://10.16.46.170:3306/redis_manager_new?useUnicode=true&characterEncoding=utf-8
       username: test
       password: test
+  wechat:
+     alarm:
+      url: http://10.1.44.25:8583/mosquito
+      roleId: 2
+      alarmsize: 200
 
 mybatis:
   mapper-locations: classpath*:mappers/*
