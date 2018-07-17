@@ -51,8 +51,6 @@ public class RedisInfoChecker {
     @Value("${spring.wechat.alarm.roleId}")
     private String roleId;
 
-    @Value("${spring.wechat.alarm.alarmsize}")
-    private String alarmSize;
 
     /**
      * 分析10分钟内的warninglog，每个集群超过总共超过3封就发送微信alarm消息
@@ -224,7 +222,7 @@ public class RedisInfoChecker {
                 param.put("updateTime", updateTime);
                 param.put("formula", formula);
                 int warnsize = checkLogDao.getClusterCheckLogs(param).size();
-                if( warnsize >= Integer.valueOf(alarmSize)){
+                if( warnsize > 0 ){
                     //发微信
                     JSONObject params = new JSONObject();
                     params.put("metric","1");
@@ -232,14 +230,13 @@ public class RedisInfoChecker {
                     params.put("roleId",roleId);
                     params.put("clientId",cluster.getClusterName());
                     params.put("roleName",cluster.getClusterName()+":"+formula);
-                    params.put("errorMessage","Hello All, "+ cluster.getClusterName() + " Redis Cluster Has Some("+ warnsize +") Alarm Log In Last 10 Mins,Please Check !");
+                    params.put("errorMessage","Hello All, "+ cluster.getClusterName() + ":" + formula + " Redis Cluster Alarm Log In Last 10 Mins,Please Check !");
                     try {
                         String response = HttpClientUtil.getPostResponse(wechatUrl,params);
-                        System.out.println(response);
+                        logger.info("wechat response: " + response);
                     } catch (IOException e) {
                         logger.error("Send Alarm Info To WeChat Error ", e);
                     }
-
                 }
             };
         }

@@ -92,10 +92,11 @@ public class JedisUtil {
         int res = 0;
         Map<String, String> resMap = getMapInfo(ip, port);
         if( null != resMap && !resMap.isEmpty() ){
-            String resversion = resMap.get("redis_version");
-            if( !StringUtils.isBlank(resversion) ){
-                String[] tmps = resversion.split("\\.");
-                res = Integer.parseInt(tmps[0]);
+            String model = resMap.get("redis_mode");
+            if( model.equals("cluster") ){
+                res = 3;
+            }else{
+                res = 2;
             }
         }
         return res;
