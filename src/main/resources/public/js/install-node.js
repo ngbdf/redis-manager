@@ -7,7 +7,6 @@ $(document).ready(function(){
 
 function init_install_ui(clusterId){
     getImageList(window.pluginType, function(obj){
-        console.log( obj );
         var userGroup = window.user.userGroup || "";
         var groupList = [];
         if( userGroup != "" ){
@@ -29,7 +28,6 @@ $(document).on("click", "#start-install-cluster", function(obj){
             "pluginType": window.pluginType,
             "req": installParam
         }
-        console.log( param );
         nodePullImage( param, function(obj){
             if( obj.code ==  0 ){
                 nodeInstall( param, function(obj){
@@ -62,7 +60,6 @@ function  createClusterStep( data, clusterId){
                 console.log( cluster );
             });
             getNodeByClusterId(window.pluginType, clusterId, function(obj){
-                console.log( obj );
                 var node = obj.res;
                 $("[name='image']").selectpicker("val", node.image);
                 $("[name='image']").attr("disabled","disabled");

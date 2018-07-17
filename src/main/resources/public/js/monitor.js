@@ -8,7 +8,6 @@ $(document).ready(function(){
     window.address = "";
     getCluster(window.clusterId , function(obj){
         window.address = obj.res.address;
-        console.log(window.address);
         init();
     })
     $(".start-time").flatpickr();
@@ -109,8 +108,7 @@ $("#info").on("click", function(){
     var host = window.host;
     if(host != "all" && host != "" && host != null){
         smarty.fopen( "/cluster/getNodeInfo?address="+ host, "cluster/info_format", true, { title: "Info", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
-            console.log(obj)
-        } );
+        });
     } else {
         layer.msg("Please select one node");
     }
@@ -121,8 +119,7 @@ $("#config").on("click", function(){
     var host = window.host;
     if(host != "all" && host != "" && host != null){
         smarty.fopen( "/cluster/getRedisConfig?address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
-            console.log(obj)
-        } );
+        });
     } else {
         layer.msg("Please select one node");
     }

@@ -6,7 +6,6 @@ $(".create-cluster-link").click(function(){
     var url = $(this).data("target");
     var type = $(this).data("type");
     getPluginList(function (obj) {
-        console.log( obj.res );
         if( sparrow.in_array( type, obj.res ) != -1 ){
             window.location.href = url;
         }else{

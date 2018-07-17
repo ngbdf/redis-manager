@@ -7,7 +7,6 @@ $(document).ready(function(){
 // query dbx
 $(document).on("click", "#query-db", function(){
     smarty.fopen( "/cluster/redisDbList?address="+window.address, "monitor/redis_query", true, { title: "Query", width:800, height:500},  function(obj){
-        console.log(obj)
         var db = parseInt($(".db-list li").eq(0).find("a").attr("data-db"));
         $("#query-key").attr("data-db", db);
         $(".db-dropdown").html('db' + db + '<span class="caret"></span>');
@@ -40,7 +39,6 @@ function query(db){
     redisQueryParam.address = window.address;
     redisQueryParam.db = db;
     redisQueryParam.key = queryKey || "*";
-    console.log(redisQueryParam)
     redisQuery(redisQueryParam, function(obj){
         var result = obj.res;
         console.log(result)

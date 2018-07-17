@@ -36,7 +36,6 @@ $(document).on("click","#addAlarmRule",function(){
              var rule = sparrow_form.encode( "alarm-rule-form",2 );
              if ( !sparrow.empty( rule )  ){
                  rule.clusterId = window.clusterId;
-                 console.log(rule);
                  addRule(rule,function(obj){
                       if( obj.code <= 0 ){
                          layer.closeAll();

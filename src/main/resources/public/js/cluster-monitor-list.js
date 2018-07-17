@@ -30,7 +30,6 @@ function updateWarningCount(){
 $(document).on("click", ".list-active", function(res){
     var group = $(this).data("group");
     var isGetData = $(this).attr("aria-expanded");
-    console.log( group );
     smarty.get( "/cluster/listCluster", "monitor/cluster_info_list", "group-id-" + group, function(obj){
         $(".cluster-info-detail-" + group).click();
     }, true );
@@ -42,7 +41,6 @@ $(document).on("click", ".cluster-info-detail", function(res){
     smarty.get( "/cluster/getClusterInfoByAddress?address=" + address, "monitor/cluster_info", "cluster-info-" + clusterId, function(obj){
         countWarningLogByClusterId(clusterId, function(obj){
             var alarmNumber = parseInt(obj.res);
-            console.log(alarmNumber)
             if(alarmNumber > 0){
                 $("#cluster-alarm-" + clusterId).text(alarmNumber);
             } else {

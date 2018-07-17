@@ -22,7 +22,6 @@ function isJSON(str) {
             }
 
         } catch(e) {
-            console.log(e);
             return false;
         }
     }else if(typeof str == 'object'){

@@ -420,7 +420,6 @@ AmCharts.addInitHandler( function( chart ) {
       showCurtain( msg, options.noStyles );
     else {
       removeCurtain();
-      console.log( msg );
     }
 
   }

@@ -28,7 +28,6 @@ smarty.register_function( 'in_cluster', function( params ){
     var id = params['id'];
     var ipPort = ip+port;
     var nodeList = window.nodeList;
-    console.log( nodeList );
     var isInCluster = false;
     for(var i = 0, len = nodeList.length; i < len; i++){
         var node = nodeList[i];
