@@ -42,11 +42,7 @@ RedisManager 是  redis 一站式管理平台。 支持集群的创建、管理�
 ### 3.2 具体监控详情
 <img src="./docs/images/monitor-detail.png"/>
 
-### 4 集群数据同步
-> 集群同步原理：scan 数据源集群并读取对应的 key-value,写入到目标数据源，目前支持（string, hash,list,set）类型的数据，具体操作如下
-<img src="./docs/images/cluster-sync.png"/>
-
-### 5 Query客户端
+### 4 Query客户端
 > 支持任意类型的 key 查询，包含 scan功能
 <img src="./docs/images/query.png"/>
 	
