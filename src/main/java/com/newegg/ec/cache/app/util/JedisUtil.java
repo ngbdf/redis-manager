@@ -243,7 +243,7 @@ public class JedisUtil {
             if( null != slaveList && !slaveList.isEmpty()){
                 for(int j = 0; j < slaveList.size(); j++){
                     String slaveIp = slaveList.get(j).get("ip");
-                    String slavePort = String.valueOf(getPort( slaveList.get(j).get("port") ));
+                    String slavePort = slaveList.get(j).get("port");
                     Map temp2 = new HashMap<>();
                     temp2.put("ip", slaveIp);
                     temp2.put("port", slavePort);

@@ -161,7 +161,7 @@ public class RedisInfoSchedule{
                 Jedis jedis = null;
                 try {
                     String nodeIp = node.get("ip");
-                    int nodePort = Integer.parseInt(node.get("port"));
+                    int nodePort = JedisUtil.getPort(node.get("port"));
                     StopWatch stopWatch = new StopWatch();
                     stopWatch.start();
                     jedis = new Jedis(nodeIp, nodePort, JEDIS_TIMEOUT);

@@ -7,6 +7,7 @@ import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
+import com.newegg.ec.cache.app.util.RedisMsgUtil;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -89,12 +90,16 @@ public class RedisManager {
 
     public int getDbSize(String ip, int port){
         int allCount = 0;
-        Map<String,Map> masterNodes = JedisUtil.getMasterNodes(ip, port);
-        for(Map.Entry<String, Map> nodeItem : masterNodes.entrySet()){
-            Map node = nodeItem.getValue();
-            String itemIp = (String) node.get("ip");
-            String itemPort = (String) node.get("port");
-            allCount += JedisUtil.dbSize(itemIp, Integer.parseInt(itemPort));
+        if( JedisUtil.getRedisVersion(ip, port) == 2 ){
+            allCount = JedisUtil.dbSize(ip, port);
+        }else{
+            Map<String,Map> masterNodes = JedisUtil.getMasterNodes(ip, port);
+            for(Map.Entry<String, Map> nodeItem : masterNodes.entrySet()){
+                Map node = nodeItem.getValue();
+                String itemIp = (String) node.get("ip");
+                String itemPort = (String) node.get("port");
+                allCount += JedisUtil.dbSize(itemIp, JedisUtil.getPort(itemPort));
+            }
         }
         return allCount;
     }
