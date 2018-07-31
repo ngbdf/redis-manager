@@ -3,10 +3,8 @@ $(document).ready(function(){
     window.clusterId = getQueryString("clusterId");
     getCluster(clusterId, function(obj){
         var cluster = obj.res;
-        console.log(cluster)
         nodeList(cluster.address, function(obj){
             window.nodeList = obj.res;
-            console.log(window.nodeList)
             rebuildNodeListTable( window.clusterId );
         });
 
@@ -20,7 +18,6 @@ $(document).ready(function(){
 function rebuildNodeListTable(){
     smarty.get( "/node/getNodeList?pluginType="+ window.pluginType  +"&clusterId=" + window.clusterId , "plugin/" + window.pluginType + "/" + window.pluginType + "_mode_manager", "node-list", function(){
         $("table").dataTable({});
-        console.log("build table");
     }, true );
 }
 
@@ -40,7 +37,6 @@ $(document).on("click", ".start-node", function(){
     }
     sparrow_win.confirm("Confirm start the node", function(){
         nodeStart(reqParam, function(obj){
-            console.log(obj);
         });
     });
 });

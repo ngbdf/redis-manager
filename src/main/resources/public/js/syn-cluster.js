@@ -40,7 +40,6 @@ $("#syn-cluster-button").click(function(){
         return;
     }
     importDataToCluster(fromDetail["address"],targetAddress["address"], keyFormat,function(obj){
-        console.log(obj);
     });
 });
 

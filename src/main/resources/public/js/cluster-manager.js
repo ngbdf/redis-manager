@@ -4,11 +4,9 @@ $(document).ready(function(){
     getCluster(window.clusterId, function(obj){
         window.cluster = obj.res;
         getClusterInfoByAddress( window.cluster.address, function(obj){
-            console.log( obj.res );
             if( obj.res.cluster_slots_ok == 0 ){
                 sparrow_win.confirm("the cluster is not slot can you init it", function(){
                     initSlot( window.cluster.address, function( obj ){
-                        console.log( obj );
                     });
                 });
             }
@@ -98,7 +96,6 @@ smarty.register_function("slot_num", function( params ){
             }
         }
     }catch( e ){
-        console.log( e );
         return "";
     }
     var  subtract = count - avg;
@@ -274,9 +271,7 @@ $(document).on("click", "#import-node", function(){
     smarty.open( "cluster/import_node", {}, { title: "Import node",  width:330, height:270},function(){
         $("#import-node-confirm").click(function(){
             var data = sparrow_form.encode( "import-node-form",0 ); //0 表示所有字段都提交， 2 表示有改变的才提交
-            if ( sparrow.empty( data ) )
-            {
-                console.log(data);
+            if ( sparrow.empty( data ) ) {
                 return false;
             }
             layer.closeAll();
@@ -296,9 +291,7 @@ $(document).on("click", "#batch-config", function(){
     smarty.open( "cluster/batch_config", {}, { title: "Batch Config",  width:330, height:270},function(){
         $("#batch-config-confirm").click(function(){
             var data = sparrow_form.encode( "batch-config-form",0 ); //0 表示所有字段都提交， 2 表示有改变的才提交
-            if ( sparrow.empty( data ) )
-            {
-                console.log(data);
+            if ( sparrow.empty( data ) ){
                 return false;
             }
             layer.closeAll();
@@ -384,13 +377,11 @@ $(document).on("click", ".be-slave", function(){
 $(document).on("click", ".node-info", function(){
     var host = $(this).data("ip") + ":" + $(this).data("port");
     smarty.fopen( "/cluster/getNodeInfo?address="+ host, "cluster/info_format", true, { title: "Info", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
-        console.log(obj)
     } );
 });
 
 $(document).on("click", ".view-config", function(){
     var host = $(this).data("ip") + ":" + $(this).data("port");
     smarty.fopen( "/cluster/getRedisConfig?address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
-        console.log(obj)
     } );
 });

@@ -1,5 +1,4 @@
 smarty.get( "/cluster/listCluster", "cluster/cluster_list_content", "cluster-list-content", function(){
-       /* console.log("get...");*/
 }, true );
 
 smarty.register_function( 'cluster_state', function( params ){
@@ -128,8 +127,6 @@ $("body").delegate(".delete-container","click", function(){
             }
         },
         callback: function (result){
-
-            console.log("clusterId" + clusterId)
             if(result != null && result != "") {
                 if(result == clusterName) {
                     //TODO: ajax request
@@ -139,7 +136,6 @@ $("body").delegate(".delete-container","click", function(){
                         dataType: "json",
                         contentType : "application/json; charset=utf-8",
                         success: function(result){
-                            console.log(result);
                             var code = parseInt(result.code);
                             if(code == 0) {
                                  deleteObj.remove();
