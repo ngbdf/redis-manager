@@ -187,8 +187,13 @@ public class JedisUtil {
         Jedis jedis = new Jedis( ip, port);
         Map<String, String> result = new HashMap<>();
         try {
-            String info  = jedis.clusterInfo();
-            result = RedisMsgUtil.changeClusterInfoMap( info );
+            int version = JedisUtil.getRedisVersion(ip, port);
+            if( version == 2 ){
+                result.put("cluster_state", "ok");
+            }else{
+                String info  = jedis.clusterInfo();
+                result = RedisMsgUtil.changeClusterInfoMap( info );
+            }
         }catch ( Exception e ){
             e.printStackTrace();
         }finally {
