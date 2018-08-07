@@ -42,7 +42,7 @@ public class RedisInfoSchedule{
     @Resource
     private INodeInfoDao infoDao;
 
-    @Scheduled(fixedRate = 1000 * 120 * 3)
+    @Scheduled(fixedRate = 1000 * 120 * 3,initialDelay = 1000 * 60)
     public void scheduledMetricRedisInfo() {
         List<Cluster>  clusterList = clusterDao.getClusterList(null);
         for (Cluster cluster: clusterList) {
