@@ -30,6 +30,7 @@ RedisManager 是  redis 一站式管理平台。 支持集群的创建、管理�
 #### 2.1 ClusterManager
 > 集群管理主要包好了 slot 迁移、master slave 角色切换、动态配置
 <img src="./docs/images/readme/cluster-manage.png"/>
+<img src="./docs/images/readme/cluster-manage2.png"/>
 
 #### 2.2 NodeManager
 > 节点管理主要包含了节点的启动关闭重启扩容等
