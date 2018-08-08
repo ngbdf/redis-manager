@@ -55,7 +55,7 @@ public class RedisInfoChecker {
     /**
      * 分析10分钟内的warninglog，每个集群超过总共超过3封就发送微信alarm消息
      */
-    @Scheduled(fixedRateString = "${schedule.wechat.alarm}",initialDelay = 1000 * 60)
+    @Scheduled(fixedRateString = "${schedule.wechat.alarm}")
     public void WeChatEarlyWarning() {
         List<Cluster> clusterList =  clusterDao.getClusterList(null);
         long time = DateUtil.getBeforeMinutesTime(10);
@@ -91,7 +91,7 @@ public class RedisInfoChecker {
     /**
      * 每个小时清理一次日志，每次只保留最近12小时的的日志
      */
-    @Scheduled( cron = "${schedule.redischeck.deletelogs}",initialDelay = 1000 * 60)
+    @Scheduled( cron = "${schedule.redischeck.deletelogs}")
     public void LogsDelete() {
         long time = DateUtil.getBeforeHourTime(12);
         Map<String,Object> param = new HashMap();
