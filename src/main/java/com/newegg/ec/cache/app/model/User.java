@@ -17,6 +17,12 @@ public class User {
     @MysqlField(field = "user_group", type = "varchar(30)", notNull = true)
     private String userGroup;
 
+    public User(String username, String password, String userGroup) {
+        this.username = username;
+        this.password = password;
+        this.userGroup = userGroup;
+    }
+
     public int getId() {
         return id;
     }

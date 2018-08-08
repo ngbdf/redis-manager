@@ -19,7 +19,7 @@ spring:
       password: test
   wechat:
      alarm:
-      url: http://10.1.44.25:8583/mosquito
+      url:
       roleId: 2
       alarmsize: 200
 

@@ -14,6 +14,11 @@
     <select id="getCluster" parameterType="int" resultType="com.newegg.ec.cache.app.model.Cluster">
         select * from cluster where id=#{id}
     </select>
+
+    <select id="getClusterGroups" resultType="String">
+        select distinct user_group from cluster
+    </select>
+
     <select id="getClusterByAddress" parameterType="String" resultType="com.newegg.ec.cache.app.model.Cluster">
         select * from cluster where  address like CONCAT('%',#{address},'%')
     </select>

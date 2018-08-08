@@ -7,13 +7,10 @@ $(document).ready(function(){
 
 function init_install_ui(clusterId){
     getImageList(window.pluginType, function(obj){
-        var userGroup = window.user.userGroup || "";
-        var groupList = [];
-        if( userGroup != "" ){
-            groupList = userGroup.split(",");
-        }
-        obj.groups = groupList;
-        createClusterStep( obj, clusterId );
+        listGroup(function(data){
+            obj.groups = data.res;
+            createClusterStep( obj, clusterId );
+        });
     });
 }
 
@@ -36,7 +33,7 @@ $(document).on("click", "#start-install-cluster", function(obj){
                             sparrow_win.msg("success install");
                         }else{
                             sparrow_win.confirm("success, skip to cluster manager?", function(){
-                                window.location.href = "/cluster/clusterListManager";
+                                window.location.href = "/";
                             });
                         }
                     }else{

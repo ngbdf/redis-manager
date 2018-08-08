@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import redis.clients.util.Slowlog;
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -57,6 +58,9 @@ public class RedisInfoChecker {
      */
     @Scheduled(fixedRateString = "${schedule.wechat.alarm}")
     public void WeChatEarlyWarning() {
+        if( StringUtils.isEmpty( wechatUrl ) ){
+            return;
+        }
         List<Cluster> clusterList =  clusterDao.getClusterList(null);
         long time = DateUtil.getBeforeMinutesTime(10);
         for(Cluster cluster: clusterList){

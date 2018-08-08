@@ -189,7 +189,10 @@ public class JedisUtil {
         try {
             int version = JedisUtil.getRedisVersion(ip, port);
             if( version == 2 ){
+                List nodeList = nodeList(ip, port);
                 result.put("cluster_state", "ok");
+                result.put("cluster_size", String.valueOf(1));
+                result.put("cluster_known_nodes", String.valueOf(nodeList.size()));
             }else{
                 String info  = jedis.clusterInfo();
                 result = RedisMsgUtil.changeClusterInfoMap( info );
@@ -243,7 +246,7 @@ public class JedisUtil {
             if( null != slaveList && !slaveList.isEmpty()){
                 for(int j = 0; j < slaveList.size(); j++){
                     String slaveIp = slaveList.get(j).get("ip");
-                    String slavePort = slaveList.get(j).get("port");
+                    String slavePort = String.valueOf(getPort( String.valueOf(slaveList.get(j).get("port"))));
                     Map temp2 = new HashMap<>();
                     temp2.put("ip", slaveIp);
                     temp2.put("port", slavePort);
@@ -255,7 +258,7 @@ public class JedisUtil {
         return nodeList;
     }
 
-    private static List<Map<String, String>> getRedis2Nodes(String ip, int port){
+    public static List<Map<String, String>> getRedis2Nodes(String ip, int port){
         List<Map<String, String>> resList = new ArrayList<>();
         Map<String, String> infoMap = getMapInfo(ip, port);
         if( infoMap.get("role").equals("slave") ){

@@ -7,6 +7,8 @@ public class Common {
 
     public final static String SESSION_USER_KEY = "user";
 
+    public final static String ADMIN_GROUP = "admin";
+
     public static final String NODE_INFO_TABLE_FORMAT = "node_info_";
 
     public static final String CLUSTER_NUMBER = "clusterNumber";

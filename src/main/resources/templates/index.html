@@ -28,20 +28,17 @@
                 <!--logo end-->
 
                 <div class="top-nav ">
-                    <ul class="nav pull-right top-menu" style="display:none">
+                    <ul class="nav pull-right top-menu">
                     <!-- user login dropdown start-->
                         <li class="dropdown">
                             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                                 <img alt="" src="../img/redis.svg" class="head-pic" />
-                                <span class="username">Admin</span>
+                                <span id="username">Admin</span>
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu extended logout">
                                 <div class="log-arrow-up"></div>
-                                <li><a href="#"><i class="icon-suitcase"></i>Profile</a></li>
-                                <li><a href="#"><i class="icon-cog"></i> Settings</a></li>
-                                <li><a href="#"><i class="icon-bell-alt"></i> Notification</a></li>
-                                <li><a href="#"><i class="icon-key"></i> Log Out</a></li>
+                                <li><a href="#" id="user-logout"><i class="icon-key"></i> Log Out</a></li>
                             </ul>
                         </li>
                     <!-- user login dropdown end -->
@@ -55,17 +52,19 @@
                     <!-- sidebar menu start-->
                     <ul class="sidebar-menu">
                         <li class="active">
+                            <a class="dashboard" href="/monitor/clusterMonitorList" target="change-page">
+                            <i class="icon-dashboard"></i>
+                            <span>Cluster List</span>
+                            </a>
+                        </li>
+                        <!--
+                        <li>
                             <a class="" href="/cluster/clusterListManager" target="change-page">
                                 <i class=" icon-cog"></i>
                                 <span>Cluster Manager</span>
                             </a>
                         </li>
-                        <li>
-                            <a class="dashboard" href="/monitor/clusterMonitorList" target="change-page">
-                            <i class="icon-dashboard"></i>
-                            <span>Cluster Monitor</span>
-                            </a>
-                        </li>
+                        -->
                         <li>
                             <a class="" href="/node/selectClusterType" target="change-page">
                                 <i class="icon-plus-sign-alt"></i>
@@ -100,7 +99,7 @@
             <!--main content start-->
             <section id="main-content">
                 <section class="wrapper">
-                    <iframe src="/cluster/clusterListManager" name="change-page" class="content-page" scrolling="no"  frameborder="0" ></iframe>
+                    <iframe src="/monitor/clusterMonitorList" name="change-page" class="content-page" scrolling="no"  frameborder="0" ></iframe>
                 </section>
             </section>
             <!--main content end-->
@@ -112,5 +111,10 @@
         <script src="../js/jquery.scrollTo.min.js"></script>
         <script src="../js/jquery.nicescroll.js" type="text/javascript"></script>
         <script src="../js/common-scripts.js"></script>
+        <script type="text/javascript" src="../vender/sparrow/layer/layer.js"></script>
+        <script src="../vender/sparrow/ajax.js"></script>
+        <script src="../core/userApi.js"></script>
+
+        <script src="../js/index.js"></script>
     </body>
 </html>

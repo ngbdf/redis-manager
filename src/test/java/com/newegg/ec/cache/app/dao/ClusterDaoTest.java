@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 /**
  * Created by gl49 on 2018/4/24.
@@ -61,6 +62,13 @@ public class ClusterDaoTest {
     public void updateCluster(){
         boolean res = clusterDao.updateClusterAddress(1, "localhost:8018");
         System.out.println( res );
+    }
+
+    @Test
+    public void getClusterGroups(){
+        List<String> clusters = clusterDao.getClusterGroups();
+        System.out.println( clusters );
+
     }
 
 }

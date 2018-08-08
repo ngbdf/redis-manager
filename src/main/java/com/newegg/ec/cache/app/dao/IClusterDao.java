@@ -21,4 +21,6 @@ public interface IClusterDao {
     int addCluster(Cluster cluster);
 
     boolean updateClusterAddress(@Param("id")int id, @Param("address")String address);
+
+    List<String> getClusterGroups();
 }

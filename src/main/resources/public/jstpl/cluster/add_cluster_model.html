@@ -12,7 +12,9 @@
     <div class="input-group item">
         <span class="input-group-addon input-title">Group</span>
         <select name="userGroup" class="form-control">
-            <option value="admin" class="sparrow-tip">admin</option>
+            {{foreach from=$res item=group}}
+            <option class="sparrow-tip">{{$group}}</option>
+            {{/foreach}}
         </select>
     </div>
     <div class="input-group item">

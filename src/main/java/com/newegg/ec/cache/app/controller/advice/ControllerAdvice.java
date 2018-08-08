@@ -54,11 +54,15 @@ public class ControllerAdvice {
                 clientIp = request.getRemoteHost();
             }
             String path = request.getServletPath();
+            String groups = null;
+            int userid = -1;
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute( Common.SESSION_USER_KEY );
-            RequestUtil.setUser( user );
-            int userid = user.getId();
-            String groups = user.getUserGroup();
+            if( null != user ){
+                RequestUtil.setUser( user );
+                userid = user.getId();
+                groups = user.getUserGroup();
+            }
             /* 请求参数 */
             Object[] params = proceedingJoinPoint.getArgs();
             String param = "";

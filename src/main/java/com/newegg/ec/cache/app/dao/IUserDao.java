@@ -14,4 +14,6 @@ public interface IUserDao {
     User getUser(int id);
     void removeUser(int id);
     void addUser(User user);
+    List<String> getGroups();
+    User getUserByName(String username);
 }

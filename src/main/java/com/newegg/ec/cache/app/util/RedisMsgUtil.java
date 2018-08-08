@@ -49,8 +49,8 @@ public class RedisMsgUtil {
                 if( map.containsKey( masterId ) ){
                     masterMap = map.get( masterId );
                 }
-                masterMap.put("host", tmp[1] );
                 setIpAndPort(masterMap, tmp[1]);
+                masterMap.put("host", masterMap.get("ip") + ":" + masterMap.get("port") );
                 masterMap.put("slot", ArrayUtils.subarray(tmp, 8, tmp.length) );
                 masterMap.put("role", "master");
                 masterMap.put("nodeId", masterId);
@@ -68,8 +68,8 @@ public class RedisMsgUtil {
                         slaveList = (List) masterMap.get( SLAVE_LIST );
                     }
                     Map slaveMap = new HashMap<>();
-                    slaveMap.put("host", tmp[1] );
                     setIpAndPort(slaveMap, tmp[1]);
+                    slaveMap.put("host", slaveMap.get("ip") + ":" + slaveMap.get("port") );
                     slaveMap.put("role", "slave" );
                     slaveMap.put("masterId", masterId);
                     slaveMap.put("nodeId", tmp[0] );
@@ -115,7 +115,7 @@ public class RedisMsgUtil {
         String[] tmp = host.split(":");
         if( 2 == tmp.length ){
             masterMap.put("ip", tmp[0]);
-            masterMap.put("port", tmp[1]);
+            masterMap.put("port", JedisUtil.getPort(tmp[1]));
         }
     }
 }

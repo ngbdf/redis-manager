@@ -30,7 +30,6 @@ public class CreateClusterLogHandler implements WebSocketHandler {
         BlockingDeque<String> logQueue;
         while (true){
             logQueue = getLogQueue(id);
-            System.out.println( logMap.size() + " ............... websocket" + websocketLogMap.size() );
             String message = logQueue.poll();
             if( !StringUtils.isEmpty( message )){
                 webSocketSession.sendMessage(new TextMessage(message));

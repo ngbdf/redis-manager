@@ -25,9 +25,8 @@ public class WebSecurityConfig  extends WebMvcConfigurerAdapter {
     public void addInterceptors(InterceptorRegistry registry) {
         InterceptorRegistration addInterceptor = registry.addInterceptor(getSecurityInterceptor());
         // 排除配置
-        addInterceptor.excludePathPatterns("*");
+        addInterceptor.excludePathPatterns("/user/verifyLogin");
         addInterceptor.excludePathPatterns("/user/login");
-
         // 拦截配置
         addInterceptor.addPathPatterns("/**");
     }
@@ -36,18 +35,20 @@ public class WebSecurityConfig  extends WebMvcConfigurerAdapter {
         @Override
         public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
             HttpSession session = request.getSession();
-            // new user
+            /*
             User user = new User();
             user.setId(1);
             user.setUserGroup("admin");
             session.setAttribute(Common.SESSION_USER_KEY, user);
+            */
             if (session.getAttribute(Common.SESSION_USER_KEY) != null){
                 return true;
+            }else{
+                // 跳转登录
+                String url = "/user/login";
+                response.sendRedirect(url);
+                return false;
             }
-            // 跳转登录
-            String url = "/user/login";
-            response.sendRedirect(url);
-            return false;
         }
     }
 }

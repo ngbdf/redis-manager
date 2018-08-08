@@ -10,6 +10,7 @@
 	<link rel="shortcut icon" type="image/x-icon" href="../img/favicon.ico" />
     <title>Redis Monitor List</title>
 
+	<link href="../vender/sparrow/sparrow.css" rel="stylesheet" charset="utf-8" />
     <link rel="stylesheet" href="../vender/bootstrap-3.3.7/css/bootstrap.css"/>
 	<link rel="stylesheet" href="../css/bootstrap-reset.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
@@ -21,11 +22,13 @@
 	<script type="text/javascript" src="../vender/jquery/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript" src="../vender/bootstrap-3.3.7/js/bootstrap.js"></script>
 
-	<script src="../vender/sparrow/layer/layer.js"></script>
+
+	<script type="text/javascript" src="../vender/sparrow/layer/layer.js"></script>
 	<script src="../vender/sparrow/ajax.js"></script>
+	<script src="../core/userApi.js"></script>
 	<script src="../vender/sparrow/util.js"></script>
 	<script src="../vender/sparrow/smarty.js"></script>
-	<script src="../core/userApi.js"></script>
+	<script src="../vender/sparrow/validate.js"></script>
 	<script type="text/javascript" src="../js/common.js"></script>
 </head>
 <body>
@@ -90,8 +93,17 @@
 			<div id="group-classify">
 
 			</div>
+
+			<div class="panel panel-default my-list-panel">
+				<div tyle="height:100px">
+					<div class="add-btn" id="add-cluster">
+						<i class="glyphicon glyphicon-plus"></i>
+					</div>
+				</div>
+			</div>
         </div>
     </div>
 </body>
 <script src="../js/cluster-monitor-list.js"></script>
+<script type="text/javascript" src="../js/cluster-meta.js"></script>
 </html>

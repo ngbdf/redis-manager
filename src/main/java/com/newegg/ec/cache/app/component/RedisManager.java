@@ -96,8 +96,8 @@ public class RedisManager {
             Map<String,Map> masterNodes = JedisUtil.getMasterNodes(ip, port);
             for(Map.Entry<String, Map> nodeItem : masterNodes.entrySet()){
                 Map node = nodeItem.getValue();
-                String itemIp = (String) node.get("ip");
-                String itemPort = (String) node.get("port");
+                String itemIp = String.valueOf(node.get("ip"));
+                String itemPort = String.valueOf(node.get("port"));
                 allCount += JedisUtil.dbSize(itemIp, JedisUtil.getPort(itemPort));
             }
         }

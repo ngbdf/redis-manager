@@ -18,8 +18,16 @@ public class UserLogic {
         return userDao.getUser( id );
     }
 
+    public User getUser(String username){
+        return userDao.getUserByName( username );
+    }
+
     public List<User> getUserList(){
         return userDao.getUserList();
+    }
+
+    public List<String> getGroups(){
+        return userDao.getGroups();
     }
 
     public boolean removeUser(int id){

@@ -301,3 +301,11 @@ td>a.redis-meta {
 .view-config{
     margin-left:15px;
 }
+
+.left{
+    float: left;
+}
+
+.right{
+    float: right;
+}

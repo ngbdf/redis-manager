@@ -6,6 +6,7 @@ import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.util.*;
 import com.newegg.ec.cache.core.logger.CommonLogger;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,9 +41,16 @@ public class ClusterLogic {
         return redisManager.query( redisQueryParam );
     }
 
-    public List<Cluster> getClusterList(String group){
-        System.out.println( group + "--------------");
-        return clusterDao.getClusterList( group );
+    public Map<String, List<Cluster>> getClusterMap(String group){
+        Map<String, List<Cluster>> clusterMap = new HashedMap();
+        if( group.equals( Common.ADMIN_GROUP ) ){
+            List<String> groups = clusterDao.getClusterGroups();
+            for(String groupStr : groups){
+                clusterMap.put( groupStr, clusterDao.getClusterList(groupStr) );
+            }
+        }
+        clusterMap.put( group, clusterDao.getClusterList(group) );
+        return clusterMap;
     }
 
     public boolean clusterExistAddress(String address){
@@ -169,13 +177,28 @@ public class ClusterLogic {
     }
 
     public List<Cluster> getClusterListByUser(User user) {
-        String addressStr = user.getUserGroup();
-        String[] addressArr = addressStr.split(",");
         List<Cluster> listCluster = new ArrayList<>();
-        for(String adddress : addressArr ){
-            listCluster.addAll( getClusterList( adddress ) );
-        }
+        listCluster = getClusterList(user.getUserGroup());
         return listCluster;
+    }
+
+    public List<Cluster> getClusterList(String group){
+        List<Cluster> clusterList = new ArrayList<>();
+        if( group.equals( Common.ADMIN_GROUP ) ){
+            List<String> groups = clusterDao.getClusterGroups();
+            for(String groupStr : groups){
+                clusterList.addAll( clusterDao.getClusterList(groupStr) );
+            }
+        }else{
+            clusterList.addAll( clusterDao.getClusterList( group ) );
+        }
+        return clusterList;
+    }
+
+    public List<Cluster> getClusterListByGroup(String group){
+        List<Cluster> clusterList = new ArrayList<>();
+        clusterList.addAll( clusterDao.getClusterList( group ) );
+        return clusterList;
     }
 
     public boolean beSlave(String ip, int port, String masterId) {

@@ -55,12 +55,29 @@ public class ClusterController {
         return Response.Result(0, redisDBList);
     }
 
+    @RequestMapping(value = "/clustersGroup", method = RequestMethod.GET)
+    @ResponseBody
+    public Response clustersGroup(){
+        Map<String, List<Cluster>> listCluster = null;
+        String userGroup = RequestUtil.getUser().getUserGroup();
+        listCluster = logic.getClusterMap( userGroup );
+        return Response.Result(0, listCluster);
+    }
+
     @RequestMapping(value = "/listCluster", method = RequestMethod.GET)
     @ResponseBody
     public Response listCluster(){
         List<Cluster> listCluster = null;
         String userGroup = RequestUtil.getUser().getUserGroup();
         listCluster = logic.getClusterList( userGroup );
+        return Response.Result(0, listCluster);
+    }
+
+    @RequestMapping(value = "/getClusterListByGroup", method = RequestMethod.GET)
+    @ResponseBody
+    public Response getClusterListByGroup(@RequestParam String group){
+        List<Cluster> listCluster = null;
+        listCluster = logic.getClusterListByGroup( group );
         return Response.Result(0, listCluster);
     }
 
@@ -129,7 +146,7 @@ public class ClusterController {
         return Response.Result(0, res);
     }
 
-    @RequestMapping(value = "/removeCluster", method = RequestMethod.POST)
+    @RequestMapping(value = "/removeCluster", method = RequestMethod.GET)
     @ResponseBody
     public Response removeCluster(@RequestParam String clusterId){
         int id = Integer.parseInt(clusterId);
