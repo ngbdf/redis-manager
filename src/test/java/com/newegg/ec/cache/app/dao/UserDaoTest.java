@@ -27,7 +27,7 @@ public class UserDaoTest {
 
     @Test
     public void addUser(){
-        User user = new User("test2", "test2", "test2");
+        User user = new User("admin", "admin", "admin");
         userDao.addUser( user );
     }
 }

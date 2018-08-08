@@ -1,5 +1,8 @@
 package com.newegg.ec.cache.backend;
 
+import com.newegg.ec.cache.app.dao.IUserDao;
+import com.newegg.ec.cache.app.model.Common;
+import com.newegg.ec.cache.app.model.User;
 import com.newegg.ec.cache.core.mysql.MysqlUtil;
 import com.newegg.ec.cache.core.userapi.UserApiUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +21,8 @@ import java.util.List;
 public class InitConfig implements ApplicationListener<ContextRefreshedEvent> {
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
+    @Autowired
+    private IUserDao userDao;
     @Value("${cache.mysql.database.name}")
     private String databaseName;
     @Value("${cache.user.api.path}")
@@ -30,7 +34,15 @@ public class InitConfig implements ApplicationListener<ContextRefreshedEvent> {
     public void onApplicationEvent(ContextRefreshedEvent event) {
         initUserApi();
         initMysqlTable();
+        initUserData();
         System.out.println("****************** init success ********************");
+    }
+
+    private void initUserData() {
+        User user = userDao.getUserByName("admin");
+        if( null == user ){
+            userDao.addUser(new User("admin", "admin", "admin"));
+        }
     }
 
     /**
