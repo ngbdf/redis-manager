@@ -42,7 +42,10 @@ public class RedisInfoSchedule{
     @Resource
     private INodeInfoDao infoDao;
 
-    @Scheduled(fixedRate = 1000 * 60 * 3)
+    /**
+     * 两分钟后开始采集，以后一分钟采集一次
+     */
+    @Scheduled(fixedRate = 1000 * 60, initialDelay = 1000 * 120)
     public void scheduledMetricRedisInfo() {
         List<Cluster>  clusterList = clusterDao.getClusterList(null);
         for (Cluster cluster: clusterList) {
