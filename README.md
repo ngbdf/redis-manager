@@ -17,7 +17,7 @@ RedisManager 是  redis 一站式管理平台。 支持集群的创建、管理�
  <img src="./docs/images/wechat.png" width="200px"/>
 
 ## 产品截图
-<img src="./docs/images/readme/readme/index.png"/>
+<img src="./docs/images/readme/index.png"/>
 > 截图部分包含了 创建模块、管理模块、监控模块、集群同步、query客户端的使用，详情如下:
 ### 1 创建集群
 > 创建集群包含了三种选择、您可以选择机器安装也可以选择 docker 或 humpback
