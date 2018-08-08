@@ -55,7 +55,7 @@ public class RedisInfoChecker {
     /**
      * 分析10分钟内的warninglog，每个集群超过总共超过3封就发送微信alarm消息
      */
-    @Scheduled(fixedRateString = "${schedule.wechat.alarm}")
+    @Scheduled(fixedRateString = "${schedule.wechat.alarm}",initialDelay = 1000 * 60)
     public void WeChatEarlyWarning() {
         List<Cluster> clusterList =  clusterDao.getClusterList(null);
         long time = DateUtil.getBeforeMinutesTime(10);
@@ -68,7 +68,7 @@ public class RedisInfoChecker {
     /**
      * 2min按配置规则检查一次cluster情况
      */
-    @Scheduled(fixedRateString = "${schedule.redischeck.warnning}")
+    @Scheduled(fixedRateString = "${schedule.redischeck.warnning}",initialDelay = 1000 * 60)
     public void warningCheck() {
         List<Cluster> clusterList =  clusterDao.getClusterList(null);
         for(Cluster cluster: clusterList){
