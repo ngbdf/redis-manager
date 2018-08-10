@@ -187,9 +187,8 @@ public class JedisUtilTest {
 
     @Test
     public void testHashMap(){
-        Map<String, String> map1 = new HashMap<>();
-        AtomicInteger atomicInteger = new AtomicInteger(0);
-        atomicInteger.incrementAndGet();
-        //map1.put()
+        Object a = 123;
+        String b = String.valueOf(a);
+        System.out.println(b);
     }
 }

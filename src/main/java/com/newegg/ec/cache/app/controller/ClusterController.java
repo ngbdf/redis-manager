@@ -233,7 +233,10 @@ public class ClusterController {
     @ResponseBody
     public Response moveSlot(@RequestParam String ip, @RequestParam int port, @RequestParam int startKey, @RequestParam int endKey){
         boolean res = logic.reShard(ip, port, startKey, endKey);
-        return Response.Result(0, res);
+        if( res ){
+            return Response.Success();
+        }
+        return Response.Error("move slot fail");
     }
 
     @RequestMapping(value = "/importNode", method = RequestMethod.GET)

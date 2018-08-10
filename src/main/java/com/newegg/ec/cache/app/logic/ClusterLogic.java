@@ -393,7 +393,7 @@ public class ClusterLogic {
             if( slotInMaster(master, slot ) ){
                 sourceId = (String) master.get("nodeId");
                 sourceIP = (String) master.get("ip");
-                sourcePort = (String) master.get("port");
+                sourcePort = String.valueOf(master.get("port"));
             }
             if( !"".equals(myselfId) && !"".equals(sourceIP) && "".equals(sourcePort) && !"".equals(sourceId) ){
                 break;
