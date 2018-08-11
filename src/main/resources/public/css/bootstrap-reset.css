@@ -145,7 +145,7 @@ ul {
     color: #fff;
 }
 
-.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open .dropdown-toggle.btn-default {
+.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open .dropdown-toggle.btn-default,.btn-default:active:hover,  {
     background-color: #b0b5b9;
     border-color: #b0b5b9;
     color: #fff;
@@ -157,7 +157,13 @@ ul {
     color: #FFFFFF;
 }
 
-.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open .dropdown-toggle.btn-primary {
+.btn-primary:focus,
+.btn-primary:hover,
+.btn-primary:active:hover,
+.btn-primary:active:focus,
+.btn-primary.active:focus,
+.btn-primary.focus,
+.btn-primary:active.focus {
     background-color: #39b2a9;
     border-color: #39b2a9;
     color: #FFFFFF;
@@ -169,7 +175,13 @@ ul {
     color: #FFFFFF;
 }
 
-.btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active, .open .dropdown-toggle.btn-success {
+.btn-success:focus,
+.btn-success:hover,
+.btn-success:active:hover,
+.btn-success:active:focus,
+.btn-success.active:focus,
+.btn-success.focus,
+.btn-success:active.focus {
     background-color: #6dbb4a;
     border-color: #6dbb4a;
     color: #FFFFFF;
@@ -181,7 +193,13 @@ ul {
     color: #FFFFFF;
 }
 
-.btn-info:hover, .btn-info:focus, .btn-info:active, .btn-info.active, .open .dropdown-toggle.btn-info {
+.btn-info:focus,
+.btn-info:hover,
+.btn-info:active:hover,
+.btn-info:active:focus,
+.btn-info.active:focus,
+.btn-info.focus,
+.btn-info:active.focus {
     background-color: #53bee6;
     border-color: #53BEE6;
     color: #FFFFFF;
@@ -193,7 +211,13 @@ ul {
     color: #FFFFFF;
 }
 
-.btn-warning:hover, .btn-warning:focus, .btn-warning:active, .btn-warning.active, .open .dropdown-toggle.btn-warning {
+.btn-warning:focus,
+.btn-warning:hover,
+.btn-warning:active:hover,
+.btn-warning:active:focus,
+.btn-warning.active:focus,
+.btn-warning.focus,
+.btn-warning:active.focus {
     background-color: #e4ba00;
     border-color: #e4ba00;
     color: #FFFFFF;
@@ -205,7 +229,13 @@ ul {
     color: #FFFFFF;
 }
 
-.btn-danger:hover, .btn-danger:focus, .btn-danger:active, .btn-danger.active, .open .dropdown-toggle.btn-danger {
+.btn-danger:focus,
+.btn-danger:hover,
+.btn-danger:active:hover,
+.btn-danger:active:focus,
+.btn-danger.active:focus,
+.btn-danger.focus,
+.btn-danger:active.focus {
     background-color: #ec6459;
     border-color: #ec6459;
     color: #FFFFFF;

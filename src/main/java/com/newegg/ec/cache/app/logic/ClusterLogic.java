@@ -310,7 +310,9 @@ public class ClusterLogic {
         String temMyselfId = "";
         String temSourceId = "";
         Map<String,Map> masterNodes =  JedisUtil.getMasterNodes(ip, port);
+        Jedis jedis = null;
         try {
+            jedis = new Jedis(ip, port);
             // 迁移必须要知道自己的 nodeid 和 source 的ip port nodeid
             for(int slot = startKey; slot <= endKey; slot++){
                 Map<String, String> slotObjmap = fillMoveSlotObject(masterNodes, ip, port, slot );
@@ -318,6 +320,14 @@ public class ClusterLogic {
                 String sourceId = slotObjmap.get("sourceId");
                 String sourceIP = slotObjmap.get("sourceIP");
                 String strSourcePort = slotObjmap.get("sourcePort");
+                // 如果 strSourcePort 为空，则进行集群初始化
+                if( StringUtils.isBlank( strSourcePort ) ){
+                    String resstr = jedis.clusterAddSlots( slot );
+                    if( !resstr.equals("OK") ){
+                        jedis.clusterAddSlots( slot );
+                    }
+                    continue;
+                }
                 int  sourcePort = Integer.parseInt(strSourcePort);
                 try {
                     moveSlot(myselfId, ip, port, sourceId, sourceIP, sourcePort, slot);
@@ -328,6 +338,8 @@ public class ClusterLogic {
             res = true;
         }catch (Exception e){
             logger.error("move slot ", e);
+        }finally {
+            jedis.close();
         }
         return res;
     }
@@ -393,7 +405,7 @@ public class ClusterLogic {
             if( slotInMaster(master, slot ) ){
                 sourceId = (String) master.get("nodeId");
                 sourceIP = (String) master.get("ip");
-                sourcePort = (String) master.get("port");
+                sourcePort = String.valueOf(master.get("port"));
             }
             if( !"".equals(myselfId) && !"".equals(sourceIP) && "".equals(sourcePort) && !"".equals(sourceId) ){
                 break;

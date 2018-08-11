@@ -14,6 +14,6 @@ $("#user-logout").click(function(){
 
 function heartbeat(){
     ajax.async_get('/heartbeat',function(obj){
-       
+
     });
 }
