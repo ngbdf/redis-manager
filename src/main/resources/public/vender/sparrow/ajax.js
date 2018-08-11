@@ -156,7 +156,6 @@ sparrow_ajax.prototype = {
 			title += '，返回结果非JSON';
 		}
 		title += ' status:' + ajax_obj.status +' ' + ajax_obj.statusText;
-		title += '检查是否登陆超时';
 		layer.alert( title, {
           icon: 1,
           skin: 'layer-ext-moon',
