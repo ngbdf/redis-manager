@@ -132,9 +132,10 @@
 .cluster-title {
 	font-size: 16px;
 	padding-bottom: 10px;
-	border-bottom: 1px solid #dadada;
+	border-bottom: 1px solid #eee;
 	cursor: pointer;
 	display: flex;
+	justify-content: space-between;
     align-items: center;
 }
 
@@ -224,7 +225,7 @@
 }
 
 .delete-container i{
-	color: #dadada;
+	color: #eee;
  	transition:all 0.5s linear;transform:rotate(0deg);
 }
 

@@ -9,27 +9,48 @@
     <title>Redis Manager</title>
 
     <link rel="stylesheet" href="../vender/bootstrap-3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../css/bootstrap-reset.css"/>
     <link rel="stylesheet" href="../font-awesome/css/font-awesome.css" />
     <link rel="stylesheet" href="../vender/bootstrap-select-1.12.4/dist/css/bootstrap-select.css" />
     <link rel="stylesheet" href="../css/common.css"/>
     <link href="../vender/sparrow/sparrow.css" rel="stylesheet" charset="utf-8" />
 
     <style>
+        body {
+            background-color: #f1f2f7;
+        }
+
+        .login-container {
+            display: inline-flex;
+            justify-content: center;
+            margin-top: 16%;
+            width: 100%;
+        }
         .login-wrapper {
-            width:350px;
-            margin:0 auto;
-            margin-top:150px;
-            padding:15px
+            padding: 20px 20px 10px;
+            box-shadow: 0 9px 30px -6px rgba(0,0,0,.2);
+            background-color: #ffffff;
+            width: 300px;
+        }
+        .login-title {
+            height: 40px;
+            line-height: 40px;
+            color: black;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 <div class="clearfix nav-height"></div>
 <div class="container-fluid">
-    <div class="login-wrapper" >
-        <div class="panel panel-default">
-            <div class="panel-heading"><span class="glyphicon glyphicon-user"></span> Login</div>
-            <div class="panel-body">
+    <div class="login-container" >
+        <div class="login-wrapper">
+            <div class="login-title">Redis Manager Login</div>
+            <div>
                 <div class="form-horizontal" id="login-form">
                     <div class="form-group">
                         <div class="col-sm-12">
@@ -45,7 +66,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-sm-12">
-                            <button type="button" class="btn form-control btn-default btn-sm selected" id="login-button"> Login </button>
+                            <button type="button" class="btn form-control btn-primary btn-sm selected" id="login-button"> LOGIN </button>
                         </div>
                     </div>
                 </div>

@@ -112,7 +112,7 @@ a:hover {
 .form-control {
     border: 1px solid #e2e2e4;
     box-shadow: none;
-    color: #c2c2c2;
+    color: #2a3542;
 }
 
 
@@ -140,12 +140,16 @@ ul {
 /*button*/
 
 .btn-default {
-    background-color: #bec3c7;
+    /*background-color: #bec3c7;
     border-color: #bec3c7;
-    color: #fff;
+    color: #fff;*/
 }
 
-.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open .dropdown-toggle.btn-default,.btn-default:active:hover,  {
+.btn-default:hover,
+.btn-default:focus,
+.btn-default:active,
+.btn-default.active,
+.open .dropdown-toggle.btn-default,.btn-default:active:hover,  {
     background-color: #b0b5b9;
     border-color: #b0b5b9;
     color: #fff;
@@ -240,7 +244,6 @@ ul {
     border-color: #ec6459;
     color: #FFFFFF;
 }
-
 
 .btn-white {
     box-shadow: none !important;

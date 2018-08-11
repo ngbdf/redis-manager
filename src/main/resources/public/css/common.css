@@ -1,4 +1,4 @@
-html, body, table{
+html, body{
 	padding: 0px;
 	margin: 0px;
 	height: 100%;
@@ -171,65 +171,6 @@ a, a:hover{
 
 .operation-btn:hover{
 	background: linear-gradient(to top, #F9F9F9, white);
-}
-
-
-.btn-default,
-.btn-default:focus,
-.btn-default:hover,
-.btn-default:active:hover,
-.btn-default:active:focus,
-.btn-default.active:focus,
-.btn-default.focus,
-.btn-default:active.focus,
-.btn-default:active.focus {
-    border: 1px solid #dadada;
-    outline: none;
-    background-color: #FFFFFF;
-    color: #333;
-}
-
-.btn-primary,
-.btn-primary:focus,
-.btn-primary:hover,
-.btn-primary:active:focus,
-.btn-primary.active:focus,
-.btn-primary.focus,
-.btn-primary:active.focus {
-    border: 1px solid #3fa7dc;
-    outline: none;
-    background-color: #3fa7dc;
-    color: #FFFFFF;
-}
-
-.btn-warning,
-.btn-warning:focus,
-.btn-warning:hover,
-.btn-warning:active:hover,
-.btn-warning:active:focus,
-.btn-warning.active:focus,
-.btn-warning.focus,
-.btn-warning:active.focus,
-.btn-warning:active.focus {
-    border: 1px solid #f8d347;
-    outline: none;
-    background-color: #f8d347;
-    color: #FFFFFF;
-}
-
-.btn-danger,
-.btn-danger:focus,
-.btn-danger:hover,
-.btn-danger:active:hover,
-.btn-danger:active:focus,
-.btn-danger.active:focus,
-.btn-danger.focus,
-.btn-danger:active.focus,
-.btn-danger:active.focus {
-    border: 1px solid #ff6c60;
-    outline: none;
-    background-color: #ff6c60;
-    color: #FFFFFF;
 }
 
 .label-success, .label-danger, .label-info {
