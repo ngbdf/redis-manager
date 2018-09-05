@@ -13,7 +13,7 @@ $(document).ready(function(){
         });
         checkRedisVersion(window.cluster.address,function(obj){
             if( obj.res  == 2 ){
-                sparrow_win.confirm("redis version only support monitor", function(){
+                sparrow_win.confirm("Only support Redis Cluster mode", function(){
                     window.location.href = "/monitor/clusterMonitorList";
                 });
             }
