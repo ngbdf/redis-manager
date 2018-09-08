@@ -6,7 +6,9 @@
 RedisManager 是  redis 一站式管理平台。 支持集群的创建、管理、监控。      
 集群的创建包含了三种方式 docker、machine、humpback;集群的管理支持 slot迁移、master slave 角色的选举、动态配置的修改;监控部分有 redis info、 slow log;集群之间数据同步;以及可以查询任意类型的query接口。
 
-[快速开始](https://github.com/ngbdf/redis-manager/wiki/)     
+[快速开始](https://github.com/ngbdf/redis-manager/wiki/) 
+
+[redisManager体验地址（用户名/密码 admin/admin）](http://39.105.114.48:8182/)
 
 ## 联系方式
 > 您在使用产品的过程中如果遇到问题或者需要改进的地方可以通过以下两种方式直接联系我们
