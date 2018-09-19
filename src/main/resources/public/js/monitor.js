@@ -22,6 +22,13 @@ $(document).ready(function(){
 
 });
 
+$(window).resize(function(){
+    $(".chart-sm").each(function(){
+        var id = $(this).attr('id');
+        echarts.getInstanceByDom(document.getElementById(id)).resize();
+    });
+});
+
 function getCurrentTime(){
     return Date.parse(new Date())/1000;
 }

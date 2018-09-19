@@ -1,4 +1,4 @@
-.idea/*
-redis-manager.iml
-target/*
+.idea/
+*.iml
+target/
 logs/*
