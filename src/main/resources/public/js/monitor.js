@@ -217,13 +217,16 @@ function init(){
         var storageUnit = calStorageUnit(obj.res[0].usedMemory);
         var numberUnit = calNumberUnit(obj.res[0].expires);
         var usefulData = refactor(obj.res,window.date,storageUnit,numberUnit);
-        buildChart("charts-cpu","CPU占用率","date","usedCpuUser",obj.res,"CPU usage"," %/s");
-        buildChart("charts-memory","内存占用","date","usedMemory",obj.res,"memory usage", storageUnit);
-        buildChart("charts-client","客户端连接数","date","connectedClients",obj.res,"client connections"," ");
-        buildChart("charts-ops","每秒指令数(instantaneous_ops_per_sec )","date","instantaneousOpsPerSec",obj.res,"command  /sec"," ");
-        buildChart("charts-commands","每秒命令数(total_commands_processed)","date","totalCommandsProcessed",obj.res,"command  /sec  "," ");
-        buildChart("charts-Keyspace-expires","有TTL的key总数","date","expires",obj.res,"keys with ttl",numberUnit);
-        buildChart("charts-hitRate","命中率","date","keyspaceHitRate",obj.res,"hitRate_avg"," ");
+        clearChart_invalidatedData(usefulData);
+
+        buildChart("charts-cpu","CPU占用率","date","usedCpuUser",usefulData,"CPU usage"," %/s");
+        buildChart("charts-memory","内存占用","date","usedMemory",usefulData,"memory usage", storageUnit);
+        buildChart("charts-client","客户端连接数","date","connectedClients",usefulData,"client connections"," ");
+        buildChart("charts-ops","每秒指令数(instantaneous_ops_per_sec )","date","instantaneousOpsPerSec",usefulData,"command  /sec"," ");
+        buildChart("charts-commands","每秒命令数(total_commands_processed)","date","totalCommandsProcessed",usefulData,"command  /sec  "," ");
+        buildChart("charts-Keyspace-expires","有TTL的key总数","date","expires",usefulData,"keys with ttl",numberUnit);
+        buildChart("charts-hitRate","命中率","date","keyspaceHitRate",usefulData,"hitRate_avg"," ");
+
     });
 
     getCluster(window.clusterId , function(obj){
@@ -307,7 +310,7 @@ function refactor(originData,timeUnit,storageUnit,numberUnit){
         }
 
         // 计算 获得有用的 统计值
-        thisRecord.keyspaceHitRate = (thisRecord.keyspaceHits/(parseInt(thisRecord.keyspaceHits) + parseInt(thisRecord.keyspaceMisses))).toFixed(2);
+        thisRecord.keyspaceHitRate = (Number(thisRecord.keyspaceHits) / ( Number(thisRecord.keyspaceHits) + Number(thisRecord.keyspaceMisses))).toFixed(2);
         if(isNaN(thisRecord.keyspaceHitRate) || thisRecord.keyspaceHitRate==Infinity){
             thisRecord.keyspaceHitRate = 0.0;
         }
@@ -362,6 +365,42 @@ function refactor(originData,timeUnit,storageUnit,numberUnit){
     // 清除没有做减法的数据
     originData.shift();
     return originData;
+}
+
+// 清除不合理的数据
+function clearChart_invalidatedData(originData){
+    var clearChart_commands = false;
+    var clearChart_cpu = false;
+    var clearChart_hitRate = false;
+    originData.forEach(function(thisRecord){
+        if(thisRecord.totalCommandsProcessed<0){
+            clearChart_commands = true;
+        }
+        if(thisRecord.usedCpuUser<0){
+            clearChart_cpu = true;
+        }
+        if(thisRecord.keyspaceHitRate>1 || thisRecord.keyspaceHitRate<0 ){
+            clearChart_hitRate = true;
+        }
+    });
+    if(clearChart_commands){
+        originData.forEach(function(thisRecord){
+            thisRecord.totalCommandsProcessed = "clear";
+        });
+        console.log("have some invalidate data, clear chart-totalCommandsProcessed");
+    }
+    if(clearChart_cpu){
+        originData.forEach(function(thisRecord){
+            thisRecord.usedCpuUser = "clear";
+        });
+        console.log("have some invalidate data, clear chart-usedCpuUser");
+    }
+    if(clearChart_hitRate){
+        originData.forEach(function(thisRecord){
+            thisRecord.keyspaceHitRate = "clear";
+        });
+        console.log("have some invalidate data, clear chart-keyspaceHitRate");
+    }
 }
 
 
