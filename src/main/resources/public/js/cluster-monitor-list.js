@@ -44,7 +44,7 @@ $(document).on("click", ".cluster-info-detail", function(res){
         data.clusterType = obj.res.clusterType;
         getClusterInfoByAddress(address, function(obj){
             data.res = obj.res;
-            console.log(data);
+//            console.log(data);
             smarty.html( "monitor/cluster_info", data, "cluster-info-" + clusterId,function () {
                 countWarningLogByClusterId(clusterId, function(obj){
                     var alarmNumber = parseInt(obj.res);

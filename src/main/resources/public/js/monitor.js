@@ -38,12 +38,16 @@ $(".relative-section ul li").on("click", function(){
     var timeRangeObj = $(this);
     timeRangeObj.addClass("time-selected").siblings().removeClass("time-selected");
     timeRangeObj.parent().siblings().children().removeClass('time-selected');
-    var timeRange = parseInt(timeRangeObj.attr("data"));
+    var timeRange = parseInt(timeRangeObj.attr("data")); // timeUnit is minute
     var currentTime = getCurrentTime();
     window.endTime = currentTime;
     window.startTime = window.endTime - timeRange * 60;
-    if(timeRange > 720) {
+    if(timeRange >= 60*24*3 ) {
+        window.date = "day";
+    }else if(timeRange >= 60*12 ) {
         window.date = "hour";
+    }else{
+        window.date = "minute";
     }
     reloadMonitor();
 })
@@ -60,8 +64,12 @@ $(".query").on("click", function(){
     var endTime = Date.parse(new Date(endStr.replace(/-/g, '/')));
     if(startTime < endTime){
         var timeRange = (endTime - startTime) / 1000 / 60 / 60;
-        if(timeRange > 12){
+        if(timeRange >= 72){
+            window.date = "day";
+        }else if(timeRange >= 3){
             window.date = "hour";
+        }else{
+            window.date = "minute";
         }
         window.startTime = startTime / 1000;
         window.endTime = endTime / 1000;
@@ -206,14 +214,15 @@ function init(){
     });
 
    monitorGetGroupNodeInfo(window.clusterId ,window.startTime,window.endTime,window.host,window.type,window.date,function(obj){
-        var storageUnit = calculationStorageUnit(obj.res[0].usedMemory);
-        var usefulData = refactor(obj.res,window.date,storageUnit);
+        var storageUnit = calStorageUnit(obj.res[0].usedMemory);
+        var numberUnit = calNumberUnit(obj.res[0].expires);
+        var usefulData = refactor(obj.res,window.date,storageUnit,numberUnit);
         buildChart("charts-cpu","CPU占用率","date","usedCpuUser",obj.res,"CPU usage"," %/s");
         buildChart("charts-memory","内存占用","date","usedMemory",obj.res,"memory usage", storageUnit);
         buildChart("charts-client","客户端连接数","date","connectedClients",obj.res,"client connections"," ");
         buildChart("charts-ops","每秒指令数(instantaneous_ops_per_sec )","date","instantaneousOpsPerSec",obj.res,"command  /sec"," ");
         buildChart("charts-commands","每秒命令数(total_commands_processed)","date","totalCommandsProcessed",obj.res,"command  /sec  "," ");
-        buildChart("charts-Keyspace-expires","有TTL的key总数","date","expires",obj.res,"keys with ttl"," ");
+        buildChart("charts-Keyspace-expires","有TTL的key总数","date","expires",obj.res,"keys with ttl",numberUnit);
         buildChart("charts-hitRate","命中率","date","keyspaceHitRate",obj.res,"hitRate_avg"," ");
     });
 
@@ -243,7 +252,7 @@ function init(){
     });
 }
 
-function  calculationStorageUnit(numberValue){
+function  calStorageUnit(numberValue){
     var sizeUnit = '';
     if( numberValue < 1024 ){
         sizeUnit = 'B';
@@ -257,8 +266,17 @@ function  calculationStorageUnit(numberValue){
     return sizeUnit;
 }
 
+function  calNumberUnit(numberValue){
+    var numberUnit = '';
+    if( numberValue/10000 < 10 ){
+        numberUnit = '';
+    }else {
+        numberUnit = 'W';
+    }
+    return numberUnit;
+}
 
-function refactor(originData,timeUnit,storageUnit){
+function refactor(originData,timeUnit,storageUnit,numberUnit){
     var maxIndex = originData.length;
     for(var index=maxIndex-1;index>0;index--){
         var thisRecord = originData[index];
@@ -290,7 +308,7 @@ function refactor(originData,timeUnit,storageUnit){
 
         // 计算 获得有用的 统计值
         thisRecord.keyspaceHitRate = (thisRecord.keyspaceHits/(parseInt(thisRecord.keyspaceHits) + parseInt(thisRecord.keyspaceMisses))).toFixed(2);
-        if(isNaN(thisRecord.keyspaceHitRate )){
+        if(isNaN(thisRecord.keyspaceHitRate) || thisRecord.keyspaceHitRate==Infinity){
             thisRecord.keyspaceHitRate = 0.0;
         }
 
@@ -311,6 +329,10 @@ function refactor(originData,timeUnit,storageUnit){
 
         }
 
+        if(numberUnit == 'W'){
+            thisRecord.expires = (thisRecord.expires/10000).toFixed(2);
+        }
+
         var dateStr_hhh = thisRecord.date.toString();
         // 时间字符串转化
         var splitIndex_date = dateStr_hhh.indexOf(":");
@@ -321,7 +343,7 @@ function refactor(originData,timeUnit,storageUnit){
                 if(str2.length  == 1 ){
                     str2 = '0'+str2;
                 }
-                dateStr_hhh = str1.substring(4,5)+'/'+str1.substring(6,7) + ' ' + str2 +':00';
+                dateStr_hhh = str1.substring(4,6)+'/'+str1.substring(6,8) + ' ' + str2 +':00';
             }else {
                 if(str1.length ==1){
                     str1 = '0'+str1;
@@ -332,9 +354,12 @@ function refactor(originData,timeUnit,storageUnit){
                 dateStr_hhh = str1+':'+str2;
             }
             thisRecord.date = dateStr_hhh;
+        }else{
+            thisRecord.date = dateStr_hhh.substring(4,6)+'/'+dateStr_hhh.substring(6,8) ;
         }
 
     }
+    // 清除没有做减法的数据
     originData.shift();
     return originData;
 }
