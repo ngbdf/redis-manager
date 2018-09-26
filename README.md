@@ -8,7 +8,7 @@ RedisManager 是  redis 一站式管理平台。 支持集群的创建、管理�
 
 [快速开始](https://github.com/ngbdf/redis-manager/wiki/) 
 
-[redisManager体验地址（用户名/密码 admin/admin）](http://39.105.114.48:8182/)
+[redisManager体验地址（用户名/密码 admin/admin）](http://ngbdf.github.io)
 
 ## 联系方式
 > 您在使用产品的过程中如果遇到问题或者需要改进的地方可以通过以下两种方式直接联系我们
