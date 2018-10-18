@@ -11,25 +11,29 @@ import org.slf4j.LoggerFactory;
  */
 public class CommonLogger {
     private Logger logger;
+
     public CommonLogger(Class<?> loggerClazz) {
         this.logger = LoggerFactory.getLogger(loggerClazz);
     }
+
     public CommonLogger(String loggerName) {
         this.logger = LoggerFactory.getLogger(loggerName);
     }
 
-    public void error(String msg, Throwable e){
-        this.logger.error( msg, e );
+    public void error(String msg, Throwable e) {
+        this.logger.error(msg, e);
     }
-    public void info(String msg){
-        this.logger.info( msg );
+
+    public void info(String msg) {
+        this.logger.info(msg);
     }
-    public String websocket(String msg){
+
+    public String websocket(String msg) {
         User user = RequestUtil.getUser();
-        if( null == user ){
+        if (null == user) {
             return msg;
         }
-        CreateClusterLogHandler.appendLog(String.valueOf( RequestUtil.getUser().getId() ), msg);
+        CreateClusterLogHandler.appendLog(String.valueOf(RequestUtil.getUser().getId()), msg);
         return msg;
     }
 }

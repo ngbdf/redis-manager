@@ -14,6 +14,7 @@ import java.util.Map;
 public interface IClusterCheckLogDao {
     /**
      * 添加日志
+     *
      * @param log
      * @return
      */
@@ -21,24 +22,27 @@ public interface IClusterCheckLogDao {
 
     /**
      * 条件检索日志
+     *
      * @param params
      * @return
      */
-    List<ClusterCheckLog> getClusterCheckLogs(@Param("params")Map<String,Object> params);
+    List<ClusterCheckLog> getClusterCheckLogs(@Param("params") Map<String, Object> params);
 
     /**
      * 按条件删除日志
+     *
      * @param params
      * @return
      */
-    void delLogs(@Param("params")Map<String,Object> params);
+    void delLogs(@Param("params") Map<String, Object> params);
 
     /**
      * 将日志的isChecked置为true
+     *
      * @param params
      * @return
      */
-    Boolean checkWarningLogs(@Param("params")Map<String,Object> params);
+    Boolean checkWarningLogs(@Param("params") Map<String, Object> params);
 
 
     Integer countTotalWarningLog(List<String> clusterIds);

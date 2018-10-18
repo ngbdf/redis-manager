@@ -7,7 +7,7 @@ public class Host {
     private String ip;
     private int port;
 
-    public Host(){
+    public Host() {
 
     }
 

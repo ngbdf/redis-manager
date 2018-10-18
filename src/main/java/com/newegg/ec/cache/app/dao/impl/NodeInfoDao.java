@@ -1,7 +1,7 @@
 package com.newegg.ec.cache.app.dao.impl;
 
-import com.newegg.ec.cache.core.mysql.MysqlUtil;
 import com.newegg.ec.cache.app.model.NodeInfo;
+import com.newegg.ec.cache.core.mysql.MysqlUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -18,22 +18,22 @@ public class NodeInfoDao {
         boolean res = true;
         try {
             Class claz = NodeInfo.class;
-            String createTable = MysqlUtil.createTableSql( claz, tableName);
-            System.out.println( createTable );
-            jdbcTemplate.execute( createTable );
-        }catch (Exception e){
+            String createTable = MysqlUtil.createTableSql(claz, tableName);
+            System.out.println(createTable);
+            jdbcTemplate.execute(createTable);
+        } catch (Exception e) {
             res = false;
         }
         return res;
     }
 
-    public boolean dropTable(String tableName){
+    public boolean dropTable(String tableName) {
         boolean res = false;
         try {
             String sql = "drop table " + tableName;
-            jdbcTemplate.execute( sql );
+            jdbcTemplate.execute(sql);
             res = true;
-        }catch ( Exception e ){
+        } catch (Exception e) {
 
         }
         return res;

@@ -16,31 +16,30 @@ import javax.annotation.Resource;
  */
 @Component
 public class NodeManager {
-    @Value("${cache.plugin}")
-    private String pluginList;
-
     @Resource
     public MachineManager machineManager;
     @Resource
     public DockerManager dockerManager;
     @Resource
     public HumpbackManager humpbackManager;
+    @Value("${cache.plugin}")
+    private String pluginList;
 
-    public NodeManager(){
+    public NodeManager() {
 
     }
 
-    public String[] pluginList(){
-        if( StringUtils.isBlank( pluginList ) ){
+    public String[] pluginList() {
+        if (StringUtils.isBlank(pluginList)) {
             return new String[0];
-        }else{
+        } else {
             return pluginList.split(",");
         }
     }
 
-    public INodeOperate factoryOperate(PluginType pluginType){
+    public INodeOperate factoryOperate(PluginType pluginType) {
         INodeOperate nodeOperate = null;
-        switch ( pluginType ){
+        switch (pluginType) {
             case machine:
                 nodeOperate = machineManager;
                 break;

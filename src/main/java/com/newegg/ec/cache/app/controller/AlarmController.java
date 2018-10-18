@@ -23,63 +23,63 @@ public class AlarmController {
     private AlarmLogic logic;
 
     @RequestMapping("/alarmSystem")
-    public String ruleList(Model model){
+    public String ruleList(Model model) {
         return "alarmSystem";
     }
 
     @RequestMapping(value = "/getRuleList", method = RequestMethod.GET)
     @ResponseBody
-    public Response getRuleList(@RequestParam String clusterId){
-        List<ClusterCheckRule> res = logic.getRuleList( clusterId );
+    public Response getRuleList(@RequestParam String clusterId) {
+        List<ClusterCheckRule> res = logic.getRuleList(clusterId);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/addRule", method = RequestMethod.POST)
     @ResponseBody
-    public Response addRule(@RequestBody ClusterCheckRule rule){
+    public Response addRule(@RequestBody ClusterCheckRule rule) {
         Boolean res = logic.addRule(rule);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/checkAlarmRule", method = RequestMethod.POST)
     @ResponseBody
-    public Response checkAlarmRule(@RequestBody ClusterCheckRule rule){
-       Boolean check = logic.checkRule(rule);
-        if(check){
+    public Response checkAlarmRule(@RequestBody ClusterCheckRule rule) {
+        Boolean check = logic.checkRule(rule);
+        if (check) {
             return Response.Info("success!");
-        }else {
+        } else {
             return Response.Warn("you are fail");
         }
     }
 
     @RequestMapping(value = "/deleteRule", method = RequestMethod.GET)
     @ResponseBody
-    public Response deleteRule(@RequestParam String ruleId){
+    public Response deleteRule(@RequestParam String ruleId) {
         Boolean boo = logic.deleteRule(ruleId);
-        if(boo){
+        if (boo) {
             return Response.Info("success!");
-        }else {
+        } else {
             return Response.Warn("you are fail");
         }
     }
 
     @RequestMapping(value = "/getCaseLogs", method = RequestMethod.GET)
     @ResponseBody
-    public Response getCaseList(@RequestParam String clusterId){
+    public Response getCaseList(@RequestParam String clusterId) {
         List<ClusterCheckLog> res = logic.getCaseList(clusterId);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/deleteCaseLog", method = RequestMethod.GET)
     @ResponseBody
-    public Response deleteCaseLog(@RequestParam String logId){
+    public Response deleteCaseLog(@RequestParam String logId) {
         logic.deleteCaseLog(logId);
         return Response.Info("success!");
     }
 
     @RequestMapping(value = "/deleteAllLog", method = RequestMethod.GET)
     @ResponseBody
-    public Response deleteAllLog(@RequestParam String cluster){
+    public Response deleteAllLog(@RequestParam String cluster) {
         logic.deleteAllLog(cluster);
         return Response.Info("success!");
 
@@ -87,17 +87,17 @@ public class AlarmController {
 
     @RequestMapping(value = "/countTotal", method = RequestMethod.POST)
     @ResponseBody
-    public Response countTotalAlarm(@RequestBody List<String> clusterIds){
+    public Response countTotalAlarm(@RequestBody List<String> clusterIds) {
 
         Integer count = logic.countTotalLog(clusterIds);
-        return Response.Result(0,count);
+        return Response.Result(0, count);
     }
 
     @RequestMapping(value = "/countWarningLogByClusterId", method = RequestMethod.POST)
     @ResponseBody
-    public Response countWarningLogByClusterId(@RequestBody Integer clusterId){
+    public Response countWarningLogByClusterId(@RequestBody Integer clusterId) {
         Integer count = logic.countWarningLogByClusterId(clusterId);
-        return Response.Result(0,count);
+        return Response.Result(0, count);
     }
 
 }

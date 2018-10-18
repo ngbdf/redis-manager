@@ -11,9 +11,14 @@ import java.util.List;
 @Repository
 public interface IUserDao {
     List<User> getUserList();
+
     User getUser(int id);
+
     void removeUser(int id);
+
     void addUser(User user);
+
     List<String> getGroups();
+
     User getUserByName(String username);
 }

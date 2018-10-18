@@ -13,31 +13,34 @@ public class Response {
     private String msg;
     private Object res;
 
-    public Response(int code, String msg){
+    public Response(int code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
-    public Response(int code, Object o, String msg){
+    public Response(int code, Object o, String msg) {
         this.code = code;
         this.res = o;
         this.msg = msg;
     }
 
-    public static Response Result(int code, Object res){
-        return new Response(code, res, null );
+    public static Response Result(int code, Object res) {
+        return new Response(code, res, null);
     }
 
-    public static Response Success(){
+    public static Response Success() {
         return new Response(DEFAULT, "success");
     }
-    public static Response Info(String msg){
+
+    public static Response Info(String msg) {
         return new Response(INFO, msg);
     }
-    public static Response Warn(String msg){
+
+    public static Response Warn(String msg) {
         return new Response(WARN, msg);
     }
-    public static Response Error(String msg){
+
+    public static Response Error(String msg) {
         return new Response(ERROR, msg);
     }
 

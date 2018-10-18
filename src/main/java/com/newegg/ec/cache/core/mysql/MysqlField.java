@@ -12,8 +12,12 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD})
 public @interface MysqlField {
     boolean isPrimaryKey() default false;
+
     boolean notNull() default false;
+
     String field() default "";
+
     String type() default "";
+
     String value() default "";
 }

@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @EnableScheduling
 @SpringBootApplication
-@MapperScan(basePackages={"com.newegg.ec.cache"})
+@MapperScan(basePackages = {"com.newegg.ec.cache"})
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

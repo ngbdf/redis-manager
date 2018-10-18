@@ -13,6 +13,7 @@ public interface IHumpbackNodeDao {
 
     /**
      * get humbackNode list
+     *
      * @param cluster_id
      * @return
      */
@@ -20,6 +21,7 @@ public interface IHumpbackNodeDao {
 
     /**
      * get a humpbackNode by id
+     *
      * @param id
      * @return
      */
@@ -27,6 +29,7 @@ public interface IHumpbackNodeDao {
 
     /**
      * remove humpbackNode
+     *
      * @param id
      * @return
      */
@@ -34,6 +37,7 @@ public interface IHumpbackNodeDao {
 
     /**
      * add a humpbackNode
+     *
      * @param humpbackNode
      * @return
      */

@@ -1,21 +1,22 @@
 package com.newegg.ec.cache.app.controller.security;
 
 import com.newegg.ec.cache.app.model.Common;
-import com.newegg.ec.cache.app.model.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
 /**
  * Created by lzz on 2018/5/2.
  */
 @Configuration
-public class WebSecurityConfig  extends WebMvcConfigurerAdapter {
+public class WebSecurityConfig extends WebMvcConfigurerAdapter {
     @Bean
     public SecurityInterceptor getSecurityInterceptor() {
         return new SecurityInterceptor();
@@ -41,9 +42,9 @@ public class WebSecurityConfig  extends WebMvcConfigurerAdapter {
             user.setUserGroup("admin");
             session.setAttribute(Common.SESSION_USER_KEY, user);
             */
-            if (session.getAttribute(Common.SESSION_USER_KEY) != null){
+            if (session.getAttribute(Common.SESSION_USER_KEY) != null) {
                 return true;
-            }else{
+            } else {
                 // 跳转登录
                 String url = "/user/login";
                 response.sendRedirect(url);

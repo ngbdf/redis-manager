@@ -3,6 +3,7 @@ package com.newegg.ec.cache.app.util;
 
 import com.newegg.ec.cache.app.model.Host;
 import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
@@ -20,16 +21,16 @@ public class NetUtil {
 
     public static long pingTime(String ip) throws IOException {
         long startTime = System.currentTimeMillis();
-        InetAddress.getByName( ip ).isReachable(3000);
+        InetAddress.getByName(ip).isReachable(3000);
         long endTime = System.currentTimeMillis();
         return endTime - startTime;
     }
 
-    public static boolean checkUrl(String address){
+    public static boolean checkUrl(String address) {
         boolean res = false;
         URL url;
         try {
-            url = new URL( address.trim() );
+            url = new URL(address.trim());
             InputStream in = url.openStream();
             res = true;
         } catch (Exception ignore) {
@@ -37,7 +38,7 @@ public class NetUtil {
         return res;
     }
 
-    public static boolean checkPort(Integer port){
+    public static boolean checkPort(Integer port) {
         boolean res = false;
         try {
             String ip = getLocalIp();
@@ -48,7 +49,7 @@ public class NetUtil {
         return res;
     }
 
-    public static boolean checkIp(String ip){
+    public static boolean checkIp(String ip) {
         boolean res = false;
         try {
             res = InetAddress.getByName(ip).isReachable(5000);
@@ -66,19 +67,19 @@ public class NetUtil {
         return false;
     }
 
-    public static Host getHostPassAddress(String address){
+    public static Host getHostPassAddress(String address) {
         Host host = null;
-        if( !StringUtils.isBlank( address ) ){
+        if (!StringUtils.isBlank(address)) {
             String[] addressArr = address.split(",");
-            if( addressArr.length > 0 ){
-                for( String addressStr : addressArr ){
+            if (addressArr.length > 0) {
+                for (String addressStr : addressArr) {
                     String[] tmpArr = addressStr.split(":");
                     String ip = tmpArr[0];
                     int port = Integer.valueOf(tmpArr[1]);
-                    if( checkIpAndPort( ip, port ) ){
+                    if (checkIpAndPort(ip, port)) {
                         host = new Host();
-                        host.setIp( ip );
-                        host.setPort( port );
+                        host.setIp(ip);
+                        host.setPort(port);
                         break;
                     }
                 }
@@ -87,15 +88,15 @@ public class NetUtil {
         return host;
     }
 
-    public static boolean checkHost(String address){
+    public static boolean checkHost(String address) {
         String[] tmpArr = address.split(":");
-        if( tmpArr.length == 2 ){
-            return checkIpAndPort( tmpArr[0], Integer.valueOf(tmpArr[1]));
+        if (tmpArr.length == 2) {
+            return checkIpAndPort(tmpArr[0], Integer.valueOf(tmpArr[1]));
         }
         return true;
     }
 
-    public static boolean checkIpAndPort(String ip, Integer port){
+    public static boolean checkIpAndPort(String ip, Integer port) {
         boolean res = false;
         Socket socket = new Socket();
         try {
@@ -106,12 +107,13 @@ public class NetUtil {
         } finally {
             try {
                 socket.close();
-            } catch (IOException ignore) {}
+            } catch (IOException ignore) {
+            }
         }
         return res;
     }
 
-    public static boolean checkIpAnduserAccess(String ip, String username, String password){
+    public static boolean checkIpAnduserAccess(String ip, String username, String password) {
         RemoteShellUtil remoteShellUtil = new RemoteShellUtil(ip, username, password);
         boolean res = true;
         try {
@@ -121,25 +123,27 @@ public class NetUtil {
         }
         return res;
     }
-    public static Host getHost(String hostStr){
+
+    public static Host getHost(String hostStr) {
         Host host = new Host();
         String[] tmp = hostStr.split(":");
         String ip = tmp[0];
         int port = Integer.parseInt(tmp[1]);
-        host.setIp( ip );
-        host.setPort( port );
+        host.setIp(ip);
+        host.setPort(port);
         return host;
     }
+
     public static List<Host> getHostByAddress(String addressStr) {
         String[] addressArr = addressStr.split(",");
         List<Host> listHost = new ArrayList<>();
-        for(String address : addressArr){
+        for (String address : addressArr) {
             String[] tmpArr = address.split(":");
-            if( tmpArr.length == 2 ){
+            if (tmpArr.length == 2) {
                 Host host = new Host();
-                host.setIp( tmpArr[0]);
+                host.setIp(tmpArr[0]);
                 host.setPort(Integer.parseInt(tmpArr[1]));
-                listHost.add( host );
+                listHost.add(host);
             }
         }
         return listHost;

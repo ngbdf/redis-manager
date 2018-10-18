@@ -8,8 +8,8 @@ import java.io.Serializable;
 /**
  * Created by lf52 on 2018/4/26.
  */
-@MysqlTable( name = "cluster_check_logs", autoCreate = true)
-public class ClusterCheckLog implements Serializable{
+@MysqlTable(name = "cluster_check_logs", autoCreate = true)
+public class ClusterCheckLog implements Serializable {
 
     @MysqlField(field = "id", type = "varchar(36)", notNull = true)
     private String id;
@@ -31,7 +31,8 @@ public class ClusterCheckLog implements Serializable{
     private Integer isChecked;
     @MysqlField(field = "update_time", type = "int")
     private int updateTime;
-    public ClusterCheckLog(){
+
+    public ClusterCheckLog() {
         // 0:未检查过 1:检查过
         this.isChecked = 0;
     }
@@ -125,7 +126,7 @@ public class ClusterCheckLog implements Serializable{
     }
 
     public static enum LogType {
-        warnlog,slowlog
+        warnlog, slowlog
     }
 
 }

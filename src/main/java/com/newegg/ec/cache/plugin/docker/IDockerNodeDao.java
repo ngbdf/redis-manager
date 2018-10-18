@@ -10,9 +10,10 @@ import java.util.List;
  */
 @Repository
 public interface IDockerNodeDao {
-    
+
     /**
      * get DockerNode list
+     *
      * @param cluster_id
      * @return
      */
@@ -20,6 +21,7 @@ public interface IDockerNodeDao {
 
     /**
      * get a DockerNode by id
+     *
      * @param id
      * @return
      */
@@ -27,6 +29,7 @@ public interface IDockerNodeDao {
 
     /**
      * remove DockerNode
+     *
      * @param id
      * @return
      */
@@ -34,6 +37,7 @@ public interface IDockerNodeDao {
 
     /**
      * add a DockerNode
+     *
      * @param DockerNode
      * @return
      */

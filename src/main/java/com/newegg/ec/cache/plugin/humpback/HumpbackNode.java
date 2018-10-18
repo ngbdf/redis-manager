@@ -7,8 +7,8 @@ import com.newegg.ec.cache.plugin.basemodel.Node;
 /**
  * Created by gl49 on 2018/4/22.
  */
-@MysqlTable( name = "humpback_node", autoCreate = true)
-public class HumpbackNode extends Node{
+@MysqlTable(name = "humpback_node", autoCreate = true)
+public class HumpbackNode extends Node {
     @MysqlField(isPrimaryKey = true, field = "id", type = "int")
     private int id;
     @MysqlField(field = "image", type = "varchar(250)", notNull = true)
@@ -23,7 +23,7 @@ public class HumpbackNode extends Node{
     private String ip;
     @MysqlField(field = "port", type = "smallint", notNull = true)
     private int port;
-    @MysqlField(field = "add_time", type = "int",  notNull = true)
+    @MysqlField(field = "add_time", type = "int", notNull = true)
     private int addTime;
 
 

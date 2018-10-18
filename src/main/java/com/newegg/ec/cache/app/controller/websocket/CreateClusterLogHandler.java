@@ -16,6 +16,33 @@ public class CreateClusterLogHandler implements WebSocketHandler {
     private static final Map<String, BlockingDeque<String>> logMap = new ConcurrentHashMap<>();
     private static final Map<WebSocketSession, String> websocketLogMap = new ConcurrentHashMap<>();
 
+    private static BlockingDeque<String> createLogQueueIfNotExist(String id, WebSocketSession webSocketSession) {
+        if (null == logMap.get(id)) {
+            logMap.put(id, new LinkedBlockingDeque<>());
+        }
+        if (null == websocketLogMap.get(webSocketSession)) {
+            websocketLogMap.put(webSocketSession, id);
+        }
+        return logMap.get(id);
+    }
+
+    private static BlockingDeque<String> getLogQueue(String id) {
+        return logMap.get(id);
+    }
+
+    public static void appendLog(String id, String msg) {
+        BlockingDeque<String> blockingDeque = getLogQueue(id);
+        if (null != blockingDeque) {
+            blockingDeque.add(msg);
+        }
+    }
+
+    public static void removeLogMap(WebSocketSession webSocketSession) {
+        String id = websocketLogMap.get(webSocketSession);
+        websocketLogMap.remove(webSocketSession);
+        logMap.remove(id);
+    }
+
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
         webSocketSession.getAttributes();
@@ -28,12 +55,12 @@ public class CreateClusterLogHandler implements WebSocketHandler {
         String id = reqObject.getString("id");
         createLogQueueIfNotExist(id, webSocketSession);
         BlockingDeque<String> logQueue;
-        while (true){
+        while (true) {
             logQueue = getLogQueue(id);
             String message = logQueue.poll();
-            if( !StringUtils.isEmpty( message )){
+            if (!StringUtils.isEmpty(message)) {
                 webSocketSession.sendMessage(new TextMessage(message));
-            }else{
+            } else {
                 Thread.sleep(1000);
             }
         }
@@ -50,39 +77,11 @@ public class CreateClusterLogHandler implements WebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
         removeLogMap(webSocketSession);
-        System.out.println( "close" );
+        System.out.println("close");
     }
 
     @Override
     public boolean supportsPartialMessages() {
         return false;
-    }
-
-
-    private static BlockingDeque<String> createLogQueueIfNotExist(String id, WebSocketSession webSocketSession){
-        if( null == logMap.get( id ) ){
-            logMap.put(id, new LinkedBlockingDeque<>());
-        }
-        if( null == websocketLogMap.get(webSocketSession) ){
-            websocketLogMap.put(webSocketSession, id);
-        }
-        return logMap.get( id );
-    }
-
-    private static BlockingDeque<String> getLogQueue(String id){
-        return logMap.get( id );
-    }
-
-    public static void appendLog(String id, String msg){
-        BlockingDeque<String> blockingDeque = getLogQueue( id );
-        if( null != blockingDeque ){
-            blockingDeque.add( msg );
-        }
-    }
-
-    public static void removeLogMap(WebSocketSession webSocketSession){
-        String id = websocketLogMap.get( webSocketSession );
-        websocketLogMap.remove( webSocketSession );
-        logMap.remove( id );
     }
 }

@@ -5,7 +5,6 @@ import com.newegg.ec.cache.app.model.Common;
 import com.newegg.ec.cache.app.model.User;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.RequestUtil;
-import com.newegg.ec.cache.core.logger.CommonLogger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -26,19 +26,21 @@ import javax.servlet.http.HttpSession;
 public class ControllerAdvice {
     private static final Log logger = LogFactory.getLog("access");
     private static final String LOG_SEPARATOR = ",";
+
     /**
      * 用于记录 access log
+     *
      * @param proceedingJoinPoint
      * @return
      */
-    @Around( "execution(* com.newegg.ec.cache.app.controller.*.*(..))" )
-    public  Object arroundExecuteController( ProceedingJoinPoint proceedingJoinPoint ){
+    @Around("execution(* com.newegg.ec.cache.app.controller.*.*(..))")
+    public Object arroundExecuteController(ProceedingJoinPoint proceedingJoinPoint) {
         Object value = accessInit(proceedingJoinPoint);
         return value;
     }
 
-    @Around( "execution(* com.newegg.ec.cache.app.controller.check.CheckController.*(..))" )
-    public  Object arroundExecuteWebsocket( ProceedingJoinPoint proceedingJoinPoint ){
+    @Around("execution(* com.newegg.ec.cache.app.controller.check.CheckController.*(..))")
+    public Object arroundExecuteWebsocket(ProceedingJoinPoint proceedingJoinPoint) {
         Object value = accessInit(proceedingJoinPoint);
         return value;
     }
@@ -46,30 +48,30 @@ public class ControllerAdvice {
     private Object accessInit(ProceedingJoinPoint proceedingJoinPoint) {
         Object value = null;
         try {
-            String currentDate  = DateUtil.getCurrentDate();
+            String currentDate = DateUtil.getCurrentDate();
             /* 客户端ip */
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             String clientIp = request.getHeader("x-forwarded-for");
-            if ( clientIp == null ){
+            if (clientIp == null) {
                 clientIp = request.getRemoteHost();
             }
             String path = request.getServletPath();
             String groups = null;
             int userid = -1;
             HttpSession session = request.getSession();
-            User user = (User) session.getAttribute( Common.SESSION_USER_KEY );
-            if( null != user ){
-                RequestUtil.setUser( user );
+            User user = (User) session.getAttribute(Common.SESSION_USER_KEY);
+            if (null != user) {
+                RequestUtil.setUser(user);
                 userid = user.getId();
                 groups = user.getUserGroup();
             }
             /* 请求参数 */
             Object[] params = proceedingJoinPoint.getArgs();
             String param = "";
-            if( null != params && params.length != 0 ){
+            if (null != params && params.length != 0) {
                 param = params[0].toString();
             }
-            if( param.contains("session") ){
+            if (param.contains("session")) {
                 param = "";
             }
             /* 计算调用时间 */
@@ -79,15 +81,15 @@ public class ControllerAdvice {
             try {
                 value = proceedingJoinPoint.proceed();
                 msgType = "INFO";
-            }catch (Exception e){
+            } catch (Exception e) {
                 msgType = "ERROR";
-                logger.error( "", e );
+                logger.error("", e);
             }
             String msg = currentDate + LOG_SEPARATOR + msgType + LOG_SEPARATOR + clientIp + LOG_SEPARATOR + userid + LOG_SEPARATOR + groups + LOG_SEPARATOR + path + LOG_SEPARATOR + param + LOG_SEPARATOR + stopWatch.getTotalTimeMillis();
-            logger.info( msg );
+            logger.info(msg);
             stopWatch.stop();
         } catch (Throwable e) {
-            logger.error( "", e );
+            logger.error("", e);
         }
         return value;
     }

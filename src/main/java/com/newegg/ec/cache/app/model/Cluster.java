@@ -2,10 +2,11 @@ package com.newegg.ec.cache.app.model;
 
 import com.newegg.ec.cache.core.mysql.MysqlField;
 import com.newegg.ec.cache.core.mysql.MysqlTable;
+
 /**
  * Created by gl49 on 2018/4/20.
  */
-@MysqlTable( name = "cluster", autoCreate = true)
+@MysqlTable(name = "cluster", autoCreate = true)
 public class Cluster {
     @MysqlField(isPrimaryKey = true, field = "id", type = "int")
     private int id;

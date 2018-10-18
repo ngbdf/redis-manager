@@ -18,28 +18,28 @@ import java.util.Map;
 @RequestMapping("/demo")
 public class DemoController {
     @RequestMapping("/smarty")
-    public String list(Model model){
+    public String list(Model model) {
         return "demo/smarty";
     }
 
     @RequestMapping("/form")
-    public String form(Model model){
+    public String form(Model model) {
         return "demo/form";
     }
 
     @RequestMapping("/ajax")
-    public String ajax(Model model){
+    public String ajax(Model model) {
         return "demo/ajax";
     }
 
     @RequestMapping(value = "/getList", method = RequestMethod.GET)
     @ResponseBody
-    public Response getList(){
+    public Response getList() {
         List list = new ArrayList<>();
         Map<String, String> obj = new HashMap<>();
         obj.put("username", "username001");
         obj.put("password", "password001");
-        list.add( obj );
+        list.add(obj);
         return Response.Result(0, list);
     }
 
@@ -51,7 +51,7 @@ public class DemoController {
         obj.put("username", "username001");
         obj.put("password", "password001");
         obj.put("req", req.toString());
-        list.add( obj );
+        list.add(obj);
         Thread.sleep(2000);
         return Response.Result(0, list);
     }
@@ -59,7 +59,7 @@ public class DemoController {
     @RequestMapping(value = "/check", method = RequestMethod.POST)
     @ResponseBody
     public Response check(@RequestBody JSONObject req) throws InterruptedException {
-        System.out.println( req );
+        System.out.println(req);
         Thread.sleep(2000);
         return Response.Error("fail");
     }
@@ -68,15 +68,15 @@ public class DemoController {
     @ResponseBody
     public Response ajaxPost(@RequestBody JSONObject req) throws InterruptedException {
         Thread.sleep(2000);
-        System.out.println( req );
+        System.out.println(req);
         int code = req.getInt("code");
         Response response = null;
-        switch ( code ){
+        switch (code) {
             case Response.INFO:
-                response = Response.Info( "hahha info" );
+                response = Response.Info("hahha info");
                 break;
             case Response.WARN:
-                response = Response.Warn( "hahah warn" );
+                response = Response.Warn("hahah warn");
                 break;
             case Response.ERROR:
                 response = response.Error("hahah error");
@@ -93,12 +93,12 @@ public class DemoController {
     public Response ajaxGet(@RequestParam int code) throws InterruptedException {
         Thread.sleep(2000);
         Response response = null;
-        switch ( code ){
+        switch (code) {
             case Response.INFO:
-                response = Response.Info( "hahha info" );
+                response = Response.Info("hahha info");
                 break;
             case Response.WARN:
-                response = Response.Warn( "hahah warn" );
+                response = Response.Warn("hahah warn");
                 break;
             case Response.ERROR:
                 response = response.Error("hahah error");

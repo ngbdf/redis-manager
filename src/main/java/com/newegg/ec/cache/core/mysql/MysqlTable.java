@@ -12,7 +12,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface MysqlTable {
     String name();
+
     String engine() default "innodb";
+
     String charset() default "utf8";
+
     boolean autoCreate() default true;
 }

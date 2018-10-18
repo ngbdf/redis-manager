@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * Created by lf52 on 2018/4/26.
  */
-@MysqlTable( name = "cluster_check_rule", autoCreate = true)
+@MysqlTable(name = "cluster_check_rule", autoCreate = true)
 public class ClusterCheckRule implements Serializable {
 
     @MysqlField(field = "id", type = "varchar(36)", notNull = true)

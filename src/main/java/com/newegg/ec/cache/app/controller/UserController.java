@@ -1,18 +1,16 @@
 package com.newegg.ec.cache.app.controller;
 
-import com.newegg.ec.cache.app.model.Common;
-import com.newegg.ec.cache.core.userapi.UserAccess;
 import com.newegg.ec.cache.app.logic.UserLogic;
-import com.newegg.ec.cache.app.model.Cluster;
+import com.newegg.ec.cache.app.model.Common;
 import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.model.User;
+import com.newegg.ec.cache.core.userapi.UserAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -30,22 +28,22 @@ public class UserController {
     private UserLogic logic;
 
     @RequestMapping("/login")
-    public String login(Model model){
+    public String login(Model model) {
         return "login";
     }
 
     @RequestMapping(value = "/listUser", method = RequestMethod.GET)
     @ResponseBody
-    public Response list(){
+    public Response list() {
         List<User> userList = logic.getUserList();
         return Response.Result(0, userList);
     }
 
     @RequestMapping(value = "/verifyLogin", method = RequestMethod.GET)
     @ResponseBody
-    public Response verifyLogin(@RequestParam String username, @RequestParam String password){
-        User user = logic.getUser( username );
-        if( null != user && user.getPassword().equals( password ) ){
+    public Response verifyLogin(@RequestParam String username, @RequestParam String password) {
+        User user = logic.getUser(username);
+        if (null != user && user.getPassword().equals(password)) {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             HttpSession session = request.getSession();
             session.setAttribute(Common.SESSION_USER_KEY, user);
@@ -56,7 +54,7 @@ public class UserController {
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     @ResponseBody
-    public Response logout(){
+    public Response logout() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         HttpSession session = request.getSession();
         session.removeAttribute(Common.SESSION_USER_KEY);
@@ -65,14 +63,14 @@ public class UserController {
 
     @RequestMapping(value = "/getUser", method = RequestMethod.GET)
     @ResponseBody
-    public Response getUser(@RequestParam int id){
-        User user = logic.getUser( id );
+    public Response getUser(@RequestParam int id) {
+        User user = logic.getUser(id);
         return Response.Result(0, user);
     }
 
     @RequestMapping(value = "/autoGetUser", method = RequestMethod.GET)
     @ResponseBody
-    public Response autoGetUser(){
+    public Response autoGetUser() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute(Common.SESSION_USER_KEY);
@@ -81,26 +79,26 @@ public class UserController {
 
     @RequestMapping(value = "/addUser", method = RequestMethod.POST)
     @ResponseBody
-    public Response addUser(@RequestBody User user){
-        boolean res = logic.addUser( user );
+    public Response addUser(@RequestBody User user) {
+        boolean res = logic.addUser(user);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/removeUser", method = RequestMethod.GET)
     @ResponseBody
-    public Response removeUser(@RequestParam int id){
-        boolean res = logic.removeUser( id );
+    public Response removeUser(@RequestParam int id) {
+        boolean res = logic.removeUser(id);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/listGroup", method = RequestMethod.GET)
     @ResponseBody
-    public Response listGroup(@SessionAttribute(Common.SESSION_USER_KEY) User user){
+    public Response listGroup(@SessionAttribute(Common.SESSION_USER_KEY) User user) {
         List<String> list = new ArrayList<>();
-        if( user.getUserGroup().equals(Common.ADMIN_GROUP) ){
+        if (user.getUserGroup().equals(Common.ADMIN_GROUP)) {
             list = logic.getGroups();
-        }else{
-            list.add( user.getUserGroup() );
+        } else {
+            list.add(user.getUserGroup());
         }
         return Response.Result(0, list);
     }

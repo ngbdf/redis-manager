@@ -14,7 +14,34 @@ public class SlotBalanceUtil {
 
     private static int totalSlot = 16384;
 
-    public static class Shade{
+    public static List<Shade> balanceSlot(int totalShade) {
+        List<Shade> shades = new LinkedList();
+        int almostCount = totalSlot / totalShade;
+        int leftCount = totalSlot % totalShade;
+        for (int i = 0; i < totalShade; i++) {
+            if (i < leftCount) {
+                Shade shade = new Shade();
+                shade.setStartSlot(i * (almostCount + 1));
+                shade.setEndSlot((i + 1) * (almostCount + 1) - 1);
+                shade.setSlotCount(almostCount + 1);
+                shades.add(shade);
+            } else {
+                Shade shade = new Shade();
+                shade.setStartSlot(i * almostCount + leftCount);
+                shade.setEndSlot((i + 1) * almostCount + leftCount - 1);
+                shade.setSlotCount(almostCount);
+                shades.add(shade);
+            }
+        }
+        return shades;
+    }
+
+    public static void main(String[] args) {
+        List<Shade> shades = balanceSlot(5);
+        System.out.println(shades);
+    }
+
+    public static class Shade {
 
         private int startSlot;
 
@@ -46,35 +73,8 @@ public class SlotBalanceUtil {
             this.slotCount = slotCount;
         }
 
-        public String toString(){
-            return startSlot+"-"+endSlot+":"+slotCount;
+        public String toString() {
+            return startSlot + "-" + endSlot + ":" + slotCount;
         }
-    }
-
-    public static List<Shade> balanceSlot(int totalShade){
-        List<Shade> shades= new LinkedList();
-        int almostCount = totalSlot/totalShade;
-        int leftCount = totalSlot%totalShade;
-        for(int i=0;i<totalShade;i++){
-            if(i<leftCount){
-                Shade shade  = new Shade();
-                shade.setStartSlot(i*(almostCount+1));
-                shade.setEndSlot((i+1)*(almostCount+1)-1);
-                shade.setSlotCount(almostCount+1);
-                shades.add(shade);
-            }else{
-                Shade shade =  new Shade();
-                shade.setStartSlot(i*almostCount + leftCount);
-                shade.setEndSlot((i+1)*almostCount + leftCount -1);
-                shade.setSlotCount(almostCount);
-                shades.add(shade);
-            }
-        }
-        return shades;
-    }
-
-    public static void main(String [] args){
-        List<Shade> shades= balanceSlot(5);
-        System.out.println( shades );
     }
 }

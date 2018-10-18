@@ -10,9 +10,10 @@ import java.util.List;
  */
 @Repository
 public interface IMachineNodeDao {
-    
+
     /**
      * get MachineNode list
+     *
      * @param cluster_id
      * @return
      */
@@ -20,6 +21,7 @@ public interface IMachineNodeDao {
 
     /**
      * get a machineNode by id
+     *
      * @param id
      * @return
      */
@@ -27,6 +29,7 @@ public interface IMachineNodeDao {
 
     /**
      * remove machineNode
+     *
      * @param id
      * @return
      */
@@ -34,6 +37,7 @@ public interface IMachineNodeDao {
 
     /**
      * add a machineNode
+     *
      * @param machineNode
      * @return
      */

@@ -6,7 +6,7 @@ import com.newegg.ec.cache.core.mysql.MysqlTable;
 /**
  * Created by gl49 on 2018/4/21.
  */
-@MysqlTable( name = "", autoCreate = false)
+@MysqlTable(name = "", autoCreate = false)
 public class NodeInfo {
     @MysqlField(isPrimaryKey = true, field = "id", type = "int")
     private int id;

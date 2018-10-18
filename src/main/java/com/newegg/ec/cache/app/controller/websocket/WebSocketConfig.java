@@ -18,11 +18,11 @@ public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocke
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(createClusterLogHandler(),"/webSocket/createClusterLog").setAllowedOrigins("*").withSockJS();
+        registry.addHandler(createClusterLogHandler(), "/webSocket/createClusterLog").setAllowedOrigins("*").withSockJS();
     }
 
     @Bean
-    public WebSocketHandler createClusterLogHandler(){
+    public WebSocketHandler createClusterLogHandler() {
         return new CreateClusterLogHandler();
     }
 }

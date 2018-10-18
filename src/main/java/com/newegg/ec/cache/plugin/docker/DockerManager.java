@@ -5,8 +5,8 @@ import com.newegg.ec.cache.app.controller.check.CheckLogic;
 import com.newegg.ec.cache.app.model.RedisNode;
 import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.util.DateUtil;
-import com.newegg.ec.cache.app.util.httpclient.HttpClientUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
+import com.newegg.ec.cache.app.util.httpclient.HttpClientUtil;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import com.newegg.ec.cache.plugin.INodeOperate;
 import com.newegg.ec.cache.plugin.basemodel.Node;
@@ -34,46 +34,41 @@ import java.util.concurrent.Future;
 @Component
 public class DockerManager extends PluginParent implements INodeOperate {
 
-    private static CommonLogger logger = new CommonLogger( DockerManager.class );
-
     static ExecutorService executorService = Executors.newFixedThreadPool(100);
-
-    @Value("${cache.docker.api.format}")
-    private String dockerApiFormat;
-
-    @Value("${cache.docker.image}")
-    private String images;
-
-    public DockerManager(){
-        //ignore
-    }
-
+    private static CommonLogger logger = new CommonLogger(DockerManager.class);
     @Autowired
     IDockerNodeDao dockerNodeDao;
     @Resource
     CheckLogic checkLogic;
+    @Value("${cache.docker.api.format}")
+    private String dockerApiFormat;
+    @Value("${cache.docker.image}")
+    private String images;
+    public DockerManager() {
+        //ignore
+    }
 
     @Override
     public boolean pullImage(JSONObject pullParam) {
 
         boolean res = true;
-        String ipStr = pullParam.getString( PluginParent.IPLIST_NAME );
+        String ipStr = pullParam.getString(PluginParent.IPLIST_NAME);
         Set<String> ipSet = JedisUtil.getIPList(ipStr);
-        String imageUrl = pullParam.getString( PluginParent.IMAGE );
+        String imageUrl = pullParam.getString(PluginParent.IMAGE);
         logger.websocket("start pull image ");
         List<Future<String>> futureList = new ArrayList<>();
-        for(String ip : ipSet){
-            Future<String> future = executorService.submit( new PullImageTask(ip, imageUrl) );
-            futureList.add( future );
+        for (String ip : ipSet) {
+            Future<String> future = executorService.submit(new PullImageTask(ip, imageUrl));
+            futureList.add(future);
         }
-        for(Future<String> future : futureList){
+        for (Future<String> future : futureList) {
             try {
                 String pullRes = future.get();
-                logger.websocket( "pull image : " + pullRes );
+                logger.websocket("pull image : " + pullRes);
             } catch (Exception e) {
                 res = false;
-                logger.websocket( e.getMessage() );
-                logger.error("",e);
+                logger.websocket(e.getMessage());
+                logger.error("", e);
             }
         }
         logger.websocket("pull image is finish");
@@ -87,8 +82,8 @@ public class DockerManager extends PluginParent implements INodeOperate {
 
     @Override
     protected boolean checkInstall(JSONObject reqParam) {
-        Response checkRes =  checkLogic.checkDockerBatchInstall( reqParam );
-        if( checkRes.getCode() == Response.DEFAULT ){
+        Response checkRes = checkLogic.checkDockerBatchInstall(reqParam);
+        if (checkRes.getCode() == Response.DEFAULT) {
             return true;
         }
         return false;
@@ -102,15 +97,15 @@ public class DockerManager extends PluginParent implements INodeOperate {
             String port = String.valueOf(node.getPort());
             String image = reqParam.getString("image");
             String name = reqParam.getString("containerName");
-            String command = ip + " "+ port;
-            JSONObject installObject = generateInstallObject(image,name,command);
-            futureList.add(executorService.submit(new RedisInstallTask(ip,installObject)));
+            String command = ip + " " + port;
+            JSONObject installObject = generateInstallObject(image, name, command);
+            futureList.add(executorService.submit(new RedisInstallTask(ip, installObject)));
         });
-        for(Future<Boolean> future : futureList){
+        for (Future<Boolean> future : futureList) {
             try {
                 future.get();
             } catch (Exception e) {
-                logger.error("",e);
+                logger.error("", e);
             }
         }
         logger.websocket("redis cluster node install success");
@@ -122,13 +117,13 @@ public class DockerManager extends PluginParent implements INodeOperate {
         String containerName = reqParam.getString("containerName");
         List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         String errorMsg = "";
-        for( RedisNode redisNode : nodelist ){
+        for (RedisNode redisNode : nodelist) {
             String ip = redisNode.getIp();
             int port = redisNode.getPort();
             String fomatName = formatContainerName(containerName, port);
             JSONObject res = getContainerInfo(ip, fomatName);
-            if( res.size() > 1 ){
-                errorMsg += logger.websocket( ip + ":" + port + " the container name " + fomatName + "alreay exit" );
+            if (res.size() > 1) {
+                errorMsg += logger.websocket(ip + ":" + port + " the container name " + fomatName + "alreay exit");
                 break;
             }
         }
@@ -139,13 +134,13 @@ public class DockerManager extends PluginParent implements INodeOperate {
     protected void addNodeList(JSONObject reqParam, int clusterId) {
 
         String ipListStr = reqParam.getString(IPLIST_NAME);
-        String image = reqParam.getString(  PluginParent.IMAGE );
+        String image = reqParam.getString(PluginParent.IMAGE);
         String containerName = reqParam.getString("containerName");
         List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
-        for(RedisNode redisNode : nodelist){
+        for (RedisNode redisNode : nodelist) {
             DockerNode node = new DockerNode();
             node.setClusterId(clusterId);
-            node.setContainerName( containerName + redisNode.getPort());
+            node.setContainerName(containerName + redisNode.getPort());
             node.setUserGroup(reqParam.get("userGroup").toString());
             node.setImage(image);
             node.setIp(redisNode.getIp());
@@ -199,6 +194,7 @@ public class DockerManager extends PluginParent implements INodeOperate {
     /**
      * 获取container信息
      * 用于判断当前名称的容器是否存在
+     *
      * @param ip
      * @param containerName
      * @return
@@ -209,23 +205,24 @@ public class DockerManager extends PluginParent implements INodeOperate {
             String url = getContainerApi(ip);
             res = HttpClientUtil.getGetResponse(url, containerName + "/json");
         } catch (Exception e) {
-            logger.error( "", e );
+            logger.error("", e);
         }
         JSONObject result = JSONObject.fromObject(res);
         return result;
     }
 
-    private String formatContainerName(String containerName, int port){
+    private String formatContainerName(String containerName, int port) {
         return containerName + port;
     }
 
     /**
      * create  container 创建失败会返回一个空的json串
+     *
      * @param ip
      * @param param
      * @return
      */
-    public JSONObject createContainer(String ip,JSONObject param){
+    public JSONObject createContainer(String ip, JSONObject param) {
 
         //返回的结果
         JSONObject result = new JSONObject();
@@ -234,13 +231,13 @@ public class DockerManager extends PluginParent implements INodeOperate {
         String containerName = param.getString("HostName");
         try {
             //create 容器（镜像会先拉去到指定的机器上）
-            result = JSONObject.fromObject(HttpClientUtil.getPostResponse(getContainerApi(ip)+"/create?name="+containerName, param));
+            result = JSONObject.fromObject(HttpClientUtil.getPostResponse(getContainerApi(ip) + "/create?name=" + containerName, param));
             String container_id = result.getString("Id");
             //启动容器
             optionContainer(ip, container_id, StartType.start);
-            result.put("result","true");
+            result.put("result", "true");
         } catch (IOException e) {
-            result.put("result", false );
+            result.put("result", false);
             logger.error("", e);
         }
 
@@ -249,15 +246,16 @@ public class DockerManager extends PluginParent implements INodeOperate {
 
     /**
      * container操作 : start stop restart
+     *
      * @param ip
      * @param containerName
      * @param startType
      * @return
      */
-    public boolean optionContainer(String ip,String containerName, StartType startType) {
+    public boolean optionContainer(String ip, String containerName, StartType startType) {
         try {
             HttpClientUtil.getPostResponse(getContainerApi(ip) + "/" + containerName + "/" + startType, new JSONObject());
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("", e);
             return false;
         }
@@ -266,15 +264,16 @@ public class DockerManager extends PluginParent implements INodeOperate {
 
     /**
      * 删除容器
+     *
      * @param ip
      * @param containerName
      * @return
      */
-    public boolean deleteContainer(String ip,String containerName) {
-        optionContainer(ip,containerName, StartType.stop);
+    public boolean deleteContainer(String ip, String containerName) {
+        optionContainer(ip, containerName, StartType.stop);
         try {
             HttpClientUtil.getDeleteResponse(getContainerApi(ip), containerName);
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("", e);
             return false;
         }
@@ -283,25 +282,27 @@ public class DockerManager extends PluginParent implements INodeOperate {
 
     /**
      * pull image 操作
+     *
      * @param url
      * @param imageVersion
      * @return
      */
-    public boolean imagePull(String url,String imageVersion) throws IOException {
+    public boolean imagePull(String url, String imageVersion) throws IOException {
         String imageName = images + imageVersion;
-        String temp  = url+"/create?fromImage=" + imageName;
+        String temp = url + "/create?fromImage=" + imageName;
         HttpClientUtil.getPostResponse(temp, new JSONObject());
         return true;
     }
 
     /**
      * 构建生成容器所需要的参数
+     *
      * @param image
      * @param name
      * @param command
      * @return
      */
-    private JSONObject generateInstallObject(String image, String name, String command){
+    private JSONObject generateInstallObject(String image, String name, String command) {
 
         JSONObject req = new JSONObject();
         req.put("Image", image);
@@ -312,8 +313,8 @@ public class DockerManager extends PluginParent implements INodeOperate {
         restartPolicy.put("Name", "always");
         hostConfig.put("RestartPolicy", restartPolicy);
         JSONArray binds = new JSONArray();
-        String bindStr = "/data/redis:/data/redis" ;
-        binds.add( bindStr );
+        String bindStr = "/data/redis:/data/redis";
+        binds.add(bindStr);
         hostConfig.put("Binds", binds);
         req.put("HostConfig", hostConfig);
         String[] cmds = command.split("\\s+");
@@ -322,13 +323,26 @@ public class DockerManager extends PluginParent implements INodeOperate {
         return req;
     }
 
+    private String getContainerApi(String ip) {
+        return getDockerRestfullApi(ip) + "/containers";
+    }
+
+    private String getImageApi(String ip) {
+        return getDockerRestfullApi(ip) + "/images";
+    }
+
+    private String getDockerRestfullApi(String ip) {
+        return String.format(dockerApiFormat, ip);
+    }
+
     /**
      * pull images task
      */
     class PullImageTask implements Callable<String> {
         private String image;
         private String ip;
-        public PullImageTask(String ip, String image){
+
+        public PullImageTask(String ip, String image) {
             this.ip = ip;
             this.image = image;
         }
@@ -339,9 +353,9 @@ public class DockerManager extends PluginParent implements INodeOperate {
             try {
                 String url = getImageApi(ip);
                 logger.websocket("start pull image " + url);
-                imagePull(url,image);
-            }catch (Exception e){
-                res = logger.websocket( e.getMessage() );
+                imagePull(url, image);
+            } catch (Exception e) {
+                res = logger.websocket(e.getMessage());
             }
             return res;
         }
@@ -349,33 +363,21 @@ public class DockerManager extends PluginParent implements INodeOperate {
 
     class RedisInstallTask implements Callable<Boolean> {
         private String ip;
-        private JSONObject installObj ;
+        private JSONObject installObj;
 
-        public RedisInstallTask(String ip,JSONObject installObj) {
+        public RedisInstallTask(String ip, JSONObject installObj) {
             this.ip = ip;
             this.installObj = installObj;
         }
 
         @Override
         public Boolean call() throws Exception {
-            if(createContainer(ip,installObj) != null){
+            if (createContainer(ip, installObj) != null) {
                 return true;
             }
             return false;
         }
 
-    }
-
-    private  String getContainerApi(String ip){
-        return getDockerRestfullApi(ip) + "/containers";
-    }
-
-    private String getImageApi(String ip){
-        return getDockerRestfullApi(ip) + "/images";
-    }
-
-    private String getDockerRestfullApi(String ip){
-        return String.format(dockerApiFormat, ip);
     }
 
 

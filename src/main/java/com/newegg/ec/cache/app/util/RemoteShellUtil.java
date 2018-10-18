@@ -2,15 +2,13 @@ package com.newegg.ec.cache.app.util;
 
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * 远程Shell脚本执行工具
@@ -24,12 +22,53 @@ public class RemoteShellUtil {
     private String userName;
     private String password;
 
-    public RemoteShellUtil (String ipAddr, String userName, String password) {
+    public RemoteShellUtil(String ipAddr, String userName, String password) {
         this.ipAddr = ipAddr;
         this.userName = userName;
         this.password = password;
     }
 
+    public static String localExec(String cmd) {
+        String result = "";
+        try {
+            String[] cmds = {"/bin/sh", "-c", cmd};
+            Process ps = Runtime.getRuntime().exec(cmds);
+            InputStream in = ps.getInputStream();
+            result = processStdout(in);
+            InputStream errorIn = ps.getErrorStream();
+            result += processStdout(errorIn);
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return result;
+    }
+
+    /**
+     * 解析流获取字符串信息
+     *
+     * @return
+     */
+    public static String processStdout(InputStream in) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+        } catch (IOException e) {
+            logger.error(e);
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+                logger.error(e);
+            }
+        }
+        return sb.toString();
+
+    }
 
     /**
      * 登录远程Linux主机
@@ -43,28 +82,10 @@ public class RemoteShellUtil {
         return conn.authenticateWithPassword(userName, password); // 认证
     }
 
-    public static String localExec(String cmd){
-        String result = "";
-        try {
-            String[] cmds = { "/bin/sh", "-c", cmd };
-            Process ps = Runtime.getRuntime().exec( cmds );
-            InputStream in = ps.getInputStream();
-            result = processStdout(in);
-            InputStream errorIn = ps.getErrorStream();
-            result += processStdout(errorIn);
-        }
-        catch (Exception e) {
-            logger.error( e );
-        }
-        return result;
-    }
-
-
     /**
      * 执行Shell脚本或命令
      *
-     * @param cmds
-     *            命令行序列
+     * @param cmds 命令行序列
      * @return
      */
     public String exec(String cmds) {
@@ -80,37 +101,11 @@ public class RemoteShellUtil {
                 result += processStdout(errorIn);
             }
         } catch (IOException e) {
-            logger.error( e );
+            logger.error(e);
         } finally {
             conn.close();
         }
         return result;
-    }
-
-    /**
-     * 解析流获取字符串信息
-     * @return
-     */
-    public static String processStdout(InputStream in) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
-        StringBuilder sb = new StringBuilder();
-        String line = null;
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-        } catch (IOException e) {
-            logger.error( e );
-        } finally {
-            try {
-                in.close();
-            } catch (IOException e) {
-                logger.error( e );
-            }
-        }
-        return sb.toString();
-
     }
 
 }

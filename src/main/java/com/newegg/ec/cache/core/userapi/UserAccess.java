@@ -12,5 +12,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface UserAccess {
     boolean autoCreate() default true;
+
     String name() default "";
 }

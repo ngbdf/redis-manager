@@ -10,6 +10,7 @@ import com.newegg.ec.cache.app.util.MathExpressionCalculateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,60 +26,61 @@ public class AlarmLogic {
     IClusterCheckLogDao clusterCheckLogDao;
 
 
-    public List<ClusterCheckRule> getRuleList(String clusterId){
-        return clusterCheckRuleDao.getClusterRuleList( clusterId );
+    public List<ClusterCheckRule> getRuleList(String clusterId) {
+        return clusterCheckRuleDao.getClusterRuleList(clusterId);
     }
 
-    public Boolean addRule(ClusterCheckRule rule){
+    public Boolean addRule(ClusterCheckRule rule) {
         Boolean check = MathExpressionCalculateUtil.checkRule(rule.getFormula());
-        if( check ){
+        if (check) {
             rule.setId(CommonUtil.getUuid());
             rule.setUpdateTime(DateUtil.getTime());
-            return clusterCheckRuleDao.addClusterCheckRule( rule );
-        }else {
+            return clusterCheckRuleDao.addClusterCheckRule(rule);
+        } else {
             return Boolean.FALSE;
         }
     }
 
-    public Boolean checkRule(ClusterCheckRule rule){
+    public Boolean checkRule(ClusterCheckRule rule) {
         return MathExpressionCalculateUtil.checkRule(rule.getFormula());
     }
 
-    public Boolean deleteRule(String ruleId){
-        Map<String,Object> params = new HashMap<>();
-        params.put("id",ruleId);
+    public Boolean deleteRule(String ruleId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", ruleId);
         return clusterCheckRuleDao.delClusterCheckRule(params);
     }
 
-    public List<ClusterCheckLog> getCaseList(String clusterId){
-        Map<String,Object> params = new HashMap<>();
+    public List<ClusterCheckLog> getCaseList(String clusterId) {
+        Map<String, Object> params = new HashMap<>();
         params.put("clusterId", clusterId);
         return clusterCheckLogDao.getClusterCheckLogs(params);
     }
 
-    public void deleteCaseLog(String logId){
-        Map<String,Object> params = new HashMap<>();
-        params.put("id",logId);
+    public void deleteCaseLog(String logId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", logId);
         clusterCheckLogDao.delLogs(params);
     }
 
-    public void deleteAllLog(String clusterId){
-        Map<String,Object> params = new HashMap<>();
-        params.put("clusterId",clusterId);
-        clusterCheckLogDao.delLogs( params );
+    public void deleteAllLog(String clusterId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("clusterId", clusterId);
+        clusterCheckLogDao.delLogs(params);
     }
-    public Integer countTotalLog(List<String> clusterIds){
-        System.out.println( StringUtils.join(clusterIds, ",") );
+
+    public Integer countTotalLog(List<String> clusterIds) {
+        System.out.println(StringUtils.join(clusterIds, ","));
         Integer count = 0;
-        if (clusterIds != null && clusterIds.size() > 0){
-            count =  clusterCheckLogDao.countTotalWarningLog( clusterIds );
+        if (clusterIds != null && clusterIds.size() > 0) {
+            count = clusterCheckLogDao.countTotalWarningLog(clusterIds);
         }
         return count;
     }
 
-    public Integer countWarningLogByClusterId(Integer clusterId){
+    public Integer countWarningLogByClusterId(Integer clusterId) {
         int count = 0;
-        if (StringUtils.isNotBlank(clusterId.toString())){
+        if (StringUtils.isNotBlank(clusterId.toString())) {
             count = clusterCheckLogDao.countWarningLogByClusterId(clusterId);
         }
         return count;

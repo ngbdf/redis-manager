@@ -10,19 +10,20 @@ public class JedisSingleClient extends RedisClientBase implements IRedis {
     protected String ip;
     protected int port;
     protected Jedis singleClient;
-    public JedisSingleClient(String ip, int port){
+
+    public JedisSingleClient(String ip, int port) {
         this.ip = ip;
         this.port = port;
         singleClient = new Jedis(ip, port);
     }
 
-    public ScanResult<String> redisScan(String path, String cursor, ScanParams params){
+    public ScanResult<String> redisScan(String path, String cursor, ScanParams params) {
         return singleClient.scan(cursor, params);
     }
 
     @Override
     public void close() {
-        if( null != singleClient ){
+        if (null != singleClient) {
             try {
                 singleClient.close();
             } catch (Exception e) {

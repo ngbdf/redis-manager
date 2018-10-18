@@ -7,8 +7,8 @@ import com.newegg.ec.cache.plugin.basemodel.Node;
 /**
  * Created by lzz on 2018/5/8.
  */
-@MysqlTable( name = "docker_node", autoCreate = true)
-public class DockerNode extends Node{
+@MysqlTable(name = "docker_node", autoCreate = true)
+public class DockerNode extends Node {
     @MysqlField(isPrimaryKey = true, field = "id", type = "int")
     private int id;
     @MysqlField(field = "image", type = "varchar(250)", notNull = true)
@@ -23,7 +23,7 @@ public class DockerNode extends Node{
     private String ip;
     @MysqlField(field = "port", type = "smallint", notNull = true)
     private int port;
-    @MysqlField(field = "add_time", type = "int",  notNull = true)
+    @MysqlField(field = "add_time", type = "int", notNull = true)
     private int addTime;
 
     public int getId() {

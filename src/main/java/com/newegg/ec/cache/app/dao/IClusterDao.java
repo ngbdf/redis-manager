@@ -3,6 +3,7 @@ package com.newegg.ec.cache.app.dao;
 import com.newegg.ec.cache.app.model.Cluster;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 /**
@@ -16,11 +17,11 @@ public interface IClusterDao {
 
     Cluster getCluster(int id);
 
-    int removeCluster(int id );
+    int removeCluster(int id);
 
     int addCluster(Cluster cluster);
 
-    boolean updateClusterAddress(@Param("id")int id, @Param("address")String address);
+    boolean updateClusterAddress(@Param("id") int id, @Param("address") String address);
 
     List<String> getClusterGroups();
 }

@@ -6,7 +6,7 @@ import com.newegg.ec.cache.core.mysql.MysqlTable;
 /**
  * Created by gl49 on 2018/4/20.
  */
-@MysqlTable( name = "user", autoCreate = true)
+@MysqlTable(name = "user", autoCreate = true)
 public class User {
     @MysqlField(isPrimaryKey = true, field = "id", type = "int")
     private int id;

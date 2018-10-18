@@ -4,6 +4,7 @@ import com.newegg.ec.cache.app.dao.IUserDao;
 import com.newegg.ec.cache.app.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 /**
@@ -14,39 +15,39 @@ public class UserLogic {
     @Autowired
     private IUserDao userDao;
 
-    public User getUser(int id){
-        return userDao.getUser( id );
+    public User getUser(int id) {
+        return userDao.getUser(id);
     }
 
-    public User getUser(String username){
-        return userDao.getUserByName( username );
+    public User getUser(String username) {
+        return userDao.getUserByName(username);
     }
 
-    public List<User> getUserList(){
+    public List<User> getUserList() {
         return userDao.getUserList();
     }
 
-    public List<String> getGroups(){
+    public List<String> getGroups() {
         return userDao.getGroups();
     }
 
-    public boolean removeUser(int id){
+    public boolean removeUser(int id) {
         boolean res = false;
         try {
-            userDao.removeUser( id );
+            userDao.removeUser(id);
             res = true;
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
         return res;
     }
 
-    public boolean addUser(User user){
+    public boolean addUser(User user) {
         boolean res = false;
         try {
-            userDao.addUser( user );
+            userDao.addUser(user);
             res = true;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return res;

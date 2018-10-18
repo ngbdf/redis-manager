@@ -14,6 +14,7 @@ import java.util.Map;
 public interface IClusterCheckRuleDao {
     /**
      * 条件获取所有规则
+     *
      * @param clusterId
      * @return
      */
@@ -21,6 +22,7 @@ public interface IClusterCheckRuleDao {
 
     /**
      * 根据id获取某条规则
+     *
      * @param id
      * @return
      */
@@ -28,6 +30,7 @@ public interface IClusterCheckRuleDao {
 
     /**
      * 添加一条规则
+     *
      * @param rule
      * @return
      */
@@ -35,6 +38,7 @@ public interface IClusterCheckRuleDao {
 
     /**
      * 修改规则
+     *
      * @param rule
      * @return
      */
@@ -42,8 +46,9 @@ public interface IClusterCheckRuleDao {
 
     /**
      * 删除规则（1.指定id删除 2.删除某个cluster的所有规则3.删除所有）
+     *
      * @param params
      * @return
      */
-    Boolean delClusterCheckRule(@Param("params")Map<String,Object> params);
+    Boolean delClusterCheckRule(@Param("params") Map<String, Object> params);
 }

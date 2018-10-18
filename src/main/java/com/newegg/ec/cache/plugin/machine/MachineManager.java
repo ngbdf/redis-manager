@@ -28,9 +28,13 @@ import java.util.List;
  */
 @Component
 public class MachineManager extends PluginParent implements INodeOperate {
-    private static CommonLogger logger = new CommonLogger( MachineManager.class );
+    private static CommonLogger logger = new CommonLogger(MachineManager.class);
 
     private static String REDIS_INSTALL_FILE = "redis_install.sh";
+    @Autowired
+    IMachineNodeDao machineNodeDao;
+    @Resource
+    CheckLogic checkLogic;
     @Value("${server.port}")
     private int servicePort;
     @Value("${cache.machine.image}")
@@ -42,12 +46,7 @@ public class MachineManager extends PluginParent implements INodeOperate {
     @Value("${cache.machine.install.basepath}")
     private String installBasePath;
 
-    @Autowired
-    IMachineNodeDao  machineNodeDao;
-    @Resource
-    CheckLogic checkLogic;
-
-    public MachineManager(){
+    public MachineManager() {
         //ignore
     }
 
@@ -58,6 +57,7 @@ public class MachineManager extends PluginParent implements INodeOperate {
 
     /**
      * 通过检查权限判断是否能拉取镜像
+     *
      * @param pullParam
      * @return
      */
@@ -79,7 +79,7 @@ public class MachineManager extends PluginParent implements INodeOperate {
 
     @Override
     public boolean stop(JSONObject stopParam) {
-        operateNode( stopParam, StartType.stop );
+        operateNode(stopParam, StartType.stop);
         return true;
     }
 
@@ -92,23 +92,23 @@ public class MachineManager extends PluginParent implements INodeOperate {
 
     @Override
     public boolean remove(JSONObject removePram) {
-        MachineNode machineNode = (MachineNode) JSONObject.toBean( removePram, MachineNode.class );
+        MachineNode machineNode = (MachineNode) JSONObject.toBean(removePram, MachineNode.class);
         int port = machineNode.getPort();
         RemoteShellUtil rms = new RemoteShellUtil(machineNode.getIp(), machineNode.getUsername(), machineNode.getPassword());
-        String path = getPortPath(machineNode.getInstallPath(), port );
-        if( path.length() > 4 ){
-            String cmd =  "rm -rf " + getPortPath(machineNode.getInstallPath(), port );
-            rms.exec( cmd );
+        String path = getPortPath(machineNode.getInstallPath(), port);
+        if (path.length() > 4) {
+            String cmd = "rm -rf " + getPortPath(machineNode.getInstallPath(), port);
+            rms.exec(cmd);
         }
-        boolean res = machineNodeDao.removeMachineNode( machineNode.getId() );
-        System.out.println( res );
+        boolean res = machineNodeDao.removeMachineNode(machineNode.getId());
+        System.out.println(res);
         return res;
     }
 
 
     @Override
     public List<String> getImageList() {
-        return Lists.newArrayList( images.split(",") );
+        return Lists.newArrayList(images.split(","));
     }
 
     @Override
@@ -118,8 +118,8 @@ public class MachineManager extends PluginParent implements INodeOperate {
 
     @Override
     protected boolean checkInstall(JSONObject reqParam) {
-        Response checkRes =  checkLogic.checkMachineBatchInstall( reqParam );
-        if( checkRes.getCode() == Response.DEFAULT ){
+        Response checkRes = checkLogic.checkMachineBatchInstall(reqParam);
+        if (checkRes.getCode() == Response.DEFAULT) {
             return true;
         }
         return false;
@@ -129,23 +129,23 @@ public class MachineManager extends PluginParent implements INodeOperate {
     protected void addNodeList(JSONObject reqParam, int clusterId) {
         logger.websocket("start add node to db ...");
         String ipListStr = reqParam.getString(IPLIST_NAME);
-        String image = reqParam.getString(  PluginParent.IMAGE );
+        String image = reqParam.getString(PluginParent.IMAGE);
         String username = reqParam.getString("username");
         String password = reqParam.getString("password");
         String installPath = reqParam.getString("installPath");
         List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
-        for(RedisNode redisNode : nodelist){
+        for (RedisNode redisNode : nodelist) {
             MachineNode node = new MachineNode();
             node.setClusterId(clusterId);
-            node.setPassword( password );
-            node.setUsername( username );
+            node.setPassword(password);
+            node.setUsername(username);
             node.setUserGroup(reqParam.get("userGroup").toString());
             node.setImage(image);
-            node.setInstallPath( installPath );
-            node.setIp( redisNode.getIp() );
-            node.setPort( redisNode.getPort());
+            node.setInstallPath(installPath);
+            node.setIp(redisNode.getIp());
+            node.setPort(redisNode.getPort());
             node.setAddTime(DateUtil.getTime());
-            machineNodeDao.addMachineNode( node );
+            machineNodeDao.addMachineNode(node);
         }
         logger.websocket("start add node finish!");
     }
@@ -155,7 +155,7 @@ public class MachineManager extends PluginParent implements INodeOperate {
         String installPath = reqParam.getString("installPath").trim();
         String username = reqParam.getString("username").trim();
         String password = reqParam.getString("password").trim();
-        String imagePackage = reqParam.getString(  PluginParent.IMAGE ).trim();
+        String imagePackage = reqParam.getString(PluginParent.IMAGE).trim();
         String localIp = null;
         try {
             localIp = NetUtil.getLocalIp();
@@ -163,39 +163,39 @@ public class MachineManager extends PluginParent implements INodeOperate {
             return;
         }
         String serviceUrl = "http://" + localIp + ":" + servicePort + "/";
-        String packageUrl =serviceUrl + installPackage;
-        for(RedisNode redisNode : nodelist){
+        String packageUrl = serviceUrl + installPackage;
+        for (RedisNode redisNode : nodelist) {
             try {
                 String ip = redisNode.getIp();
                 int port = redisNode.getPort();
                 RemoteShellUtil rms = new RemoteShellUtil(ip, username, password);
                 String[] cmds = new String[3];
                 cmds[0] = "cd " + installPath;
-                cmds[1] = "/usr/bin/wget http://"+ localIp + ":" + servicePort + installShell + " -O " + REDIS_INSTALL_FILE;
-                cmds[2] = "bash " + REDIS_INSTALL_FILE + " " + packageUrl + " " + imagePackage + " " +  port + " " + installBasePath;
-                String cmd = StringUtils.join( cmds, ";");
+                cmds[1] = "/usr/bin/wget http://" + localIp + ":" + servicePort + installShell + " -O " + REDIS_INSTALL_FILE;
+                cmds[2] = "bash " + REDIS_INSTALL_FILE + " " + packageUrl + " " + imagePackage + " " + port + " " + installBasePath;
+                String cmd = StringUtils.join(cmds, ";");
                 String installRes;
-                if( ip.equals( localIp ) ){ // 如果是要安装到本地机器就不要调用ssh api
-                    installRes = RemoteShellUtil.localExec( cmd );
-                }else{
-                    installRes = rms.exec( cmd );
+                if (ip.equals(localIp)) { // 如果是要安装到本地机器就不要调用ssh api
+                    installRes = RemoteShellUtil.localExec(cmd);
+                } else {
+                    installRes = rms.exec(cmd);
                 }
-                logger.websocket( installRes );
-            }catch (Exception e){
-                logger.websocket( e.getMessage() );
+                logger.websocket(installRes);
+            } catch (Exception e) {
+                logger.websocket(e.getMessage());
             }
         }
     }
 
     private void operateNode(JSONObject startParam, StartType startType) {
-        MachineNode machineNode = (MachineNode) JSONObject.toBean( startParam, MachineNode.class );
+        MachineNode machineNode = (MachineNode) JSONObject.toBean(startParam, MachineNode.class);
         int port = machineNode.getPort();
-        System.out.println( machineNode.getIp() + " -- " + machineNode.getUsername() + " --- " + machineNode.getPassword() );
+        System.out.println(machineNode.getIp() + " -- " + machineNode.getUsername() + " --- " + machineNode.getPassword());
         RemoteShellUtil rms = new RemoteShellUtil(machineNode.getIp(), machineNode.getUsername(), machineNode.getPassword());
-        String cmd = "cd " + getPortPath(machineNode.getInstallPath(), port );
-        cmd +=  ";bash "  + startType + ".sh " + port;
-        System.out.println( cmd );
-        rms.exec( cmd );
+        String cmd = "cd " + getPortPath(machineNode.getInstallPath(), port);
+        cmd += ";bash " + startType + ".sh " + port;
+        System.out.println(cmd);
+        rms.exec(cmd);
     }
 
     private String getPortPath(String installPath, int port) {

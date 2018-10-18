@@ -27,10 +27,10 @@ public abstract class PluginParent {
     @Resource
     private RedisManager redisManager;
 
-    public boolean installTemplate(PluginParent pluginParent, JSONObject reqParam){
+    public boolean installTemplate(PluginParent pluginParent, JSONObject reqParam) {
         //重新检查一下各种权限
         boolean checkReq = pluginParent.checkInstall(reqParam);
-        if( !checkReq ){
+        if (!checkReq) {
             return false;
         }
         String ipListStr = reqParam.getString(IPLIST_NAME);
@@ -39,19 +39,19 @@ public abstract class PluginParent {
         // 安装节点
         pluginParent.installNodeList(reqParam, nodelist);
         // 判断节点是否成功
-        boolean checkRes = pluginParent.checkInstallResult( nodelist );
+        boolean checkRes = pluginParent.checkInstallResult(nodelist);
         int clusterId = 0;
-        if( checkRes ){ // 如果安装成功
-            if( reqParam.containsKey("clusterId") ){  //如果有传 clusterId 那么证明是从扩容界面来的
+        if (checkRes) { // 如果安装成功
+            if (reqParam.containsKey("clusterId")) {  //如果有传 clusterId 那么证明是从扩容界面来的
                 clusterId = reqParam.getInt("clusterId");
-            }else{
+            } else {
                 clusterId = pluginParent.addCluster(reqParam);
             }
-            if(clusterId != -1){
+            if (clusterId != -1) {
                 pluginParent.addNodeList(reqParam, clusterId);
             }
             // 建立集群
-            pluginParent.buildRedisCluster( clusterId, ipMap );
+            pluginParent.buildRedisCluster(clusterId, ipMap);
         }
         return checkRes;
     }
@@ -64,40 +64,41 @@ public abstract class PluginParent {
 
     /**
      * table cluster 写入数据
+     *
      * @param reqParam
      * @return 返回-1 写入数据失败
      */
-    protected  int addCluster(JSONObject reqParam){
+    protected int addCluster(JSONObject reqParam) {
         int clusterId = -1;
         String ipListStr = reqParam.getString(IPLIST_NAME);
         List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         RedisNode node = new RedisNode();
-        for(RedisNode redisNode : nodelist){
-            if(NetUtil.checkIpAndPort(redisNode.getIp(),redisNode.getPort())){
+        for (RedisNode redisNode : nodelist) {
+            if (NetUtil.checkIpAndPort(redisNode.getIp(), redisNode.getPort())) {
                 node = redisNode;
                 break;
             }
         }
-        if(StringUtils.isNotEmpty(node.getIp())){
+        if (StringUtils.isNotEmpty(node.getIp())) {
             Cluster cluster = new Cluster();
             cluster.setAddress(node.getIp() + ":" + node.getPort());
             cluster.setUserGroup(reqParam.get("userGroup").toString());
             cluster.setClusterType(reqParam.get("pluginType").toString());
             cluster.setClusterName(reqParam.get("clusterName").toString());
-            clusterId = clusterLogic.addCluster( cluster );
+            clusterId = clusterLogic.addCluster(cluster);
         }
         return clusterId;
     }
 
-    protected void buildRedisCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap){
-        redisManager.buildCluster( clusterId, ipMap );
+    protected void buildRedisCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
+        redisManager.buildCluster(clusterId, ipMap);
     }
 
-    protected boolean checkInstallResult(List<RedisNode> ipList){
+    protected boolean checkInstallResult(List<RedisNode> ipList) {
         boolean res = false;
-        for(RedisNode redisNode : ipList){
-            res = NetUtil.checkIpAndPort( redisNode.getIp(), redisNode.getPort() );
-            if( res ){
+        for (RedisNode redisNode : ipList) {
+            res = NetUtil.checkIpAndPort(redisNode.getIp(), redisNode.getPort());
+            if (res) {
                 break;
             }
         }
