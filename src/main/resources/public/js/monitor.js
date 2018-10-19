@@ -219,7 +219,7 @@ function init(){
         var usefulData = refactor(obj.res,window.date,storageUnit,numberUnit);
         clearChart_invalidatedData(usefulData);
 
-        buildChart("charts-cpu","CPU占用率","date","usedCpuUser",usefulData,"CPU usage"," %/s");
+        buildChart("charts-cpu","平均每秒使用CPU时间","date","usedCpuUser",usefulData,"CPU usage","  /s");
         buildChart("charts-memory","内存占用","date","usedMemory",usefulData,"memory usage", storageUnit);
         buildChart("charts-client","客户端连接数","date","connectedClients",usefulData,"client connections"," ");
         buildChart("charts-ops","每秒指令数(instantaneous_ops_per_sec )","date","instantaneousOpsPerSec",usefulData,"command  /sec"," ");
