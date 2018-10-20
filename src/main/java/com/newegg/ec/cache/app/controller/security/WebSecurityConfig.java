@@ -46,8 +46,7 @@ public class WebSecurityConfig extends WebMvcConfigurerAdapter {
                 return true;
             } else {
                 // 跳转登录
-                String url = "/user/login";
-                response.sendRedirect(url);
+                response.sendRedirect("/user/login");
                 return false;
             }
         }

@@ -8,7 +8,7 @@ $("#login-button").click(function(){
     }
     verifyLogin(user.username,user.password,function(obj){
         if( obj.code == 0 ){
-            window.location.href="/";
+            window.parent.location.href="/";
         }else{
             sparrow_win.msg("user or password is error!");
         }

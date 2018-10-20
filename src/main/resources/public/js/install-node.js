@@ -33,7 +33,7 @@ $(document).on("click", "#start-install-cluster", function(obj){
                             sparrow_win.msg("success install");
                         }else{
                             sparrow_win.confirm("success, skip to cluster manager?", function(){
-                                window.location.href = "/";
+                                window.parent.location.href = "/";
                             });
                         }
                     }else{
