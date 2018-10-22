@@ -6,10 +6,14 @@ $(document).ready(function(){
     window.date = getQueryString("date") || "minute";
     window.type = getQueryString("type") || "max";
     window.address = "";
+
     getCluster(window.clusterId , function(obj){
-        window.address = obj.res.address;
+        var cluster = obj.res;
+        window.address = cluster.address;
+        $("#monitorTitle").html(cluster.clusterName);
         init();
     })
+
     $(".start-time").flatpickr();
     $(".end-time").flatpickr();
     $(".start-time").val(timestampToDate(window.startTime));
