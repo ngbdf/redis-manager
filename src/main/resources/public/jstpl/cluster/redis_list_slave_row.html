@@ -4,8 +4,8 @@
 <td data-toggle="tooltip" data-placement="bottom" title="{{$slave.nodeId}}" >{{$slave.host}}</td>
 <td></td>
 <td>
-    <a href="javascript:void(0)" id="{{$clusterNodes.nodeId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}" class="redis-meta node-info"><span class="glyphicon glyphicon-search"></span> Info</a>
-    <a href="javascript:void(0)" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}"  class="redis-meta view-config">Config</a>
+    <a href="javascript:void(0)" id="{{$slave.nodeId}}" data-ip="{{$slave.ip}}" data-port="{{$slave.port}}" class="redis-meta node-info"><span class="glyphicon glyphicon-search"></span> Info</a>
+    <a href="javascript:void(0)" data-ip="{{$slave.ip}}" data-port="{{$slave.port}}"  class="redis-meta view-config">Config</a>
 </td>
 <td style="text-align:right">
     <button class="option-button forget-node btn btn-default btn-xs" data-nodeid="{{$slave.nodeId}}" data-masterid="{{$slave.masterId}}" data-ip="{{$slave.ip}}" data-port="{{$slave.port}}" >Forget Node</button>
