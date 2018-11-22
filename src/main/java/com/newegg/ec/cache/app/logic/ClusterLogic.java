@@ -232,6 +232,11 @@ public class ClusterLogic {
                 if (configList.size() != 2) {
                     break;
                 }
+                //Edit Truman for support save ""or save "600 30000" or save 600 3000 start
+                if(configValue.indexOf("\"")>=0) {
+                	configValue=configValue.replace("\"", "");
+                }
+                //Edit Truman for support save ""or save "600 30000" or save 600 3000 end
                 jedis.configSet(configName, configValue);
                 jedis.clusterSaveConfig();
                 // 同步一下配置文件
