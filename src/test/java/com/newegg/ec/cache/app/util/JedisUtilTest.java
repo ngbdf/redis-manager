@@ -20,21 +20,21 @@ import java.util.Set;
 public class JedisUtilTest {
     @Test
     public void test(){
-        Map<String, Map> res = JedisUtil.getClusterNodes("localhost", 8028);
+       /* Map<String, Map> res = JedisUtil.getClusterNodes("localhost", 8028);
         List<Map<String, String>> ress = JedisUtil.dbInfo("localhost", 8028);
-        System.out.println( ress );
+        System.out.println( ress );*/
     }
 
     @Test
     public void test454(){
-        int size = JedisUtil.dbSize("10.16.46.196", 8700);
-        System.out.println( size );
+       /* int size = JedisUtil.dbSize("10.16.46.196", 8700);
+        System.out.println( size );*/
     }
 
     @Test
     public void testConfig(){
-        Map map = JedisUtil.getRedisConfig("10.16.46.192", 8008);
-        System.out.println( map );
+        /*Map map = JedisUtil.getRedisConfig("10.16.46.192", 8008);
+        System.out.println( map );*/
     }
 
     @Test
@@ -183,9 +183,9 @@ public class JedisUtilTest {
 
     @Test
     public void testImportData() throws InterruptedException {
-        JedisClusterClient jedisClusterClient = new JedisClusterClient("10.16.46.192", 8018);
+        /*JedisClusterClient jedisClusterClient = new JedisClusterClient("10.16.46.192", 8018);
         jedisClusterClient.importDataToCluster("10.16.46.172", 8008, "test_key_map_*");
-        Thread.sleep(300000);
+        Thread.sleep(300000);*/
     }
 
     @Test
@@ -201,10 +201,10 @@ public class JedisUtilTest {
     @Test
     public void testRedisClient(){
 
-        RedisClient redisClient = new RedisClient("10.16.46.172", 8009);
+        RedisClient redisClient = new RedisClient("10.16.50.224", 8010);
         String result = null;
         try {
-            result = redisClient.redisCommandOpt("*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n");
+            // result = redisClient.redisCommandOpt("*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n");
             result = redisClient.redisCommandOpt("123456","*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n");
         } catch (IOException e) {
             e.printStackTrace();

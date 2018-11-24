@@ -7,9 +7,10 @@ import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
-import com.newegg.ec.cache.core.logger.CommonLogger;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
@@ -26,8 +27,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 public class RedisManager {
-    public static CommonLogger logger = new CommonLogger(RedisManager.class);
-    public static Map<String, AtomicInteger> importMap = new HashMap<>(); // 用于统计已经倒入多少数据
+    public static Log logger = LogFactory.getLog(RedisManager.class);
+
+    /**
+     * 用于统计已经倒入多少数据
+     */
+    public static Map<String, AtomicInteger> importMap = new HashMap<>();
 
     @Resource
     private ClusterLogic clusterLogic;
@@ -135,7 +140,7 @@ public class RedisManager {
     public boolean beSlave(ConnectionParam param, String masterId) {
         boolean res = false;
 
-        Jedis jedis = getJedisClient(param);
+        Jedis jedis = JedisUtil.getJedisClient(param);
 
         try {
             jedis.clusterReplicate(masterId);
@@ -151,7 +156,7 @@ public class RedisManager {
 
     public boolean beMaster(ConnectionParam param) {
         boolean res = false;
-        Jedis jedis = getJedisClient(param);
+        Jedis jedis = JedisUtil.getJedisClient(param);
         try {
             jedis.clusterFailover();
             res = true;
@@ -169,7 +174,7 @@ public class RedisManager {
         List<Map<String, String>> masterList = JedisUtil.getNodeList(param);
         String ip = param.getIp();
         int port = param.getPort();
-        Jedis myselef = getJedisClient(param);
+        Jedis myselef = JedisUtil.getJedisClient(param);
         try {
             for (int i = 0; i < masterList.size(); i++) {
                 String nodeIp = masterList.get(i).get("ip").trim();
@@ -206,7 +211,7 @@ public class RedisManager {
 
     public boolean clusterMeet(ConnectionParam slaveParam, String masterIp, int masterPort) {
         boolean res = false;
-        Jedis jedis = getJedisClient(slaveParam);
+        Jedis jedis = JedisUtil.getJedisClient(slaveParam);
         try {
             jedis.clusterMeet(masterIp, masterPort);
             res = true;
@@ -236,17 +241,17 @@ public class RedisManager {
                     ConnectionParam param = new ConnectionParam(masterIp, masterPort, cluster.getRedisPassword());
                     clusterMeet(param, currentAliableIp, currentAliablePort);
                     for (RedisNode redisNode : slaveList) {
-                        logger.websocket(redisNode.getIp() + ":" + redisNode.getPort() + " is meet cluster");
+                        logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is meet cluster");
                         param.setIp(redisNode.getIp());
                         param.setPort(redisNode.getPort());
                         clusterMeet(param, masterIp, masterPort);
                         Thread.sleep(500);
                     }
                 } else {
-                    logger.websocket(masterIp + ":" + masterPort + " master is install fail");
+                    logger.error(masterIp + ":" + masterPort + " master is install fail");
                 }
             } catch (Exception e) {
-
+                logger.error("Cluster meet error.");
             }
         }
         return ipMapRes;
@@ -264,7 +269,7 @@ public class RedisManager {
                     String nodeId = JedisUtil.getNodeid(masterIp, masterPort);
                     List<RedisNode> slaveList = nodeItem.getValue();
                     for (RedisNode redisNode : slaveList) {
-                        logger.websocket(redisNode.getIp() + ":" + redisNode.getPort() + " is be slave to " + masterIp + ":" + masterPort);
+                        logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is be slave to " + masterIp + ":" + masterPort);
                         ConnectionParam param = new ConnectionParam(redisNode.getIp(), redisNode.getPort(), password);
                         beSlave(param, nodeId);
                         Thread.sleep(500);
@@ -278,19 +283,11 @@ public class RedisManager {
     }
 
     public boolean buildCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
-        logger.websocket("start meet all node to cluster");
+        logger.info("start meet all node to cluster");
         buildClusterMeet(clusterId, ipMap);
-        logger.websocket("start set slave for cluster");
+        logger.info("start set slave for cluster");
         buildClusterBeSlave(clusterId, ipMap);
         return true;
     }
 
-    private Jedis getJedisClient(ConnectionParam param) {
-        Jedis jedis = new Jedis(param.getIp(), param.getPort());
-        String password = param.getRedisPassword();
-        if (StringUtils.isNotBlank(password)) {
-            jedis.auth(password);
-        }
-        return jedis;
-    }
 }

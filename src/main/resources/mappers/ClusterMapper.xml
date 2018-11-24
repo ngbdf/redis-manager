@@ -36,12 +36,4 @@
         WHERE
         id = #{id}
     </update>
-    <update id="updatePassword">
-        UPDATE
-            cluster
-        SET
-            redis_password = #{redisPassword}
-        WHERE
-            id = #{clusterId}
-    </update>
 </mapper>

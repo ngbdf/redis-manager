@@ -11,12 +11,14 @@ import java.net.Socket;
 /**
  * Created by Leo Fu on 2018/11/24.
  *
- * jedis¿Í»§¶ËÃ»ÓĞÌá¹©Ä³Ğ©ÃüÁîµÄAPI(Èçconfig rewriteµÈ)£¬¿ÉÒÔÒÀ¾İRESPĞ­Òé¼òµ¥ÊµÏÖÕâĞ©µÄAPI
- * ¿ªÏä¼´ÓÃ£¬ÓÃÍê¹Ø±Õ¿Í»§¶¼¼´¿É
+ * jediså®¢æˆ·ç«¯æ²¡æœ‰æä¾›æŸäº›å‘½ä»¤çš„API(å¦‚config rewriteç­‰)ï¼Œå¯ä»¥ä¾æ®RESPåè®®ç®€å•å®ç°è¿™äº›çš„API
+ * å¼€ç®±å³ç”¨ï¼Œç”¨å®Œå…³é—­å®¢æˆ·éƒ½å³å¯
  */
 public class RedisClient {
 
     public static final CommonLogger logger = new CommonLogger(RedisClient.class);
+
+    public static final String AUTH = "*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n";
 
     private Socket socket;
     private OutputStream outputStream;
@@ -56,7 +58,7 @@ public class RedisClient {
     }
 
     /**
-     * ÃÜÂëÈÏÖ¤redis²Ù×÷
+     * å¯†ç è®¤è¯redisæ“ä½œ
      * @param pssword
      * @param command
      * @return

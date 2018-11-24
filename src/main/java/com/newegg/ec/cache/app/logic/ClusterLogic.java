@@ -1,19 +1,22 @@
 package com.newegg.ec.cache.app.logic;
 
 import com.newegg.ec.cache.app.component.RedisManager;
+import com.newegg.ec.cache.app.component.redis.RedisClient;
 import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.*;
-import com.newegg.ec.cache.core.logger.CommonLogger;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +27,7 @@ import java.util.Map;
  */
 @Component
 public class ClusterLogic {
-    private static CommonLogger logger = new CommonLogger(ClusterLogic.class);
+    private static Log logger = LogFactory.getLog(ClusterLogic.class);
 
     @Value("${cache.redis.client}")
     private String redisClient;
@@ -40,7 +43,7 @@ public class ClusterLogic {
         return clusterDao.getCluster(id);
     }
 
-    public Object query( RedisQueryParam redisQueryParam) {
+    public Object query(RedisQueryParam redisQueryParam) {
         return redisManager.query(redisQueryParam);
     }
 
@@ -242,6 +245,9 @@ public class ClusterLogic {
 
     public boolean batchConfig(int clusterId, String myIp, int myPort, String configName, String configValue) {
         boolean res = true;
+        if ("requirepass".equalsIgnoreCase(configName)) {
+            return false;
+        }
         ConnectionParam param = new ConnectionParam(myIp, myPort);
         Cluster cluster = getCluster(clusterId);
         String password = cluster.getRedisPassword();
@@ -261,45 +267,30 @@ public class ClusterLogic {
                 }
                 jedis.configSet(configName, configValue);
                 jedis.clusterSaveConfig();
-                if ("requirepass".equalsIgnoreCase(configName)) {
-                    password = configValue.trim();
-                    clusterDao.updatePassword(clusterId, password);
-                }
-                // 同步一下配置文件
 
-                String configCmd = redisClient + " -c -h " + ip + " -p " + port + " -a " + password + " config rewrite";
-                if (StringUtils.isNotBlank(password)) {
-                    configCmd += " -a " + password + " config rewrite";
-                } else {
-                    configCmd += " config rewrite";
+                // 同步一下配置文件
+                RedisClient redisClient = new RedisClient(ip, port);
+                String result = null;
+                try {
+                    if (StringUtils.isNotBlank(password)) {
+                        result = redisClient.redisCommandOpt(password, RedisClient.AUTH);
+                    } else {
+                        result = redisClient.redisCommandOpt(RedisClient.AUTH);
+                    }
+                } catch (IOException e) {
+                    logger.error("rewrite conf error", e);
+                } finally {
+                    redisClient.closeClient();
                 }
-                System.out.println(configCmd);
-                RemoteShellUtil.localExec(configCmd);
             } catch (Exception e) {
                 res = false;
-                logger.error("", e);
+                logger.error("Update config error, ip: " + ip + ", port: " + port, e);
             } finally {
                 jedis.close();
             }
         }
         return res;
     }
-
-    /*public boolean batchModfifyConfigFile(String myip, int myPort, String userName, String password, String fileFormat, String configName, String configValue) {
-        if (StringUtils.isBlank(userName) || StringUtils.isBlank(fileFormat)) {
-            return true;
-        }
-        List<Host> hostList = new ArrayList<>();
-        List<Map<String, String>> nodeList = JedisUtil.getNodeList(myip, myPort);
-        for (Map<String, String> node : nodeList) {
-            String ip = node.get("ip");
-            int port = Integer.parseInt(node.get("port"));
-            Host host = new Host(ip, port);
-            hostList.add(host);
-        }
-        return changeConfigFile(hostList, userName, password, fileFormat, configName, configValue);
-    }*/
-
 
     public boolean initSlot(int clusterId, String address) {
         boolean res = true;

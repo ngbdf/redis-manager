@@ -25,6 +25,4 @@ public interface IClusterDao {
 
     List<String> getClusterGroups();
 
-    int updatePassword(@Param("clusterId") int clusterId, @Param("redisPassword")String redisPassword);
-
 }
