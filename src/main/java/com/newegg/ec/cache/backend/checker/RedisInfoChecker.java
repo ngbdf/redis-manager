@@ -140,6 +140,7 @@ public class RedisInfoChecker {
         public void run() {
             //获取当前cluster所有配置的rule
             int cluster_id = cluster.getId();
+            String password = cluster.getRedisPassword();
             String clusterName = cluster.getClusterName();
             String host = cluster.getAddress().split(",")[0];
             String ip = host.split(":")[0];
@@ -149,7 +150,7 @@ public class RedisInfoChecker {
             //获取每个cluster所有的node
             List<Map<String, String>> nodeList = null;
             try {
-                nodeList = JedisUtil.nodeList(ip, port);
+                nodeList = JedisUtil.nodeList(new ConnectionParam(ip, port, password));
             } catch (Exception e) {
                 logger.error("Node " + host + " can not get nodelist", e);
             }

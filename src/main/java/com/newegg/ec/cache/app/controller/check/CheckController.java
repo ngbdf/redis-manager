@@ -21,8 +21,8 @@ public class CheckController {
 
     @RequestMapping("/checkVersion")
     @ResponseBody
-    public Response checkRedisVersion(@RequestParam String address) {
-        int version = logic.checkRedisVersion(address);
+    public Response checkRedisVersion(@RequestParam int clusterId, @RequestParam String address) {
+        int version = logic.checkRedisVersion(clusterId, address);
         return Response.Result(0, version);
     }
 

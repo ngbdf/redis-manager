@@ -5,7 +5,7 @@ smarty.register_function( 'cluster_state', function( params ){
     var address = params['address'];
     var id = params["id"];
     var div_id = "cluster-state-" +  id;
-    getClusterInfoByAddress(address, function(obj){
+    getClusterInfoByAddress(window.clusterId, address, function(obj){
         var state = obj.res.cluster_state;
         if(state == "ok"){
             $("#" + div_id).append( "<span class='state-ok'>OK</span>" );

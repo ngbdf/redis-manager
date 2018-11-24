@@ -42,7 +42,7 @@ $(document).on("click", ".cluster-info-detail", function(res){
     getCluster(clusterId , function(obj){
         var data = {};
         data.clusterType = obj.res.clusterType;
-        getClusterInfoByAddress(address, function(obj){
+        getClusterInfoByAddress(clusterId, address, function(obj){
             data.res = obj.res;
 //            console.log(data);
             smarty.html( "monitor/cluster_info", data, "cluster-info-" + clusterId,function () {

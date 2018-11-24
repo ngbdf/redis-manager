@@ -7,6 +7,7 @@ import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import redis.clients.util.Slowlog;
 
@@ -22,6 +23,10 @@ import java.util.Map;
 public class MonitorLogic {
     @Resource
     private RedisManager redisManager;
+
+    @Autowired
+    private ClusterLogic clusterLogic;
+
     @Resource
     private INodeInfoDao nodeDao;
 
@@ -85,9 +90,11 @@ public class MonitorLogic {
         return cmdList;
     }
 
-    public int getDbSize(String address) {
+    public int getDbSize(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
-        int size = redisManager.getDbSize(host.getIp(), host.getPort());
+        Cluster cluster = clusterLogic.getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        int size = redisManager.getDbSize(param);
         return size;
     }
 }

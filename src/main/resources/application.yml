@@ -14,9 +14,9 @@ spring:
   datasource:
       name: serverbase
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/redis_manager_new?useUnicode=true&characterEncoding=utf-8
-      username: test
-      password: test
+      url: jdbc:mysql://10.16.50.209:3306/redis_manager_test?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: Newegg@1234
   wechat:
      alarm:
       url:

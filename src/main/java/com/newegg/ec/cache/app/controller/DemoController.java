@@ -59,7 +59,6 @@ public class DemoController {
     @RequestMapping(value = "/check", method = RequestMethod.POST)
     @ResponseBody
     public Response check(@RequestBody JSONObject req) throws InterruptedException {
-        System.out.println(req);
         Thread.sleep(2000);
         return Response.Error("fail");
     }
@@ -68,7 +67,6 @@ public class DemoController {
     @ResponseBody
     public Response ajaxPost(@RequestBody JSONObject req) throws InterruptedException {
         Thread.sleep(2000);
-        System.out.println(req);
         int code = req.getInt("code");
         Response response = null;
         switch (code) {
