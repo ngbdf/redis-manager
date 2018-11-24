@@ -41,9 +41,37 @@ public class RedisClient {
         }
     }
 
+    /**
+     * @param command
+     * @return
+     * @throws IOException
+     */
     public String redisCommandOpt(String command) throws IOException {
 
         byte[] bytes= new byte[4096];
+        outputStream.write(command.toString().getBytes());
+        inputStream.read(bytes);
+        return new String(bytes);
+
+    }
+
+    /**
+     * √‹¬Î»œ÷§redis≤Ÿ◊˜
+     * @param pssword
+     * @param command
+     * @return
+     * @throws IOException
+     */
+    public String redisCommandOpt(String pssword,String command) throws IOException {
+
+        byte[] bytes= new byte[4096];
+        StringBuilder auth = new StringBuilder();
+        auth.append("*2").append("\r\n");
+        auth.append("$4").append("\r\n");
+        auth.append("AUTH").append("\r\n");
+        auth.append("$").append(pssword.length()).append("\r\n");
+        auth.append(pssword).append("\r\n");
+        outputStream.write(auth.toString().getBytes());
         outputStream.write(command.toString().getBytes());
         inputStream.read(bytes);
         return new String(bytes);
