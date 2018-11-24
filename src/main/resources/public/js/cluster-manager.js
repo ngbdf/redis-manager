@@ -294,6 +294,10 @@ $(document).on("click", "#batch-config", function(){
             if ( sparrow.empty( data ) ){
                 return false;
             }
+            if(data.configName.trim() == "requirepass") {
+                layer.msg("Warn: Changing passwords is not supported.", function(){})
+                return false;
+            }
             layer.closeAll();
             var address =  window.cluster.address;
             var hostArr = address.split(",");
@@ -301,7 +305,6 @@ $(document).on("click", "#batch-config", function(){
             var masterIp = tmps[0];
             var masterPort = tmps[1];
             batchConfig(window.clusterId, masterIp, masterPort,data.configName, data.configValue, function(){
-
             });
         });
     } );
