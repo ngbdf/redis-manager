@@ -1,6 +1,7 @@
 package com.newegg.ec.cache.app.util;
 
 import com.newegg.ec.cache.app.component.redis.JedisClusterClient;
+import com.newegg.ec.cache.app.component.redis.RedisClient;
 import com.newegg.ec.cache.app.model.RedisNode;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.Test;
@@ -8,8 +9,10 @@ import redis.clients.jedis.*;
 import redis.clients.util.JedisClusterCRC16;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by gl49 on 2018/4/21.
@@ -146,7 +149,7 @@ public class JedisUtilTest {
 
         HostAndPort hostAndPort = new HostAndPort("10.16.46.192", 8018);
         Set<HostAndPort> hostAndPortSet = new HashSet<>();
-        hostAndPortSet.add( hostAndPort );
+        hostAndPortSet.add(hostAndPort);
         JedisCluster jedisCluster = new JedisCluster(hostAndPort);
         jedisCluster.get("dfsa");
         //jedisCluster.set("123456", "23423");
@@ -156,7 +159,7 @@ public class JedisUtilTest {
         JedisSlotBasedConnectionHandler jedisSlotBasedConnectionHandler = new JedisSlotBasedConnectionHandler(hostAndPortSet, new GenericObjectPoolConfig(), 10000);
         Jedis jedis = jedisSlotBasedConnectionHandler.getConnectionFromSlot( JedisClusterCRC16.getSlot("dsaf") );
 
-        jedis.pipelined().set("","");
+        jedis.pipelined().set("", "");
         Pipeline pipeline = new Pipeline();
         //pipeline.exec()
         pipeline.set("", "");
@@ -190,6 +193,24 @@ public class JedisUtilTest {
         Object a = 123;
         String b = String.valueOf(a);
         System.out.println(b);
+    }
+
+    /**
+     * 使用socket 发送config rewrite命令
+     */
+    @Test
+    public void testRedisClient(){
+
+        RedisClient redisClient = new RedisClient("10.16.46.172", 8009);
+        String result = null;
+        try {
+            result = redisClient.redisCommandOpt("*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            redisClient.closeClient();
+        }
+        System.out.println(result);
     }
 }
 
