@@ -364,9 +364,9 @@ public class JedisUtil {
                 }
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return nodeid;
     }
@@ -386,7 +386,7 @@ public class JedisUtil {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return result;
     }
@@ -402,13 +402,13 @@ public class JedisUtil {
         return Integer.parseInt(strPort);
     }
 
-    public static List<Slowlog> getSlowLog(String ip, int port, long size) {
-        Jedis jedis = new Jedis(ip, port);
+    public static List<Slowlog> getSlowLog(ConnectionParam param, long size) {
+        Jedis jedis = getJedisClient(param);
         List<Slowlog> list = new ArrayList((int) size);
         try {
             list = jedis.slowlogGet(size);
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return list;
     }
@@ -423,7 +423,7 @@ public class JedisUtil {
                 String ip = host.split(":")[0];
                 ipSet.add(ip);
             } catch (Exception ignore) {
-
+                ignore.printStackTrace();
             }
         }
         return ipSet;

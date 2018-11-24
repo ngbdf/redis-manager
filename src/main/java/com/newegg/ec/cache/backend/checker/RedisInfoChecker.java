@@ -205,7 +205,7 @@ public class RedisInfoChecker {
             String ip = host.split(":")[0];
             int port = Integer.parseInt(host.split(":")[1]);
             try {
-                List<Slowlog> list = JedisUtil.getSlowLog(ip, port, 2000);
+                List<Slowlog> list = JedisUtil.getSlowLog(new ConnectionParam(ip, port, cluster.getRedisPassword()), 2000);
                 for (Slowlog slowlog : list) {
                     if (slowlog.getTimeStamp() > time) {
                         num++;

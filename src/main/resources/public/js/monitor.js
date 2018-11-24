@@ -501,6 +501,7 @@ function slowLog(){
         var ipAndPort = logNode.split(":");
         logParam.hostList = [{"ip":ipAndPort[0], "port": parseInt(ipAndPort[1])}];
     }
+    logParam.clusterId = window.clusterId;
     var tableStr = '<table class="table table-bordered scrollbar">';
     tableStr += "<thead><tr><th>Host</th><th>Slow Date</th><th>Run Time</th><th>Type</th><th>command</th></tr></thead><tbody>"
     monitorSlowLogs(logParam,function(obj){

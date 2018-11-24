@@ -63,9 +63,10 @@ public class MonitorLogic {
         } else if (slowLogParam.getLogLimit() == 0) {
             logLimit = 800 / ipList.size();
         }
+        Cluster cluster = clusterLogic.getCluster(slowLogParam.getClusterId());
         for (Host host1 : ipList) {
             try {
-                List<Slowlog> slowList = JedisUtil.getSlowLog(host1.getIp(), host1.getPort(), logLimit);
+                List<Slowlog> slowList = JedisUtil.getSlowLog(new ConnectionParam(host1.getIp(), host1.getPort(), cluster.getRedisPassword()), logLimit);
                 for (Slowlog log : slowList) {
                     String slowDate = DateUtil.getFormatDate(log.getTimeStamp() * 1000);
                     long logTime = log.getExecutionTime();
