@@ -33,10 +33,6 @@ public class MathExpressionCalculateUtil {
 
     }
 
-    public static void main(String[] args) {
-        String rule = "@{mem_fragmentation_ratio}>2.2";
-        System.out.println(checkRule(rule));
-    }
     //-------------------------------------------------calculate-------------------------//
 
     public static boolean checkRule(String formula) {

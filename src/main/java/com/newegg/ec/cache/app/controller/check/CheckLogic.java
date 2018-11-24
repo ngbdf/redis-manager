@@ -1,10 +1,7 @@
 package com.newegg.ec.cache.app.controller.check;
 
 import com.newegg.ec.cache.app.logic.ClusterLogic;
-import com.newegg.ec.cache.app.model.Cluster;
-import com.newegg.ec.cache.app.model.Host;
-import com.newegg.ec.cache.app.model.Response;
-import com.newegg.ec.cache.app.model.User;
+import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
 import com.newegg.ec.cache.app.util.RemoteShellUtil;
@@ -31,9 +28,11 @@ public class CheckLogic {
         return logger.websocket(msg) + "<br>";
     }
 
-    public int checkRedisVersion(String address) {
+    public int checkRedisVersion(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
-        int version = JedisUtil.getRedisVersion(host.getIp(), host.getPort());
+        Cluster cluster = clusterLogic.getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        int version = JedisUtil.getRedisVersion(param);
         return version;
     }
 

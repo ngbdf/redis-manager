@@ -76,8 +76,8 @@ public class MonitorController {
 
     @RequestMapping(value = "/getDbSize", method = RequestMethod.GET)
     @ResponseBody
-    public Response getDbSize(@RequestParam String host) {
-        int dbsize = logic.getDbSize(host);
+    public Response getDbSize(@RequestParam int clusterId, @RequestParam String host) {
+        int dbsize = logic.getDbSize(clusterId, host);
         return Response.Result(0, dbsize);
     }
 

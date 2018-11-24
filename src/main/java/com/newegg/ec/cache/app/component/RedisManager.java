@@ -36,25 +36,25 @@ public class RedisManager {
         return ownerIp + "-" + ownerPort + "-" + targetIp + "-" + targetPort + "-" + formatKey;
     }
 
-    public IRedis factory(String address) {
+    public IRedis factory(int clusterId, String address) {
         IRedis redis;
         Host host = NetUtil.getHostPassAddress(address);
-        String ip = host.getIp();
-        int port = host.getPort();
-        int version = JedisUtil.getRedisVersion(ip, port);
+        Cluster cluster = clusterLogic.getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        int version = JedisUtil.getRedisVersion(param);
         if (version > 2) {
-            redis = new JedisClusterClient(ip, port);
+            redis = new JedisClusterClient(param);
         } else {
-            redis = new JedisMasterSlaveClient(ip, port);
+            redis = new JedisMasterSlaveClient(param);
         }
         return redis;
     }
 
-    public boolean importDataToCluster(String address, String targetAddress, String keyFormat) throws InterruptedException {
+    public boolean importDataToCluster(int clusterId, String address, String targetAddress, String keyFormat) throws InterruptedException {
         Host host = NetUtil.getHostPassAddress(targetAddress);
         String targetIp = host.getIp();
         int targetPort = host.getPort();
-        IRedis redis = factory(address);
+        IRedis redis = factory(clusterId, address);
         if (StringUtils.isBlank(keyFormat)) {
             keyFormat = "*";
         }
@@ -74,7 +74,7 @@ public class RedisManager {
 
     public Object query(RedisQueryParam redisQueryParam) {
         Object res = null;
-        IRedis redis = factory(redisQueryParam.getAddress());
+        IRedis redis = factory(redisQueryParam.getClusterId(), redisQueryParam.getAddress());
         if (!redisQueryParam.getKey().equals("*")) {
             RedisValue redisValue = redis.getRedisValue(redisQueryParam.getDb(), redisQueryParam.getKey());
             res = redisValue.getResult();
@@ -86,81 +86,90 @@ public class RedisManager {
         return res;
     }
 
-    public Map<String, String> getClusterInfo(String ip, int port) {
-        Map<String, String> res = JedisUtil.getClusterInfo(ip, port);
+    public Map<String, String> getClusterInfo(ConnectionParam param) {
+        Map<String, String> res = JedisUtil.getClusterInfo(param);
         return res;
     }
 
-    public int getDbSize(String ip, int port) {
+    public int getDbSize(ConnectionParam param) {
         int allCount = 0;
-        if (JedisUtil.getRedisVersion(ip, port) == 2) {
-            allCount = JedisUtil.dbSize(ip, port);
+        if (JedisUtil.getRedisVersion(param) == 2) {
+            allCount = JedisUtil.dbSize(param);
         } else {
-            Map<String, Map> masterNodes = JedisUtil.getMasterNodes(ip, port);
+            Map<String, Map> masterNodes = JedisUtil.getMasterNodes(param);
             for (Map.Entry<String, Map> nodeItem : masterNodes.entrySet()) {
                 Map node = nodeItem.getValue();
                 String itemIp = String.valueOf(node.get("ip"));
                 String itemPort = String.valueOf(node.get("port"));
-                allCount += JedisUtil.dbSize(itemIp, JedisUtil.getPort(itemPort));
+                param.setIp(itemIp);
+                param.setPort(JedisUtil.getPort(itemPort));
+                allCount += JedisUtil.dbSize(param);
             }
         }
         return allCount;
     }
 
-    public Map<String, Map> getClusterNodes(String ip, int port) {
-        return JedisUtil.getClusterNodes(ip, port);
+    public Map<String, Map> getClusterNodes(ConnectionParam param) {
+        return JedisUtil.getClusterNodes(param);
     }
 
-    public Map<String, String> getMapInfo(String ip, int port) {
-        Map<String, String> res = JedisUtil.getMapInfo(ip, port);
+    public Map<String, String> getMapInfo(ConnectionParam param) {
+        Map<String, String> res = JedisUtil.getMapInfo(param);
         return res;
     }
 
-    public Map<String, String> getRedisConfig(String ip, int port) {
-        Map<String, String> res = JedisUtil.getRedisConfig(ip, port);
+    public Map<String, String> getRedisConfig(ConnectionParam param) {
+        Map<String, String> res = JedisUtil.getRedisConfig(param);
         return res;
     }
 
-    public List<Map<String, String>> nodeList(String ip, int port) {
-        return JedisUtil.nodeList(ip, port);
+    public List<Map<String, String>> nodeList(ConnectionParam param) {
+        return JedisUtil.nodeList(param);
     }
 
-    public List<Map<String, String>> getRedisDBList(String ip, int port) {
-        List<Map<String, String>> res = JedisUtil.dbInfo(ip, port);
+    public List<Map<String, String>> getRedisDBList(ConnectionParam param) {
+        List<Map<String, String>> res = JedisUtil.dbInfo(param);
         return res;
     }
 
-    public boolean beSlave(String ip, int port, String masterId) {
+    public boolean beSlave(ConnectionParam param, String masterId) {
         boolean res = false;
-        Jedis jedis = new Jedis(ip, port);
+
+        Jedis jedis = getJedisClient(param);
+
         try {
             jedis.clusterReplicate(masterId);
             res = true;
         } catch (Exception e) {
 
         } finally {
+
             jedis.close();
         }
         return res;
     }
 
-    public boolean beMaster(String ip, int port) {
+    public boolean beMaster(ConnectionParam param) {
         boolean res = false;
-        Jedis jedis = new Jedis(ip, port);
+        Jedis jedis = getJedisClient(param);
         try {
             jedis.clusterFailover();
             res = true;
         } catch (Exception e) {
-
+            logger.error("Be master error", e);
         } finally {
-            jedis.close();
+            if (jedis != null) {
+                jedis.close();
+            }
         }
         return res;
     }
 
-    public boolean forget(String ip, int port, String nodeId) {
-        List<Map<String, String>> masterList = JedisUtil.getNodeList(ip, port);
-        Jedis myselef = new Jedis(ip, port);
+    public boolean forget(ConnectionParam param, String nodeId) {
+        List<Map<String, String>> masterList = JedisUtil.getNodeList(param);
+        String ip = param.getIp();
+        int port = param.getPort();
+        Jedis myselef = getJedisClient(param);
         try {
             for (int i = 0; i < masterList.size(); i++) {
                 String nodeIp = masterList.get(i).get("ip").trim();
@@ -172,6 +181,10 @@ public class RedisManager {
                 Jedis jedis = null;
                 try {
                     jedis = new Jedis(nodeIp, Integer.parseInt(nodePort));
+                    String password = param.getRedisPassword();
+                    if (StringUtils.isNotBlank(password)) {
+                        jedis.auth(password);
+                    }
                     jedis.clusterForget(nodeId);
                 } catch (Exception e) {
                     logger.error("", e);
@@ -191,9 +204,9 @@ public class RedisManager {
         return true;
     }
 
-    public boolean clusterMeet(String slaveIp, int slavePort, String masterIp, int masterPort) {
+    public boolean clusterMeet(ConnectionParam slaveParam, String masterIp, int masterPort) {
         boolean res = false;
-        Jedis jedis = new Jedis(slaveIp, slavePort);
+        Jedis jedis = getJedisClient(slaveParam);
         try {
             jedis.clusterMeet(masterIp, masterPort);
             res = true;
@@ -219,10 +232,14 @@ public class RedisManager {
                 if (NetUtil.checkIpAndPort(masterIp, masterPort)) {
                     List<RedisNode> slaveList = nodeItem.getValue();
                     ipMapRes.put(master, slaveList);
-                    clusterMeet(masterIp, masterPort, currentAliableIp, currentAliablePort);
+
+                    ConnectionParam param = new ConnectionParam(masterIp, masterPort, cluster.getRedisPassword());
+                    clusterMeet(param, currentAliableIp, currentAliablePort);
                     for (RedisNode redisNode : slaveList) {
                         logger.websocket(redisNode.getIp() + ":" + redisNode.getPort() + " is meet cluster");
-                        clusterMeet(redisNode.getIp(), redisNode.getPort(), masterIp, masterPort);
+                        param.setIp(redisNode.getIp());
+                        param.setPort(redisNode.getPort());
+                        clusterMeet(param, masterIp, masterPort);
                         Thread.sleep(500);
                     }
                 } else {
@@ -235,7 +252,9 @@ public class RedisManager {
         return ipMapRes;
     }
 
-    public boolean buildClusterBeSlave(Map<RedisNode, List<RedisNode>> ipMap) {
+    public boolean buildClusterBeSlave(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
+        Cluster cluster = clusterLogic.getCluster(clusterId);
+        String password = cluster.getRedisPassword();
         for (Map.Entry<RedisNode, List<RedisNode>> nodeItem : ipMap.entrySet()) {
             try {
                 RedisNode master = nodeItem.getKey();
@@ -246,7 +265,8 @@ public class RedisManager {
                     List<RedisNode> slaveList = nodeItem.getValue();
                     for (RedisNode redisNode : slaveList) {
                         logger.websocket(redisNode.getIp() + ":" + redisNode.getPort() + " is be slave to " + masterIp + ":" + masterPort);
-                        beSlave(redisNode.getIp(), redisNode.getPort(), nodeId);
+                        ConnectionParam param = new ConnectionParam(redisNode.getIp(), redisNode.getPort(), password);
+                        beSlave(param, nodeId);
                         Thread.sleep(500);
                     }
                 }
@@ -261,7 +281,16 @@ public class RedisManager {
         logger.websocket("start meet all node to cluster");
         buildClusterMeet(clusterId, ipMap);
         logger.websocket("start set slave for cluster");
-        buildClusterBeSlave(ipMap);
+        buildClusterBeSlave(clusterId, ipMap);
         return true;
+    }
+
+    private Jedis getJedisClient(ConnectionParam param) {
+        Jedis jedis = new Jedis(param.getIp(), param.getPort());
+        String password = param.getRedisPassword();
+        if (StringUtils.isNotBlank(password)) {
+            jedis.auth(password);
+        }
+        return jedis;
     }
 }

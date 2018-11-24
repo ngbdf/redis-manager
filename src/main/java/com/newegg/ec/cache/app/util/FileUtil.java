@@ -29,7 +29,6 @@ public class FileUtil {
                 RemoteShellUtil.localExec(cmd);
             } else {
                 String tmp = remoteShellUtil.exec(cmd);
-                System.out.println(tmp);
             }
             res = true;
         } catch (Exception ignore) {
