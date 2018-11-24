@@ -92,7 +92,7 @@ a, a:hover{
 
 .item{
 	margin: 0 auto 15px;
-	width: 80%;
+	width: 95%;
 }
 
 .input-title{
@@ -222,7 +222,6 @@ textarea{
     height:20px;
 }
 .sparrow-input-placeholder{
-    margin-left:15px;
     color:#a69bb4;
 }
 
@@ -249,4 +248,8 @@ td>a.redis-meta {
 
 .right{
     float: right;
+}
+
+.full-width {
+    width: 100%;
 }

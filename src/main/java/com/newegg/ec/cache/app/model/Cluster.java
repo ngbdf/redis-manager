@@ -17,7 +17,7 @@ public class Cluster {
     @MysqlField(field = "address", type = "varchar(255)", notNull = true)
     private String address;
     @MysqlField(field = "redis_password", type = "varchar(255)", notNull = false)
-    private String redisPassword = "12345678";
+    private String redisPassword;
     @MysqlField(field = "cluster_type", type = "varchar(10)", notNull = true)
     private String clusterType;
 
