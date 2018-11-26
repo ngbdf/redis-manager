@@ -85,6 +85,9 @@ public class ClusterLogic {
         int clusterOkNumber = 0;
         int clusterFailNumber = 0;
         if (StringUtils.isNotBlank(userGroup)) {
+            if (userGroup.equalsIgnoreCase(Common.ADMIN_GROUP)) {
+                userGroup = null;
+            }
             List<Cluster> clusterList = clusterDao.getClusterList(userGroup);
             if (clusterList != null && clusterList.size() > 0) {
                 clusterListInfo.put(Common.CLUSTER_NUMBER, clusterList.size());
