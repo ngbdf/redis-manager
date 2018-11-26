@@ -28,6 +28,7 @@
             <button class="option-button forget-node btn btn-default btn-xs" data-nodeid="{{$clusterNodes.nodeId}}" data-masterid="{{$clusterNodes.masterId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}" >Forget Node</button>
             {{/if}}
             <button class="option-button btn move-slot btn-default btn-xs" data-nodeid="{{$clusterNodes.nodeId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}">Move Slot</button>
+            <button class="option-button btn memory-purge btn-default btn-xs" data-nodeid="{{$clusterNodes.nodeId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}">Memory Purge</button>
             <button class="{{slave_tag slot=$clusterNodes.slot}} option-button be-slave btn btn-default second-selected btn-xs" data-nodeid="{{$clusterNodes.nodeId}}" data-masterid="{{$clusterNodes.masterId}}" data-ip="{{$clusterNodes.ip}}" data-port="{{$clusterNodes.port}}">Be Slave</button>
         {{/if}}
     </td>

@@ -493,8 +493,8 @@ public class ClusterLogic {
             String ip = host.getIp();
             int port = host.getPort();
             String filePath = filePathFormat.replaceAll("\\{port\\}", String.valueOf(port));
-            System.out.println(filePath);
-            res = res & FileUtil.modifyFileContent(ip, port, username, password, filePath, field, value);
+            //System.out.println(filePath);
+            res = res && FileUtil.modifyFileContent(ip, port, username, password, filePath, field, value);
         }
         return res;
     }
@@ -512,6 +512,44 @@ public class ClusterLogic {
 
     public List<ClusterImportResult> getImportCountList() {
         return redisManager.getClusterImportResult();
+    }
+
+    /**
+     * 手动整理node内存碎片
+     * @param clusterId
+     * @param ip
+     * @param port
+     * @return 如果成功memory purge 返回当前的mem_fragmentation_ratio
+     */
+    public String memoryPurge(int clusterId, String ip, int port) {
+        String result = "this redis can not support memory purge";
+        Cluster cluster = getCluster(clusterId);
+        String password = cluster.getRedisPassword();
+        ConnectionParam param =new ConnectionParam(ip,port,password);
+        Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
+        String memAllocator = nodeInfo.get("mem_allocator");
+        String redisVersion = nodeInfo.get("redis_version");
+        if(memAllocator.startsWith("jemalloc") && redisVersion.startsWith("4.0.")){
+            RedisClient redisClient = new RedisClient(ip,port);
+            try {
+                if (StringUtils.isNotBlank(password)) {
+                    result = redisClient.redisCommandOpt(password, RedisClient.MEMORYPURGE);
+                } else {
+                    result =  redisClient.redisCommandOpt(RedisClient.MEMORYPURGE);
+                }
+
+                if(result.contains("+OK")){
+                    Map<String, String> info = JedisUtil.getMapInfo(param);
+                    return "now mem_fragmentation_ratio :" + info.get("mem_fragmentation_ratio");
+                }
+            } catch (IOException e) {
+                result = "memory purge error";
+                logger.error("memory purge error", e);
+            }finally {
+                redisClient.closeClient();
+            }
+        }
+        return result;
     }
 
 }
