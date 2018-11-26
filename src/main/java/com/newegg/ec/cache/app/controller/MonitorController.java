@@ -92,7 +92,6 @@ public class MonitorController {
     @RequestMapping(value = "/slowLogs", method = RequestMethod.POST)
     @ResponseBody
     public Response slowLogs(@RequestBody SlowLogParam logParam) {
-        MonitorLogic logic = new MonitorLogic();
         List<RedisSlowLog> redisSlowLogs = logic.getSlowLogs(logParam);
         return Response.Result(0, redisSlowLogs);
     }

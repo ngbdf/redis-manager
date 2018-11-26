@@ -1,6 +1,7 @@
 package com.newegg.ec.cache.app.logic;
 
 import com.newegg.ec.cache.app.component.RedisManager;
+import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.INodeInfoDao;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.DateUtil;
@@ -21,11 +22,12 @@ import java.util.Map;
  */
 @Component
 public class MonitorLogic {
+
     @Resource
     private RedisManager redisManager;
 
     @Autowired
-    private ClusterLogic clusterLogic;
+    private IClusterDao clusterDao;
 
     @Resource
     private INodeInfoDao nodeDao;
@@ -63,7 +65,7 @@ public class MonitorLogic {
         } else if (slowLogParam.getLogLimit() == 0) {
             logLimit = 800 / ipList.size();
         }
-        Cluster cluster = clusterLogic.getCluster(slowLogParam.getClusterId());
+        Cluster cluster = clusterDao.getCluster(slowLogParam.getClusterId());
         for (Host host1 : ipList) {
             try {
                 List<Slowlog> slowList = JedisUtil.getSlowLog(new ConnectionParam(host1.getIp(), host1.getPort(), cluster.getRedisPassword()), logLimit);
@@ -93,7 +95,7 @@ public class MonitorLogic {
 
     public int getDbSize(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
-        Cluster cluster = clusterLogic.getCluster(clusterId);
+        Cluster cluster = clusterDao.getCluster(clusterId);
         ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
         int size = redisManager.getDbSize(param);
         return size;
