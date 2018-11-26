@@ -201,6 +201,11 @@ public class JedisUtil {
                 String info = jedis.clusterInfo();
                 result = RedisMsgUtil.changeClusterInfoMap(info);
             }
+
+            // add by jay
+            String info = jedis.info();
+            Map<String, String> mapInfo = getMapInfo(info);
+            result.putAll(mapInfo);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

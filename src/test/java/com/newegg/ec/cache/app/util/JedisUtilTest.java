@@ -1,6 +1,5 @@
 package com.newegg.ec.cache.app.util;
 
-import com.newegg.ec.cache.app.component.redis.JedisClusterClient;
 import com.newegg.ec.cache.app.component.redis.RedisClient;
 import com.newegg.ec.cache.app.model.RedisNode;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
