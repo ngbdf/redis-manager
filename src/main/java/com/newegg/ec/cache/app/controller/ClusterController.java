@@ -1,6 +1,5 @@
 package com.newegg.ec.cache.app.controller;
 
-import com.google.common.collect.Maps;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.*;
@@ -198,7 +197,7 @@ public class ClusterController {
         res.put("nodeList", detailNodeList);
         Map<String, String> clusterInfo = logic.getClusterInfo(clusterId, address);
         res.put("clusterInfo", clusterInfo);
-        System.out.println(res);
+        //System.out.println(res);
         return Response.Result(0, res);
     }
 
@@ -255,5 +254,15 @@ public class ClusterController {
             return Response.Info("modify config is sucess");
         }
         return Response.Warn("modify config is fail");
+    }
+
+    @RequestMapping(value = "/memoryPurge", method = RequestMethod.GET)
+    @ResponseBody
+    public Response memoryPurge(@RequestParam int clusterId, @RequestParam String ip, @RequestParam int port) {
+        String res = logic.memoryPurge(clusterId, ip, port);
+        if (res != null) {
+            return Response.Info(res);
+        }
+        return Response.Warn("memory purge is fail");
     }
 }

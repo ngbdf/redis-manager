@@ -349,6 +349,16 @@ $(document).on("click", ".move-slot", function(){
     });
 });
 
+$(document).on("click", ".memory-purge", function(){
+    var ip = $(this).data("ip");
+    var port = $(this).data("port");
+    var clusterId = window.clusterId
+    memoryPurge(clusterId,ip,port,function(result){
+        console.log(result);
+    });
+
+});
+
 $(document).on("click", ".forget-node", function(){
     var masterId = $(this).data("nodeid");
     var ip = $(this).data("ip");
