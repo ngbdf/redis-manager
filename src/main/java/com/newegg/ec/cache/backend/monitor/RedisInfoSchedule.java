@@ -76,7 +76,7 @@ public class RedisInfoSchedule {
             }
             processDb(strInfo, o);
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         return o;
     }
@@ -183,11 +183,10 @@ public class RedisInfoSchedule {
 
                     infoDao.addNodeInfo(Common.NODE_INFO_TABLE_FORMAT + clusterId, resInfo);
                 } catch (Exception e) {
-                    logger.error("", e);
+                    logger.error(node + " error.", e);
+                    e.printStackTrace();
                 } finally {
-                    if (null != jedis) {
-                        jedis.close();
-                    }
+                    JedisUtil.closeJedis(jedis);
                 }
             }
         } catch (Exception e) {
