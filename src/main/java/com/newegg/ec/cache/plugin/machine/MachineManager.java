@@ -186,6 +186,15 @@ public class MachineManager extends PluginParent implements INodeOperate {
         }
     }
 
+    @Override
+    protected void auth(int clusterId, String redisPasswd) {
+        List<Node> nodelist = machineNodeDao.getMachineNodeList(clusterId);
+        nodelist.forEach(node -> {
+            MachineNode machineNode = (MachineNode) node;
+            clusterLogic.addRedisPassd(machineNode.getIp(), machineNode.getPort(),redisPasswd);
+        });
+    }
+
     private void operateNode(JSONObject startParam, StartType startType) {
         MachineNode machineNode = (MachineNode) JSONObject.toBean(startParam, MachineNode.class);
         int port = machineNode.getPort();

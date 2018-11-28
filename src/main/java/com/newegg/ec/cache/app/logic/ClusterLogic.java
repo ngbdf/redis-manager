@@ -295,6 +295,35 @@ public class ClusterLogic {
         return res;
     }
 
+    public void addRedisPassd( String ip, int port, String password) {
+
+        Jedis jedis = new Jedis(ip, port);
+        try {
+            //先判断是否是3.0 or 4.0的集群
+            ConnectionParam param =new ConnectionParam(ip,port,password);
+            Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
+            String redisVersion = nodeInfo.get("redis_version");
+            if(redisVersion.startsWith("3.0.") || redisVersion.startsWith("4.0.")){
+                jedis.configSet("requirepass", password);
+                jedis.clusterSaveConfig();
+                // 同步一下配置文件
+                RedisClient redisClient = new RedisClient(ip, port);
+                try {
+                    redisClient.redisCommandOpt(password, RedisClient.AUTH);
+                } catch (IOException e) {
+                    logger.error("rewrite conf error", e);
+                } finally {
+                    redisClient.closeClient();
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("add RedisPassd error, ip: " + ip + ", port: " + port, e);
+        } finally {
+            jedis.close();
+        }
+    }
+
     public boolean initSlot(int clusterId, String address) {
         boolean res = true;
         Host host = NetUtil.getHost(address);
