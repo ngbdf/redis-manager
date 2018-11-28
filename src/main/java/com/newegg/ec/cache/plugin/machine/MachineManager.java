@@ -101,7 +101,6 @@ public class MachineManager extends PluginParent implements INodeOperate {
             rms.exec(cmd);
         }
         boolean res = machineNodeDao.removeMachineNode(machineNode.getId());
-        System.out.println(res);
         return res;
     }
 
@@ -187,14 +186,22 @@ public class MachineManager extends PluginParent implements INodeOperate {
         }
     }
 
+    @Override
+    protected void auth(int clusterId, String redisPasswd) {
+        List<Node> nodelist = machineNodeDao.getMachineNodeList(clusterId);
+        nodelist.forEach(node -> {
+            MachineNode machineNode = (MachineNode) node;
+            clusterLogic.addRedisPassd(machineNode.getIp(), machineNode.getPort(),redisPasswd);
+        });
+    }
+
     private void operateNode(JSONObject startParam, StartType startType) {
         MachineNode machineNode = (MachineNode) JSONObject.toBean(startParam, MachineNode.class);
         int port = machineNode.getPort();
-        System.out.println(machineNode.getIp() + " -- " + machineNode.getUsername() + " --- " + machineNode.getPassword());
+        logger.info(machineNode.getIp() + " -- " + machineNode.getUsername() + " --- " + machineNode.getPassword());
         RemoteShellUtil rms = new RemoteShellUtil(machineNode.getIp(), machineNode.getUsername(), machineNode.getPassword());
         String cmd = "cd " + getPortPath(machineNode.getInstallPath(), port);
         cmd += ";bash " + startType + ".sh " + port;
-        System.out.println(cmd);
         rms.exec(cmd);
     }
 

@@ -2,6 +2,7 @@ package com.newegg.ec.cache.plugin.docker;
 
 import com.google.common.collect.Lists;
 import com.newegg.ec.cache.app.controller.check.CheckLogic;
+import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.RedisNode;
 import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.util.DateUtil;
@@ -40,6 +41,10 @@ public class DockerManager extends PluginParent implements INodeOperate {
     IDockerNodeDao dockerNodeDao;
     @Resource
     CheckLogic checkLogic;
+
+    @Resource
+    ClusterLogic clusterLogic;
+
     @Value("${cache.docker.api.format}")
     private String dockerApiFormat;
     @Value("${cache.docker.image}")
@@ -109,6 +114,15 @@ public class DockerManager extends PluginParent implements INodeOperate {
             }
         }
         logger.websocket("redis cluster node install success");
+    }
+
+    @Override
+    protected void auth(int clusterId, String redisPasswd) {
+        List<Node> nodelist = dockerNodeDao.getDockerNodeList(clusterId);
+        nodelist.forEach(node -> {
+            DockerNode dockerNode = (DockerNode) node;
+            clusterLogic.addRedisPassd(dockerNode.getIp(), dockerNode.getPort(),redisPasswd);
+        });
     }
 
     @Override

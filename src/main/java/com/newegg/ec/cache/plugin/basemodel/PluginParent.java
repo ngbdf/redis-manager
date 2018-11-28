@@ -50,8 +50,14 @@ public abstract class PluginParent {
             if (clusterId != -1) {
                 pluginParent.addNodeList(reqParam, clusterId);
             }
-            // 建立集群
-            pluginParent.buildRedisCluster(clusterId, ipMap);
+
+            // 建立集群成功：如果redis需要设置密码，统一auth
+            if(pluginParent.buildRedisCluster(clusterId, ipMap)){
+                String redisPasswd = reqParam.getString("redisPasswd");
+                if(StringUtils.isNotEmpty(redisPasswd)){
+                    auth(clusterId,redisPasswd);
+                }
+            }
         }
         return checkRes;
     }
@@ -61,6 +67,13 @@ public abstract class PluginParent {
     protected abstract void addNodeList(JSONObject reqParam, int clusterId);
 
     protected abstract void installNodeList(JSONObject reqParam, List<RedisNode> nodelist);
+
+    /**
+     * 如果必要，给redis统一添加密码
+     * @param clusterId
+     * @return
+     */
+    protected abstract void auth(int clusterId , String redisPasswd);
 
     /**
      * table cluster 写入数据
@@ -85,13 +98,14 @@ public abstract class PluginParent {
             cluster.setUserGroup(reqParam.get("userGroup").toString());
             cluster.setClusterType(reqParam.get("pluginType").toString());
             cluster.setClusterName(reqParam.get("clusterName").toString());
+            cluster.setRedisPassword(reqParam.get("redisPasswd").toString());
             clusterId = clusterLogic.addCluster(cluster);
         }
         return clusterId;
     }
 
-    protected void buildRedisCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
-        redisManager.buildCluster(clusterId, ipMap);
+    protected boolean buildRedisCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
+        return redisManager.buildCluster(clusterId, ipMap);
     }
 
     protected boolean checkInstallResult(List<RedisNode> ipList) {
@@ -104,4 +118,6 @@ public abstract class PluginParent {
         }
         return res;
     }
+
+
 }

@@ -146,7 +146,7 @@ public class RedisManager {
             jedis.clusterReplicate(masterId);
             res = true;
         } catch (Exception e) {
-
+            logger.error("Be Slave error", e);
         } finally {
 
             jedis.close();
@@ -192,7 +192,7 @@ public class RedisManager {
                     }
                     jedis.clusterForget(nodeId);
                 } catch (Exception e) {
-                    logger.error("", e);
+                    logger.error("forget node error", e);
                 } finally {
                     if (null != jedis) {
                         jedis.close();
@@ -216,7 +216,7 @@ public class RedisManager {
             jedis.clusterMeet(masterIp, masterPort);
             res = true;
         } catch (Exception e) {
-
+            logger.error("cluster meet error", e);
         } finally {
             jedis.close();
         }
@@ -251,7 +251,7 @@ public class RedisManager {
                     logger.error(masterIp + ":" + masterPort + " master is install fail");
                 }
             } catch (Exception e) {
-                logger.error("Cluster meet error.");
+                throw new RuntimeException("Cluster meet error.",e);
             }
         }
         return ipMapRes;
@@ -276,17 +276,22 @@ public class RedisManager {
                     }
                 }
             } catch (Exception e) {
-
+                throw new RuntimeException("Cluster be Slave error",e);
             }
         }
         return true;
     }
 
     public boolean buildCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
-        logger.info("start meet all node to cluster");
-        buildClusterMeet(clusterId, ipMap);
-        logger.info("start set slave for cluster");
-        buildClusterBeSlave(clusterId, ipMap);
+        try{
+            logger.info("start meet all node to cluster");
+            buildClusterMeet(clusterId, ipMap);
+            logger.info("start set slave for cluster");
+            buildClusterBeSlave(clusterId, ipMap);
+        }catch (Exception e){
+            logger.error("Build Cluster error", e);
+            return false;
+        }
         return true;
     }
 
