@@ -6,6 +6,8 @@ import com.newegg.ec.cache.app.model.RedisNode;
 import com.newegg.ec.cache.app.model.RedisNodeType;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.util.Slowlog;
 
@@ -20,6 +22,9 @@ import java.util.*;
  * Created by gl49 on 2018/4/21.
  */
 public class JedisUtil {
+
+    private static final Log logger = LogFactory.getLog(JedisUtil.class);
+
     private JedisUtil() {
         //ignore
     }
@@ -320,29 +325,22 @@ public class JedisUtil {
      * @return
      */
     public static Map<String, Map> getClusterNodes(ConnectionParam param) {
-        Jedis jedis = new Jedis(param.getIp(), param.getPort());
-        String password = param.getRedisPassword();
-        if (StringUtils.isNotBlank(password)) {
-            jedis.auth(password);
-        }
+        Jedis jedis = getJedisClient(param);
         Map<String, Map> result = new HashMap<>();
         try {
             String info = jedis.clusterNodes();
             result = RedisMsgUtil.changeNodesInfoMap(info, false);
         } catch (Exception e) {
+            logger.error("Get cluster nodes error. " + param, e);
             e.printStackTrace();
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return result;
     }
 
     public static Map<String, Map> getMasterNodes(ConnectionParam param) {
-        Jedis jedis = new Jedis(param.getIp(), param.getPort());
-        String password = param.getRedisPassword();
-        if (StringUtils.isNotBlank(password)) {
-            jedis.auth(password);
-        }
+        Jedis jedis = getJedisClient(param);
         Map<String, Map> result = new HashMap<>();
         try {
             String info = jedis.clusterNodes();
@@ -355,8 +353,8 @@ public class JedisUtil {
         return result;
     }
 
-    public static String getNodeid(String ip, int port) {
-        Jedis jedis = new Jedis(ip, port);
+    public static String getNodeId(ConnectionParam param) {
+        Jedis jedis = getJedisClient(param);
         String nodeid = null;
         try {
             String info = jedis.clusterNodes();
@@ -379,12 +377,11 @@ public class JedisUtil {
     /**
      * 发送 failover 信号
      *
-     * @param ip
-     * @param port
+     * @param param
      * @return
      */
-    private static String clusterFailover(String ip, int port) {
-        Jedis jedis = new Jedis(ip, port);
+    private static String clusterFailover(ConnectionParam param) {
+        Jedis jedis = getJedisClient(param);
         String result = "";
         try {
             result = jedis.clusterFailover();
@@ -427,8 +424,8 @@ public class JedisUtil {
                 String host = tmpArr[0];
                 String ip = host.split(":")[0];
                 ipSet.add(ip);
-            } catch (Exception ignore) {
-                ignore.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return ipSet;

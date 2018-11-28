@@ -184,7 +184,6 @@ public class RedisInfoSchedule {
                     infoDao.addNodeInfo(Common.NODE_INFO_TABLE_FORMAT + clusterId, resInfo);
                 } catch (Exception e) {
                     logger.error(node + " error.", e);
-                    e.printStackTrace();
                 } finally {
                     JedisUtil.closeJedis(jedis);
                 }

@@ -266,7 +266,7 @@ public class RedisManager {
                 String masterIp = master.getIp();
                 int masterPort = master.getPort();
                 if (NetUtil.checkIpAndPort(masterIp, masterPort)) {
-                    String nodeId = JedisUtil.getNodeid(masterIp, masterPort);
+                    String nodeId = JedisUtil.getNodeId(new ConnectionParam(masterIp, masterPort, password));
                     List<RedisNode> slaveList = nodeItem.getValue();
                     for (RedisNode redisNode : slaveList) {
                         logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is be slave to " + masterIp + ":" + masterPort);
