@@ -6,7 +6,10 @@ import com.newegg.ec.cache.app.model.RedisNode;
 import com.newegg.ec.cache.app.model.RedisNodeType;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.util.Slowlog;
 
 import java.io.BufferedReader;
@@ -20,6 +23,9 @@ import java.util.*;
  * Created by gl49 on 2018/4/21.
  */
 public class JedisUtil {
+
+    public static Log logger = LogFactory.getLog(JedisUtil.class);
+
     private JedisUtil() {
         //ignore
     }
@@ -58,7 +64,7 @@ public class JedisUtil {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("getMapInfo error",e);
         }
         resMap.put("detail", strInfo);
         return resMap;
@@ -84,7 +90,7 @@ public class JedisUtil {
                 }
             }
         } catch (Exception e) {
-
+            logger.error("getRedisConfig error",e);
         } finally {
             closeJedis(jedis);
         }
@@ -207,7 +213,7 @@ public class JedisUtil {
             Map<String, String> mapInfo = getMapInfo(info);
             result.putAll(mapInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("getClusterInfo error", e);
         } finally {
             jedis.close();
         }
@@ -329,8 +335,11 @@ public class JedisUtil {
         try {
             String info = jedis.clusterNodes();
             result = RedisMsgUtil.changeNodesInfoMap(info, false);
+            throw  new RuntimeException("111");
         } catch (Exception e) {
-            e.printStackTrace();
+            if(!(e instanceof JedisDataException && "ERR This instance has cluster support disabled".equals(e.getMessage()))){
+                logger.error("getClusterNodes error", e);
+            }
         } finally {
             jedis.close();
         }
@@ -348,7 +357,7 @@ public class JedisUtil {
             String info = jedis.clusterNodes();
             result = RedisMsgUtil.changeNodesInfoMap(info, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("getMasterNodes error", e);
         } finally {
             jedis.close();
         }
@@ -369,7 +378,7 @@ public class JedisUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("getNodeid error", e);
         } finally {
             closeJedis(jedis);
         }
@@ -389,7 +398,7 @@ public class JedisUtil {
         try {
             result = jedis.clusterFailover();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("clusterFailover error", e);
         } finally {
             closeJedis(jedis);
         }
@@ -427,8 +436,8 @@ public class JedisUtil {
                 String host = tmpArr[0];
                 String ip = host.split(":")[0];
                 ipSet.add(ip);
-            } catch (Exception ignore) {
-                ignore.printStackTrace();
+            } catch (Exception e) {
+                logger.error("getIPList error", e);
             }
         }
         return ipSet;
@@ -466,8 +475,8 @@ public class JedisUtil {
                 if (nodeItem.getRole() == RedisNodeType.slave) {
                     slaveList.add(nodeItem);
                 }
-            } catch (Exception ignore) {
-
+            } catch (Exception e) {
+                logger.error("getInstallNodeMap error", e);
             }
         }
         return resMap;
