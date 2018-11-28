@@ -6,7 +6,7 @@ $(document).ready(function(){
         getClusterInfoByAddress(window.clusterId, window.cluster.address, function(obj){
             if( obj.res.cluster_slots_ok == 0 ){
                 sparrow_win.confirm("the cluster is not slot can you init it", function(){
-                    initSlot(window.cluster.clusterId, window.cluster.address, function( obj ){
+                    initSlot(window.clusterId, window.cluster.address, function( obj ){
                     });
                 });
             }

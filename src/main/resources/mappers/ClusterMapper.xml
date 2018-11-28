@@ -36,4 +36,13 @@
         WHERE
         id = #{id}
     </update>
+
+    <update id="updatePassword" parameterType="com.newegg.ec.cache.app.model.Cluster">
+        UPDATE
+            cluster
+        SET
+            redis_password = #{redisPassword}
+        WHERE
+            id = #{id}
+    </update>
 </mapper>

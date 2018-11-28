@@ -587,4 +587,8 @@ public class ClusterLogic {
         return result;
     }
 
+    public int updateRedisPassword(int id, String redisPassword) {
+        return clusterDao.updatePassword(id, redisPassword);
+    }
+
 }

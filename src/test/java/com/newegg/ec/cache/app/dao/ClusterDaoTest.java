@@ -75,6 +75,13 @@ public class ClusterDaoTest {
     }
 
     @Test
+    public void updatePassword(){
+        int result = clusterDao.updatePassword(30008,"");
+        System.out.println( result );
+
+    }
+
+    @Test
     public void query() {
         HostAndPort hostAndPort = new HostAndPort("10.16.46.195", 8800);
         //public JedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout, int soTimeout,

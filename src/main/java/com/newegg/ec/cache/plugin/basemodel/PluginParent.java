@@ -58,6 +58,7 @@ public abstract class PluginParent {
                     auth(clusterId,redisPasswd);
                 }
             }
+            updateClusterPassword(clusterId,reqParam.get("redisPasswd").toString());
         }
         return checkRes;
     }
@@ -98,10 +99,13 @@ public abstract class PluginParent {
             cluster.setUserGroup(reqParam.get("userGroup").toString());
             cluster.setClusterType(reqParam.get("pluginType").toString());
             cluster.setClusterName(reqParam.get("clusterName").toString());
-            cluster.setRedisPassword(reqParam.get("redisPasswd").toString());
             clusterId = clusterLogic.addCluster(cluster);
         }
         return clusterId;
+    }
+
+    protected int updateClusterPassword(int clusterId, String  password) {
+        return clusterLogic.updateRedisPassword(clusterId,password);
     }
 
     protected boolean buildRedisCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
