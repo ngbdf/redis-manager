@@ -27,13 +27,17 @@ $(document).ready(function(){
 });
 
 $(window).resize(function(){
-    $(".chart-sm").each(function(){
-        var id = $(this).attr('id');
-        var dom = document.getElementById(id)
-        if(isNotEmpty(dom) && isNotEmpty(echarts.getInstanceByDom(dom))){
-            echarts.getInstanceByDom(dom).resize();
-        }
-    });
+    var chart = $(".chart-sm");
+    if(isNotEmpty(chart)){
+        $(".chart-sm").each(function(){
+                var id = $(this).attr('id');
+                var dom = document.getElementById(id)
+                if(isNotEmpty(dom) && isNotEmpty(echarts.getInstanceByDom(dom))){
+                    echarts.getInstanceByDom(dom).resize();
+                }
+         });
+    }
+
 });
 
 function getCurrentTime(){
@@ -421,12 +425,16 @@ function clearChart_invalidatedData(originData){
 
 
 function buildChart(webElementId,titleText,xAxisFieldName,yAxisFieldName,chartData,legendText,yAxisText){
+
     var myChart = echarts.init(document.getElementById(webElementId));
     myChart.showLoading({
         text: '数据正在努力加载...',
         textStyle: { fontSize : 30 , color: '#444' },
         effectOption: {backgroundColor: 'rgba(0, 0, 0, 0)'}
     });
+    if(chartData == "" || chartData == "undefined"){
+          return;
+        }
     var option_bar = {
         title: {
             text: titleText,
