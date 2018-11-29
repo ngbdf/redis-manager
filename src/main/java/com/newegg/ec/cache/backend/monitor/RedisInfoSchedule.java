@@ -2,6 +2,7 @@ package com.newegg.ec.cache.backend.monitor;
 
 import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.INodeInfoDao;
+import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
@@ -9,10 +10,13 @@ import com.newegg.ec.cache.app.util.NetUtil;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import com.newegg.ec.cache.core.mysql.MysqlField;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
@@ -31,7 +35,7 @@ import java.util.concurrent.Executors;
 @Component
 public class RedisInfoSchedule {
     private static final int JEDIS_TIMEOUT = 1000;
-    public static CommonLogger logger = new CommonLogger(RedisInfoSchedule.class);
+    private static Log logger = LogFactory.getLog(RedisInfoSchedule.class);
     private static ExecutorService threadPool = Executors.newFixedThreadPool(200);
 
     @Resource
@@ -114,9 +118,9 @@ public class RedisInfoSchedule {
     }
 
     /**
-     * 两分钟后开始采集，以后一分钟采集一次
+     * 5分钟后开始采集，以后一分钟采集一次
      */
-    @Scheduled(fixedRate = 1000 * 60, initialDelay = 1000 * 120)
+    @Scheduled(fixedRate = 1000 * 60, initialDelay = 1000 * 600)
     public void scheduledMetricRedisInfo() {
         List<Cluster> clusterList = clusterDao.getClusterList(null);
         for (Cluster cluster : clusterList) {
@@ -131,7 +135,7 @@ public class RedisInfoSchedule {
                     }
                 });
             } catch (Exception e) {
-                //
+
             }
         }
     }
@@ -183,7 +187,10 @@ public class RedisInfoSchedule {
 
                     infoDao.addNodeInfo(Common.NODE_INFO_TABLE_FORMAT + clusterId, resInfo);
                 } catch (Exception e) {
-                    logger.error(node + " error.", e);
+                    if(e instanceof JedisConnectionException)
+                        logger.error(node + " Get Momitor Data Error ,May RedisCluster IsNot Ready，Please Wait .");
+                    else
+                        logger.error(node + " Error.", e);
                 } finally {
                     JedisUtil.closeJedis(jedis);
                 }

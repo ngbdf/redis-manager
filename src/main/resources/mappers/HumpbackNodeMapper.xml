@@ -21,6 +21,10 @@
         delete from humpback_node where id = #{id}
     </delete>
 
+    <delete id="removeHumbackNodeByClusterId" parameterType="int">
+        delete from humpback_node where cluster_id = #{id}
+    </delete>
+
     <insert id="addHumbackNode"  parameterType="com.newegg.ec.cache.plugin.humpback.HumpbackNode"  useGeneratedKeys="true" keyProperty="id">
         insert into humpback_node(image,container_name,cluster_id, user_group, ip,port, add_time ) values(#{image},#{containerName},#{clusterId},#{userGroup},#{ip},#{port},#{addTime})
     </insert>

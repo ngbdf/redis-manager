@@ -42,4 +42,12 @@ public interface IMachineNodeDao {
      * @return
      */
     public Boolean addMachineNode(MachineNode machineNode);
+
+    /**
+     * remove MachineNode By ClusterId
+     * @param id
+     * @return
+     */
+    public Boolean removeMachineNodeByClusterId(int id);
+
 }

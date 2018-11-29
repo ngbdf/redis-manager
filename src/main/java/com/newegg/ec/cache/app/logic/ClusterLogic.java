@@ -5,7 +5,13 @@ import com.newegg.ec.cache.app.component.redis.RedisClient;
 import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.model.*;
-import com.newegg.ec.cache.app.util.*;
+import com.newegg.ec.cache.app.util.FileUtil;
+import com.newegg.ec.cache.app.util.JedisUtil;
+import com.newegg.ec.cache.app.util.NetUtil;
+import com.newegg.ec.cache.app.util.SlotBalanceUtil;
+import com.newegg.ec.cache.plugin.docker.IDockerNodeDao;
+import com.newegg.ec.cache.plugin.humpback.IHumpbackNodeDao;
+import com.newegg.ec.cache.plugin.machine.IMachineNodeDao;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -39,6 +45,13 @@ public class ClusterLogic {
     @Resource
     private RedisManager redisManager;
 
+    @Autowired
+    private IMachineNodeDao machineNodeDao;
+    @Autowired
+    private IDockerNodeDao dockerNodeDao;
+    @Autowired
+    private IHumpbackNodeDao humpbackNodeDao;
+
     public Cluster getCluster(int id) {
         return clusterDao.getCluster(id);
     }
@@ -67,12 +80,25 @@ public class ClusterLogic {
         return true;
     }
 
-    public boolean removeCluster(int id) {
+    public boolean removeCluster(int clusterId) {
         boolean res = false;
         try {
-            clusterDao.removeCluster(id);
-            String tableName = Common.NODE_INFO_TABLE_FORMAT + id;
+            String type= clusterDao.getCluster(clusterId).getClusterType();
+            clusterDao.removeCluster(clusterId);
+            String tableName = Common.NODE_INFO_TABLE_FORMAT + clusterId;
             nodeInfoTable.dropTable(tableName);
+            //删除对应nodelist数据 todo
+            switch (type){
+                case "machine":
+                    machineNodeDao.removeMachineNodeByClusterId(clusterId);
+                    break;
+                case "docker":
+                    dockerNodeDao.removeDockerNodeByClusterId(clusterId);
+                    break;
+                case "humpback":
+                    humpbackNodeDao.removeHumbackNodeByClusterId(clusterId);
+                    break;
+            }
             res = true;
         } catch (Exception e) {
 

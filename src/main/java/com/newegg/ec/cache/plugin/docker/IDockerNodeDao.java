@@ -42,4 +42,11 @@ public interface IDockerNodeDao {
      * @return
      */
     public Boolean addDockerNode(DockerNode DockerNode);
+
+    /**
+     * remove DockerNode By ClusterId
+     * @param id
+     * @return
+     */
+    public Boolean removeDockerNodeByClusterId(int id);
 }
