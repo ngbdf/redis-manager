@@ -443,7 +443,7 @@ public class ClusterLogic {
             }
             res = true;
         } catch (Exception e) {
-            logger.error("move slot ", e);
+            logger.error("Cluster Add Slots Error : " + e.getMessage());
         } finally {
             jedis.close();
         }
@@ -481,7 +481,7 @@ public class ClusterLogic {
                 }
             } while (keys.size() > 0);
         } catch (Exception e) {
-            logger.error("", e);
+            logger.error(e.getMessage());
             // 出现异常就恢复 slot
             myself.clusterSetSlotStable(slot);
             source.clusterSetSlotStable(slot);
