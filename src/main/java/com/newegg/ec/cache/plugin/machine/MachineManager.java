@@ -187,11 +187,10 @@ public class MachineManager extends PluginParent implements INodeOperate {
     }
 
     @Override
-    protected void auth(int clusterId, String redisPasswd) {
-        List<Node> nodelist = machineNodeDao.getMachineNodeList(clusterId);
+    protected void auth(String ipListStr, String redisPasswd) {
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         nodelist.forEach(node -> {
-            MachineNode machineNode = (MachineNode) node;
-            clusterLogic.addRedisPassd(machineNode.getIp(), machineNode.getPort(),redisPasswd);
+            clusterLogic.addRedisPassd(node.getIp(), node.getPort(),redisPasswd);
         });
     }
 

@@ -50,13 +50,11 @@ public abstract class PluginParent {
             if (clusterId != -1) {
                 pluginParent.addNodeList(reqParam, clusterId);
             }
-
+            pluginParent.buildRedisCluster(clusterId, ipMap);
             // 建立集群成功：如果redis需要设置密码，统一auth
-            if(pluginParent.buildRedisCluster(clusterId, ipMap)){
-                String redisPasswd = reqParam.getString("redisPasswd");
-                if(StringUtils.isNotEmpty(redisPasswd)){
-                    auth(clusterId,redisPasswd);
-                }
+            String redisPasswd = reqParam.getString("redisPasswd");
+            if(StringUtils.isNotEmpty(redisPasswd)){
+                auth(reqParam.getString(IPLIST_NAME),redisPasswd);
             }
             updateClusterPassword(clusterId,reqParam.get("redisPasswd").toString());
         }
@@ -71,10 +69,10 @@ public abstract class PluginParent {
 
     /**
      * 如果必要，给redis统一添加密码
-     * @param clusterId
+     * @param ipListStr
      * @return
      */
-    protected abstract void auth(int clusterId , String redisPasswd);
+    protected abstract void auth(String ipListStr , String redisPasswd);
 
     /**
      * table cluster 写入数据

@@ -18,7 +18,7 @@ public class RedisClient {
 
     public static final CommonLogger logger = new CommonLogger(RedisClient.class);
 
-    public static final String AUTH = "*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n";
+    public static final String REWRITE = "*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n";
     public static final String MEMORYPURGE = "*2\r\n$6\r\nmemory\r\n$5\r\npurge\r\n";
 
     private Socket socket;

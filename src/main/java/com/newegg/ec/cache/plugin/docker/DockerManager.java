@@ -117,11 +117,10 @@ public class DockerManager extends PluginParent implements INodeOperate {
     }
 
     @Override
-    protected void auth(int clusterId, String redisPasswd) {
-        List<Node> nodelist = dockerNodeDao.getDockerNodeList(clusterId);
+    protected void auth(String ipListStr, String redisPasswd) {
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         nodelist.forEach(node -> {
-            DockerNode dockerNode = (DockerNode) node;
-            clusterLogic.addRedisPassd(dockerNode.getIp(), dockerNode.getPort(),redisPasswd);
+            clusterLogic.addRedisPassd(node.getIp(), node.getPort(),redisPasswd);
         });
     }
 

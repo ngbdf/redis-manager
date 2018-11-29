@@ -218,11 +218,10 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
     }
 
     @Override
-    protected void auth(int clusterId, String redisPasswd) {
-        List<Node> nodelist = nodeDao.getHumbackNodeList(clusterId);
+    protected void auth(String ipListStr, String redisPasswd) {
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         nodelist.forEach(node -> {
-            HumpbackNode humpbackNode = (HumpbackNode) node;
-            clusterLogic.addRedisPassd(humpbackNode.getIp(), humpbackNode.getPort(),redisPasswd);
+            clusterLogic.addRedisPassd(node.getIp(), node.getPort(),redisPasswd);
         });
     }
 

@@ -282,9 +282,9 @@ public class ClusterLogic {
                 RedisClient redisClient = new RedisClient(ip, port);
                 try {
                     if (StringUtils.isNotBlank(password)) {
-                        redisClient.redisCommandOpt(password, RedisClient.AUTH);
+                        redisClient.redisCommandOpt(password, RedisClient.REWRITE);
                     } else {
-                        redisClient.redisCommandOpt(RedisClient.AUTH);
+                        redisClient.redisCommandOpt(RedisClient.REWRITE);
                     }
                 } catch (IOException e) {
                     logger.error("rewrite conf error", e);
@@ -306,16 +306,17 @@ public class ClusterLogic {
         Jedis jedis = new Jedis(ip, port);
         try {
             //先判断是否是3.0 or 4.0的集群
-            ConnectionParam param =new ConnectionParam(ip,port,password);
+            ConnectionParam param =new ConnectionParam(ip,port);
             Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
             String redisVersion = nodeInfo.get("redis_version");
-            if(redisVersion.startsWith("3.0.") || redisVersion.startsWith("4.0.")){
+            if(!redisVersion.startsWith("1.0.")){
                 jedis.configSet("requirepass", password);
+                jedis.auth(password);
                 jedis.clusterSaveConfig();
                 // 同步一下配置文件
                 RedisClient redisClient = new RedisClient(ip, port);
                 try {
-                    redisClient.redisCommandOpt(password, RedisClient.AUTH);
+                    redisClient.redisCommandOpt(password,RedisClient.REWRITE);
                 } catch (IOException e) {
                     logger.error("rewrite conf error", e);
                 } finally {

@@ -77,7 +77,6 @@ public class CreateClusterLogHandler implements WebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
         removeLogMap(webSocketSession);
-        System.out.println("close");
     }
 
     @Override
