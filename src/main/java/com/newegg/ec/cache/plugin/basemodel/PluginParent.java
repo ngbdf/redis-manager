@@ -42,23 +42,34 @@ public abstract class PluginParent {
         boolean checkRes = pluginParent.checkInstallResult(nodelist);
         int clusterId = 0;
         if (checkRes) { // 如果安装成功
+            boolean isExtends = false;
             if (reqParam.containsKey("clusterId")) {  //如果有传 clusterId 那么证明是从扩容界面来的
                 clusterId = reqParam.getInt("clusterId");
+                isExtends = true;
             } else {
                 clusterId = pluginParent.addCluster(reqParam);
             }
             if (clusterId != -1) {
                 pluginParent.addNodeList(reqParam, clusterId);
             }
-            pluginParent.buildRedisCluster(clusterId, ipMap);
+            pluginParent.buildRedisCluster(clusterId, ipMap,isExtends);
+
             // 建立集群成功：如果redis需要设置密码，统一auth
-            String redisPasswd = reqParam.getString("redisPasswd");
-            if(StringUtils.isNotEmpty(redisPasswd)){
-                auth(reqParam.getString(IPLIST_NAME),redisPasswd);
+            if(reqParam.containsKey("redisPasswd")){
+                String redisPasswd = reqParam.getString("redisPasswd");
+                if(StringUtils.isNotEmpty(redisPasswd)){
+                    auth(reqParam.getString(IPLIST_NAME),redisPasswd);
+                    updateClusterPassword(clusterId, redisPasswd);
+                }
             }
-            updateClusterPassword(clusterId,reqParam.get("redisPasswd").toString());
+
         }
         return checkRes;
+    }
+
+    public static void main(String[] args) {
+        JSONObject p = new JSONObject();
+        System.out.println(p.containsKey("a"));
     }
 
     protected abstract boolean checkInstall(JSONObject reqParam);
@@ -106,8 +117,8 @@ public abstract class PluginParent {
         return clusterLogic.updateRedisPassword(clusterId,password);
     }
 
-    protected boolean buildRedisCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
-        return redisManager.buildCluster(clusterId, ipMap);
+    protected boolean buildRedisCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
+        return redisManager.buildCluster(clusterId, ipMap,isExtends);
     }
 
     protected boolean checkInstallResult(List<RedisNode> ipList) {

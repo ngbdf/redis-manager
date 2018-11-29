@@ -438,7 +438,7 @@ public class ClusterLogic {
                 try {
                     moveSlot(myselfId, ip, port, password, sourceId, sourceIP, sourcePort, slot);
                 } catch (Exception e) {
-                    logger.error("", e);
+                    logger.error("Move Slot Error : " + e.getMessage());
                 }
             }
             res = true;

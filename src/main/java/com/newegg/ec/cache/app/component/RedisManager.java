@@ -223,7 +223,7 @@ public class RedisManager {
         return res;
     }
 
-    public Map<RedisNode, List<RedisNode>> buildClusterMeet(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
+    public Map<RedisNode, List<RedisNode>> buildClusterMeet(int clusterId, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
         Cluster cluster = clusterLogic.getCluster(clusterId);
         Host host = NetUtil.getHostPassAddress(cluster.getAddress());
         Map<RedisNode, List<RedisNode>> ipMapRes = new HashedMap();
@@ -239,6 +239,9 @@ public class RedisManager {
                     ipMapRes.put(master, slaveList);
 
                     ConnectionParam param = new ConnectionParam(masterIp, masterPort, cluster.getRedisPassword());
+                    // 如果扩容有密码的集群，meet的时候不需要认证密码
+                    if (isExtends)
+                        param = new ConnectionParam(masterIp, masterPort);
                     clusterMeet(param, currentAliableIp, currentAliablePort);
                     for (RedisNode redisNode : slaveList) {
                         logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is meet cluster");
@@ -257,7 +260,7 @@ public class RedisManager {
         return ipMapRes;
     }
 
-    public boolean buildClusterBeSlave(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
+    public boolean buildClusterBeSlave(int clusterId, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
         Cluster cluster = clusterLogic.getCluster(clusterId);
         String password = cluster.getRedisPassword();
         for (Map.Entry<RedisNode, List<RedisNode>> nodeItem : ipMap.entrySet()) {
@@ -266,14 +269,27 @@ public class RedisManager {
                 String masterIp = master.getIp();
                 int masterPort = master.getPort();
                 if (NetUtil.checkIpAndPort(masterIp, masterPort)) {
-                    String nodeId = JedisUtil.getNodeId(new ConnectionParam(masterIp, masterPort, password));
-                    List<RedisNode> slaveList = nodeItem.getValue();
-                    for (RedisNode redisNode : slaveList) {
-                        logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is be slave to " + masterIp + ":" + masterPort);
-                        ConnectionParam param = new ConnectionParam(redisNode.getIp(), redisNode.getPort(), password);
-                        beSlave(param, nodeId);
-                        Thread.sleep(500);
+                    // 如果扩容有密码的集群，beSlave的时候不需要认证密码
+                    if (isExtends){
+                        String nodeId = JedisUtil.getNodeId(new ConnectionParam(masterIp, masterPort));
+                        List<RedisNode> slaveList = nodeItem.getValue();
+                        for (RedisNode redisNode : slaveList) {
+                            logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is be slave to " + masterIp + ":" + masterPort);
+                            ConnectionParam param = new ConnectionParam(redisNode.getIp(), redisNode.getPort());
+                            beSlave(param, nodeId);
+                            Thread.sleep(500);
+                        }
+                    }else{
+                        String nodeId = JedisUtil.getNodeId(new ConnectionParam(masterIp, masterPort, password));
+                        List<RedisNode> slaveList = nodeItem.getValue();
+                        for (RedisNode redisNode : slaveList) {
+                            logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is be slave to " + masterIp + ":" + masterPort);
+                            ConnectionParam param = new ConnectionParam(redisNode.getIp(), redisNode.getPort(), password);
+                            beSlave(param, nodeId);
+                            Thread.sleep(500);
+                        }
                     }
+
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Cluster be Slave error",e);
@@ -282,12 +298,19 @@ public class RedisManager {
         return true;
     }
 
-    public boolean buildCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap) {
+    /**
+     * 建立集群
+     * @param clusterId
+     * @param ipMap
+     * @param isExtends true： 扩容操作建立集群 false ：初始建立集群
+     * @return
+     */
+    public boolean buildCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
         try{
             logger.info("start meet all node to cluster");
-            buildClusterMeet(clusterId, ipMap);
+            buildClusterMeet(clusterId, ipMap,isExtends);
             logger.info("start set slave for cluster");
-            buildClusterBeSlave(clusterId, ipMap);
+            buildClusterBeSlave(clusterId, ipMap,isExtends);
         }catch (Exception e){
             logger.error("Build Cluster error", e);
             return false;
