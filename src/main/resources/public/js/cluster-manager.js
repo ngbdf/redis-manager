@@ -20,6 +20,8 @@ $(document).ready(function(){
         });
         show_cluster_node_list( window.cluster.address );
     });
+
+    auth();
 });
 
 $('[href="#nodeManager"]').click(function () {
@@ -411,3 +413,26 @@ $(document).on("click", ".view-config", function(){
     smarty.fopen( "/cluster/getRedisConfig?clusterId="+window.clusterId+"&address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
     } );
 });
+
+function auth() {
+    var log = "                                                                                                    \n" +
+               "        @@@@,                @` :@        @        @                                                \n" +
+               "        @   @+               @`  ,        @@      .@                                                \n" +
+               "        @    @               @`           @@      @@                                                \n" +
+               "        @    @   +@@@    #@@@#` `#  +@@@  @:#     @@   ;@@@   #`@@@.   `@@@ @   @@@#   @#@#         \n" +
+               "        @   :@  +@  ;@  @#  .@`  # `@     @ @    @`@   #  `@  #@   @   @   @@  @;  @'  @#           \n" +
+               "        @;;@@   @    @  @    @`  # .@     @ +'   @ @       @  #+   @` @`   `@  @    @  @            \n" +
+               "        @ .@    @@@@@@ `@    @`  #  @@    @  @  @. @    @@@@  #`   #` @     @ :@@@@@@  @            \n" +
+               "        @  .@   @      .@    @`  #   .@'  @  @, @  @  `@   @  #`   #` @     @ :'       @            \n" +
+               "        @   @   @       @    @`  #     @  @   @+;  @  @`   @  #`   #` @    `@ `@       @            \n" +
+               "        @   :@  @#   @  @,  .@`  #     @  @   @@   @  #'  @@  #`   #` ;@   @@  @.   +  @            \n" +
+               "        @    @   @@@@`   @@@@@` `# .@@@.  @    #   @   @@@,@  #`   #`  #@@@ @   @@@@   @            \n" +
+               "                                                                           `@                       \n" +
+               "                                                                           @.                       \n" +
+               "                                                                      ,@''@@                        \n" +
+               "                                                                                                    \n" +
+               "                                                                                   @AU. GL LF JZ    \n" +
+               "                                                                                   www.newegg.com   \n" +
+               "                                                                                                    \n";
+    console.log(log);
+}

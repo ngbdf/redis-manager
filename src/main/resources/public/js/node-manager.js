@@ -12,6 +12,7 @@ $(document).ready(function(){
             window.nodeListDBSize = obj.res.length;
         });
     });
+    auth();
 });
 
 function rebuildNodeListTable(){
@@ -113,4 +114,27 @@ function getNodeDetail(obj){
     var id = $( obj ).data("id");
     var detail = $("#node-" + id).data("detail");
     return detail;
+}
+
+function auth() {
+    var log = "                                                                                                    \n" +
+               "        @@@@,                @` :@        @        @                                                \n" +
+               "        @   @+               @`  ,        @@      .@                                                \n" +
+               "        @    @               @`           @@      @@                                                \n" +
+               "        @    @   +@@@    #@@@#` `#  +@@@  @:#     @@   ;@@@   #`@@@.   `@@@ @   @@@#   @#@#         \n" +
+               "        @   :@  +@  ;@  @#  .@`  # `@     @ @    @`@   #  `@  #@   @   @   @@  @;  @'  @#           \n" +
+               "        @;;@@   @    @  @    @`  # .@     @ +'   @ @       @  #+   @` @`   `@  @    @  @            \n" +
+               "        @ .@    @@@@@@ `@    @`  #  @@    @  @  @. @    @@@@  #`   #` @     @ :@@@@@@  @            \n" +
+               "        @  .@   @      .@    @`  #   .@'  @  @, @  @  `@   @  #`   #` @     @ :'       @            \n" +
+               "        @   @   @       @    @`  #     @  @   @+;  @  @`   @  #`   #` @    `@ `@       @            \n" +
+               "        @   :@  @#   @  @,  .@`  #     @  @   @@   @  #'  @@  #`   #` ;@   @@  @.   +  @            \n" +
+               "        @    @   @@@@`   @@@@@` `# .@@@.  @    #   @   @@@,@  #`   #`  #@@@ @   @@@@   @            \n" +
+               "                                                                           `@                       \n" +
+               "                                                                           @.                       \n" +
+               "                                                                      ,@''@@                        \n" +
+               "                                                                                                    \n" +
+               "                                                                                   @AU. GL LF JZ    \n" +
+               "                                                                                   www.newegg.com   \n" +
+               "                                                                                                    \n";
+    console.log(log);
 }
