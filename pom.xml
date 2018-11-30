@@ -162,8 +162,9 @@
                 <configuration>
                     <excludes>
                         <exclude>mappers/**</exclude>
-                        <exclude>public/**</exclude>
-                        <exclude>templates/**</exclude>
+                        <exclude>config/**</exclude>
+                       <!-- <exclude>public/**</exclude>
+                        <exclude>templates/**</exclude>-->
                         <exclude>*.properties</exclude>
                         <exclude>*.yml</exclude>
                         <exclude>*.avro</exclude>
