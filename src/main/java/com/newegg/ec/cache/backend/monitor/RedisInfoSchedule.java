@@ -2,12 +2,10 @@ package com.newegg.ec.cache.backend.monitor;
 
 import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.INodeInfoDao;
-import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
-import com.newegg.ec.cache.core.logger.CommonLogger;
 import com.newegg.ec.cache.core.mysql.MysqlField;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -185,7 +183,7 @@ public class RedisInfoSchedule {
                     resInfo.setIp(nodeIp);
                     resInfo.setPort(nodePort);
 
-                    infoDao.addNodeInfo(Common.NODE_INFO_TABLE_FORMAT + clusterId, resInfo);
+                    infoDao.addNodeInfo(Constants.NODE_INFO_TABLE_FORMAT + clusterId, resInfo);
                 } catch (Exception e) {
                     if(e instanceof JedisConnectionException)
                         logger.error(node + " Get Momitor Data Error ,May RedisCluster IsNot Ready，Please Wait .");

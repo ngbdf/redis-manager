@@ -37,7 +37,7 @@ cache:
     mysql:
         scan.package: com.newegg.ec.cache
         # 配置成跟 jdbc 连接的信息一样
-        database.name: redis_manager_new
+        database.name: redis_manager
         # 用于删除 7 天的后的数据
         clearn.day: 7
     # 支持的插件多个可以用逗号隔开
@@ -64,5 +64,5 @@ cache:
             # 安装的基础路径
             basepath: redis-cluster/
         # 可以安装的 tar 包
-        image: redis3.0.6.tar,redis-4.0.8.tar,redis-4.0.10.tar
+        image: redis3.0.6.tar,redis-4.0.10.tar
 

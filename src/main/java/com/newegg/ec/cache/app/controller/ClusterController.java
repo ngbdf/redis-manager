@@ -109,7 +109,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/listClusterByUser", method = RequestMethod.GET)
     @ResponseBody
-    public Response listClusterByUser(@SessionAttribute(Common.SESSION_USER_KEY) User user) {
+    public Response listClusterByUser(@SessionAttribute(Constants.SESSION_USER_KEY) User user) {
         List<Cluster> listCluster = null;
         listCluster = logic.getClusterListByUser(user);
         return Response.Result(0, listCluster);
@@ -117,7 +117,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/getClusterListInfo", method = RequestMethod.GET)
     @ResponseBody
-    public Response getClusterListInfo(@SessionAttribute(Common.SESSION_USER_KEY) User user) {
+    public Response getClusterListInfo(@SessionAttribute(Constants.SESSION_USER_KEY) User user) {
         Map<String, Integer> clusterListInfo = null;
         if (user != null) {
             clusterListInfo = logic.getClusterListInfo(user.getUserGroup());

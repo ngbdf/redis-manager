@@ -1,7 +1,7 @@
 package com.newegg.ec.cache.app.controller;
 
 import com.newegg.ec.cache.app.component.NodeManager;
-import com.newegg.ec.cache.app.model.Common;
+import com.newegg.ec.cache.app.model.Constants;
 import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.model.User;
 import com.newegg.ec.cache.core.userapi.UserAccess;
@@ -35,13 +35,13 @@ public class NodeController {
     }
 
     @RequestMapping("/install")
-    public String cluster(Model model, @SessionAttribute(Common.SESSION_USER_KEY) User user) {
+    public String cluster(Model model, @SessionAttribute(Constants.SESSION_USER_KEY) User user) {
         model.addAttribute("user", user);
         return "installNode";
     }
 
     @RequestMapping("/manager")
-    public String manager(Model model, @SessionAttribute(Common.SESSION_USER_KEY) User user) {
+    public String manager(Model model, @SessionAttribute(Constants.SESSION_USER_KEY) User user) {
         model.addAttribute("user", user);
         return "nodeManager";
     }

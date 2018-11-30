@@ -1,6 +1,6 @@
 package com.newegg.ec.cache.app.util;
 
-import com.newegg.ec.cache.app.model.Common;
+import com.newegg.ec.cache.app.model.Constants;
 import com.newegg.ec.cache.app.model.User;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -54,10 +54,10 @@ public class RequestUtil {
     }
 
     public static User getUser() {
-        return (User) getObject(Common.SESSION_USER_KEY);
+        return (User) getObject(Constants.SESSION_USER_KEY);
     }
 
     public static void setUser(User user) {
-        setObject(Common.SESSION_USER_KEY, user);
+        setObject(Constants.SESSION_USER_KEY, user);
     }
 }

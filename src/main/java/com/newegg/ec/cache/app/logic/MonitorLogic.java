@@ -33,27 +33,27 @@ public class MonitorLogic {
     private INodeInfoDao nodeDao;
 
     public List<NodeInfo> getGroupNodeInfo(int clusterId, int startTime, int endTime, String host, String type, String date) {
-        return nodeDao.getGroupNodeInfo(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, type, date);
+        return nodeDao.getGroupNodeInfo(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, type, date);
     }
 
     public List<Map> getMaxField(int clusterId, int startTime, int endTime, String key, int limit) {
-        return nodeDao.getMaxField(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
+        return nodeDao.getMaxField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
     }
 
     public List<Map> getMinField(int clusterId, int startTime, int endTime, String key, int limit) {
-        return nodeDao.getMinField(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
+        return nodeDao.getMinField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
     }
 
     public String getAvgField(int clusterId, int startTime, int endTime, String host, String key) {
-        return nodeDao.getAvgField(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, key);
+        return nodeDao.getAvgField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, key);
     }
 
     public String getAllField(int clusterId, int startTime, int endTime, String key) {
-        return nodeDao.getAllField(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key);
+        return nodeDao.getAllField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key);
     }
 
     public NodeInfo getLastNodeInfo(int clusterId, int startTime, int endTime, String host) {
-        return nodeDao.getLastNodeInfo(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host);
+        return nodeDao.getLastNodeInfo(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host);
     }
 
     public List<RedisSlowLog> getSlowLogs(SlowLogParam slowLogParam) {

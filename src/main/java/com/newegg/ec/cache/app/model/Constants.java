@@ -1,9 +1,11 @@
 package com.newegg.ec.cache.app.model;
 
 /**
- * Created by gl49 on 2018/5/2.
+ *
+ * @author gl49
+ * @date 2018/5/2
  */
-public class Common {
+public class Constants {
 
     public final static String SESSION_USER_KEY = "user";
 
@@ -18,6 +20,9 @@ public class Common {
     public static final String CLUSTER_FAIL_NUMBER = "clusterFailNumber";
 
     public static final String CLUSTER_STATE = "cluster_state";
+
+    public static final String CLUSTER_ID = "clusterId";
+
 
 
 }

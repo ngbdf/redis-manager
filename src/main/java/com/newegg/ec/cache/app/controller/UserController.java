@@ -1,7 +1,7 @@
 package com.newegg.ec.cache.app.controller;
 
 import com.newegg.ec.cache.app.logic.UserLogic;
-import com.newegg.ec.cache.app.model.Common;
+import com.newegg.ec.cache.app.model.Constants;
 import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.model.User;
 import com.newegg.ec.cache.core.userapi.UserAccess;
@@ -46,7 +46,7 @@ public class UserController {
         if (null != user && user.getPassword().equals(password)) {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             HttpSession session = request.getSession();
-            session.setAttribute(Common.SESSION_USER_KEY, user);
+            session.setAttribute(Constants.SESSION_USER_KEY, user);
             return Response.Success();
         }
         return Response.Error("用户名或密码填写有误");
@@ -57,7 +57,7 @@ public class UserController {
     public Response logout() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         HttpSession session = request.getSession();
-        session.removeAttribute(Common.SESSION_USER_KEY);
+        session.removeAttribute(Constants.SESSION_USER_KEY);
         return Response.Info("logout");
     }
 
@@ -73,7 +73,7 @@ public class UserController {
     public Response autoGetUser() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         HttpSession session = request.getSession();
-        User user = (User) session.getAttribute(Common.SESSION_USER_KEY);
+        User user = (User) session.getAttribute(Constants.SESSION_USER_KEY);
         return Response.Result(0, user);
     }
 
@@ -93,9 +93,9 @@ public class UserController {
 
     @RequestMapping(value = "/listGroup", method = RequestMethod.GET)
     @ResponseBody
-    public Response listGroup(@SessionAttribute(Common.SESSION_USER_KEY) User user) {
+    public Response listGroup(@SessionAttribute(Constants.SESSION_USER_KEY) User user) {
         List<String> list = new ArrayList<>();
-        if (user.getUserGroup().equals(Common.ADMIN_GROUP)) {
+        if (user.getUserGroup().equals(Constants.ADMIN_GROUP)) {
             list = logic.getGroups();
         } else {
             list.add(user.getUserGroup());

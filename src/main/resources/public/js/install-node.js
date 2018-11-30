@@ -54,7 +54,8 @@ function  createClusterStep( data, clusterId){
                 var cluster = obj.res;
                 $("[name='clusterName']").val( cluster.clusterName );
                 $("[name='clusterName']").attr("disabled","disabled");
-                console.log( cluster );
+                $("[name='redisPassword']").val(cluster.redisPassword);
+                $("[name='redisPassword']").attr("disabled", "disabled");
             });
             getNodeByClusterId(window.pluginType, clusterId, function(obj){
                 var node = obj.res;
@@ -62,6 +63,7 @@ function  createClusterStep( data, clusterId){
                 $("[name='image']").attr("disabled","disabled");
                 $('[name="userGroup"]').selectpicker("val", node.userGroup);
                 $('[name="userGroup"]').attr("disabled","disabled");
+
                 if( node.username ){
                     $('[name="username"]').val(node.username);
                     $('[name="username"]').attr("disabled","disabled");

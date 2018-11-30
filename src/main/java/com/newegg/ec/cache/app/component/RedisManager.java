@@ -240,8 +240,9 @@ public class RedisManager {
 
                     ConnectionParam param = new ConnectionParam(masterIp, masterPort, cluster.getRedisPassword());
                     // 如果扩容有密码的集群，meet的时候不需要认证密码
-                    if (isExtends)
+                    if (isExtends) {
                         param = new ConnectionParam(masterIp, masterPort);
+                    }
                     clusterMeet(param, currentAliableIp, currentAliablePort);
                     for (RedisNode redisNode : slaveList) {
                         logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is meet cluster");

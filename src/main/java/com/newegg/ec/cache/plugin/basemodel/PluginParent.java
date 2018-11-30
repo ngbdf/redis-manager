@@ -3,6 +3,7 @@ package com.newegg.ec.cache.plugin.basemodel;
 import com.newegg.ec.cache.app.component.RedisManager;
 import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.Cluster;
+import com.newegg.ec.cache.app.model.Constants;
 import com.newegg.ec.cache.app.model.RedisNode;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
@@ -19,8 +20,20 @@ import java.util.Map;
  */
 @Component
 public abstract class PluginParent {
-    public static final String IPLIST_NAME = "iplist";
-    public static final String IMAGE = "image";
+    protected static final String IPLIST_NAME = "iplist";
+
+    protected static final String IMAGE = "image";
+
+    protected static final String CLUSTER_ID = "clusterId";
+
+    protected static final String USER_GROUP = "userGroup";
+
+    protected static final String PLUGIN_TYPE = "pluginType";
+
+    protected static final String CLUSTER_NAME = "clusterName";
+
+    protected static final String REDIS_PASSWORD = "redisPassword";
+
     @Resource
     protected ClusterLogic clusterLogic;
 
@@ -41,35 +54,34 @@ public abstract class PluginParent {
         // 判断节点是否成功
         boolean checkRes = pluginParent.checkInstallResult(nodelist);
         int clusterId = 0;
-        if (checkRes) { // 如果安装成功
+        // 如果安装成功
+        if (checkRes) {
             boolean isExtends = false;
-            if (reqParam.containsKey("clusterId")) {  //如果有传 clusterId 那么证明是从扩容界面来的
-                clusterId = reqParam.getInt("clusterId");
+            //如果有传 clusterId 那么证明是从扩容界面来的，如果有密码，则将新增的节点密码设置为同之前一样
+            String redisPassword = null;
+            if(reqParam.containsKey(REDIS_PASSWORD)){
+                redisPassword = reqParam.getString(REDIS_PASSWORD);
+            }
+            if (reqParam.containsKey(CLUSTER_ID)) {
+                clusterId = reqParam.getInt(CLUSTER_ID);
                 isExtends = true;
             } else {
                 clusterId = pluginParent.addCluster(reqParam);
             }
+            // 新增节点
             if (clusterId != -1) {
                 pluginParent.addNodeList(reqParam, clusterId);
+                Cluster cluster = clusterLogic.getCluster(clusterId);
+                redisPassword = cluster.getRedisPassword();
             }
             pluginParent.buildRedisCluster(clusterId, ipMap,isExtends);
 
-            // 建立集群成功：如果redis需要设置密码，统一auth
-            if(reqParam.containsKey("redisPasswd")){
-                String redisPasswd = reqParam.getString("redisPasswd");
-                if(StringUtils.isNotEmpty(redisPasswd)){
-                    auth(reqParam.getString(IPLIST_NAME),redisPasswd);
-                    updateClusterPassword(clusterId, redisPasswd);
-                }
+            // 建立集群成功：如果redis需要设置密码，统一auth，默认一套集群对应一个密码
+            if(StringUtils.isNotEmpty(redisPassword)){
+                auth(reqParam.getString(IPLIST_NAME), redisPassword);
             }
-
         }
         return checkRes;
-    }
-
-    public static void main(String[] args) {
-        JSONObject p = new JSONObject();
-        System.out.println(p.containsKey("a"));
     }
 
     protected abstract boolean checkInstall(JSONObject reqParam);
@@ -83,7 +95,7 @@ public abstract class PluginParent {
      * @param ipListStr
      * @return
      */
-    protected abstract void auth(String ipListStr , String redisPasswd);
+    protected abstract void auth(String ipListStr , String redisPassword);
 
     /**
      * table cluster 写入数据
@@ -105,9 +117,10 @@ public abstract class PluginParent {
         if (StringUtils.isNotEmpty(node.getIp())) {
             Cluster cluster = new Cluster();
             cluster.setAddress(node.getIp() + ":" + node.getPort());
-            cluster.setUserGroup(reqParam.get("userGroup").toString());
-            cluster.setClusterType(reqParam.get("pluginType").toString());
-            cluster.setClusterName(reqParam.get("clusterName").toString());
+            cluster.setUserGroup(reqParam.getString(USER_GROUP));
+            cluster.setClusterType(reqParam.getString(PLUGIN_TYPE));
+            cluster.setClusterName(reqParam.getString(CLUSTER_NAME));
+            cluster.setRedisPassword(reqParam.getString(REDIS_PASSWORD));
             clusterId = clusterLogic.addCluster(cluster);
         }
         return clusterId;

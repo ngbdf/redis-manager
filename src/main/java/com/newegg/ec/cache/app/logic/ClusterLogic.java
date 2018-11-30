@@ -62,7 +62,7 @@ public class ClusterLogic {
 
     public Map<String, List<Cluster>> getClusterMap(String group) {
         Map<String, List<Cluster>> clusterMap = new HashedMap();
-        if (group.equals(Common.ADMIN_GROUP)) {
+        if (group.equals(Constants.ADMIN_GROUP)) {
             List<String> groups = clusterDao.getClusterGroups();
             for (String groupStr : groups) {
                 clusterMap.put(groupStr, clusterDao.getClusterList(groupStr));
@@ -85,7 +85,7 @@ public class ClusterLogic {
         try {
             String type= clusterDao.getCluster(clusterId).getClusterType();
             clusterDao.removeCluster(clusterId);
-            String tableName = Common.NODE_INFO_TABLE_FORMAT + clusterId;
+            String tableName = Constants.NODE_INFO_TABLE_FORMAT + clusterId;
             nodeInfoTable.dropTable(tableName);
             //删除对应nodelist数据 todo
             switch (type){
@@ -111,12 +111,12 @@ public class ClusterLogic {
         int clusterOkNumber = 0;
         int clusterFailNumber = 0;
         if (StringUtils.isNotBlank(userGroup)) {
-            if (userGroup.equalsIgnoreCase(Common.ADMIN_GROUP)) {
+            if (userGroup.equalsIgnoreCase(Constants.ADMIN_GROUP)) {
                 userGroup = null;
             }
             List<Cluster> clusterList = clusterDao.getClusterList(userGroup);
             if (clusterList != null && clusterList.size() > 0) {
-                clusterListInfo.put(Common.CLUSTER_NUMBER, clusterList.size());
+                clusterListInfo.put(Constants.CLUSTER_NUMBER, clusterList.size());
                 for (Cluster cluster : clusterList) {
                     if (getClusterState(cluster.getId())) {
                         clusterOkNumber++;
@@ -124,12 +124,12 @@ public class ClusterLogic {
                         clusterFailNumber++;
                     }
                 }
-                clusterListInfo.put(Common.CLUSTER_OK_NUMBER, clusterOkNumber);
-                clusterListInfo.put(Common.CLUSTER_FAIL_NUMBER, clusterFailNumber);
+                clusterListInfo.put(Constants.CLUSTER_OK_NUMBER, clusterOkNumber);
+                clusterListInfo.put(Constants.CLUSTER_FAIL_NUMBER, clusterFailNumber);
             } else {
-                clusterListInfo.put(Common.CLUSTER_NUMBER, 0);
-                clusterListInfo.put(Common.CLUSTER_OK_NUMBER, 0);
-                clusterListInfo.put(Common.CLUSTER_FAIL_NUMBER, 0);
+                clusterListInfo.put(Constants.CLUSTER_NUMBER, 0);
+                clusterListInfo.put(Constants.CLUSTER_OK_NUMBER, 0);
+                clusterListInfo.put(Constants.CLUSTER_FAIL_NUMBER, 0);
             }
         }
         return clusterListInfo;
@@ -143,7 +143,7 @@ public class ClusterLogic {
                 cluster.setAddress(cluster.getAddress());
                 cluster.setUserGroup(cluster.getUserGroup());
                 cluster.setClusterName(cluster.getClusterName());
-                nodeInfoTable.createTable(Common.NODE_INFO_TABLE_FORMAT + cluster.getId());
+                nodeInfoTable.createTable(Constants.NODE_INFO_TABLE_FORMAT + cluster.getId());
                 res = cluster.getId();
             }
         } catch (Exception e) {
@@ -199,7 +199,7 @@ public class ClusterLogic {
         try {
             Host host = getClusterHost(clusterId);
             final Map<String, String> clusterInfo = getClusterInfo(clusterId, host.getIp(), host.getPort());
-            String state = clusterInfo.get(Common.CLUSTER_STATE);
+            String state = clusterInfo.get(Constants.CLUSTER_STATE);
             if ("ok".equals(state)) {
                 res = true;
             }
@@ -231,7 +231,7 @@ public class ClusterLogic {
 
     public List<Cluster> getClusterList(String group) {
         List<Cluster> clusterList = new ArrayList<>();
-        if (group.equals(Common.ADMIN_GROUP)) {
+        if (group.equals(Constants.ADMIN_GROUP)) {
             List<String> groups = clusterDao.getClusterGroups();
             for (String groupStr : groups) {
                 clusterList.addAll(clusterDao.getClusterList(groupStr));

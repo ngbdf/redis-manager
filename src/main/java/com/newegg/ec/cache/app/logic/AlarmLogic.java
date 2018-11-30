@@ -22,6 +22,7 @@ import java.util.Map;
 public class AlarmLogic {
     @Autowired
     IClusterCheckRuleDao clusterCheckRuleDao;
+
     @Autowired
     IClusterCheckLogDao clusterCheckLogDao;
 
