@@ -79,6 +79,7 @@ public abstract class PluginParent {
             // 建立集群成功：如果redis需要设置密码，统一auth，默认一套集群对应一个密码
             if(StringUtils.isNotEmpty(redisPassword)){
                 auth(reqParam.getString(IPLIST_NAME), redisPassword);
+                updateClusterPassword(clusterId, redisPassword);
             }
         }
         return checkRes;
@@ -120,7 +121,6 @@ public abstract class PluginParent {
             cluster.setUserGroup(reqParam.getString(USER_GROUP));
             cluster.setClusterType(reqParam.getString(PLUGIN_TYPE));
             cluster.setClusterName(reqParam.getString(CLUSTER_NAME));
-            cluster.setRedisPassword(reqParam.getString(REDIS_PASSWORD));
             clusterId = clusterLogic.addCluster(cluster);
         }
         return clusterId;
