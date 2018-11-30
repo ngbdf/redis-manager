@@ -62,15 +62,18 @@ public abstract class PluginParent {
             if(reqParam.containsKey(REDIS_PASSWORD)){
                 redisPassword = reqParam.getString(REDIS_PASSWORD);
             }
-            if (reqParam.containsKey(CLUSTER_ID)) {
+            ;
+            if (reqParam.containsKey(CLUSTER_ID) && StringUtils.isNotBlank(reqParam.getString(CLUSTER_ID))) {
                 clusterId = reqParam.getInt(CLUSTER_ID);
                 isExtends = true;
             } else {
                 clusterId = pluginParent.addCluster(reqParam);
             }
-            // 新增节点
+
+            // 集群已经存在，新增节点
             if (clusterId != -1) {
                 pluginParent.addNodeList(reqParam, clusterId);
+                // 获取之前节点的密码，为了统一
                 Cluster cluster = clusterLogic.getCluster(clusterId);
                 redisPassword = cluster.getRedisPassword();
             }
