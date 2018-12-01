@@ -256,7 +256,6 @@ $(document).on("click", ".status-type", function(){
     });
 });
 
-
 function table_tr_prepend(index){
     $("tr.slave[data-index=" + index + "]").each(function(){
         $("#nodes-details").prepend( $(this).prop("outerHTML") );
@@ -313,9 +312,15 @@ $(document).on("click", ".be-master", function(){
     sparrow_win.confirm('Confirm set the node master',function(){
         beMaster(ip,port,function(){
             sparrow_win.msg("be master");
+            delay(function(){show_cluster_node_list( window.cluster.address )});
         });
      });
 });
+
+// delay 3 second
+function delay(fun){
+    setTimeout(fun, 3000);
+}
 
 $(document).on("click", ".move-slot", function(){
     var ip = $(this).data("ip");
@@ -352,6 +357,7 @@ $(document).on("click", ".forget-node", function(){
             }else{
                 forgetNode(ip,port,masterId, function(){
                      sparrow_win.msg("forget node");
+                     delay(function(){show_cluster_node_list( window.cluster.address )});
                 });
             }
         });
@@ -369,6 +375,7 @@ $(document).on("click", ".be-slave", function(){
             var masterId = $(this).data("nodeid");
             beSlave(ip,port,masterId, function(){
                 sparrow_win.msg("move slave ...");
+                delay(function(){show_cluster_node_list( window.cluster.address )});
             });
         });
     });
