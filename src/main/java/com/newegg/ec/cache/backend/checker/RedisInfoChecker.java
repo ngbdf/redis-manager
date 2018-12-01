@@ -10,7 +10,6 @@ import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.MathExpressionCalculateUtil;
 import com.newegg.ec.cache.backend.checker.strategy.impl.MailNotify;
-import com.newegg.ec.cache.backend.checker.strategy.impl.WechatNotify;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
@@ -48,8 +47,6 @@ public class RedisInfoChecker {
     @Autowired
     private MailNotify mailNotify;
 
-    @Autowired
-    private WechatNotify wechatNotify;
 
     /**
      * 格式化NodeInfo数据
@@ -75,11 +72,11 @@ public class RedisInfoChecker {
 
     /**
      * 告警通知策略 : 通过实现接口定制化，可以是邮件，微信，短信等任意形式
-     *   默认使用邮件告警策略，用只要配置邮件相关参数即可
+     *   默认使用邮件告警策略，用只要配置邮件服务器相关参数即可
      */
     @Scheduled(fixedRateString = "${schedule.notify.alarm}", initialDelay = 1000 * 60)
     public void EarlyWarningNotify() {
-        wechatNotify.notifyUser();
+        mailNotify.notifyUser();
     }
 
     /**
