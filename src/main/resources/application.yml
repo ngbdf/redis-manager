@@ -75,5 +75,5 @@ cache:
             # 安装的基础路径
             basepath: redis-cluster/
         # 可以安装的 tar 包
-        image: redis3.0.6.tar,redis-4.0.10.tar
+        image: redis-4.0.10.tar,redis3.0.6.tar
 

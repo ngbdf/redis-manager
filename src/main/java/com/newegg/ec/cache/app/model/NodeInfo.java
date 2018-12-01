@@ -20,7 +20,7 @@ public class NodeInfo {
     private long usedMemoryRss;
     @MysqlField(field = "used_memory_peak", type = "bigint")
     private long usedMemoryPeak;
-    @MysqlField(field = "mem_fragmentation_ratio", type = "bigint")
+    @MysqlField(field = "mem_fragmentation_ratio", type = "float")
     private float memFragmentationRatio;
     @MysqlField(field = "aof_enabled", type = "bigint")
     private long aofEnabled;

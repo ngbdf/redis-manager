@@ -38,7 +38,7 @@ public abstract class AbstractNotifyStrategy implements NotifyStrategy,Applicati
     }
 
     @Override
-    public void notifyUser() {
+    public final void notifyUser() {
         if (checkNotify()) {
             List<Cluster> clusterList = clusterDao.getClusterList(null);
             long time = DateUtil.getBeforeMinutesTime(10);
