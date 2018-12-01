@@ -23,7 +23,6 @@ public class SlotRebanlance {
 
     public static void kuorong() {
         List<Shade> initShades = getShades("init", initCount);
-        System.out.println("init:" + initShades);
         List<Shade> targetShades = getShades("", targetCount);
         System.out.println("target:" + targetShades);
 

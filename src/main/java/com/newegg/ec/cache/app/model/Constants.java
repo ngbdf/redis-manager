@@ -23,6 +23,6 @@ public class Constants {
 
     public static final String CLUSTER_ID = "clusterId";
 
-
+    public static final String IS_SAFE = "isSafe";
 
 }

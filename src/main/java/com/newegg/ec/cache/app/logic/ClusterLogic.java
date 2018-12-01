@@ -33,6 +33,7 @@ import java.util.Map;
  */
 @Component
 public class ClusterLogic {
+
     private static Log logger = LogFactory.getLog(ClusterLogic.class);
 
     @Value("${cache.redis.client}")
@@ -348,7 +349,9 @@ public class ClusterLogic {
                 } finally {
                     redisClient.closeClient();
                 }
+                System.out.println("Install success");
             }
+
 
         } catch (Exception e) {
             logger.error("add RedisPassd error, ip: " + ip + ", port: " + port, e);

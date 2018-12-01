@@ -21,6 +21,7 @@ $(document).on("click", "#start-install-cluster", function(obj){
         if( window.clusterId ){
             installParam.clusterId = clusterId;
         }
+        console.log(installParam);
         var param = {
             "pluginType": window.pluginType,
             "req": installParam

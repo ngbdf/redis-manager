@@ -39,13 +39,16 @@ $(document).on("click", ".collapsed", function(res){
 $(document).on("click", ".cluster-info-detail", function(res){
     var clusterId = $(this).data("cluster-id");
     var address = $(this).data("cluster-address");
-
     getCluster(clusterId , function(obj){
         var data = {};
         data.clusterType = obj.res.clusterType;
+        data.redisPassword = obj.res.redisPassword;
         getClusterInfoByAddress(clusterId, address, function(obj){
             data.res = obj.res;
             smarty.html( "monitor/cluster_info", data, "cluster-info-" + clusterId,function () {
+                if(data.res.cluster_state != "ok") {
+                    $("#cluster-" + clusterId).addClass("cluster-container-fail");
+                }
                 countWarningLogByClusterId(clusterId, function(obj){
                     var alarmNumber = parseInt(obj.res);
                     if(alarmNumber > 0){

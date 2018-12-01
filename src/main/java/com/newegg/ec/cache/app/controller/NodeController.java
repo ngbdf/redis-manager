@@ -11,6 +11,8 @@ import com.newegg.ec.cache.plugin.basemodel.NodeRequestPram;
 import com.newegg.ec.cache.plugin.basemodel.PluginType;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +27,11 @@ import java.util.List;
 @RequestMapping("/node")
 @UserAccess
 public class NodeController {
+
+    private static final Log logger = LogFactory.getLog(NodeController.class);
+
     private INodeOperate nodeOperate;
+
     @Resource
     private NodeManager nodeManager;
 
@@ -131,6 +137,7 @@ public class NodeController {
     @RequestMapping(value = "/nodeInstall", method = RequestMethod.POST)
     @ResponseBody
     public Response nodeInstall(@RequestBody NodeRequestPram nodeRequestPram) {
+        logger.info("Install: " + nodeRequestPram);
         nodeOperate = nodeManager.factoryOperate(nodeRequestPram.getPluginType());
         boolean res = nodeOperate.install(nodeRequestPram.getReq());
         if (res) {

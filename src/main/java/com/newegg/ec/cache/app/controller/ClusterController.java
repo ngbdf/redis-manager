@@ -5,6 +5,7 @@ import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.RequestUtil;
 import com.newegg.ec.cache.core.userapi.UserAccess;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,11 +27,6 @@ public class ClusterController {
 
     @Autowired
     private NodeInfoDao nodeInfoTable;
-
-    @RequestMapping("/clusterListManager")
-    public String clusterListManager(Model model) {
-        return "clusterListManager";
-    }
 
     @RequestMapping("/clusterManager")
     public String clusterManager(Model model) {
@@ -69,17 +65,15 @@ public class ClusterController {
     @RequestMapping(value = "/listCluster", method = RequestMethod.GET)
     @ResponseBody
     public Response listCluster() {
-        List<Cluster> listCluster = null;
         String userGroup = RequestUtil.getUser().getUserGroup();
-        listCluster = logic.getClusterList(userGroup);
+        List<Cluster> listCluster = logic.getClusterList(userGroup);
         return Response.Result(0, listCluster);
     }
 
     @RequestMapping(value = "/getClusterListByGroup", method = RequestMethod.GET)
     @ResponseBody
     public Response getClusterListByGroup(@RequestParam String group) {
-        List<Cluster> listCluster = null;
-        listCluster = logic.getClusterListByGroup(group);
+        List<Cluster> listCluster = logic.getClusterListByGroup(group);
         return Response.Result(0, listCluster);
     }
 

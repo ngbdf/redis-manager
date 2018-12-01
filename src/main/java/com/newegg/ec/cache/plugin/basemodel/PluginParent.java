@@ -9,6 +9,8 @@ import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -20,6 +22,9 @@ import java.util.Map;
  */
 @Component
 public abstract class PluginParent {
+
+    private static final Log logger = LogFactory.getLog(PluginParent.class);
+
     protected static final String IPLIST_NAME = "iplist";
 
     protected static final String IMAGE = "image";
@@ -41,6 +46,7 @@ public abstract class PluginParent {
     private RedisManager redisManager;
 
     public boolean installTemplate(PluginParent pluginParent, JSONObject reqParam) {
+        logger.info("Request Param: " + reqParam);
         //重新检查一下各种权限
         boolean checkReq = pluginParent.checkInstall(reqParam);
         if (!checkReq) {
@@ -49,6 +55,8 @@ public abstract class PluginParent {
         String ipListStr = reqParam.getString(IPLIST_NAME);
         Map<RedisNode, List<RedisNode>> ipMap = JedisUtil.getInstallNodeMap(ipListStr);
         List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
+
+
         // 安装节点
         pluginParent.installNodeList(reqParam, nodelist);
         // 判断节点是否成功
@@ -62,10 +70,13 @@ public abstract class PluginParent {
             if(reqParam.containsKey(REDIS_PASSWORD)){
                 redisPassword = reqParam.getString(REDIS_PASSWORD);
             }
-            ;
+            logger.info(redisPassword);
             if (reqParam.containsKey(CLUSTER_ID) && StringUtils.isNotBlank(reqParam.getString(CLUSTER_ID))) {
                 clusterId = reqParam.getInt(CLUSTER_ID);
                 isExtends = true;
+                // 获取之前节点的密码，为了统一
+                Cluster cluster = clusterLogic.getCluster(clusterId);
+                redisPassword = cluster.getRedisPassword();
             } else {
                 clusterId = pluginParent.addCluster(reqParam);
             }
@@ -73,9 +84,6 @@ public abstract class PluginParent {
             // 集群已经存在，新增节点
             if (clusterId != -1) {
                 pluginParent.addNodeList(reqParam, clusterId);
-                // 获取之前节点的密码，为了统一
-                Cluster cluster = clusterLogic.getCluster(clusterId);
-                redisPassword = cluster.getRedisPassword();
             }
             pluginParent.buildRedisCluster(clusterId, ipMap,isExtends);
 

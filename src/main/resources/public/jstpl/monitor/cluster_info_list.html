@@ -2,12 +2,17 @@
     {{foreach from=$res item=cluster}}
         {{if !empty($cluster) }}
             <div class="col-lg-3 col-sm-6">
-                <div class="cluster-container">
+                <div class="cluster-container" id="cluster-{{$cluster.id}}">
                     <section class="panel">
                         <div class="panel-body">
                             <div class="monitor-box-header">
                                 <div class="cluster-title">
-                                    <b class="cluster-info-detail cluster-info-detail-{{$cluster.userGroup}}"  data-cluster-address="{{$cluster.address}}" data-group="{{$cluster.userGroup}}" data-cluster-id="{{$cluster.id}}">{{$cluster.clusterName}}</b>
+                                    <b class="cluster-info-detail cluster-info-detail-{{$cluster.userGroup}}"  data-cluster-address="{{$cluster.address}}" data-group="{{$cluster.userGroup}}" data-cluster-id="{{$cluster.id}}">
+                                        <span>{{$cluster.clusterName}}</span>
+                                        {{if !empty($cluster.redisPassword)}}
+                                            <i class="icon-shield safe" title="With redis password"></i>
+                                        {{/if}}
+                                    </b>
                                     <div class="delete-container" data-cluster-id="{{$cluster.id}}">
                                         <i class="icon-remove"></i>
                                         <!--<i class="icon-remove"></i>-->

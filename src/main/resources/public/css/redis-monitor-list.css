@@ -44,8 +44,12 @@
 	box-shadow: 0 5px 10px -6px rgba(0,0,0,.2);
 }
 
-.list-container ul li:hover {
+.cluster-container:hover {
     box-shadow: 0 6px 25px -6px rgba(0,0,0,.2);
+}
+
+.cluster-container-fail, .cluster-container-fail:hover{
+    box-shadow: 0 5px 10px rgb(249, 139, 130);
 }
 
 .icon-chart-container {
@@ -251,4 +255,9 @@
     border: 1px solid #e2e2e4;
     box-shadow: none;
     color: #756363;
+}
+
+.safe {
+    margin-left: 15px;
+    color: #00bb9a;
 }
