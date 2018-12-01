@@ -10,7 +10,7 @@
                                     <b class="cluster-info-detail cluster-info-detail-{{$cluster.userGroup}}"  data-cluster-address="{{$cluster.address}}" data-group="{{$cluster.userGroup}}" data-cluster-id="{{$cluster.id}}">
                                         <span>{{$cluster.clusterName}}</span>
                                         {{if !empty($cluster.redisPassword)}}
-                                            <i class="icon-shield safe" title="With redis password"></i>
+                                            <i class="icon-shield safe" title="Redis with password"></i>
                                         {{/if}}
                                     </b>
                                     <div class="delete-container" data-cluster-id="{{$cluster.id}}">

@@ -56,7 +56,6 @@ public abstract class PluginParent {
         Map<RedisNode, List<RedisNode>> ipMap = JedisUtil.getInstallNodeMap(ipListStr);
         List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
 
-
         // 安装节点
         pluginParent.installNodeList(reqParam, nodelist);
         // 判断节点是否成功

@@ -52,7 +52,7 @@ cache:
         # 用于删除 7 天的后的数据
         clearn.day: 7
     # 支持的插件多个可以用逗号隔开
-    plugin: machine,humpback
+    plugin: machine,docker
     # humpback 相关配置
     humpback:
         # 镜像列表, 如果没有humpback，则可为空
