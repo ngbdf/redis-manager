@@ -80,6 +80,6 @@ public class DateUtil {
         Calendar beforeTime = Calendar.getInstance();
         beforeTime.add(Calendar.MINUTE, -num);
         Date beforeD = beforeTime.getTime();
-        return beforeD.getTime();
+        return beforeD.getTime()/1000;
     }
 }
