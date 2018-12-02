@@ -60,23 +60,29 @@ function  createClusterStep( data, clusterId){
             });
             getNodeByClusterId(window.pluginType, clusterId, function(obj){
                 var node = obj.res;
-                $("[name='image']").selectpicker("val", node.image);
-                $("[name='image']").attr("disabled","disabled");
-                $('[name="userGroup"]').selectpicker("val", node.userGroup);
-                $('[name="userGroup"]').attr("disabled","disabled");
+                //说明这是从我们平台创建的集群
+                if(node != null){
+                        $("[name='image']").selectpicker("val", node.image);
+                        $("[name='image']").attr("disabled","disabled");
+                        $('[name="userGroup"]').selectpicker("val", node.userGroup);
+                        $('[name="userGroup"]').attr("disabled","disabled");
 
-                if( node.username ){
-                    $('[name="username"]').val(node.username);
-                    $('[name="username"]').attr("disabled","disabled");
+                        if( node.username ){
+                            $('[name="username"]').val(node.username);
+                            $('[name="username"]').attr("disabled","disabled");
+                        }
+                        if( node.password ){
+                            $('[name="password"]').val(node.password);
+                            $('[name="password"]').attr("disabled","disabled");
+                        }
+                        if( node.installPath ){
+                            $('[name="installPath"]').val( node.installPath );
+                            $('[name="installPath"]').attr("disabled","disabled");
+                        }
+                }else{
+                     alert("该集群是由外部导入，扩容请务必保证所有节点信息一致");
                 }
-                if( node.password ){
-                    $('[name="password"]').val(node.password);
-                    $('[name="password"]').attr("disabled","disabled");
-                }
-                if( node.installPath ){
-                    $('[name="installPath"]').val( node.installPath );
-                    $('[name="installPath"]').attr("disabled","disabled");
-                }
+
             });
         }
         autosize(document.querySelectorAll('textarea'));

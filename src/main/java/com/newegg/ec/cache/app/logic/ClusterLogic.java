@@ -349,7 +349,7 @@ public class ClusterLogic {
                 } finally {
                     redisClient.closeClient();
                 }
-                System.out.println("Install success");
+                logger.info("Node "+ ip +":"+ port + " Install success");
             }
 
 

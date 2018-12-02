@@ -80,7 +80,6 @@ public class CheckController {
     @ResponseBody
     public Response checkBatchHumpbackContainerName(@RequestBody String req) {
         JSONObject jsonObject = JSONObject.fromObject(req);
-        System.out.println(jsonObject + "container");
         return Response.Success();
     }
 

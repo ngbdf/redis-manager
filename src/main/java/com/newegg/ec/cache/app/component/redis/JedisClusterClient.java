@@ -93,7 +93,6 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
             String ip = masterMap.get("ip");
             int port = Integer.parseInt(masterMap.get("port"));
             // 一个 master 对应一个线程去 scan
-            System.out.println(ip + "port" + port);
             executorPool.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -109,10 +108,10 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
                             scanResult = jedis.scan(scanResult.getStringCursor(), scanParams);
                             RedisManager.importMap.get(importKey).addAndGet(scanResult.getResult().size()); //统计scan的次数
                             importScanResult(scanResult.getResult().iterator(), targetIp, targetPort);
-                            System.out.println(scanResult.getStringCursor() + "---" + RedisManager.importMap.get(importKey).get());
+                            logger.info(scanResult.getStringCursor() + "---" + RedisManager.importMap.get(importKey).get());
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.error("importDataToCluster Error",e);
                     } finally {
                         jedis.close();
                         countDownLatch.countDown();

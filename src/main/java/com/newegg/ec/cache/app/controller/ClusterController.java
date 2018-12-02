@@ -5,7 +5,6 @@ import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.RequestUtil;
 import com.newegg.ec.cache.core.userapi.UserAccess;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -191,7 +190,6 @@ public class ClusterController {
         res.put("nodeList", detailNodeList);
         Map<String, String> clusterInfo = logic.getClusterInfo(clusterId, address);
         res.put("clusterInfo", clusterInfo);
-        //System.out.println(res);
         return Response.Result(0, res);
     }
 
