@@ -257,7 +257,6 @@ $(document).on("click", ".status-type", function(){
     });
 });
 
-
 function table_tr_prepend(index){
     $("tr.slave[data-index=" + index + "]").each(function(){
         $("#nodes-details").prepend( $(this).prop("outerHTML") );
@@ -326,6 +325,11 @@ $(document).on("click", ".be-master", function(){
         });
      });
 });
+
+// delay 3 second
+function delay(fun){
+    setTimeout(fun, 3000);
+}
 
 $(document).on("click", ".move-slot", function(){
     var ip = $(this).data("ip");
