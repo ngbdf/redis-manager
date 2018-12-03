@@ -14,16 +14,16 @@ spring:
   datasource:
       name: serverbase
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://10.16.50.209:4000/redis_manager?useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8
       username: root
       password:
 
   # 如果使用微信报警，填写微信企业号相关信息
-  wechat:
-     alarm:
-      url:
-      roleId: 2
-      alarmsize: 200
+  #wechat:
+     #alarm:
+     #url:
+     #roleId: 2
+     #alarmsize: 200
 
   # 如果使用邮件报警，在此处开启开关并配置log4j邮件相关信息
   mail:
