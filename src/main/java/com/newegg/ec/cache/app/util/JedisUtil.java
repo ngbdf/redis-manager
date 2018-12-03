@@ -1,11 +1,15 @@
 package com.newegg.ec.cache.app.util;
 
+import com.newegg.ec.cache.app.model.ConnectionParam;
 import com.newegg.ec.cache.app.model.Host;
 import com.newegg.ec.cache.app.model.RedisNode;
 import com.newegg.ec.cache.app.model.RedisNodeType;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.util.Slowlog;
 
 import java.io.BufferedReader;
@@ -19,6 +23,9 @@ import java.util.*;
  * Created by gl49 on 2018/4/21.
  */
 public class JedisUtil {
+
+    public static Log logger = LogFactory.getLog(JedisUtil.class);
+
     private JedisUtil() {
         //ignore
     }
@@ -26,24 +33,24 @@ public class JedisUtil {
     /**
      * 获取 redis info
      *
-     * @param ip
-     * @param port
+     * @param param
      * @return
      */
-    public static String getInfo(String ip, int port) {
+    public static String getInfo(ConnectionParam param) {
         String res = "";
         Jedis jedis = null;
         try {
-            jedis = new Jedis(ip, port);
+            jedis = getJedisClient(param);
             res = jedis.info();
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return res;
     }
 
     public static Map<String, String> getMapInfo(String strInfo) {
-        Map<String, String> resMap = new HashMap<>();
+        // LinkedHashMap for db sort
+        Map<String, String> resMap = new LinkedHashMap<>();
         if (StringUtils.isBlank(strInfo)) {
             return resMap;
         }
@@ -57,19 +64,19 @@ public class JedisUtil {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("getMapInfo error",e);
         }
         resMap.put("detail", strInfo);
         return resMap;
     }
 
-    public static Map<String, String> getMapInfo(String ip, int port) {
-        String strInfo = JedisUtil.getInfo(ip, port);
+    public static Map<String, String> getMapInfo(ConnectionParam param) {
+        String strInfo = JedisUtil.getInfo(param);
         return getMapInfo(strInfo);
     }
 
-    public static Map<String, String> getRedisConfig(String ip, int port) {
-        Jedis jedis = new Jedis(ip, port);
+    public static Map<String, String> getRedisConfig(ConnectionParam param) {
+        Jedis jedis = getJedisClient(param);
         Map<String, String> configMap = new HashMap();
         try {
             List<String> list = jedis.configGet("*");
@@ -83,16 +90,16 @@ public class JedisUtil {
                 }
             }
         } catch (Exception e) {
-
+            logger.error("getRedisConfig error",e);
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return configMap;
     }
 
-    public static int getRedisVersion(String ip, int port) {
+    public static int getRedisVersion(ConnectionParam param) {
         int res = 0;
-        Map<String, String> resMap = getMapInfo(ip, port);
+        Map<String, String> resMap = getMapInfo(param);
         if (null != resMap && !resMap.isEmpty()) {
             String model = resMap.get("redis_mode");
             if (model.equals("cluster")) {
@@ -104,8 +111,8 @@ public class JedisUtil {
         return res;
     }
 
-    public static List<Map<String, String>> dbInfo(String ip, int port) {
-        String info = getInfo(ip, port);
+    public static List<Map<String, String>> dbInfo(ConnectionParam param) {
+        String info = getInfo(param);
         return dbInfo(info);
     }
 
@@ -129,14 +136,14 @@ public class JedisUtil {
         return resList;
     }
 
-    public static Map<Integer, Integer> dbMap(String ip, int port) {
+    public static Map<Integer, Integer> dbMap(ConnectionParam param) {
         Map<Integer, Integer> resMap = new TreeMap<>(new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
                 return o1.compareTo(o2);
             }
         });
-        Map<String, String> infoMap = getMapInfo(ip, port);
+        Map<String, String> infoMap = getMapInfo(param);
         if (null != infoMap && !infoMap.isEmpty()) {
             for (Map.Entry<String, String> item : infoMap.entrySet()) {
                 String key = item.getKey();
@@ -167,8 +174,8 @@ public class JedisUtil {
         return index;
     }
 
-    public static int dbSize(String ip, int port) {
-        Map<Integer, Integer> alldb = dbMap(ip, port);
+    public static int dbSize(ConnectionParam param) {
+        Map<Integer, Integer> alldb = dbMap(param);
         int size = 0;
         if (null != alldb && !alldb.isEmpty()) {
             for (Map.Entry<Integer, Integer> item : alldb.entrySet()) {
@@ -183,17 +190,16 @@ public class JedisUtil {
     /**
      * 获取集群信息
      *
-     * @param ip
-     * @param port
+     * @param param
      * @return
      */
-    public static Map<String, String> getClusterInfo(String ip, int port) {
-        Jedis jedis = new Jedis(ip, port);
+    public static Map<String, String> getClusterInfo(ConnectionParam param) {
+        Jedis jedis = getJedisClient(param);
         Map<String, String> result = new HashMap<>();
         try {
-            int version = JedisUtil.getRedisVersion(ip, port);
+            int version = JedisUtil.getRedisVersion(param);
             if (version == 2) {
-                List nodeList = nodeList(ip, port);
+                List nodeList = nodeList(param);
                 result.put("cluster_state", "ok");
                 result.put("cluster_size", String.valueOf(1));
                 result.put("cluster_known_nodes", String.valueOf(nodeList.size()));
@@ -201,41 +207,45 @@ public class JedisUtil {
                 String info = jedis.clusterInfo();
                 result = RedisMsgUtil.changeClusterInfoMap(info);
             }
+
+            // add by jay
+            String info = jedis.info();
+            Map<String, String> mapInfo = getMapInfo(info);
+            result.putAll(mapInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("getClusterInfo error", e);
         } finally {
             jedis.close();
         }
         return result;
     }
 
-    public static List<Map<String, String>> nodeList(String ip, int port) {
+    public static List<Map<String, String>> nodeList(ConnectionParam param) {
         List<Map<String, String>> nodeList = new ArrayList<>();
-        if (JedisUtil.getRedisVersion(ip, port) > 2) {
-            nodeList = JedisUtil.getNodeList(ip, port);
+        if (JedisUtil.getRedisVersion(param) > 2) {
+            nodeList = JedisUtil.getNodeList(param);
         } else {
-            nodeList = JedisUtil.getRedis2Nodes(ip, port);
+            nodeList = JedisUtil.getRedis2Nodes(param);
         }
         return nodeList;
     }
 
-    public static List<Map<String, String>> getNodeList(String ip, int port) {
-        return getNodeList(ip, port, false);
+    public static List<Map<String, String>> getNodeList(ConnectionParam param) {
+        return getNodeList(param, false);
     }
 
     /**
      * 获取节点列表
      *
-     * @param ip
-     * @param port
+     * @param param
      * @return
      */
-    public static List<Map<String, String>> getNodeList(String ip, int port, boolean filterMaster) {
+    public static List<Map<String, String>> getNodeList(ConnectionParam param, boolean filterMaster) {
         Map<String, Map> result = new HashMap<>();
         if (filterMaster) {
-            result = JedisUtil.getMasterNodes(ip, port);
+            result = JedisUtil.getMasterNodes(param);
         } else {
-            result = JedisUtil.getClusterNodes(ip, port);
+            result = JedisUtil.getClusterNodes(param);
         }
 
         List<Map<String, String>> nodeList = new ArrayList<>();
@@ -263,13 +273,17 @@ public class JedisUtil {
         return nodeList;
     }
 
-    public static List<Map<String, String>> getRedis2Nodes(String ip, int port) {
+    public static List<Map<String, String>> getRedis2Nodes(ConnectionParam param) {
         List<Map<String, String>> resList = new ArrayList<>();
-        Map<String, String> infoMap = getMapInfo(ip, port);
+        String ip = param.getIp();
+        int port = param.getPort();
+        Map<String, String> infoMap = getMapInfo(param);
         if (infoMap.get("role").equals("slave")) {
             ip = infoMap.get("master_host");
             port = Integer.parseInt(infoMap.get("master_port"));
-            infoMap = getMapInfo(ip, port);
+            param.setIp(ip);
+            param.setPort(port);
+            infoMap = getMapInfo(param);
         }
         for (Map.Entry<String, String> item : infoMap.entrySet()) {
             String key = item.getKey();
@@ -308,56 +322,56 @@ public class JedisUtil {
     /**
      * 获取集群节点信息
      *
-     * @param ip
-     * @param port
+     * @param param
      * @return
      */
-    public static Map<String, Map> getClusterNodes(String ip, int port) {
-        Jedis jedis = new Jedis(ip, port);
+    public static Map<String, Map> getClusterNodes(ConnectionParam param) {
+        Jedis jedis = getJedisClient(param);
         Map<String, Map> result = new HashMap<>();
         try {
             String info = jedis.clusterNodes();
             result = RedisMsgUtil.changeNodesInfoMap(info, false);
         } catch (Exception e) {
-            e.printStackTrace();
+            if(!(e instanceof JedisDataException && "ERR This instance has cluster support disabled".equals(e.getMessage()))){
+                logger.error("getClusterNodes error", e);
+            }
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return result;
     }
 
-    public static Map<String, Map> getMasterNodes(String ip, int port) {
-        Jedis jedis = new Jedis(ip, port);
+    public static Map<String, Map> getMasterNodes(ConnectionParam param) {
+        Jedis jedis = getJedisClient(param);
         Map<String, Map> result = new HashMap<>();
         try {
             String info = jedis.clusterNodes();
             result = RedisMsgUtil.changeNodesInfoMap(info, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("getMasterNodes error", e);
         } finally {
             jedis.close();
         }
         return result;
     }
 
-    public static String getNodeid(String ip, int port) {
-        Jedis jedis = new Jedis(ip, port);
+    public static String getNodeId(ConnectionParam param) {
+        Jedis jedis = getJedisClient(param);
         String nodeid = null;
         try {
             String info = jedis.clusterNodes();
             String[] lines = info.split("\n");
             for (String line : lines) {
                 if (line.contains("myself")) {
-                    System.out.println(line);
                     String[] tmps = line.split(" ");
                     nodeid = tmps[0];
                     break;
                 }
             }
         } catch (Exception e) {
-
+            logger.error("getNodeid error", e);
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return nodeid;
     }
@@ -365,19 +379,18 @@ public class JedisUtil {
     /**
      * 发送 failover 信号
      *
-     * @param ip
-     * @param port
+     * @param param
      * @return
      */
-    private static String clusterFailover(String ip, int port) {
-        Jedis jedis = new Jedis(ip, port);
+    private static String clusterFailover(ConnectionParam param) {
+        Jedis jedis = getJedisClient(param);
         String result = "";
         try {
             result = jedis.clusterFailover();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("clusterFailover error", e);
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return result;
     }
@@ -393,13 +406,13 @@ public class JedisUtil {
         return Integer.parseInt(strPort);
     }
 
-    public static List<Slowlog> getSlowLog(String ip, int port, long size) {
-        Jedis jedis = new Jedis(ip, port);
+    public static List<Slowlog> getSlowLog(ConnectionParam param, long size) {
+        Jedis jedis = getJedisClient(param);
         List<Slowlog> list = new ArrayList((int) size);
         try {
             list = jedis.slowlogGet(size);
         } finally {
-            jedis.close();
+            closeJedis(jedis);
         }
         return list;
     }
@@ -413,8 +426,8 @@ public class JedisUtil {
                 String host = tmpArr[0];
                 String ip = host.split(":")[0];
                 ipSet.add(ip);
-            } catch (Exception ignore) {
-
+            } catch (Exception e) {
+                logger.error("getIPList error", e);
             }
         }
         return ipSet;
@@ -452,8 +465,8 @@ public class JedisUtil {
                 if (nodeItem.getRole() == RedisNodeType.slave) {
                     slaveList.add(nodeItem);
                 }
-            } catch (Exception ignore) {
-
+            } catch (Exception e) {
+                logger.error("getInstallNodeMap error", e);
             }
         }
         return resMap;
@@ -483,4 +496,18 @@ public class JedisUtil {
         return list;
     }
 
+    public static Jedis getJedisClient(ConnectionParam param) {
+        Jedis jedis = new Jedis(param.getIp(), param.getPort());
+        String password = param.getRedisPassword();
+        if (StringUtils.isNotBlank(password)) {
+            jedis.auth(password);
+        }
+        return jedis;
+    }
+
+    public static void closeJedis(Jedis jedis) {
+        if (jedis != null) {
+            jedis.close();
+        }
+    }
 }

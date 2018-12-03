@@ -1,42 +1,51 @@
-<ul>
+<div class="row">
     {{foreach from=$res item=cluster}}
         {{if !empty($cluster) }}
-        <li>
-            <div>
-                <div class="monitor-box-header">
-                    <div class="cluster-title">
-                        <b class="cluster-info-detail cluster-info-detail-{{$cluster.userGroup}}"  data-cluster-address="{{$cluster.address}}" data-group="{{$cluster.userGroup}}" data-cluster-id="{{$cluster.id}}">{{$cluster.clusterName}}</b>
-                        <div class="delete-container" data-cluster-id="{{$cluster.id}}">
-                            <i class="material-icons">close</i>
-                            <!--<i class="icon-remove"></i>-->
+            <div class="col-lg-3 col-sm-6">
+                <div class="cluster-container" id="cluster-{{$cluster.id}}">
+                    <section class="panel">
+                        <div class="panel-body">
+                            <div class="monitor-box-header">
+                                <div class="cluster-title">
+                                    <b class="cluster-info-detail cluster-info-detail-{{$cluster.userGroup}}"  data-cluster-address="{{$cluster.address}}" data-group="{{$cluster.userGroup}}" data-cluster-id="{{$cluster.id}}">
+                                        <span>{{$cluster.clusterName}}</span>
+                                        {{if !empty($cluster.redisPassword)}}
+                                            <i class="icon-shield safe" title="Redis with password"></i>
+                                        {{/if}}
+                                    </b>
+                                    <div class="delete-container" data-cluster-id="{{$cluster.id}}">
+                                        <i class="icon-remove"></i>
+                                        <!--<i class="icon-remove"></i>-->
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="info-wrapper">
+                                <div id="cluster-info-{{$cluster.id}}">
+
+                                </div>
+                            </div>
+                            <div class="option-wrapper">
+                                <a href="/cluster/clusterManager?clusterId={{$cluster.id}}&pluginType={{$cluster.clusterType}}" class="option-container">
+                                    <button class="btn btn-primary btn-xs" type="button">Manager</button>
+                                </a>
+                                <a href="/monitor/manager?clusterId={{$cluster.id}}" class="option-container">
+                                    <button class="btn btn-danger btn-xs" type="button">Monitor</button>
+                                </a>
+                                <a href="/alarm/alarmSystem?clusterId={{$cluster.id}}" class="option-container">
+                                    <button class="btn btn-warning btn-xs" type="button">Alarm</button>
+                                </a>
+                                <a href="/alarm/alarmSystem?clusterId={{$cluster.id}}" id="cluster-alarm-{{$cluster.id}}" class="alarm" title="cluster alarm">
+                                </a>
+                                <!--<a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                                    <i class="icon-tasks"></i>
+                                    <span class="badge bg-success">6</span>
+                                </a>-->
+                            </div>
                         </div>
-                    </div>
-
+                    </section>
                 </div>
-                <div class="info-wrapper">
-                    <div id="cluster-info-{{$cluster.id}}">
-
-                    </div>
-                </div>
-                <div class="option-wrapper">
-                    <a href="/cluster/clusterManager?clusterId={{$cluster.id}}&pluginType={{$cluster.clusterType}}" class="option-container">
-                        <button class="btn btn-primary btn-xs" type="button">Manager</button>
-                    </a>
-                    <a href="/monitor/manager?clusterId={{$cluster.id}}" class="option-container">
-                        <button class="btn btn-danger btn-xs" type="button">Monitor</button>
-                    </a>
-                    <a href="/alarm/alarmSystem?clusterId={{$cluster.id}}" class="option-container">
-                        <button class="btn btn-warning btn-xs" type="button">Alarm</button>
-                    </a>
-                    <a href="/alarm/alarmSystem?clusterId={{$cluster.id}}" id="cluster-alarm-{{$cluster.id}}" class="alarm" title="cluster alarm">
-                    </a>
-                    <!--<a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                        <i class="icon-tasks"></i>
-                        <span class="badge bg-success">6</span>
-                    </a>-->
-                 </div>
             </div>
-        </li>
         {{/if}}
     {{/foreach}}
-</ul>
+</div>

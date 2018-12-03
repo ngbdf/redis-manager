@@ -21,6 +21,11 @@
         delete from machine_node where id = #{id}
     </delete>
 
+    <delete id="removeMachineNodeByClusterId" parameterType="int">
+        delete from machine_node where cluster_id = #{id}
+    </delete>
+
+
     <insert id="addMachineNode"  parameterType="com.newegg.ec.cache.plugin.machine.MachineNode"  useGeneratedKeys="true" keyProperty="id">
         insert into machine_node(image,cluster_id,username,password, user_group, ip,port,install_path, add_time ) values(#{image},#{clusterId},#{username},#{password},#{userGroup},#{ip},#{port},#{installPath},#{addTime})
     </insert>

@@ -38,6 +38,7 @@ public class RemoteShellUtil {
             InputStream errorIn = ps.getErrorStream();
             result += processStdout(errorIn);
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(e);
         }
         return result;

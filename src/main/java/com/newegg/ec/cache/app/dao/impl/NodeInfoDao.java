@@ -19,7 +19,6 @@ public class NodeInfoDao {
         try {
             Class claz = NodeInfo.class;
             String createTable = MysqlUtil.createTableSql(claz, tableName);
-            System.out.println(createTable);
             jdbcTemplate.execute(createTable);
         } catch (Exception e) {
             res = false;

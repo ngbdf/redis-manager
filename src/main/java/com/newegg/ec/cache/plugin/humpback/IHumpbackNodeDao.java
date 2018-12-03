@@ -42,4 +42,11 @@ public interface IHumpbackNodeDao {
      * @return
      */
     public Boolean addHumbackNode(HumpbackNode humpbackNode);
+
+    /**
+     * remove HumbackNode By ClusterId
+     * @param id
+     * @return
+     */
+    public Boolean removeHumbackNodeByClusterId(int id);
 }

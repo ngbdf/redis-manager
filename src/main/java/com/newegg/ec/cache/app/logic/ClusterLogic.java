@@ -1,30 +1,37 @@
 package com.newegg.ec.cache.app.logic;
 
 import com.newegg.ec.cache.app.component.RedisManager;
+import com.newegg.ec.cache.app.component.redis.RedisClient;
 import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.model.*;
-import com.newegg.ec.cache.app.util.*;
-import com.newegg.ec.cache.core.logger.CommonLogger;
+import com.newegg.ec.cache.app.util.FileUtil;
+import com.newegg.ec.cache.app.util.JedisUtil;
+import com.newegg.ec.cache.app.util.NetUtil;
+import com.newegg.ec.cache.app.util.SlotBalanceUtil;
+import com.newegg.ec.cache.plugin.docker.IDockerNodeDao;
+import com.newegg.ec.cache.plugin.humpback.IHumpbackNodeDao;
+import com.newegg.ec.cache.plugin.machine.IMachineNodeDao;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Created by gl49 on 2018/4/21.
  */
 @Component
 public class ClusterLogic {
-    private static CommonLogger logger = new CommonLogger(ClusterLogic.class);
+
+    private static Log logger = LogFactory.getLog(ClusterLogic.class);
 
     @Value("${cache.redis.client}")
     private String redisClient;
@@ -36,6 +43,13 @@ public class ClusterLogic {
     @Resource
     private RedisManager redisManager;
 
+    @Autowired
+    private IMachineNodeDao machineNodeDao;
+    @Autowired
+    private IDockerNodeDao dockerNodeDao;
+    @Autowired
+    private IHumpbackNodeDao humpbackNodeDao;
+
     public Cluster getCluster(int id) {
         return clusterDao.getCluster(id);
     }
@@ -45,9 +59,10 @@ public class ClusterLogic {
     }
 
     public Map<String, List<Cluster>> getClusterMap(String group) {
-        Map<String, List<Cluster>> clusterMap = new HashedMap();
-        if (group.equals(Common.ADMIN_GROUP)) {
+        Map<String, List<Cluster>> clusterMap = new LinkedHashMap<>();
+        if (group.equals(Constants.ADMIN_GROUP)) {
             List<String> groups = clusterDao.getClusterGroups();
+            Collections.sort(groups);
             for (String groupStr : groups) {
                 clusterMap.put(groupStr, clusterDao.getClusterList(groupStr));
             }
@@ -64,12 +79,25 @@ public class ClusterLogic {
         return true;
     }
 
-    public boolean removeCluster(int id) {
+    public boolean removeCluster(int clusterId) {
         boolean res = false;
         try {
-            clusterDao.removeCluster(id);
-            String tableName = Common.NODE_INFO_TABLE_FORMAT + id;
+            String type = clusterDao.getCluster(clusterId).getClusterType();
+            clusterDao.removeCluster(clusterId);
+            String tableName = Constants.NODE_INFO_TABLE_FORMAT + clusterId;
             nodeInfoTable.dropTable(tableName);
+            //删除对应nodelist数据 todo
+            switch (type) {
+                case "machine":
+                    machineNodeDao.removeMachineNodeByClusterId(clusterId);
+                    break;
+                case "docker":
+                    dockerNodeDao.removeDockerNodeByClusterId(clusterId);
+                    break;
+                case "humpback":
+                    humpbackNodeDao.removeHumbackNodeByClusterId(clusterId);
+                    break;
+            }
             res = true;
         } catch (Exception e) {
 
@@ -82,9 +110,12 @@ public class ClusterLogic {
         int clusterOkNumber = 0;
         int clusterFailNumber = 0;
         if (StringUtils.isNotBlank(userGroup)) {
+            if (userGroup.equalsIgnoreCase(Constants.ADMIN_GROUP)) {
+                userGroup = null;
+            }
             List<Cluster> clusterList = clusterDao.getClusterList(userGroup);
             if (clusterList != null && clusterList.size() > 0) {
-                clusterListInfo.put(Common.CLUSTER_NUMBER, clusterList.size());
+                clusterListInfo.put(Constants.CLUSTER_NUMBER, clusterList.size());
                 for (Cluster cluster : clusterList) {
                     if (getClusterState(cluster.getId())) {
                         clusterOkNumber++;
@@ -92,12 +123,12 @@ public class ClusterLogic {
                         clusterFailNumber++;
                     }
                 }
-                clusterListInfo.put(Common.CLUSTER_OK_NUMBER, clusterOkNumber);
-                clusterListInfo.put(Common.CLUSTER_FAIL_NUMBER, clusterFailNumber);
+                clusterListInfo.put(Constants.CLUSTER_OK_NUMBER, clusterOkNumber);
+                clusterListInfo.put(Constants.CLUSTER_FAIL_NUMBER, clusterFailNumber);
             } else {
-                clusterListInfo.put(Common.CLUSTER_NUMBER, 0);
-                clusterListInfo.put(Common.CLUSTER_OK_NUMBER, 0);
-                clusterListInfo.put(Common.CLUSTER_FAIL_NUMBER, 0);
+                clusterListInfo.put(Constants.CLUSTER_NUMBER, 0);
+                clusterListInfo.put(Constants.CLUSTER_OK_NUMBER, 0);
+                clusterListInfo.put(Constants.CLUSTER_FAIL_NUMBER, 0);
             }
         }
         return clusterListInfo;
@@ -111,7 +142,7 @@ public class ClusterLogic {
                 cluster.setAddress(cluster.getAddress());
                 cluster.setUserGroup(cluster.getUserGroup());
                 cluster.setClusterName(cluster.getClusterName());
-                nodeInfoTable.createTable(Common.NODE_INFO_TABLE_FORMAT + cluster.getId());
+                nodeInfoTable.createTable(Constants.NODE_INFO_TABLE_FORMAT + cluster.getId());
                 res = cluster.getId();
             }
         } catch (Exception e) {
@@ -120,28 +151,38 @@ public class ClusterLogic {
         return res;
     }
 
-    public Map<String, String> getClusterInfo(String ip, int port) {
-        return redisManager.getClusterInfo(ip, port);
+    public Map<String, String> getClusterInfo(int clusterId, String ip, int port) {
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(ip, port, cluster.getRedisPassword());
+        return redisManager.getClusterInfo(param);
     }
 
-    public Map<String, String> getClusterInfo(String address) {
+    public Map<String, String> getClusterInfo(int clusterId, String address) {
         List<Host> host = NetUtil.getHostByAddress(address);
-        return redisManager.getClusterInfo(host.get(0).getIp(), host.get(0).getPort());
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.get(0).getIp(), host.get(0).getPort(), cluster.getRedisPassword());
+        return redisManager.getClusterInfo(param);
     }
 
-    public Map<String, String> getNodeInfo(String address) {
+    public Map<String, String> getNodeInfo(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
-        return redisManager.getMapInfo(host.getIp(), host.getPort());
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        return redisManager.getMapInfo(param);
     }
 
-    public Map<String, String> getRedisConfig(String address) {
+    public Map<String, String> getRedisConfig(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
-        return redisManager.getRedisConfig(host.getIp(), host.getPort());
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        return redisManager.getRedisConfig(param);
     }
 
-    public List<Map<String, String>> nodeList(String address) {
+    public List<Map<String, String>> nodeList(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
-        List<Map<String, String>> list = redisManager.nodeList(host.getIp(), host.getPort());
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        List<Map<String, String>> list = redisManager.nodeList(param);
         return list;
     }
 
@@ -152,13 +193,12 @@ public class ClusterLogic {
         return host;
     }
 
-    public boolean getClusterState(int id) {
+    public boolean getClusterState(int clusterId) {
         boolean res = false;
         try {
-            Host host = getClusterHost(id);
-            final Map<String, String> clusterInfo = getClusterInfo(host.getIp(), host.getPort());
-            System.out.println(clusterInfo);
-            String state = clusterInfo.get(Common.CLUSTER_STATE);
+            Host host = getClusterHost(clusterId);
+            final Map<String, String> clusterInfo = getClusterInfo(clusterId, host.getIp(), host.getPort());
+            String state = clusterInfo.get(Constants.CLUSTER_STATE);
             if ("ok".equals(state)) {
                 res = true;
             }
@@ -168,26 +208,29 @@ public class ClusterLogic {
         return res;
     }
 
-    public Map<String, Map> detailNodeList(String address) {
+    public Map<String, Map> detailNodeList(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
-        Map<String, Map> result = redisManager.getClusterNodes(host.getIp(), host.getPort());
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        Map<String, Map> result = redisManager.getClusterNodes(param);
         return result;
     }
 
-    public List<Map<String, String>> getRedisDBList(String address) {
+    public List<Map<String, String>> getRedisDBList(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
-        return redisManager.getRedisDBList(host.getIp(), host.getPort());
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        return redisManager.getRedisDBList(param);
     }
 
     public List<Cluster> getClusterListByUser(User user) {
-        List<Cluster> listCluster = new ArrayList<>();
-        listCluster = getClusterList(user.getUserGroup());
+        List<Cluster> listCluster = getClusterList(user.getUserGroup());
         return listCluster;
     }
 
     public List<Cluster> getClusterList(String group) {
         List<Cluster> clusterList = new ArrayList<>();
-        if (group.equals(Common.ADMIN_GROUP)) {
+        if (group.equals(Constants.ADMIN_GROUP)) {
             List<String> groups = clusterDao.getClusterGroups();
             for (String groupStr : groups) {
                 clusterList.addAll(clusterDao.getClusterList(groupStr));
@@ -204,48 +247,78 @@ public class ClusterLogic {
         return clusterList;
     }
 
-    public boolean beSlave(String ip, int port, String masterId) {
-        return redisManager.beSlave(ip, port, masterId);
+    public boolean beSlave(int clusterId, String ip, int port, String masterId) {
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(ip, port, cluster.getRedisPassword());
+        return redisManager.beSlave(param, masterId);
     }
 
-    public boolean beMaster(String ip, int port) {
-        return redisManager.beMaster(ip, port);
+    public boolean beMaster(int clusterId, String ip, int port) {
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(ip, port, cluster.getRedisPassword());
+        return redisManager.beMaster(param);
     }
 
-    public boolean forgetNode(String ip, int port, String nodeId) {
-        return redisManager.forget(ip, port, nodeId);
+    public boolean forgetNode(int clusterId, String ip, int port, String nodeId) {
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(ip, port, cluster.getRedisPassword());
+        return redisManager.forget(param, nodeId);
     }
 
-    public boolean importNode(String ip, int port, String masterIP, int masterPort) {
-        return redisManager.clusterMeet(ip, port, masterIP, masterPort);
+    public boolean importNode(int clusterId, String ip, int port, String masterIP, int masterPort) {
+        Cluster cluster = getCluster(clusterId);
+        ConnectionParam slaveParam = new ConnectionParam(ip, port, cluster.getRedisPassword());
+        return redisManager.clusterMeet(slaveParam, masterIP, masterPort);
     }
 
-    public boolean batchConfig(String myip, int myPort, String configName, String configValue) {
+    public boolean batchConfig(int clusterId, String myIp, int myPort, String configName, String configValue) {
         boolean res = true;
-        List<Map<String, String>> nodeList = JedisUtil.getNodeList(myip, myPort);
+        if ("requirepass".equalsIgnoreCase(configName)) {
+            return false;
+        }
+        ConnectionParam param = new ConnectionParam(myIp, myPort);
+        Cluster cluster = getCluster(clusterId);
+        String password = cluster.getRedisPassword();
+        param.setRedisPassword(password);
+        List<Map<String, String>> nodeList = JedisUtil.getNodeList(param);
         for (Map<String, String> node : nodeList) {
             String ip = node.get("ip");
             int port = Integer.parseInt(node.get("port"));
             Jedis jedis = new Jedis(ip, port);
+            if (StringUtils.isNotBlank(password)) {
+                jedis.auth(password);
+            }
             try {
                 List<String> configList = jedis.configGet(configName);
                 if (configList.size() != 2) {
                     break;
                 }
+
                 //Edit Truman for support save ""or save "600 30000" or save 600 3000 start
-                if(configValue.indexOf("\"")>=0) {
-                	configValue=configValue.replace("\"", "");
+                if (configValue.indexOf("\"") >= 0) {
+                    configValue = configValue.replace("\"", "");
                 }
                 //Edit Truman for support save ""or save "600 30000" or save 600 3000 end
+
                 jedis.configSet(configName, configValue);
                 jedis.clusterSaveConfig();
+
                 // 同步一下配置文件
-                String configCmd = redisClient + " -h " + ip + " -p " + port + " config rewrite";
-                System.out.println(configCmd);
-                RemoteShellUtil.localExec(configCmd);
+                RedisClient redisClient = new RedisClient(ip, port);
+                try {
+                    if (StringUtils.isNotBlank(password)) {
+                        redisClient.redisCommandOpt(password, RedisClient.REWRITE);
+                    } else {
+                        redisClient.redisCommandOpt(RedisClient.REWRITE);
+                    }
+                } catch (IOException e) {
+                    logger.error("rewrite conf error", e);
+                } finally {
+                    redisClient.closeClient();
+                }
             } catch (Exception e) {
                 res = false;
-                logger.error("", e);
+                logger.error("Update config error, ip: " + ip + ", port: " + port, e);
             } finally {
                 jedis.close();
             }
@@ -253,28 +326,47 @@ public class ClusterLogic {
         return res;
     }
 
-    public boolean batchModfifyConfigFile(String myip, int myPort, String userName, String password, String fileFormat, String configName, String configValue) {
-        if (StringUtils.isBlank(userName) || StringUtils.isBlank(fileFormat)) {
-            return true;
+    public void addRedisPassd(String ip, int port, String password) {
+
+        Jedis jedis = new Jedis(ip, port);
+        try {
+            //先判断是否是3.0 or 4.0的集群
+            ConnectionParam param = new ConnectionParam(ip, port);
+            Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
+            String redisVersion = nodeInfo.get("redis_version");
+            if (!redisVersion.startsWith("1.0.")) {
+                jedis.configSet("requirepass", password);
+                jedis.auth(password);
+                jedis.clusterSaveConfig();
+                // 同步一下配置文件
+                RedisClient redisClient = new RedisClient(ip, port);
+                try {
+                    redisClient.redisCommandOpt(password, RedisClient.REWRITE);
+                } catch (IOException e) {
+                    logger.error("rewrite conf error", e);
+                } finally {
+                    redisClient.closeClient();
+                }
+                logger.info("Node " + ip + ":" + port + " Install success");
+            }
+
+
+        } catch (Exception e) {
+            logger.error("add RedisPassd error, ip: " + ip + ", port: " + port, e);
+        } finally {
+            jedis.close();
         }
-        List<Host> hostList = new ArrayList<>();
-        List<Map<String, String>> nodeList = JedisUtil.getNodeList(myip, myPort);
-        for (Map<String, String> node : nodeList) {
-            String ip = node.get("ip");
-            int port = Integer.parseInt(node.get("port"));
-            Host host = new Host(ip, port);
-            hostList.add(host);
-        }
-        return changeConfigFile(hostList, userName, password, fileFormat, configName, configValue);
     }
 
-
-    public boolean initSlot(String address) {
+    public boolean initSlot(int clusterId, String address) {
         boolean res = true;
         Host host = NetUtil.getHost(address);
         String ip = host.getIp();
         int port = host.getPort();
-        List<Map<String, String>> masterList = JedisUtil.getNodeList(ip, port, true);
+        Cluster cluster = getCluster(clusterId);
+        String password = cluster.getRedisPassword();
+        ConnectionParam param = new ConnectionParam(ip, port, password);
+        List<Map<String, String>> masterList = JedisUtil.getNodeList(param, true);
         int masterSize = masterList.size();
         List<SlotBalanceUtil.Shade> balanceSlots = SlotBalanceUtil.balanceSlot(masterSize);
         for (int i = 0; i < balanceSlots.size(); i++) {
@@ -287,6 +379,9 @@ public class ClusterLogic {
                 String itemPort = hostMap.get("port");
                 int intItemPort = Integer.parseInt(itemPort);
                 Jedis jedis = new Jedis(itemIp, intItemPort);
+                if (StringUtils.isNotBlank(password)) {
+                    jedis.auth(password);
+                }
                 try {
                     for (int slot = start; slot <= end; slot++) {
                         try {
@@ -313,14 +408,18 @@ public class ClusterLogic {
         return res;
     }
 
-    public boolean reShard(String ip, int port, int startKey, int endKey) {
+    public boolean reShard(int clusterId, String ip, int port, int startKey, int endKey) {
         boolean res = false;
-        String temMyselfId = "";
-        String temSourceId = "";
-        Map<String, Map> masterNodes = JedisUtil.getMasterNodes(ip, port);
+        Cluster cluster = getCluster(clusterId);
+        String password = cluster.getRedisPassword();
+        ConnectionParam param = new ConnectionParam(ip, port, password);
+        Map<String, Map> masterNodes = JedisUtil.getMasterNodes(param);
         Jedis jedis = null;
         try {
             jedis = new Jedis(ip, port);
+            if (StringUtils.isNotBlank(password)) {
+                jedis.auth(password);
+            }
             // 迁移必须要知道自己的 nodeid 和 source 的ip port nodeid
             for (int slot = startKey; slot <= endKey; slot++) {
                 Map<String, String> slotObjmap = fillMoveSlotObject(masterNodes, ip, port, slot);
@@ -338,14 +437,14 @@ public class ClusterLogic {
                 }
                 int sourcePort = Integer.parseInt(strSourcePort);
                 try {
-                    moveSlot(myselfId, ip, port, sourceId, sourceIP, sourcePort, slot);
+                    moveSlot(myselfId, ip, port, password, sourceId, sourceIP, sourcePort, slot);
                 } catch (Exception e) {
-                    logger.error("", e);
+                    logger.error("Move Slot Error : " + e.getMessage());
                 }
             }
             res = true;
         } catch (Exception e) {
-            logger.error("move slot ", e);
+            logger.error("Cluster Add Slots Error : " + e.getMessage());
         } finally {
             jedis.close();
         }
@@ -363,9 +462,13 @@ public class ClusterLogic {
      * @param sourcePort
      * @param slot
      */
-    private void moveSlot(String myselfId, String ip, int port, String sourceId, String sourceIP, int sourcePort, int slot) {
+    private void moveSlot(String myselfId, String ip, int port, String password, String sourceId, String sourceIP, int sourcePort, int slot) {
         Jedis myself = new Jedis(ip, port);
         Jedis source = new Jedis(sourceIP, sourcePort);
+        if (StringUtils.isNotBlank(password)) {
+            myself.auth(password);
+            source.auth(password);
+        }
         try {
             // 设置导入导出状态
             myself.clusterSetSlotImporting(slot, sourceId);
@@ -379,7 +482,7 @@ public class ClusterLogic {
                 }
             } while (keys.size() > 0);
         } catch (Exception e) {
-            logger.error("", e);
+            logger.error(e.getMessage());
             // 出现异常就恢复 slot
             myself.clusterSetSlotStable(slot);
             source.clusterSetSlotStable(slot);
@@ -453,16 +556,16 @@ public class ClusterLogic {
             String ip = host.getIp();
             int port = host.getPort();
             String filePath = filePathFormat.replaceAll("\\{port\\}", String.valueOf(port));
-            System.out.println(filePath);
-            res = res & FileUtil.modifyFileContent(ip, port, username, password, filePath, field, value);
+            //System.out.println(filePath);
+            res = res && FileUtil.modifyFileContent(ip, port, username, password, filePath, field, value);
         }
         return res;
     }
 
-    public boolean importDataToCluster(String address, String targetAddress, String keyFormat) {
+    public boolean importDataToCluster(int clusterId, String address, String targetAddress, String keyFormat) {
         boolean res = false;
         try {
-            redisManager.importDataToCluster(address, targetAddress, keyFormat);
+            redisManager.importDataToCluster(clusterId, address, targetAddress, keyFormat);
             res = true;
         } catch (Exception e) {
             logger.error("import to cluster", e);
@@ -473,4 +576,48 @@ public class ClusterLogic {
     public List<ClusterImportResult> getImportCountList() {
         return redisManager.getClusterImportResult();
     }
+
+    /**
+     * 手动整理node内存碎片
+     *
+     * @param clusterId
+     * @param ip
+     * @param port
+     * @return 如果成功memory purge 返回当前的mem_fragmentation_ratio
+     */
+    public String memoryPurge(int clusterId, String ip, int port) {
+        String result = "this redis can not support memory purge";
+        Cluster cluster = getCluster(clusterId);
+        String password = cluster.getRedisPassword();
+        ConnectionParam param = new ConnectionParam(ip, port, password);
+        Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
+        String memAllocator = nodeInfo.get("mem_allocator");
+        String redisVersion = nodeInfo.get("redis_version");
+        if (memAllocator.startsWith("jemalloc") && (Integer.valueOf(redisVersion.substring(0, 1)) >= 4)) {
+            RedisClient redisClient = new RedisClient(ip, port);
+            try {
+                if (StringUtils.isNotBlank(password)) {
+                    result = redisClient.redisCommandOpt(password, RedisClient.MEMORYPURGE);
+                } else {
+                    result = redisClient.redisCommandOpt(RedisClient.MEMORYPURGE);
+                }
+
+                if (result.contains("+OK")) {
+                    Map<String, String> info = JedisUtil.getMapInfo(param);
+                    return "now mem_fragmentation_ratio :" + info.get("mem_fragmentation_ratio");
+                }
+            } catch (IOException e) {
+                result = "memory purge error";
+                logger.error("memory purge error", e);
+            } finally {
+                redisClient.closeClient();
+            }
+        }
+        return result;
+    }
+
+    public int updateRedisPassword(int id, String redisPassword) {
+        return clusterDao.updatePassword(id, redisPassword);
+    }
+
 }

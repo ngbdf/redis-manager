@@ -1,6 +1,8 @@
 package com.newegg.ec.cache.app.component.redis;
 
+import com.newegg.ec.cache.app.model.ConnectionParam;
 import com.newegg.ec.cache.app.model.RedisValue;
+import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.*;
 
 /**
@@ -9,12 +11,17 @@ import redis.clients.jedis.*;
 public class JedisSingleClient extends RedisClientBase implements IRedis {
     protected String ip;
     protected int port;
+    protected String password;
     protected Jedis singleClient;
 
-    public JedisSingleClient(String ip, int port) {
-        this.ip = ip;
-        this.port = port;
+    public JedisSingleClient(ConnectionParam param) {
+        this.ip = param.getIp();
+        this.port = param.getPort();
+        this.password = param.getRedisPassword();
         singleClient = new Jedis(ip, port);
+        if (StringUtils.isNotBlank(this.password)) {
+            singleClient.auth(this.password);
+        }
     }
 
     public ScanResult<String> redisScan(String path, String cursor, ScanParams params) {

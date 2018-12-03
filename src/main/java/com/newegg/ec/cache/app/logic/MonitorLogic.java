@@ -1,12 +1,14 @@
 package com.newegg.ec.cache.app.logic;
 
 import com.newegg.ec.cache.app.component.RedisManager;
+import com.newegg.ec.cache.app.dao.IClusterDao;
 import com.newegg.ec.cache.app.dao.INodeInfoDao;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import redis.clients.util.Slowlog;
 
@@ -20,33 +22,38 @@ import java.util.Map;
  */
 @Component
 public class MonitorLogic {
+
     @Resource
     private RedisManager redisManager;
+
+    @Autowired
+    private IClusterDao clusterDao;
+
     @Resource
     private INodeInfoDao nodeDao;
 
     public List<NodeInfo> getGroupNodeInfo(int clusterId, int startTime, int endTime, String host, String type, String date) {
-        return nodeDao.getGroupNodeInfo(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, type, date);
+        return nodeDao.getGroupNodeInfo(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, type, date);
     }
 
     public List<Map> getMaxField(int clusterId, int startTime, int endTime, String key, int limit) {
-        return nodeDao.getMaxField(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
+        return nodeDao.getMaxField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
     }
 
     public List<Map> getMinField(int clusterId, int startTime, int endTime, String key, int limit) {
-        return nodeDao.getMinField(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
+        return nodeDao.getMinField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
     }
 
     public String getAvgField(int clusterId, int startTime, int endTime, String host, String key) {
-        return nodeDao.getAvgField(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, key);
+        return nodeDao.getAvgField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, key);
     }
 
     public String getAllField(int clusterId, int startTime, int endTime, String key) {
-        return nodeDao.getAllField(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key);
+        return nodeDao.getAllField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key);
     }
 
     public NodeInfo getLastNodeInfo(int clusterId, int startTime, int endTime, String host) {
-        return nodeDao.getLastNodeInfo(Common.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host);
+        return nodeDao.getLastNodeInfo(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host);
     }
 
     public List<RedisSlowLog> getSlowLogs(SlowLogParam slowLogParam) {
@@ -58,9 +65,10 @@ public class MonitorLogic {
         } else if (slowLogParam.getLogLimit() == 0) {
             logLimit = 800 / ipList.size();
         }
+        Cluster cluster = clusterDao.getCluster(slowLogParam.getClusterId());
         for (Host host1 : ipList) {
             try {
-                List<Slowlog> slowList = JedisUtil.getSlowLog(host1.getIp(), host1.getPort(), logLimit);
+                List<Slowlog> slowList = JedisUtil.getSlowLog(new ConnectionParam(host1.getIp(), host1.getPort(), cluster.getRedisPassword()), logLimit);
                 for (Slowlog log : slowList) {
                     String slowDate = DateUtil.getFormatDate(log.getTimeStamp() * 1000);
                     long logTime = log.getExecutionTime();
@@ -85,9 +93,11 @@ public class MonitorLogic {
         return cmdList;
     }
 
-    public int getDbSize(String address) {
+    public int getDbSize(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
-        int size = redisManager.getDbSize(host.getIp(), host.getPort());
+        Cluster cluster = clusterDao.getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        int size = redisManager.getDbSize(param);
         return size;
     }
 }

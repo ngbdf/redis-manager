@@ -6,7 +6,7 @@ $(function(){
             var username = obj.res["username"];
             $("#username").text(username);
         } else {
-            window.parent.location.href="/";
+            window.parent.location.href="/user/login";
         }
 
     });
@@ -14,7 +14,7 @@ $(function(){
 
 $("#user-logout").click(function(){
     logout(function(){
-        window.location.href="/user/login";
+        window.parent.location.href="/user/login";
     });
 });
 

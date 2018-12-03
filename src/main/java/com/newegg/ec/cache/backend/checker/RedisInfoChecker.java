@@ -9,18 +9,15 @@ import com.newegg.ec.cache.app.util.CommonUtil;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.MathExpressionCalculateUtil;
-import com.newegg.ec.cache.app.util.httpclient.HttpClientUtil;
+import com.newegg.ec.cache.backend.checker.strategy.impl.MailNotify;
 import com.newegg.ec.cache.core.logger.CommonLogger;
-import net.sf.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import redis.clients.util.Slowlog;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +33,7 @@ import java.util.concurrent.Executors;
 public class RedisInfoChecker {
 
     private static final CommonLogger logger = new CommonLogger(RedisInfoChecker.class);
-    private static ExecutorService pool = Executors.newFixedThreadPool(200);
+    private static ExecutorService pool = Executors.newFixedThreadPool(100);
 
     @Resource
     private IClusterCheckRuleDao checkRuleDao;
@@ -47,11 +44,9 @@ public class RedisInfoChecker {
     @Resource
     private IClusterDao clusterDao;
 
-    @Value("${spring.wechat.alarm.url}")
-    private String wechatUrl;
+    @Autowired
+    private MailNotify mailNotify;
 
-    @Value("${spring.wechat.alarm.roleId}")
-    private String roleId;
 
     /**
      * 格式化NodeInfo数据
@@ -76,19 +71,12 @@ public class RedisInfoChecker {
     }
 
     /**
-     * 分析10分钟内的warninglog，每个集群超过总共超过3封就发送微信alarm消息
+     * 告警通知策略 : 通过实现接口定制化，可以是邮件，微信，短信等任意形式
+     *   默认使用邮件告警策略，用只要配置邮件服务器相关参数即可
      */
-    @Scheduled(fixedRateString = "${schedule.wechat.alarm}", initialDelay = 1000 * 60)
-    public void WeChatEarlyWarning() {
-        if (StringUtils.isEmpty(wechatUrl)) {
-            return;
-        }
-        List<Cluster> clusterList = clusterDao.getClusterList(null);
-        long time = DateUtil.getBeforeMinutesTime(10);
-        for (Cluster cluster : clusterList) {
-            pool.execute(new WeChatEarlyWarningTask(cluster, time));
-        }
-
+    @Scheduled(fixedRateString = "${schedule.notify.alarm}", initialDelay = 1000 * 60)
+    public void EarlyWarningNotify() {
+        mailNotify.notifyUser();
     }
 
     /**
@@ -140,7 +128,7 @@ public class RedisInfoChecker {
         public void run() {
             //获取当前cluster所有配置的rule
             int cluster_id = cluster.getId();
-            String clusterName = cluster.getClusterName();
+            String password = cluster.getRedisPassword();
             String host = cluster.getAddress().split(",")[0];
             String ip = host.split(":")[0];
             int port = Integer.parseInt(host.split(":")[1]);
@@ -149,14 +137,14 @@ public class RedisInfoChecker {
             //获取每个cluster所有的node
             List<Map<String, String>> nodeList = null;
             try {
-                nodeList = JedisUtil.nodeList(ip, port);
+                nodeList = JedisUtil.nodeList(new ConnectionParam(ip, port, password));
             } catch (Exception e) {
                 logger.error("Node " + host + " can not get nodelist", e);
             }
             for (ClusterCheckRule rule : ruleList) {
                 String formula = rule.getFormula();
                 for (Map<String, String> node : nodeList) {
-                    NodeInfo nodeInfo = infoDao.getLastNodeInfo(Common.NODE_INFO_TABLE_FORMAT + cluster_id, 0, DateUtil.getTime(), node.get("ip") + ":" + node.get("port"));
+                    NodeInfo nodeInfo = infoDao.getLastNodeInfo(Constants.NODE_INFO_TABLE_FORMAT + cluster_id, 0, DateUtil.getTime(), node.get("ip") + ":" + node.get("port"));
                     if (nodeInfo != null) {
                         Map<String, Object> nodeInfoMap = formatNodeInfo(nodeInfo);
                         try {
@@ -204,7 +192,7 @@ public class RedisInfoChecker {
             String ip = host.split(":")[0];
             int port = Integer.parseInt(host.split(":")[1]);
             try {
-                List<Slowlog> list = JedisUtil.getSlowLog(ip, port, 2000);
+                List<Slowlog> list = JedisUtil.getSlowLog(new ConnectionParam(ip, port, cluster.getRedisPassword()), 2000);
                 for (Slowlog slowlog : list) {
                     if (slowlog.getTimeStamp() > time) {
                         num++;
@@ -227,47 +215,6 @@ public class RedisInfoChecker {
         }
     }
 
-    class WeChatEarlyWarningTask implements Runnable {
-        private Cluster cluster;
-        private long updateTime;
-
-        public WeChatEarlyWarningTask(Cluster cluster, long updateTime) {
-            this.cluster = cluster;
-            this.updateTime = updateTime;
-        }
-
-        @Override
-        public void run() {
-
-            //按规则检查日志
-            List<ClusterCheckRule> ruleList = checkRuleDao.getClusterRuleList(cluster.getId() + "");
-            for (ClusterCheckRule rule : ruleList) {
-                String formula = rule.getFormula();
-                Map<String, Object> param = new HashMap();
-                param.put("clusterId", cluster.getId());
-                param.put("updateTime", updateTime);
-                param.put("formula", formula);
-                int warnsize = checkLogDao.getClusterCheckLogs(param).size();
-                if (warnsize > 0) {
-                    //发微信
-                    JSONObject params = new JSONObject();
-                    params.put("metric", "1");
-                    params.put("metricValue", "2");
-                    params.put("roleId", roleId);
-                    params.put("clientId", cluster.getClusterName());
-                    params.put("roleName", cluster.getClusterName() + ":" + formula);
-                    params.put("errorMessage", "Hello All, " + cluster.getClusterName() + ":" + formula + " Redis Cluster Alarm Log In Last 10 Mins,Please Check !");
-                    try {
-                        String response = HttpClientUtil.getPostResponse(wechatUrl, params);
-                        logger.info("wechat response: " + response);
-                    } catch (IOException e) {
-                        logger.error("Send Alarm Info To WeChat Error ", e);
-                    }
-                }
-            }
-            ;
-        }
-    }
 
 
 }

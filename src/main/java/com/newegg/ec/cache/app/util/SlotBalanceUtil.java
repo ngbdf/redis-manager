@@ -36,11 +36,6 @@ public class SlotBalanceUtil {
         return shades;
     }
 
-    public static void main(String[] args) {
-        List<Shade> shades = balanceSlot(5);
-        System.out.println(shades);
-    }
-
     public static class Shade {
 
         private int startSlot;

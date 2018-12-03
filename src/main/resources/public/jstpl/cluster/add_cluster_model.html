@@ -10,6 +10,11 @@
     </div>
     <div id="address_tip" class="sparrow-tip cluster-form-input-tip"><span class="sparrow-input-placeholder">format: 127.0.0.1:6380,127.0.0.1:6381</span></div>
     <div class="input-group item">
+        <span class="input-group-addon input-title" >Password</span>
+        <input name="redisPassword" type="text" class="form-control" placeholder="redis password" data-len="0-250" data-ajax-type="get" />
+    </div>
+    <div class="sparrow-tip cluster-form-input-tip"><span class="sparrow-input-placeholder">Enter redis password if necessary</span></div>
+    <div class="input-group item">
         <span class="input-group-addon input-title">Group</span>
         <select name="userGroup" class="form-control">
             {{foreach from=$res item=group}}
@@ -42,6 +47,6 @@
         </div>
     </span>
     <div class="input-group item btn-container">
-        <button id="save-cluster" type="button" class="btn btn-primary">Add Cluster</button>
+        <button id="save-cluster" type="button" class="btn btn-primary full-width">Add Cluster</button>
     </div>
 </div>

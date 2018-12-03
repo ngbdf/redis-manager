@@ -16,12 +16,8 @@ public class Cluster {
     private String userGroup;
     @MysqlField(field = "address", type = "varchar(255)", notNull = true)
     private String address;
-    @MysqlField(field = "redisPassword", type = "varchar(255)", notNull = false)
+    @MysqlField(field = "redis_password", type = "varchar(255)", notNull = false)
     private String redisPassword;
-    @MysqlField(field = "ssl_username", type = "varchar(64)", notNull = false)
-    private String sslUsername;
-    @MysqlField(field = "ssl_password", type = "varchar(64)", notNull = false)
-    private String sslPassword;
     @MysqlField(field = "cluster_type", type = "varchar(10)", notNull = true)
     private String clusterType;
 
@@ -65,22 +61,6 @@ public class Cluster {
         this.redisPassword = redisPassword;
     }
 
-    public String getSslUsername() {
-        return sslUsername;
-    }
-
-    public void setSslUsername(String sslUsername) {
-        this.sslUsername = sslUsername;
-    }
-
-    public String getSslPassword() {
-        return sslPassword;
-    }
-
-    public void setSslPassword(String sslPassword) {
-        this.sslPassword = sslPassword;
-    }
-
     public String getClusterType() {
         return clusterType;
     }
@@ -97,8 +77,6 @@ public class Cluster {
                 ", userGroup='" + userGroup + '\'' +
                 ", address='" + address + '\'' +
                 ", redisPassword='" + redisPassword + '\'' +
-                ", sslUsername='" + sslUsername + '\'' +
-                ", sslPassword='" + sslPassword + '\'' +
                 ", clusterType='" + clusterType + '\'' +
                 '}';
     }

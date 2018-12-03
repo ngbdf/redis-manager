@@ -1,7 +1,7 @@
 package com.newegg.ec.cache.app.controller.advice;
 
 
-import com.newegg.ec.cache.app.model.Common;
+import com.newegg.ec.cache.app.model.Constants;
 import com.newegg.ec.cache.app.model.User;
 import com.newegg.ec.cache.app.util.DateUtil;
 import com.newegg.ec.cache.app.util.RequestUtil;
@@ -59,7 +59,7 @@ public class ControllerAdvice {
             String groups = null;
             int userid = -1;
             HttpSession session = request.getSession();
-            User user = (User) session.getAttribute(Common.SESSION_USER_KEY);
+            User user = (User) session.getAttribute(Constants.SESSION_USER_KEY);
             if (null != user) {
                 RequestUtil.setUser(user);
                 userid = user.getId();

@@ -22,14 +22,12 @@ public class FileUtil {
     public static boolean modifyFileContent(String ip, int port, String username, String password, String filepath, String field, String value) {
         boolean res = false;
         String cmd = "echo " + password + " | sudo -S sed -i 's/^" + field + " .*/" + field + " " + value + "/g' " + filepath;
-        System.out.println(ip + "   " + username + "   " + cmd);
         RemoteShellUtil remoteShellUtil = new RemoteShellUtil(ip, username, password);
         try {
             if (ip.equals(NetUtil.getLocalIp())) {
                 RemoteShellUtil.localExec(cmd);
             } else {
                 String tmp = remoteShellUtil.exec(cmd);
-                System.out.println(tmp);
             }
             res = true;
         } catch (Exception ignore) {

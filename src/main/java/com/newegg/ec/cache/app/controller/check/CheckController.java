@@ -4,6 +4,8 @@ import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.util.MathExpressionCalculateUtil;
 import com.newegg.ec.cache.core.userapi.UserAccess;
 import net.sf.json.JSONObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,13 +18,16 @@ import javax.annotation.Resource;
 @RequestMapping("/check")
 @UserAccess(autoCreate = true)
 public class CheckController {
+
+    private static final Log logger = LogFactory.getLog(CheckController.class);
+
     @Resource
     private CheckLogic logic;
 
     @RequestMapping("/checkVersion")
     @ResponseBody
-    public Response checkRedisVersion(@RequestParam String address) {
-        int version = logic.checkRedisVersion(address);
+    public Response checkRedisVersion(@RequestParam int clusterId, @RequestParam String address) {
+        int version = logic.checkRedisVersion(clusterId, address);
         return Response.Result(0, version);
     }
 
@@ -75,7 +80,6 @@ public class CheckController {
     @ResponseBody
     public Response checkBatchHumpbackContainerName(@RequestBody String req) {
         JSONObject jsonObject = JSONObject.fromObject(req);
-        System.out.println(jsonObject + "container");
         return Response.Success();
     }
 
@@ -104,6 +108,7 @@ public class CheckController {
     @ResponseBody
     public Response checkBatchUserPermisson(@RequestBody String req) {
         JSONObject jsonObject = JSONObject.fromObject(req);
+        logger.info("Request ==> " + req);
         return logic.checkBatchUserPermisson(jsonObject);
     }
 

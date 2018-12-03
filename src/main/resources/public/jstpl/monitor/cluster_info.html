@@ -1,40 +1,54 @@
-<div class="summary">
+<div>
     <div class="one-data">
-        <i class="fa fa-heartbeat"></i>
+        <i class="icon-volume-up"></i>
         <div class="data-item">
-            <span class="one-data-name">Cluster State:</span>
+            <span class="one-data-name">&nbspCluster State:&nbsp</span>
             <span class="state-{{$res.cluster_state}}">{{$res.cluster_state}}</span>
         </div>
     </div>
     <div class="one-data">
-        <i class="material-icons">record_voice_over</i>
+        <i class="icon-user"></i>
         <div class="data-item">
-            <span class="one-data-name">Cluster Master:</span>
+            <span class="one-data-name">&nbspCluster Master:&nbsp</span>
             <span><b>{{$res.cluster_size}}</b></span>
         </div>
     </div>
     <div class="one-data">
-        <i class="icon-tag icon-margin"></i>
+        <i class="icon-puzzle-piece"></i>
         <div class="data-item">
-            <span class="one-data-name">Type:&nbsp</span>
-            <span><b> {{$clusterType}} </b></span>
-        </div>
-    </div>
-    <!--<div class="one-data">
-        <i class="material-icons">dashboard</i>
-        <div class="data-item">
-            <span class="one-data-name">Cluster Nodes:</span>
+            <span class="one-data-name">&nbspCluster Nodes:&nbsp</span>
             <span><b>{{$res.cluster_known_nodes}}</b></span>
         </div>
     </div>
     <div class="one-data">
-        <i class="material-icons">flip_to_back</i>
+        <i class="icon-qrcode"></i>
         <div class="data-item">
-            <span class="one-data-name">Slots Assigned(ok/all):
+            <span class="one-data-name">&nbspSlots Assigned(ok/all):&nbsp</span>
             <span><b>{{$res.cluster_slots_ok}}/{{$res.cluster_slots_assigned}}</b></span>
-        </span>
         </div>
-    </div>-->
+    </div>
+    <div class="one-data">
+        <i class="icon-star"></i>
+        <div class="data-item">
+            <span class="one-data-name">&nbspRedis Version:&nbsp</span>
+            <span><b>{{$res.redis_version}}</b></span>
+        </div>
+    </div>
+
+    <div class="one-data">
+        <i class="icon-trophy"></i>
+        <div class="data-item">
+            <span class="one-data-name">&nbspRedis Mode:&nbsp</span>
+            <span><b>{{$res.redis_mode}}</b></span>
+        </div>
+    </div>
+    <div class="one-data">
+        <i class="icon-tag"></i>
+        <div class="data-item">
+            <span class="one-data-name">&nbspType:&nbsp</span>
+            <span><b> {{$clusterType}} </b></span>
+        </div>
+    </div>
     <!--<div class="one-data">
         <i class="material-icons">settings_input_component</i>
         <div class="one-data-name">
@@ -62,7 +76,7 @@
             <span class="one-data-name">My Epoch:</span>
             <span><b>{{$res.cluster_my_epoch}}</b></span>
         </div>
-    </div>-->
+    </div>
     <div class="one-data">
         <i class="material-icons">settings_ethernet</i>
         <div class="data-item">
@@ -70,5 +84,5 @@
                 <span><b>{{$res.cluster_stats_messages_sent}}/{{$res.cluster_stats_messages_received}}</b></span>
             </span>
         </div>
-    </div>
+    </div>-->
 </div>

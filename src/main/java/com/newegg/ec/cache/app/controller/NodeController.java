@@ -1,7 +1,7 @@
 package com.newegg.ec.cache.app.controller;
 
 import com.newegg.ec.cache.app.component.NodeManager;
-import com.newegg.ec.cache.app.model.Common;
+import com.newegg.ec.cache.app.model.Constants;
 import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.model.User;
 import com.newegg.ec.cache.core.userapi.UserAccess;
@@ -11,6 +11,8 @@ import com.newegg.ec.cache.plugin.basemodel.NodeRequestPram;
 import com.newegg.ec.cache.plugin.basemodel.PluginType;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +27,11 @@ import java.util.List;
 @RequestMapping("/node")
 @UserAccess
 public class NodeController {
+
+    private static final Log logger = LogFactory.getLog(NodeController.class);
+
     private INodeOperate nodeOperate;
+
     @Resource
     private NodeManager nodeManager;
 
@@ -35,13 +41,13 @@ public class NodeController {
     }
 
     @RequestMapping("/install")
-    public String cluster(Model model, @SessionAttribute(Common.SESSION_USER_KEY) User user) {
+    public String cluster(Model model, @SessionAttribute(Constants.SESSION_USER_KEY) User user) {
         model.addAttribute("user", user);
         return "installNode";
     }
 
     @RequestMapping("/manager")
-    public String manager(Model model, @SessionAttribute(Common.SESSION_USER_KEY) User user) {
+    public String manager(Model model, @SessionAttribute(Constants.SESSION_USER_KEY) User user) {
         model.addAttribute("user", user);
         return "nodeManager";
     }
@@ -131,6 +137,7 @@ public class NodeController {
     @RequestMapping(value = "/nodeInstall", method = RequestMethod.POST)
     @ResponseBody
     public Response nodeInstall(@RequestBody NodeRequestPram nodeRequestPram) {
+        logger.info("Install: " + nodeRequestPram);
         nodeOperate = nodeManager.factoryOperate(nodeRequestPram.getPluginType());
         boolean res = nodeOperate.install(nodeRequestPram.getReq());
         if (res) {

@@ -39,11 +39,11 @@
         <tr class="input-tip-tr">
             <td class="field-name">UserName</td>
             <td>
-                <input name="username" type="text" class="form-control" data-require="1"  data-len="3-20" placeholder="ssh username" data-check-fields="iplist" data-len-msg="length range 3-20" data-format-msg="only support letter and number"  >
+                <input name="username" type="text" class="form-control" data-require="1"  data-len="3-20" placeholder="ssh username" data-check-fields="iplist" data-len-msg="length range 3-20" data-format-msg="only support letter and number"/>
             </td>
             <td class="field-name">Password </td>
             <td>
-                <input name="password" type="password" class="form-control" data-require="1" data-len="5-20" placeholder="ssh password" data-check-fields="iplist" data-len-msg="length range 5-20" data-format-msg="only support letter and number"  >
+                <input name="password" type="password" class="form-control" data-require="1" data-len="5-20" placeholder="ssh password" data-check-fields="iplist" data-len-msg="length range 5-20" data-format-msg="only support letter and number"/>
             </td>
         </tr>
         <tr class="error-input-tip-tr">
@@ -52,6 +52,15 @@
             <td></td>
             <td><div id="password_tip"></div></td>
         </tr>
+
+        <tr class="input-tip-tr">
+            <td class="field-name">RedisPassword</td>
+            <td>
+                <input name="redisPassword" type="text" class="form-control"  placeholder="redis password" >
+            </td>
+        </tr>
+        <tr class="error-input-tip-tr"><td></td></tr>
+
         <tr class="input-tip-tr">
             <td class="container-table-tag" >
                 Batch IP List
@@ -65,7 +74,7 @@
             </td>
             <td colspan="3">
                 <div class="node-value text-value">
-                    <textarea class="host-list form-control" rows="6" name="iplist" data-relation="username,password,installPath"  data-require="1" data-server-check="/check/checkBatchHostNotPass,/check/checkBatchDirPermission,/check/checkBatchWgetPermission,/check/checkBatchUserPermisson"  placeholder="example 127.0.0.1:8008 master" ></textarea>
+                    <textarea class="host-list form-control" rows="6" name="iplist" data-relation="username,password,redisPassword,installPath"  data-require="1" data-server-check="/check/checkBatchHostNotPass,/check/checkBatchDirPermission,/check/checkBatchWgetPermission,/check/checkBatchUserPermisson"  placeholder="example 127.0.0.1:8008 master" ></textarea>
                 </div>
             </td>
         </tr>

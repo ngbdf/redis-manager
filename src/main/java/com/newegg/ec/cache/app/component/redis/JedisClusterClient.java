@@ -1,8 +1,13 @@
 package com.newegg.ec.cache.app.component.redis;
 
 import com.newegg.ec.cache.app.component.RedisManager;
+import com.newegg.ec.cache.app.model.ConnectionParam;
 import com.newegg.ec.cache.app.model.RedisValue;
 import com.newegg.ec.cache.app.util.JedisUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.*;
 
 import java.io.IOException;
@@ -19,14 +24,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by lzz on 2018/3/19.
  */
 public class JedisClusterClient extends JedisSingleClient implements IRedis {
+
+    private static Log logger = LogFactory.getLog(JedisClusterClient.class);
+
     private static ExecutorService executorPool = Executors.newFixedThreadPool(200);
 
     private JedisCluster jedis;
 
-    public JedisClusterClient(String ip, int port) {
-        super(ip, port);
-        HostAndPort hostAndPort = new HostAndPort(ip, port);
-        jedis = new JedisCluster(hostAndPort);
+    public JedisClusterClient(ConnectionParam param) {
+        super(param);
+        // HostAndPort hostAndPort = new HostAndPort(ip, port);
+        jedis = getJedisClusterClient(param);
     }
 
     @Override
@@ -78,14 +86,14 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
         if (null == RedisManager.importMap.get(importKey)) {
             RedisManager.importMap.put(importKey, new AtomicInteger(0));
         }
-        Map<String, Map> masterNodes = JedisUtil.getMasterNodes(this.ip, this.port);
+        ConnectionParam param = new ConnectionParam(this.ip, this.port);
+        Map<String, Map> masterNodes = JedisUtil.getMasterNodes(param);
         CountDownLatch countDownLatch = new CountDownLatch(masterNodes.size());
         for (Map.Entry<String, Map> masterNode : masterNodes.entrySet()) {
             Map<String, String> masterMap = masterNode.getValue();
             String ip = masterMap.get("ip");
             int port = Integer.parseInt(masterMap.get("port"));
             // 一个 master 对应一个线程去 scan
-            System.out.println(ip + "port" + port);
             executorPool.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -101,10 +109,10 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
                             scanResult = jedis.scan(scanResult.getStringCursor(), scanParams);
                             RedisManager.importMap.get(importKey).addAndGet(scanResult.getResult().size()); //统计scan的次数
                             importScanResult(scanResult.getResult().iterator(), targetIp, targetPort);
-                            System.out.println(scanResult.getStringCursor() + "---" + RedisManager.importMap.get(importKey).get());
+                            logger.info(scanResult.getStringCursor() + "---" + RedisManager.importMap.get(importKey).get());
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.error("importDataToCluster Error",e);
                     } finally {
                         jedis.close();
                         countDownLatch.countDown();
@@ -152,7 +160,7 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e);
         } finally {
             try {
                 targetCluster.close();
@@ -160,5 +168,14 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
                 e.printStackTrace();
             }
         }
+    }
+
+    public JedisCluster getJedisClusterClient(ConnectionParam param) {
+        HostAndPort hostAndPort = new HostAndPort(param.getIp(), param.getPort());
+        String redisPassword = param.getRedisPassword();
+        if (StringUtils.isNotBlank(redisPassword)) {
+            return new JedisCluster(hostAndPort, 5000, 5000, 5, redisPassword, new GenericObjectPoolConfig());
+        }
+        return new JedisCluster(hostAndPort, new GenericObjectPoolConfig());
     }
 }

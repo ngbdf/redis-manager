@@ -21,6 +21,7 @@ $(document).on("click", "#start-install-cluster", function(obj){
         if( window.clusterId ){
             installParam.clusterId = clusterId;
         }
+        console.log(installParam);
         var param = {
             "pluginType": window.pluginType,
             "req": installParam
@@ -54,26 +55,34 @@ function  createClusterStep( data, clusterId){
                 var cluster = obj.res;
                 $("[name='clusterName']").val( cluster.clusterName );
                 $("[name='clusterName']").attr("disabled","disabled");
-                console.log( cluster );
+                $("[name='redisPassword']").val(cluster.redisPassword);
+                $("[name='redisPassword']").attr("disabled", "disabled");
             });
             getNodeByClusterId(window.pluginType, clusterId, function(obj){
                 var node = obj.res;
-                $("[name='image']").selectpicker("val", node.image);
-                $("[name='image']").attr("disabled","disabled");
-                $('[name="userGroup"]').selectpicker("val", node.userGroup);
-                $('[name="userGroup"]').attr("disabled","disabled");
-                if( node.username ){
-                    $('[name="username"]').val(node.username);
-                    $('[name="username"]').attr("disabled","disabled");
+                //说明这是从我们平台创建的集群
+                if(node != null){
+                        $("[name='image']").selectpicker("val", node.image);
+                        $("[name='image']").attr("disabled","disabled");
+                        $('[name="userGroup"]').selectpicker("val", node.userGroup);
+                        $('[name="userGroup"]').attr("disabled","disabled");
+
+                        if( node.username ){
+                            $('[name="username"]').val(node.username);
+                            $('[name="username"]').attr("disabled","disabled");
+                        }
+                        if( node.password ){
+                            $('[name="password"]').val(node.password);
+                            $('[name="password"]').attr("disabled","disabled");
+                        }
+                        if( node.installPath ){
+                            $('[name="installPath"]').val( node.installPath );
+                            $('[name="installPath"]').attr("disabled","disabled");
+                        }
+                }else{
+                     alert("该集群是由外部导入，扩容请务必保证所有节点信息一致");
                 }
-                if( node.password ){
-                    $('[name="password"]').val(node.password);
-                    $('[name="password"]').attr("disabled","disabled");
-                }
-                if( node.installPath ){
-                    $('[name="installPath"]').val( node.installPath );
-                    $('[name="installPath"]').attr("disabled","disabled");
-                }
+
             });
         }
         autosize(document.querySelectorAll('textarea'));

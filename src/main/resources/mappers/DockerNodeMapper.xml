@@ -21,6 +21,10 @@
         delete from docker_node where id = #{id}
     </delete>
 
+    <delete id="removeDockerNodeByClusterId" parameterType="int">
+        delete from docker_node where cluster_id = #{id}
+    </delete>
+
     <insert id="addDockerNode"  parameterType="com.newegg.ec.cache.plugin.docker.DockerNode"  useGeneratedKeys="true" keyProperty="id">
         insert into docker_node(image,container_name,cluster_id, user_group, ip,port, add_time ) values(#{image},#{containerName},#{clusterId},#{userGroup},#{ip},#{port},#{addTime})
     </insert>

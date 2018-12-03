@@ -1,5 +1,8 @@
 package com.newegg.ec.cache.app.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -8,6 +11,9 @@ import java.util.Random;
  * Created by gl49 on 2017/9/26.
  */
 public class SlotRebanlance {
+
+    private static Log logger = LogFactory.getLog(SlotRebanlance.class);
+
     private static int totalSlot = 16384;
 
     private static int initCount = 5;
@@ -23,9 +29,8 @@ public class SlotRebanlance {
 
     public static void kuorong() {
         List<Shade> initShades = getShades("init", initCount);
-        System.out.println("init:" + initShades);
         List<Shade> targetShades = getShades("", targetCount);
-        System.out.println("target:" + targetShades);
+        logger.info("target:" + targetShades);
 
         int missSlot = 0;
         boolean[] oldShades = new boolean[initCount];
@@ -59,25 +64,25 @@ public class SlotRebanlance {
             }
             missSlot++;
         }
-        System.out.println("assign old shades:" + targetShades);
+        logger.info("assign old shades:" + targetShades);
         for (int jj = 0; jj < targetShades.size(); jj++) {
             if (targetShades.get(jj).getName() == null) {
                 targetShades.get(jj).setName("new");
             }
         }
-        System.out.println("result:" + targetShades);
+        logger.info("result:" + targetShades);
     }
 
     public static void shousuo() {
         List<Shade> initShades = getShades("init", initCount);
-        System.out.println("init:" + initShades);
+        logger.info("init:" + initShades);
         List<Shade> targetShades = getShades("", targetCount);
-        System.out.println("target:" + targetShades);
+        logger.info("target:" + targetShades);
         for (int i = 0; i < initCount - targetCount; i++) {
             int x = new Random().nextInt(initShades.size());
             initShades.remove(x);
         }
-        System.out.println("left Shade" + initShades);
+        logger.info("left Shade" + initShades);
         int missSlot = 0;
         boolean[] oldShades = new boolean[targetCount];
         boolean[] newShades = new boolean[targetCount];
@@ -121,7 +126,7 @@ public class SlotRebanlance {
                 }
             }
         }
-        System.out.println("result" + targetShades);
+        logger.info("result" + targetShades);
     }
 
     public static List<Shade> getShades(String tag, int shadeCount) {

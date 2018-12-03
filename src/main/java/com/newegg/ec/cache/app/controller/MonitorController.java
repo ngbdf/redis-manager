@@ -76,8 +76,8 @@ public class MonitorController {
 
     @RequestMapping(value = "/getDbSize", method = RequestMethod.GET)
     @ResponseBody
-    public Response getDbSize(@RequestParam String host) {
-        int dbsize = logic.getDbSize(host);
+    public Response getDbSize(@RequestParam int clusterId, @RequestParam String host) {
+        int dbsize = logic.getDbSize(clusterId, host);
         return Response.Result(0, dbsize);
     }
 
@@ -92,7 +92,6 @@ public class MonitorController {
     @RequestMapping(value = "/slowLogs", method = RequestMethod.POST)
     @ResponseBody
     public Response slowLogs(@RequestBody SlowLogParam logParam) {
-        MonitorLogic logic = new MonitorLogic();
         List<RedisSlowLog> redisSlowLogs = logic.getSlowLogs(logParam);
         return Response.Result(0, redisSlowLogs);
     }

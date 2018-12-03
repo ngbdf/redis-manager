@@ -3,15 +3,15 @@ $(document).ready(function(){
     window.clusterId = getQueryString("clusterId");
     getCluster(window.clusterId, function(obj){
         window.cluster = obj.res;
-        getClusterInfoByAddress( window.cluster.address, function(obj){
+        getClusterInfoByAddress(window.clusterId, window.cluster.address, function(obj){
             if( obj.res.cluster_slots_ok == 0 ){
                 sparrow_win.confirm("the cluster is not slot can you init it", function(){
-                    initSlot( window.cluster.address, function( obj ){
+                    initSlot(window.clusterId, window.cluster.address, function( obj ){
                     });
                 });
             }
         });
-        checkRedisVersion(window.cluster.address,function(obj){
+        checkRedisVersion(window.clusterId, window.cluster.address,function(obj){
             if( obj.res  == 2 ){
                 sparrow_win.confirm("Only support Redis Cluster mode", function(){
                     window.location.href = "/monitor/clusterMonitorList";
@@ -20,6 +20,7 @@ $(document).ready(function(){
         });
         show_cluster_node_list( window.cluster.address );
     });
+
 });
 
 $('[href="#nodeManager"]').click(function () {
@@ -31,7 +32,7 @@ $('[href="#clusterManager"]').click(function () {
 });
 
 function show_cluster_node_list(address){
-    smarty.get( "/cluster/detailNodeList?address=" + address, "cluster/cluster_manager_content", "clusterManager", function(){
+    smarty.get( "/cluster/detailNodeList?clusterId="+window.clusterId+"&address=" + address, "cluster/cluster_manager_content", "clusterManager", function(){
         // 默认展开
         //$(".expand-all").trigger("click");
     }, true );
@@ -279,7 +280,7 @@ $(document).on("click", "#import-node", function(){
             var tmps = hostArr[0].split(":");
             var masterIp = tmps[0];
             var masterPort = tmps[1];
-            importNode(data.ip, data.port,masterIp,masterPort, function(){
+            importNode(window.clusterId, data.ip, data.port,masterIp,masterPort, function(){
 
             });
         });
@@ -293,14 +294,17 @@ $(document).on("click", "#batch-config", function(){
             if ( sparrow.empty( data ) ){
                 return false;
             }
+            if(data.configName.trim() == "requirepass") {
+                layer.msg("Warn: Changing passwords is not supported.", function(){})
+                return false;
+            }
             layer.closeAll();
             var address =  window.cluster.address;
             var hostArr = address.split(",");
             var tmps = hostArr[0].split(":");
             var masterIp = tmps[0];
             var masterPort = tmps[1];
-            batchConfig(masterIp, masterPort,data.configName, data.configValue, function(){
-
+            batchConfig(window.clusterId, masterIp, masterPort,data.configName, data.configValue, function(){
             });
         });
     } );
@@ -310,9 +314,14 @@ $(document).on("click", ".be-master", function(){
     var ip = $(this).data("ip");
     var port = $(this).data("port");
     sparrow_win.confirm('Confirm set the node master',function(){
-        beMaster(ip,port,function(){
-            sparrow_win.msg("be master");
-            delay(function(){show_cluster_node_list( window.cluster.address )});
+        beMaster(window.clusterId, ip, port, function(data){
+            var result = data.res;
+            if(new String(result) == 'true') {
+                sparrow_win.msg("be master successfully.");
+                delay(function(){show_cluster_node_list( window.cluster.address )});
+            } else {
+                sparrow_win.msg("be master error.");
+            }
         });
      });
 });
@@ -334,7 +343,7 @@ $(document).on("click", ".move-slot", function(){
             layer.closeAll();
             var startKey = data["startKey"];
             var endKey = data["endKey"];
-            moveSlot(ip,port,startKey,endKey,function(obj){
+            moveSlot(window.clusterId, ip, port, startKey, endKey, function(obj){
                 if( obj.code == 0 ){
                     sparrow_win.msg("success!");
                 }else{
@@ -343,6 +352,16 @@ $(document).on("click", ".move-slot", function(){
             });
         });
     });
+});
+
+$(document).on("click", ".memory-purge", function(){
+    var ip = $(this).data("ip");
+    var port = $(this).data("port");
+    var clusterId = window.clusterId
+    memoryPurge(clusterId,ip,port,function(result){
+        console.log(result);
+    });
+
 });
 
 $(document).on("click", ".forget-node", function(){
@@ -355,7 +374,7 @@ $(document).on("click", ".forget-node", function(){
             if( obj.res == true || obj.res == "true" ){
                 sparrow_win.msg("the node is in cluster db can not forget");
             }else{
-                forgetNode(ip,port,masterId, function(){
+                forgetNode(window.clusterId, ip, port, masterId, function(){
                      sparrow_win.msg("forget node");
                      delay(function(){show_cluster_node_list( window.cluster.address )});
                 });
@@ -369,13 +388,19 @@ $(document).on("click", ".be-slave", function(){
     var ip = $(this).data("ip");
     var port = $(this).data("port");
     var address = ip + ":" + port;
-    smarty.fopen( "/cluster/detailNodeList?address=" + address, "cluster/be_slave", true, { title: "Select master for move slave " + ip + ":" + port, width:1000, height:580}, function(){
+    smarty.fopen( "/cluster/detailNodeList?clusterId="+window.clusterId+"&address=" + address, "cluster/be_slave", true, { title: "Select master for move slave " + ip + ":" + port, width:1000, height:580}, function(){
         $(".move-slave-confirm").click(function(){
             layer.closeAll();
             var masterId = $(this).data("nodeid");
-            beSlave(ip,port,masterId, function(){
-                sparrow_win.msg("move slave ...");
-                delay(function(){show_cluster_node_list( window.cluster.address )});
+            beSlave(window.clusterId, ip, port, masterId, function(data){
+                var result = data.res;
+                if(new String(result) == 'true') {
+                    sparrow_win.msg("move slave successfully.");
+                    delay(function(){show_cluster_node_list( window.cluster.address )});
+                } else {
+                    sparrow_win.msg("move slave error.");
+                }
+                window.location.reload();
             });
         });
     });
@@ -383,12 +408,17 @@ $(document).on("click", ".be-slave", function(){
 
 $(document).on("click", ".node-info", function(){
     var host = $(this).data("ip") + ":" + $(this).data("port");
-    smarty.fopen( "/cluster/getNodeInfo?address="+ host, "cluster/info_format", true, { title: "Info", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
+    smarty.fopen( "/cluster/getNodeInfo?clusterId="+window.clusterId+"&address="+ host, "cluster/info_format", true, { title: "Info", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
     } );
 });
 
 $(document).on("click", ".view-config", function(){
     var host = $(this).data("ip") + ":" + $(this).data("port");
-    smarty.fopen( "/cluster/getRedisConfig?address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
+    smarty.fopen( "/cluster/getRedisConfig?clusterId="+window.clusterId+"&address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
     } );
 });
+
+// delay 3 second
+function delay(fun){
+    setTimeout(fun, 3000);
+}

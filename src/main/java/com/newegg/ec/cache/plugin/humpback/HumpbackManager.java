@@ -217,6 +217,14 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
         logger.websocket("redis cluster node install success");
     }
 
+    @Override
+    protected void auth(String ipListStr, String redisPassword) {
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
+        nodelist.forEach(node -> {
+            clusterLogic.addRedisPassd(node.getIp(), node.getPort(),redisPassword);
+        });
+    }
+
     private String formatContainerName(String containerName, int port) {
         return containerName + port;
     }

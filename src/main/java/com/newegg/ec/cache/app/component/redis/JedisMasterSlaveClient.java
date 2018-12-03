@@ -1,6 +1,8 @@
 package com.newegg.ec.cache.app.component.redis;
 
+import com.newegg.ec.cache.app.model.ConnectionParam;
 import com.newegg.ec.cache.app.model.RedisValue;
+import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCommands;
 import redis.clients.jedis.MultiKeyCommands;
@@ -12,11 +14,16 @@ public class JedisMasterSlaveClient extends RedisClientBase implements IRedis {
     private Jedis jedis;
     private String ip;
     private int port;
+    private String password;
 
-    public JedisMasterSlaveClient(String ip, int port) {
-        this.ip = ip;
-        this.port = port;
+    public JedisMasterSlaveClient(ConnectionParam param) {
+        this.ip = param.getIp();
+        this.port = param.getPort();
+        this.password = param.getRedisPassword();
         jedis = new Jedis(ip, port);
+        if(StringUtils.isNotBlank(this.password)) {
+            jedis.auth(this.password);
+        }
     }
 
     @Override

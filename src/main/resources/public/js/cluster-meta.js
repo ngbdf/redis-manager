@@ -1,6 +1,6 @@
 $(document).on("click", "#add-cluster", function(){
     listGroup(function(obj){
-        smarty.open( "cluster/add_cluster_model", obj, { title: "Add New Cluster", width:400, height:345},function(){
+        smarty.open( "cluster/add_cluster_model", obj, { title: "Add New Cluster", width:400, height:420},function(){
 
         });
     });

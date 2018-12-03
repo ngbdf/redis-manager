@@ -22,6 +22,7 @@ import java.util.Map;
 public class AlarmLogic {
     @Autowired
     IClusterCheckRuleDao clusterCheckRuleDao;
+
     @Autowired
     IClusterCheckLogDao clusterCheckLogDao;
 
@@ -70,7 +71,6 @@ public class AlarmLogic {
     }
 
     public Integer countTotalLog(List<String> clusterIds) {
-        System.out.println(StringUtils.join(clusterIds, ","));
         Integer count = 0;
         if (clusterIds != null && clusterIds.size() > 0) {
             count = clusterCheckLogDao.countTotalWarningLog(clusterIds);

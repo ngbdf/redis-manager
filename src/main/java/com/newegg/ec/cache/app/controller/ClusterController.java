@@ -27,11 +27,6 @@ public class ClusterController {
     @Autowired
     private NodeInfoDao nodeInfoTable;
 
-    @RequestMapping("/clusterListManager")
-    public String clusterListManager(Model model) {
-        return "clusterListManager";
-    }
-
     @RequestMapping("/clusterManager")
     public String clusterManager(Model model) {
         return "clusterManager";
@@ -51,8 +46,9 @@ public class ClusterController {
 
     @RequestMapping(value = "/redisDbList", method = RequestMethod.GET)
     @ResponseBody
-    public Response redisDbList(@RequestParam String address) {
-        List<Map<String, String>> redisDBList = logic.getRedisDBList(address);
+    public Response redisDbList(@RequestParam int clusterId, @RequestParam String address) {
+        List<Map<String, String>> redisDBList = logic.getRedisDBList(clusterId, address);
+
         return Response.Result(0, redisDBList);
     }
 
@@ -68,17 +64,15 @@ public class ClusterController {
     @RequestMapping(value = "/listCluster", method = RequestMethod.GET)
     @ResponseBody
     public Response listCluster() {
-        List<Cluster> listCluster = null;
         String userGroup = RequestUtil.getUser().getUserGroup();
-        listCluster = logic.getClusterList(userGroup);
+        List<Cluster> listCluster = logic.getClusterList(userGroup);
         return Response.Result(0, listCluster);
     }
 
     @RequestMapping(value = "/getClusterListByGroup", method = RequestMethod.GET)
     @ResponseBody
     public Response getClusterListByGroup(@RequestParam String group) {
-        List<Cluster> listCluster = null;
-        listCluster = logic.getClusterListByGroup(group);
+        List<Cluster> listCluster = logic.getClusterListByGroup(group);
         return Response.Result(0, listCluster);
     }
 
@@ -91,8 +85,8 @@ public class ClusterController {
 
     @RequestMapping(value = "/importDataToCluster", method = RequestMethod.GET)
     @ResponseBody
-    public Response importDataToCluster(@RequestParam String address, @RequestParam String targetAddress, @RequestParam String keyFormat) {
-        boolean res = logic.importDataToCluster(address, targetAddress, keyFormat);
+    public Response importDataToCluster(@RequestParam int clusterId, @RequestParam String address, @RequestParam String targetAddress, @RequestParam String keyFormat) {
+        boolean res = logic.importDataToCluster(clusterId, address, targetAddress, keyFormat);
         if (res) {
             return Response.Success();
         }
@@ -106,10 +100,9 @@ public class ClusterController {
         return Response.Result(0, clusterImportResultList);
     }
 
-
     @RequestMapping(value = "/listClusterByUser", method = RequestMethod.GET)
     @ResponseBody
-    public Response listClusterByUser(@SessionAttribute(Common.SESSION_USER_KEY) User user) {
+    public Response listClusterByUser(@SessionAttribute(Constants.SESSION_USER_KEY) User user) {
         List<Cluster> listCluster = null;
         listCluster = logic.getClusterListByUser(user);
         return Response.Result(0, listCluster);
@@ -117,14 +110,13 @@ public class ClusterController {
 
     @RequestMapping(value = "/getClusterListInfo", method = RequestMethod.GET)
     @ResponseBody
-    public Response getClusterListInfo(@SessionAttribute(Common.SESSION_USER_KEY) User user) {
+    public Response getClusterListInfo(@SessionAttribute(Constants.SESSION_USER_KEY) User user) {
         Map<String, Integer> clusterListInfo = null;
         if (user != null) {
             clusterListInfo = logic.getClusterListInfo(user.getUserGroup());
         }
         return Response.Result(0, clusterListInfo);
     }
-
 
     @RequestMapping(value = "/getCluster", method = RequestMethod.GET)
     @ResponseBody
@@ -157,83 +149,82 @@ public class ClusterController {
 
     @RequestMapping(value = "/getClusterInfo", method = RequestMethod.GET)
     @ResponseBody
-    public Response getClusterInfo(@RequestParam String ip, @RequestParam int port) {
-        Map<String, String> res = logic.getClusterInfo(ip, port);
+    public Response getClusterInfo(@RequestParam int clusterId, @RequestParam String ip, @RequestParam int port) {
+        Map<String, String> res = logic.getClusterInfo(clusterId, ip, port);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/getClusterInfoByAddress", method = RequestMethod.GET)
     @ResponseBody
-    public Response getClusterInfoByAddress(@RequestParam String address) {
-        Map<String, String> res = logic.getClusterInfo(address);
+    public Response getClusterInfoByAddress(@RequestParam int clusterId, @RequestParam String address) {
+        Map<String, String> res = logic.getClusterInfo(clusterId, address);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/getNodeInfo", method = RequestMethod.GET)
     @ResponseBody
-    public Response getNodeInfo(@RequestParam String address) {
-        Map<String, String> res = logic.getNodeInfo(address);
+    public Response getNodeInfo(@RequestParam int clusterId, @RequestParam String address) {
+        Map<String, String> res = logic.getNodeInfo(clusterId, address);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/getRedisConfig", method = RequestMethod.GET)
     @ResponseBody
-    public Response getRedisConfig(@RequestParam String address) {
-        Map<String, String> res = logic.getRedisConfig(address);
+    public Response getRedisConfig(@RequestParam int clusterId, @RequestParam String address) {
+        Map<String, String> res = logic.getRedisConfig(clusterId, address);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/nodeList", method = RequestMethod.GET)
     @ResponseBody
-    public Response nodeList(@RequestParam String address) {
-        List<Map<String, String>> list = logic.nodeList(address);
+    public Response nodeList(@RequestParam int clusterId, @RequestParam String address) {
+        List<Map<String, String>> list = logic.nodeList(clusterId, address);
         return Response.Result(0, list);
     }
 
     @RequestMapping(value = "/detailNodeList", method = RequestMethod.GET)
     @ResponseBody
-    public Response detailNodeList(@RequestParam String address) {
-        Map<String, Map> detailNodeList = logic.detailNodeList(address);
+    public Response detailNodeList(@RequestParam int clusterId, @RequestParam String address) {
+        Map<String, Map> detailNodeList = logic.detailNodeList(clusterId, address);
         Map<String, Object> res = new HashMap<>();
         res.put("nodeList", detailNodeList);
-        Map<String, String> clusterInfo = logic.getClusterInfo(address);
+        Map<String, String> clusterInfo = logic.getClusterInfo(clusterId, address);
         res.put("clusterInfo", clusterInfo);
-        System.out.println(res);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/beSlave", method = RequestMethod.GET)
     @ResponseBody
-    public Response beSlave(@RequestParam String ip, @RequestParam int port, @RequestParam String masterId) {
-        boolean res = logic.beSlave(ip, port, masterId);
+    public Response beSlave(@RequestParam int clusterId, @RequestParam String ip, @RequestParam int port, @RequestParam String masterId) {
+        boolean res = logic.beSlave(clusterId, ip, port, masterId);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/beMaster", method = RequestMethod.GET)
     @ResponseBody
-    public Response beMaster(@RequestParam String ip, @RequestParam int port) {
-        boolean res = logic.beMaster(ip, port);
+    public Response beMaster(@RequestParam int clusterId, @RequestParam String ip, @RequestParam int port) {
+        boolean res = logic.beMaster(clusterId, ip, port);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/initSlot", method = RequestMethod.GET)
     @ResponseBody
-    public Response initSlot(@RequestParam String address) {
-        boolean res = logic.initSlot(address);
+    public Response initSlot(@RequestParam int clusterId, @RequestParam String address) {
+        boolean res = logic.initSlot(clusterId, address);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/forgetNode", method = RequestMethod.GET)
     @ResponseBody
-    public Response forgetNode(@RequestParam String ip, @RequestParam int port, @RequestParam String masterId) {
-        boolean res = logic.forgetNode(ip, port, masterId);
+    public Response forgetNode(@RequestParam int clusterId, @RequestParam String ip, @RequestParam int port, @RequestParam String masterId) {
+        boolean res = logic.forgetNode(clusterId, ip, port, masterId);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/moveSlot", method = RequestMethod.GET)
     @ResponseBody
-    public Response moveSlot(@RequestParam String ip, @RequestParam int port, @RequestParam int startKey, @RequestParam int endKey) {
-        boolean res = logic.reShard(ip, port, startKey, endKey);
+    public Response moveSlot(@RequestParam int clusterId, @RequestParam String ip, @RequestParam int port, @RequestParam int startKey, @RequestParam int endKey) {
+        boolean res = logic.reShard(clusterId, ip, port, startKey, endKey);
         if (res) {
             return Response.Success();
         }
@@ -242,18 +233,28 @@ public class ClusterController {
 
     @RequestMapping(value = "/importNode", method = RequestMethod.GET)
     @ResponseBody
-    public Response importNode(@RequestParam String ip, @RequestParam int port, @RequestParam String masterIP, @RequestParam int masterPort) {
-        boolean res = logic.importNode(ip, port, masterIP, masterPort);
+    public Response importNode(@RequestParam int clusterId, @RequestParam String ip, @RequestParam int port, @RequestParam String masterIP, @RequestParam int masterPort) {
+        boolean res = logic.importNode(clusterId, ip, port, masterIP, masterPort);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/batchConfig", method = RequestMethod.GET)
     @ResponseBody
-    public Response batchConfig(@RequestParam String ip, @RequestParam int port, @RequestParam String configName, @RequestParam String configValue) {
-        boolean res = logic.batchConfig(ip, port, configName, configValue);
+    public Response batchConfig(@RequestParam int clusterId, @RequestParam String ip, @RequestParam int port, @RequestParam String configName, @RequestParam String configValue) {
+        boolean res = logic.batchConfig(clusterId, ip, port, configName, configValue);
         if (res) {
             return Response.Info("modify config is sucess");
         }
         return Response.Warn("modify config is fail");
+    }
+
+    @RequestMapping(value = "/memoryPurge", method = RequestMethod.GET)
+    @ResponseBody
+    public Response memoryPurge(@RequestParam int clusterId, @RequestParam String ip, @RequestParam int port) {
+        String res = logic.memoryPurge(clusterId, ip, port);
+        if (res != null) {
+            return Response.Info(res);
+        }
+        return Response.Warn("memory purge is fail");
     }
 }

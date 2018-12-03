@@ -3,13 +3,12 @@ $(document).ready(function(){
     window.clusterId = getQueryString("clusterId");
     getCluster(clusterId, function(obj){
         var cluster = obj.res;
-        nodeList(cluster.address, function(obj){
+        nodeList(clusterId, cluster.address, function(obj){
             window.nodeList = obj.res;
             rebuildNodeListTable( window.clusterId );
         });
 
         getNodeList(window.pluginType, window.clusterId, function(obj){
-            console.log( obj );
             window.nodeListDBSize = obj.res.length;
         });
     });

@@ -39,7 +39,7 @@ $("#syn-cluster-button").click(function(){
         sparrow_win.alert("sorry you from cluster equal target cluster");
         return;
     }
-    importDataToCluster(fromDetail["address"],targetAddress["address"], keyFormat,function(obj){
+    importDataToCluster(window.clusterId, fromDetail["address"],targetAddress["address"], keyFormat,function(obj){
     });
 });
 

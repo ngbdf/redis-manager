@@ -24,13 +24,22 @@ $(document).ready(function(){
      $("#instance").text(window.host);
      $("#data-type").text(window.type);
 
+    auth();
+
 });
 
 $(window).resize(function(){
-    $(".chart-sm").each(function(){
-        var id = $(this).attr('id');
-        echarts.getInstanceByDom(document.getElementById(id)).resize();
-    });
+    var chart = $(".chart-sm");
+    if(isNotEmpty(chart)){
+        $(".chart-sm").each(function(){
+                var id = $(this).attr('id');
+                var dom = document.getElementById(id)
+                if(isNotEmpty(dom) && isNotEmpty(echarts.getInstanceByDom(dom))){
+                    echarts.getInstanceByDom(dom).resize();
+                }
+         });
+    }
+
 });
 
 function getCurrentTime(){
@@ -105,9 +114,9 @@ $('#dataType').on('changed.bs.select', function (e) {
 
 // cluster info command
 $(".cluster-info").on("click", function(){
-    getCluster(window.clusterId , function(obj){
+    getCluster(window.clusterId, function(obj){
         var address = obj.res.address;
-        getClusterInfoByAddress(address, function(obj){
+        getClusterInfoByAddress(window.clusterId, address, function(obj){
             layer.open({
                 title: 'Cluster Info',
                 type: 1,
@@ -126,7 +135,7 @@ $(".cluster-info").on("click", function(){
 $("#info").on("click", function(){
     var host = window.host;
     if(host != "all" && host != "" && host != null){
-        smarty.fopen( "/cluster/getNodeInfo?address="+ host, "cluster/info_format", true, { title: "Info", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
+        smarty.fopen( "/cluster/getNodeInfo?clusterId="+window.clusterId+"&address="+ host, "cluster/info_format", true, { title: "Info", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
         });
     } else {
         layer.msg("Please select one node");
@@ -137,7 +146,7 @@ $("#info").on("click", function(){
 $("#config").on("click", function(){
     var host = window.host;
     if(host != "all" && host != "" && host != null){
-        smarty.fopen( "/cluster/getRedisConfig?address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
+        smarty.fopen( "/cluster/getRedisConfig?clusterId="+window.clusterId+"&address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
         });
     } else {
         layer.msg("Please select one node");
@@ -150,7 +159,7 @@ function reloadMonitor(){
 
 function init(){
     // cluster info for state
-    getClusterInfoByAddress(window.address, function(obj){
+    getClusterInfoByAddress(window.clusterId, window.address, function(obj){
         var clusterInfo = obj.res;
         var state = clusterInfo.cluster_state;
         if(state == "ok"){
@@ -173,18 +182,26 @@ function init(){
         $("#avg-response").html( obj.res );
     });
 
-    monitorGetDbSize(window.address,function(obj){
+    monitorGetDbSize(window.clusterId, window.address,function(obj){
         if( obj.res ){
             $("#all-key").html( Math.round(obj.res) );
         }
     });
     monitorGetMaxField(window.clusterId ,window.startTime,window.endTime,"total_keys", 2,function(obj){
-        $("#max-all-key").attr("title", obj.res[0].host)
-        $("#max-all-key").html( obj.res[0].total_keys );
+        var data = obj.res[0];
+        if(isNotEmpty(data)) {
+            $("#max-all-key").attr("title", data.host);
+            $("#max-all-key").html(data.total_keys );
+        }
+
     });
     monitorGetMinField(window.clusterId ,window.startTime,window.endTime,"total_keys", 2,function(obj){
-        $("#min-all-key").attr("title", obj.res[0].host)
-        $("#min-all-key").html( obj.res[0].total_keys );
+        var data = obj.res[0];
+        if(isNotEmpty(data)) {
+            $("#min-all-key").attr("title", data.host)
+            $("#min-all-key").html(data.total_keys );
+        }
+
     });
 
     monitorGetMaxField(window.clusterId ,window.startTime,window.endTime,"connected_clients", 2,function(obj){
@@ -218,19 +235,20 @@ function init(){
     });
 
    monitorGetGroupNodeInfo(window.clusterId ,window.startTime,window.endTime,window.host,window.type,window.date,function(obj){
-        var storageUnit = calStorageUnit(obj.res[0].usedMemory);
-        var numberUnit = calNumberUnit(obj.res[0].expires);
-        var usefulData = refactor(obj.res,window.date,storageUnit,numberUnit);
-        clearChart_invalidatedData(usefulData);
-
-        buildChart("charts-cpu","平均每秒使用CPU时间","date","usedCpuUser",usefulData,"CPU usage","  /s");
-        buildChart("charts-memory","内存占用","date","usedMemory",usefulData,"memory usage", storageUnit);
-        buildChart("charts-client","客户端连接数","date","connectedClients",usefulData,"client connections"," ");
-        buildChart("charts-ops","每秒指令数(instantaneous_ops_per_sec )","date","instantaneousOpsPerSec",usefulData,"command  /sec"," ");
-        buildChart("charts-commands","每秒命令数(total_commands_processed)","date","totalCommandsProcessed",usefulData,"command  /sec  "," ");
-        buildChart("charts-Keyspace-expires","有TTL的key总数","date","expires",usefulData,"keys with ttl",numberUnit);
-        buildChart("charts-hitRate","命中率","date","keyspaceHitRate",usefulData,"hitRate_avg"," ");
-
+        var data = obj.res[0];
+        if(isNotEmpty(data)){
+                var storageUnit = calStorageUnit(data.usedMemory);
+                var numberUnit = calNumberUnit(data.expires);
+                var usefulData = refactor(obj.res,window.date,storageUnit,numberUnit);
+                clearChart_invalidatedData(usefulData);
+                buildChart("charts-cpu","平均每秒使用CPU时间","date","usedCpuUser",usefulData,"CPU usage","  /s");
+                buildChart("charts-memory","内存占用","date","usedMemory",usefulData,"memory usage", storageUnit);
+                buildChart("charts-client","客户端连接数","date","connectedClients",usefulData,"client connections"," ");
+                buildChart("charts-ops","每秒指令数(instantaneous_ops_per_sec )","date","instantaneousOpsPerSec",usefulData,"command  /sec"," ");
+                buildChart("charts-commands","每秒命令数(total_commands_processed)","date","totalCommandsProcessed",usefulData,"command  /sec  "," ");
+                buildChart("charts-Keyspace-expires","有TTL的key总数","date","expires",usefulData,"keys with ttl",numberUnit);
+                buildChart("charts-hitRate","命中率","date","keyspaceHitRate",usefulData,"hitRate_avg"," ");
+        }
     });
 
     getCluster(window.clusterId , function(obj){
@@ -239,7 +257,7 @@ function init(){
 
     // set node options
     var address = window.address;
-    nodeList(address, function(nodeObj){
+    nodeList(window.clusterId, address, function(nodeObj){
         var nodeList = nodeObj.res;
         window.nodeList = nodeList;
         var options = '<option>all</option>';
@@ -409,12 +427,16 @@ function clearChart_invalidatedData(originData){
 
 
 function buildChart(webElementId,titleText,xAxisFieldName,yAxisFieldName,chartData,legendText,yAxisText){
+
     var myChart = echarts.init(document.getElementById(webElementId));
     myChart.showLoading({
         text: '数据正在努力加载...',
         textStyle: { fontSize : 30 , color: '#444' },
         effectOption: {backgroundColor: 'rgba(0, 0, 0, 0)'}
     });
+    if(chartData == "" || chartData == "undefined"){
+          return;
+        }
     var option_bar = {
         title: {
             text: titleText,
@@ -489,6 +511,7 @@ function slowLog(){
         var ipAndPort = logNode.split(":");
         logParam.hostList = [{"ip":ipAndPort[0], "port": parseInt(ipAndPort[1])}];
     }
+    logParam.clusterId = window.clusterId;
     var tableStr = '<table class="table table-bordered scrollbar">';
     tableStr += "<thead><tr><th>Host</th><th>Slow Date</th><th>Run Time</th><th>Type</th><th>command</th></tr></thead><tbody>"
     monitorSlowLogs(logParam,function(obj){
@@ -515,4 +538,39 @@ function slowLog(){
 }
 
 
+function auth() {
+    var log ="                                                                                                                                                                        \n"+
+             " #@@@@@@@,                             .@:   @@'              ,@;             '@.                                                                                       \n"+
+             " #@@@@@@@@#                            .@:   @@#              ,@@             @@.                                                                                       \n"+
+             " #@     `@@:                           .@:                    ,@@,           ,@@.                                                                                       \n"+
+             " #@      ,@@                           .@:                    ,@@@           @@@.                                                                                       \n"+
+             " #@       @@                           .@:                    ,@@@`         `@@@.                                                                                       \n"+
+             " #@       #@        @@@           @@@` .@:           .@@@     ,@'@#         #@'@.       +@@+           @@@.         ,@@@          ,@@@            @@@           @@'     \n"+
+             " #@       @@      @@@@@@@       @@@@@@@.@:   :@`    @@@@@@;   ,@,@@         @@:@.     @@@@@@@.    `@:#@@@@@@      @@@@@@@+      .@@@@@@@#@      @@@@@@@     @@:@@@@     \n"+
+             " #@ .     @@     @@+   @@#     @@@   '@@@:   :@`   @@#   @;   ,@,;@;       '@::@.    '@@   ;@@    `@@@@   @@#    `@@`  `@@`    `@@'   @@@@     @@+   @@#    @@@@        \n"+
+             " #@      #@;    #@:     @@`   #@+     ,@@:   :@`  `@@         ,@, @@       @@ :@.    ;      #@.   `@@+     @@    `:     ,@#    @@,     #@@    #@,     @@`   @@@         \n"+
+             " #@     @@@     @@      ,@'   @@       @@:   :@`  `@+         ,@, #@,     ,@' :@.           ,@;   `@@      +@`           @@   ,@#       @@    @#      :@;   @@'         \n"+
+             " #@@@@@@@#     :@:       @#  :@'       ;@:   :@`   @@         ,@,  @#     @@  :@.           `@'   `@#      :@,           @@   #@`       @@   :@,       @#   @@`         \n"+
+             " #@@@@@@;      #@`       @#  +@.       .@:   :@`   #@@        ,@,  @@`   `@#  :@.         @@@@'   `@:      .@,        @@@@@   @@        #@   #@`       @#   @@          \n"+
+             " #@    @@`     #@@@@@@@@@@@  #@        .@:   :@`    @@@#      ,@,  ,@'   +@`  :@.     #@@@@@@@'   `@:      .@,    .@@@@@@@@   @@        #@   @@@@@@@@@@@@   @@          \n"+
+             " #@    .@#     #@            #@        .@:   :@`     .@@@.    ,@,   @@   @@   :@.    @@@:   `@'   `@:      .@,   '@@#    @@   @@        #@   @@             @@          \n"+
+             " #@     @@`    #@`           #@`       .@:   :@`       :@@.   ,@,   ;@: ;@:   :@.   ;@+     `@'   `@:      .@,   @@      @@   @@        #@   #@`            @@          \n"+
+             " #@     :@+    ;@:           '@:       '@:   :@`        ,@#   ,@,    @@ @@    :@.   #@      ,@'   `@:      .@,  ,@:      @@   #@        @@   '@:            @@          \n"+
+             " #@      @@     @@           `@@       @@:   :@`         @@   ,@,    +@.@+    :@.   #@      #@'   `@:      .@,  :@,     :@@   '@'      `@@   `@#            @@          \n"+
+             " #@      +@;    @@:      ;    @@,     +@@:   :@`         @#   ,@,    `@@@     :@.   #@.    :@@'   `@:      .@,  ,@#    `@@@    @@`     @@@    @@,      ;    @@          \n"+
+             " #@       @@    `@@+   ,@@    .@@;   @@@@:   :@`  .@,   @@;   ,@,     #@#     :@.   ,@@`  +@@@'   `@:      .@,   @@;  `@@@@    #@@.   @@@@    `@@+   ,@@    @@          \n"+
+             " #@       #@,    ,@@@@@@@;     ,@@@@@@@.@:   :@`  .@@@@@@@    ,@,     ,@`     :@.    @@@@@@@`@'   `@:      .@,   ,@@@@@@ @@     #@@@@@@;#@     ,@@@@@@@;    @@          \n"+
+             "                   ,@@@          '@@#               +@@@                               @@@                         #@@.           @@@'  #@       ,@@@                   \n"+
+             "                                                                                                                                        @@                              \n"+
+             "                                                                                                                                        @#                              \n"+
+             "                                                                                                                                       #@;                              \n"+
+             "                                                                                                                               @`     #@@                               \n"+
+             "                                                                                                                               @@@@@@@@@                                \n"+
+             "                                                                                                                                '@@@@@;                                 \n"+
+             "                                                                                                                                                                        \n"+
+             "                                                                                                                                                 @AU. GL LF JZ .        \n"+
+             "                                                                                                                                                 www.newegg.com         \n"+
+             "                                                                                                                                                                        \n";
 
+    console.log(log);
+}

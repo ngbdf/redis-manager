@@ -14,12 +14,13 @@
     <link rel="stylesheet" href="../vender/bootstrap-3.3.7/css/bootstrap.css"/>
 	<link rel="stylesheet" href="../css/bootstrap-reset.css"/>
 	<link rel="stylesheet" href="../css/bootstrap-reset.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />-->
 	<link rel="stylesheet" href="../font-awesome/css/font-awesome.css" />
 	<link rel="stylesheet" href="../css/common.css"/>
+
 	<link rel="stylesheet" href="../css/redis-monitor-list.css"/>
-	
+	<link rel="stylesheet" href="../css/style.css"/>
 	<script type="text/javascript" src="../vender/jquery/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript" src="../vender/bootstrap-3.3.7/js/bootstrap.js"></script>
 
@@ -35,61 +36,54 @@
 <body>
     <div  class="body-container scrollbar-div scrollbar-div-1">
         <div class="data-container scrollbar">
-            <div class="list-info">
-            	<ul>
-            		<li class="margin-right">
-            			<div class="icon-chart-container total-icon">
-            				<i class="fa fa-bar-chart icon-chart"></i>
-            			</div>
-            			<div class="total-data-container">
-            				<div class="data">
-            					<a id="cluster-number">0</a>
-            				</div>
-            				<div class="total-data-title">
-            					<span>Redis Cluster</span>
-            				</div>
-            			</div>
-            		</li>
-            		<li class="margin-right">
-            			<div class="icon-chart-container good-icon">
-            				<i class="fa fa-heartbeat icon-chart"></i>
-            			</div>
-            			<div class="total-data-container">
-            				<div class="data">
-            					<a id="cluster-ok-number">0</a>
-            				</div>
-            				<div class="total-data-title">
-            					<span>Good Cluster</span>
-            				</div>
-            			</div>
-            		</li>
-            		<li class="margin-right">
-            			<div class="icon-chart-container bad-icon">
-            				<i class="fa fa-stethoscope icon-chart"></i>
-            			</div>
-            			<div class="total-data-container">
-            				<div class="data">
-            					<a id="cluster-fail-number">0</a>
-            				</div>
-            				<div class="total-data-title">
-            					<span>Bad Cluster</span>
-            				</div>
-            			</div>
-            		</li>
-            		<li>
-            			<div class="icon-chart-container warning-icon">
-            				<i class="fa fa-bell icon-chart"></i>
-            			</div>
-            			<div class="total-data-container">
-            				<div class="data">
-            					<a id="cluster-alarm-count">0</a>
-            				</div>
-            				<div class="total-data-title">
-            					<span>Cluster Warning</span>
-            				</div>
-            			</div>
-            		</li>
-            	</ul>
+
+            <div class="state-overview list-info">
+            	<div class="row">
+            		<div class="col-lg-3 col-sm-6">
+						<section class="panel">
+							<div class="symbol blue">
+								<i class="icon-signal"></i>
+							</div>
+							<div class="value">
+								<h1 id="cluster-number">0</h1>
+								<p>Redis Cluster</p>
+							</div>
+						</section>
+            		</div>
+            		<div class="col-lg-3 col-sm-6">
+						<section class="panel">
+							<div class="symbol terques">
+								<i class="icon-heart"></i>
+							</div>
+							<div class="value">
+								<h1 id="cluster-ok-number">0</h1>
+								<p>Good Cluster</p>
+							</div>
+						</section>
+            		</div>
+            		<div class="col-lg-3 col-sm-6">
+						<section class="panel">
+							<div class="symbol red">
+								<i class="icon-frown"></i>
+							</div>
+							<div class="value">
+								<h1 id="cluster-fail-number">0</h1>
+								<p>Bad Cluster</p>
+							</div>
+						</section>
+					</div>
+            		<div class="col-lg-3 col-sm-6">
+						<section class="panel">
+							<div class="symbol yellow">
+								<i class="icon-bell"></i>
+							</div>
+							<div class="value">
+								<h1 id="cluster-alarm-count">0</h1>
+								<p>Cluster Warning</p>
+							</div>
+						</section>
+            		</div>
+            	</div>
             </div>
 			<div id="group-classify">
 

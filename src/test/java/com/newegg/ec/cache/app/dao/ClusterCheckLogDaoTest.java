@@ -40,9 +40,9 @@ public class ClusterCheckLogDaoTest {
     @Test
     public void getLogsTest(){
         Map<String,Object> param = new HashMap();
-        param.put("clusterId", "ssecbigdata");
-        param.put("nodeId", "localhost:8008");
-        param.put("formula", "@{mem_fragmentation_ratio}>2.2");
+        param.put("clusterId", "1");
+        param.put("nodeId", "10.16.46.192:8018");
+        param.put("formula", "@{mem_fragmentation_ratio}>=1.0");
         param.put("logType", ClusterCheckLog.LogType.warnlog.toString());
         //param.put("limit",1);
         System.out.println(logDao.getClusterCheckLogs(param).size());

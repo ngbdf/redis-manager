@@ -3,11 +3,14 @@ package com.newegg.ec.cache.app.dao;
 import com.newegg.ec.cache.Application;
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.model.Cluster;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisCluster;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -69,6 +72,24 @@ public class ClusterDaoTest {
         List<String> clusters = clusterDao.getClusterGroups();
         System.out.println( clusters );
 
+    }
+
+    @Test
+    public void updatePassword(){
+        int result = clusterDao.updatePassword(30008,"");
+        System.out.println( result );
+
+    }
+
+    @Test
+    public void query() {
+        HostAndPort hostAndPort = new HostAndPort("10.16.46.195", 8800);
+        //public JedisCluster(Set<HostAndPort> jedisClusterNode, int connectionTimeout, int soTimeout,
+        //                      int maxAttempts, String password, final GenericObjectPoolConfig poolConfig) {
+        //    super(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, password, poolConfig);
+        JedisCluster jedisCluster = new JedisCluster(hostAndPort, 5000, 5000, 5, "12345678", new GenericObjectPoolConfig());
+        String kk = jedisCluster.get("kk");
+        System.out.println(kk);
     }
 
 }
