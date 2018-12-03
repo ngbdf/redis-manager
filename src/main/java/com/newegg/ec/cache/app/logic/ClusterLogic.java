@@ -23,10 +23,7 @@ import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by gl49 on 2018/4/21.
@@ -62,9 +59,10 @@ public class ClusterLogic {
     }
 
     public Map<String, List<Cluster>> getClusterMap(String group) {
-        Map<String, List<Cluster>> clusterMap = new HashedMap();
+        Map<String, List<Cluster>> clusterMap = new LinkedHashMap<>();
         if (group.equals(Constants.ADMIN_GROUP)) {
             List<String> groups = clusterDao.getClusterGroups();
+            Collections.sort(groups);
             for (String groupStr : groups) {
                 clusterMap.put(groupStr, clusterDao.getClusterList(groupStr));
             }
@@ -84,12 +82,12 @@ public class ClusterLogic {
     public boolean removeCluster(int clusterId) {
         boolean res = false;
         try {
-            String type= clusterDao.getCluster(clusterId).getClusterType();
+            String type = clusterDao.getCluster(clusterId).getClusterType();
             clusterDao.removeCluster(clusterId);
             String tableName = Constants.NODE_INFO_TABLE_FORMAT + clusterId;
             nodeInfoTable.dropTable(tableName);
             //删除对应nodelist数据 todo
-            switch (type){
+            switch (type) {
                 case "machine":
                     machineNodeDao.removeMachineNodeByClusterId(clusterId);
                     break;
@@ -297,7 +295,7 @@ public class ClusterLogic {
                 }
 
                 //Edit Truman for support save ""or save "600 30000" or save 600 3000 start
-                if(configValue.indexOf("\"")>=0) {
+                if (configValue.indexOf("\"") >= 0) {
                     configValue = configValue.replace("\"", "");
                 }
                 //Edit Truman for support save ""or save "600 30000" or save 600 3000 end
@@ -328,28 +326,28 @@ public class ClusterLogic {
         return res;
     }
 
-    public void addRedisPassd( String ip, int port, String password) {
+    public void addRedisPassd(String ip, int port, String password) {
 
         Jedis jedis = new Jedis(ip, port);
         try {
             //先判断是否是3.0 or 4.0的集群
-            ConnectionParam param =new ConnectionParam(ip,port);
+            ConnectionParam param = new ConnectionParam(ip, port);
             Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
             String redisVersion = nodeInfo.get("redis_version");
-            if(!redisVersion.startsWith("1.0.")){
+            if (!redisVersion.startsWith("1.0.")) {
                 jedis.configSet("requirepass", password);
                 jedis.auth(password);
                 jedis.clusterSaveConfig();
                 // 同步一下配置文件
                 RedisClient redisClient = new RedisClient(ip, port);
                 try {
-                    redisClient.redisCommandOpt(password,RedisClient.REWRITE);
+                    redisClient.redisCommandOpt(password, RedisClient.REWRITE);
                 } catch (IOException e) {
                     logger.error("rewrite conf error", e);
                 } finally {
                     redisClient.closeClient();
                 }
-                logger.info("Node "+ ip +":"+ port + " Install success");
+                logger.info("Node " + ip + ":" + port + " Install success");
             }
 
 
@@ -581,6 +579,7 @@ public class ClusterLogic {
 
     /**
      * 手动整理node内存碎片
+     *
      * @param clusterId
      * @param ip
      * @param port
@@ -590,27 +589,27 @@ public class ClusterLogic {
         String result = "this redis can not support memory purge";
         Cluster cluster = getCluster(clusterId);
         String password = cluster.getRedisPassword();
-        ConnectionParam param =new ConnectionParam(ip,port,password);
+        ConnectionParam param = new ConnectionParam(ip, port, password);
         Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
         String memAllocator = nodeInfo.get("mem_allocator");
         String redisVersion = nodeInfo.get("redis_version");
-        if(memAllocator.startsWith("jemalloc") && redisVersion.startsWith("4.0.")){
-            RedisClient redisClient = new RedisClient(ip,port);
+        if (memAllocator.startsWith("jemalloc") && (Integer.valueOf(redisVersion.substring(0, 1)) >= 4)) {
+            RedisClient redisClient = new RedisClient(ip, port);
             try {
                 if (StringUtils.isNotBlank(password)) {
                     result = redisClient.redisCommandOpt(password, RedisClient.MEMORYPURGE);
                 } else {
-                    result =  redisClient.redisCommandOpt(RedisClient.MEMORYPURGE);
+                    result = redisClient.redisCommandOpt(RedisClient.MEMORYPURGE);
                 }
 
-                if(result.contains("+OK")){
+                if (result.contains("+OK")) {
                     Map<String, String> info = JedisUtil.getMapInfo(param);
                     return "now mem_fragmentation_ratio :" + info.get("mem_fragmentation_ratio");
                 }
             } catch (IOException e) {
                 result = "memory purge error";
                 logger.error("memory purge error", e);
-            }finally {
+            } finally {
                 redisClient.closeClient();
             }
         }

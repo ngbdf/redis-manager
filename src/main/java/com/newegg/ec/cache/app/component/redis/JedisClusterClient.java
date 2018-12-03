@@ -4,6 +4,7 @@ import com.newegg.ec.cache.app.component.RedisManager;
 import com.newegg.ec.cache.app.model.ConnectionParam;
 import com.newegg.ec.cache.app.model.RedisValue;
 import com.newegg.ec.cache.app.util.JedisUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -171,6 +172,10 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
 
     public JedisCluster getJedisClusterClient(ConnectionParam param) {
         HostAndPort hostAndPort = new HostAndPort(param.getIp(), param.getPort());
-        return new JedisCluster(hostAndPort, 5000, 5000, 5, param.getRedisPassword(), new GenericObjectPoolConfig());
+        String redisPassword = param.getRedisPassword();
+        if (StringUtils.isNotBlank(redisPassword)) {
+            return new JedisCluster(hostAndPort, 5000, 5000, 5, redisPassword, new GenericObjectPoolConfig());
+        }
+        return new JedisCluster(hostAndPort, new GenericObjectPoolConfig());
     }
 }

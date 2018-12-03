@@ -40,7 +40,9 @@ public class CreateClusterLogHandler implements WebSocketHandler {
     public static void removeLogMap(WebSocketSession webSocketSession) {
         String id = websocketLogMap.get(webSocketSession);
         websocketLogMap.remove(webSocketSession);
-        logMap.remove(id);
+        if (logMap.containsKey(id)) {
+            logMap.remove(id);
+        }
     }
 
     @Override

@@ -21,7 +21,6 @@ public class JedisMasterSlaveClient extends RedisClientBase implements IRedis {
         this.port = param.getPort();
         this.password = param.getRedisPassword();
         jedis = new Jedis(ip, port);
-
         if(StringUtils.isNotBlank(this.password)) {
             jedis.auth(this.password);
         }

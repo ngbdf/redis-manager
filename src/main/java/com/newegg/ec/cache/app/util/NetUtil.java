@@ -3,6 +3,8 @@ package com.newegg.ec.cache.app.util;
 
 import com.newegg.ec.cache.app.model.Host;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +16,9 @@ import java.util.List;
  * Created by lzz on 2018/2/5.
  */
 public class NetUtil {
+
+    private static final Log logger = LogFactory.getLog(NetUtil.class);
+
     public static String getLocalIp() throws UnknownHostException {
         String ip = InetAddress.getLocalHost().getHostAddress();
         return ip;
@@ -126,11 +131,17 @@ public class NetUtil {
 
     public static Host getHost(String hostStr) {
         Host host = new Host();
-        String[] tmp = hostStr.split(":");
-        String ip = tmp[0];
-        int port = Integer.parseInt(tmp[1]);
-        host.setIp(ip);
-        host.setPort(port);
+
+        try{
+            String[] tmp = hostStr.split(":");
+            String ip = tmp[0];
+            int port = Integer.parseInt(tmp[1]);
+            host.setIp(ip);
+            host.setPort(port);
+        }catch (ArrayIndexOutOfBoundsException e){
+            logger.error("HostStr: " + hostStr + ", node format error : " + e.getMessage());
+        }
+
         return host;
     }
 

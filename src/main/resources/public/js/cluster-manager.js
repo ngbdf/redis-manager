@@ -319,7 +319,7 @@ $(document).on("click", ".be-master", function(){
             var result = data.res;
             if(new String(result) == 'true') {
                 sparrow_win.msg("be master successfully.");
-                window.location.reload();
+                delay(function(){show_cluster_node_list( window.cluster.address )});
             } else {
                 sparrow_win.msg("be master error.");
             }
@@ -372,6 +372,7 @@ $(document).on("click", ".forget-node", function(){
             }else{
                 forgetNode(window.clusterId, ip, port, masterId, function(){
                      sparrow_win.msg("forget node");
+                     delay(function(){show_cluster_node_list( window.cluster.address )});
                 });
             }
         });
@@ -391,7 +392,7 @@ $(document).on("click", ".be-slave", function(){
                 var result = data.res;
                 if(new String(result) == 'true') {
                     sparrow_win.msg("move slave successfully.");
-                    window.location.reload();
+                    delay(function(){show_cluster_node_list( window.cluster.address )});
                 } else {
                     sparrow_win.msg("move slave error.");
                 }
@@ -412,3 +413,8 @@ $(document).on("click", ".view-config", function(){
     smarty.fopen( "/cluster/getRedisConfig?clusterId="+window.clusterId+"&address="+ host, "cluster/config_format", true, { title: "Config", area: '800px', type: 1, closeBtn: 1, anim: 2, shadeClose: true},  function(obj){
     } );
 });
+
+// delay 3 second
+function delay(fun){
+    setTimeout(fun, 3000);
+}
