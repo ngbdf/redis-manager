@@ -25,6 +25,7 @@ RedisManager 是  redis 一站式管理平台。 支持集群的创建、管理�
 > 创建集群包含了三种选择、您可以选择机器安装也可以选择 docker 或 humpback            
 <img src="./docs/images/redis-manager/introduction/create.png"/>
 <img src="./docs/images/redis-manager/introduction/docker-create.png"/>
+  
 ### 2 管理集群
 > 管理集群分为 ClusterManager、NodeManager 两部分
 
