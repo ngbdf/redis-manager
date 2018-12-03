@@ -400,7 +400,6 @@ $(document).on("click", ".be-slave", function(){
                 } else {
                     sparrow_win.msg("move slave error.");
                 }
-                window.location.reload();
             });
         });
     });
