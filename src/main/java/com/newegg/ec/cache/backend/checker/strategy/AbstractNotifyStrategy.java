@@ -34,7 +34,7 @@ public abstract class AbstractNotifyStrategy implements NotifyStrategy,Applicati
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        pool = Executors.newFixedThreadPool(100);
+        pool = Executors.newFixedThreadPool(50);
     }
 
     @Override
