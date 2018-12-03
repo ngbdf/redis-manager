@@ -52,18 +52,18 @@ cache:
         # 用于删除 7 天的后的数据
         clearn.day: 7
     # 支持的插件多个可以用逗号隔开
-    plugin: machine,docker
+    plugin: machine,docker,humpback
     # humpback 相关配置
     humpback:
         # 镜像列表, 如果没有humpback，则可为空
-        image: humpback-hub.newegg.org/shec/redis3.0.6:v3,docker.neg/shec/redis-4.0.8:v1,docker.neg/shec/redis-4.0.10:v-01
+        image: docker.neg/shec/redis-4.0.10:v3,docker.neg/shec/redis-4.0.8:v1,humpback-hub.newegg.org/shec/redis3.0.6:v3
         # humpback 操作的 api 接口 %s 是占位符
         api.format: http://%s:8500/dockerapi/v2/
     # docker 相关配置
     docker:
         # docker 镜像需要自己 build
-        image: ssecbigdata02:5000/redis4.0.1
-        # docker api 格式
+        image: docker.neg/shec/redis-4.0.10
+      # docker api 格式
         api.format: http://%s:2375/
     # 物理机相关配置
     machine:

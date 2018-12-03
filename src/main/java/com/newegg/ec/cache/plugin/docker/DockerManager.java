@@ -99,9 +99,9 @@ public class DockerManager extends PluginParent implements INodeOperate {
         List<Future<Boolean>> futureList = new ArrayList<>();
         nodelist.forEach(node -> {
             String ip = String.valueOf(node.getIp());
-            String port = String.valueOf(node.getPort());
+            int port = Integer.valueOf(node.getPort());
             String image = reqParam.getString("image");
-            String name = reqParam.getString("containerName");
+            String name = formatContainerName(reqParam.getString("containerName"), port);
             String command = ip + " " + port;
             JSONObject installObject = generateInstallObject(image, name, command);
             futureList.add(executorService.submit(new RedisInstallTask(ip, installObject)));
