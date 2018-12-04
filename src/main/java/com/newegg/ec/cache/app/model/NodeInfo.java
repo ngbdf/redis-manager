@@ -50,7 +50,7 @@ public class NodeInfo {
     private long expiredKeys;
     @MysqlField(field = "evicted_keys", type = "bigint")
     private long evictedKeys;
-    @MysqlField(field = "keyspace_hits", type = "bigint")
+    @MysqlField(field = "keyspace_hits", type = "float")
     private long keyspaceHits;
     @MysqlField(field = "keyspace_misses", type = "bigint")
     private long keyspaceMisses;
