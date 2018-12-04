@@ -20,6 +20,7 @@
             cast(${type}(total_commands_processed) as decimal(20,2)) as totalCommandsProcessed,
             cast(${type}(instantaneous_ops_per_sec) as decimal(20,2)) as instantaneousOpsPerSec,
             cast(${type}(keyspace_hits) as decimal(20,2)) as keyspaceHits,
+            cast(${type}(keyspace_misses) as decimal(20,2)) as keyspaceMisses,
             cast(${type}(used_cpu_user) as decimal(20,2)) as usedCpuUser,
             cast(${type}(expires) as decimal(20,2)) as expires
         from ${tableName}
