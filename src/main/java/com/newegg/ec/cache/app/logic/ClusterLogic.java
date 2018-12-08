@@ -334,8 +334,9 @@ public class ClusterLogic {
             Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
             String redisVersion = nodeInfo.get("redis_version");
             if (!redisVersion.startsWith("1.0.")) {
-                jedis.configSet("requirepass", password);
+                //注意masterauth要在前
                 jedis.configSet("masterauth", password);
+                jedis.configSet("requirepass", password);
                 jedis.auth(password);
                 jedis.clusterSaveConfig();
                 // 同步一下配置文件
