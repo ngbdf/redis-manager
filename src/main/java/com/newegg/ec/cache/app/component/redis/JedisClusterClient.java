@@ -135,20 +135,20 @@ public class JedisClusterClient extends JedisSingleClient implements IRedis {
                 try {
                     switch (redisValue.getType()) {
                         case "string":
-                            targetCluster.set(key, String.valueOf(redisValue.getResult()));
+                            targetCluster.set(key, String.valueOf(redisValue.getRedisValue()));
                             break;
                         case "hash":
-                            Map<String, String> hashRes = (Map<String, String>) redisValue.getResult();
+                            Map<String, String> hashRes = (Map<String, String>) redisValue.getRedisValue();
                             targetCluster.hmset(key, hashRes);
                             break;
                         case "list":
-                            List<String> listRes = (List<String>) redisValue.getResult();
+                            List<String> listRes = (List<String>) redisValue.getRedisValue();
                             for (int i = 0; i < listRes.size(); i++) {
                                 targetCluster.lpush(key, listRes.get(i));
                             }
                             break;
                         case "set":
-                            Set<String> setRes = (Set<String>) redisValue.getResult();
+                            Set<String> setRes = (Set<String>) redisValue.getRedisValue();
                             Iterator<String> setIterator = setRes.iterator();
                             while (setIterator.hasNext()) {
                                 targetCluster.sadd(key, setIterator.next());

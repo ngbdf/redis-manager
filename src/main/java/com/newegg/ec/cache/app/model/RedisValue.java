@@ -6,12 +6,16 @@ package com.newegg.ec.cache.app.model;
 public class RedisValue {
     private long ttl;
     private String type;
-    private Object result;
+    private Object redisValue;
+
+    public RedisValue(){
+
+    }
 
     public RedisValue(long ttl, String type, Object result) {
         this.ttl = ttl;
         this.type = type;
-        this.result = result;
+        this.redisValue = result;
     }
 
     public long getTtl() {
@@ -30,11 +34,11 @@ public class RedisValue {
         this.type = type;
     }
 
-    public Object getResult() {
-        return result;
+    public Object getRedisValue() {
+        return redisValue;
     }
 
-    public void setResult(Object result) {
-        this.result = result;
+    public void setRedisValue(Object redisValue) {
+        this.redisValue = redisValue;
     }
 }

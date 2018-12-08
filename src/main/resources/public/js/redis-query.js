@@ -27,7 +27,6 @@ $("body").delegate("#query-key", "click", function(){
         db = parseInt($(".db-list li").eq(0).find("a").attr("data-db"));
         $("#query-key").attr("data-db", db);
         $(".db-dropdown").html('db' + db + '<span class="caret"></span>');
-        alert("555")
     }
     console.log(db)
     query(db)
@@ -41,8 +40,12 @@ function query(db){
     redisQueryParam.db = db;
     redisQueryParam.key = queryKey || "*";
     redisQuery(redisQueryParam, function(obj){
-        var result = obj.res;
-        console.log(result)
-        $("#show-result").html(syntaxHighlightRedisResult(result));
+        var  result = obj.res;
+        if((parseInt(result.ttl) <=  0) && (result.type == "" || result.type == undefined || result.type == "none")){
+          $("#show-result").html(syntaxHighlightRedisResult(result.redisValue));
+        }else{
+          $("#show-result").html(syntaxHighlightRedisResult(result));
+        }
+
     })
 }

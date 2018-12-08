@@ -77,18 +77,18 @@ public class RedisManager {
         return clusterImportResultList;
     }
 
-    public Object query(RedisQueryParam redisQueryParam) {
-        Object res = null;
+    public RedisValue query(RedisQueryParam redisQueryParam) {
+        RedisValue redisValue = new RedisValue();
         IRedis redis = factory(redisQueryParam.getClusterId(), redisQueryParam.getAddress());
         if (!redisQueryParam.getKey().equals("*")) {
-            RedisValue redisValue = redis.getRedisValue(redisQueryParam.getDb(), redisQueryParam.getKey());
-            res = redisValue.getResult();
+            redisValue  = redis.getRedisValue(redisQueryParam.getDb(), redisQueryParam.getKey());
         }
-        if (null == res) {
-            res = redis.scanRedis(redisQueryParam.getDb(), redisQueryParam.getKey());
+        if (null == redisValue.getRedisValue()) {
+            Object res = redis.scanRedis(redisQueryParam.getDb(), redisQueryParam.getKey());
+            redisValue.setRedisValue(res);
         }
         redis.close();
-        return res;
+        return redisValue;
     }
 
     public Map<String, String> getClusterInfo(ConnectionParam param) {

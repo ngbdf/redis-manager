@@ -53,7 +53,7 @@ public class ClusterLogic {
         return clusterDao.getCluster(id);
     }
 
-    public Object query(RedisQueryParam redisQueryParam) {
+    public RedisValue query(RedisQueryParam redisQueryParam) {
         return redisManager.query(redisQueryParam);
     }
 
