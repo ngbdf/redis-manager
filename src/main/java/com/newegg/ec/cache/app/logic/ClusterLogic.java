@@ -12,7 +12,6 @@ import com.newegg.ec.cache.app.util.SlotBalanceUtil;
 import com.newegg.ec.cache.plugin.docker.IDockerNodeDao;
 import com.newegg.ec.cache.plugin.humpback.IHumpbackNodeDao;
 import com.newegg.ec.cache.plugin.machine.IMachineNodeDao;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -336,6 +335,7 @@ public class ClusterLogic {
             String redisVersion = nodeInfo.get("redis_version");
             if (!redisVersion.startsWith("1.0.")) {
                 jedis.configSet("requirepass", password);
+                jedis.configSet("masterauth", password);
                 jedis.auth(password);
                 jedis.clusterSaveConfig();
                 // 同步一下配置文件
