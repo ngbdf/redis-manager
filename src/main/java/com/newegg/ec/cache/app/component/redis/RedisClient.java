@@ -52,7 +52,7 @@ public class RedisClient {
     public String redisCommandOpt(String command) throws IOException {
 
         byte[] bytes= new byte[4096];
-        outputStream.write(command.toString().getBytes());
+        outputStream.write(command.getBytes());
         inputStream.read(bytes);
         return new String(bytes);
 
@@ -75,7 +75,7 @@ public class RedisClient {
         auth.append("$").append(pssword.length()).append("\r\n");
         auth.append(pssword).append("\r\n");
         outputStream.write(auth.toString().getBytes());
-        outputStream.write(command.toString().getBytes());
+        outputStream.write(command.getBytes());
         inputStream.read(bytes);
         return new String(bytes);
 

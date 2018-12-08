@@ -44,6 +44,8 @@ public class HttpClientUtil {
         httpclient = HttpClientBuilder.create()
                 // set keep_alive strategy
                 .setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
+
+                    @Override
                     public long getKeepAliveDuration(HttpResponse httpResponse, HttpContext httpContext) {
                         HeaderElementIterator it = new BasicHeaderElementIterator(httpResponse.headerIterator(HTTP.CONN_KEEP_ALIVE));
                         while (it.hasNext()) {

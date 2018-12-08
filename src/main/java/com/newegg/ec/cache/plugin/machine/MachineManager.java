@@ -2,6 +2,8 @@ package com.newegg.ec.cache.plugin.machine;
 
 import com.google.common.collect.Lists;
 import com.newegg.ec.cache.app.controller.check.CheckLogic;
+import com.newegg.ec.cache.app.model.Cluster;
+import com.newegg.ec.cache.app.model.Constants;
 import com.newegg.ec.cache.app.model.RedisNode;
 import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.util.DateUtil;
@@ -195,16 +197,31 @@ public class MachineManager extends PluginParent implements INodeOperate {
     }
 
     private void operateNode(JSONObject startParam, StartType startType) {
+
         MachineNode machineNode = (MachineNode) JSONObject.toBean(startParam, MachineNode.class);
         int port = machineNode.getPort();
         logger.info(machineNode.getIp() + " -- " + machineNode.getUsername() + " --- " + machineNode.getPassword());
         RemoteShellUtil rms = new RemoteShellUtil(machineNode.getIp(), machineNode.getUsername(), machineNode.getPassword());
         String cmd = "cd " + getPortPath(machineNode.getInstallPath(), port);
         cmd += ";bash " + startType + ".sh " + port;
+
+        // stop redis in machine with redis password
+        int clusterId = startParam.getInt(Constants.CLUSTER_ID);
+        Cluster cluster = clusterLogic.getCluster(clusterId);
+        String redisPassword = cluster.getRedisPassword();
+        if (StringUtils.isNotBlank(redisPassword)) {
+            cmd += " " + redisPassword;
+        }
         rms.exec(cmd);
     }
 
     private String getPortPath(String installPath, int port) {
+        if (installPath.endsWith("/")) {
+            installPath = installPath.substring(0, installPath.length() - 1);
+        }
+        if (installBasePath.endsWith("/")) {
+            installBasePath = installBasePath.substring(0, installPath.length() - 1);
+        }
         return installPath + "/" + installBasePath + "/" + port + "/";
     }
 }

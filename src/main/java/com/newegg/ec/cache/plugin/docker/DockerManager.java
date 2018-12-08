@@ -188,9 +188,14 @@ public class DockerManager extends PluginParent implements INodeOperate {
     @Override
     public boolean remove(JSONObject removePram) {
         logger.websocket(removePram.toString());
+        int id = removePram.getInt("id");
         String ip = removePram.getString("ip");
         String containerName = removePram.getString("containerName");
-        return deleteContainer(ip, containerName);
+        boolean isDelete = deleteContainer(ip, containerName);
+        if (isDelete) {
+            dockerNodeDao.removeDockerNode(id);
+        }
+        return isDelete;
     }
 
 
@@ -337,11 +342,11 @@ public class DockerManager extends PluginParent implements INodeOperate {
     }
 
     private String getContainerApi(String ip) {
-        return getDockerRestfullApi(ip) + "/containers";
+        return getDockerRestfullApi(ip) + "containers";
     }
 
     private String getImageApi(String ip) {
-        return getDockerRestfullApi(ip) + "/images";
+        return getDockerRestfullApi(ip) + "images";
     }
 
     private String getDockerRestfullApi(String ip) {

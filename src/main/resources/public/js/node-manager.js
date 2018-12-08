@@ -42,6 +42,7 @@ $(document).on("click", ".start-node", function(){
 
 $(document).on("click", ".stop-node", function(){
     var reqParam = getReqParam( this );
+    reqParam.clusterId = window.clusterId;
     if( reqParam.inCluster == "YES" && window.nodeListDBSize != 1 ){
         sparrow_win.alert("The node is in cluster please forget it then retry");
         return;
