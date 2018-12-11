@@ -219,9 +219,6 @@ public class MachineManager extends PluginParent implements INodeOperate {
         if (installPath.endsWith("/")) {
             installPath = installPath.substring(0, installPath.length() - 1);
         }
-        if (installBasePath.endsWith("/")) {
-            installBasePath = installBasePath.substring(0, installPath.length() - 1);
-        }
-        return installPath + "/" + installBasePath + "/" + port + "/";
+        return installPath + "/" + installBasePath + port + "/";
     }
 }
