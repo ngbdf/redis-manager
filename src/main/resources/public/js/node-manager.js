@@ -15,8 +15,9 @@ $(document).ready(function(){
 });
 
 function rebuildNodeListTable(){
-    smarty.get( "/node/getNodeList?pluginType="+ window.pluginType  +"&clusterId=" + window.clusterId , "plugin/" + window.pluginType + "/" + window.pluginType + "_mode_manager", "node-list", function(){
-        $("table").dataTable({});
+    smarty.get( "/node/getNodeList?pluginType="+ window.pluginType  +"&clusterId=" + window.clusterId , "plugin/" + window.pluginType + "/" + window.pluginType + "_mode_manager", "node-list", function(obj){
+        /*$("table").dataTable({
+        });*/
     }, true );
 }
 
