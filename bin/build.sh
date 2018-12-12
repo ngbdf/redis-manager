@@ -7,7 +7,7 @@ mkdir logs
 mkdir conf
 cp -f ../target/redis-manager*.jar ./
 cp -rf ../target/lib ./
-cp -rf ../bin/st*.sh ./bin/
+cp -rf ../bin ./
 cp -rf ../target/classes/* ./conf
 echo "please update the config."
 
