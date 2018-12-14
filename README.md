@@ -3,11 +3,11 @@
 [![Build Status](https://travis-ci.org/ngbdf/redis-manager.svg?branch=master)](https://travis-ci.org/ngbdf/redis-manager)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理、监控和预警。  
+Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理、监控和报警。  
 **集群创建**：包含了三种方式 Docker、Machine、Humpback；  
 **集群管理**：支持节点扩容、缩容、Slots迁移、BeMaster、BeSlave、Memory Purge、配置修改等功能；  
 **集群监控**：Redis 集群重要监控指标，如Memory、Clients、命中率等；可实时查看Redis Info、Redis Config、Slow Log等信息；Query 功能可查询任何类型的Key。  
-**集群报警**：支持used_memory、clients等监控，并默认实现了邮件报警，用户可自己对预警接口进行其他实现，如微信、短信报警等。 
+**集群报警**：支持used_memory、clients等监控，并默认实现了邮件报警，用户可自己对报警接口进行其他实现，如微信、短信报警等。 
 
 [快速开始](https://github.com/ngbdf/redis-manager/wiki/) 
 
