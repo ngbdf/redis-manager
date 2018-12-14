@@ -39,7 +39,7 @@ Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理�
 <img src="./docs/images/redis-manager/introduction/cluster-manage.png"/>
 
 ##### 2.2 NodeManager
-> 节点管理主要包含了节点的启动关闭重启扩容等。  
+> 节点管理主要包含了节点的启动、关闭、重启、扩容等。 
 
 <img src="./docs/images/redis-manager/introduction/node-manage.png"/>
 
