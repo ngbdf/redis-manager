@@ -607,7 +607,7 @@ public class ClusterLogic {
                     Map<String, String> info = JedisUtil.getMapInfo(param);
                     return "now mem_fragmentation_ratio :" + info.get("mem_fragmentation_ratio");
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 result = "memory purge error";
                 logger.error("memory purge error", e);
             } finally {
