@@ -40,7 +40,7 @@ Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理�
 ##### 2.1 ClusterManager
 > 集群管理主要包括节点导入、Slots 迁移、Master Slave 角色切换、动态配置、整理内存碎片等功能
 
-<img src="./docs/images/redis-manager/introduction/manage.png"/>
+<img src="./docs/images/redis-manager/introduction/cluster-manage.png"/>
 
 ##### 2.2 NodeManager
 > 节点管理主要包含了节点的启动、关闭、重启、扩容等。
