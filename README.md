@@ -18,6 +18,7 @@ Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理�
 1. RedisManager讨论群      
 [![Join the chat at https://gitter.im/dianping/cat](https://badges.gitter.im/dianping/cat.svg)](https://gitter.im/redis-manager/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
 2. RedisManager微信群     
+
  <img src="./docs/images/wechat.png" width="200px"/>
 
 ## 产品主要功能介绍
@@ -69,13 +70,13 @@ Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理�
 ## 用户手册
 > 用户手册主要介绍如何使用 Redis Manager
 
-0. [如何启动项目](https://github.com/ngbdf/redis-manager/wiki/如何启动项目)
-1. [如何创建集群](https://github.com/ngbdf/redis-manager/wiki/如何创建集群)
-2. [如何管理或监控一个已存在的集群](https://github.com/ngbdf/redis-manager/wiki/如何管理或监控一个已存在的集群)
-3. [如何管理集群](https://github.com/ngbdf/redis-manager/wiki/如何管理集群)
-4. [如何管理节点](https://github.com/ngbdf/redis-manager/wiki/如何管理节点)
-5. [如何查看监控](https://github.com/ngbdf/redis-manager/wiki/如何查看监控)
-6. [query功能介绍](https://github.com/ngbdf/redis-manager/wiki/query功能介绍)
+1. [如何启动项目](https://github.com/ngbdf/redis-manager/wiki/如何启动项目)
+2. [接入已经存在的集群](https://github.com/ngbdf/redis-manager/wiki/接入已经存在的集群)
+3. [如何查看监控](https://github.com/ngbdf/redis-manager/wiki/如何查看监控)
+4. [集群管理与节点管理](https://github.com/ngbdf/redis-manager/wiki/集群管理与节点管理)
+5. [创建集群(Machine安装)](https://github.com/ngbdf/redis-manager/wiki/创建集群(Machine安装))
+6. [创建集群(Docker安装)](https://github.com/ngbdf/redis-manager/wiki/创建集群(Docker安装))
+7. [常见问题汇总](https://github.com/ngbdf/redis-manager/wiki/常见问题汇总)
 
 ## 产品设计
 > 设计文档主要介绍 redisMangaer 架构设计、框架设计
