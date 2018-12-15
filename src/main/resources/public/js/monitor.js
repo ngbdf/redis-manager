@@ -248,6 +248,7 @@ function init(){
                 buildChart("charts-commands","每秒命令数(total_commands_processed)","date","totalCommandsProcessed",usefulData,"command  /sec  "," ");
                 buildChart("charts-Keyspace-expires","有TTL的key总数","date","expires",usefulData,"keys with ttl",numberUnit);
                 buildChart("charts-hitRate","命中率","date","keyspaceHitRate",usefulData,"hitRate_avg"," ");
+                buildChart("charts-memFragmentationRatio","节点内存碎片率","date","memFragmentationRatio",usefulData," mem_fragmentation_ratio"," ");
         }
     });
 

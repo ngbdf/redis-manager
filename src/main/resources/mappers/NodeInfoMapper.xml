@@ -17,6 +17,7 @@
             </if>
             cast(${type}(connected_clients) as decimal(20,2)) as connectedClients,
             cast(${type}(used_memory) as decimal(20,2)) as usedMemory,
+            cast(${type}(mem_fragmentation_ratio) as decimal(20,2)) as memFragmentationRatio,
             cast(${type}(total_commands_processed) as decimal(20,2)) as totalCommandsProcessed,
             cast(${type}(instantaneous_ops_per_sec) as decimal(20,2)) as instantaneousOpsPerSec,
             cast(${type}(keyspace_hits) as decimal(20,2)) as keyspaceHits,
