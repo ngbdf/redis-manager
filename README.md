@@ -20,45 +20,49 @@ Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理�
 2. RedisManager微信群     
  <img src="./docs/images/wechat.png" width="200px"/>
 
-## 产品主要功能介绍  
+## 产品主要功能介绍
 ### Dashboard    
 > 展示当前用户组监控的所有集群  
-<img src="./docs/images/redis-manager/introduction/index.png"/>
+
+![](https://user-gold-cdn.xitu.io/2018/12/14/167aa7768e035622?w=1920&h=938&f=png&s=91256)
 
 ### 1.创建集群      
-> 目前支持 Redis Cluster 模式的创建，包括机器安装、Docker安装和Humpback安装方式。           
-<img src="./docs/images/redis-manager/introduction/create.png"/>
-<img src="./docs/images/redis-manager/introduction/docker-create.png"/>
+> 目前支持 Redis Cluster 模式的创建，包括机器安装、Docker 安装和 Humpback 安装方式。  
+
+![](https://user-gold-cdn.xitu.io/2018/12/14/167aa7831c6da7a8?w=1920&h=938&f=png&s=24508)
   
+![](https://user-gold-cdn.xitu.io/2018/12/14/167aa78813c4297d?w=1920&h=938&f=png&s=45941)
+
 ### 2.管理集群
-> 管理集群分为 ClusterManager 和 NodeManager 两部分。
+> 管理集群分为 ClusterManager 和 NodeManager 两部分
 
 ##### 2.1 ClusterManager
-> 集群管理主要包括节点导入、slots 迁移、master slave 角色切换、动态配置、集群缩容、扩容等功能。  
+> 集群管理主要包括节点导入、Slots 迁移、Master Slave 角色切换、动态配置、整理内存碎片等功能
 
-<img src="./docs/images/redis-manager/introduction/cluster-manage.png"/>
+![](https://user-gold-cdn.xitu.io/2018/12/14/167aa790e4ab8e10?w=1920&h=938&f=png&s=48100)
 
 ##### 2.2 NodeManager
-> 节点管理主要包含了节点的启动、关闭、重启、扩容等。 
+> 节点管理主要包含了节点的启动、关闭、重启、扩容等。
 
-<img src="./docs/images/redis-manager/introduction/node-manage.png"/>
+![](https://user-gold-cdn.xitu.io/2018/12/14/167aa7945f5d0682?w=1920&h=938&f=png&s=47976)
 
 ### 3.集群监控
-> 提供集群监控、查询 key、查看slow log 等功能。
+> 提供集群监控、查询 Key、查看 Slowlog 等功能。
 
 #### 3.1 具体监控详情
-> 可在右上角通过 Time Range、Nodes 的选择来查看不同时间或不同节点的监控，监控详情如图：
+> 可在右上角通过 Time Ranges、Nodes 的选择来查看不同时间或不同节点的监控，监控详情如图：
 
-<img src="./docs/images/redis-manager/introduction/monitor.png"/>
+![](https://user-gold-cdn.xitu.io/2018/12/14/167aa81359cba9bc?w=1920&h=938&f=png&s=174475)
 
 #### 3.2 Query客户端
-> 支持任意类型的 key 查询。
+> 支持任意类型的 Key 查询。
 
-<img src="./docs/images/redis-manager/introduction/query.png"/>
+![](https://user-gold-cdn.xitu.io/2018/12/14/167aa8efd47dc148?w=1920&h=938&f=png&s=160886)
 
 ### 4.集群报警
-> 针对 Redis 集群一些重要指标进行监控报警，默认实现了邮件报警。  
-<img src="./docs/images/redis-manager/introduction/alarm.png"/>
+> 针对 Redis 集群一些重要指标进行监控报警，默认实现了邮件报警。
+
+![](https://user-gold-cdn.xitu.io/2018/12/14/167aa8fe80f84d8a?w=1920&h=938&f=png&s=44373)
 
 
 	
