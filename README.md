@@ -76,7 +76,8 @@ Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理�
 4. [集群管理与节点管理](https://github.com/ngbdf/redis-manager/wiki/集群管理与节点管理)
 5. [创建集群(Machine安装)](https://github.com/ngbdf/redis-manager/wiki/创建集群(Machine安装))
 6. [创建集群(Docker安装)](https://github.com/ngbdf/redis-manager/wiki/创建集群(Docker安装))
-7. [常见问题汇总](https://github.com/ngbdf/redis-manager/wiki/常见问题汇总)
+7. [自定义Redis安装包](https://github.com/ngbdf/redis-manager/wiki/自定义Redis安装包)
+8. [常见问题汇总](https://github.com/ngbdf/redis-manager/wiki/常见问题汇总)
 
 ## 产品设计
 > 设计文档主要介绍 redisMangaer 架构设计、框架设计
