@@ -2,6 +2,7 @@ package com.newegg.ec.cache.app.controller;
 
 import com.newegg.ec.cache.app.dao.impl.NodeInfoDao;
 import com.newegg.ec.cache.app.logic.ClusterLogic;
+import com.newegg.ec.cache.app.logic.ExtensionLogic;
 import com.newegg.ec.cache.app.model.*;
 import com.newegg.ec.cache.app.util.RequestUtil;
 import com.newegg.ec.cache.core.userapi.UserAccess;
@@ -23,6 +24,10 @@ import java.util.Map;
 public class ClusterController {
     @Autowired
     private ClusterLogic logic;
+
+    @Autowired
+    private ExtensionLogic extensionLogic;
+
 
     @Autowired
     private NodeInfoDao nodeInfoTable;
@@ -256,5 +261,15 @@ public class ClusterController {
             return Response.Info(res);
         }
         return Response.Warn("memory purge is fail");
+    }
+
+    @RequestMapping(value = "/memoryDoctor", method = RequestMethod.GET)
+    @ResponseBody
+    public Response memoryDoctor(@RequestParam int clusterId) {
+        List<Map<String, String>> doctorResult = extensionLogic.memoryDoctor(clusterId);
+        if (doctorResult != null && doctorResult.size() > 0) {
+            return Response.Result(0, doctorResult);
+        }
+        return Response.Result(0,"This Cluster Can not get effective memory diagnosis result");
     }
 }

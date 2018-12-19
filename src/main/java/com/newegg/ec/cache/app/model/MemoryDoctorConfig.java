@@ -29,8 +29,8 @@ public class MemoryDoctorConfig implements ApplicationListener<ContextRefreshedE
     private String little_memory;
     @Value("${Peak_memory}")
     private String Peak_memory;
-    @Value("${High_total_RSS}")
-    private String High_total_RSS;
+    @Value("${High_fragmentation}")
+    private String High_fragmentation;
     @Value("${High_allocator_fragmentation}")
     private String High_allocator_fragmentation;
     @Value("${High_allocator_RSS_overhead}")
@@ -53,7 +53,7 @@ public class MemoryDoctorConfig implements ApplicationListener<ContextRefreshedE
         configMap.put(Constants.MEMORY_ISSUE,memory_issue);
         configMap.put(Constants.LITTLE_MEMORY,little_memory);
         configMap.put(Constants.PEAK_MEMORY,Peak_memory);
-        configMap.put(Constants.HIGH_TOTAL_RSS,High_total_RSS);
+        configMap.put(Constants.High_FRAGMENTATION,High_fragmentation);
         configMap.put(Constants.HIGH_ALLOCATOR_FRAGMENTATION,High_allocator_fragmentation);
         configMap.put(Constants.HIGH_ALLOCATOR_RSS_OVERHEAD,High_allocator_RSS_overhead);
         configMap.put(Constants.HIGH_PROCESS_RSS_OVERHEAD,High_process_RSS_overhead);

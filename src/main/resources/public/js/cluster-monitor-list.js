@@ -65,3 +65,36 @@ $(document).on("click", ".cluster-info-detail", function(res){
 });
 
 
+$(document).on("click", "#memory-doctor", function(e){
+     //阻止子元素事件向上冒泡
+     e.stopPropagation();
+     var clusterId = $(this).data("cluster-id");
+     //弹出一个自定义弹出层
+     layer.open({
+        type: 1 //Page层类型
+       ,area: ['600px', '75%']
+       ,title: 'Memory Diagnosis'
+       ,shade: 0.4 //遮罩透明度
+       ,maxmin: true //允许全屏最小化
+       ,anim: 1 //0-6的动画形式，-1不开启
+       ,content: "<div class='margin-around'><ul id = 'result'></ul></div>"
+     });
+     var index = layer.load(1, {
+       shade: [0.1,'#fff'] //0.1透明度的白色背景
+     });
+
+     memoryDoctor(clusterId,function(result){
+           layer.close(index);
+           var nodes = result.res;
+
+           if(nodes instanceof Array){
+             nodes.forEach(function(element){
+                 var html = "<li><span class='node'>"+element.addr+"</span>"+element.result+"</li>"
+                  $("#result").append(html);
+              });
+           }else{
+             $("#result").append(nodes);
+           }
+
+     });
+});

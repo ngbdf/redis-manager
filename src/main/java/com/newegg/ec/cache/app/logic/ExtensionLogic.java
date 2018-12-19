@@ -1,9 +1,13 @@
 package com.newegg.ec.cache.app.logic;
 
+import com.newegg.ec.cache.app.component.RedisManager;
 import com.newegg.ec.cache.app.component.redis.RedisClient;
+import com.newegg.ec.cache.app.dao.IClusterDao;
+import com.newegg.ec.cache.app.model.Cluster;
 import com.newegg.ec.cache.app.model.ConnectionParam;
+import com.newegg.ec.cache.app.model.Host;
 import com.newegg.ec.cache.app.model.MemoryDoctorConfig;
-import com.newegg.ec.cache.app.util.JedisUtil;
+import com.newegg.ec.cache.app.util.NetUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,7 +16,12 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import javax.annotation.Resource;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Created by lf52 on 2018/12/15.
@@ -23,10 +32,18 @@ public class ExtensionLogic implements ApplicationListener<ContextRefreshedEvent
 
     private static Log logger = LogFactory.getLog(ExtensionLogic.class);
 
+    private static ExecutorService executorPool = Executors.newFixedThreadPool(30);
+
+    @Autowired
+    private IClusterDao clusterDao;
+
+    @Resource
+    private RedisManager redisManager;
+
     @Autowired
     private MemoryDoctorConfig config;
 
-    private Map<String, String> map;
+    private static Map<String, String> map;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -34,20 +51,56 @@ public class ExtensionLogic implements ApplicationListener<ContextRefreshedEvent
     }
 
     /**
-     * 内存诊断功能：
-     * @param password
-     * @param ip
-     * @param port
+     * Memory Doctor功能
+     * @param clusterId
      * @return
      */
-    public String memoryDoctor(String password, String ip, int port){
+    public List<Map<String,String>> memoryDoctor(int clusterId){
 
-        String result = "";
+        List<Map<String,String>> result = new LinkedList<>();
 
-        ConnectionParam param = new ConnectionParam(ip, port, password);
-        Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
-        String redisVersion = nodeInfo.get("redis_version");
-        if(Integer.valueOf(redisVersion.substring(0, 1)) >= 4){
+        Cluster cluster = clusterDao.getCluster(clusterId);
+        String password = cluster.getRedisPassword();
+        Host host = NetUtil.getHostPassAddress(cluster.getAddress());
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(),password);
+        List<Map<String, String>> nodeList = redisManager.nodeList(param);;
+
+        List<Future<String>> futureList = new ArrayList<>(nodeList.size());
+        nodeList.forEach(node -> {
+            futureList.add(executorPool.submit(new MemoryDiagnosis(password, node.get("ip"), Integer.parseInt(node.get("port")))));
+        });
+        futureList.forEach(future -> {
+            try {
+                String str = future.get();
+                Map<String,String> map = new HashMap<>();
+                map.put("addr",str.split("~")[0] + " : ");
+                map.put("result",str.split("~")[1]);
+                result.add(map);
+            } catch (Exception e) {
+                //ingore
+            }
+        });
+        return result;
+    }
+
+    /**
+     * 内存诊断功能
+     */
+    private class MemoryDiagnosis implements Callable<String>{
+
+        private String password;
+        private String ip;
+        private int port;
+
+        public MemoryDiagnosis(String password,String ip,int port){
+            this.ip = ip;
+            this.password = password;
+            this.port = port;
+        }
+
+        @Override
+        public String call() throws Exception {
+            String result = "";
             RedisClient redisClient = new RedisClient(ip, port);
             try {
                 if (StringUtils.isNotBlank(password)) {
@@ -62,23 +115,24 @@ public class ExtensionLogic implements ApplicationListener<ContextRefreshedEvent
                 redisClient.closeClient();
             }
 
-        }else{
-            result = "this redis cannot supprot this function";
+            return ip + ":" + port + "~" +SwitchResult(result);
         }
 
-        return ip + ":" + port + " : " +SwitchResult(result);
     }
 
 
     private String SwitchResult(String commandResult) {
+        StringBuilder builder = new StringBuilder();
         for (Map.Entry<String, String> entry : map.entrySet()) {
             if (commandResult.contains(entry.getKey().replaceAll("_", " "))) {
-               return entry.getValue();
+                builder.append(entry.getValue() + ";");
             }
         }
-        return "获取不到有效的诊断信息";
+        if(builder.length() > 0){
+            return builder.toString();
+        }
+        return "Can not get effective diagnosis result" ;
     }
-
 
 
 }
