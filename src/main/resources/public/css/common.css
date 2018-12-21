@@ -258,8 +258,7 @@ td>a.redis-meta {
     color: #00bb9a;
 }
 
-.title-hidden {
-    display: none;
+.cursor {
     cursor: pointer;
 }
 
