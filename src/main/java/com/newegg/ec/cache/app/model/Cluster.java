@@ -21,6 +21,11 @@ public class Cluster {
     @MysqlField(field = "cluster_type", type = "varchar(10)", notNull = true)
     private String clusterType;
 
+    /**
+     * 非数据库字段，只是为了前台展示
+     */
+    private boolean isVersion4 = false;
+
     public int getId() {
         return id;
     }
@@ -69,6 +74,14 @@ public class Cluster {
         this.clusterType = clusterType;
     }
 
+    public boolean isVersion4() {
+        return isVersion4;
+    }
+
+    public void setIsVersion4(boolean isVersion4) {
+        this.isVersion4 = isVersion4;
+    }
+
     @Override
     public String toString() {
         return "Cluster{" +
@@ -78,6 +91,8 @@ public class Cluster {
                 ", address='" + address + '\'' +
                 ", redisPassword='" + redisPassword + '\'' +
                 ", clusterType='" + clusterType + '\'' +
+                ", isVersion4=" + isVersion4 +
                 '}';
     }
+
 }

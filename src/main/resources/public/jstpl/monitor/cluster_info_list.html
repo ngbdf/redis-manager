@@ -11,7 +11,6 @@
                                         <span>{{$cluster.clusterName}}</span>
                                         {{if !empty($cluster.redisPassword)}}
                                             <i class="icon-shield safe" title="Redis with password"></i>
-                                            <i class="icon-medkit safe" id="memory-doctor" title="Redis Memory Diagnosis" data-cluster-id="{{$cluster.id}}"></i>
                                         {{/if}}
                                     </b>
                                     <div class="delete-container" data-cluster-id="{{$cluster.id}}">

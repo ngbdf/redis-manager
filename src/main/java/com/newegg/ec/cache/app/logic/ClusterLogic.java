@@ -50,7 +50,15 @@ public class ClusterLogic {
     private IHumpbackNodeDao humpbackNodeDao;
 
     public Cluster getCluster(int id) {
-        return clusterDao.getCluster(id);
+        Cluster cluster = clusterDao.getCluster(id);
+        Host host = NetUtil.getHostPassAddress(cluster.getAddress());
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
+        String redisVersion = nodeInfo.get("redis_version");
+        if( Integer.valueOf(redisVersion.substring(0, 1)) >= 4){
+            cluster.setIsVersion4(true);
+        }
+        return cluster;
     }
 
     public RedisValue query(RedisQueryParam redisQueryParam) {
