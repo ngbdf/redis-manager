@@ -14,9 +14,9 @@ spring:
   datasource:
       name: serverbase
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://10.16.238.104:8306/redis_manager?useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8
       username: root
-      password: 123456
+      password:
 
   # 如果使用微信报警，填写微信企业号相关信息
   wechat:
