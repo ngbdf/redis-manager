@@ -12,7 +12,7 @@ cp -rf ../target/classes/* ./conf
 mv ./conf/application.yml ./conf/application.yml.base
 tar -cvf redis-manager.tar ./
 mv ./bin/Dockerfile ./
-docker build -t docker.neg/ecbd/redis-manager:1.0.0 .
+docker build -t redis-manager:1.0.0 .
 echo "please update the config."
 
 
