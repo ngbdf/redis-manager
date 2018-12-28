@@ -1,4 +1,4 @@
-FROM docker.neg/ecbd/openjdk:8u181-jdk-alpine3.8
+FROM openjdk:8u181-jdk-alpine3.8
 LABEL author="Reason.H.Duan"
 COPY redis-manager.tar /opt/app/
 WORKDIR /opt/app
