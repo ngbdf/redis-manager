@@ -4,9 +4,12 @@ RUN apk add --no-cache unzip
 
 ARG REMOTE_URL=https://github.com/ngbdf/redis-manager/archive/dev_build.zip
 ARG SERVICE_DIR=/usr/share/redis-manger
+ARG BRANCH=dev_build
+
 RUN curl -fsSL -o /tmp/redis-manager.tar.zip ${REMOTE_URL} \
-  && unzip /tmp/redis-manager.tar.zip -d ${SERVICE_DIR} \
-  && rm -f /tmp/redis-manager.tar.zip
+  && unzip /tmp/redis-manager.tar.zip -d /tmp/ \
+  && mv /tmp/redis-manger-${BRANCH} ${SERVICE_DIR} \
+  && rm -rf /tmp/redis-manager*
 WORKDIR ${SERVICE_DIR}
 RUN mkdir build \
   && mvn clean package -Dmaven.test.skip=true
