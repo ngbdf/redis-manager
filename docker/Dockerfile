@@ -2,9 +2,9 @@ FROM maven:3.6.0-jdk-8-alpine
 
 RUN apk add --no-cache unzip
 
-ARG REMOTE_URL=https://github.com/ngbdf/redis-manager/archive/dev_build.zip
+ARG BRANCH=docker
+ARG REMOTE_URL=https://github.com/ngbdf/redis-manager/archive/${BRANCH}.zip
 ARG SERVICE_DIR=/usr/share/redis-manger
-ARG BRANCH=dev_build
 
 RUN curl -fsSL -o /tmp/redis-manager.tar.zip ${REMOTE_URL} \
   && unzip /tmp/redis-manager.tar.zip -d /tmp/ \
