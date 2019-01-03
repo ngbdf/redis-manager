@@ -8,7 +8,7 @@ ARG SERVICE_DIR=/usr/share/redis-manger
 
 RUN curl -fsSL -o /tmp/redis-manager.tar.zip ${REMOTE_URL} \
   && unzip /tmp/redis-manager.tar.zip -d /tmp/ \
-  && mv /tmp/redis-manger-${BRANCH} ${SERVICE_DIR} \
+  && mv /tmp/redis-manager-${BRANCH} ${SERVICE_DIR} \
   && rm -rf /tmp/redis-manager*
 WORKDIR ${SERVICE_DIR}
 RUN mkdir build \
