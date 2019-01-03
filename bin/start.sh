@@ -1,5 +1,54 @@
 #!/bin/bash
 set encoding=utf-8
+
+
+# check environment variable
+function check() {
+  if [ ! "$CONFIG_URL" ]; then
+    if [ ! "$MYSQL_URL" ] || [ ! "$MYSQL_USER" ] || [ ! "$MYSQL_PWD" ]; then
+      echo "if 'CONFIG_URL' is null, then [MYSQL_URL,MYSQL_USER,MYSQL_PWD] by not null."
+      exit 1
+    fi
+  fi
+}
+
+# update config file by environment variable
+function up_conf() {
+  if [ ! "$CONFIG_URL" ]; then
+    cp ./conf/application.yml.base ./conf/application.yml
+    if [ -n "$SERVICE_PORT" ];then
+      echo "service port "$SERVICE_PORT
+      sed -i "s/port: 8182/port: $SERVICE_PORT/g" ./conf/application.yml
+    fi
+
+    if [ -n "$MYSQL_URL" ];then
+      echo "mysql url "$MYSQL_URL
+      MYSQL_URL=${MYSQL_URL//\&/\\\&}
+      sed -i "s#url: jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8#url: $MYSQL_URL#g" ./conf/application.yml
+    fi
+    if [ -n "$MYSQL_USER" ];then
+      echo "mysql user name "$MYSQL_USER
+      sed -i "s/username: root/username: $MYSQL_USER/g" ./conf/application.yml
+    fi
+    if [ -n "$MYSQL_PWD" ];then
+      echo "mysql password ******"
+      sed -i "s/password:/password: $MYSQL_PWD/g" ./conf/application.yml
+    fi
+
+  else
+    if wget -O ./conf/application.yml.temp $CONFIG_URL; then
+      echo "Redis manager run with CONFIG_URL get config."
+      mv ./conf/application.yml.temp ./conf/application.yml
+    else
+      echo "Download remote config fail."
+    fi
+  fi
+}
+
+check
+up_conf
+
+# start redis manager
 CLASSPATH=conf/
 for i in lib/*.jar; do
         CLASSPATH=${CLASSPATH}:$i
@@ -8,5 +57,4 @@ for i in *.jar; do
         CLASSPATH=${CLASSPATH}:$i
 done
 echo ${CLASSPATH}
-java -cp ${CLASSPATH} com.newegg.ec.cache.Application >> logs/start.log 2>&1 < /dev/null &
-echo $! > pid
+java -cp ${CLASSPATH} com.newegg.ec.cache.Application
