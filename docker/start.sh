@@ -36,7 +36,7 @@ function up_conf() {
     fi
 
   else
-    if wget -o application.yml.temp $CONFIG_URL; then
+    if wget -O application.yml.temp $CONFIG_URL; then
       echo "Redis manager run with CONFIG_URL get config."
       mv application.yml.temp ./conf/application.yml
     else
