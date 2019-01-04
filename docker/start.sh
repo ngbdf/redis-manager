@@ -35,7 +35,7 @@ function up_conf() {
       sed -i "s/password:/password: $MYSQL_PWD/g" ./conf/application.yml
     fi
 
-  else
+  elif [ -n "$CONFIG_URL" ];then
     if wget -O application.yml.temp $CONFIG_URL; then
       echo "Redis manager run with CONFIG_URL get config."
       mv application.yml.temp ./conf/application.yml
@@ -45,7 +45,6 @@ function up_conf() {
   fi
 }
 
-check
 up_conf
 
 # start redis manager
