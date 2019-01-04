@@ -18,7 +18,7 @@ RUN mkdir logs \
   && cp -rf /tmp/redis-manager/target/lib ${SERVICE_DIR} \
   && cp -rf /tmp/redis-manager/docker/start.sh ${SERVICE_DIR} \
   && cp -rf /tmp/redis-manager/target/classes/* ${SERVICE_DIR}/conf \
-  && mv ${SERVICE_DIR}/conf/application.yml ${SERVICE_DIR}/conf/application.yml.base
+  && mv ${SERVICE_DIR}/conf/application.yml ${SERVICE_DIR}/conf/application.yml.base \
   && rm -rf /tmp/redis-manager*
 WORKDIR ${SERVICE_DIR}
 ENTRYPOINT ["sh","./start.sh"]
