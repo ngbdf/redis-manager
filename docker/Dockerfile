@@ -15,9 +15,7 @@ RUN curl -fsSL -o /tmp/redis-manager.tar.zip ${REMOTE_URL} \
   && cp -rf ${TEMP_DIR}/docker/start.sh ${SERVICE_DIR} \
   && cp -rf ${TEMP_DIR}/target/lib/* ${SERVICE_DIR}/lib \
   && cp -rf ${TEMP_DIR}/target/classes/* ${SERVICE_DIR}/web \
-  && mv ${SERVICE_DIR}/web/log4j.properties ${SERVICE_DIR}/conf/log4j.properties \
-  && mv ${SERVICE_DIR}/web/application.yml ${SERVICE_DIR}/conf/application.yml \
-  && cp ${SERVICE_DIR}/conf/application.yml ${SERVICE_DIR}/conf/application.yml.base \
+  && cp ${SERVICE_DIR}/web/application.yml ${SERVICE_DIR}/web/application.yml.base \
   && rm -rf /tmp/redis-manager*
 
 WORKDIR ${SERVICE_DIR}

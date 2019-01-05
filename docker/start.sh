@@ -12,6 +12,17 @@ function check() {
   fi
 }
 
+function init_conf(){
+  if [ ! -f "./conf/application.yml" ]; then
+    cp ./web/application.yml.base ./conf/application.yml
+  fi
+  if [ ! -f "./conf/log4j.properties" ]; then
+    mv ./web/log4j.properties ./conf/log4j.properties
+  elif [ -f "./web/log4j.properties" ]; then
+    rm -f ./web/log4j.properties
+  fi
+}
+
 # update config file by environment variable
 function up_conf() {
   if [ ! "$CONFIG_URL" ]; then
@@ -46,6 +57,8 @@ function up_conf() {
 }
 
 up_conf
+init_conf
+
 
 # start redis manager
 CLASSPATH=conf/:web/
