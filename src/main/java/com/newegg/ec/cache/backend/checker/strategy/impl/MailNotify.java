@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MailNotify extends AbstractNotifyStrategy {
 
-    private static Logger logger = Logger.getLogger(MailNotify.class);
+    private static final Logger logger = Logger.getLogger(MailNotify.class);
 
     private SMTPAppender appender = new SMTPAppender();
 

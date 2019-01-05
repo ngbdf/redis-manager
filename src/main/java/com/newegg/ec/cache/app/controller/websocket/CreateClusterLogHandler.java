@@ -17,10 +17,10 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class CreateClusterLogHandler implements WebSocketHandler {
 
 
-    public static CommonLogger logger = new CommonLogger(CreateClusterLogHandler.class);
+    public static final CommonLogger logger = new CommonLogger(CreateClusterLogHandler.class);
 
-    private static final Map<String, BlockingDeque<String>> logMap = new ConcurrentHashMap<>();
-    private static final Map<WebSocketSession, String> websocketLogMap = new ConcurrentHashMap<>();
+    private static  Map<String, BlockingDeque<String>> logMap = new ConcurrentHashMap<>();
+    private static  Map<WebSocketSession, String> websocketLogMap = new ConcurrentHashMap<>();
 
     private static BlockingDeque<String> createLogQueueIfNotExist(String id, WebSocketSession webSocketSession) {
         if (null == logMap.get(id)) {
@@ -52,13 +52,9 @@ public class CreateClusterLogHandler implements WebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession webSocketSession) {
+    public void afterConnectionEstablished(WebSocketSession webSocketSession) throws IOException {
         webSocketSession.getAttributes();
-        try {
-            webSocketSession.sendMessage(new TextMessage("connection success"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        webSocketSession.sendMessage(new TextMessage("connection success"));
     }
 
     @Override

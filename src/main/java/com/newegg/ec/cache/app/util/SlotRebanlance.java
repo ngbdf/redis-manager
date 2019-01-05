@@ -12,7 +12,7 @@ import java.util.Random;
  */
 public class SlotRebanlance {
 
-    private static Log logger = LogFactory.getLog(SlotRebanlance.class);
+    private static final Log logger = LogFactory.getLog(SlotRebanlance.class);
 
     private static int totalSlot = 16384;
 

@@ -30,7 +30,7 @@ import java.util.concurrent.Future;
 @Component
 public class ExtensionLogic implements ApplicationListener<ContextRefreshedEvent> {
 
-    private static Log logger = LogFactory.getLog(ExtensionLogic.class);
+    private static final Log logger = LogFactory.getLog(ExtensionLogic.class);
 
     private static ExecutorService executorPool = Executors.newFixedThreadPool(30);
 

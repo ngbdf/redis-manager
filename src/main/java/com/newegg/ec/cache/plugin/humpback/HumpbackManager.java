@@ -34,10 +34,13 @@ import java.util.concurrent.Future;
 @Component
 public class HumpbackManager extends PluginParent implements INodeOperate {
 
+
+    private static final CommonLogger logger = new CommonLogger(HumpbackManager.class);
+
     private static final String CONTAINER_OPTION_API = "containers";
     private static final String IMAGE_OPTION_API = "images";
     static ExecutorService executorService = Executors.newFixedThreadPool(100);
-    private static CommonLogger logger = new CommonLogger(HumpbackManager.class);
+
     @Autowired
     IHumpbackNodeDao nodeDao;
     @Resource

@@ -20,7 +20,7 @@ import java.util.Set;
  */
 @Component
 public class CheckLogic {
-    public static CommonLogger logger = new CommonLogger(CheckLogic.class);
+    public static  final CommonLogger logger = new CommonLogger(CheckLogic.class);
     @Autowired
     private ClusterLogic clusterLogic;
 

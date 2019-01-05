@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class JedisClusterClient extends JedisSingleClient implements IRedis {
 
-    private static Log logger = LogFactory.getLog(JedisClusterClient.class);
+    private static final Log logger = LogFactory.getLog(JedisClusterClient.class);
 
     private static ExecutorService executorPool = Executors.newFixedThreadPool(200);
 

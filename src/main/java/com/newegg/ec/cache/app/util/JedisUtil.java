@@ -24,7 +24,7 @@ import java.util.*;
  */
 public class JedisUtil {
 
-    public static Log logger = LogFactory.getLog(JedisUtil.class);
+    public static final Log logger = LogFactory.getLog(JedisUtil.class);
 
     private JedisUtil() {
         //ignore

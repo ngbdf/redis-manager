@@ -30,7 +30,7 @@ import java.util.*;
 @Component
 public class ClusterLogic {
 
-    private static Log logger = LogFactory.getLog(ClusterLogic.class);
+    private static final  Log logger = LogFactory.getLog(ClusterLogic.class);
 
     @Value("${cache.redis.client}")
     private String redisClient;

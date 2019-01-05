@@ -36,7 +36,7 @@ import java.util.concurrent.Future;
 public class DockerManager extends PluginParent implements INodeOperate {
 
     static ExecutorService executorService = Executors.newFixedThreadPool(100);
-    private static CommonLogger logger = new CommonLogger(DockerManager.class);
+    private static final CommonLogger logger = new CommonLogger(DockerManager.class);
     @Autowired
     IDockerNodeDao dockerNodeDao;
     @Resource

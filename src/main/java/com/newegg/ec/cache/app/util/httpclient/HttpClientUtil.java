@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class HttpClientUtil {
 
-    private static CommonLogger logger = new CommonLogger(HttpClientUtil.class);
+    private static final CommonLogger logger = new CommonLogger(HttpClientUtil.class);
     private static HttpClient httpclient;
 
     static {
