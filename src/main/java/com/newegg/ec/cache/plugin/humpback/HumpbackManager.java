@@ -240,8 +240,7 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
             int port = redisNode.getPort();
             String fomatName = formatContainerName(containerName, port);
             JSONObject res = getContainerInfo(ip, fomatName);
-            int code = res.getInt("Code");
-            if (code <= 200) {
+            if (res.containsKey("Code") && res.getInt("Code") <= 200) {
                 errorMsg += logger.websocket(ip + ":" + port + " the container name " + fomatName + "alreay exit");
                 break;
             }
@@ -370,6 +369,7 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
             res = JSONObject.fromObject(response);
         } catch (IOException e) {
             logger.error("", e);
+            res = new JSONObject();
         }
         return res;
     }
