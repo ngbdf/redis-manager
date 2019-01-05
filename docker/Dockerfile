@@ -9,12 +9,15 @@ ARG TEMP_DIR=/tmp/redis-manager-docker
 RUN curl -fsSL -o /tmp/redis-manager.tar.zip ${REMOTE_URL} \
   && unzip /tmp/redis-manager.tar.zip -d /tmp \
   && mvn clean package -Dmaven.test.skip=true -f ${TEMP_DIR} \
-  && mkdir ${SERVICE_DIR} && mkdir ${SERVICE_DIR}/logs && mkdir ${SERVICE_DIR}/conf && mkdir ${SERVICE_DIR}/lib \
+  && mkdir ${SERVICE_DIR} && mkdir ${SERVICE_DIR}/logs && mkdir ${SERVICE_DIR}/web \
+  && mkdir ${SERVICE_DIR}/conf && mkdir ${SERVICE_DIR}/lib \
   && cp -f ${TEMP_DIR}/target/redis-manager*.jar ${SERVICE_DIR} \
   && cp -rf ${TEMP_DIR}/docker/start.sh ${SERVICE_DIR} \
   && cp -rf ${TEMP_DIR}/target/lib/* ${SERVICE_DIR}/lib \
-  && cp -rf ${TEMP_DIR}/target/classes/* ${SERVICE_DIR}/conf \
-  && mv ${SERVICE_DIR}/conf/application.yml ${SERVICE_DIR}/conf/application.yml.base \
+  && cp -rf ${TEMP_DIR}/target/classes/* ${SERVICE_DIR}/web \
+  && mv ${SERVICE_DIR}/web/log4j.properties ${SERVICE_DIR}/conf/log4j.properties \
+  && mv ${SERVICE_DIR}/web/application.yml ${SERVICE_DIR}/conf/application.yml \
+  && cp ${SERVICE_DIR}/conf/application.yml ${SERVICE_DIR}/conf/application.yml.base \
   && rm -rf /tmp/redis-manager*
 
 WORKDIR ${SERVICE_DIR}

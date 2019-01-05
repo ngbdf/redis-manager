@@ -49,7 +49,7 @@ check
 up_conf
 
 # start redis manager
-CLASSPATH=conf/
+CLASSPATH=conf/:web/
 for i in lib/*.jar; do
         CLASSPATH=${CLASSPATH}:$i
 done
