@@ -26,7 +26,6 @@ function init_conf(){
 # update config file by environment variable
 function up_conf() {
   if [ ! "$CONFIG_URL" ]; then
-    cp ./conf/application.yml.base ./conf/application.yml
     if [ -n "$SERVICE_PORT" ];then
       echo "service port "$SERVICE_PORT
       sed -i "s/port: 8182/port: $SERVICE_PORT/g" ./conf/application.yml
@@ -56,9 +55,8 @@ function up_conf() {
   fi
 }
 
-up_conf
 init_conf
-
+up_conf
 
 # start redis manager
 CLASSPATH=conf/:web/
