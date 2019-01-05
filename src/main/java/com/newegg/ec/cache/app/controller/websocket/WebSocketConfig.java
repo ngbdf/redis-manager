@@ -21,9 +21,9 @@ public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocke
         registry.addHandler(createClusterLogHandler(), "/webSocket/createClusterLog")
                 .setAllowedOrigins("*")
                 .withSockJS()
-                .setStreamBytesLimit(512 * 1024)
-                .setHttpMessageCacheSize(1000)
-                .setDisconnectDelay(30 * 1000);
+                .setStreamBytesLimit(512 * 1024 * 1024)
+                .setHttpMessageCacheSize(10 * 1000)
+                .setDisconnectDelay(30 * 1000 * 60);
 
     }
 
