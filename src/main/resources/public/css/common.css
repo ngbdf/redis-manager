@@ -273,3 +273,8 @@ td>a.redis-meta {
 .node {
 	font-weight: 700;
 }
+
+body .danger .layui-layer-btn .layui-layer-btn0 {
+    border-color: #ff6c60 !important;
+    background-color: #ff6c60 !important;
+}

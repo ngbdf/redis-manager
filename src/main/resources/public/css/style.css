@@ -376,7 +376,7 @@ ul.sidebar-menu li.active a i {
    	right: 0;
    	display: inline-block;
     margin-top: 60px;
-    padding: 5px;
+    /*padding: 5px;*/
 }
 
 a.logo {
@@ -3956,4 +3956,12 @@ span.customSelect.changed {
 }
 .customSelectInner {
     background:url(../img/customSelect-arrow.gif) no-repeat center right;
+}
+
+.modal-span {
+    width: 150px !important;
+}
+
+.modal-input {
+    width: 425px !important;
 }
