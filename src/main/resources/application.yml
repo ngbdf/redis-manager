@@ -62,7 +62,7 @@ cache:
     # docker 相关配置
     docker:
         # docker 镜像需要自己 build
-        image: docker.neg/shec/redis-4.0.10:v3
+        image: reasonduan/redis:4.0.12-alpine,reasonduan/redis:5.0.3-alpine
       # docker api 格式
         api.format: http://%s:2375/
     # 物理机相关配置
