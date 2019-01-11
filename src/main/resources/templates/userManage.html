@@ -37,16 +37,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>bigdata</td>
-                            <td>bigdata</td>
-                            <td class="hidden-phone">bigdata</td>
-                            <td>
-                                <button class="btn btn-primary btn-xs updateUser"><i class="icon-pencil"></i></button>
-                                <button class="btn btn-danger btn-xs deleteUser"><i class="icon-trash "></i></button>
-                            </td>
-                        </tr>
+                           <!-- user lists-->
                         </tbody>
                     </table>
                 </section>
@@ -61,17 +52,20 @@
                         <h4 class="modal-title" id="myModalLabel">Edit User</h4>
                     </div>
                     <div class="modal-body">
+
+                        <input id="userId" type="hidden" class="form-control modal-input"  />
+
                         <div class="input-group m-bot15">
                             <span class="input-group-addon modal-span">Group</span>
-                            <input id="group" type="text" class="form-control modal-input" placeholder="group" value="444" />
+                            <input id="group" type="text" class="form-control modal-input" placeholder="group"  />
                         </div>
                         <div class="input-group m-bot15">
                             <span class="input-group-addon modal-span">UserName</span>
-                            <input id="userName" type="text" class="form-control modal-input" placeholder="user name" value="444"/>
+                            <input id="userName" type="text" class="form-control modal-input" placeholder="user name" />
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon modal-span">Password</span>
-                            <input id="password" type="text" class="form-control modal-input" placeholder="password" value="444" />
+                            <input id="password" type="text" class="form-control modal-input" placeholder="password"  />
                         </div>
                     </div>
                     <div class="modal-footer">

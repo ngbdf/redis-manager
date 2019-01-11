@@ -1,6 +1,6 @@
 $(function() {
    // 加载数据
-   // getAllUsers();
+    getAllUsers();
 });
 
 $("#addUser").on("click", function() {
@@ -8,50 +8,110 @@ $("#addUser").on("click", function() {
     $('#myModal').modal('show');
 })
 
-$(".updateUser").on("click", function() {
-
-    var userID = $(this).attr("data");
+function updateUser(userID) {
     $('#myModal').modal('show');
-    /*if(userID != null && userID != '') {
-       // TODO: Ajax 请求后台获取单个 user 信息，填充到 modal 表单中
+    if(userID != null && userID != '') {
        $('#myModal').modal('show');
-     } else {
-        layer.msg("Get user data error.");
-     }*/
+           $.ajax({
+               type: "GET",
+               url: "/user/getUser?id=" + userID ,
+               success: function(result) {
+                   if(result.code == 0){
+                       console.log(result.res);
+                       $('#group').val(result.res.userGroup);
+                       $('#userName').val(result.res.username);
+                       $('#password').val(result.res.password);
+                       $('#userId').val(result.res.id);
+                   } else {
+                        layer.msg("Get user data error.");
+                   }
+               }
+          })
+    }
 
-})
+}
 
 $("#confirm").on("click",  function() {
-    // TODO: 获取表单数据，请求后台,刷新当前页
 
+    var group =  $('#group').val();
+    var userName = $('#userName').val();
+    var password = $('#password').val();
+    var userId = $('#userId').val();
+    if(group != '' && userName != '' && password != ''){
+
+        var user;
+        if(userId != '' && userId != null){
+          user = JSON.stringify({
+            "userId": userId,
+            "group": group,
+            "username": userName,
+            "password": password
+          });
+        }else{
+          user = JSON.stringify({
+            "group": group,
+            "username": userName,
+            "password": password
+          });
+        }
+
+        $.ajax({
+               type: "POST",
+               data: user,
+               dataType: "json",
+               contentType: "application/json",
+               url: "/user/addUser",
+               success: function(result) {
+                    if(result.code == 0){
+                         layer.msg("Add/Update User success.")
+                         getAllUsers();
+                         $("#myModal .modal-input").val("");
+                         $('#myModal').modal('hide');
+                    }else{
+                         layer.msg("Add/Update User failure.")
+                    }
+
+               }
+           })
+
+    }else{
+       layer.msg("Please input complete data.");
+    }
 })
 
-$(".deleteUser").on("click", function() {
+function deleteUser(userID) {
     layer.confirm('Confirm to delete this user?', {
       title: 'Delete',
       btn: ['Delete','Cancel'], //按钮
       skin: 'danger'
     }, function(){
-         var userID = $(this).attr("data");
          if(userID != null && userID != '') {
-            // TODO: 请求后台删除
+             $.ajax({
+                    type: "GET",
+                    url: "/user/removeUser?id=" + userID ,
+                    success: function(result) {
+                        if(result.code == 0){
+                             layer.msg("Delete User success.")
+                             getAllUsers();
+                        }else{
+                             layer.msg("Delete User failure.")
+                        }
+                    }
+             })
          }
 
     }, function(){
         // cancel
     });
-})
+}
 
 function getAllUsers() {
     $.ajax({
-        type: "POST",
-        url: "/user/getAllUsers",
+        type: "GET",
+        url: "/user/listUser",
         success: function(result) {
-            // user model list
-            var userList = result;
-            if(userList != null) {
-                buildUserTable(userList);
-            }
+          // user model list
+          buildUserTable(result.res);
         }
     })
 }
@@ -73,10 +133,12 @@ function buildUserTable(userList) {
                         '<td>' + userName + '</td>' +
                         '<td class="hidden-phone">' + password + '</td>' +
                         '<td>' +
-                        '    <button class="btn btn-primary btn-xs updateUser" data="' + userID + '"><i class="icon-pencil" title="update user"></i></button>' +
-                        '    <button class="btn btn-danger btn-xs deleteUser" data="' + userID + '"><i class="icon-trash "  title="delete user"></i></button>' +
+                        '    <button class="btn btn-primary btn-xs updateUser" onclick="updateUser(' + userID + ')"><i class="icon-pencil" title="update user"></i></button>' +
+                        '    <button class="btn btn-danger btn-xs deleteUser" onclick="deleteUser(' + userID + ')"><i class="icon-trash "  title="delete user"></i></button>' +
                         '</td>' +
                     '</tr>';
     }
     tbody.html(content);
+
+
 }

@@ -28,6 +28,12 @@ public class UserDaoTest {
     @Test
     public void addUser(){
         User user = new User("admin", "admin", "admin");
-        userDao.addUser( user );
+        userDao.addUser(user);
+    }
+
+    @Test
+    public void updateUser(){
+        User user = new User(30005,"30005", "30005", "30005");
+        System.out.println(userDao.updateUser( user ));
     }
 }
