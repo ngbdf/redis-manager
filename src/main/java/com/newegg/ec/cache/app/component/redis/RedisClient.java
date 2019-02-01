@@ -29,9 +29,6 @@ public class RedisClient {
     public RedisClient(String host, int port){
         try {
 
-            this.socket = new Socket(host,port);
-            this.outputStream = this.socket.getOutputStream();
-            this.inputStream = this.socket.getInputStream();
             socket = new Socket();
             socket.setReuseAddress(true);
             socket.setTcpNoDelay(true);
