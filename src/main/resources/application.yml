@@ -14,7 +14,7 @@ spring:
   datasource:
       name: serverbase
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://10.16.50.209:4000/redis_manager?useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://xx.xx.xx.xx:3306/redis_manager?useUnicode=true&characterEncoding=utf-8
       username: root
       password:
 
@@ -22,8 +22,8 @@ spring:
   wechat:
      alarm:
       url:
-      roleId: 2
-      alarmsize: 200
+      roleId:
+      alarmsize:
 
   # 如果使用邮件报警，在此处开启开关并配置log4j邮件相关信息
   mail:
@@ -52,11 +52,11 @@ cache:
         # 用于删除 7 天的后的数据
         clearn.day: 7
     # 支持的插件多个可以用逗号隔开
-    plugin: machine,docker,humpback
+    plugin: machine,docker
     # humpback 相关配置
     humpback:
         # 镜像列表, 如果没有humpback，则可为空
-        image: docker.neg/shec/redis-4.0.10:v3,docker.neg/shec/redis-4.0.8:v1,humpback-hub.newegg.org/shec/redis3.0.6:v3
+        image:
         # humpback 操作的 api 接口 %s 是占位符
         api.format: http://%s:8500/dockerapi/v2/
     # docker 相关配置
@@ -75,5 +75,5 @@ cache:
             # 安装的基础路径
             basepath: redis-cluster/
         # 可以安装的 tar 包
-        image: redis-4.0.10.tar,redis3.0.6.tar
+        image: redis-4.0.10.tar,redis-5.0.2.tar,redis3.0.6.tar
 
