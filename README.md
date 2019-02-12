@@ -21,9 +21,13 @@ Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理�
 
  <img src="./docs/images/wechat.png" width="200px"/>
  
-3. 知乎专栏  https://zhuanlan.zhihu.com/c_1055846842708930560
+3. RedisManager QQ群
 
-4. 云栖社区  https://yq.aliyun.com/album/227?spm=a2c4e.11155435.0.0.3ece24f0lQw15C
+ <img src="./docs/images/qq.jpg" width="200px"/>
+
+4. 知乎专栏  https://zhuanlan.zhihu.com/c_1055846842708930560
+
+5. 云栖社区  https://yq.aliyun.com/album/227?spm=a2c4e.11155435.0.0.3ece24f0lQw15C
 
 ## 产品主要功能介绍
 ### Dashboard    
