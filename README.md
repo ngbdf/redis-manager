@@ -21,7 +21,7 @@ Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理�
 
  <img src="./docs/images/wechat.png" width="200px"/>
  
-3. RedisManager QQ群
+3. RedisManager QQ群(备用，请优先加入微信群)
 
  <img src="./docs/images/qq.jpg" width="200px"/>
 
