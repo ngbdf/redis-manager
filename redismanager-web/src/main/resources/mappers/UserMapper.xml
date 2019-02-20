@@ -10,7 +10,7 @@
     </select>
 
     <select id="getUser"  resultType="com.newegg.ec.cache.core.entity.model.User">
-        select * from user where id=#{id
+        select * from user where id=#{id}
     </select>
 
     <select id="getUserByName"  resultType="com.newegg.ec.cache.core.entity.model.User">

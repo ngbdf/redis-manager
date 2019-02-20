@@ -16,7 +16,7 @@ spring:
       driver-class-name: com.mysql.jdbc.Driver
       url: jdbc:mysql://10.16.50.209:3306/redis_manager?useUnicode=true&characterEncoding=utf-8
       username: root
-      password: 123456
+      password: Newegg@1234
 
   # 如果使用微信报警，填写微信企业号相关信息
   wechat:
@@ -34,10 +34,10 @@ spring:
      mailFrom: xxx@qq.com
      mailTo: xxx@qq.com
 
-#mybatis:
-  #mapper-locations: classpath*:mappers/*
-  #configuration:
-      #mapUnderscoreToCamelCase: true
+mybatis:
+  mapper-locations: classpath*:mappers/*
+  configuration:
+      mapUnderscoreToCamelCase: true
 
 cache:
     # redis 客户端用于配置修改什么的,记得安装部署的时候要修改一下权限 chmod 777 redis-cli
@@ -63,7 +63,7 @@ cache:
     docker:
         # docker 镜像需要自己 build
         image: reasonduan/redis:4.0.12-alpine,reasonduan/redis:5.0.3-alpine
-      # docker api 格式
+        # docker api 格式
         api.format: http://%s:2375/
     # 物理机相关配置
     machine:

@@ -19,7 +19,7 @@
                </if>
                <if test="params.clusterId != null and params.clusterId !=''">
                    and cluster_id = #{params.clusterId}
-               </if
+               </if>
                <if test="params.nodeId != null and params.nodeId !=''">
                    and node_id = #{params.nodeId}
                </if>

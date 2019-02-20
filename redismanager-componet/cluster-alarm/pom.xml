@@ -3,31 +3,17 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>redismanager</artifactId>
+        <artifactId>redismanager-componet</artifactId>
         <groupId>com.newegg.ec</groupId>
         <version>1.0-SNAPSHOT</version>
-        <relativePath>..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.newegg.ec</groupId>
-    <artifactId>redismanager-componet</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <modules>
-        <module>cluster-build</module>
-        <module>cluster-monitor</module>
-        <module>user-manager</module>
-        <module>cluster-alarm</module>
-    </modules>
-    <packaging>pom</packaging>
+    <artifactId>cluster-alarm</artifactId>
 
     <properties>
         <java.version>1.8</java.version>
     </properties>
-
-    <dependencies>
-
-    </dependencies>
-
-
+    
 </project>

@@ -1,4 +1,4 @@
-package com.newegg.ec.cache;
+package com.newegg.ec.cache.core;
 
 import com.newegg.ec.cache.core.dao.IUserDao;
 import com.newegg.ec.cache.core.entity.annotation.mysql.MysqlUtil;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +16,8 @@ import java.util.List;
 /**
  * Created by gl49 on 2018/4/21.
  */
-@Component
 public class InitConfig implements ApplicationListener<ContextRefreshedEvent> {
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
