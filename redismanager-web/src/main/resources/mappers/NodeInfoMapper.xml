@@ -3,8 +3,8 @@
         "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.newegg.ec.cache.app.dao.INodeInfoDao">
-    <select id="getGroupNodeInfo" resultType="com.newegg.ec.redismanager.core.entity.model.NodeInfo" statementType="STATEMENT">
+<mapper namespace="com.newegg.ec.cache.core.dao.INodeInfoDao">
+    <select id="getGroupNodeInfo" resultType="com.newegg.ec.cache.core.entity.model.NodeInfo" statementType="STATEMENT">
         select
             <if test="date == 'day'">
                 day as date,
@@ -70,7 +70,7 @@
         add_time &gt; ${startTime} and add_time &lt; ${endTime}
         group by host) as aliasTable
     </select>
-    <select id="getLastNodeInfo" resultType="com.newegg.ec.redismanager.core.entity.model.NodeInfo" statementType="STATEMENT">
+    <select id="getLastNodeInfo" resultType="com.newegg.ec.cache.core.entity.model.NodeInfo" statementType="STATEMENT">
         select * from ${tableName}
         where
         add_time &gt; ${startTime} and add_time &lt; ${endTime}
@@ -79,7 +79,7 @@
         </if>
         order by id desc limit 1
     </select>
-    <insert id="addNodeInfo" parameterType="com.newegg.ec.redismanager.core.entity.model.NodeInfo" statementType="STATEMENT">
+    <insert id="addNodeInfo" parameterType="com.newegg.ec.cache.core.entity.model.NodeInfo" statementType="STATEMENT">
         insert into
         ${tableName}
         (

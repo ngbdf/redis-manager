@@ -3,14 +3,14 @@
         "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.newegg.ec.cache.app.dao.IClusterCheckRuleDao">
+<mapper namespace="com.newegg.ec.cache.core.dao.IClusterCheckRuleDao">
 
-     <insert id="addClusterCheckRule"  parameterType="com.newegg.ec.redismanager.core.entity.model.ClusterCheckRule">
+     <insert id="addClusterCheckRule"  parameterType="com.newegg.ec.cache.core.entity.model.ClusterCheckRule">
          insert into cluster_check_rule(id, cluster_id,limit_name,formula,description,update_time)
                                 values(#{id},#{clusterId},#{limitName},#{formula},#{description},#{updateTime})
      </insert>
 
-    <update id="updateClusterCheckRule" parameterType="com.newegg.ec.redismanager.core.entity.model.ClusterCheckRule">
+    <update id="updateClusterCheckRule" parameterType="com.newegg.ec.cache.core.entity.model.ClusterCheckRule">
         update  cluster_check_rule set
         id = #{id},
         cluster_id = #{clusterId},
@@ -35,11 +35,11 @@
         </where>
     </delete>
 
-     <select id="getClusterRuleList" parameterType="java.lang.String" resultType="com.newegg.ec.redismanager.core.entity.model.ClusterCheckRule">
+     <select id="getClusterRuleList" parameterType="java.lang.String" resultType="com.newegg.ec.cache.core.entity.model.ClusterCheckRule">
         select  * from cluster_check_rule where cluster_id = #{clusterId}
     </select>
 
-    <select id="getClusterRule" parameterType="java.lang.String" resultType="com.newegg.ec.redismanager.core.entity.model.ClusterCheckRule">
+    <select id="getClusterRule" parameterType="java.lang.String" resultType="com.newegg.ec.cache.core.entity.model.ClusterCheckRule">
         select  * from cluster_check_rule  Where  id = #{id}
     </select>
 

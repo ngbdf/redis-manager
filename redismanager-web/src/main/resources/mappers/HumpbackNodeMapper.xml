@@ -3,9 +3,9 @@
         "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.newegg.ec.cache.plugin.humpback.IHumpbackNodeDao">
+<mapper namespace="com.newegg.ec.cache.core.dao.plugin.IHumpbackNodeDao">
 
-    <select id="getHumbackNodeList"  resultType="com.newegg.ec.cache.plugin.humpback.HumpbackNode" parameterType="int">
+    <select id="getHumbackNodeList"  resultType="com.newegg.ec.cache.core.entity.model.plugin.HumpbackNode" parameterType="int">
         select * from humpback_node
         <if test="_parameter != null">
             where cluster_id =#{id}
@@ -13,7 +13,7 @@
         limit 500
     </select>
 
-    <select id="getHumpbackNode" parameterType="int" resultType="com.newegg.ec.cache.plugin.humpback.HumpbackNode">
+    <select id="getHumpbackNode" parameterType="int" resultType="com.newegg.ec.cache.core.entity.model.plugin.HumpbackNode">
         select * from humpback_node where id=#{id}
     </select>
 
@@ -25,7 +25,7 @@
         delete from humpback_node where cluster_id = #{id}
     </delete>
 
-    <insert id="addHumbackNode"  parameterType="com.newegg.ec.cache.plugin.humpback.HumpbackNode"  useGeneratedKeys="true" keyProperty="id">
+    <insert id="addHumbackNode"  parameterType="com.newegg.ec.cache.core.entity.model.plugin.HumpbackNode"  useGeneratedKeys="true" keyProperty="id">
         insert into humpback_node(image,container_name,cluster_id, user_group, ip,port, add_time ) values(#{image},#{containerName},#{clusterId},#{userGroup},#{ip},#{port},#{addTime})
     </insert>
 

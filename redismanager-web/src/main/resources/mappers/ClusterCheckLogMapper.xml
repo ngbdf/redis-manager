@@ -3,14 +3,14 @@
         "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.newegg.ec.cache.app.dao.IClusterCheckLogDao">
+<mapper namespace="com.newegg.ec.cache.core.dao.IClusterCheckLogDao">
 
-     <insert id="addClusterCheckLog"  parameterType="com.newegg.ec.redismanager.core.entity.model.ClusterCheckLog">
+     <insert id="addClusterCheckLog"  parameterType="com.newegg.ec.cache.core.entity.model.ClusterCheckLog">
          insert into cluster_check_logs(id, cluster_id,node_id,formula,log_type,log_info,description,is_checked,update_time)
                                 values(#{id},#{clusterId},#{nodeId},#{formula},#{logType},#{logInfo},#{description},#{isChecked},#{updateTime})
      </insert>
 
-     <select id="getClusterCheckLogs" parameterType="java.util.Map" resultType="com.newegg.ec.redismanager.core.entity.model.ClusterCheckLog">
+     <select id="getClusterCheckLogs" parameterType="java.util.Map" resultType="com.newegg.ec.cache.core.entity.model.ClusterCheckLog">
            select  * from cluster_check_logs
            <where>
                0 = 0
