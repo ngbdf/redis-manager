@@ -37,10 +37,7 @@ public class RedisClusterClient implements LettuceRedisClient {
 	
 	@Override
 	public Boolean auth(String password) {
-		System.out.println(command.auth(password));
-
-
-		return !Strings.isNullOrEmpty("");
+		return !Strings.isNullOrEmpty(command.auth(password));
 	}
 
 	@Override

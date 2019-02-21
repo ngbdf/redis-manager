@@ -58,12 +58,19 @@ public class ClusterClientFactory extends AbstractLettuceRedisClientFactory {
 				}
 				redisURIs.add(build.build());
 			}
+
+
 			ClusterTopologyRefreshOptions clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
-					.enablePeriodicRefresh(Duration.ofMillis(30))
+					.enablePeriodicRefresh(Duration.ofMillis(60)) //long
 					.enableAllAdaptiveRefreshTriggers()
+					.enablePeriodicRefresh(true) //boolean
+					.refreshPeriod(Duration.ofMillis(60)) //long
+					.adaptiveRefreshTriggersTimeout(Duration.ofMillis(30))//long
+					.refreshTriggersReconnectAttempts(5) //int
 					.build();
 
 			ClusterClientOptions clusterClientOptions = ClusterClientOptions.builder()
+					.maxRedirects(5) //int
 					.topologyRefreshOptions(clusterTopologyRefreshOptions)
 					.build();
 
@@ -129,7 +136,7 @@ public class ClusterClientFactory extends AbstractLettuceRedisClientFactory {
 
 	@Override
 	public AbstractLettuceRedisClientFactory reset(RedisFactoryConfig config,String password) {
-           return new ClusterClientFactory(config.resetPassword(config,password));
+           return new ClusterClientFactory(config.resetFactoryConfig(config, password));
 	}
 
 	@Override

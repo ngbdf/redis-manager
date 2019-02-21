@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * Created by lf52 on 2019/2/21.
  */
 public interface RedisBaseClient extends RedisStringClient {
 		

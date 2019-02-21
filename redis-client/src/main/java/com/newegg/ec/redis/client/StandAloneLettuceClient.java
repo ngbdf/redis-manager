@@ -13,7 +13,6 @@ import java.util.Set;
 /**
  * Abstract Redis Client implements by lettuce
  * Not thread safe
- * @author wc4t
  */
 @SuppressWarnings("unchecked")
 public  class StandAloneLettuceClient extends RedisClusterClient {

@@ -5,6 +5,7 @@ import com.newegg.ec.redis.client.StandAloneLettuceClient;
 import com.newegg.ec.redis.client.config.RedisFactoryConfig;
 import com.newegg.ec.redis.client.entity.StringByteRedisCodec;
 import com.newegg.ec.redis.client.exception.RedisClientException;
+import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.RedisURI.Builder;
@@ -73,7 +74,12 @@ public class StandAloneClientFactory extends AbstractLettuceRedisClientFactory {
 			if (redisConfig.getPassword() != null) {
 				build.withPassword(redisConfig.getPassword());
 			}
-			return RedisClient.create(build.build());
+
+			ClientOptions clientOptions = ClientOptions.builder().build();
+
+			RedisClient standAloneClient = RedisClient.create(build.build());
+			standAloneClient.setOptions(clientOptions);
+			return standAloneClient;
 		}
 		return null;
 	}
@@ -116,7 +122,7 @@ public class StandAloneClientFactory extends AbstractLettuceRedisClientFactory {
 
 	@Override
 	public AbstractLettuceRedisClientFactory reset(RedisFactoryConfig config,String password) {
-		return new StandAloneClientFactory(config.resetPassword(config,password));
+		return new StandAloneClientFactory(config.resetFactoryConfig(config,password));
 	}
 
 

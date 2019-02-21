@@ -7,9 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RedisFactoryConfig {
+
 	private static final int DEFAULT_CONNECTION = 8;
 	private static final long DEFAULT_TIMEOUT = 3000;
-	
+
+	private long refreshPeriod;
+	private boolean enablePeriodicRefresh;
+	private long adaptiveRefreshTriggersTimeout;
+	private int refreshTriggersReconnectAttempts;
+	private int maxRedirects;
+
+
 	private int StringMaxConnection;
 	private int byteMaxConnection;
 	private List<IpAndPort> nodeList;
@@ -22,6 +30,11 @@ public class RedisFactoryConfig {
 		this.StringMaxConnection = builder.StringMaxConnection;
 		this.nodeList = builder.nodeList;
 		this.timeout = builder.timeout;
+		this.refreshPeriod = builder.refreshPeriod;
+		this.enablePeriodicRefresh = builder.enablePeriodicRefresh;
+		this.adaptiveRefreshTriggersTimeout = builder.adaptiveRefreshTriggersTimeout;
+		this.refreshTriggersReconnectAttempts = builder.refreshTriggersReconnectAttempts;
+		this.maxRedirects = builder.maxRedirects;
 		this.password = builder.password;
 	}
 
@@ -68,14 +81,55 @@ public class RedisFactoryConfig {
 		return password;
 	}
 
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	public static Builder builder(){
 		return new Builder();
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+
+	public long getRefreshPeriod() {
+		return refreshPeriod;
 	}
-	
+
+	public void setRefreshPeriod(long refreshPeriod) {
+		this.refreshPeriod = refreshPeriod;
+	}
+
+	public boolean isEnablePeriodicRefresh() {
+		return enablePeriodicRefresh;
+	}
+
+	public void setEnablePeriodicRefresh(boolean enablePeriodicRefresh) {
+		this.enablePeriodicRefresh = enablePeriodicRefresh;
+	}
+
+	public long getAdaptiveRefreshTriggersTimeout() {
+		return adaptiveRefreshTriggersTimeout;
+	}
+
+	public void setAdaptiveRefreshTriggersTimeout(long adaptiveRefreshTriggersTimeout) {
+		this.adaptiveRefreshTriggersTimeout = adaptiveRefreshTriggersTimeout;
+	}
+
+	public int getRefreshTriggersReconnectAttempts() {
+		return refreshTriggersReconnectAttempts;
+	}
+
+	public void setRefreshTriggersReconnectAttempts(int refreshTriggersReconnectAttempts) {
+		this.refreshTriggersReconnectAttempts = refreshTriggersReconnectAttempts;
+	}
+
+	public int getMaxRedirects() {
+		return maxRedirects;
+	}
+
+	public void setMaxRedirects(int maxRedirects) {
+		this.maxRedirects = maxRedirects;
+	}
+
 	private static List<IpAndPort> getHostsFromStr(String nodeListStr){
 		List<IpAndPort> nodeList = new ArrayList<>();
 		if (!Strings.isNullOrEmpty(nodeListStr) ) {
@@ -134,6 +188,12 @@ public class RedisFactoryConfig {
 		private long timeout = DEFAULT_TIMEOUT;
 		private String password = null;
 
+		private long refreshPeriod = 60;
+		private boolean enablePeriodicRefresh = true;
+		private long adaptiveRefreshTriggersTimeout = 30;
+		private int refreshTriggersReconnectAttempts = 5;
+		private int maxRedirects = 5;
+
 		private Builder() {
 			super();
 		}
@@ -153,11 +213,32 @@ public class RedisFactoryConfig {
 			return this;
 		}
 		
+		public Builder setRefreshPeriod(long millisecond){
+			this.refreshPeriod = millisecond;
+			return this;
+		}
+
+		public Builder setEnablePeriodicRefresh(boolean enablePeriodicRefresh){
+			this.enablePeriodicRefresh = enablePeriodicRefresh;
+			return this;
+		}
+		public Builder setAdaptiveRefreshTriggersTimeout(long adaptiveRefreshTriggersTimeout){
+			this.adaptiveRefreshTriggersTimeout = adaptiveRefreshTriggersTimeout;
+			return this;
+		}
+		public Builder setRefreshTriggersReconnectAttempts(int refreshTriggersReconnectAttempts){
+			this.refreshTriggersReconnectAttempts = refreshTriggersReconnectAttempts;
+			return this;
+		}
+		public Builder setMaxRedirects(int maxRedirects){
+			this.maxRedirects = maxRedirects;
+			return this;
+		}
 		public Builder setTimeout(long millisecond){
 			this.timeout = millisecond;
 			return this;
 		}
-		
+
 		public Builder setPassword(String password){
 			this.password = password;
 			return this;
@@ -168,12 +249,26 @@ public class RedisFactoryConfig {
 		}
 	}
 
-	public RedisFactoryConfig resetPassword(RedisFactoryConfig config,String password){
+	/**
+	 * reset factory config
+	 * @param config
+	 * @param password
+	 * @return
+	 */
+	public RedisFactoryConfig resetFactoryConfig(RedisFactoryConfig config,String password){
+
 		Builder builder = RedisFactoryConfig.builder().setNodeList(getHostsStr(config.getNodeList())).
 				setByteMaxConnection(config.getByteMaxConnection()).
 				setStringMaxConnection(config.getStringMaxConnection()).
 				setPassword(password).
-				setTimeout(config.getTimeout());
+				setRefreshPeriod(config.getRefreshPeriod()).
+				setAdaptiveRefreshTriggersTimeout(config.getAdaptiveRefreshTriggersTimeout()).
+				setRefreshTriggersReconnectAttempts(config.getRefreshTriggersReconnectAttempts()).
+				setEnablePeriodicRefresh(config.isEnablePeriodicRefresh()).
+				setMaxRedirects(config.getMaxRedirects()).
+		        setTimeout(config.getTimeout());
 		return new RedisFactoryConfig(builder);
+
 	}
+
 }
