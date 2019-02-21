@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.newegg.ec</groupId>
-    <artifactId>redismanager-web</artifactId>
+    <artifactId>redismanager-rest</artifactId>
 
     <properties>
         <java.version>1.8</java.version>

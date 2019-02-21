@@ -12,9 +12,9 @@
     <modules>
         <module>redis-client</module>
         <module>redismanager-backend</module>
-        <module>redismanager-web</module>
+        <module>redismanager-rest</module>
         <module>redismanager-core</module>
-        <module>redismanager-componet</module>
+        <module>redismanager-component</module>
     </modules>
 
     <properties>
