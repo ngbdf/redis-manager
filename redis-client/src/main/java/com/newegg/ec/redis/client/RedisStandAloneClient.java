@@ -2,6 +2,7 @@ package com.newegg.ec.redis.client;
 
 import com.newegg.ec.redis.client.entity.KeyValue;
 import com.newegg.ec.redis.client.entity.ValueAndScore;
+import com.newegg.ec.redis.client.exception.RedisClientException;
 import io.lettuce.core.api.StatefulConnection;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -14,14 +15,13 @@ import java.util.Set;
  * Abstract Redis Client implements by lettuce
  * Not thread safe
  */
-@SuppressWarnings("unchecked")
-public  class StandAloneLettuceClient extends RedisClusterClient {
+public  class RedisStandAloneClient extends RedisClusterClient {
 	protected  StatefulRedisConnection<String, byte[]> byteRedisConnect;
 	
 	protected  StatefulRedisConnection<String, String> stringRedisConnect;
 	
 	
-	public StandAloneLettuceClient(StatefulRedisConnection<String, byte[]> byteConnect, StatefulRedisConnection<String, String> stringConnect) {
+	public RedisStandAloneClient(StatefulRedisConnection<String, byte[]> byteConnect, StatefulRedisConnection<String, String> stringConnect) {
 		if (byteConnect != null) {
 			this.bytecommand = byteConnect.sync();
 			this.byteRedisConnect = byteConnect;
@@ -32,8 +32,8 @@ public  class StandAloneLettuceClient extends RedisClusterClient {
 		}
 	}
 	
-	public StandAloneLettuceClient(StatefulRedisConnection<String, byte[]> byteConnect,
-								   StatefulRedisConnection<String, String> stringConnect, int db) {
+	public RedisStandAloneClient(StatefulRedisConnection<String, byte[]> byteConnect,
+								 StatefulRedisConnection<String, String> stringConnect, int db) {
 		this(byteConnect, stringConnect);
 		 
 		if (bytecommand != null && bytecommand instanceof RedisCommands) {
@@ -47,7 +47,12 @@ public  class StandAloneLettuceClient extends RedisClusterClient {
 
 	@Override
 	public List<String> clusterNodes() {
-		return null;
+		throw new RedisClientException("standalone mode can not support this command");
+	}
+
+	@Override
+	public Map<String,String> clusterInfo() {
+		throw new RedisClientException("standalone mode can not support this command");
 	}
 
 	@Override

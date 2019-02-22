@@ -85,7 +85,25 @@ public class RedisClusterClient implements LettuceRedisClient {
 
 	@Override
 	public List<String> clusterNodes() {
-		return null;
+
+		List<String> result = new LinkedList<>();
+		String[] nodes =command.clusterNodes().split("\n");
+		for (String node : nodes) {
+			String[] arr = node.split(" ");
+			result.add(arr[1]);
+		}
+		return result;
+	}
+
+	public Map<String,String> clusterInfo() {
+
+		Map<String, String> result = new HashMap();
+		String[] clusterinfos =command.clusterInfo().split("\r\n");
+		for (String info : clusterinfos) {
+			String[] arr = info.split(":");
+			result.put(arr[0], arr[1]);
+		}
+		return result;
 	}
 
 	@Override
@@ -111,6 +129,11 @@ public class RedisClusterClient implements LettuceRedisClient {
 	@Override
 	public Long incrby(String key,Long amount) {
 		return command.incrby(key, amount);
+	}
+
+	@Override
+	public String info() {
+		return command.info();
 	}
 
 	@Override

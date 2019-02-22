@@ -3,7 +3,7 @@ package com.newegg.ec.redis.client.factory;
 
 import com.newegg.ec.redis.client.RedisBaseClient;
 import com.newegg.ec.redis.client.RedisClusterClient;
-import com.newegg.ec.redis.client.StandAloneLettuceClient;
+import com.newegg.ec.redis.client.RedisStandAloneClient;
 import com.newegg.ec.redis.client.config.RedisFactoryConfig;
 import com.newegg.ec.redis.client.entity.StringByteRedisCodec;
 import com.newegg.ec.redis.client.exception.RedisClientException;
@@ -138,8 +138,8 @@ public class ClusterClientFactory extends AbstractLettuceRedisClientFactory {
 
 	@Override
 	public void releaseClient(RedisBaseClient client) {
-		if (client instanceof StandAloneLettuceClient) {
-			StandAloneLettuceClient tempClient = (StandAloneLettuceClient) client;
+		if (client instanceof RedisStandAloneClient) {
+			RedisStandAloneClient tempClient = (RedisStandAloneClient) client;
 			if (tempClient.getByteConnect() != null) {
 				bytePool.returnObject((StatefulRedisClusterConnection<String, byte[]>)tempClient.getByteConnect());
 			}

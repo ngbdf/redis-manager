@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.client.factory;
 
 import com.newegg.ec.redis.client.RedisBaseClient;
-import com.newegg.ec.redis.client.StandAloneLettuceClient;
+import com.newegg.ec.redis.client.RedisStandAloneClient;
 import com.newegg.ec.redis.client.config.RedisFactoryConfig;
 import com.newegg.ec.redis.client.entity.StringByteRedisCodec;
 import com.newegg.ec.redis.client.exception.RedisClientException;
@@ -69,7 +69,7 @@ public class StandAloneClientFactory extends AbstractLettuceRedisClientFactory {
 
 	
 	@Override
-	public StandAloneLettuceClient provideClient(String keySpace) {
+	public RedisStandAloneClient provideClient(String keySpace) {
 		StatefulRedisConnection<String, String> stringConnection = null;
 		StatefulRedisConnection<String, byte[]> byteConnection = null; 
 		
@@ -106,7 +106,7 @@ public class StandAloneClientFactory extends AbstractLettuceRedisClientFactory {
 		return null;
 	}
 
-	protected StandAloneLettuceClient createLettuceClient(String keySpace, StatefulRedisConnection<String, byte[]> byteconnnect,
+	protected RedisStandAloneClient createLettuceClient(String keySpace, StatefulRedisConnection<String, byte[]> byteconnnect,
 			StatefulRedisConnection<String, String> stringconnnect) {
 		int db = 0;
 		try {
@@ -114,15 +114,15 @@ public class StandAloneClientFactory extends AbstractLettuceRedisClientFactory {
 		} catch (Exception e) {
 			throw new RedisClientException("keySpace is not number,sentinel keySpace must be int", e);
 		}
-		return new StandAloneLettuceClient(byteconnnect, stringconnnect, db);
+		return new RedisStandAloneClient(byteconnnect, stringconnnect, db);
 	}
 
 
 	
 	@Override
 	public void releaseClient(RedisBaseClient client) {
-		if (client instanceof StandAloneLettuceClient) {
-			StandAloneLettuceClient tempClient = (StandAloneLettuceClient) client;
+		if (client instanceof RedisStandAloneClient) {
+			RedisStandAloneClient tempClient = (RedisStandAloneClient) client;
 			if (tempClient.getByteConnect() != null) {
 				bytePool.returnObject((StatefulRedisConnection<String, byte[]>)tempClient.getByteConnect());
 			}

@@ -62,7 +62,9 @@ public interface RedisBaseClient extends RedisStringClient {
 	 * get redis cluster node
 	 * @return
 	 */
-	public List<String> clusterNodes();
+	public List<String>  clusterNodes();
+
+	public Map<String,String> clusterInfo();
 
 	/**
 	 * is redis key in
@@ -97,6 +99,12 @@ public interface RedisBaseClient extends RedisStringClient {
 	 * @return
 	 */
 	public Long incrby(String key,Long amount);
+
+	/**
+	 * get node info command
+	 * @return
+	 */
+	public String info();
 
 	/**
 	 * scan hanlder
