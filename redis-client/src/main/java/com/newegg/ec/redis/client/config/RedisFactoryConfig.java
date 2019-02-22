@@ -2,14 +2,31 @@ package com.newegg.ec.redis.client.config;
 
 
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.client.exception.RedisClientException;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class RedisFactoryConfig {
 
-	private static final int DEFAULT_CONNECTION = 8;
+	private static final int DEFAULT_CONNECTION = 16;
 	private static final long DEFAULT_TIMEOUT = 3000;
+
+	private static final String DEFAULT_PROPERTIES= "redis.properties";
+	private static final String CLIENT_NODELIST= "redis.client.nodeList";
+	private static final String CLIENT_PASSWORD= "redis.client.password";
+	private static final String CLIENT_MAXREDIRECTS = "redis.client.maxRedirects";
+	private static final String CLIENT_REFRESHPERIOD= "redis.client.refreshPeriod";
+	private static final String CLIENT_TIMEOUT = "redis.client.timeout";
+	private static final String CLIENT_ADAPTIVEREFRESHTRIGGERSTIMEOUT = "redis.client.adaptiveRefreshTriggersTimeout";
+	private static final String CLIENT_REFRESHTRIGGERSRECONNECTATTEMPTS= "redis.client.refreshTriggersReconnectAttempts";
+	private static final String CLIENT_ENABLEPERIODICREFRESH = "redis.client.enablePeriodicRefresh";
+	private static final String POOL_BYTEMAXCONNECTION = "redis.common.pool.byteMaxConnection";
+	private static final String POOL_STRINGMAXCONNECTION= "redis.common.pool.stringMaxConnection";
+
 
 	private long refreshPeriod;
 	private boolean enablePeriodicRefresh;
@@ -37,6 +54,26 @@ public class RedisFactoryConfig {
 		this.maxRedirects = builder.maxRedirects;
 		this.password = builder.password;
 	}
+
+	public RedisFactoryConfig(String confName) {
+		Properties properties = getProperties(confName);
+		this.byteMaxConnection = Integer.parseInt(properties.getProperty(POOL_BYTEMAXCONNECTION));
+		this.StringMaxConnection = Integer.parseInt(properties.getProperty(POOL_STRINGMAXCONNECTION));
+		this.nodeList =getHostsFromStr(properties.getProperty(CLIENT_NODELIST));
+		this.timeout = Long.parseLong(properties.getProperty(CLIENT_TIMEOUT));
+		this.password = properties.getProperty(CLIENT_PASSWORD);
+
+		this.refreshPeriod = Long.parseLong(properties.getProperty(CLIENT_REFRESHPERIOD,"60"));
+		this.enablePeriodicRefresh = Boolean.parseBoolean(properties.getProperty(CLIENT_ENABLEPERIODICREFRESH,"true"));
+		this.adaptiveRefreshTriggersTimeout = Long.parseLong(properties.getProperty(CLIENT_ADAPTIVEREFRESHTRIGGERSTIMEOUT,"30"));
+		this.refreshTriggersReconnectAttempts = Integer.parseInt(properties.getProperty(CLIENT_REFRESHTRIGGERSRECONNECTATTEMPTS,"5"));
+		this.maxRedirects = Integer.parseInt(properties.getProperty(CLIENT_MAXREDIRECTS,"5"));
+	}
+
+	public RedisFactoryConfig() {
+		this(DEFAULT_PROPERTIES);
+	}
+
 
 	public int getStringMaxConnection() {
 		return StringMaxConnection;
@@ -270,5 +307,20 @@ public class RedisFactoryConfig {
 		return new RedisFactoryConfig(builder);
 
 	}
+
+	private Properties getProperties(String confName) {
+		if(Strings.isNullOrEmpty(confName)){
+			throw new RedisClientException("param cluster is null when create factory");
+		}
+		Properties properties = new Properties();
+		InputStream inputStream = ClassLoader.getSystemResourceAsStream(confName);
+		try {
+			properties.load(inputStream);
+		} catch (IOException e) {
+			throw new RedisClientException("load redis conf fail",e);
+		}
+		return properties;
+	}
+
 
 }

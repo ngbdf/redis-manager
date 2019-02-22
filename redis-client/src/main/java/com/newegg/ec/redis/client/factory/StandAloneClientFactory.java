@@ -5,7 +5,6 @@ import com.newegg.ec.redis.client.StandAloneLettuceClient;
 import com.newegg.ec.redis.client.config.RedisFactoryConfig;
 import com.newegg.ec.redis.client.entity.StringByteRedisCodec;
 import com.newegg.ec.redis.client.exception.RedisClientException;
-import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.RedisURI.Builder;
@@ -41,7 +40,33 @@ public class StandAloneClientFactory extends AbstractLettuceRedisClientFactory {
 			}
 		},bytePoolConfig);
 	}
-	
+
+	public StandAloneClientFactory(String nodeList,String password) {
+
+		super(DEFAULT_CONNECTION,DEFAULT_CONNECTION,DEFAULT_CONNECTION,DEFAULT_CONNECTION);
+
+		RedisFactoryConfig config = buildConfig(nodeList, password);
+		RedisClient redisClient = createClient(config);
+
+		this.stringPool = ConnectionPoolSupport.createGenericObjectPool(new Supplier<StatefulRedisConnection<String, String>>() {
+
+			@Override
+			public StatefulRedisConnection<String, String> get() {
+				return redisClient.connect();
+			}
+		},stringPoolConfig);
+
+		this.bytePool = ConnectionPoolSupport.createGenericObjectPool(new Supplier<StatefulRedisConnection<String, byte[]>>() {
+
+			@Override
+			public StatefulRedisConnection<String, byte[]> get() {
+				return redisClient.connect(new StringByteRedisCodec());
+			}
+		},bytePoolConfig);
+
+	}
+
+
 	
 	@Override
 	public StandAloneLettuceClient provideClient(String keySpace) {
@@ -75,10 +100,7 @@ public class StandAloneClientFactory extends AbstractLettuceRedisClientFactory {
 				build.withPassword(redisConfig.getPassword());
 			}
 
-			ClientOptions clientOptions = ClientOptions.builder().build();
-
 			RedisClient standAloneClient = RedisClient.create(build.build());
-			standAloneClient.setOptions(clientOptions);
 			return standAloneClient;
 		}
 		return null;
@@ -110,6 +132,8 @@ public class StandAloneClientFactory extends AbstractLettuceRedisClientFactory {
 		}
 	}
 
+
+
 	@Override
 	public void shutdown() {
 		if (stringPool != null) {
@@ -120,8 +144,9 @@ public class StandAloneClientFactory extends AbstractLettuceRedisClientFactory {
 		}
 	}
 
+
 	@Override
-	public AbstractLettuceRedisClientFactory reset(RedisFactoryConfig config,String password) {
+	public StandAloneClientFactory resetFactory(RedisFactoryConfig config,String password) {
 		return new StandAloneClientFactory(config.resetFactoryConfig(config,password));
 	}
 

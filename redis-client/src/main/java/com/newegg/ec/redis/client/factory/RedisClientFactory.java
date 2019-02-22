@@ -8,7 +8,7 @@ import com.newegg.ec.redis.client.config.RedisFactoryConfig;
  * Thread Safed redis client factory
  * @author wc4t
  */
-public interface RedisClientFactory {
+public interface RedisClientFactory<T extends  AbstractLettuceRedisClientFactory> {
 
 	/**
 	 * provide one redis client
@@ -23,16 +23,23 @@ public interface RedisClientFactory {
 	 * return 
 	 */
 	public void releaseClient(RedisBaseClient client);
-	
-	
+
+	/**
+	 * quick build Factory with nodelist & password
+	 * @param nodeList
+	 * @param password
+	 * @return
+	 */
+	public RedisFactoryConfig buildConfig(String nodeList,String password);
+
+	/**
+	 * reset factory with password
+	 */
+	public T resetFactory(RedisFactoryConfig config,String password);
+
 	/**
 	 * close the factory and clear resource
 	 */
 	public void shutdown();
 
-	/**
-	 * reset factory with password
-	 */
-	public AbstractLettuceRedisClientFactory reset(RedisFactoryConfig config,String password);
-	
 }

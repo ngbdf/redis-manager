@@ -19,12 +19,13 @@ public class StandAloneClientTest {
 
     @Before
     public void before(){
-        config = RedisFactoryConfig.builder().setNodeList("10.16.46.196:8800").
+       /* config = RedisFactoryConfig.builder().setNodeList("10.16.46.196:8800").
                 setByteMaxConnection(100).
                 setStringMaxConnection(100).
                 setPassword("12345678").
-                setTimeout(3000).build();
-       clientFactory = new StandAloneClientFactory(config);
+                setTimeout(3000).build();*/
+        config = new RedisFactoryConfig("redis-standalone.properties");
+        clientFactory = new StandAloneClientFactory(config);
     }
 
     @Test
@@ -34,12 +35,13 @@ public class StandAloneClientTest {
         System.out.println(client.clusterNodes());
         List<Map<String, String>> result = client.hgetall("0GA-0001-001N3|USA|1003");
         System.out.println(result.get(0));
+        clientFactory.releaseClient(client);
 
     }
 
     @Test
     public void testRedisCommandWithPassword(){
-        clientFactory =  (StandAloneClientFactory)clientFactory.reset(config,"12345678");
+        clientFactory =  clientFactory.resetFactory(config,"12345678");
         RedisBaseClient client = clientFactory.provideClient("0");
         System.out.println(client.contains("02289190229|USA|1003"));
         clientFactory.releaseClient(client);

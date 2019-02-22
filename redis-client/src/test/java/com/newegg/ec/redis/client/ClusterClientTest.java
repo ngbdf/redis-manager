@@ -19,12 +19,14 @@ public class ClusterClientTest {
 
     @Before
     public void before(){
-        config = RedisFactoryConfig.builder().setNodeList("10.16.50.219:9101").
+      /*  config = RedisFactoryConfig.builder().setNodeList("10.16.50.219:9101").
                 setByteMaxConnection(100).
                 setStringMaxConnection(100).
                 setPassword("Newegg@1234").
-                setTimeout(3000).build();
-       clientFactory = new ClusterClientFactory(config);
+                setTimeout(3000).build();*/
+       // config = new RedisFactoryConfig();
+        config = new RedisFactoryConfig("redis-cluster.properties");
+        clientFactory = new ClusterClientFactory(config);
     }
 
     @Test
@@ -43,7 +45,7 @@ public class ClusterClientTest {
 
     @Test
     public void testRedisCommandWithPassword(){
-        clientFactory =  (ClusterClientFactory)clientFactory.reset(config,"Newegg@1234");
+        clientFactory =  clientFactory.resetFactory(config,"");
         RedisBaseClient client = clientFactory.provideClient("0");
         System.out.println(client.contains("02289190229|USA|1003"));
         clientFactory.releaseClient(client);

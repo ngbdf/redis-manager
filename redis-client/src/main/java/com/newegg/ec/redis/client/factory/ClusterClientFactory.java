@@ -26,6 +26,10 @@ public class ClusterClientFactory extends AbstractLettuceRedisClientFactory {
 	private GenericObjectPool<StatefulRedisClusterConnection<String, byte[]>> bytePool;
 
 
+	/**
+	 * 自定义Config项构建Factory
+	 * @param config
+	 */
 	public ClusterClientFactory(RedisFactoryConfig config) {
 		super(config);
 
@@ -43,6 +47,28 @@ public class ClusterClientFactory extends AbstractLettuceRedisClientFactory {
 				return clusterClient.connect(new StringByteRedisCodec());
 			}
 		},bytePoolConfig);
+	}
+
+	public ClusterClientFactory(String nodeList,String password) {
+
+		super(DEFAULT_CONNECTION,DEFAULT_CONNECTION,DEFAULT_CONNECTION,DEFAULT_CONNECTION);
+
+		RedisFactoryConfig config = buildConfig(nodeList, password);
+		io.lettuce.core.cluster.RedisClusterClient clusterClient = createClient(config);
+		this.stringPool = ConnectionPoolSupport.createGenericObjectPool(new Supplier<StatefulRedisClusterConnection<String, String>>() {
+			@Override
+			public StatefulRedisClusterConnection<String, String> get() {
+				return clusterClient.connect();
+			}
+		},stringPoolConfig);
+
+		this.bytePool = ConnectionPoolSupport.createGenericObjectPool(new Supplier<StatefulRedisClusterConnection<String, byte[]>>() {
+			@Override
+			public StatefulRedisClusterConnection<String, byte[]> get() {
+				return clusterClient.connect(new StringByteRedisCodec());
+			}
+		},bytePoolConfig);
+
 	}
 
 	protected io.lettuce.core.cluster.RedisClusterClient createClient(RedisFactoryConfig redisConfig) {
@@ -135,9 +161,10 @@ public class ClusterClientFactory extends AbstractLettuceRedisClientFactory {
 	}
 
 	@Override
-	public AbstractLettuceRedisClientFactory reset(RedisFactoryConfig config,String password) {
+	public ClusterClientFactory resetFactory(RedisFactoryConfig config,String password) {
            return new ClusterClientFactory(config.resetFactoryConfig(config, password));
 	}
+
 
 	@Override
 	protected int getMaxIdleConnection(int maxConnection) {
