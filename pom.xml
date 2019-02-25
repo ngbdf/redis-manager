@@ -11,10 +11,7 @@
 
     <modules>
         <module>redis-client</module>
-        <module>redismanager-backend</module>
-        <module>redismanager-rest</module>
-        <module>redismanager-core</module>
-        <module>redismanager-component</module>
+        <module>redismanager-platform</module>
     </modules>
 
     <properties>
