@@ -228,7 +228,6 @@ public class RedisUtils {
                 }
             }
         } else if("standalone".equals(getRedisMode(param))) {
-            //todo
             throw new RuntimeException("redis cannot support this command");
         }
         return nodeId;

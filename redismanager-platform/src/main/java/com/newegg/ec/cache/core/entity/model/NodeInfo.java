@@ -9,6 +9,7 @@ import com.newegg.ec.cache.core.entity.annotation.mysql.MysqlTable;
  */
 @MysqlTable(name = "", autoCreate = false)
 public class NodeInfo {
+
     @MysqlField(isPrimaryKey = true, field = "id", type = "int")
     private int id;
     @MysqlField(field = "connected_clients", type = "bigint")

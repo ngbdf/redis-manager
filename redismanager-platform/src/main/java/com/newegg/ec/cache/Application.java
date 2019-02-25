@@ -25,4 +25,5 @@ public class Application {
     public InitConfig initConfig() {
         return new InitConfig();
     }
+
 }

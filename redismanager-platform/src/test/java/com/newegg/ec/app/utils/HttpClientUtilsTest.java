@@ -1,7 +1,7 @@
 package com.newegg.ec.app.utils;
 
-import com.newegg.ec.cache.core.utils.httpclient.HttpClientUtil;
-import com.newegg.ec.cache.core.utils.httpclient.RequestHandler;
+import com.newegg.ec.cache.util.httpclient.HttpClientUtil;
+import com.newegg.ec.cache.util.httpclient.RequestHandler;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;

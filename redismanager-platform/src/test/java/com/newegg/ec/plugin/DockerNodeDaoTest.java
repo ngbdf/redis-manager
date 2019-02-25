@@ -1,9 +1,9 @@
 package com.newegg.ec.plugin;
 
 import com.newegg.ec.cache.Application;
-import com.newegg.ec.cache.core.dao.plugin.IDockerNodeDao;
 import com.newegg.ec.cache.core.entity.model.plugin.DockerNode;
 import com.newegg.ec.cache.core.entity.model.plugin.Node;
+import com.newegg.ec.cache.dao.plugin.IDockerNodeDao;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;

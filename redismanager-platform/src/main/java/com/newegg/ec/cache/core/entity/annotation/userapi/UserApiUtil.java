@@ -1,7 +1,7 @@
 package com.newegg.ec.cache.core.entity.annotation.userapi;
 
 import com.google.common.collect.Lists;
-import com.newegg.ec.cache.core.utils.ClassUtil;
+import com.newegg.ec.cache.util.ClassUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.stereotype.Controller;

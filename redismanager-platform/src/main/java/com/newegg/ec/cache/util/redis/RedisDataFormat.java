@@ -39,6 +39,26 @@ public class RedisDataFormat {
         return resMap;
     }
 
+    public static List<Map<String, String>> dbInfo(String info) {
+        List<Map<String, String>> resList = new ArrayList<>();
+        if (null != info && !info.isEmpty()) {
+            Map<String, String> mapInfo = getMapInfo(info);
+            for (Map.Entry<String, String> db : mapInfo.entrySet()) {
+                String key = db.getKey();
+                if (key.contains("db")) {
+                    key = key.substring(2);
+                    String value = db.getValue();
+                    Map<String, String> resMap = changeStrToMap(value);
+                    if (null != resMap && !resMap.isEmpty()) {
+                        resMap.put("db", key);
+                        resList.add(resMap);
+                    }
+                }
+            }
+        }
+        return resList;
+    }
+
     public static Map<String, String> changeStrToMap(String info) {
         Map<String, String> resMap = new HashMap<>();
         if (!StringUtils.isBlank(info)) {

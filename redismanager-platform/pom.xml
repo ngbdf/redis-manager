@@ -82,11 +82,11 @@
             <version>24.0-jre</version>
         </dependency>
 
-        <dependency>
+  <!--      <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
             <version>3.0.1</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>io.lettuce</groupId>
