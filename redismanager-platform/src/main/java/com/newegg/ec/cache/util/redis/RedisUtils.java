@@ -21,6 +21,11 @@ public class RedisUtils {
         return RedisDataFormat.getMapInfo(client.connect().sync().info());
     }
 
+    /**
+     * 获取redis 集群所有节点
+     * @param param
+     * @return
+     */
     public static List<Map<String, String>> getAllNodes(RedisConnectParam param) {
 
         List<Map<String, String>> nodeList = new ArrayList<>();
@@ -30,13 +35,16 @@ public class RedisUtils {
         } else if("standalone".equals(getRedisMode(param))) {
             nodeList = getRedisStandAloneNodes(param);
         }else {
-             //todo
             throw  new RuntimeException("invalid redis mode type");
         }
         return nodeList;
     }
 
-
+    /**
+     * 获取standalone模式所有节点
+     * @param param
+     * @return
+     */
     public static List<Map<String, String>> getRedisStandAloneNodes(RedisConnectParam param) {
         List<Map<String, String>> resList = new ArrayList<>();
         String ip = param.getIp();
@@ -83,6 +91,11 @@ public class RedisUtils {
         return resList;
     }
 
+    /**
+     * redis db info信息（version < 3.0.0）
+     * @param param
+     * @return
+     */
     public static List<Map<String, String>> redisDBInfo(RedisConnectParam param) {
         List<Map<String, String>> resList = new ArrayList<>();
         Map<String, String> mapInfo = getInfo(param);
@@ -101,6 +114,11 @@ public class RedisUtils {
         return resList;
     }
 
+    /**
+     * 获取redis集群配置
+     * @param param
+     * @return
+     */
     public static Map<String, String> getRedisConfig(RedisConnectParam param) {
         client = RedisClient.create(buildRedisURI(param));
         return client.connect().sync().configGet("*");
@@ -120,6 +138,11 @@ public class RedisUtils {
         return "";
     }
 
+    /**
+     * redis db info信息（version < 3.0.0）
+     * @param param
+     * @return
+     */
     public static Map<Integer, Integer> dbMap(RedisConnectParam param) {
         Map<Integer, Integer> resMap = new TreeMap<>(new Comparator<Integer>() {
             @Override
@@ -146,6 +169,11 @@ public class RedisUtils {
         return resMap;
     }
 
+    /**
+     * 获取redis db index （version < 3.0.0）
+     * @param db
+     * @return
+     */
     public static int getDbIndex(String db) {
         int index = 0;
         if (db.contains("db")) {
@@ -157,6 +185,11 @@ public class RedisUtils {
         return index;
     }
 
+    /**
+     * redis dbsize command
+     * @param param
+     * @return
+     */
     public static int dbSize(RedisConnectParam param) {
         Map<Integer, Integer> alldb = dbMap(param);
         int size = 0;
@@ -169,6 +202,11 @@ public class RedisUtils {
         return size;
     }
 
+    /**
+     * redis clusterinfo command (version > 3.0.0)
+     * @param param
+     * @return
+     */
     public static Map<String, String> getClusterInfo(RedisConnectParam param) {
 
         Map<String, String> result = new HashMap<>();
@@ -183,6 +221,44 @@ public class RedisUtils {
         }
         return result;
     }
+
+    /**
+     * 获取redis node id名称
+     * @param param
+     * @return
+     */
+    public static String getNodeId(RedisConnectParam param) {
+
+        String nodeId = "";
+        if ("cluster".equals(getRedisMode(param))) {
+            client = RedisClient.create(buildRedisURI(param));
+            String info = client.connect().sync().clusterNodes();
+            String[] lines = info.split("\n");
+            for (String line : lines) {
+                if (line.contains("myself")) {
+                    String[] tmps = line.split(" ");
+                    nodeId = tmps[0];
+                    break;
+                }
+            }
+        } else if("standalone".equals(getRedisMode(param))) {
+            throw new RuntimeException("redis cannot support this command");
+        }
+        return nodeId;
+    }
+
+    /**
+     * redis slowlogs command
+     * @param param
+     * @param size
+     * @return
+     */
+    public static List<Object> getSlowLog(RedisConnectParam param, int size) {
+        client = RedisClient.create(buildRedisURI(param));
+        List<Object> slowLog = client.connect().sync().slowlogGet(size);
+        return slowLog;
+    }
+
 
     private static List<Map<String, String>> getRedisClusterNodes(RedisConnectParam param,boolean filterMaster) {
 
@@ -212,33 +288,6 @@ public class RedisUtils {
         }
         return nodeList;
     }
-
-    public static String getNodeId(RedisConnectParam param) {
-
-        String nodeId = "";
-        if ("cluster".equals(getRedisMode(param))) {
-            client = RedisClient.create(buildRedisURI(param));
-            String info = client.connect().sync().clusterNodes();
-            String[] lines = info.split("\n");
-            for (String line : lines) {
-                if (line.contains("myself")) {
-                    String[] tmps = line.split(" ");
-                    nodeId = tmps[0];
-                    break;
-                }
-            }
-        } else if("standalone".equals(getRedisMode(param))) {
-            throw new RuntimeException("redis cannot support this command");
-        }
-        return nodeId;
-    }
-
-    public static List<Object> getSlowLog(RedisConnectParam param, int size) {
-        client = RedisClient.create(buildRedisURI(param));
-        List<Object> slowLog = client.connect().sync().slowlogGet(size);
-        return slowLog;
-    }
-
 
     private static RedisURI buildRedisURI(RedisConnectParam param) {
         if(StringUtils.isNotBlank(param.getRedisPassword())){
