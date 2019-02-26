@@ -1,5 +1,6 @@
 package com.newegg.ec.cache.util.redis;
 
+import com.newegg.ec.cache.core.logger.RMException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,7 +34,7 @@ public class RedisDataFormat {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("getMapInfo error",e);
+            throw new RMException("getMapInfo error",e);
         }
         resMap.put("detail", strInfo);
         return resMap;

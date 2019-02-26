@@ -1,0 +1,128 @@
+ .tab-position{
+    margin-bottom:5px
+}
+
+.sort-span{
+    margin-top:5px;
+    float:right;
+    color:#85929E;
+    cursor:pointer;
+}
+
+.display-hide{
+    display:none;
+}
+
+.main-wrapper {
+    padding: 10px;
+}
+
+.item-container {
+    margin-bottom: 10px;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* main page */
+
+.container-color, .data-container {
+    background-color: #FFFFFF;
+}
+
+.header-swapper {
+    margin: 10px 0px;
+    padding: 2px 10px;
+}
+
+.main-swapper {
+    padding: 0 10px 10px;
+    background-color: #FFFFFF;
+}
+
+.tab-content {
+    margin-top: 15px;
+}
+
+.pagination-support {
+    margin: 10px 0px;
+}
+
+.pagination-support li {
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.tip {
+    margin-left: 10px;
+    font-size: 12px;
+    color: #aaaaaa;
+}
+
+.row-button {
+    margin: 10px 0px;
+}
+
+.node-body {
+    padding-top: 0;
+}
+
+.node-manager-tab {
+    margin: 0;
+}
+
+#create-cluster-form > tbody > tr > td{
+    border: 0px;
+}
+#create-cluster-form > tbody > tr.error-input-tip-tr > td{
+    height: 25px;
+    padding: 0px;
+    overflow-y: hidden;
+}
+#create-cluster-form > tbody > tr.input-tip-tr > td{
+    border: 1px solid #f1f1f1;
+}
+#create-cluster-form > tbody > tr > td.field-name{
+    width: 100px;
+    text-align: left;
+    padding-top: 15px;
+}
+
+.field-value{
+    width: auto;
+    max-width: 130px;
+}
+
+.no-border-input{
+
+}
+.plugin-install-title{
+    margin-left: 15px;
+    font-size: 30px;
+}
+.create-cluster-button{
+    margin-left:-8px;
+}
+ .sparrow_input_tip_error, .sparrow_input_tip_info, .sparrow_input_tip_ok{
+    padding-left: 28px;
+    line-height: 15px;
+    background-repeat: no-repeat;
+    background-position: 0px;
+}
+
+.manager-create-iframe{
+    margin-top:-20px;
+}
+
+.dataTables_info,.dataTables_length,.dataTables_paginate,.dataTables_filter{
+   display:none;
+}
+.ip-list-tip{
+    border: 0px;
+    color:#9E9E9E;
+    margin-left: -10px;
+    background-color: #ffffff;
+}

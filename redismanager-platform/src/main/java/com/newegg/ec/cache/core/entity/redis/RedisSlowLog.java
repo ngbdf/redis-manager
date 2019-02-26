@@ -4,11 +4,39 @@ package com.newegg.ec.cache.core.entity.redis;
  * Created by lf52 on 2018/4/27.
  */
 public class RedisSlowLog {
+
+    public RedisSlowLog(){
+
+    }
+
+    /**
+     * ipport
+     */
     private String host;
+
+    /**
+     * now system time
+     */
     private String showDate;
+
+    /**
+     * command run time
+     */
     private long runTime;
+
+    /**
+     * command type
+     */
     private String type;
+
+    /**
+     * show log command
+     */
     private String command;
+
+    /**
+     * show log time
+     */
     private long addTime;
 
     public String getHost() {
@@ -58,4 +86,17 @@ public class RedisSlowLog {
     public void setAddTime(long addTime) {
         this.addTime = addTime;
     }
+
+    @Override
+    public String toString() {
+        return "RedisSlowLog{" +
+                "host='" + host + '\'' +
+                ", showDate='" + showDate + '\'' +
+                ", runTime=" + runTime +
+                ", type='" + type + '\'' +
+                ", command='" + command + '\'' +
+                ", addTime=" + addTime +
+                '}';
+    }
+
 }

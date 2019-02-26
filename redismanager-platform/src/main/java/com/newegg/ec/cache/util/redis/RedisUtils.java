@@ -1,6 +1,8 @@
 package com.newegg.ec.cache.util.redis;
 
+import com.newegg.ec.cache.core.entity.model.Slowlog;
 import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.logger.RMException;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +37,7 @@ public class RedisUtils {
         } else if("standalone".equals(getRedisMode(param))) {
             nodeList = getRedisStandAloneNodes(param);
         }else {
-            throw  new RuntimeException("invalid redis mode type");
+            throw  new RMException("invalid redis mode type");
         }
         return nodeList;
     }
@@ -242,7 +244,7 @@ public class RedisUtils {
                 }
             }
         } else if("standalone".equals(getRedisMode(param))) {
-            throw new RuntimeException("redis cannot support this command");
+            throw new RMException("redis cannot support this command");
         }
         return nodeId;
     }
@@ -253,10 +255,10 @@ public class RedisUtils {
      * @param size
      * @return
      */
-    public static List<Object> getSlowLog(RedisConnectParam param, int size) {
+    public static List<Slowlog> getSlowLog(RedisConnectParam param, int size) {
         client = RedisClient.create(buildRedisURI(param));
         List<Object> slowLog = client.connect().sync().slowlogGet(size);
-        return slowLog;
+        return Slowlog.from(slowLog);
     }
 
 

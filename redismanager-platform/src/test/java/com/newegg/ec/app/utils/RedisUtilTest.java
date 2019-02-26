@@ -1,9 +1,11 @@
 package com.newegg.ec.app.utils;
 
+import com.newegg.ec.cache.core.entity.model.Slowlog;
 import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
 import com.newegg.ec.cache.util.redis.RedisUtils;
-import net.sf.json.JSONArray;
 import org.junit.Test;
+
+import java.util.List;
 
 /**
  * Created by lf52 on 2019/2/23.
@@ -37,8 +39,10 @@ public class RedisUtilTest {
         //System.out.println(RedisUtils.getClusterInfo(param));
         //System.out.println(RedisUtils.getNodes(param,false));
         //System.out.println(RedisUtils.getNodeId(param));
-        JSONArray array = JSONArray.fromObject(RedisUtils.getSlowLog(param, 1));
-        System.out.println((int)JSONArray.fromObject(array.get(0)).get(1));
+        List<Slowlog> list = RedisUtils.getSlowLog(param, 1);
+        list.forEach(o -> {
+            System.out.println(o);
+        });
     }
 
 }
