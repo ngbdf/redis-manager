@@ -10,6 +10,7 @@ import com.newegg.ec.cache.core.entity.redis.RedisSlowLog;
 import com.newegg.ec.cache.core.entity.redis.SlowLogParam;
 import com.newegg.ec.cache.dao.IClusterDao;
 import com.newegg.ec.cache.dao.INodeInfoDao;
+import com.newegg.ec.cache.module.extend.MonitorExtensionService;
 import com.newegg.ec.cache.util.DateUtil;
 import com.newegg.ec.cache.util.NetUtil;
 import com.newegg.ec.cache.util.redis.RedisUtils;
@@ -26,7 +27,7 @@ import java.util.Map;
  * Created by gl49 on 2018/4/21.
  */
 @Component
-public class MonitorLogic {
+public class MonitorService extends MonitorExtensionService implements IMonitorService{
 
     @Autowired
     private IClusterDao clusterDao;
@@ -34,32 +35,39 @@ public class MonitorLogic {
     @Resource
     private INodeInfoDao nodeDao;
 
+    @Override
     public List<NodeInfo> getGroupNodeInfo(int clusterId, int startTime, int endTime, String host, String type, String date) {
         return nodeDao.getGroupNodeInfo(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, type, date);
     }
 
+    @Override
     public List<Map> getMaxField(int clusterId, int startTime, int endTime, String key, int limit) {
         return nodeDao.getMaxField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
     }
 
+    @Override
     public List<Map> getMinField(int clusterId, int startTime, int endTime, String key, int limit) {
         return nodeDao.getMinField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key, limit);
     }
 
+    @Override
     public String getAvgField(int clusterId, int startTime, int endTime, String host, String key) {
         return nodeDao.getAvgField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host, key);
     }
 
+    @Override
     public String getAllField(int clusterId, int startTime, int endTime, String key) {
         return nodeDao.getAllField(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, key);
     }
 
+    @Override
     public NodeInfo getLastNodeInfo(int clusterId, int startTime, int endTime, String host) {
         return nodeDao.getLastNodeInfo(Constants.NODE_INFO_TABLE_FORMAT + clusterId, startTime, endTime, host);
     }
 
+    @Override
     public List<RedisSlowLog> getSlowLogs(SlowLogParam slowLogParam) {
-        List<RedisSlowLog> cmdList = new ArrayList<>();
+        List<RedisSlowLog> cmdList = new ArrayList<>(slowLogParam.getLogLimit());
         List<Host> ipList = slowLogParam.getHostList();
         int logLimit = 0;
         if (ipList.size() > 800) {
@@ -95,6 +103,7 @@ public class MonitorLogic {
         return cmdList;
     }
 
+    @Override
     public int getDbSize(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
         Cluster cluster = clusterDao.getCluster(clusterId);
@@ -102,4 +111,5 @@ public class MonitorLogic {
         int size = RedisUtils.dbSize(param);
         return size;
     }
+
 }

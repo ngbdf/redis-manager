@@ -5,7 +5,7 @@ import com.newegg.ec.cache.core.entity.model.NodeInfo;
 import com.newegg.ec.cache.core.entity.model.Response;
 import com.newegg.ec.cache.core.entity.redis.RedisSlowLog;
 import com.newegg.ec.cache.core.entity.redis.SlowLogParam;
-import com.newegg.ec.cache.module.clustermonitor.MonitorLogic;
+import com.newegg.ec.cache.module.clustermonitor.MonitorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,7 +23,7 @@ import java.util.Map;
 public class MonitorController {
 
     @Autowired
-    private MonitorLogic logic;
+    private MonitorService monitorService;
 
     @RequestMapping(value = "/manager")
     public String manager(Model model) {
@@ -43,49 +43,49 @@ public class MonitorController {
     @RequestMapping(value = "/getGroupNodeInfo", method = RequestMethod.GET)
     @ResponseBody
     public Response getGroupNodeInfo(@RequestParam int clusterId, @RequestParam int startTime, @RequestParam int endTime, @RequestParam String host, @RequestParam String type, @RequestParam String date) {
-        List<NodeInfo> list = logic.getGroupNodeInfo(clusterId, startTime, endTime, host, type, date);
+        List<NodeInfo> list = monitorService.getGroupNodeInfo(clusterId, startTime, endTime, host, type, date);
         return Response.Result(Response.DEFAULT, list);
     }
 
     @RequestMapping(value = "/getMaxField", method = RequestMethod.GET)
     @ResponseBody
     public Response getMaxField(@RequestParam int clusterId, @RequestParam int startTime, @RequestParam int endTime, @RequestParam String key, @RequestParam int limit) {
-        List<Map> list = logic.getMaxField(clusterId, startTime, endTime, key, limit);
+        List<Map> list = monitorService.getMaxField(clusterId, startTime, endTime, key, limit);
         return Response.Result(0, list);
     }
 
     @RequestMapping(value = "/getMinField", method = RequestMethod.GET)
     @ResponseBody
     public Response getMinField(@RequestParam int clusterId, @RequestParam int startTime, @RequestParam int endTime, @RequestParam String key, @RequestParam int limit) {
-        List<Map> list = logic.getMinField(clusterId, startTime, endTime, key, limit);
+        List<Map> list = monitorService.getMinField(clusterId, startTime, endTime, key, limit);
         return Response.Result(0, list);
     }
 
     @RequestMapping(value = "/getAvgField", method = RequestMethod.GET)
     @ResponseBody
     public Response getAvgField(@RequestParam int clusterId, @RequestParam int startTime, @RequestParam int endTime, @RequestParam String host, @RequestParam String key) {
-        String res = logic.getAvgField(clusterId, startTime, endTime, host, key);
+        String res = monitorService.getAvgField(clusterId, startTime, endTime, host, key);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/getAllField", method = RequestMethod.GET)
     @ResponseBody
     public Response getAllField(@RequestParam int clusterId, @RequestParam int startTime, @RequestParam int endTime, @RequestParam String key) {
-        String res = logic.getAllField(clusterId, startTime, endTime, key);
+        String res = monitorService.getAllField(clusterId, startTime, endTime, key);
         return Response.Result(0, res);
     }
 
     @RequestMapping(value = "/getDbSize", method = RequestMethod.GET)
     @ResponseBody
     public Response getDbSize(@RequestParam int clusterId, @RequestParam String host) {
-        int dbsize = logic.getDbSize(clusterId, host);
+        int dbsize = monitorService.getDbSize(clusterId, host);
         return Response.Result(0, dbsize);
     }
 
     @RequestMapping(value = "/getLastNodeInfo", method = RequestMethod.GET)
     @ResponseBody
     public Response getLastNodeInfo(@RequestParam int clusterId, @RequestParam int startTime, @RequestParam int endTime, @RequestParam String host) {
-        NodeInfo list = logic.getLastNodeInfo(clusterId, startTime, endTime, host);
+        NodeInfo list = monitorService.getLastNodeInfo(clusterId, startTime, endTime, host);
         return Response.Result(0, list);
     }
 
@@ -93,7 +93,7 @@ public class MonitorController {
     @RequestMapping(value = "/slowLogs", method = RequestMethod.POST)
     @ResponseBody
     public Response slowLogs(@RequestBody SlowLogParam logParam) {
-        List<RedisSlowLog> redisSlowLogs = logic.getSlowLogs(logParam);
+        List<RedisSlowLog> redisSlowLogs = monitorService.getSlowLogs(logParam);
         return Response.Result(0, redisSlowLogs);
     }
 
