@@ -2,7 +2,6 @@ package com.newegg.ec.cache.core.security;
 
 import com.newegg.ec.cache.core.entity.constants.Constants;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -15,7 +14,7 @@ import javax.servlet.http.HttpSession;
 /**
  * Created by lzz on 2018/5/2.
  */
-@Configuration
+//
 public class WebSecurityConfig extends WebMvcConfigurerAdapter {
     @Bean
     public SecurityInterceptor getSecurityInterceptor() {

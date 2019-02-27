@@ -4,19 +4,19 @@ import com.newegg.ec.cache.core.entity.constants.Constants;
 import com.newegg.ec.cache.core.entity.model.Cluster;
 import com.newegg.ec.cache.core.entity.model.Host;
 import com.newegg.ec.cache.core.entity.model.NodeInfo;
-import com.newegg.ec.cache.core.entity.model.Slowlog;
-import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.entity.redis.ConnectionParam;
 import com.newegg.ec.cache.core.entity.redis.RedisSlowLog;
 import com.newegg.ec.cache.core.entity.redis.SlowLogParam;
 import com.newegg.ec.cache.dao.IClusterDao;
 import com.newegg.ec.cache.dao.INodeInfoDao;
 import com.newegg.ec.cache.module.extend.ExtensionService;
 import com.newegg.ec.cache.util.DateUtil;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.NetUtil;
-import com.newegg.ec.cache.util.redis.RedisUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import redis.clients.util.Slowlog;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public class MonitorService extends ExtensionService implements IMonitorService{
         Cluster cluster = clusterDao.getCluster(slowLogParam.getClusterId());
         for (Host host1 : ipList) {
             try {
-                List<Slowlog> slowList =  RedisUtils.getSlowLog(new RedisConnectParam(host1.getIp(), host1.getPort(), cluster.getRedisPassword()), logLimit);
+                List<Slowlog> slowList =  JedisUtil.getSlowLog(new ConnectionParam(host1.getIp(), host1.getPort(), cluster.getRedisPassword()), logLimit);
                 for (Slowlog log : slowList) {
                     String slowDate = DateUtil.getFormatDate(log.getTimeStamp() * 1000);
                     long logTime = log.getExecutionTime();
@@ -107,8 +107,8 @@ public class MonitorService extends ExtensionService implements IMonitorService{
     public int getDbSize(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
         Cluster cluster = clusterDao.getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
-        int size = RedisUtils.dbSize(param);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        int size = JedisUtil.dbSize(param);
         return size;
     }
 

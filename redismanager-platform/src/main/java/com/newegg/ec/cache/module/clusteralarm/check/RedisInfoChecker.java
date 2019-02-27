@@ -1,8 +1,11 @@
 package com.newegg.ec.cache.module.clusteralarm.check;
 
 import com.newegg.ec.cache.core.entity.constants.Constants;
-import com.newegg.ec.cache.core.entity.model.*;
-import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.entity.model.Cluster;
+import com.newegg.ec.cache.core.entity.model.ClusterCheckLog;
+import com.newegg.ec.cache.core.entity.model.ClusterCheckRule;
+import com.newegg.ec.cache.core.entity.model.NodeInfo;
+import com.newegg.ec.cache.core.entity.redis.ConnectionParam;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import com.newegg.ec.cache.dao.IClusterCheckLogDao;
 import com.newegg.ec.cache.dao.IClusterCheckRuleDao;
@@ -11,12 +14,13 @@ import com.newegg.ec.cache.dao.INodeInfoDao;
 import com.newegg.ec.cache.module.clusteralarm.notify.impl.MailNotify;
 import com.newegg.ec.cache.util.CommonUtil;
 import com.newegg.ec.cache.util.DateUtil;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.MathExpressionCalculateUtil;
-import com.newegg.ec.cache.util.redis.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import redis.clients.util.Slowlog;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -138,7 +142,7 @@ public class RedisInfoChecker {
             //获取每个cluster所有的node
             List<Map<String, String>> nodeList = null;
             try {
-                nodeList = RedisUtils.getAllNodes(new RedisConnectParam(ip, port, password));
+                nodeList = JedisUtil.getNodeList(new ConnectionParam(ip, port, password));
             } catch (Exception e) {
                 logger.error("Node " + host + " can not get nodelist", e);
             }
@@ -193,7 +197,7 @@ public class RedisInfoChecker {
             String ip = host.split(":")[0];
             int port = Integer.parseInt(host.split(":")[1]);
             try {
-                List<Slowlog> list = RedisUtils.getSlowLog(new RedisConnectParam(ip, port, cluster.getRedisPassword()), 2000);
+                List<Slowlog> list = JedisUtil.getSlowLog(new ConnectionParam(ip, port, cluster.getRedisPassword()), 2000);
                 for (Slowlog log : list) {
                     if (log.getTimeStamp() > time) {
                         num++;

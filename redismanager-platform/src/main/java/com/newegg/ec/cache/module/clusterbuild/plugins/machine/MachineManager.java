@@ -14,9 +14,9 @@ import com.newegg.ec.cache.module.clusterbuild.plugins.INodeOperate;
 import com.newegg.ec.cache.module.clusterbuild.plugins.basemodel.PluginParent;
 import com.newegg.ec.cache.module.clusterbuild.plugins.basemodel.StartType;
 import com.newegg.ec.cache.util.DateUtil;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.NetUtil;
 import com.newegg.ec.cache.util.RemoteShellUtil;
-import com.newegg.ec.cache.util.redis.RedisUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +138,7 @@ public class MachineManager extends PluginParent implements INodeOperate {
         String username = reqParam.getString("username");
         String password = reqParam.getString("password");
         String installPath = reqParam.getString("installPath");
-        List<RedisNode> nodelist = RedisUtils.getInstallNodeList(ipListStr);
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         for (RedisNode redisNode : nodelist) {
             MachineNode node = new MachineNode();
             node.setClusterId(clusterId);
@@ -194,7 +194,7 @@ public class MachineManager extends PluginParent implements INodeOperate {
 
     @Override
     protected void auth(String ipListStr, String redisPassword) {
-        List<RedisNode> nodelist = RedisUtils.getInstallNodeList(ipListStr);
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         nodelist.forEach(node -> {
             clusterService.addRedisPassd(node.getIp(), node.getPort(),redisPassword);
         });

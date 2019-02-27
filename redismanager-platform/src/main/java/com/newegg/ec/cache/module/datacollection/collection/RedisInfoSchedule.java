@@ -5,15 +5,12 @@ import com.newegg.ec.cache.core.entity.constants.Constants;
 import com.newegg.ec.cache.core.entity.model.Cluster;
 import com.newegg.ec.cache.core.entity.model.Host;
 import com.newegg.ec.cache.core.entity.model.NodeInfo;
-import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.entity.redis.ConnectionParam;
 import com.newegg.ec.cache.dao.IClusterDao;
 import com.newegg.ec.cache.dao.INodeInfoDao;
 import com.newegg.ec.cache.util.DateUtil;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.NetUtil;
-import com.newegg.ec.cache.util.redis.RedisDataFormat;
-import com.newegg.ec.cache.util.redis.RedisUtils;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +18,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
@@ -83,25 +82,24 @@ public class RedisInfoSchedule {
     public void infoCollection(int clusterId, String ip, int port) {
 
         Cluster cluster = clusterDao.getCluster(clusterId);
+
         // 获取集群的所有节点
-        List<Map<String, String>> nodeList = RedisUtils.getAllNodes(new RedisConnectParam(ip, port, cluster.getRedisPassword()));
+        List<Map<String, String>> nodeList = JedisUtil.nodeList(new ConnectionParam(ip, port, cluster.getRedisPassword()));
         try {
             long pingTime = NetUtil.pingTime(ip.trim());
             for (Map<String, String> node : nodeList) {
-                RedisClient client = null;
+                Jedis jedis = null;
                 try {
                     String nodeIp = node.get("ip");
-                    int nodePort = RedisDataFormat.getPort(node.get("port"));
+                    int nodePort = JedisUtil.getPort(node.get("port"));
                     StopWatch stopWatch = new StopWatch();
                     stopWatch.start();
-
-                    if(StringUtils.isNotBlank(cluster.getRedisPassword())){
-                        String password = cluster.getRedisPassword();
-                        client = RedisClient.create(RedisURI.Builder.redis(nodeIp, nodePort).withPassword(password).build());
-                    }else {
-                        client = RedisClient.create(RedisURI.Builder.redis(nodeIp, nodePort).build());
+                    jedis = new Jedis(nodeIp, nodePort, JEDIS_TIMEOUT);
+                    String password = cluster.getRedisPassword();
+                    if (StringUtils.isNotBlank(password)) {
+                        jedis.auth(password);
                     }
-                    String strInfo = client.connect().sync().info();
+                    String strInfo = jedis.info();
                     stopWatch.stop();
                     long responTime = stopWatch.getTotalTimeMillis();
                     NodeInfo info = getNodeMonitorInfo(strInfo);
@@ -113,8 +111,12 @@ public class RedisInfoSchedule {
 
                     infoDao.addNodeInfo(Constants.NODE_INFO_TABLE_FORMAT + clusterId, resInfo);
                 } catch (Exception e) {
-                    logger.error(node + " Get Momitor Data Error ,May RedisCluster IsNot Ready，Please Wait .");
+                    if(e instanceof JedisConnectionException)
+                        logger.error(node + " Get Momitor Data Error ,May RedisCluster IsNot Ready，Please Wait .");
+                    else
+                        logger.error(node + " Error.", e);
                 } finally {
+                    JedisUtil.closeJedis(jedis);
                 }
             }
         } catch (Exception e) {
@@ -197,7 +199,7 @@ public class RedisInfoSchedule {
      * @param info
      */
     private void processDb(String strInfo, NodeInfo info) {
-        List<Map<String, String>> resDb = RedisDataFormat.dbInfo(strInfo);
+        List<Map<String, String>> resDb = JedisUtil.dbInfo(strInfo);
         long keys = 0;
         long avg_ttl = 0;
         long expires = 0;

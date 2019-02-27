@@ -82,17 +82,17 @@
             <version>24.0-jre</version>
         </dependency>
 
-  <!--      <dependency>
+        <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>3.0.1</version>
-        </dependency>-->
+            <version>2.9.1</version>
+        </dependency>
 
-        <dependency>
+     <!--   <dependency>
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
             <version>5.1.4.RELEASE</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.webjars</groupId>

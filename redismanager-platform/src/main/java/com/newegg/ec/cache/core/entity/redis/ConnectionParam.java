@@ -1,22 +1,22 @@
 package com.newegg.ec.cache.core.entity.redis;
 
 /**
- * Created by lf52 on 2019/2/23.
+ * @author: Jay.H.Zou
+ * @date: 2018/5/29
  */
-public class RedisConnectParam {
-
+public class ConnectionParam {
     private String ip;
     private Integer port;
     private String redisPassword;
 
-    public RedisConnectParam() {}
+    public ConnectionParam() {}
 
-    public RedisConnectParam(String ip, Integer port) {
+    public ConnectionParam(String ip, Integer port) {
         this.ip = ip;
         this.port = port;
     }
 
-    public RedisConnectParam(String ip, Integer port, String redisPassword) {
+    public ConnectionParam(String ip, Integer port, String redisPassword) {
         this.ip = ip;
         this.port = port;
         this.redisPassword = redisPassword;

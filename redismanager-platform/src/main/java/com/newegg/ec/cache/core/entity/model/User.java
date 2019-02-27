@@ -1,6 +1,5 @@
 package com.newegg.ec.cache.core.entity.model;
 
-
 import com.newegg.ec.cache.core.entity.annotation.mysql.MysqlField;
 import com.newegg.ec.cache.core.entity.annotation.mysql.MysqlTable;
 

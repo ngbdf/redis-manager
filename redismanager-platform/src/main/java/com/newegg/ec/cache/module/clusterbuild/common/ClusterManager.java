@@ -3,29 +3,28 @@ package com.newegg.ec.cache.module.clusterbuild.common;
 import com.newegg.ec.cache.core.entity.model.Cluster;
 import com.newegg.ec.cache.core.entity.model.ClusterImportResult;
 import com.newegg.ec.cache.core.entity.model.Host;
-import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.entity.redis.ConnectionParam;
 import com.newegg.ec.cache.core.entity.redis.RedisNode;
 import com.newegg.ec.cache.core.entity.redis.RedisQueryParam;
 import com.newegg.ec.cache.core.entity.redis.RedisValue;
-import com.newegg.ec.cache.core.logger.RMException;
+import com.newegg.ec.cache.module.clusterbuild.build.ClusterService;
 import com.newegg.ec.cache.module.clusterbuild.common.redis.IRedis;
 import com.newegg.ec.cache.module.clusterbuild.common.redis.RedisClusterClient;
 import com.newegg.ec.cache.module.clusterbuild.common.redis.RedisExtendClient;
-import com.newegg.ec.cache.module.clusterbuild.common.redis.RedisSingleClient;
+import com.newegg.ec.cache.module.clusterbuild.common.redis.RedisStandAloneClient;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.NetUtil;
 import com.newegg.ec.cache.util.SlotBalanceUtil;
-import com.newegg.ec.cache.util.redis.RedisDataFormat;
-import com.newegg.ec.cache.util.redis.RedisUtils;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisConnectionException;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.sync.RedisCommands;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 public class ClusterManager {
-
     public static final Log logger = LogFactory.getLog(ClusterManager.class);
 
     /**
@@ -46,31 +44,32 @@ public class ClusterManager {
      */
     public static Map<String, AtomicInteger> importMap = new HashMap<>();
 
+    @Resource
+    private ClusterService clusterService;
 
     public static String getImportKey(String ownerIp, int ownerPort, String targetIp, int targetPort, String formatKey) {
         return ownerIp + "-" + ownerPort + "-" + targetIp + "-" + targetPort + "-" + formatKey;
     }
 
-    public IRedis factory(Cluster cluster, String address) {
+    public IRedis factory(int clusterId, String address) {
         IRedis redis;
         Host host = NetUtil.getHostPassAddress(address);
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
-        String mode = RedisUtils.getRedisMode(param);
-        if ("cluster".equals(mode)) {
+        Cluster cluster = clusterService.getCluster(clusterId);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        int version = JedisUtil.getRedisVersion(param);
+        if (version > 2) {
             redis = new RedisClusterClient(param);
-        } else if("standalone".equals(mode)) {
-            redis = new RedisSingleClient(param);
-        }else {
-            throw  new RMException("invalid redis mode type");
+        } else {
+            redis = new RedisStandAloneClient(param);
         }
         return redis;
     }
 
-    public boolean importDataToCluster(Cluster cluster, String address, String targetAddress, String keyFormat) throws InterruptedException {
+    public boolean importDataToCluster(int clusterId, String address, String targetAddress, String keyFormat) throws InterruptedException {
         Host host = NetUtil.getHostPassAddress(targetAddress);
         String targetIp = host.getIp();
         int targetPort = host.getPort();
-        IRedis redis = factory(cluster, address);
+        IRedis redis = factory(clusterId, address);
         if (StringUtils.isBlank(keyFormat)) {
             keyFormat = "*";
         }
@@ -88,9 +87,9 @@ public class ClusterManager {
         return clusterImportResultList;
     }
 
-    public RedisValue query(RedisQueryParam redisQueryParam,Cluster cluster) {
+    public RedisValue query(RedisQueryParam redisQueryParam) {
         RedisValue redisValue = new RedisValue();
-        IRedis redis = factory(cluster, redisQueryParam.getAddress());
+        IRedis redis = factory(redisQueryParam.getClusterId(), redisQueryParam.getAddress());
         if (!redisQueryParam.getKey().equals("*")) {
             redisValue  = redis.getRedisValue(redisQueryParam.getDb(), redisQueryParam.getKey());
         }
@@ -102,80 +101,90 @@ public class ClusterManager {
         return redisValue;
     }
 
-    public Map<String, String> getClusterInfo(RedisConnectParam param) {
-        Map<String, String> res = RedisUtils.getClusterInfo(param);
+    public Map<String, String> getClusterInfo(ConnectionParam param) {
+        Map<String, String> res = JedisUtil.getClusterInfo(param);
         return res;
     }
 
-    public int getDbSize(RedisConnectParam param) {
-        return RedisUtils.dbSize(param);
+    public int getDbSize(ConnectionParam param) {
+        int allCount = 0;
+        if (JedisUtil.getRedisVersion(param) == 2) {
+            allCount = JedisUtil.dbSize(param);
+        } else {
+            Map<String, Map> masterNodes = JedisUtil.getMasterNodes(param);
+            for (Map.Entry<String, Map> nodeItem : masterNodes.entrySet()) {
+                Map node = nodeItem.getValue();
+                String itemIp = String.valueOf(node.get("ip"));
+                String itemPort = String.valueOf(node.get("port"));
+                param.setIp(itemIp);
+                param.setPort(JedisUtil.getPort(itemPort));
+                allCount += JedisUtil.dbSize(param);
+            }
+        }
+        return allCount;
     }
 
-    public Map<String, Map> getClusterNodes(RedisConnectParam param) {
-        RedisClient client = RedisClient.create(buildRedisURI(param));
-        return  RedisDataFormat.changeNodesInfoMap(client.connect().sync().clusterNodes(), false);
+    public Map<String, Map> getClusterNodes(ConnectionParam param) {
+        return JedisUtil.getClusterNodes(param);
     }
 
-    public Map<String, String> getMapInfo(RedisConnectParam param) {
-        Map<String, String> res = RedisUtils.getInfo(param);
+    public Map<String, String> getMapInfo(ConnectionParam param) {
+        Map<String, String> res = JedisUtil.getMapInfo(param);
         return res;
     }
 
-    public Map<String, String> getRedisConfig(RedisConnectParam param) {
-        Map<String, String> res = RedisUtils.getRedisConfig(param);
+    public Map<String, String> getRedisConfig(ConnectionParam param) {
+        Map<String, String> res = JedisUtil.getRedisConfig(param);
         return res;
     }
 
-    public List<Map<String, String>> nodeList(RedisConnectParam param) {
-        return RedisUtils.getAllNodes(param);
+    public List<Map<String, String>> nodeList(ConnectionParam param) {
+        return JedisUtil.nodeList(param);
     }
 
-    public List<Map<String, String>> getRedisDBList(RedisConnectParam param) {
-        List<Map<String, String>> res = RedisUtils.redisDBInfo(param);
+    public List<Map<String, String>> getRedisDBList(ConnectionParam param) {
+        List<Map<String, String>> res = JedisUtil.dbInfo(param);
         return res;
     }
 
-    public boolean beSlave(RedisConnectParam param, String masterId) {
+    public boolean beSlave(ConnectionParam param, String masterId) {
         boolean res = false;
-        RedisClient client = RedisClient.create(buildRedisURI(param));
+
+        Jedis jedis = JedisUtil.getJedisClient(param);
+
         try {
-            client.connect().sync().clusterReplicate(masterId);
+            jedis.clusterReplicate(masterId);
             res = true;
         } catch (Exception e) {
             logger.error("Be Slave error", e);
         } finally {
-            client.shutdown();
+
+            jedis.close();
         }
         return res;
     }
 
-    public boolean beMaster(RedisConnectParam param) {
+    public boolean beMaster(ConnectionParam param) {
         boolean res = false;
-        RedisClient client = RedisClient.create(buildRedisURI(param));
+        Jedis jedis = JedisUtil.getJedisClient(param);
         try {
-            /**
-             * 强制master failover
-             */
-            client.connect().sync().clusterFailover(true);
+            jedis.clusterFailover();
             res = true;
         } catch (Exception e) {
             logger.error("Be master error", e);
         } finally {
-            if (client != null) {
-                client.shutdown();
+            if (jedis != null) {
+                jedis.close();
             }
         }
         return res;
     }
 
-    public boolean forget(RedisConnectParam param, String nodeId) {
-
-        List<Map<String, String>> masterList = RedisUtils.getAllNodes(param);
+    public boolean forget(ConnectionParam param, String nodeId) {
+        List<Map<String, String>> masterList = JedisUtil.getNodeList(param);
         String ip = param.getIp();
         int port = param.getPort();
-
-        RedisClient myselef = RedisClient.create(buildRedisURI(param));
-
+        Jedis myselef = JedisUtil.getJedisClient(param);
         try {
             for (int i = 0; i < masterList.size(); i++) {
                 String nodeIp = masterList.get(i).get("ip").trim();
@@ -184,48 +193,48 @@ public class ClusterManager {
                         (nodeIp.equals(ip) && nodePort.equals(String.valueOf(port)))) {
                     continue;
                 }
-                RedisClient redis = null;
+                Jedis jedis = null;
                 try {
-                    redis = RedisClient.create(buildRedisURI(nodeIp,Integer.parseInt(nodePort)));
+                    jedis = new Jedis(nodeIp, Integer.parseInt(nodePort));
                     String password = param.getRedisPassword();
-                    RedisCommands<String, String> command = redis.connect().sync();
                     if (StringUtils.isNotBlank(password)) {
-                        command.auth(password);
+                        jedis.auth(password);
                     }
-                    command.clusterForget(nodeId);
+                    jedis.clusterForget(nodeId);
                 } catch (Exception e) {
                     logger.error("forget node error", e);
                 } finally {
-                    if (null != redis) {
-                        redis.shutdown();
+                    if (null != jedis) {
+                        jedis.close();
                     }
                 }
                 // forget 自己的信息
-                myselef.connect().sync().clusterReset(true);
+                myselef.clusterReset(JedisCluster.Reset.HARD);
             }
         } catch (Exception e) {
             logger.error("", e);
         } finally {
-            myselef.shutdown();
+            myselef.close();
         }
         return true;
     }
 
-    public boolean clusterMeet(RedisConnectParam slaveParam, String masterIp, int masterPort) {
+    public boolean clusterMeet(ConnectionParam slaveParam, String masterIp, int masterPort) {
         boolean res = false;
-        RedisClient redis = RedisClient.create(buildRedisURI(slaveParam));
+        Jedis jedis = JedisUtil.getJedisClient(slaveParam);
         try {
-            redis.connect().sync().clusterMeet(masterIp, masterPort);
+            jedis.clusterMeet(masterIp, masterPort);
             res = true;
         } catch (Exception e) {
             logger.error("cluster meet error", e);
         } finally {
-            redis.shutdown();
+            jedis.close();
         }
         return res;
     }
 
-    public Map<RedisNode, List<RedisNode>> buildClusterMeet(Cluster cluster, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
+    public Map<RedisNode, List<RedisNode>> buildClusterMeet(int clusterId, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
+        Cluster cluster = clusterService.getCluster(clusterId);
         Host host = NetUtil.getHostPassAddress(cluster.getAddress());
         Map<RedisNode, List<RedisNode>> ipMapRes = new HashedMap();
         String currentAliableIp = host.getIp();
@@ -239,10 +248,10 @@ public class ClusterManager {
                     List<RedisNode> slaveList = nodeItem.getValue();
                     ipMapRes.put(master, slaveList);
 
-                    RedisConnectParam param = new RedisConnectParam(masterIp, masterPort, cluster.getRedisPassword());
+                    ConnectionParam param = new ConnectionParam(masterIp, masterPort, cluster.getRedisPassword());
                     // 如果扩容有密码的集群，meet的时候不需要认证密码
                     if (isExtends) {
-                        param = new RedisConnectParam(masterIp, masterPort);
+                        param = new ConnectionParam(masterIp, masterPort);
                     }
                     clusterMeet(param, currentAliableIp, currentAliablePort);
                     for (RedisNode redisNode : slaveList) {
@@ -262,7 +271,8 @@ public class ClusterManager {
         return ipMapRes;
     }
 
-    public boolean buildClusterBeSlave(Cluster cluster, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
+    public boolean buildClusterBeSlave(int clusterId, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
+        Cluster cluster = clusterService.getCluster(clusterId);
         String password = cluster.getRedisPassword();
         for (Map.Entry<RedisNode, List<RedisNode>> nodeItem : ipMap.entrySet()) {
             try {
@@ -272,20 +282,20 @@ public class ClusterManager {
                 if (NetUtil.checkIpAndPort(masterIp, masterPort)) {
                     // 如果扩容有密码的集群，beSlave的时候不需要认证密码
                     if (isExtends){
-                        String nodeId = RedisUtils.getNodeId(new RedisConnectParam(masterIp, masterPort));
+                        String nodeId = JedisUtil.getNodeId(new ConnectionParam(masterIp, masterPort));
                         List<RedisNode> slaveList = nodeItem.getValue();
                         for (RedisNode redisNode : slaveList) {
                             logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is be slave to " + masterIp + ":" + masterPort);
-                            RedisConnectParam param = new RedisConnectParam(redisNode.getIp(), redisNode.getPort());
+                            ConnectionParam param = new ConnectionParam(redisNode.getIp(), redisNode.getPort());
                             beSlave(param, nodeId);
                             Thread.sleep(500);
                         }
                     }else{
-                        String nodeId = RedisUtils.getNodeId(new RedisConnectParam(masterIp, masterPort, password));
+                        String nodeId = JedisUtil.getNodeId(new ConnectionParam(masterIp, masterPort, password));
                         List<RedisNode> slaveList = nodeItem.getValue();
                         for (RedisNode redisNode : slaveList) {
                             logger.info(redisNode.getIp() + ":" + redisNode.getPort() + " is be slave to " + masterIp + ":" + masterPort);
-                            RedisConnectParam param = new RedisConnectParam(redisNode.getIp(), redisNode.getPort(), password);
+                            ConnectionParam param = new ConnectionParam(redisNode.getIp(), redisNode.getPort(), password);
                             beSlave(param, nodeId);
                             Thread.sleep(500);
                         }
@@ -301,17 +311,17 @@ public class ClusterManager {
 
     /**
      * 建立集群
-     * @param cluster
+     * @param clusterId
      * @param ipMap
      * @param isExtends true： 扩容操作建立集群 false ：初始建立集群
      * @return
      */
-    public boolean buildCluster(Cluster cluster, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
+    public boolean buildCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
         try{
             logger.info("start meet all node to cluster");
-            buildClusterMeet(cluster, ipMap,isExtends);
+            buildClusterMeet(clusterId, ipMap,isExtends);
             logger.info("start set slave for cluster");
-            buildClusterBeSlave(cluster, ipMap,isExtends);
+            buildClusterBeSlave(clusterId, ipMap, isExtends);
         }catch (Exception e){
             logger.error("Build Cluster error", e);
             return false;
@@ -319,37 +329,36 @@ public class ClusterManager {
         return true;
     }
 
-    public boolean batchConfig(Cluster cluster, String myIp, int myPort, String configName, String configValue){
-
+    public boolean batchConfig(Cluster cluster, String myIp, int myPort, String configName, String configValue) {
         boolean res = true;
-        /**
-         * 不让通过UI修改redis密码
-         */
         if ("requirepass".equalsIgnoreCase(configName)) {
             return false;
         }
-        RedisConnectParam param = new RedisConnectParam(myIp, myPort);
+        ConnectionParam param = new ConnectionParam(myIp, myPort);
         String password = cluster.getRedisPassword();
         param.setRedisPassword(password);
-
-        List<Map<String, String>> nodeList = RedisUtils.getAllNodes(param);
+        List<Map<String, String>> nodeList = JedisUtil.getNodeList(param);
         for (Map<String, String> node : nodeList) {
             String ip = node.get("ip");
             int port = Integer.parseInt(node.get("port"));
-            RedisClient client = RedisClient.create(buildRedisURI(ip, port));
-            RedisCommands<String, String> command = client.connect().sync();
+            Jedis jedis = new Jedis(ip, port);
             if (org.apache.commons.lang.StringUtils.isNotBlank(password)) {
-                command.auth(password);
+                jedis.auth(password);
             }
             try {
+                List<String> configList = jedis.configGet(configName);
+                if (configList.size() != 2) {
+                    break;
+                }
+
                 //Edit Truman for support save ""or save "600 30000" or save 600 3000 start
                 if (configValue.indexOf("\"") >= 0) {
                     configValue = configValue.replace("\"", "");
                 }
                 //Edit Truman for support save ""or save "600 30000" or save 600 3000 end
 
-                command.configSet(configName, configValue);
-                command.clusterSaveconfig();
+                jedis.configSet(configName, configValue);
+                jedis.clusterSaveConfig();
 
                 // 同步一下配置文件
                 RedisExtendClient redisClient = new RedisExtendClient(ip, port);
@@ -368,28 +377,26 @@ public class ClusterManager {
                 res = false;
                 logger.error("Update config error, ip: " + ip + ", port: " + port, e);
             } finally {
-                client.shutdown();
+                jedis.close();
             }
         }
-
         return res;
     }
 
     public void addRedisPassd(String ip, int port, String password) {
 
-        RedisClient client = RedisClient.create(buildRedisURI(ip, port));
-        RedisCommands<String, String> command = client.connect().sync();
+        Jedis jedis = new Jedis(ip, port);
         try {
             //先判断是否是3.0 or 4.0的集群
-            RedisConnectParam param = new RedisConnectParam(ip, port);
-            Map<String, String> nodeInfo = RedisUtils.getInfo(param);
+            ConnectionParam param = new ConnectionParam(ip, port);
+            Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
             String redisVersion = nodeInfo.get("redis_version");
             if (!redisVersion.startsWith("1.0.")) {
                 //注意masterauth要在前
-                command.configSet("masterauth", password);
-                command.configSet("requirepass", password);
-                command.auth(password);
-                command.clusterSaveconfig();
+                jedis.configSet("masterauth", password);
+                jedis.configSet("requirepass", password);
+                jedis.auth(password);
+                jedis.clusterSaveConfig();
                 // 同步一下配置文件
                 RedisExtendClient redisClient = new RedisExtendClient(ip, port);
                 try {
@@ -406,7 +413,7 @@ public class ClusterManager {
         } catch (Exception e) {
             logger.error("add RedisPassd error, ip: " + ip + ", port: " + port, e);
         } finally {
-            client.shutdown();
+            jedis.close();
         }
     }
 
@@ -416,8 +423,8 @@ public class ClusterManager {
         String ip = host.getIp();
         int port = host.getPort();
         String password = cluster.getRedisPassword();
-        RedisConnectParam param = new RedisConnectParam(ip, port, password);
-        List<Map<String, String>> masterList = RedisUtils.getMasterNodes(param, true);
+        ConnectionParam param = new ConnectionParam(ip, port, password);
+        List<Map<String, String>> masterList = JedisUtil.getNodeList(param, true);
         int masterSize = masterList.size();
         List<SlotBalanceUtil.Shade> balanceSlots = SlotBalanceUtil.balanceSlot(masterSize);
         for (int i = 0; i < balanceSlots.size(); i++) {
@@ -428,20 +435,19 @@ public class ClusterManager {
             String itemIp = hostMap.get("ip");
             String itemPort = hostMap.get("port");
             int intItemPort = Integer.parseInt(itemPort);
-            RedisClient client = RedisClient.create(buildRedisURI(itemIp, intItemPort));
-            RedisCommands<String, String> command = client.connect().sync();
+            Jedis jedis = new Jedis(itemIp, intItemPort);
             if (org.apache.commons.lang.StringUtils.isNotBlank(password)) {
-                command.auth(password);
+                jedis.auth(password);
             }
             try {
                 for (int slot = start; slot <= end; slot++) {
                     try {
-                        String resstr = command.clusterAddSlots(slot);
+                        String resstr = jedis.clusterAddSlots(slot);
                         if (!resstr.equals("OK")) {
-                            command.clusterAddSlots(slot);
+                            jedis.clusterAddSlots(slot);
                         }
                     } catch (Exception e) {
-                        if(e instanceof RedisConnectionException){
+                        if(e instanceof JedisConnectionException){
                             logger.error(e.getMessage() + " Can Not Init Slot");
                         }else{
                             logger.error("", e);
@@ -450,31 +456,29 @@ public class ClusterManager {
                     }
                 }
             } catch (Exception e) {
-                if(e instanceof  RedisConnectionException){
+                if(e instanceof  JedisConnectionException){
                     logger.error(e.getMessage() + " Can Not Init Slot");
                 }else{
                     logger.error("", e);
                 }
                 res = false;
             } finally {
-                client.shutdown();
+                jedis.close();
             }
         }
         return res;
     }
 
-
     public boolean reShard(Cluster cluster, String ip, int port, int startKey, int endKey) {
         boolean res = false;
         String password = cluster.getRedisPassword();
-        RedisConnectParam param = new RedisConnectParam(ip, port, password);
-        Map<String, Map> masterNodes = RedisUtils.getMasterNodes(param);
-        RedisClient client = null;
+        ConnectionParam param = new ConnectionParam(ip, port, password);
+        Map<String, Map> masterNodes = JedisUtil.getMasterNodes(param);
+        Jedis jedis = null;
         try {
-            client = RedisClient.create(buildRedisURI(ip, port));
-            RedisCommands<String, String> command = client.connect().sync();
+            jedis = new Jedis(ip, port);
             if (org.apache.commons.lang.StringUtils.isNotBlank(password)) {
-                command.auth(password);
+                jedis.auth(password);
             }
             // 迁移必须要知道自己的 nodeid 和 source 的ip port nodeid
             for (int slot = startKey; slot <= endKey; slot++) {
@@ -485,9 +489,9 @@ public class ClusterManager {
                 String strSourcePort = slotObjmap.get("sourcePort");
                 // 如果 strSourcePort 为空，则进行集群初始化
                 if (org.apache.commons.lang.StringUtils.isBlank(strSourcePort)) {
-                    String resstr = command.clusterAddSlots(slot);
+                    String resstr = jedis.clusterAddSlots(slot);
                     if (!resstr.equals("OK")) {
-                        command.clusterAddSlots(slot);
+                        jedis.clusterAddSlots(slot);
                     }
                     continue;
                 }
@@ -502,9 +506,54 @@ public class ClusterManager {
         } catch (Exception e) {
             logger.error("Cluster Add Slots Error : " + e.getMessage());
         } finally {
-            client.shutdown();
+            jedis.close();
         }
         return res;
+    }
+
+    /**
+     * 移动 slot
+     *
+     * @param myselfId
+     * @param ip
+     * @param port
+     * @param sourceId
+     * @param sourceIP
+     * @param sourcePort
+     * @param slot
+     */
+    private void moveSlot(String myselfId, String ip, int port, String password, String sourceId, String sourceIP, int sourcePort, int slot) {
+        Jedis myself = new Jedis(ip, port);
+        Jedis source = new Jedis(sourceIP, sourcePort);
+        if (org.apache.commons.lang.StringUtils.isNotBlank(password)) {
+            myself.auth(password);
+            source.auth(password);
+        }
+        try {
+            // 设置导入导出状态
+            myself.clusterSetSlotImporting(slot, sourceId);
+            source.clusterSetSlotMigrating(slot, myselfId);
+            List<String> keys;
+            // 真正迁移
+            do {
+                keys = source.clusterGetKeysInSlot(slot, 100);
+                for (String key : keys) {
+                    source.migrate(ip, port, key, 0, 600000);
+                }
+            } while (keys.size() > 0);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            // 出现异常就恢复 slot
+            myself.clusterSetSlotStable(slot);
+            source.clusterSetSlotStable(slot);
+        } finally {
+            // 设置 slot 给 myself 节点
+            myself.clusterSetSlotNode(slot, myselfId);
+            //？ 这个很奇怪如果没有设置 stable 它的迁移状态会一直在的
+            source.clusterSetSlotStable(slot);
+            source.close();
+            myself.close();
+        }
     }
 
     /**
@@ -543,50 +592,6 @@ public class ClusterManager {
         return resultMap;
     }
 
-    /**
-     * 移动 slot
-     *
-     * @param myselfId
-     * @param ip
-     * @param port
-     * @param sourceId
-     * @param sourceIP
-     * @param sourcePort
-     * @param slot
-     */
-    private void moveSlot(String myselfId, String ip, int port, String password, String sourceId, String sourceIP, int sourcePort, int slot) {
-        RedisCommands<String, String> myself = RedisClient.create(buildRedisURI(ip, port)).connect().sync();
-        RedisCommands<String, String> source = RedisClient.create(buildRedisURI(sourceIP, sourcePort)).connect().sync();
-        if (org.apache.commons.lang.StringUtils.isNotBlank(password)) {
-            myself.auth(password);
-            source.auth(password);
-        }
-        try {
-            // 设置导入导出状态
-            myself.clusterSetSlotImporting(slot, sourceId);
-            source.clusterSetSlotMigrating(slot, myselfId);
-            List<String> keys;
-            // 真正迁移
-            do {
-                keys = source.clusterGetKeysInSlot(slot, 100);
-                for (String key : keys) {
-                    source.migrate(ip, port, key, 0, 600000);
-                }
-            } while (keys.size() > 0);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            // 出现异常就恢复 slot
-            myself.clusterSetSlotStable(slot);
-            source.clusterSetSlotStable(slot);
-        } finally {
-            // 设置 slot 给 myself 节点
-            myself.clusterSetSlotNode(slot, myselfId);
-            //？ 这个很奇怪如果没有设置 stable 它的迁移状态会一直在的
-            source.clusterSetSlotStable(slot);
-        }
-    }
-
-
     private boolean slotInMaster(Map<String, Object> master, int slot) {
         String[] slots = (String[]) master.get("slot");
         for (Object itemSlot : slots) {
@@ -603,18 +608,6 @@ public class ClusterManager {
             }
         }
         return false;
-    }
-
-
-    private static RedisURI buildRedisURI(RedisConnectParam param) {
-        if(StringUtils.isNotBlank(param.getRedisPassword())){
-            return RedisURI.Builder.redis(param.getIp(), param.getPort()).withPassword(param.getRedisPassword()).build();
-        }
-        return RedisURI.Builder.redis(param.getIp(), param.getPort()).build();
-    }
-
-    private static RedisURI buildRedisURI(String ip, int port) {
-        return RedisURI.Builder.redis(ip, port).build();
     }
 
 }

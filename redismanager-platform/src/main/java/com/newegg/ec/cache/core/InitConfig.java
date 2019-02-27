@@ -4,6 +4,7 @@ import com.newegg.ec.cache.core.entity.annotation.mysql.MysqlUtil;
 import com.newegg.ec.cache.core.entity.annotation.userapi.UserApiUtil;
 import com.newegg.ec.cache.core.entity.model.User;
 import com.newegg.ec.cache.dao.IUserDao;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -60,6 +61,9 @@ public class InitConfig implements ApplicationListener<ContextRefreshedEvent> {
      * 初始化用户 api
      */
     public void initUserApi() {
+        if(StringUtils.isBlank(userApiPath)){
+            return;
+        }
         List<String> packages = new ArrayList<>();
         packages.add(mysqlScanTable);
         System.out.println(userApiPath);

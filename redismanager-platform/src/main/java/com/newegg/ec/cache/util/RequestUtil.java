@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
  * Created by gl49 on 2018/5/8.
  */
 public class RequestUtil {
-
     public static final CommonLogger logger = new CommonLogger(RequestUtil.class);
     public static final ThreadLocal<HttpServletRequest> request = new ThreadLocal<>();
 

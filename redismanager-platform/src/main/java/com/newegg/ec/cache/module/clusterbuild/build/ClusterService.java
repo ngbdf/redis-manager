@@ -5,7 +5,7 @@ import com.newegg.ec.cache.core.entity.model.Cluster;
 import com.newegg.ec.cache.core.entity.model.ClusterImportResult;
 import com.newegg.ec.cache.core.entity.model.Host;
 import com.newegg.ec.cache.core.entity.model.User;
-import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.entity.redis.ConnectionParam;
 import com.newegg.ec.cache.core.entity.redis.RedisQueryParam;
 import com.newegg.ec.cache.core.entity.redis.RedisValue;
 import com.newegg.ec.cache.dao.IClusterDao;
@@ -15,8 +15,8 @@ import com.newegg.ec.cache.dao.plugin.IHumpbackNodeDao;
 import com.newegg.ec.cache.dao.plugin.IMachineNodeDao;
 import com.newegg.ec.cache.module.clusterbuild.common.ClusterManager;
 import com.newegg.ec.cache.module.extend.ExtensionService;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.NetUtil;
-import com.newegg.ec.cache.util.redis.RedisUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +41,7 @@ public class ClusterService extends ExtensionService implements IClusterQuerySer
     private IClusterDao clusterDao;
     @Autowired
     private NodeInfoDao nodeInfoTable;
+
     @Autowired
     private ClusterManager clusterManager;
 
@@ -57,8 +58,8 @@ public class ClusterService extends ExtensionService implements IClusterQuerySer
         Cluster cluster = clusterDao.getCluster(id);
         Host host = NetUtil.getHostPassAddress(cluster.getAddress());
         if(host != null){
-            RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
-            Map<String, String> nodeInfo = RedisUtils.getInfo(param);
+            ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+            Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
             String redisVersion = nodeInfo.get("redis_version");
             if( Integer.valueOf(redisVersion.substring(0, 1)) >= 4){
                 cluster.setIsVersion4(true);
@@ -192,41 +193,41 @@ public class ClusterService extends ExtensionService implements IClusterQuerySer
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public RedisValue query(RedisQueryParam redisQueryParam) {
-        return clusterManager.query(redisQueryParam, getCluster(redisQueryParam.getClusterId()));
+        return clusterManager.query(redisQueryParam);
     }
 
 
     public Map<String, String> getClusterInfo(int clusterId, String ip, int port) {
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(ip, port, cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(ip, port, cluster.getRedisPassword());
         return clusterManager.getClusterInfo(param);
     }
 
     public Map<String, String> getClusterInfo(int clusterId, String address) {
         List<Host> host = NetUtil.getHostByAddress(address);
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(host.get(0).getIp(), host.get(0).getPort(), cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(host.get(0).getIp(), host.get(0).getPort(), cluster.getRedisPassword());
         return clusterManager.getClusterInfo(param);
     }
 
     public Map<String, String> getNodeInfo(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
         return clusterManager.getMapInfo(param);
     }
 
     public Map<String, String> getRedisConfig(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
         return clusterManager.getRedisConfig(param);
     }
 
     public List<Map<String, String>> nodeList(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
         List<Map<String, String>> list = clusterManager.nodeList(param);
         return list;
     }
@@ -256,7 +257,7 @@ public class ClusterService extends ExtensionService implements IClusterQuerySer
     public Map<String, Map> detailNodeList(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
         Map<String, Map> result = clusterManager.getClusterNodes(param);
         return result;
     }
@@ -264,7 +265,7 @@ public class ClusterService extends ExtensionService implements IClusterQuerySer
     public List<Map<String, String>> getRedisDBList(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
         return clusterManager.getRedisDBList(param);
     }
 
@@ -277,25 +278,25 @@ public class ClusterService extends ExtensionService implements IClusterQuerySer
 
     public boolean beSlave(int clusterId, String ip, int port, String masterId) {
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(ip, port, cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(ip, port, cluster.getRedisPassword());
         return clusterManager.beSlave(param, masterId);
     }
 
     public boolean beMaster(int clusterId, String ip, int port) {
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(ip, port, cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(ip, port, cluster.getRedisPassword());
         return clusterManager.beMaster(param);
     }
 
     public boolean forgetNode(int clusterId, String ip, int port, String nodeId) {
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(ip, port, cluster.getRedisPassword());
+        ConnectionParam param = new ConnectionParam(ip, port, cluster.getRedisPassword());
         return clusterManager.forget(param, nodeId);
     }
 
     public boolean importNode(int clusterId, String ip, int port, String masterIP, int masterPort) {
         Cluster cluster = getCluster(clusterId);
-        RedisConnectParam slaveParam = new RedisConnectParam(ip, port, cluster.getRedisPassword());
+        ConnectionParam slaveParam = new ConnectionParam(ip, port, cluster.getRedisPassword());
         return clusterManager.clusterMeet(slaveParam, masterIP, masterPort);
     }
 
@@ -318,7 +319,7 @@ public class ClusterService extends ExtensionService implements IClusterQuerySer
     public boolean importDataToCluster(int clusterId, String address, String targetAddress, String keyFormat) {
         boolean res = false;
         try {
-            clusterManager.importDataToCluster(getCluster(clusterId), address, targetAddress, keyFormat);
+            clusterManager.importDataToCluster(clusterId, address, targetAddress, keyFormat);
             res = true;
         } catch (Exception e) {
             logger.error("import to cluster", e);

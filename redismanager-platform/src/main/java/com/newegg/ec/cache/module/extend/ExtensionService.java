@@ -3,11 +3,11 @@ package com.newegg.ec.cache.module.extend;
 import com.newegg.ec.cache.core.entity.model.Cluster;
 import com.newegg.ec.cache.core.entity.model.Host;
 import com.newegg.ec.cache.core.entity.model.MemoryDoctorConfig;
-import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.entity.redis.ConnectionParam;
 import com.newegg.ec.cache.dao.IClusterDao;
 import com.newegg.ec.cache.module.clusterbuild.common.redis.RedisExtendClient;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.NetUtil;
-import com.newegg.ec.cache.util.redis.RedisUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,8 +52,8 @@ public class ExtensionService implements ApplicationListener<ContextRefreshedEve
         Cluster cluster = clusterDao.getCluster(clusterId);
         String password = cluster.getRedisPassword();
         Host host = NetUtil.getHostPassAddress(cluster.getAddress());
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(),password);
-        Map<String, String> nodeInfo = RedisUtils.getInfo(param);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(),password);
+        Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
         String memAllocator = nodeInfo.get("mem_allocator");
         String redisVersion = nodeInfo.get("redis_version");
         if (memAllocator.startsWith("jemalloc") && (Integer.valueOf(redisVersion.substring(0, 1)) >= 4)) {
@@ -66,7 +66,7 @@ public class ExtensionService implements ApplicationListener<ContextRefreshedEve
                 }
 
                 if (result.contains("+OK")) {
-                    Map<String, String> info = RedisUtils.getInfo(param);
+                    Map<String, String> info = JedisUtil.getMapInfo(param);
                     return "now mem_fragmentation_ratio :" + info.get("mem_fragmentation_ratio");
                 }
             } catch (Exception e) {
@@ -87,8 +87,8 @@ public class ExtensionService implements ApplicationListener<ContextRefreshedEve
         Cluster cluster = clusterDao.getCluster(clusterId);
         String password = cluster.getRedisPassword();
         Host host = NetUtil.getHostPassAddress(cluster.getAddress());
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(),password);
-        List<Map<String, String>> nodeList = RedisUtils.getAllNodes(param);;
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(),password);
+        List<Map<String, String>> nodeList = JedisUtil.getNodeList(param);;
         List<Future<String>> futureList = new ArrayList<>(nodeList.size());
         nodeList.forEach(node -> {
             futureList.add(executorPool.submit(new MemoryDiagnosis(password, node.get("ip"), Integer.parseInt(node.get("port")))));

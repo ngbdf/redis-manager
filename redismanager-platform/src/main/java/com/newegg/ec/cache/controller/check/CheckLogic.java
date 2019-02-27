@@ -4,14 +4,13 @@ import com.newegg.ec.cache.core.entity.model.Cluster;
 import com.newegg.ec.cache.core.entity.model.Host;
 import com.newegg.ec.cache.core.entity.model.Response;
 import com.newegg.ec.cache.core.entity.model.User;
-import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.entity.redis.ConnectionParam;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import com.newegg.ec.cache.module.clusterbuild.build.ClusterService;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.NetUtil;
 import com.newegg.ec.cache.util.RemoteShellUtil;
 import com.newegg.ec.cache.util.RequestUtil;
-import com.newegg.ec.cache.util.redis.RedisDataFormat;
-import com.newegg.ec.cache.util.redis.RedisUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +35,8 @@ public class CheckLogic {
     public int checkRedisVersion(int clusterId, String address) {
         Host host = NetUtil.getHostPassAddress(address);
         Cluster cluster = clusterLogic.getCluster(clusterId);
-        RedisConnectParam param = new RedisConnectParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
-        int version = RedisUtils.getRedisVersion(param);
+        ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+        int version = JedisUtil.getRedisVersion(param);
         return version;
     }
 
@@ -140,7 +139,7 @@ public class CheckLogic {
 
     public Response checkBatchDirPermission(JSONObject req) {
         String iplist = req.getString("iplist");
-        Set<String> ipSet = RedisDataFormat.getIPList(iplist);
+        Set<String> ipSet = JedisUtil.getIPList(iplist);
         String errorMsg = "";
         for (String ip : ipSet) {
             String username = req.getString("username");
@@ -159,7 +158,7 @@ public class CheckLogic {
 
     public Response checkBatchWgetPermission(JSONObject req) {
         String iplist = req.getString("iplist");
-        Set<String> ipSet = RedisDataFormat.getIPList(iplist);
+        Set<String> ipSet = JedisUtil.getIPList(iplist);
         String errorMsg = "";
         for (String ip : ipSet) {
             String username = req.getString("username");
@@ -185,7 +184,7 @@ public class CheckLogic {
 
     public Response checkBatchUserPermisson(JSONObject req) {
         String iplist = req.getString("iplist");
-        Set<String> ipSet = RedisDataFormat.getIPList(iplist);
+        Set<String> ipSet = JedisUtil.getIPList(iplist);
         String errorMsg = "";
         for (String ip : ipSet) {
             String username = req.getString("username");

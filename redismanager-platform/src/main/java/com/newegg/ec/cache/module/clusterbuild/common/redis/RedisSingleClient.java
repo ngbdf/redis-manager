@@ -1,51 +1,43 @@
 package com.newegg.ec.cache.module.clusterbuild.common.redis;
 
-import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.entity.redis.ConnectionParam;
 import com.newegg.ec.cache.core.entity.redis.RedisValue;
-import com.newegg.ec.cache.core.logger.RMException;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.sync.RedisCommands;
 import org.apache.commons.lang3.StringUtils;
+import redis.clients.jedis.*;
 
 /**
  * Created by lzz on 2018/3/19.
  */
-public class RedisSingleClient extends AbstractRedisClient{
-
+public class RedisSingleClient extends RedisClientBase implements IRedis {
     protected String ip;
     protected int port;
     protected String password;
-    protected RedisClient singleClient;
+    protected Jedis singleClient;
 
-    public RedisSingleClient(RedisConnectParam param) {
+    public RedisSingleClient(ConnectionParam param) {
         this.ip = param.getIp();
         this.port = param.getPort();
         this.password = param.getRedisPassword();
-
-        if(StringUtils.isNotBlank(param.getRedisPassword())){
-            singleClient = RedisClient.create(RedisURI.Builder.redis(param.getIp(), param.getPort()).withPassword(param.getRedisPassword()).build());
-        }else{
-            singleClient = RedisClient.create(RedisURI.Builder.redis(param.getIp(), param.getPort()).build());
+        singleClient = new Jedis(ip, port);
+        if (StringUtils.isNotBlank(this.password)) {
+            singleClient.auth(this.password);
         }
     }
 
+    public ScanResult<String> redisScan(String path, String cursor, ScanParams params) {
+        return singleClient.scan(cursor, params);
+    }
 
     @Override
     public void close() {
         if (null != singleClient) {
             try {
-                singleClient.shutdown();
+                singleClient.close();
             } catch (Exception e) {
-                throw new RMException("close client error",e);
+                e.printStackTrace();
             }
         }
 
-    }
-
-    @Override
-    public RedisValue getRedisValue(int db, String key) {
-        return null;
     }
 
     @Override
@@ -55,12 +47,21 @@ public class RedisSingleClient extends AbstractRedisClient{
 
     @Override
     public boolean importDataToCluster(String targetIp, int targetPort, String keyFormat) throws InterruptedException {
-        throw new RMException("not support");
+        throw new RuntimeException("not support");
     }
 
     @Override
-    public RedisCommands getRedisCommands() {
-        return singleClient.connect().sync();
+    public RedisValue getRedisValue(int db, String key) {
+        return super.getRedisValue(this, db, key);
     }
 
+    @Override
+    public JedisCommands getRedisCommands() {
+        return singleClient;
+    }
+
+    @Override
+    public MultiKeyCommands redisMultiKeyCommands() {
+        return singleClient;
+    }
 }

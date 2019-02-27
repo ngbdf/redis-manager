@@ -11,9 +11,8 @@ import com.newegg.ec.cache.module.clusterbuild.plugins.INodeOperate;
 import com.newegg.ec.cache.module.clusterbuild.plugins.basemodel.PluginParent;
 import com.newegg.ec.cache.module.clusterbuild.plugins.basemodel.StartType;
 import com.newegg.ec.cache.util.DateUtil;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.httpclient.HttpClientUtil;
-import com.newegg.ec.cache.util.redis.RedisDataFormat;
-import com.newegg.ec.cache.util.redis.RedisUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -67,7 +66,7 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
     public boolean pullImage(JSONObject pullParam) {
         boolean res = true;
         String ipStr = pullParam.getString(PluginParent.IPLIST_NAME);
-        Set<String> ipSet = RedisDataFormat.getIPList(ipStr);
+        Set<String> ipSet = JedisUtil.getIPList(ipStr);
         String imageUrl = pullParam.getString(PluginParent.IMAGE);
         logger.websocket("start pull image ");
         List<Future<String>> futureList = new ArrayList<>();
@@ -225,7 +224,7 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
 
     @Override
     protected void auth(String ipListStr, String redisPassword) {
-        List<RedisNode> nodelist = RedisUtils.getInstallNodeList(ipListStr);
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         nodelist.forEach(node -> {
             clusterService.addRedisPassd(node.getIp(), node.getPort(),redisPassword);
         });
@@ -239,7 +238,7 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
     public String checkAccess(JSONObject reqParam) {
         String ipListStr = reqParam.getString(IPLIST_NAME);
         String containerName = reqParam.getString("containerName");
-        List<RedisNode> nodelist = RedisUtils.getInstallNodeList(ipListStr);
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         String errorMsg = "";
         for (RedisNode redisNode : nodelist) {
             String ip = redisNode.getIp();
@@ -302,7 +301,7 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
         String ipListStr = reqParam.getString(IPLIST_NAME);
         String image = reqParam.getString(PluginParent.IMAGE);
         String containerName = reqParam.getString("containerName");
-        List<RedisNode> nodelist = RedisUtils.getInstallNodeList(ipListStr);
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         for (RedisNode redisNode : nodelist) {
             HumpbackNode node = new HumpbackNode();
             node.setClusterId(clusterId);

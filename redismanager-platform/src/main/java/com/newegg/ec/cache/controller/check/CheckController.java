@@ -1,8 +1,15 @@
 package com.newegg.ec.cache.controller.check;
 
 import com.newegg.ec.cache.core.entity.annotation.userapi.UserAccess;
+import com.newegg.ec.cache.core.entity.model.Response;
+import com.newegg.ec.cache.util.MathExpressionCalculateUtil;
+import net.sf.json.JSONObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 /**
  * Created by gl49 on 2018/4/22.
@@ -12,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @UserAccess(autoCreate = true)
 public class CheckController {
 
-    /*private static final Log logger = LogFactory.getLog(CheckController.class);
+    private static final Log logger = LogFactory.getLog(CheckController.class);
 
     @Resource
     private CheckLogic logic;
@@ -103,7 +110,7 @@ public class CheckController {
         JSONObject jsonObject = JSONObject.fromObject(req);
         logger.info("Request ==> " + req);
         return logic.checkBatchUserPermisson(jsonObject);
-    }*/
+    }
 
 
 }

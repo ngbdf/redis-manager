@@ -4,8 +4,8 @@ import com.newegg.ec.cache.core.entity.model.Cluster;
 import com.newegg.ec.cache.core.entity.redis.RedisNode;
 import com.newegg.ec.cache.module.clusterbuild.build.ClusterService;
 import com.newegg.ec.cache.module.clusterbuild.common.ClusterManager;
+import com.newegg.ec.cache.util.JedisUtil;
 import com.newegg.ec.cache.util.NetUtil;
-import com.newegg.ec.cache.util.redis.RedisUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -52,8 +52,8 @@ public abstract class PluginParent {
             return false;
         }
         String ipListStr = reqParam.getString(IPLIST_NAME);
-        Map<RedisNode, List<RedisNode>> ipMap = RedisUtils.getInstallNodeMap(ipListStr);
-        List<RedisNode> nodelist = RedisUtils.getInstallNodeList(ipListStr);
+        Map<RedisNode, List<RedisNode>> ipMap = JedisUtil.getInstallNodeMap(ipListStr);
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
 
         // 安装节点
         pluginParent.installNodeList(reqParam, nodelist);
@@ -116,7 +116,7 @@ public abstract class PluginParent {
     protected int addCluster(JSONObject reqParam) {
         int clusterId = -1;
         String ipListStr = reqParam.getString(IPLIST_NAME);
-        List<RedisNode> nodelist = RedisUtils.getInstallNodeList(ipListStr);
+        List<RedisNode> nodelist = JedisUtil.getInstallNodeList(ipListStr);
         RedisNode node = new RedisNode();
         for (RedisNode redisNode : nodelist) {
             if (NetUtil.checkIpAndPort(redisNode.getIp(), redisNode.getPort())) {
@@ -140,7 +140,7 @@ public abstract class PluginParent {
     }
 
     protected boolean buildRedisCluster(int clusterId, Map<RedisNode, List<RedisNode>> ipMap,boolean isExtends) {
-        return clusterManager.buildCluster(clusterService.getCluster(clusterId), ipMap,isExtends);
+        return clusterManager.buildCluster(clusterId, ipMap,isExtends);
     }
 
     protected boolean checkInstallResult(List<RedisNode> ipList) {
