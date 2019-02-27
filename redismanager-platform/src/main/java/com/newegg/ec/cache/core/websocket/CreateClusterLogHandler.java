@@ -46,7 +46,7 @@ public class CreateClusterLogHandler implements WebSocketHandler {
     public static void removeLogMap(WebSocketSession webSocketSession) {
         String id = websocketLogMap.get(webSocketSession);
         websocketLogMap.remove(webSocketSession);
-        if (logMap != null && logMap.containsKey(id)) {
+        if (logMap != null && !StringUtils.isEmpty(id)) {
             logMap.remove(id);
         }
     }
@@ -70,7 +70,7 @@ public class CreateClusterLogHandler implements WebSocketHandler {
                 try {
                     webSocketSession.sendMessage(new TextMessage(message));
                 } catch (IOException e) {
-                    logger.error("webSocket send Message Error" ,e);
+                    //ingore
                 }
             } else {
                     Thread.sleep(1000);
