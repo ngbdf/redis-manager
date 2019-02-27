@@ -2,9 +2,9 @@ package com.newegg.ec.cache.module.clusterbuild.common;
 
 import com.newegg.ec.cache.module.clusterbuild.plugins.INodeOperate;
 import com.newegg.ec.cache.module.clusterbuild.plugins.basemodel.PluginType;
-import com.newegg.ec.cache.module.clusterbuild.plugins.docker.DockerManager;
-import com.newegg.ec.cache.module.clusterbuild.plugins.humpback.HumpbackManager;
-import com.newegg.ec.cache.module.clusterbuild.plugins.machine.MachineManager;
+import com.newegg.ec.cache.module.clusterbuild.plugins.DockerManager;
+import com.newegg.ec.cache.module.clusterbuild.plugins.HumpbackManager;
+import com.newegg.ec.cache.module.clusterbuild.plugins.MachineManager;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

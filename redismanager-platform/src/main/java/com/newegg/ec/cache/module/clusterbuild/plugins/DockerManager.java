@@ -1,4 +1,4 @@
-package com.newegg.ec.cache.module.clusterbuild.plugins.docker;
+package com.newegg.ec.cache.module.clusterbuild.plugins;
 
 import com.google.common.collect.Lists;
 import com.newegg.ec.cache.controller.check.CheckLogic;
@@ -8,7 +8,6 @@ import com.newegg.ec.cache.core.entity.model.plugin.Node;
 import com.newegg.ec.cache.core.entity.redis.RedisNode;
 import com.newegg.ec.cache.core.logger.CommonLogger;
 import com.newegg.ec.cache.dao.plugin.IDockerNodeDao;
-import com.newegg.ec.cache.module.clusterbuild.plugins.INodeOperate;
 import com.newegg.ec.cache.module.clusterbuild.plugins.basemodel.PluginParent;
 import com.newegg.ec.cache.module.clusterbuild.plugins.basemodel.StartType;
 import com.newegg.ec.cache.util.DateUtil;
