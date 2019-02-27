@@ -1,10 +1,15 @@
 package com.newegg.ec.cache.util.redis;
 
+import com.newegg.ec.cache.core.entity.model.Host;
 import com.newegg.ec.cache.core.entity.model.Slowlog;
 import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
+import com.newegg.ec.cache.core.entity.redis.RedisNode;
+import com.newegg.ec.cache.core.entity.redis.RedisNodeType;
 import com.newegg.ec.cache.core.logger.RMException;
+import com.newegg.ec.cache.util.NetUtil;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -31,10 +36,10 @@ public class RedisUtils {
     public static List<Map<String, String>> getAllNodes(RedisConnectParam param) {
 
         List<Map<String, String>> nodeList = new ArrayList<>();
-
-        if ("cluster".equals(getRedisMode(param))) {
+        String mode = getRedisMode(param);
+        if ("cluster".equals(mode)) {
             nodeList = getRedisClusterNodes(param,false);
-        } else if("standalone".equals(getRedisMode(param))) {
+        } else if("standalone".equals(mode)) {
             nodeList = getRedisStandAloneNodes(param);
         }else {
             throw  new RMException("invalid redis mode type");
@@ -140,6 +145,22 @@ public class RedisUtils {
         return "";
     }
 
+
+    public static int getRedisVersion(RedisConnectParam param) {
+        int res = 0;
+        Map<String, String> resMap = getInfo(param);
+        if (null != resMap && !resMap.isEmpty()) {
+            String model = resMap.get("redis_mode");
+            if (model.equals("cluster")) {
+                res = 3;
+            } else {
+                res = 2;
+            }
+        }
+        return res;
+    }
+
+
     /**
      * redis db info信息（version < 3.0.0）
      * @param param
@@ -212,8 +233,8 @@ public class RedisUtils {
     public static Map<String, String> getClusterInfo(RedisConnectParam param) {
 
         Map<String, String> result = new HashMap<>();
-        String version = getRedisMode(param);
-        if ("cluster".equals(version)) {
+        String mode = getRedisMode(param);
+        if ("cluster".equals(mode)) {
             client = RedisClient.create(buildRedisURI(param));
             result =  RedisDataFormat.changeClusterInfoMap(client.connect().sync().clusterInfo());
         } else {
@@ -232,7 +253,8 @@ public class RedisUtils {
     public static String getNodeId(RedisConnectParam param) {
 
         String nodeId = "";
-        if ("cluster".equals(getRedisMode(param))) {
+        String mode = getRedisMode(param);
+        if ("cluster".equals(mode)) {
             client = RedisClient.create(buildRedisURI(param));
             String info = client.connect().sync().clusterNodes();
             String[] lines = info.split("\n");
@@ -243,7 +265,7 @@ public class RedisUtils {
                     break;
                 }
             }
-        } else if("standalone".equals(getRedisMode(param))) {
+        } else if("standalone".equals(mode)) {
             throw new RMException("redis cannot support this command");
         }
         return nodeId;
@@ -262,12 +284,13 @@ public class RedisUtils {
     }
 
 
-    private static List<Map<String, String>> getRedisClusterNodes(RedisConnectParam param,boolean filterMaster) {
+    public static List<Map<String, String>> getRedisClusterNodes(RedisConnectParam param,boolean filterMaster) {
 
-        Map<String, Map<String, String>> result  = RedisDataFormat.changeNodesInfoMap(client.connect().sync().clusterNodes(), filterMaster);
+        client = RedisClient.create(buildRedisURI(param));
+        Map<String, Map> result  = RedisDataFormat.changeNodesInfoMap(client.connect().sync().clusterNodes(), filterMaster);
         List<Map<String, String>> nodeList = new ArrayList<>();
 
-        for (Map.Entry<String, Map<String, String>> entry : result.entrySet()) {
+        for (Map.Entry<String, Map> entry : result.entrySet()) {
             Map node = entry.getValue();
             Map temp = new HashMap<>();
             temp.put("ip", node.get("ip"));
@@ -291,10 +314,84 @@ public class RedisUtils {
         return nodeList;
     }
 
+    public static List<Map<String, String>> getMasterNodes(RedisConnectParam param, boolean b) {
+        return getRedisClusterNodes(param, true);
+    }
+
+    public static Map<String, Map> getMasterNodes(RedisConnectParam param) {
+        client = RedisClient.create(buildRedisURI(param));
+        Map<String, Map> result  = RedisDataFormat.changeNodesInfoMap(client.connect().sync().clusterNodes(),true);
+        return result;
+    }
+
+    public static Map<RedisNode, List<RedisNode>> getInstallNodeMap(String nodeStr) {
+        Map<RedisNode, List<RedisNode>> resMap = new HashedMap();
+        RedisNode currentMaster = new RedisNode();
+        String[] nodeArr = nodeStr.split("\n");
+        for (String node : nodeArr) {
+            try {
+                RedisNode nodeItem = new RedisNode();
+                String[] tmpArr = node.split("\\s+");
+                if (tmpArr.length >= 1) {
+                    String hostStr = tmpArr[0];
+                    Host host = NetUtil.getHost(hostStr);
+                    nodeItem.setIp(host.getIp());
+                    nodeItem.setPort(host.getPort());
+                    nodeItem.setRole(RedisNodeType.slave);
+                }
+                if (tmpArr.length >= 2) {
+                    if (tmpArr[1].equals("master")) {
+                        nodeItem.setRole(RedisNodeType.master);
+                        currentMaster = nodeItem;
+                    }
+                }
+                if (StringUtils.isBlank(currentMaster.getIp())) {
+                    currentMaster = nodeItem;
+                    currentMaster.setRole(RedisNodeType.master);
+                }
+                if (resMap.get(currentMaster) == null) {
+                    resMap.put(currentMaster, new ArrayList<>());
+                }
+                List<RedisNode> slaveList = resMap.get(currentMaster);
+                if (nodeItem.getRole() == RedisNodeType.slave) {
+                    slaveList.add(nodeItem);
+                }
+            } catch (Exception e) {
+                throw new RMException("getInstallNodeMap error", e);
+            }
+        }
+        return resMap;
+    }
+
+    public static List<RedisNode> getInstallNodeList(String nodeStr) {
+
+        List<RedisNode> list = new LinkedList();
+        String[] nodeArr = nodeStr.split("\n");
+        for (String node : nodeArr) {
+            RedisNode nodeItem = new RedisNode();
+            String[] tmpArr = node.split("\\s+");
+            String hostStr = tmpArr[0];
+            Host host = NetUtil.getHost(hostStr);
+            nodeItem.setIp(host.getIp());
+            nodeItem.setPort(host.getPort());
+            if (tmpArr.length >= 1) {
+                nodeItem.setRole(RedisNodeType.slave);
+            }
+            if (tmpArr.length >= 2) {
+                if (tmpArr[1].equals("master")) {
+                    nodeItem.setRole(RedisNodeType.master);
+                }
+            }
+            list.add(nodeItem);
+        }
+        return list;
+    }
+
     private static RedisURI buildRedisURI(RedisConnectParam param) {
         if(StringUtils.isNotBlank(param.getRedisPassword())){
             return RedisURI.Builder.redis(param.getIp(), param.getPort()).withPassword(param.getRedisPassword()).build();
         }
         return RedisURI.Builder.redis(param.getIp(), param.getPort()).build();
     }
+
 }

@@ -10,7 +10,7 @@ import com.newegg.ec.cache.core.entity.redis.RedisSlowLog;
 import com.newegg.ec.cache.core.entity.redis.SlowLogParam;
 import com.newegg.ec.cache.dao.IClusterDao;
 import com.newegg.ec.cache.dao.INodeInfoDao;
-import com.newegg.ec.cache.module.extend.MonitorExtensionService;
+import com.newegg.ec.cache.module.extend.ExtensionService;
 import com.newegg.ec.cache.util.DateUtil;
 import com.newegg.ec.cache.util.NetUtil;
 import com.newegg.ec.cache.util.redis.RedisUtils;
@@ -27,7 +27,7 @@ import java.util.Map;
  * Created by gl49 on 2018/4/21.
  */
 @Component
-public class MonitorService extends MonitorExtensionService implements IMonitorService{
+public class MonitorService extends ExtensionService implements IMonitorService{
 
     @Autowired
     private IClusterDao clusterDao;

@@ -1,14 +1,14 @@
 package com.newegg.ec.cache.controller;
 
-import com.newegg.ec.cache.app.component.NodeManager;
 import com.newegg.ec.cache.core.entity.annotation.userapi.UserAccess;
 import com.newegg.ec.cache.core.entity.constants.Constants;
 import com.newegg.ec.cache.core.entity.model.Response;
 import com.newegg.ec.cache.core.entity.model.User;
-import com.newegg.ec.cache.plugin.INodeOperate;
-import com.newegg.ec.cache.plugin.basemodel.Node;
-import com.newegg.ec.cache.plugin.basemodel.NodeRequestPram;
-import com.newegg.ec.cache.plugin.basemodel.PluginType;
+import com.newegg.ec.cache.core.entity.model.plugin.Node;
+import com.newegg.ec.cache.module.clusterbuild.common.NodeManager;
+import com.newegg.ec.cache.module.clusterbuild.plugins.INodeOperate;
+import com.newegg.ec.cache.module.clusterbuild.plugins.basemodel.NodeRequestPram;
+import com.newegg.ec.cache.module.clusterbuild.plugins.basemodel.PluginType;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;

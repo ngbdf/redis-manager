@@ -1,11 +1,8 @@
 package com.newegg.ec.app.utils;
 
-import com.newegg.ec.cache.core.entity.model.Slowlog;
 import com.newegg.ec.cache.core.entity.redis.RedisConnectParam;
 import com.newegg.ec.cache.util.redis.RedisUtils;
 import org.junit.Test;
-
-import java.util.List;
 
 /**
  * Created by lf52 on 2019/2/23.
@@ -19,30 +16,30 @@ public class RedisUtilTest {
         //System.out.println(RedisUtils.getRedisConfig(param));
         //System.out.println(RedisUtils.getRedisMode(param));
         //System.out.println(RedisUtils.redisDBInfo(param));
-        //System.out.println(RedisUtils.dbSize(param));
+        System.out.println(RedisUtils.dbSize(param));
         //System.out.println(RedisUtils.getAllNodes(param));
         //System.out.println(RedisUtils.getClusterInfo(param));
         //System.out.println(RedisUtils.getNodeId(param));
-        System.out.println(RedisUtils.getSlowLog(param, 1000));
+        //System.out.println(RedisUtils.getSlowLog(param, 1000));
 
     }
 
     @Test
     public void test2(){
-        RedisConnectParam param = new RedisConnectParam("10.16.46.192",8008);
+        RedisConnectParam param = new RedisConnectParam("10.16.46.132",8008);
         //System.out.println(RedisUtils.getInfo(param));
         //System.out.println(RedisUtils.getRedisConfig(param));
         //System.out.println(RedisUtils.getRedisMode(param));
         //System.out.println(RedisUtils.redisDBInfo(param));
-        //System.out.println(RedisUtils.dbSize(param));
+        System.out.println(RedisUtils.dbSize(param));
         //System.out.println(RedisUtils.getAllNodes(param));
         //System.out.println(RedisUtils.getClusterInfo(param));
         //System.out.println(RedisUtils.getNodes(param,false));
         //System.out.println(RedisUtils.getNodeId(param));
-        List<Slowlog> list = RedisUtils.getSlowLog(param, 1);
+       /* List<Slowlog> list = RedisUtils.getSlowLog(param, 1);
         list.forEach(o -> {
             System.out.println(o);
-        });
+        });*/
     }
 
 }

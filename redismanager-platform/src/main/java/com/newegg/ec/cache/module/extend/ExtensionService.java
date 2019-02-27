@@ -27,9 +27,9 @@ import java.util.concurrent.Future;
  * 对于Redis4.0新特性的功能扩展 ：MEMORY PURGE,手动整理内存碎片  MEMORY DOCTOR,给出redis集群的诊断建议
  */
 @Component
-public class MonitorExtensionService implements ApplicationListener<ContextRefreshedEvent>,IExtensionService {
+public class ExtensionService implements ApplicationListener<ContextRefreshedEvent>,IExtensionService {
 
-    private static final Log logger = LogFactory.getLog(MonitorExtensionService.class);
+    private static final Log logger = LogFactory.getLog(ExtensionService.class);
 
     private static ExecutorService executorPool = Executors.newFixedThreadPool(30);
 

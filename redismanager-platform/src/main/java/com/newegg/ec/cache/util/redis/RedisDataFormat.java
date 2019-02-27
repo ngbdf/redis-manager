@@ -80,7 +80,7 @@ public class RedisDataFormat {
      * @param info
      * @return
      */
-    public static Map<String, Map<String,String>> changeNodesInfoMap(String info, boolean filterMaster) {
+    public static Map<String, Map> changeNodesInfoMap(String info, boolean filterMaster) {
         Map<String, Map> map = new HashMap<>();
         String[] lines = info.split("\n");
         for (String line : lines) {
@@ -122,7 +122,7 @@ public class RedisDataFormat {
                 }
             }
         }
-        Map<String, Map<String,String>> result = new HashMap<>();
+        Map<String, Map> result = new HashMap<>();
         // 过滤掉非法 master
         for (Map.Entry<String, Map> item : map.entrySet()) {
             String key = item.getKey();
@@ -174,6 +174,22 @@ public class RedisDataFormat {
             strPort = port;
         }
         return Integer.parseInt(strPort);
+    }
+
+    public static Set<String> getIPList(String nodeStr) {
+        Set<String> ipSet = new HashSet<>();
+        String[] nodeArr = nodeStr.split("\n");
+        for (String node : nodeArr) {
+            try {
+                String[] tmpArr = node.split("\\s+");
+                String host = tmpArr[0];
+                String ip = host.split(":")[0];
+                ipSet.add(ip);
+            } catch (Exception e) {
+                throw new RMException("getIPList error", e);
+            }
+        }
+        return ipSet;
     }
 
 }
