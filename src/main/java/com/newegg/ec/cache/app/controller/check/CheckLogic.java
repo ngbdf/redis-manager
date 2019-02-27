@@ -198,7 +198,7 @@ public class CheckLogic {
     }
 
     public String getCheckDirPermission(String installPath) {
-        return "if [ ! -w '" + installPath + "' ];then echo '" + installPath + " without permision <br>'; fi";
+        return "if [ ! -w '" + installPath + "' ];then echo '" + installPath + " without permission <br>'; fi";
     }
 
     public String getCheckDirExist(String installPath) {
