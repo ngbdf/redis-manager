@@ -52,30 +52,43 @@ public class CreateClusterLogHandler implements WebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession webSocketSession) throws IOException {
-        webSocketSession.getAttributes();
-        webSocketSession.sendMessage(new TextMessage("connection success"));
+    public void afterConnectionEstablished(WebSocketSession webSocketSession){
+        try {
+            webSocketSession.getAttributes();
+            webSocketSession.sendMessage(new TextMessage("connection success"));
+        } catch (Exception e) {
+        }
     }
 
     @Override
-    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) throws InterruptedException {
-        JSONObject reqObject = JSONObject.fromObject(webSocketMessage.getPayload().toString());
-        String id = reqObject.getString("id");
-        createLogQueueIfNotExist(id, webSocketSession);
-        BlockingDeque<String> logQueue;
-        while (true) {
-            logQueue = getLogQueue(id);
-            String message = logQueue.poll();
-            if (!StringUtils.isEmpty(message)) {
-                try {
-                    webSocketSession.sendMessage(new TextMessage(message));
-                } catch (IOException e) {
-                    //ingore
+    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage){
+        try{
+            JSONObject reqObject = JSONObject.fromObject(webSocketMessage.getPayload().toString());
+            String id = reqObject.getString("id");
+            createLogQueueIfNotExist(id, webSocketSession);
+            BlockingDeque<String> logQueue;
+            while (true) {
+                logQueue = getLogQueue(id);
+                if(logQueue !=null && logQueue.size()>0){
+                    String message = logQueue.poll();
+                    if (!StringUtils.isEmpty(message)) {
+                        try {
+                            webSocketSession.sendMessage(new TextMessage(message));
+                        } catch (IOException e) {
+                            //ingore
+                        }
+                    } else {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                        }
+                    }
                 }
-            } else {
-                    Thread.sleep(1000);
             }
+        }catch (Exception e){
+
         }
+
     }
 
     @Override
