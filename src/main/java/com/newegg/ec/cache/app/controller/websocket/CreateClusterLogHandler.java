@@ -4,6 +4,7 @@ import com.newegg.ec.cache.core.logger.CommonLogger;
 import net.sf.json.JSONObject;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.*;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -46,48 +47,66 @@ public class CreateClusterLogHandler implements WebSocketHandler {
     public static void removeLogMap(WebSocketSession webSocketSession) {
         String id = websocketLogMap.get(webSocketSession);
         websocketLogMap.remove(webSocketSession);
-        if (logMap != null && logMap.containsKey(id)) {
+        if (logMap != null && !StringUtils.isEmpty(id)) {
             logMap.remove(id);
         }
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession webSocketSession) throws IOException {
-        webSocketSession.getAttributes();
-        webSocketSession.sendMessage(new TextMessage("connection success"));
+    public void afterConnectionEstablished(WebSocketSession webSocketSession)  {
+
+        try {
+            webSocketSession.getAttributes();
+            webSocketSession.sendMessage(new TextMessage("connection success"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) throws InterruptedException {
-        JSONObject reqObject = JSONObject.fromObject(webSocketMessage.getPayload().toString());
-        String id = reqObject.getString("id");
-        createLogQueueIfNotExist(id, webSocketSession);
-        BlockingDeque<String> logQueue;
-        while (true) {
-            logQueue = getLogQueue(id);
-            String message = logQueue.poll();
-            if (!StringUtils.isEmpty(message)) {
-                try {
-                    webSocketSession.sendMessage(new TextMessage(message));
-                } catch (IOException e) {
-                    logger.error("webSocket send Message Error" ,e);
-                }
-            } else {
-                    Thread.sleep(1000);
+    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage){
+       try{
+           JSONObject reqObject = JSONObject.fromObject(webSocketMessage.getPayload().toString());
+           String id = reqObject.getString("id");
+           createLogQueueIfNotExist(id, webSocketSession);
+           BlockingDeque<String> logQueue;
+           while (true) {
+               logQueue = getLogQueue(id);
+               if(logQueue !=null && logQueue.size()>0){
+                   String message = logQueue.poll();
+                   if (!StringUtils.isEmpty(message)) {
+                       try {
+                           webSocketSession.sendMessage(new TextMessage(message));
+                       } catch (SockJsTransportFailureException e) {
+                           //ingore
+                       } catch (IOException e) {
+                           //ingore
+                       }
+                   } else {
+                       Thread.sleep(1000);
+                   }
+               }
+           }
+       }catch (Exception e){
+
+       }
+
+    }
+
+    @Override
+    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable){
+        try {
+            if (webSocketSession.isOpen()) {
+                    webSocketSession.close();
             }
+            removeLogMap(webSocketSession);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
-    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable) throws Exception {
-        if (webSocketSession.isOpen()) {
-            webSocketSession.close();
-        }
-        removeLogMap(webSocketSession);
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
+    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) {
         removeLogMap(webSocketSession);
     }
 
