@@ -3,7 +3,6 @@ package com.newegg.ec.cache.plugin.basemodel;
 import com.newegg.ec.cache.app.component.RedisManager;
 import com.newegg.ec.cache.app.logic.ClusterLogic;
 import com.newegg.ec.cache.app.model.Cluster;
-import com.newegg.ec.cache.app.model.Constants;
 import com.newegg.ec.cache.app.model.RedisNode;
 import com.newegg.ec.cache.app.util.JedisUtil;
 import com.newegg.ec.cache.app.util.NetUtil;
