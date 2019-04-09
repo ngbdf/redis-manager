@@ -13,6 +13,10 @@
     <link rel="stylesheet" href="../css/common.css"/>
     <link rel="stylesheet" href="../css/cluster-monitor-detail.css"/>
 
+    <link rel="stylesheet" href="../font-awesome/css/font-awesome.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+
     <script type="text/javascript" src="../vender/jquery/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="../vender/bootstrap-3.3.7/js/bootstrap.js"></script>
     <script type="text/javascript" src="../vender/sparrow/layer/layer.js"></script>
@@ -37,7 +41,7 @@
     <div class="data-container scrollbar">
         <div class="detail-header">
             <div class="cluster-name-container">
-                <span id="clusterName"></span>
+                <span id="clusterName"></span><i class="icon-medkit safe cursor" style="display:none" id="memory-doctor" title="Redis Memory Diagnosis"></i>
             </div>
             <div class="filter-container">
                 <div class="select-node">
@@ -48,13 +52,13 @@
                         </div>
                     </form>
                 </div>
-                <!--<div class="value-type-container">
+                <div class="value-type-container">
                     <select class="selectpicker" data-width="100%" id="dataType">
                         <option value="max">max</option>
                         <option value="min">min</option>
                         <option value="avg">avg</option>
                     </select>
-                </div>-->
+                </div>
                 <div class="time-filter-container">
                     <a data-toggle="collapse" data-parent="#accordion" href="#time-select-panel" class="list-active">
                         <img src="../img/time.svg" class="time-img"/>
@@ -192,6 +196,7 @@
                                 <div id="charts-commands" class="col-xs-4 chart-sm" ></div>
                                 <div id="charts-Keyspace-expires" class="col-xs-4 chart-sm" ></div>
                                 <div id="charts-hitRate" class="col-xs-4 chart-sm" ></div>
+                                <div id="charts-memFragmentationRatio" class="col-xs-4 chart-sm" ></div>
                             </div><!-- .row -->
                         </div>
                         <div class="panel-body   scrollbar-div-1" >

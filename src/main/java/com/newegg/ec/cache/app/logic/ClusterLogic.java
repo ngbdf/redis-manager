@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.util.*;
 @Component
 public class ClusterLogic {
 
-    private static Log logger = LogFactory.getLog(ClusterLogic.class);
+    private static final  Log logger = LogFactory.getLog(ClusterLogic.class);
 
     @Value("${cache.redis.client}")
     private String redisClient;
@@ -50,7 +51,19 @@ public class ClusterLogic {
     private IHumpbackNodeDao humpbackNodeDao;
 
     public Cluster getCluster(int id) {
-        return clusterDao.getCluster(id);
+
+        Cluster cluster = clusterDao.getCluster(id);
+        Host host = NetUtil.getHostPassAddress(cluster.getAddress());
+        if(host != null){
+            ConnectionParam param = new ConnectionParam(host.getIp(), host.getPort(), cluster.getRedisPassword());
+            Map<String, String> nodeInfo = JedisUtil.getMapInfo(param);
+            String redisVersion = nodeInfo.get("redis_version");
+            if( Integer.valueOf(redisVersion.substring(0, 1)) >= 4){
+                cluster.setIsVersion4(true);
+            }
+        }
+
+        return cluster;
     }
 
     public RedisValue query(RedisQueryParam redisQueryParam) {
@@ -371,7 +384,6 @@ public class ClusterLogic {
         int masterSize = masterList.size();
         List<SlotBalanceUtil.Shade> balanceSlots = SlotBalanceUtil.balanceSlot(masterSize);
         for (int i = 0; i < balanceSlots.size(); i++) {
-            try {
                 SlotBalanceUtil.Shade shade = balanceSlots.get(i);
                 int start = shade.getStartSlot();
                 int end = shade.getEndSlot();
@@ -391,20 +403,24 @@ public class ClusterLogic {
                                 jedis.clusterAddSlots(slot);
                             }
                         } catch (Exception e) {
-                            logger.error("", e);
+                            if(e instanceof  JedisConnectionException){
+                                logger.error(e.getMessage() + " Can Not Init Slot");
+                            }else{
+                                logger.error("", e);
+                            }
                             res = false;
                         }
                     }
                 } catch (Exception e) {
+                    if(e instanceof  JedisConnectionException){
+                        logger.error(e.getMessage() + " Can Not Init Slot");
+                    }else{
+                        logger.error("", e);
+                    }
                     res = false;
-                    logger.error("", e);
                 } finally {
                     jedis.close();
                 }
-            } catch (Exception e) {
-                res = false;
-                logger.error("", e);
-            }
         }
         return res;
     }
@@ -607,7 +623,7 @@ public class ClusterLogic {
                     Map<String, String> info = JedisUtil.getMapInfo(param);
                     return "now mem_fragmentation_ratio :" + info.get("mem_fragmentation_ratio");
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 result = "memory purge error";
                 logger.error("memory purge error", e);
             } finally {

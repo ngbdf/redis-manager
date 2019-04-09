@@ -1,7 +1,19 @@
 $(function(){
+
     window.clusterId = getQueryString("clusterId");
     getCluster(window.clusterId, function(obj){
-        window.cluster = obj.res;
+        var cluster = obj.res;
+
+        var clusterId = cluster.id;
+        var address = cluster.address;
+        getClusterInfoByAddress(clusterId, address, function(obj){
+           if(obj.res.redis_mode != "cluster") {
+                sparrow_win.confirm("Only support Redis Cluster mode", function(){
+                    window.location.href = "/monitor/clusterMonitorList";
+                });
+           }
+        });
+        window.cluster = cluster;
         $("#cluster-name").text( obj.res.clusterName );
     });
 
@@ -72,3 +84,4 @@ $(document).on("click","#deleteAllHistory",function(){
        });
   }
 });
+

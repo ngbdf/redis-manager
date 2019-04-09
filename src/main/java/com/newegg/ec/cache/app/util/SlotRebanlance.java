@@ -12,7 +12,7 @@ import java.util.Random;
  */
 public class SlotRebanlance {
 
-    private static Log logger = LogFactory.getLog(SlotRebanlance.class);
+    private static final Log logger = LogFactory.getLog(SlotRebanlance.class);
 
     private static int totalSlot = 16384;
 
@@ -22,12 +22,12 @@ public class SlotRebanlance {
 
     public static void main(String[] args) {
         if (initCount <= targetCount)
-            kuorong();
+            expand();
         else
-            shousuo();
+            reduced();
     }
 
-    public static void kuorong() {
+    public static void expand() {
         List<Shade> initShades = getShades("init", initCount);
         List<Shade> targetShades = getShades("", targetCount);
         logger.info("target:" + targetShades);
@@ -73,7 +73,7 @@ public class SlotRebanlance {
         logger.info("result:" + targetShades);
     }
 
-    public static void shousuo() {
+    public static void reduced() {
         List<Shade> initShades = getShades("init", initCount);
         logger.info("init:" + initShades);
         List<Shade> targetShades = getShades("", targetCount);

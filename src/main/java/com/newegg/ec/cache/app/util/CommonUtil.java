@@ -9,7 +9,7 @@ import java.util.UUID;
  */
 public class CommonUtil {
 
-    private static CommonLogger logger = new CommonLogger(CommonUtil.class);
+    private static final CommonLogger logger = new CommonLogger(CommonUtil.class);
 
     public static String getUuid() {
         return UUID.randomUUID().toString();

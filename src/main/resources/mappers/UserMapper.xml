@@ -4,22 +4,38 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.newegg.ec.cache.app.dao.IUserDao">
+
     <select id="getUserList"  resultType="com.newegg.ec.cache.app.model.User">
-        select username, password, user_group from user limit 500
+        select * from user limit 500
     </select>
+
     <select id="getUser"  resultType="com.newegg.ec.cache.app.model.User">
-        select username, password, user_group  from user where id=#{id}
+        select * from user where id=#{id}
     </select>
+
     <select id="getUserByName"  resultType="com.newegg.ec.cache.app.model.User">
         select username, password, user_group  from user where username=#{username}
     </select>
+
     <delete id="removeUser" parameterType="int">
         delete from user where id = #{id};
     </delete>
+
     <select id="getGroups" resultType="String">
         select distinct user_group from user
     </select>
+
     <insert id="addUser"  parameterType="com.newegg.ec.cache.app.model.User">
         insert into user(username, password, user_group) values(#{username},#{password},#{userGroup})
     </insert>
+
+    <update id="updateUser" parameterType="com.newegg.ec.cache.app.model.User">
+        update user set
+        username = #{username},
+        password = #{password},
+        user_group = #{userGroup}
+        where
+        id = #{id}
+    </update>
+
 </mapper>

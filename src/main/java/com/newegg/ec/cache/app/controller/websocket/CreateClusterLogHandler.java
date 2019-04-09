@@ -1,9 +1,12 @@
 package com.newegg.ec.cache.app.controller.websocket;
 
+import com.newegg.ec.cache.core.logger.CommonLogger;
 import net.sf.json.JSONObject;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.*;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,8 +16,12 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Created by gl49 on 2018/4/22.
  */
 public class CreateClusterLogHandler implements WebSocketHandler {
-    private static final Map<String, BlockingDeque<String>> logMap = new ConcurrentHashMap<>();
-    private static final Map<WebSocketSession, String> websocketLogMap = new ConcurrentHashMap<>();
+
+
+    public static final CommonLogger logger = new CommonLogger(CreateClusterLogHandler.class);
+
+    private static  Map<String, BlockingDeque<String>> logMap = new ConcurrentHashMap<>();
+    private static  Map<WebSocketSession, String> websocketLogMap = new ConcurrentHashMap<>();
 
     private static BlockingDeque<String> createLogQueueIfNotExist(String id, WebSocketSession webSocketSession) {
         if (null == logMap.get(id)) {
@@ -40,44 +47,66 @@ public class CreateClusterLogHandler implements WebSocketHandler {
     public static void removeLogMap(WebSocketSession webSocketSession) {
         String id = websocketLogMap.get(webSocketSession);
         websocketLogMap.remove(webSocketSession);
-        if (logMap.containsKey(id)) {
+        if (logMap != null && !StringUtils.isEmpty(id)) {
             logMap.remove(id);
         }
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
-        webSocketSession.getAttributes();
-        webSocketSession.sendMessage(new TextMessage("connection success"));
+    public void afterConnectionEstablished(WebSocketSession webSocketSession)  {
+
+        try {
+            webSocketSession.getAttributes();
+            webSocketSession.sendMessage(new TextMessage("connection success"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) throws Exception {
-        JSONObject reqObject = JSONObject.fromObject(webSocketMessage.getPayload().toString());
-        String id = reqObject.getString("id");
-        createLogQueueIfNotExist(id, webSocketSession);
-        BlockingDeque<String> logQueue;
-        while (true) {
-            logQueue = getLogQueue(id);
-            String message = logQueue.poll();
-            if (!StringUtils.isEmpty(message)) {
-                webSocketSession.sendMessage(new TextMessage(message));
-            } else {
-                Thread.sleep(1000);
+    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage){
+       try{
+           JSONObject reqObject = JSONObject.fromObject(webSocketMessage.getPayload().toString());
+           String id = reqObject.getString("id");
+           createLogQueueIfNotExist(id, webSocketSession);
+           BlockingDeque<String> logQueue;
+           while (true) {
+               logQueue = getLogQueue(id);
+               if(logQueue !=null && logQueue.size()>0){
+                   String message = logQueue.poll();
+                   if (!StringUtils.isEmpty(message)) {
+                       try {
+                           webSocketSession.sendMessage(new TextMessage(message));
+                       } catch (SockJsTransportFailureException e) {
+                           //ingore
+                       } catch (IOException e) {
+                           //ingore
+                       }
+                   } else {
+                       Thread.sleep(1000);
+                   }
+               }
+           }
+       }catch (Exception e){
+
+       }
+
+    }
+
+    @Override
+    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable){
+        try {
+            if (webSocketSession.isOpen()) {
+                    webSocketSession.close();
             }
+            removeLogMap(webSocketSession);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
-    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable) throws Exception {
-        if (webSocketSession.isOpen()) {
-            webSocketSession.close();
-        }
-        removeLogMap(webSocketSession);
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
+    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) {
         removeLogMap(webSocketSession);
     }
 

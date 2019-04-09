@@ -35,4 +35,9 @@ public class IndexConttroller {
         return "managerCluster";
     }
 
+    @RequestMapping("/pages/userManage")
+    public String userManager() {
+       return  "userManage";
+    }
+
 }

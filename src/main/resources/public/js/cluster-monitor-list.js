@@ -63,5 +63,3 @@ $(document).on("click", ".cluster-info-detail", function(res){
     });
 
 });
-
-

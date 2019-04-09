@@ -33,7 +33,7 @@ import java.util.concurrent.Executors;
 @Component
 public class RedisInfoSchedule {
     private static final int JEDIS_TIMEOUT = 1000;
-    private static Log logger = LogFactory.getLog(RedisInfoSchedule.class);
+    private static final Log logger = LogFactory.getLog(RedisInfoSchedule.class);
     private static ExecutorService threadPool = Executors.newFixedThreadPool(200);
 
     @Resource

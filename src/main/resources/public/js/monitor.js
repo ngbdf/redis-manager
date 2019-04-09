@@ -131,6 +131,40 @@ $(".cluster-info").on("click", function(){
     })
 })
 
+//memory doctor
+$(document).on("click", "#memory-doctor", function(e){
+
+     var clusterId = window.cluster.id;
+     //弹出一个自定义弹出层
+     layer.open({
+        type: 1 //Page层类型
+       ,area: ['600px', '60%']
+       ,title: 'Memory Diagnosis'
+       ,shade: 0.4 //遮罩透明度
+       ,maxmin: true //允许全屏最小化
+       ,anim: 1 //0-6的动画形式，-1不开启
+       ,content: "<div class='margin-around'><ul id = 'result'></ul></div>"
+     });
+     var index = layer.load(1, {
+       shade: [0.1,'#fff'] //0.1透明度的白色背景
+     });
+
+     memoryDoctor(clusterId,function(result){
+           layer.close(index);
+           var nodes = result.res;
+
+           if(nodes instanceof Array){
+             nodes.forEach(function(element){
+                 var html = "<li><span class='node'>"+element.addr+"</span>"+element.result+"</li>"
+                 $("#result").append(html);
+              });
+           }else{
+             $("#result").append(nodes);
+           }
+
+     });
+});
+
 // info command
 $("#info").on("click", function(){
     var host = window.host;
@@ -248,11 +282,18 @@ function init(){
                 buildChart("charts-commands","每秒命令数(total_commands_processed)","date","totalCommandsProcessed",usefulData,"command  /sec  "," ");
                 buildChart("charts-Keyspace-expires","有TTL的key总数","date","expires",usefulData,"keys with ttl",numberUnit);
                 buildChart("charts-hitRate","命中率","date","keyspaceHitRate",usefulData,"hitRate_avg"," ");
+                buildChart("charts-memFragmentationRatio","节点内存碎片率","date","memFragmentationRatio",usefulData," mem_fragmentation_ratio"," ");
         }
     });
 
     getCluster(window.clusterId , function(obj){
-        $("#clusterName").html(obj.res.clusterName);
+            window.cluster = obj.res;
+            //如果是4.0的redis，显示memory doctor按钮
+            if(obj.res.version4){
+              $("#memory-doctor").show();
+            }
+
+            $("#clusterName").html(obj.res.clusterName);
     });
 
     // set node options

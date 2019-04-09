@@ -24,7 +24,7 @@ import java.util.*;
  */
 public class JedisUtil {
 
-    public static Log logger = LogFactory.getLog(JedisUtil.class);
+    public static final Log logger = LogFactory.getLog(JedisUtil.class);
 
     private JedisUtil() {
         //ignore
@@ -113,7 +113,27 @@ public class JedisUtil {
 
     public static List<Map<String, String>> dbInfo(ConnectionParam param) {
         String info = getInfo(param);
-        return dbInfo(info);
+        List<Map<String, String>> dbInfo = dbInfo(info);
+
+        //fix bug on query mode when first create cluster
+        if(dbInfo.size() == 0){
+            Map<String, Map> nodes = JedisUtil.getMasterNodes(param);
+            for (Map.Entry<String, Map> node : nodes.entrySet()) {
+                Map map = node.getValue();
+                List<Map<String, String>> templist = dbInfo(JedisUtil.getInfo(new ConnectionParam((String) map.get("ip"), (Integer) map.get("port"), param.getRedisPassword())));
+                if(templist.size() > 0) {
+                    return templist;
+                }
+            }
+
+            Map<String, String> resMap = new HashMap<>();
+            resMap.put("expires","0");
+            resMap.put("keys","1");
+            resMap.put("db","0");
+            resMap.put("avg_ttl","0");
+            dbInfo.add(resMap);
+        }
+        return dbInfo;
     }
 
     public static List<Map<String, String>> dbInfo(String info) {
@@ -122,7 +142,7 @@ public class JedisUtil {
             Map<String, String> mapInfo = getMapInfo(info);
             for (Map.Entry<String, String> db : mapInfo.entrySet()) {
                 String key = db.getKey();
-                if (key.contains("db")) {
+                if (key.startsWith("db")) {
                     key = key.substring(2);
                     String value = db.getValue();
                     Map<String, String> resMap = RedisMsgUtil.changeStrToMap(value);

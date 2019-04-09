@@ -4,7 +4,9 @@ import com.newegg.ec.cache.app.logic.UserLogic;
 import com.newegg.ec.cache.app.model.Constants;
 import com.newegg.ec.cache.app.model.Response;
 import com.newegg.ec.cache.app.model.User;
+import com.newegg.ec.cache.app.util.RequestUtil;
 import com.newegg.ec.cache.core.userapi.UserAccess;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -79,16 +81,28 @@ public class UserController {
 
     @RequestMapping(value = "/addUser", method = RequestMethod.POST)
     @ResponseBody
-    public Response addUser(@RequestBody User user) {
-        boolean res = logic.addUser(user);
-        return Response.Result(0, res);
+    public Response addUser(@RequestBody JSONObject user) {
+
+       if("admin".equals(RequestUtil.getUser().getUsername())) {
+           boolean res = logic.addUser(user);
+           return Response.Result(0, res);
+       }else {
+           return Response.Warn("Illegal Operation");
+       }
+
     }
 
     @RequestMapping(value = "/removeUser", method = RequestMethod.GET)
     @ResponseBody
     public Response removeUser(@RequestParam int id) {
-        boolean res = logic.removeUser(id);
-        return Response.Result(0, res);
+
+        if("admin".equals(RequestUtil.getUser().getUsername())) {
+            boolean res = logic.removeUser(id);
+            return Response.Result(0, res);
+        }else {
+            return Response.Warn("Illegal Operation");
+        }
+
     }
 
     @RequestMapping(value = "/listGroup", method = RequestMethod.GET)
@@ -102,4 +116,5 @@ public class UserController {
         }
         return Response.Result(0, list);
     }
+
 }

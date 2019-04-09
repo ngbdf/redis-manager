@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 public class RedisManager {
-    public static Log logger = LogFactory.getLog(RedisManager.class);
+    public static final Log logger = LogFactory.getLog(RedisManager.class);
 
     /**
      * 用于统计已经倒入多少数据

@@ -5,6 +5,11 @@ $(function(){
         if(user != null && user != '' && user != 'undefined') {
             var username = obj.res["username"];
             $("#username").text(username);
+            if(username == "admin") {
+                var userManageObj = $("#userManage");
+                userManageObj.show();
+                userManageObj.find("a").attr("href", "/pages/userManage");
+            }
         } else {
             window.parent.location.href="/user/login";
         }

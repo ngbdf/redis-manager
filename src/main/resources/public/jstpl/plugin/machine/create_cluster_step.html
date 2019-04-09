@@ -65,7 +65,8 @@
             <td class="container-table-tag" >
                 Batch IP List
                 <pre class="ip-list-tip">
-                    format:<br/>
+                    format: <font color="red">确保至少一个Master节点和一个Slave节点</font><br/>
+                    &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<font color="red">否则可能安装失败</font><br/>
                     127.0.0.1:8054 master<br/>
                     127.0.0.1:8053<br/>
                     127.0.0.1:8056 master<br/>
@@ -74,7 +75,7 @@
             </td>
             <td colspan="3">
                 <div class="node-value text-value">
-                    <textarea class="host-list form-control" rows="6" name="iplist" data-relation="username,password,redisPassword,installPath"  data-require="1" data-server-check="/check/checkBatchHostNotPass,/check/checkBatchDirPermission,/check/checkBatchWgetPermission,/check/checkBatchUserPermisson"  placeholder="example 127.0.0.1:8008 master" ></textarea>
+                    <textarea class="host-list form-control" rows="6" name="iplist" data-relation="clusterName,installPath,username,password"  data-require="1" data-server-check="/check/checkBatchHostNotPass,/check/checkBatchDirPermission,/check/checkBatchWgetPermission,/check/checkBatchUserPermisson"  placeholder="example 127.0.0.1:8008 master" ></textarea>
                 </div>
             </td>
         </tr>

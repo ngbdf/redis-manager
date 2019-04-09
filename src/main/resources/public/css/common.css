@@ -252,3 +252,29 @@ td>a.redis-meta {
 .full-width {
     width: 100%;
 }
+
+.safe {
+    margin-left: 15px;
+    color: #00bb9a;
+}
+
+.cursor {
+    cursor: pointer;
+}
+
+.margin-around {
+	margin: 15px;
+}
+
+#result li {
+	margin-bottom: 10px;
+}
+
+.node {
+	font-weight: 700;
+}
+
+body .danger .layui-layer-btn .layui-layer-btn0 {
+    border-color: #ff6c60 !important;
+    background-color: #ff6c60 !important;
+}

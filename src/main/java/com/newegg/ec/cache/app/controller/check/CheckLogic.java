@@ -20,7 +20,7 @@ import java.util.Set;
  */
 @Component
 public class CheckLogic {
-    public static CommonLogger logger = new CommonLogger(CheckLogic.class);
+    public static  final CommonLogger logger = new CommonLogger(CheckLogic.class);
     @Autowired
     private ClusterLogic clusterLogic;
 
@@ -198,7 +198,7 @@ public class CheckLogic {
     }
 
     public String getCheckDirPermission(String installPath) {
-        return "if [ ! -w '" + installPath + "' ];then echo '" + installPath + " without permision <br>'; fi";
+        return "if [ ! -w '" + installPath + "' ];then echo '" + installPath + " without permission <br>'; fi";
     }
 
     public String getCheckDirExist(String installPath) {

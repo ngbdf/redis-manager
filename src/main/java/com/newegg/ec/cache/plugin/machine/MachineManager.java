@@ -30,7 +30,7 @@ import java.util.List;
  */
 @Component
 public class MachineManager extends PluginParent implements INodeOperate {
-    private static CommonLogger logger = new CommonLogger(MachineManager.class);
+    private static final CommonLogger logger = new CommonLogger(MachineManager.class);
 
     private static String REDIS_INSTALL_FILE = "redis_install.sh";
     @Autowired

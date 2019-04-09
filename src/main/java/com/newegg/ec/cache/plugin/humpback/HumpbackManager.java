@@ -34,10 +34,13 @@ import java.util.concurrent.Future;
 @Component
 public class HumpbackManager extends PluginParent implements INodeOperate {
 
+
+    private static final CommonLogger logger = new CommonLogger(HumpbackManager.class);
+
     private static final String CONTAINER_OPTION_API = "containers";
     private static final String IMAGE_OPTION_API = "images";
     static ExecutorService executorService = Executors.newFixedThreadPool(100);
-    private static CommonLogger logger = new CommonLogger(HumpbackManager.class);
+
     @Autowired
     IHumpbackNodeDao nodeDao;
     @Resource
@@ -240,8 +243,7 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
             int port = redisNode.getPort();
             String fomatName = formatContainerName(containerName, port);
             JSONObject res = getContainerInfo(ip, fomatName);
-            int code = res.getInt("Code");
-            if (code <= 200) {
+            if (res.containsKey("Code") && res.getInt("Code") <= 200) {
                 errorMsg += logger.websocket(ip + ":" + port + " the container name " + fomatName + "alreay exit");
                 break;
             }
@@ -370,6 +372,7 @@ public class HumpbackManager extends PluginParent implements INodeOperate {
             res = JSONObject.fromObject(response);
         } catch (IOException e) {
             logger.error("", e);
+            res = new JSONObject();
         }
         return res;
     }

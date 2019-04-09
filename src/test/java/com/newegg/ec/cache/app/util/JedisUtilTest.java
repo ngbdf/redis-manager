@@ -205,7 +205,7 @@ public class JedisUtilTest {
         try {
             // result = redisClient.redisCommandOpt("*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n");
             result = redisClient.redisCommandOpt("123456","*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n");
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }finally {
             redisClient.closeClient();

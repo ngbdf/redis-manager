@@ -20,6 +20,7 @@ public class RedisClient {
 
     public static final String REWRITE = "*2\r\n$6\r\nconfig\r\n$7\r\nrewrite\r\n";
     public static final String MEMORYPURGE = "*2\r\n$6\r\nmemory\r\n$5\r\npurge\r\n";
+    public static final String MEMORYDOCTOR = "*2\r\n$6\r\nmemory\r\n$6\r\ndoctor\r\n";
 
     private Socket socket;
     private OutputStream outputStream;
@@ -28,14 +29,11 @@ public class RedisClient {
     public RedisClient(String host, int port){
         try {
 
-            this.socket = new Socket(host,port);
-            this.outputStream = this.socket.getOutputStream();
-            this.inputStream = this.socket.getInputStream();
             socket = new Socket();
             socket.setReuseAddress(true);
             socket.setTcpNoDelay(true);
             socket.setSoLinger(true, 0);
-            socket.connect(new InetSocketAddress(host, port), 3000);
+            socket.connect(new InetSocketAddress(host, port), 10000);
             outputStream = socket.getOutputStream();
             inputStream = socket.getInputStream();
 
@@ -65,7 +63,7 @@ public class RedisClient {
      * @return
      * @throws IOException
      */
-    public String redisCommandOpt(String pssword,String command) throws IOException {
+    public String redisCommandOpt(String pssword,String command) throws IOException, InterruptedException {
 
         byte[] bytes= new byte[4096];
         StringBuilder auth = new StringBuilder();
@@ -76,6 +74,9 @@ public class RedisClient {
         auth.append(pssword).append("\r\n");
         outputStream.write(auth.toString().getBytes());
         outputStream.write(command.getBytes());
+
+        //经测试发现，在有密码的集群执行command时，需要延时一定的时间确保redis的response结果完全写入inputStream中
+        Thread.sleep(20);
         inputStream.read(bytes);
         return new String(bytes);
 

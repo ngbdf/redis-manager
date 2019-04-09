@@ -18,6 +18,8 @@ public interface IUserDao {
 
     void addUser(User user);
 
+    boolean updateUser(User user);
+
     List<String> getGroups();
 
     User getUserByName(String username);

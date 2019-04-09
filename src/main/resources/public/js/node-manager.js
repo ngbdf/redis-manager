@@ -92,7 +92,7 @@ $(document).on("click", ".import-node-to-cluster", function(){
             var tmps = hostArr[0].split(":");
             var masterIp = tmps[0];
             var masterPort = tmps[1];
-            importNode(nodeDetail.ip, nodeDetail.port,masterIp,masterPort, function(){
+            importNode(cluster.id, nodeDetail.ip, nodeDetail.port,masterIp,masterPort, function(){
                 $("[href='#node-list']").trigger("click");
             });
         });
