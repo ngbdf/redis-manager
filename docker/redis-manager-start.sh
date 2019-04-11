@@ -1,7 +1,6 @@
 #!/bin/bash
 set encoding=utf-8
 
-
 # check environment variable
 function check() {
   if [ ! "$CONFIG_URL" ]; then
@@ -26,15 +25,15 @@ function init_conf(){
 # update config file by environment variable
 function up_conf() {
   if [ ! "$CONFIG_URL" ]; then
+    cp ./web/application.yml.base ./conf/application.yml
     if [ -n "$SERVICE_PORT" ];then
       echo "service port "$SERVICE_PORT
-      sed -i "s/port: 8182/port: $SERVICE_PORT/g" ./conf/application.yml
+      sed -i "s/port:.*/port: $SERVICE_PORT/g" ./conf/application.yml
     fi
-
     if [ -n "$MYSQL_URL" ];then
       echo "mysql url "$MYSQL_URL
       MYSQL_URL=${MYSQL_URL//\&/\\\&}
-      sed -i "s#url: jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8#url: $MYSQL_URL#g" ./conf/application.yml
+      sed -i "s#url: jdbc:mysql:.*#url: $MYSQL_URL#g" ./conf/application.yml
     fi
     if [ -n "$MYSQL_USER" ];then
       echo "mysql user name "$MYSQL_USER
@@ -42,7 +41,7 @@ function up_conf() {
     fi
     if [ -n "$MYSQL_PWD" ];then
       echo "mysql password ******"
-      sed -i "s/password:/password: $MYSQL_PWD/g" ./conf/application.yml
+      sed -i "s/password:.*/password: $MYSQL_PWD/g" ./conf/application.yml
     fi
 
   elif [ -n "$CONFIG_URL" ];then
