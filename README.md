@@ -17,17 +17,14 @@ Redis Manager 是 Redis 一站式管理平台，支持集群的创建、管理�
 
 1. RedisManager讨论群      
 [![Join the chat at https://gitter.im/dianping/cat](https://badges.gitter.im/dianping/cat.svg)](https://gitter.im/redis-manager/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
-2. RedisManager微信群     
-
- <img src="./docs/images/wechat.png" width="200px"/>
  
-3. RedisManager QQ群(备用，请优先加入微信群)
+2. RedisManager QQ群
 
  <img src="./docs/images/qq.jpg" width="200px"/>
 
-4. 知乎专栏  https://zhuanlan.zhihu.com/c_1055846842708930560
+3. 知乎专栏  https://zhuanlan.zhihu.com/c_1055846842708930560
 
-5. 云栖社区  https://yq.aliyun.com/album/227?spm=a2c4e.11155435.0.0.3ece24f0lQw15C
+4. 云栖社区  https://yq.aliyun.com/album/227?spm=a2c4e.11155435.0.0.3ece24f0lQw15C
 
 ## 产品主要功能介绍
 ### Dashboard    
