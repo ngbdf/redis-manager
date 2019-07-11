@@ -12,6 +12,7 @@
     <modules>
         <module>redis-client</module>
         <module>redismanager-platform</module>
+        <module>redis-manager-dashboard</module>
     </modules>
 
     <properties>

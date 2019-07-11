@@ -10,12 +10,14 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class StringByteRedisCodec implements RedisCodec<String, byte[]> {
 	private static final byte[] EMPTY = new byte[0];
 	
 	@Override
 	public String decodeKey(ByteBuffer bytes) {
-		 return Unpooled.wrappedBuffer(bytes).toString(StandardCharsets.UTF_8);
+		 return Unpooled.wrappedBuffer(bytes).toString(UTF_8);
 	}
 
 	@Override
@@ -52,7 +54,7 @@ public class StringByteRedisCodec implements RedisCodec<String, byte[]> {
 	            return ByteBuffer.wrap(EMPTY);
 	        }
 
-	        CharsetEncoder encoder = CharsetUtil.encoder(StandardCharsets.UTF_8);
+	        CharsetEncoder encoder = CharsetUtil.encoder(UTF_8);
 	        ByteBuffer buffer = ByteBuffer.allocate((int) (encoder.maxBytesPerChar() * key.length()));
 
 	        ByteBuf byteBuf = Unpooled.wrappedBuffer(buffer);
