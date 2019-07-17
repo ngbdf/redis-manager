@@ -1,4 +1,5 @@
-https://github.com/ngbdf/redis-manager/issues/54
+
+[RedisManager 2.0 (Asgard) 重构——功能讨论](https://github.com/ngbdf/redis-manager/issues/54) 
 
 # RedisManager
 
