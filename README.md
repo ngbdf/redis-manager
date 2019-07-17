@@ -1,3 +1,5 @@
+https://github.com/ngbdf/redis-manager/issues/54
+
 # RedisManager
 
 [![Build Status](https://travis-ci.org/ngbdf/redis-manager.svg?branch=master)](https://travis-ci.org/ngbdf/redis-manager)
