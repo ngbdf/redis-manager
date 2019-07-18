@@ -2,8 +2,7 @@ package com.newegg.ec.redis.client;
 
 /**
  * @author Jay.H.Zou
- * @date 7/18/2019
+ * @date 2019/7/18
  */
-public interface RedisClientBuilder {
-
+public interface IRedisStandAloneClient {
 }
