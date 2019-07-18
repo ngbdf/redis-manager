@@ -1,7 +1,6 @@
 package com.newegg.ec.redis.client.config;
 
 
-import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.exception.RedisClientException;
 
 import java.io.IOException;
@@ -169,7 +168,7 @@ public class RedisFactoryConfig {
 
 	private static List<IpAndPort> getHostsFromStr(String nodeListStr){
 		List<IpAndPort> nodeList = new ArrayList<>();
-		if (!Strings.isNullOrEmpty(nodeListStr) ) {
+		if (nodeListStr != null && nodeListStr != "") {
 			String [] nodeArray = nodeListStr.split(",");
 			for (String node : nodeArray) {
 				String [] ipAndPort = node.split(":");
@@ -309,7 +308,7 @@ public class RedisFactoryConfig {
 	}
 
 	private Properties getProperties(String confName) {
-		if(Strings.isNullOrEmpty(confName)){
+		if(confName != null || confName != ""){
 			throw new RedisClientException("param cluster is null when create factory");
 		}
 		Properties properties = new Properties();
