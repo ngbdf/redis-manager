@@ -2,6 +2,8 @@ package com.newegg.ec.redis.client;
 
 import redis.clients.jedis.Jedis;
 
+import java.util.List;
+
 /**
  * @author Jay.H.Zou
  * @date 2019/7/18
@@ -100,6 +102,20 @@ public interface IRedisClient {
      * @return
      */
     String getSlowLog();
+
+    /**
+     * Scan redis
+     *
+     * @return
+     */
+    List<String> scan(String key);
+
+    /**
+     * Query redis
+     * @param key
+     * @return
+     */
+    Object query(String key);
 
     /**
      * Close client

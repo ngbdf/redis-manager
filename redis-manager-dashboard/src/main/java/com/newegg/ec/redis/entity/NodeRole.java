@@ -8,9 +8,6 @@ public enum  NodeRole {
 
     MASTER,
 
-    /**
-     *
-     */
     SLAVE;
 
 }
