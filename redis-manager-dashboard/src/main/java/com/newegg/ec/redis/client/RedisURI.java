@@ -8,7 +8,7 @@ import redis.clients.jedis.HostAndPort;
  * @author Jay.H.Zou
  * @date 2019/7/18
  */
-public class ConnectParam {
+public class RedisURI {
 
     private String token;
 
@@ -17,6 +17,11 @@ public class ConnectParam {
     private String requirePass;
 
     private String clientName;
+
+    private String sentinelMasterId;
+
+    private int database;
+
 
     public String getToken() {
         return token;
@@ -50,13 +55,19 @@ public class ConnectParam {
         this.clientName = clientName;
     }
 
-    @Override
-    public String toString() {
-        return "ConnectParam{" +
-                "token='" + token + '\'' +
-                ", hostAndPort=" + hostAndPort +
-                ", requirePass='" + requirePass + '\'' +
-                ", clientName='" + clientName + '\'' +
-                '}';
+    public String getSentinelMasterId() {
+        return sentinelMasterId;
+    }
+
+    public void setSentinelMasterId(String sentinelMasterId) {
+        this.sentinelMasterId = sentinelMasterId;
+    }
+
+    public int getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(int database) {
+        this.database = database;
     }
 }

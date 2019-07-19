@@ -1,6 +1,5 @@
 package com.newegg.ec.redis.client;
 
-import javafx.util.Pair;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -94,6 +93,13 @@ public interface IRedisClient {
      * @return
      */
     String getVersion();
+
+    /**
+     * Get slow log
+     *
+     * @return
+     */
+    String getSlowLog();
 
     /**
      * Close client

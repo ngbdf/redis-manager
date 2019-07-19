@@ -6,14 +6,14 @@ package com.newegg.ec.redis.client;
  */
 public interface IRedisClusterClient extends IRedisClient {
 
-    String getRedisClusterClient(ConnectParam connectParam);
+    String getRedisClusterClient();
 
-    String getClusterInfo(ConnectParam connectParam);
+    String getClusterInfo();
 
-    String getNodeList(ConnectParam connectParam);
+    String getNodeList();
 
-    String getMasterList(ConnectParam connectParam);
+    String getMasterList();
 
-    String getSlaveList(ConnectParam connectParam);
+    String getSlaveList();
 
 }
