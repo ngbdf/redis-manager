@@ -1,5 +1,9 @@
 package com.newegg.ec.redis.dao;
 
+import com.newegg.ec.redis.entity.User;
+
+import java.util.List;
+
 /**
  * Manage users
  *
@@ -8,4 +12,17 @@ package com.newegg.ec.redis.dao;
  */
 public interface IUserDao {
 
+    List<User> selectAllUser();
+
+    List<User> selectUserByGroupId(String groupId);
+
+    User selectUserByNameAndPassword(User user);
+
+    User selectUserByName(String userName);
+
+    int insertUser(User user);
+
+    int updateUser(User user);
+
+    int deleteUserById(String userId);
 }

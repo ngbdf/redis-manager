@@ -5,12 +5,15 @@ package com.newegg.ec.redis.entity;
  * @date 2019/7/19
  */
 public class Machine {
+
     private String machineId;
 
-    private String host;
+    private String machineGroup;
+
+    private String groupId;
 
     private String ip;
 
-    private String groupId;
+    private String machineDesc;
 
 }

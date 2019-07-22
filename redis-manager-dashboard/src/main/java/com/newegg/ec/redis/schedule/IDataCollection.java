@@ -8,4 +8,7 @@ package com.newegg.ec.redis.schedule;
  */
 public interface IDataCollection {
 
+
+    void collectData();
+
 }

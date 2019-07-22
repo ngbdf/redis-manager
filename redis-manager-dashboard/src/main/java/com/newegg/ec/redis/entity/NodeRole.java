@@ -6,8 +6,14 @@ package com.newegg.ec.redis.entity;
  */
 public enum  NodeRole {
 
+    /**
+     * redis master
+     */
     MASTER,
 
+    /**
+     * slave
+     */
     SLAVE;
 
 }

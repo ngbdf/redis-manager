@@ -16,5 +16,8 @@ spring:
 #    username: xxx
 #    password: xxx
 
+# http://download.redis.io/releases/
 # redis manager configuration
 redis-manager:
+
+
