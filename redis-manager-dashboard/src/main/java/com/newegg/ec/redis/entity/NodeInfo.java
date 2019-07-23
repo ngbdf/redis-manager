@@ -11,7 +11,6 @@ import java.sql.Timestamp;
  *      Stats
  *      Replication
  *      CPU
- *      Command Stats
  *      Cluster
  *      Keyspace
  * Scalable
@@ -22,7 +21,17 @@ public class NodeInfo {
 
     private String nodeInfoId;
 
-    private Timestamp collectionTime;
+    private String host;
+
+    private String ip;
+
+    private int port;
+
+    private long responseTime;
+
+    private NodeInfoType nodeInfoType;
+
+    private Timestamp addTime;
 
     /**
      * Server
@@ -36,7 +45,7 @@ public class NodeInfo {
     /**
      * Clients
      */
-    private int connectedClient;
+    private int connectedClients;
 
     private String clientLongestOutputList;
 
@@ -55,9 +64,9 @@ public class NodeInfo {
     /**
      * 从操作系统的角度，返回 Redis 已分配的内存总量（俗称常驻集大小）。这个值和 top 、 ps等命令的输出一致
      */
-    private long usedMemoryRSS;
+    private long usedMemoryRss;
 
-    private String usedMemoryRSSHuman;
+    private String usedMemoryRssHuman;
 
     private String usedMemoryPeakPerc;
 
@@ -79,22 +88,49 @@ public class NodeInfo {
     private String memFragmentationRatio;
 
     /** Stats */
+    /**
+     * 新创建连接个数,如果新创建连接过多，过度地创建和销毁连接对性能有影响，说明短连接严重或连接池使用有问题，需调研代码的连接设置
+     */
     private long totalConnectionsReceived;
 
+    /**
+     * redis处理的命令数
+     */
     private long totalCommandsProcessed;
 
+    /**
+     * redis当前的qps，redis内部较实时的每秒执行的命令数
+     */
     private long instantaneousOpsPerSec;
 
+    /**
+     * redis网络入口流量字节数
+     */
     private long totalNetInputBytes;
 
+    /**
+     * redis网络出口流量字节数
+     */
     private long totalNetOutputBytes;
 
+    /**
+     * 拒绝的连接个数，redis连接个数达到maxclients限制，拒绝新连接的个数
+     */
     private long rejectedConnections;
 
+    /**
+     * 运行以来剔除(超过了maxmemory后)的key的数量
+     */
     private long evictedKeys;
 
+    /**
+     * keyspace_hits
+     */
     private long keyspaceHits;
 
+    /**
+     * keyspace_misses
+     */
     private long keyspaceMisses;
 
     /**
@@ -103,10 +139,21 @@ public class NodeInfo {
     private double keyspaceHitsRatio;
 
     /** Replication */
-    // TODO:
+    // TODO: 计算主从复制情况
 
     /** CPU */
-    private String usedCPUSys;
+    // TODO: 计算每分钟CPU使用率
+    private double usedCpuSys;
+
+    private double usedCpuUser;
+
+    /** Keyspace */
+    /**
+     * 当前节点所有db的 key 总数
+     */
+    private long keys;
+
+    private long expires;
 
 
 }

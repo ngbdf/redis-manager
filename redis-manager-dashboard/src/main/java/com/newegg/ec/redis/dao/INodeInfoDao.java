@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.dao;
 
 import com.newegg.ec.redis.entity.NodeInfo;
+import com.newegg.ec.redis.entity.NodeInfoQueryParam;
 
 import java.util.List;
 
@@ -12,14 +13,14 @@ import java.util.List;
  */
 public interface INodeInfoDao {
 
-    List<NodeInfo> selectNodeInfoByTime(String table);
+    List<NodeInfo> selectAllNodeInfoList(NodeInfoQueryParam nodeInfoQueryParam);
 
-    List<NodeInfo> selectMonitorNodeInfoByTime(String table);
+    List<NodeInfo> selectMonitorNodeInfoList(NodeInfoQueryParam nodeInfoQueryParam);
 
     int insertNodeInfo(String table, List<NodeInfo> nodeInfoList);
 
-    int deleteNodeInfoByTime(String table);
+    int deleteNodeInfoByTime(NodeInfoQueryParam nodeInfoQueryParam);
 
-    int deleteAllNodeInfo(String table);
+    int deleteAllNodeInfo(NodeInfoQueryParam nodeInfoQueryParam);
 
 }
