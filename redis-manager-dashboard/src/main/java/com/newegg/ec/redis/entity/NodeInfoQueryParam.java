@@ -1,7 +1,6 @@
 package com.newegg.ec.redis.entity;
 
 import java.sql.Timestamp;
-import java.time.Duration;
 
 /**
  * @author Jay.H.Zou
@@ -9,25 +8,19 @@ import java.time.Duration;
  */
 public class NodeInfoQueryParam {
 
+    private String clusterId;
+
     private String tableName;
 
-    private long duration;
-
-    private NodeInfoType nodeInfoType;
+    private NodeInfoType.DataType dataType;
 
     private Timestamp startTime;
 
     private Timestamp endTime;
 
-    public NodeInfoQueryParam(String tableName, Duration duration, NodeInfoType nodeInfoType) {
+    public NodeInfoQueryParam(String tableName, NodeInfoType.DataType dataType, Timestamp startTime, Timestamp endTime) {
         this.tableName = tableName;
-        this.duration = duration.toMillis();
-        this.nodeInfoType = nodeInfoType;
-    }
-
-    public NodeInfoQueryParam(String tableName, NodeInfoType nodeInfoType, Timestamp startTime, Timestamp endTime) {
-        this.tableName = tableName;
-        this.nodeInfoType = nodeInfoType;
+        this.dataType = dataType;
         this.startTime = startTime;
         this.endTime = endTime;
     }

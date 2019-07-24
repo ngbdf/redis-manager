@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.service;
 
+import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.NodeInfo;
 
 import java.util.List;
@@ -10,8 +11,8 @@ import java.util.List;
  */
 public interface IRedisService {
 
-    List<NodeInfo> getNodeInfo();
+    List<String> getDBList();
 
-
+    Cluster getInfoServer();
 
 }

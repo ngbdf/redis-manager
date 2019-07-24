@@ -16,7 +16,7 @@ import java.util.concurrent.*;
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
-public class NodeInfoCollection implements IDataCollection, ApplicationListener<ContextRefreshedEvent> {
+public class NodeInfoCollection implements IDataCollection, IDataCalculate, ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
     private IClusterService clusterService;
@@ -27,20 +27,23 @@ public class NodeInfoCollection implements IDataCollection, ApplicationListener<
     @Autowired
     private INodeInfoService nodeInfoService;
 
-    @Value("${redis-manager.monitor.core-size:}")
-    private int coreSize = Runtime.getRuntime().availableProcessors();
+    private int coreSize;
 
     private static ExecutorService threadPool;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        coreSize = Runtime.getRuntime().availableProcessors();
         threadPool = new ThreadPoolExecutor(coreSize, coreSize * 2, 60L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("collect-node-info-pool-thread-%d").build(),
                 new ThreadPoolExecutor.AbortPolicy());
     }
 
-    @Scheduled(cron = "")
+    /**
+     * 一分钟收集一次RedisNode数据，并计算以 MINUTE 为单位的 avg, max, min
+     */
+    @Scheduled(cron = "0 */1 * * * ?")
     @Override
     public void collectData() {
         try {
@@ -50,5 +53,12 @@ public class NodeInfoCollection implements IDataCollection, ApplicationListener<
         }
     }
 
+    /**
+     * 一个小时跑一次，获取DB数据，计算所有节点以 HOUR 为单位的 avg, max, min
+     */
+    @Scheduled(cron = "0 0 * * *  ?")
+    @Override
+    public void calculate() {
 
+    }
 }

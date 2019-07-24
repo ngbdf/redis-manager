@@ -6,14 +6,34 @@ package com.newegg.ec.redis.entity;
  * @author Jay.H.Zou
  * @date 7/23/2019
  */
-public enum  NodeInfoType {
-    /** host node info */
-    NODE,
+public class NodeInfoType {
 
-    /** monitor default: calculate node info */
-    AVG_MINUTE,
+    private NodeInfoType() {
+    }
 
-    AVG_HOUR;
+    public enum DataType {
+        /**
+         * host node info
+         */
+        NODE,
 
+        /**
+         * monitor default: calculate node info
+         */
+        AVG,
+
+        MAX,
+
+        MIN;
+    }
+
+    public enum TimeType {
+        /**
+         * monitor default:
+         */
+        MINUTE,
+
+        HOUR;
+    }
 
 }

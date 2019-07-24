@@ -7,4 +7,9 @@ package com.newegg.ec.redis.schedule;
  * @date 2019/7/19
  */
 public interface IDataCleanup {
+
+    /**
+     * 定期清理
+     */
+    void cleanup();
 }

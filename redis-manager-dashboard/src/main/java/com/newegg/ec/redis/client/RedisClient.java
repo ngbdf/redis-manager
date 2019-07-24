@@ -10,6 +10,9 @@ import java.util.List;
  */
 public class RedisClient implements IRedisClient{
 
+    /** info subkey */
+    public static final String SERVER = "server";
+
     private RedisURI redisURI;
 
     public RedisClient(RedisURI redisURI) {
