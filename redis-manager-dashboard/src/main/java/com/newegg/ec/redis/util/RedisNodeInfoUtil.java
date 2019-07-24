@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 计算槽位等
@@ -20,6 +22,14 @@ import java.util.Objects;
  * @date 7/19/2019
  */
 public class RedisNodeInfoUtil {
+
+    /**
+     * Desc: 数据存放上次获取的集群 NodeInfo
+     * Cause: 为了通过一些累加的数据计算出一分钟的变化量
+     * Data: <clusterName, <host, nodeInfo>>
+     */
+    private static final Map<String, Map<String, NodeInfo>> LAST_TIME_NODE_INFO = new ConcurrentHashMap<>();
+
 
     private RedisNodeInfoUtil() {
     }
