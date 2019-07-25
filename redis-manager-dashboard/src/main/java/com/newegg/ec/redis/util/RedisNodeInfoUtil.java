@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.NodeInfo;
+import com.newegg.ec.redis.entity.RedisNode;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,7 +59,20 @@ public class RedisNodeInfoUtil {
 
     private static final String USED_MEMORY_DATASET_PERC = "used_memory_dataset_perc";
 
-    public static final NodeInfo parseInfo(String info) throws IOException {
+    /**
+     * 计算差值
+     */
+    private static final String KEYSPACE_HITS = "keyspace_hits";
+
+    private static final String KEYSPACE_MISSES = "keyspace_misses";
+
+    private static final String USED_CPU_SYS = "used_cpu_sys";
+
+    private static final String TOTAL_CONNECTIONS_RECEIVED = "total_connections_received";
+
+    private static final String TOTAL_COMMANDS_PROCESSED = "total_commands_processed";
+
+    public static final NodeInfo parseInfo(String clusterId, List<RedisNode> redisNodeList, String info) throws IOException {
         JSONObject infoJSONObject = new JSONObject();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(info.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
         long keys = 0;
@@ -85,20 +100,23 @@ public class RedisNodeInfoUtil {
                     }
                     String subContentKey = split[0];
                     String subContentVal = split[1];
-                    if (!Strings.isNullOrEmpty(subContentVal)) {
-                        if (Objects.equals(subContentKey, KEYS)) {
-                            keys += Long.valueOf(subContentVal);
-                        } else if (Objects.equals(subContentKey, EXPIRES)) {
-                            expires += Long.valueOf(subContentVal);
-                        }
+                    if (Strings.isNullOrEmpty(subContentVal)) {
+                        continue;
+                    }
+                    if (Objects.equals(subContentKey, KEYS)) {
+                        keys += Long.valueOf(subContentVal);
+                    } else if (Objects.equals(subContentKey, EXPIRES)) {
+                        expires += Long.valueOf(subContentVal);
                     }
                 }
-            } else if (isByteToMBKey(key)) {
+            } else if (isByteToMBKeyField(key)) {
                 long newValue = byteToMB(value);
                 infoJSONObject.put(nodeInfoField, newValue);
-            } else if (isRemovePercentSign(key)) {
-                double newValue = removePercentSign(value);
+            } else if (isRemovePercentSignField(key)) {
+                double newValue = truncatedPercentSign(value);
                 infoJSONObject.put(nodeInfoField, newValue);
+            } else if (isSubtractionField(key)) {
+
             } else {
                 infoJSONObject.put(nodeInfoField, value);
             }
@@ -109,16 +127,24 @@ public class RedisNodeInfoUtil {
         return nodeInfo;
     }
 
-    private static final boolean isByteToMBKey(String key) {
+    private static final boolean isByteToMBKeyField(String key) {
         return Objects.equals(USED_MEMORY, key)
                 || Objects.equals(USED_MEMORY_RSS, key)
                 || Objects.equals(USED_MEMORY_OVERHEAD, key)
                 || Objects.equals(USED_MEMORY_DATASET, key);
     }
 
-    private static final boolean isRemovePercentSign(String key) {
+    private static final boolean isRemovePercentSignField(String key) {
         return Objects.equals(USED_MEMORY_PEAK_PERC, key)
                 || Objects.equals(USED_MEMORY_DATASET_PERC, key);
+    }
+
+    private static final boolean isSubtractionField(String key) {
+        return Objects.equals(KEYSPACE_HITS, key)
+                || Objects.equals(KEYSPACE_MISSES, key)
+                || Objects.equals(USED_CPU_SYS, key)
+                || Objects.equals(TOTAL_CONNECTIONS_RECEIVED, key)
+                || Objects.equals(TOTAL_COMMANDS_PROCESSED, key);
     }
 
     public static long byteToMB(String originalData) {
@@ -130,7 +156,7 @@ public class RedisNodeInfoUtil {
         return divide.longValue();
     }
 
-    private static double removePercentSign(String originalData) {
+    private static double truncatedPercentSign(String originalData) {
         double percent = 0;
         if (!Strings.isNullOrEmpty(originalData) && originalData.contains("%")) {
             String replace = originalData.replace("%", "");
@@ -139,9 +165,17 @@ public class RedisNodeInfoUtil {
         return percent;
     }
 
+    private static long subtraction(String originalData) {
+        if (Strings.isNullOrEmpty(originalData)) {
+            return 0;
+        }
+        return 0;
+    }
+
+
     public static void main(String[] args) throws IOException {
-        NodeInfo nodeInfo = parseInfo(INFO);
-        System.err.println(JSONObject.toJSONString(nodeInfo));
+        /*NodeInfo nodeInfo = parseInfo(INFO);
+        System.err.println(JSONObject.toJSONString(nodeInfo));*/
 
     }
 

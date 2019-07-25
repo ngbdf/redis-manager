@@ -110,6 +110,8 @@ public interface IRedisClient {
      */
     List<String> scan(String key);
 
+    String nodes();
+
     /**
      * Query redis
      * @param key

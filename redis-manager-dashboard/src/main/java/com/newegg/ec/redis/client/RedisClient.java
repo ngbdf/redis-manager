@@ -85,6 +85,11 @@ public class RedisClient implements IRedisClient{
     }
 
     @Override
+    public String nodes() {
+        return null;
+    }
+
+    @Override
     public Object query(String key) {
         return null;
     }
@@ -93,5 +98,4 @@ public class RedisClient implements IRedisClient{
     public String close() {
         return null;
     }
-
 }
