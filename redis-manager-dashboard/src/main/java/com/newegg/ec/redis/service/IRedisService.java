@@ -1,8 +1,7 @@
 package com.newegg.ec.redis.service;
 
-import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.NodeInfo;
-import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.entity.*;
+import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
 
@@ -17,5 +16,9 @@ public interface IRedisService {
     List<RedisNode> getNodeList();
 
     Cluster getInfoServer();
+
+    List<String> scan(RedisQueryParam redisQueryParam);
+
+    RedisQueryResult query(RedisQueryParam redisQueryParam);
 
 }

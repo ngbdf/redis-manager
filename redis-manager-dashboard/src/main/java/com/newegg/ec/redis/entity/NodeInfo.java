@@ -17,7 +17,7 @@ import java.sql.Timestamp;
  *      Keyspace
  *
  * Monitor metrics:
- *      response_time: 平均响应时间 √
+ *      response_time: √
  *
  *      connected_clients: √
  *      blocked_clients:
@@ -27,15 +27,14 @@ import java.sql.Timestamp;
  *      used_memory_rss: √
  *      used_memory_dataset: √
  *
- *      total_commands_processed:
- *      instantaneous_ops_per_sec:
+ *      total_commands_processed: √
  *
  *      keys: √
  *      expires: √
  *
- *      keyspaceHitsRatio: 命中率
+ *      keyspaceHitsRatio:  √
  *
- *      used_cpu_sys
+ *      used_cpu_sys: √
  * Scalable
  * @author Jay.H.Zou
  * @date 2019/7/22

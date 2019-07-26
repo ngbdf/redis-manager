@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.client;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
 
@@ -91,6 +92,11 @@ public class RedisClient implements IRedisClient{
 
     @Override
     public Object query(String key) {
+        return null;
+    }
+
+    @Override
+    public List<Slowlog> getSlowLog(int size) {
         return null;
     }
 

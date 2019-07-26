@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.client;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
 
@@ -118,6 +119,13 @@ public interface IRedisClient {
      * @return
      */
     Object query(String key);
+
+    /**
+     * Get slow log
+     * @param size
+     * @return
+     */
+    List<Slowlog> getSlowLog(int size);
 
     /**
      * Close client

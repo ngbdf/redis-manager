@@ -18,7 +18,7 @@ public interface IMachineDao {
 
     int insertMachine(Machine machine);
 
-    int insertMachineBatch(List<Machine> machines);
+    int insertMachineBatch(List<Machine> machineList);
 
     int deleteMachineById(String machineId);
 
