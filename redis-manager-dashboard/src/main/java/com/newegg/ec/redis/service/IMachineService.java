@@ -12,7 +12,20 @@ public interface IMachineService {
 
     List<Machine> getAllMachine();
 
-    List<Machine> getMachineByGroupId(String groupId);
+    /**
+     * 获取多个集群集群
+     *
+     * @param machineGroup
+     * @return
+     */
+    List<List<Machine>> getMachineByMachineListByGroupId(String machineGroup);
+
+    /**
+     * 获取一个机器集群
+     * @param machineGroup
+     * @return
+     */
+    List<Machine> getMachineByMachineGroup(String machineGroup);
 
     int addMachine(Machine machine);
 

@@ -18,6 +18,13 @@ public class RedisUtil {
 
     private RedisUtil() {}
 
+    /**
+     * info => map
+     * cluster info => map
+     * @param info
+     * @return
+     * @throws IOException
+     */
     public static final Map<String, String> parseInfoToMap(String info) throws IOException {
         Map<String, String> infoMap = new HashMap<>();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(info.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));

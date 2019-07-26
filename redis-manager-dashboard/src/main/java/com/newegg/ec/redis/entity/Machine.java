@@ -14,6 +14,12 @@ public class Machine {
 
     private String ip;
 
+    private String userName;
+
+    private String password;
+
+    private String token;
+
     private String machineDesc;
 
 }
