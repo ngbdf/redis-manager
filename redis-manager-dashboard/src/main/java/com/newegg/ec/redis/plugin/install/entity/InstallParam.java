@@ -1,4 +1,7 @@
-package com.newegg.ec.redis.entity;
+package com.newegg.ec.redis.plugin.install.entity;
+
+import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.RedisNode;
 
 import java.util.List;
 
@@ -12,7 +15,9 @@ public class InstallParam {
 
     private String machineGroup;
 
-    private boolean isCustomized;
+    private boolean autoBuild;
+
+    private boolean autoInit;
 
     private int startPort;
 
@@ -36,12 +41,20 @@ public class InstallParam {
         this.machineGroup = machineGroup;
     }
 
-    public boolean isCustomized() {
-        return isCustomized;
+    public boolean isAutoBuild() {
+        return autoBuild;
     }
 
-    public void setCustomized(boolean customized) {
-        isCustomized = customized;
+    public void setAutoBuild(boolean autoBuild) {
+        this.autoBuild = autoBuild;
+    }
+
+    public boolean isAutoInit() {
+        return autoInit;
+    }
+
+    public void setAutoInit(boolean autoInit) {
+        this.autoInit = autoInit;
     }
 
     public int getStartPort() {

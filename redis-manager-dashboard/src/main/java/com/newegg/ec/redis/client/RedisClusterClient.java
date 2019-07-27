@@ -123,6 +123,21 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
+    public String clusterMeet(String ip, int port) {
+        return null;
+    }
+
+    @Override
+    public String clusterReplicate(String masterId) {
+        return null;
+    }
+
+    @Override
+    public String clusterFailover() {
+        return null;
+    }
+
+    @Override
     public String close() {
         return null;
     }

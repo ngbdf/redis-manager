@@ -128,6 +128,27 @@ public interface IRedisClient {
     List<Slowlog> getSlowLog(int size);
 
     /**
+     *
+     * @param ip
+     * @param port
+     * @return
+     */
+    String clusterMeet(String ip, int port);
+
+    /**
+     * Be slave
+     * @param masterId
+     * @return
+     */
+    String clusterReplicate(String masterId);
+
+    /**
+     * Be master
+     * @return
+     */
+    String clusterFailover();
+
+    /**
      * Close client
      *
      * @return

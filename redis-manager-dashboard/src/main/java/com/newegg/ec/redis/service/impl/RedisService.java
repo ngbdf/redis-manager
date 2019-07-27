@@ -38,4 +38,9 @@ public class RedisService implements IRedisService {
     public RedisQueryResult query(RedisQueryParam redisQueryParam) {
         return null;
     }
+
+    @Override
+    public boolean forget() {
+        return false;
+    }
 }

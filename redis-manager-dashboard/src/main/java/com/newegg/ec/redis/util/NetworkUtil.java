@@ -1,10 +1,58 @@
 package com.newegg.ec.redis.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.*;
+
 /**
- * 检查端口是否可用
+ * Check port
+ * Ping
  *
  * @author Jay.H.Zou
  * @date 7/20/2019
  */
 public class NetworkUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(NetworkUtil.class);
+
+    private static final int TIMEOUT = 2000;
+
+    private NetworkUtil() {
+    }
+
+    public static final boolean ping(String ip) {
+        try {
+            InetAddress address = InetAddress.getByName(ip);
+            return address.isReachable(TIMEOUT);
+        } catch (Exception e) {
+            logger.error(ip + " unreachable.", e);
+        }
+        return false;
+    }
+
+    /**
+     * 监测端口是否在使用
+     *
+     * @param ip
+     * @param port
+     * @return
+     */
+    public static final boolean telnet(String ip, int port) {
+        Socket socket = new Socket();
+        try {
+            socket.connect(new InetSocketAddress(ip, port), TIMEOUT);
+            return socket.isConnected();
+        } catch (Exception e) {
+            logger.error(ip + ":" + port + " can't access.", e);
+        } finally {
+            try {
+                socket.close();
+            } catch (IOException ignore) {
+            }
+        }
+        return false;
+    }
+
 }

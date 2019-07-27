@@ -21,4 +21,7 @@ public interface IRedisService {
 
     RedisQueryResult query(RedisQueryParam redisQueryParam);
 
+    boolean forget();
+
+
 }

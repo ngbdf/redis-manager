@@ -1,7 +1,6 @@
 package com.newegg.ec.redis.plugin.install;
 
-import com.newegg.ec.redis.entity.InstallParam;
-import com.newegg.ec.redis.entity.Machine;
+import com.newegg.ec.redis.entity.RedisNode;
 
 import java.util.List;
 
@@ -13,10 +12,10 @@ import java.util.List;
  */
 public interface InstallOperation {
 
+    boolean checkEnvironment();
+
     boolean pullImage();
 
-    boolean buildTopology();
-
-    boolean install();
+    boolean install(List<RedisNode> redisNodeList);
 
 }
