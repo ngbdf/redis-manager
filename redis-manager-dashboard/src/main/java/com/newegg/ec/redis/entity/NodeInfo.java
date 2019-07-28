@@ -51,7 +51,7 @@ public class NodeInfo {
 
     private NodeInfoType.TimeType timeType;
 
-    private Timestamp addTime;
+    private Timestamp updateTime;
 
     /**
      * Clients
@@ -189,12 +189,12 @@ public class NodeInfo {
         this.timeType = timeType;
     }
 
-    public Timestamp getAddTime() {
-        return addTime;
+    public Timestamp getUpdateTime() {
+        return updateTime;
     }
 
-    public void setAddTime(Timestamp addTime) {
-        this.addTime = addTime;
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 
     public long getConnectedClients() {
@@ -365,36 +365,4 @@ public class NodeInfo {
         this.expires = expires;
     }
 
-    @Override
-    public String toString() {
-        return "NodeInfo{" +
-                "nodeInfoId='" + nodeInfoId + '\'' +
-                ", host='" + host + '\'' +
-                ", responseTime=" + responseTime +
-                ", dataType=" + dataType +
-                ", timeType=" + timeType +
-                ", addTime=" + addTime +
-                ", connectedClients=" + connectedClients +
-                ", clientLongestOutputList=" + clientLongestOutputList +
-                ", clientBiggestInputBuf=" + clientBiggestInputBuf +
-                ", blockedClients=" + blockedClients +
-                ", usedMemory=" + usedMemory +
-                ", usedMemoryRss=" + usedMemoryRss +
-                ", usedMemoryOverhead=" + usedMemoryOverhead +
-                ", usedMemoryDataset=" + usedMemoryDataset +
-                ", usedMemoryDatasetPerc=" + usedMemoryDatasetPerc +
-                ", memFragmentationRatio=" + memFragmentationRatio +
-                ", totalConnectionsReceived=" + totalConnectionsReceived +
-                ", totalCommandsProcessed=" + totalCommandsProcessed +
-                ", minuteCommandProcessed=" + minuteCommandProcessed +
-                ", totalNetInputBytes=" + totalNetInputBytes +
-                ", totalNetOutputBytes=" + totalNetOutputBytes +
-                ", keyspaceHits=" + keyspaceHits +
-                ", keyspaceMisses=" + keyspaceMisses +
-                ", keyspaceHitsRatio=" + keyspaceHitsRatio +
-                ", usedCpuSys=" + usedCpuSys +
-                ", keys=" + keys +
-                ", expires=" + expires +
-                '}';
-    }
 }

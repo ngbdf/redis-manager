@@ -3,7 +3,7 @@ package com.newegg.ec.redis.plugin.install;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
-import com.newegg.ec.redis.plugin.install.entity.InstallParam;
+import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.service.IMachineService;
 import com.newegg.ec.redis.service.IRedisService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import java.util.*;
  * @author Jay.H.Zou
  * @date 2019/7/26
  */
-public class InstallTemplate {
+public class InstallationTemplate {
 
     @Autowired
     private IMachineService machineService;
@@ -27,36 +27,36 @@ public class InstallTemplate {
     /**
      * 模板通用，调用方传入不同的策略
      *
-     * @param installOperation
-     * @param installParam
+     * @param installationOperation
+     * @param installationParam
      * @return
      */
-    public boolean install(InstallOperation installOperation, InstallParam installParam) {
-        Cluster cluster = installParam.getCluster();
+    public boolean install(InstallationOperation installationOperation, InstallationParam installationParam) {
+        Cluster cluster = installationParam.getCluster();
         // TODO: 用于标记是否是新建集群
         String clusterId = cluster.getClusterId();
-        List<RedisNode> redisNodeList = installParam.getRedisNodeList();
-        String machineGroup = installParam.getMachineGroup();
+        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        String machineGroup = installationParam.getMachineGroup();
         List<Machine> machineByMachineGroup = machineService.getMachineByMachineGroup(machineGroup);
-        boolean checkEnvironmentPass = checkEnvironment(installParam, installOperation, machineByMachineGroup);
+        boolean checkEnvironmentPass = checkEnvironment(installationParam, installationOperation, machineByMachineGroup);
         if (!checkEnvironmentPass) {
             return false;
         }
-        boolean pullImageSuccess = installOperation.pullImage();
+        boolean pullImageSuccess = installationOperation.pullImage();
         if (!pullImageSuccess) {
             return false;
         }
-        boolean changeRedisConfSuccess = changeRedisConf();
-        if (!changeRedisConfSuccess) {
+        boolean buildRedisConfigSuccess = buildRedisConfig(installationOperation);
+        if (!buildRedisConfigSuccess) {
             return false;
         }
-        Map<RedisNode, List<RedisNode>> redisNodeListMap = buildTopology(installParam, machineByMachineGroup);
+        Map<RedisNode, List<RedisNode>> redisNodeListMap = buildTopology(installationParam, machineByMachineGroup);
         Set<RedisNode> redisMasterNodes = redisNodeListMap.keySet();
         if (redisMasterNodes.isEmpty()) {
             return false;
         }
-        redisNodeList = getAllNode(installParam, redisNodeListMap);
-        boolean installSuccess = installOperation.install(redisNodeList);
+        redisNodeList = getAllNode(installationParam, redisNodeListMap);
+        boolean installSuccess = installationOperation.install(redisNodeList);
         if (!installSuccess) {
             return false;
         }
@@ -64,35 +64,31 @@ public class InstallTemplate {
         if (!buildClusterSuccess) {
             return false;
         }
-        boolean initClusterSuccess = initCluster(installParam, redisMasterNodes);
+        boolean initClusterSuccess = initCluster(installationParam, redisMasterNodes);
         if (!initClusterSuccess) {
             // TODO: logger, websocket
         }
-        return saveToDB(installParam, redisNodeListMap);
+        return saveToDB(installationParam, redisNodeListMap);
     }
 
     /**
      * 检查安装环境：Machine资源、Docker 环境、Kubernetes 环境
      *
-     * @param installOperation
-     * @param installParam
+     * @param installationOperation
+     * @param installationParam
      * @return
      */
-    public boolean checkEnvironment(InstallParam installParam, InstallOperation installOperation, List<Machine> machineByMachineGroup) {
+    public boolean checkEnvironment(InstallationParam installationParam, InstallationOperation installationOperation, List<Machine> machineByMachineGroup) {
         //检查机器内存CPU资源
         // 不同安装方式的环境监测
-        installOperation.checkEnvironment();
+        installationOperation.checkEnvironment();
         // 检查所有机器之间是否网络相通, n! 次
-
         return true;
     }
 
-    /**
-     * 更改安装前需要更改的参数，path,port等
-     *
-     * @return
-     */
-    public boolean changeRedisConf() {
+
+    public boolean buildRedisConfig(InstallationOperation installationOperation) {
+        installationOperation.buildConfig();
         return true;
     }
 
@@ -101,7 +97,7 @@ public class InstallTemplate {
      *
      * @return
      */
-    public Map<RedisNode, List<RedisNode>> buildTopology(InstallParam installParam, List<Machine> machineByMachineGroup) {
+    public Map<RedisNode, List<RedisNode>> buildTopology(InstallationParam installationParam, List<Machine> machineByMachineGroup) {
         Map<RedisNode, List<RedisNode>> clusterTopology = new HashMap<>();
 
         return clusterTopology;
@@ -109,14 +105,14 @@ public class InstallTemplate {
 
     /**
      * Get all node
-     * @param installParam
+     * @param installationParam
      * @param redisNodeListMap
      * @return
      */
-    public List<RedisNode> getAllNode(InstallParam installParam, Map<RedisNode, List<RedisNode>> redisNodeListMap) {
-        boolean autoBuild = installParam.isAutoBuild();
+    public List<RedisNode> getAllNode(InstallationParam installationParam, Map<RedisNode, List<RedisNode>> redisNodeListMap) {
+        boolean autoBuild = installationParam.isAutoBuild();
         if (!autoBuild) {
-            return installParam.getRedisNodeList();
+            return installationParam.getRedisNodeList();
         }
         List<RedisNode> redisNodeList = new ArrayList<>();
         Set<Map.Entry<RedisNode, List<RedisNode>>> entries = redisNodeListMap.entrySet();
@@ -144,15 +140,15 @@ public class InstallTemplate {
 
     /**
      * Slot distribution for redis cluster
-     * @param installParam
+     * @param installationParam
      * @param redisMasterNodes
      * @return
      */
-    public boolean initCluster(InstallParam installParam, Set<RedisNode> redisMasterNodes) {
+    public boolean initCluster(InstallationParam installationParam, Set<RedisNode> redisMasterNodes) {
         return true;
     }
 
-    public boolean saveToDB(InstallParam installParam, Map<RedisNode, List<RedisNode>>  redisNodeListMap) {
+    public boolean saveToDB(InstallationParam installationParam, Map<RedisNode, List<RedisNode>>  redisNodeListMap) {
         return true;
     }
 }

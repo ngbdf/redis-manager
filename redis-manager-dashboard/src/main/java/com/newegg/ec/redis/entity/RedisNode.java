@@ -38,7 +38,12 @@ public class RedisNode {
         /**
          * slave
          */
-        SLAVE;
+        SLAVE,
+
+        /**
+         * replicate: for redis 5
+         */
+        REPLICATE;
 
     }
 }

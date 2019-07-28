@@ -1,5 +1,8 @@
 package com.newegg.ec.redis.entity;
 
+import com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment;
+import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
+
 /**
  * 描述集群基本情况
  * @author Jay.H.Zou
@@ -37,7 +40,7 @@ public class Cluster {
 
     private String clusterPass;
 
-    private ClusterType clusterType;
+    private InstallationEnvironment clusterType;
 
     public String getClusterId() {
         return clusterId;
@@ -135,11 +138,11 @@ public class Cluster {
         this.clusterPass = clusterPass;
     }
 
-    public ClusterType getClusterType() {
+    public InstallationEnvironment getClusterType() {
         return clusterType;
     }
 
-    public void setClusterType(ClusterType clusterType) {
+    public void setClusterType(InstallationEnvironment clusterType) {
         this.clusterType = clusterType;
     }
 }

@@ -11,7 +11,7 @@ public class Group {
 
     private String groupName;
 
-    private String groupDesc;
+    private String groupInfo;
 
 
 }

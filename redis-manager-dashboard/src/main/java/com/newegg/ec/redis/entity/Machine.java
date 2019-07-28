@@ -20,7 +20,7 @@ public class Machine {
 
     private String token;
 
-    private String machineDesc;
+    private String machineInfo;
 
     public String getMachineId() {
         return machineId;
@@ -78,11 +78,11 @@ public class Machine {
         this.token = token;
     }
 
-    public String getMachineDesc() {
-        return machineDesc;
+    public String getMachineInfo() {
+        return machineInfo;
     }
 
-    public void setMachineDesc(String machineDesc) {
-        this.machineDesc = machineDesc;
+    public void setMachineInfo(String machineInfo) {
+        this.machineInfo = machineInfo;
     }
 }

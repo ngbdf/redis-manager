@@ -9,7 +9,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 2019/7/26
  */
-public class InstallParam {
+public class InstallationParam {
 
     private Cluster cluster;
 

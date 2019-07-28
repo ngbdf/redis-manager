@@ -19,5 +19,11 @@ spring:
 # http://download.redis.io/releases/
 # redis manager configuration
 redis-manager:
-
-
+  # installation configuration
+  install:
+    # physics machine
+    machine:
+      package-path: /redis/machine/
+    # docker
+    docker:
+      package-path: /redis/docker/
