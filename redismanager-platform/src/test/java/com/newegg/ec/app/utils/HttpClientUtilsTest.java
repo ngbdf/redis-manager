@@ -88,7 +88,7 @@ public class HttpClientUtilsTest {
         params.put("metric","1");
         params.put("roleId","2");
         params.put("clientId","redismanager");
-        params.put("roleName","redis alarm");
+        params.put("roleName","redis alert");
         params.put("metricValue","2");
         try {
             String response = HttpClientUtil.getPostResponse("http://10.1.44.25:8583/mosquito",params);

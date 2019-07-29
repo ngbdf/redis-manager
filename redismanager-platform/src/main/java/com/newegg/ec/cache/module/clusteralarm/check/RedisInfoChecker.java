@@ -79,7 +79,7 @@ public class RedisInfoChecker {
      * 告警通知策略 : 通过实现接口定制化，可以是邮件，微信，短信等任意形式
      *   默认使用邮件告警策略，用只要配置邮件服务器相关参数即可
      */
-    @Scheduled(fixedRateString = "${schedule.notify.alarm}", initialDelay = 1000 * 60)
+    @Scheduled(fixedRateString = "${schedule.notify.alert}", initialDelay = 1000 * 60)
     public void EarlyWarningNotify() {
         mailNotify.notifyUser();
     }

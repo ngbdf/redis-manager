@@ -16,7 +16,7 @@ import java.util.List;
  * Created by tc72 on 2018/5/3.
  */
 @Controller
-@RequestMapping("/alarm")
+@RequestMapping("/alert")
 @UserAccess
 public class AlarmController {
 

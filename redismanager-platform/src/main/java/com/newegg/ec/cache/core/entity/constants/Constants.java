@@ -25,7 +25,7 @@ public class Constants {
 
     public static final String IS_SAFE = "isSafe";
 
-    //for doctor logic
+    //for doctor service
     public static final String MEMORY_ISSUE = "memory_issue";
     public static final String LITTLE_MEMORY = "little_memory";
     public static final String PEAK_MEMORY = "Peak_memory";

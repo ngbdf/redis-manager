@@ -7,6 +7,7 @@ import com.newegg.ec.redis.service.IRedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.concurrent.ExecutorService;
@@ -45,6 +46,7 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, Appl
     /**
      * 一分钟收集一次RedisNode数据，并计算以 MINUTE 为单位的 avg, max, min
      */
+    @Async
     @Scheduled(cron = "0 */1 * * * ?")
     @Override
     public void collectData() {
@@ -58,6 +60,7 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, Appl
     /**
      * 一个小时跑一次，获取DB数据，计算所有节点以 HOUR 为单位的 avg, max, min
      */
+    @Async
     @Scheduled(cron = "0 0 * * *  ?")
     @Override
     public void calculate() {

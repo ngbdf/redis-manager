@@ -20,7 +20,7 @@ public class MailNotify extends AbstractNotifyStrategy {
 
     private SMTPAppender appender = new SMTPAppender();
 
-    @Value("${spring.mail.alarm}")
+    @Value("${spring.mail.alert}")
     private boolean mailAlarm;
 
     @Value("${spring.mail.SMTPHost}")

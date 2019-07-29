@@ -23,7 +23,7 @@ public class WebSecurityConfig implements WebMvcConfigurer{
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         logger.info("add interceptors");
-        registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/alarm/*","/cluster/*","/monitor/*","/node/*");
+        registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/alert/*","/cluster/*","/monitor/*","/node/*");
 
     }
 
