@@ -12,6 +12,8 @@ public interface IAlertChannelDao {
 
     List<AlertChannel> selectAlertChannelByGroupId(String groupId);
 
+    List<AlertChannel> selecctAlertChannelByIds(List<String> channelIdList);
+
     int insertAlertChannel(AlertChannel alertChannel);
 
     int updateAlertChannel(AlertChannel alertChannel);

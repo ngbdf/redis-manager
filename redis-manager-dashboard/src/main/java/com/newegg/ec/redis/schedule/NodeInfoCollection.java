@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
-public class NodeInfoCollection implements IDataCollection, IDataCalculate, ApplicationListener<ContextRefreshedEvent> {
+public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDataCleanup, ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
     private IClusterService clusterService;
@@ -64,6 +64,16 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, Appl
     @Scheduled(cron = "0 0 * * *  ?")
     @Override
     public void calculate() {
+
+    }
+
+    /**
+     * 每周跑一次，清理数据
+     */
+    @Async
+    @Scheduled(cron = "0 0 * * *  ?")
+    @Override
+    public void cleanup() {
 
     }
 }

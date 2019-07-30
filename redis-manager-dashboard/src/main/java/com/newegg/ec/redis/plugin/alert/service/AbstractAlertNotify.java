@@ -5,13 +5,13 @@ import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 
 import java.util.List;
 
+
 /**
  * @author Jay.H.Zou
- * @date 2019/7/19
+ * @date 7/30/2019
  */
-public interface INotifyService {
+public abstract class AbstractAlertNotify implements INotifyService {
 
-
-    boolean notify(List<AlertRecord> alertRecordList);
+    protected abstract AlertMessage buildMessageContent(List<AlertRecord> alertRecordList);
 
 }
