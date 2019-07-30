@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.service.impl;
 
 import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.plugin.install.entity.RedisNode;
 import com.newegg.ec.redis.entity.RedisQueryParam;
 import com.newegg.ec.redis.entity.RedisQueryResult;
 import com.newegg.ec.redis.service.IRedisService;

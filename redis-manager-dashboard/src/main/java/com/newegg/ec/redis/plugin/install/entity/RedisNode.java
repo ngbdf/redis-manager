@@ -1,6 +1,4 @@
-package com.newegg.ec.redis.entity;
-
-import redis.clients.jedis.HostAndPort;
+package com.newegg.ec.redis.plugin.install.entity;
 
 /**
  * @author Jay.H.Zou
@@ -8,23 +6,23 @@ import redis.clients.jedis.HostAndPort;
  */
 public class RedisNode {
 
+    private String redisNodeId;
 
+    private String clusterId;
 
-    private HostAndPort hostAndPort;
+    private String host;
+
+    private int port;
+
+    private String image;
+
+    private String directory;
 
     private NodeRole nodeRole;
 
-    public HostAndPort getHostAndPort() {
-        return hostAndPort;
-    }
+    private String containerName;
 
-    public void setHostAndPort(HostAndPort hostAndPort) {
-        this.hostAndPort = hostAndPort;
-    }
-
-    public NodeRole getNodeRole() {
-        return nodeRole;
-    }
+    private InstallationEnvironment installationEnvironment;
 
     public void setNodeRole(NodeRole nodeRole) {
         this.nodeRole = nodeRole;

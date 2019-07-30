@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.*;
-import redis.clients.jedis.util.Slowlog;
+import com.newegg.ec.redis.plugin.install.entity.RedisNode;
 
 import java.util.List;
 
