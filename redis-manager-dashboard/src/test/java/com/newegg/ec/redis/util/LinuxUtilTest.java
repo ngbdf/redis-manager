@@ -20,9 +20,9 @@ public class LinuxUtilTest {
     @Test
     public void getMachineResourceInfo() {
         Machine machine = new Machine();
-        machine.setHost("10.16.20.164");
-        machine.setUserName("jz3y");
-        machine.setPassword("Coastline@999");
+        machine.setHost("127.0.0.1");
+        machine.setUserName("xxx");
+        machine.setPassword("xxx");
         Map<String, String> machineResourceInfo = LinuxUtil.getLinuxInfo(machine);
         System.err.println(machineResourceInfo);
     }
