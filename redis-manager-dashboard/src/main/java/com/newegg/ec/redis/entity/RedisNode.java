@@ -8,6 +8,8 @@ import redis.clients.jedis.HostAndPort;
  */
 public class RedisNode {
 
+
+
     private HostAndPort hostAndPort;
 
     private NodeRole nodeRole;
