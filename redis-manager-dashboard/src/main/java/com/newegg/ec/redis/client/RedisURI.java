@@ -22,7 +22,6 @@ public class RedisURI {
 
     private int database;
 
-
     public String getToken() {
         return token;
     }

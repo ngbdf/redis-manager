@@ -27,3 +27,6 @@ redis-manager:
     # docker
     docker:
       package-path: /redis/docker/
+  alert:
+  analysis:
+  monitor:

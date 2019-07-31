@@ -5,7 +5,6 @@ import com.newegg.ec.redis.entity.Cluster;
 import java.util.List;
 
 /**
- * Manage cluster in redis-manager
  *
  * @author Jay.H.Zou
  * @date 2019/7/18
@@ -24,4 +23,7 @@ public interface IClusterDao {
 
     int deleteClusterById(String clusterId);
 
+    int updateTotalKey(String clusterId, long totalKeys);
+
+    int updateTotalExpires(String cluster, long totalExpires);
 }

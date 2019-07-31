@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.entity;
 
+import java.sql.Timestamp;
+
 /**
  *
  * @author Jay.H.Zou
@@ -13,5 +15,6 @@ public class Group {
 
     private String groupInfo;
 
+    private Timestamp updateTime;
 
 }
