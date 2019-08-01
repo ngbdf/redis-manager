@@ -13,7 +13,7 @@ public class Cluster {
 
     private String groupId;
 
-    private String userId;
+    private String userIds;
 
     private String token;
 
@@ -25,7 +25,7 @@ public class Cluster {
 
     private String os;
 
-    private String version;
+    private String redisVersion;
 
     /**
      * 集群 key 总数
@@ -37,14 +37,14 @@ public class Cluster {
      */
     private long totalExpires;
 
-    private String clusterPass;
+    private String redisPassword;
 
-    private InstallationEnvironment environment;
+    private InstallationEnvironment installationEnv;
 
     /**
      * 0: created by redis manager
      * 1: other way
      */
-    private int type;
+    private int installationType;
 
 }

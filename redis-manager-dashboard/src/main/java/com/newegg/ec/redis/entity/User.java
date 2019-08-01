@@ -33,4 +33,22 @@ public class User {
     private int userType;
 
     private Timestamp updateTime;
+
+    public enum UserRole {
+
+        /**
+         * super admin: manage all groups and members
+         */
+        SUPER_ADMIN,
+
+        /**
+         * admin: manage the group and member
+         */
+        ADMIN,
+
+        /**
+         * only read
+         */
+        MEMBER;
+    }
 }

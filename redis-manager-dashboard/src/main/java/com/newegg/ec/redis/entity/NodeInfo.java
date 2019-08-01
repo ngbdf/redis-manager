@@ -60,7 +60,7 @@ public class NodeInfo {
 
     private long clientBiggestInputBuf;
 
-    private int blockedClients;
+    private long blockedClients;
 
     /** Memory */
     /**
@@ -107,7 +107,7 @@ public class NodeInfo {
     /**
      * redis 每分钟处理的命令数
      */
-    private long minuteCommandProcessed;
+    private long minuteCommandsProcessed;
     /**
      * redis网络入口流量字节数
      */
@@ -221,11 +221,11 @@ public class NodeInfo {
         this.clientBiggestInputBuf = clientBiggestInputBuf;
     }
 
-    public int getBlockedClients() {
+    public long getBlockedClients() {
         return blockedClients;
     }
 
-    public void setBlockedClients(int blockedClients) {
+    public void setBlockedClients(long blockedClients) {
         this.blockedClients = blockedClients;
     }
 
@@ -293,12 +293,12 @@ public class NodeInfo {
         this.totalCommandsProcessed = totalCommandsProcessed;
     }
 
-    public long getMinuteCommandProcessed() {
-        return minuteCommandProcessed;
+    public long getMinuteCommandsProcessed() {
+        return minuteCommandsProcessed;
     }
 
-    public void setMinuteCommandProcessed(long minuteCommandProcessed) {
-        this.minuteCommandProcessed = minuteCommandProcessed;
+    public void setMinuteCommandsProcessed(long minuteCommandsProcessed) {
+        this.minuteCommandsProcessed = minuteCommandsProcessed;
     }
 
     public long getTotalNetInputBytes() {

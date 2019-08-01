@@ -1,6 +1,6 @@
 package com.newegg.ec.redis.dao;
 
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * Create tables
@@ -21,7 +21,7 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface InitializationDao {
 
-    @Select("")
+    @Update("")
     void createGroupTable();
 
 }

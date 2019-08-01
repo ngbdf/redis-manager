@@ -219,7 +219,7 @@ public class RedisNodeInfoUtil {
         } else {
             double keyspaceHitRatio = calculateKeyspaceHitRatio(lastTimeNodeInfo, nodeInfo);
             nodeInfo.setKeyspaceHitsRatio(keyspaceHitRatio);
-            nodeInfo.setMinuteCommandProcessed(nodeInfo.getTotalCommandsProcessed() - lastTimeNodeInfo.getTotalCommandsProcessed());
+            nodeInfo.setMinuteCommandsProcessed(nodeInfo.getTotalCommandsProcessed() - lastTimeNodeInfo.getTotalCommandsProcessed());
             nodeInfo.setUsedCpuSys(nodeInfo.getUsedCpuSys() - lastTimeNodeInfo.getUsedCpuSys());
         }
         return nodeInfo;
