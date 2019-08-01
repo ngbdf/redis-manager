@@ -43,15 +43,13 @@ public class NodeInfo {
 
     private String nodeInfoId;
 
-    private String host;
+    private String node;
 
     private long responseTime;
 
     private NodeInfoType.DataType dataType;
 
     private NodeInfoType.TimeType timeType;
-
-    private Timestamp updateTime;
 
     /**
      * Clients
@@ -149,6 +147,8 @@ public class NodeInfo {
 
     private long expires;
 
+    private Timestamp updateTime;
+
     public String getNodeInfoId() {
         return nodeInfoId;
     }
@@ -157,12 +157,12 @@ public class NodeInfo {
         this.nodeInfoId = nodeInfoId;
     }
 
-    public String getHost() {
-        return host;
+    public String getNode() {
+        return node;
     }
 
-    public void setHost(String host) {
-        this.host = host;
+    public void setNode(String node) {
+        this.node = node;
     }
 
     public long getResponseTime() {
