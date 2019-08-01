@@ -41,7 +41,7 @@ import java.sql.Timestamp;
  */
 public class NodeInfo {
 
-    private String nodeInfoId;
+    private String infoId;
 
     private String node;
 
@@ -149,12 +149,12 @@ public class NodeInfo {
 
     private Timestamp updateTime;
 
-    public String getNodeInfoId() {
-        return nodeInfoId;
+    public String getInfoId() {
+        return infoId;
     }
 
-    public void setNodeInfoId(String nodeInfoId) {
-        this.nodeInfoId = nodeInfoId;
+    public void setInfoId(String infoId) {
+        this.infoId = infoId;
     }
 
     public String getNode() {

@@ -15,7 +15,7 @@ public class Cluster {
 
     private String userIds;
 
-    private String token;
+    private String clusterToken;
 
     private String clusterName;
 
@@ -42,7 +42,7 @@ public class Cluster {
     private InstallationEnvironment installationEnv;
 
     /**
-     * 0: created by redis manager
+     * 0: install by redis manager
      * 1: other way
      */
     private int installationType;
