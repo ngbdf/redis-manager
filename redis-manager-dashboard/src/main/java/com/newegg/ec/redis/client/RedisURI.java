@@ -2,6 +2,11 @@ package com.newegg.ec.redis.client;
 
 import redis.clients.jedis.HostAndPort;
 
+import java.util.Collections;
+import java.util.Set;
+
+import static com.newegg.ec.redis.entity.RedisClientName.REDIS_MANAGER_ClIENT;
+
 /**
  * Redis connection param
  *
@@ -12,15 +17,37 @@ public class RedisURI {
 
     private String token;
 
-    private HostAndPort hostAndPort;
+    private Set<HostAndPort> hostAndPortSet;
 
     private String requirePass;
 
-    private String clientName;
+    private String clientName = REDIS_MANAGER_ClIENT;
 
     private String sentinelMasterId;
 
     private int database;
+
+    public RedisURI(HostAndPort hostAndPort, String requirePass) {
+        this(Collections.singleton(hostAndPort), requirePass);
+    }
+
+    public RedisURI(Set<HostAndPort> hostAndPortSet, String requirePass) {
+        this(hostAndPortSet, requirePass, REDIS_MANAGER_ClIENT, null, 0);
+    }
+
+    public RedisURI(Set<HostAndPort> hostAndPortSet, String requirePass, String clientName, String sentinelMasterId, int database) {
+        this(null, hostAndPortSet, requirePass, clientName, sentinelMasterId, database);
+    }
+
+    public RedisURI(String token, Set<HostAndPort> hostAndPortSet, String requirePass, String clientName, String sentinelMasterId, int database) {
+        this.token = token;
+        this.hostAndPortSet = hostAndPortSet;
+        this.requirePass = requirePass;
+        this.clientName = clientName;
+        this.sentinelMasterId = sentinelMasterId;
+        this.database = database;
+    }
+
 
     public String getToken() {
         return token;
@@ -30,20 +57,20 @@ public class RedisURI {
         this.token = token;
     }
 
-    public HostAndPort getHostAndPort() {
-        return hostAndPort;
-    }
-
-    public void setHostAndPort(HostAndPort hostAndPort) {
-        this.hostAndPort = hostAndPort;
-    }
-
     public String getRequirePass() {
         return requirePass;
     }
 
     public void setRequirePass(String requirePass) {
         this.requirePass = requirePass;
+    }
+
+    public Set<HostAndPort> getHostAndPortSet() {
+        return hostAndPortSet;
+    }
+
+    public void setHostAndPortSet(Set<HostAndPort> hostAndPortSet) {
+        this.hostAndPortSet = hostAndPortSet;
     }
 
     public String getClientName() {

@@ -1,11 +1,14 @@
-CREATE DATABASE `redis_manager` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+create DATABASE `redis_manager` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 -- 最后创建索引和唯一键
 
 -- group
-CREATE TABLE IF NOT EXISTS `group` (
+create TABLE IF NOT EXISTS `group` (
     group_id integer(4) NOT NULL AUTO_INCREMENT,
     group_name varchar(255) NOT NULL,
+    cluster_number integer(2) NOT NULL,
+    good_cluster_number integer(2) NOT NULL,
+    user_number integer(2) NOT NULL,
     group_info varchar(255),
     update_time datetime(0) NOT NULL,
     PRIMARY KEY (group_id),
@@ -13,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `group` (
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- user
-CREATE TABLE IF NOT EXISTS `user`(
+create TABLE IF NOT EXISTS `user`(
     user_id integer(4) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
     user_name varchar(255) NOT NULL,
     password varchar(255) DEFAULT NULL COMMENT '密码',
@@ -29,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `user`(
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- group_user
-CREATE TABLE IF NOT EXISTS `group_user`(
+create TABLE IF NOT EXISTS `group_user`(
     group_user_id integer(4) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
     group_id integer(4) NOT NULL COMMENT '组ID',
     user_id integer(4) NOT NULL COMMENT '用户ID',
@@ -38,17 +41,25 @@ CREATE TABLE IF NOT EXISTS `group_user`(
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- cluster
-CREATE TABLE IF NOT EXISTS `cluster`(
+create TABLE IF NOT EXISTS `cluster`(
     cluster_id integer(4) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
     group_id integer(4) NOT NULL,
-    user_ids varchar(255) NOT NULL,
-    token varchar(255) DEFAULT NULL,
+    admins varchar(255) NOT NULL,
+    cluster_token varchar(255) DEFAULT NULL,
     nodes varchar(255) NOT NULL,
     redis_mode varchar(25) NOT NULL,
     os varchar(255) NOT NULL,
     redis_version varchar(25) NOT NULL,
     total_keys integer(4) NOT NULL,
     total_expires integer(4) NOT NULL,
+    cluster_state tinyint(1) NOT NULL,
+    cluster_slots_assigned integer(4) NOT NULL,
+    cluster_slots_ok integer(4) NOT NULL,
+    cluster_slots_pfail integer(4) NOT NULL,
+    cluster_slots_fail integer(4) NOT NULL,
+    cluster_known_nodes integer(4) NOT NULL,
+    cluster_size integer(2) NOT NULL,
+    db_number integer(2) NOT NULL,
     redis_password varchar(25) DEFAULT NULL,
     installation_env varchar(25) NOT NULL,
     installation_type tinyint(1) NOT NULL,
@@ -58,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `cluster`(
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- node_info_${clusterId}
-CREATE TABLE IF NOT EXISTS `node_info_0`(
+create TABLE IF NOT EXISTS `node_info_0`(
     `info_id` integer(4) NOT NULL AUTO_INCREMENT,
     `node` varchar(50) NOT NULL,
     `data_type` varchar(50) NOT NULL,
@@ -71,13 +82,17 @@ CREATE TABLE IF NOT EXISTS `node_info_0`(
     `used_memory` integer(4) NOT NULL,
     `used_memory_rss` integer(4) NOT NULL,
     `used_memory_overhead` integer(4) NOT NULL,
+    `used_memory_dataset` integer(4) NOT NULL,
     `used_memory_dataset_perc` integer(4) NOT NULL,
     `mem_fragmentation_ratio` double(6, 2) NOT NULL,
     `total_connections_received` integer(4) NOT NULL,
+    `connections_received` integer(4) NOT NULL,
     `total_commands_processed` integer(4) NOT NULL,
-    `minute_commands_processed` integer(4) NOT NULL,
+    `commands_processed` integer(4) NOT NULL,
     `total_net_input_bytes` integer(4) NOT NULL,
+    `net_input_bytes` integer(4) NOT NULL,
     `total_net_output_bytes` integer(4) NOT NULL,
+    `net_output_bytes` integer(4) NOT NULL,
     `keyspace_hits` integer(4) NOT NULL,
     `keyspace_misses` integer(4) NOT NULL,
     `keyspace_hits_ratio` double(6, 2) NOT NULL,

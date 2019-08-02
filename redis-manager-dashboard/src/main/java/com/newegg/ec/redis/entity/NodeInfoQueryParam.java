@@ -21,6 +21,8 @@ public class NodeInfoQueryParam {
 
     private Timestamp endTime;
 
+    private String node;
+
     public NodeInfoQueryParam(String tableName, NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType,  Timestamp startTime, Timestamp endTime) {
         this.tableName = tableName;
         this.dataType = dataType;

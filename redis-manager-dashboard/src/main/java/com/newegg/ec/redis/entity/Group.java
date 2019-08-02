@@ -13,6 +13,12 @@ public class Group {
 
     private String groupName;
 
+    private int clusterNumber;
+
+    private int goodClusterNumber;
+
+    private int userNumber;
+
     private String groupInfo;
 
     private Timestamp updateTime;

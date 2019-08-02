@@ -1,33 +1,43 @@
 package com.newegg.ec.redis.client;
 
+import com.google.common.base.Strings;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
-public class RedisClient implements IRedisClient{
+public class RedisClient implements IRedisClient {
 
-    /** info subkey */
+    /**
+     * info subkey
+     */
     public static final String SERVER = "server";
 
-    private RedisURI redisURI;
+    private Jedis jedis;
 
     public RedisClient(RedisURI redisURI) {
-        this.redisURI = redisURI;
+        String redisPassword = redisURI.getRequirePass();
+        Set<HostAndPort> hostAndPortSet = redisURI.getHostAndPortSet();
+        jedis = new Jedis(hostAndPortSet.iterator().next());
+        if (!Strings.isNullOrEmpty(redisPassword)) {
+            jedis.auth(redisPassword);
+        }
     }
 
     @Override
-    public Jedis getRedisClient() {
-        return null;
+    public Jedis getJedisClient() {
+        return jedis;
     }
 
     @Override
-    public boolean ping() {
-        return false;
+    public String ping() {
+        return jedis.ping();
     }
 
     @Override
@@ -57,7 +67,7 @@ public class RedisClient implements IRedisClient{
 
     @Override
     public String getInfo(String subKey) {
-        return null;
+        return jedis.info(subKey);
     }
 
     @Override
@@ -116,7 +126,9 @@ public class RedisClient implements IRedisClient{
     }
 
     @Override
-    public String close() {
-        return null;
+    public void close() {
+        if (jedis != null) {
+            jedis.close();
+        }
     }
 }

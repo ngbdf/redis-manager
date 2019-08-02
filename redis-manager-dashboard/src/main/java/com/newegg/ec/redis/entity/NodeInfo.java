@@ -45,11 +45,11 @@ public class NodeInfo {
 
     private String node;
 
-    private long responseTime;
-
     private NodeInfoType.DataType dataType;
 
     private NodeInfoType.TimeType timeType;
+
+    private long responseTime;
 
     /**
      * Clients
@@ -100,23 +100,38 @@ public class NodeInfo {
     private long totalConnectionsReceived;
 
     /**
+     * redis 每分钟或每小时新建连接数
+     */
+    private long connectionsReceived;
+
+    /**
      * redis 处理的命令数
      */
     private long totalCommandsProcessed;
 
     /**
-     * redis 每分钟处理的命令数
+     * redis 每分钟或每小时处理的命令数
      */
-    private long minuteCommandsProcessed;
+    private long commandsProcessed;
     /**
-     * redis网络入口流量字节数
+     * redis 网络入口流量字节数
      */
     private long totalNetInputBytes;
 
     /**
-     * redis网络出口流量字节数
+     * redis 每分钟或每小时网络入口流量字节数
+     */
+    private long netInputBytes;
+
+    /**
+     * redis 网络出口流量字节数
      */
     private long totalNetOutputBytes;
+
+    /**
+     * redis 每分钟或每小时网络出口流量字节数
+     */
+    private long netOutputBytes;
 
     /**
      * keyspace_hits
@@ -165,14 +180,6 @@ public class NodeInfo {
         this.node = node;
     }
 
-    public long getResponseTime() {
-        return responseTime;
-    }
-
-    public void setResponseTime(long responseTime) {
-        this.responseTime = responseTime;
-    }
-
     public NodeInfoType.DataType getDataType() {
         return dataType;
     }
@@ -189,12 +196,12 @@ public class NodeInfo {
         this.timeType = timeType;
     }
 
-    public Timestamp getUpdateTime() {
-        return updateTime;
+    public long getResponseTime() {
+        return responseTime;
     }
 
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
+    public void setResponseTime(long responseTime) {
+        this.responseTime = responseTime;
     }
 
     public long getConnectedClients() {
@@ -285,6 +292,14 @@ public class NodeInfo {
         this.totalConnectionsReceived = totalConnectionsReceived;
     }
 
+    public long getConnectionsReceived() {
+        return connectionsReceived;
+    }
+
+    public void setConnectionsReceived(long connectionsReceived) {
+        this.connectionsReceived = connectionsReceived;
+    }
+
     public long getTotalCommandsProcessed() {
         return totalCommandsProcessed;
     }
@@ -293,12 +308,12 @@ public class NodeInfo {
         this.totalCommandsProcessed = totalCommandsProcessed;
     }
 
-    public long getMinuteCommandsProcessed() {
-        return minuteCommandsProcessed;
+    public long getCommandsProcessed() {
+        return commandsProcessed;
     }
 
-    public void setMinuteCommandsProcessed(long minuteCommandsProcessed) {
-        this.minuteCommandsProcessed = minuteCommandsProcessed;
+    public void setCommandsProcessed(long commandsProcessed) {
+        this.commandsProcessed = commandsProcessed;
     }
 
     public long getTotalNetInputBytes() {
@@ -309,12 +324,28 @@ public class NodeInfo {
         this.totalNetInputBytes = totalNetInputBytes;
     }
 
+    public long getNetInputBytes() {
+        return netInputBytes;
+    }
+
+    public void setNetInputBytes(long netInputBytes) {
+        this.netInputBytes = netInputBytes;
+    }
+
     public long getTotalNetOutputBytes() {
         return totalNetOutputBytes;
     }
 
     public void setTotalNetOutputBytes(long totalNetOutputBytes) {
         this.totalNetOutputBytes = totalNetOutputBytes;
+    }
+
+    public long getNetOutputBytes() {
+        return netOutputBytes;
+    }
+
+    public void setNetOutputBytes(long netOutputBytes) {
+        this.netOutputBytes = netOutputBytes;
     }
 
     public long getKeyspaceHits() {
@@ -365,4 +396,11 @@ public class NodeInfo {
         this.expires = expires;
     }
 
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
+    }
 }

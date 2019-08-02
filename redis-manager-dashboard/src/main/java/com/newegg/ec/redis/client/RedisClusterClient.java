@@ -1,9 +1,15 @@
 package com.newegg.ec.redis.client;
 
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Jay.H.Zou
@@ -11,26 +17,41 @@ import java.util.List;
  */
 public class RedisClusterClient implements IRedisClusterClient {
 
-    private RedisURI redisURI;
+    private JedisCluster jedisCluster;
+
+    private RedisClient redisClient;
+
+    private static final int TIMEOUT = 5000;
+
+    private static final int MAX_ATTEMPTS = 3;
 
     public RedisClusterClient(RedisURI redisURI) {
-        this.redisURI = redisURI;
+        Set<HostAndPort> hostAndPortSet = redisURI.getHostAndPortSet();
+        String redisPassword = redisURI.getRequirePass();
+        jedisCluster = new JedisCluster(hostAndPortSet, TIMEOUT, TIMEOUT, MAX_ATTEMPTS, redisPassword, new GenericObjectPoolConfig());
+        redisClient = ClientFactory.buildRedisClient(redisURI);
     }
 
     @Override
-    public String getRedisClusterClient() {
-        return null;
+    public JedisCluster getRedisClusterClient() {
+        return jedisCluster;
     }
 
     @Override
     public String getClusterInfo() {
-        return null;
+        Jedis jedis = redisClient.getJedisClient();
+        return jedis.clusterInfo();
     }
 
     @Override
     public String getNodeList() {
+        Map<String, JedisPool> clusterNodes = jedisCluster.getClusterNodes();
+        System.err.println(clusterNodes);
+        String nodes = redisClient.nodes();
+        System.err.println(nodes);
         return null;
     }
+
 
     @Override
     public String getMasterList() {
@@ -43,13 +64,13 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
-    public Jedis getRedisClient() {
-        return null;
+    public Jedis getJedisClient() {
+        return redisClient.getJedisClient();
     }
 
     @Override
-    public boolean ping() {
-        return false;
+    public String ping() {
+        return null;
     }
 
     @Override
@@ -79,7 +100,7 @@ public class RedisClusterClient implements IRedisClusterClient {
 
     @Override
     public String getInfo(String subKey) {
-        return null;
+        return redisClient.getInfo(subKey);
     }
 
     @Override
@@ -138,7 +159,12 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
-    public String close() {
-        return null;
+    public void close() {
+        if (redisClient != null) {
+            redisClient.close();
+        }
+        if (jedisCluster != null) {
+            jedisCluster.close();
+        }
     }
 }

@@ -8,4 +8,13 @@ package com.newegg.ec.redis.client;
  */
 public class ClientFactory {
 
+
+    public static RedisClusterClient buildRedisClusterClient(RedisURI redisURI) {
+        return new RedisClusterClient(redisURI);
+    }
+
+    public static RedisClient buildRedisClient(RedisURI redisURI) {
+        return new RedisClient(redisURI);
+    }
+
 }

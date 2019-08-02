@@ -11,21 +11,19 @@ import java.util.List;
  */
 public interface IRedisClient {
 
-
-
     /**
-     * Get redis client
+     * Get jedis client
      *
      * @return
      */
-    Jedis getRedisClient();
+    Jedis getJedisClient();
 
     /**
      * Ping redis
      *
      * @return
      */
-    boolean ping();
+    String ping();
 
     /**
      * Verify redis password
@@ -153,5 +151,5 @@ public interface IRedisClient {
      *
      * @return
      */
-    String close();
+    void close();
 }

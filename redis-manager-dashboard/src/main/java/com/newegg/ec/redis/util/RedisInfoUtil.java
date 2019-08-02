@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
-public class RedisNodeInfoUtil {
+public class RedisInfoUtil {
 
     /**
      * Desc: 数据存放上次获取的集群 NodeInfo
@@ -92,7 +92,7 @@ public class RedisNodeInfoUtil {
     public static final String EXPIRES = "expires";
 
 
-    private RedisNodeInfoUtil() {
+    private RedisInfoUtil() {
     }
 
     private static final BigDecimal BIG_DECIMAL_1024 = new BigDecimal(1024);
@@ -219,7 +219,7 @@ public class RedisNodeInfoUtil {
         } else {
             double keyspaceHitRatio = calculateKeyspaceHitRatio(lastTimeNodeInfo, nodeInfo);
             nodeInfo.setKeyspaceHitsRatio(keyspaceHitRatio);
-            nodeInfo.setMinuteCommandsProcessed(nodeInfo.getTotalCommandsProcessed() - lastTimeNodeInfo.getTotalCommandsProcessed());
+            nodeInfo.setCommandsProcessed(nodeInfo.getTotalCommandsProcessed() - lastTimeNodeInfo.getTotalCommandsProcessed());
             nodeInfo.setUsedCpuSys(nodeInfo.getUsedCpuSys() - lastTimeNodeInfo.getUsedCpuSys());
         }
         return nodeInfo;
