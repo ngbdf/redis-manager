@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.*;
-import com.newegg.ec.redis.plugin.install.entity.RedisNode;
+import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.HostAndPort;
 
 import java.util.List;
@@ -16,6 +16,10 @@ public interface IRedisService {
     List<String> getDBList(Set<HostAndPort> hostAndPortSet, String redisPassword);
 
     List<RedisNode> getNodeList(Set<HostAndPort> hostAndPortSet, String redisPassword);
+
+    List<NodeInfo> getNodeInfoList(Set<HostAndPort> hostAndPortSet, String redisPassword);
+
+    NodeInfo getNodeInfo(HostAndPort hostAndPort, String redisPassword);
 
     Cluster getClusterInfo(Set<HostAndPort> hostAndPortSet, String redisPassword);
 

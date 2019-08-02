@@ -25,8 +25,14 @@ public class ClusterService implements IClusterService {
     private IClusterDao clusterDao;
 
     @Override
-    public Map<Group, List<Cluster>> getAllClusterList() {
-        return null;
+    public List<Cluster> getAllClusterList() {
+        List<Cluster> clusterList = new ArrayList<>();
+        try {
+            clusterList = clusterDao.selectAllCluster();
+        } catch (Exception e) {
+            logger.error("Get all cluster failed.", e);
+        }
+        return clusterList;
     }
 
     @Override

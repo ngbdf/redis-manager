@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public interface IClusterService {
 
-    Map<Group, List<Cluster>> getAllClusterList();
+    List<Cluster> getAllClusterList();
 
     List<Cluster> getClusterListByGroupId(String groupId);
 

@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.util;
 
 import com.google.common.base.Strings;
+import redis.clients.jedis.HostAndPort;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -8,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Jay.H.Zou
@@ -42,5 +45,19 @@ public class RedisUtil {
             infoMap.put(key, value);
         }
         return infoMap;
+    }
+
+    public static final Set<HostAndPort> nodesToSet(String nodes) {
+        String[] nodesArr = nodes.split(",");
+        int length = nodesArr.length;
+        Set<HostAndPort> hostAndPortSet = new HashSet<>(length);
+        if (length > 0) {
+            for (String node : nodesArr) {
+                String[] ipAndPort = node.split(":");
+                HostAndPort hostAndPort = new HostAndPort(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
+                hostAndPortSet.add(hostAndPort);
+            }
+        }
+        return hostAndPortSet;
     }
 }

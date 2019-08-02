@@ -1,6 +1,6 @@
 package com.newegg.ec.redis.plugin.install.service;
 
-import com.newegg.ec.redis.plugin.install.entity.RedisNode;
+import com.newegg.ec.redis.entity.RedisNode;
 
 import java.util.List;
 

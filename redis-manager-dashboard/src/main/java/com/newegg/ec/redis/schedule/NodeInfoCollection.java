@@ -1,15 +1,23 @@
 package com.newegg.ec.redis.schedule;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.Group;
+import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
+import com.newegg.ec.redis.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import redis.clients.jedis.HostAndPort;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -51,9 +59,35 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
     @Override
     public void collectData() {
         try {
+            List<Cluster> allClusterList = clusterService.getAllClusterList();
+            if (allClusterList == null || allClusterList.isEmpty()) {
+                return;
+            }
+            for (Cluster cluster : allClusterList) {
 
+            }
         } catch (Exception e) {
 
+        }
+    }
+
+    private class CollectNodeInfoTask implements Runnable {
+
+        private Cluster cluster;
+
+        public CollectNodeInfoTask(Cluster cluster) {
+            this.cluster = cluster;
+        }
+
+        @Override
+        public void run() {
+            String nodes = cluster.getNodes();
+            String redisPassword = cluster.getRedisPassword();
+            Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToSet(nodes);
+            List<RedisNode> redisNodeList = redisService.getNodeList(hostAndPortSet, redisPassword);
+            for (RedisNode redisNode : redisNodeList) {
+
+            }
         }
     }
 
