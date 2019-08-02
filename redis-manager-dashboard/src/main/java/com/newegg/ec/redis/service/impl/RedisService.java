@@ -45,13 +45,7 @@ public class RedisService implements IRedisService {
         return null;
     }
 
-    public static void main(String[] args) {
-        // cluster:{172.16.35.77:8204=redis.clients.jedis.JedisPool@5fb759d6, 172.16.35.77:8203=redis.clients.jedis.JedisPool@4b8d604b, 172.16.35.88:8200=redis.clients.jedis.JedisPool@5e7cd6cc, 172.16.35.77:8202=redis.clients.jedis.JedisPool@68c9d179, 172.16.35.77:8201=redis.clients.jedis.JedisPool@d554c5f, 172.16.35.77:8205=redis.clients.jedis.JedisPool@2dfaea86, 172.16.35.88:8205=redis.clients.jedis.JedisPool@15888343, 172.16.35.88:8203=redis.clients.jedis.JedisPool@33ecda92, 172.16.35.77:8200=redis.clients.jedis.JedisPool@14fc5f04, 172.16.35.88:8204=redis.clients.jedis.JedisPool@6e2829c7, 172.16.35.88:8201=redis.clients.jedis.JedisPool@3feb2dda, 172.16.35.88:8202=redis.clients.jedis.JedisPool@6a8658ff, 172.16.35.87:8202=redis.clients.jedis.JedisPool@1c742ed4, 172.16.35.87:8203=redis.clients.jedis.JedisPool@333d4a8c, 172.16.35.87:8200=redis.clients.jedis.JedisPool@55de24cc, 172.16.35.76:8204=redis.clients.jedis.JedisPool@dc7df28, 172.16.35.76:8205=redis.clients.jedis.JedisPool@30f842ca, 172.16.35.87:8201=redis.clients.jedis.JedisPool@69c81773, 172.16.35.76:8202=redis.clients.jedis.JedisPool@4d14b6c2, 172.16.35.76:8203=redis.clients.jedis.JedisPool@7e990ed7, 172.16.35.76:8200=redis.clients.jedis.JedisPool@c05fddc, 172.16.35.87:8204=redis.clients.jedis.JedisPool@25df00a0, 172.16.35.76:8201=redis.clients.jedis.JedisPool@4d15107f, 172.16.35.87:8205=redis.clients.jedis.JedisPool@7b4c50bc, 172.16.35.75:8201=redis.clients.jedis.JedisPool@5884a914, 172.16.35.75:8202=redis.clients.jedis.JedisPool@50378a4, 172.16.35.75:8200=redis.clients.jedis.JedisPool@60f00693, 172.16.35.75:8205=redis.clients.jedis.JedisPool@79207381, 172.16.35.75:8203=redis.clients.jedis.JedisPool@491b9b8, 172.16.35.75:8204=redis.clients.jedis.JedisPool@1a4927d6}
-        HostAndPort hostAndPortSet = new HostAndPort("2", 8800);
-        RedisURI redisURI = new RedisURI(hostAndPortSet, "12345678");
-        RedisClusterClient redisClusterClient = ClientFactory.buildRedisClusterClient(redisURI);
-        redisClusterClient.getNodeList();
-    }
+ 
     @Override
     public Cluster getClusterInfo(Set<HostAndPort> hostAndPortSet, String redisPassword) {
         Cluster cluster = null;
