@@ -49,6 +49,8 @@ public class NodeInfo {
 
     private NodeInfoType.TimeType timeType;
 
+    private boolean lastTime;
+
     private long responseTime;
 
     /**
@@ -164,6 +166,14 @@ public class NodeInfo {
 
     private Timestamp updateTime;
 
+    public NodeInfo() {}
+
+    public NodeInfo(NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, boolean lastTime) {
+        this.dataType = dataType;
+        this.timeType = timeType;
+        this.lastTime = lastTime;
+    }
+
     public String getInfoId() {
         return infoId;
     }
@@ -194,6 +204,14 @@ public class NodeInfo {
 
     public void setTimeType(NodeInfoType.TimeType timeType) {
         this.timeType = timeType;
+    }
+
+    public boolean isLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(boolean lastTime) {
+        this.lastTime = lastTime;
     }
 
     public long getResponseTime() {

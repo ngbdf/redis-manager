@@ -7,7 +7,7 @@ public class RedisQueryParam {
 
     private String clusterId;
 
-    private String address;
+    private String nodes;
 
     private int database;
 
@@ -21,12 +21,12 @@ public class RedisQueryParam {
         this.clusterId = clusterId;
     }
 
-    public String getAddress() {
-        return address;
+    public String getNodes() {
+        return nodes;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setNodes(String nodes) {
+        this.nodes = nodes;
     }
 
     public int getDatabase() {

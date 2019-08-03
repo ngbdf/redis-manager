@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.NodeInfo;
-import com.newegg.ec.redis.entity.NodeInfoQueryParam;
+import com.newegg.ec.redis.entity.NodeInfoParam;
 
 import java.util.List;
 
@@ -11,11 +11,13 @@ import java.util.List;
  */
 public interface INodeInfoService {
 
-    List<NodeInfo> getAllNodeInfoList(NodeInfoQueryParam nodeInfoQueryParam);
+    List<NodeInfo> getNodeInfoList(NodeInfoParam nodeInfoParam);
 
-    List<NodeInfo> getMonitorNodeInfoList(NodeInfoQueryParam nodeInfoQueryParam);
+    NodeInfo getLastTimeNodeInfo(NodeInfoParam nodeInfoParam);
 
-    int addNodeInfo(String clusterName, List<NodeInfo> nodeInfoList);
+    List<NodeInfo> getLastHourNodeInfoList(int clusterId);
 
-    int clearNodeInfo(String clusterName);
+    boolean addNodeInfo(NodeInfoParam nodeInfoParam, List<NodeInfo> nodeInfoList);
+
+    boolean cleanupNodeInfo(int clusterId);
 }

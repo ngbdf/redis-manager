@@ -34,7 +34,7 @@ public class InstallationTemplate {
     public boolean install(InstallationOperation installationOperation, InstallationParam installationParam) {
         Cluster cluster = installationParam.getCluster();
         // TODO: 用于标记是否是新建集群
-        String clusterId = cluster.getClusterId();
+        int clusterId = cluster.getClusterId();
         List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
         String machineGroup = installationParam.getMachineGroup();
         List<Machine> machineByMachineGroup = machineService.getMachineByMachineGroup(machineGroup);

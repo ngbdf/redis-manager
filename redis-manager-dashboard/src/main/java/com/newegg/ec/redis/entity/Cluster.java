@@ -9,7 +9,7 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment;
  */
 public class Cluster {
 
-    private String clusterId;
+    private int clusterId;
 
     private String groupId;
 
@@ -99,11 +99,12 @@ public class Cluster {
         WARN;
     }
 
-    public String getClusterId() {
+
+    public int getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(String clusterId) {
+    public void setClusterId(int clusterId) {
         this.clusterId = clusterId;
     }
 

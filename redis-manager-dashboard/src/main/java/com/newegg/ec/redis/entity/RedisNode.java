@@ -9,7 +9,7 @@ public class RedisNode {
 
     private String redisNodeId;
 
-    private String clusterId;
+    private int clusterId;
 
     private String host;
 
@@ -17,4 +17,43 @@ public class RedisNode {
 
     private NodeRole nodeRole;
 
+    public String getRedisNodeId() {
+        return redisNodeId;
+    }
+
+    public void setRedisNodeId(String redisNodeId) {
+        this.redisNodeId = redisNodeId;
+    }
+
+    public int getClusterId() {
+        return clusterId;
+    }
+
+    public void setClusterId(int clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public NodeRole getNodeRole() {
+        return nodeRole;
+    }
+
+    public void setNodeRole(NodeRole nodeRole) {
+        this.nodeRole = nodeRole;
+    }
 }

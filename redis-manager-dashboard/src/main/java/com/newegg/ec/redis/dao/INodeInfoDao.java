@@ -1,11 +1,9 @@
 package com.newegg.ec.redis.dao;
 
 import com.newegg.ec.redis.entity.NodeInfo;
-import com.newegg.ec.redis.entity.NodeInfoQueryParam;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import com.newegg.ec.redis.entity.NodeInfoParam;
+import com.newegg.ec.redis.entity.NodeInfoType;
+import org.apache.ibatis.annotations.*;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -19,27 +17,26 @@ import java.util.List;
 public interface INodeInfoDao {
 
     @Select("<script>" +
-            "SELECT * FROM ${tableName} " +
+            "SELECT * FROM node_info_${clusterId} " +
             "WHERE update_time >= #{startTime}" +
             "AND update_time <= #{endTime}" +
             "AND data_type = #{dataType}" +
             "AND time_type = #{timeType}" +
             "<if test='node != null'> AND node = #{node} </if>" +
             "</script>")
-    List<NodeInfo> selectAllNodeInfoList(NodeInfoQueryParam nodeInfoQueryParam);
+    List<NodeInfo> selectNodeInfoList(NodeInfoParam nodeInfoParam);
 
     @Select("<script>" +
-            "SELECT * FROM ${tableName} " +
-            "WHERE update_time >= #{startTime}" +
-            "AND update_time <= #{endTime}" +
-            "AND data_type = #{dataType}" +
+            "SELECT * FROM node_info_${clusterId} " +
+            "WHERE data_type = #{dataType}" +
             "AND time_type = #{timeType}" +
-            "<if test='node != null'> AND node = #{node} </if>" +
+            "<if test='node != null'> AND node = #{node} </if> " +
+            "AND last_time = 1" +
             "</script>")
-    List<NodeInfo> selectMonitorNodeInfoList(NodeInfoQueryParam nodeInfoQueryParam);
+    NodeInfo selectLastTimeNodeInfo(NodeInfoParam nodeInfoParam);
 
     @Insert("<script>" +
-            "INSERT INFO ${tableName} (info_id, node, data_type, time_type, " +
+            "INSERT INFO node_info_${clusterId} (info_id, node, data_type, time_type, " +
             "response_time, connected_clients, client_longest_output_list, client_biggest_input_buf, blocked_clients, " +
             "used_memory, used_memory_rss, used_memory_overhead, used_memory_dataset, used_memory_dataset_perc, mem_fragmentation_ratio, " +
             "total_connections_received, connections_received, total_commands_processed, commands_processed, " +
@@ -54,17 +51,20 @@ public interface INodeInfoDao {
             "#{totalConnectionsReceived}, #{connectionsReceived}, #{totalCommandsProcessed}, #{commandsProcessed}, " +
             "#{totalNetInputBytes}, #{netInputBytes}, #{totalNetOutputBytes}, #{commandsProcessed}, " +
             "#{keyspaceHits}, #{keyspaceMisses}, #{keyspaceHitsRatio}, " +
-            "#{usedCpuSys}, #{keys}, #{expires}, #{updateTime})" +
+            "#{usedCpuSys}, #{keys}, #{expires}, NOW())" +
             "</foreach>" +
             "</script>")
-    int insertNodeInfo(String tableName, List<NodeInfo> nodeInfoList);
+    int insertNodeInfo(@Param("clusterId") int clusterId, @Param("nodeInfoList") List<NodeInfo> nodeInfoList);
 
-    @Delete("DELETE FROM ${tableName} WHERE update_time < #{oldestTime}")
-    int deleteNodeInfoByTime(@Param("tableName") String tableName, @Param("oldestTime")Timestamp oldestTime);
+    @Delete("DELETE FROM node_info_${clusterId} WHERE update_time < #{oldestTime}")
+    int deleteNodeInfoByTime(@Param("clusterId") int clusterId, @Param("oldestTime") Timestamp oldestTime);
 
-    @Delete("DELETE FROM ${tableName}")
-    int deleteAllNodeInfo(String tableName);
+    @Update("UPDATE node_info_${clusterId} SET last_time = 0 WHERE last_time = 1 AND time_type = #{timeType}")
+    int updateLastTimeStatus(@Param("clusterId") int clusterId, @Param("timeType") NodeInfoType.TimeType timeType);
 
-    @Delete("DROP TABLE ${tableName}")
-    int dropTable(String tableName);
+    @Delete("DELETE FROM node_info_${clusterId}")
+    int deleteAllNodeInfo(int clusterId);
+
+    @Delete("DROP TABLE node_info_${clusterId}")
+    int dropTable(int clusterId);
 }

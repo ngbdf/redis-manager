@@ -7,11 +7,9 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Jay.H.Zou
@@ -19,11 +17,13 @@ import java.util.Set;
  */
 public class RedisUtil {
 
-    private RedisUtil() {}
+    private RedisUtil() {
+    }
 
     /**
      * info => map
      * cluster info => map
+     *
      * @param info
      * @return
      * @throws IOException
@@ -47,7 +47,7 @@ public class RedisUtil {
         return infoMap;
     }
 
-    public static final Set<HostAndPort> nodesToSet(String nodes) {
+    public static final Set<HostAndPort> nodesToHostAndPortSet(String nodes) {
         String[] nodesArr = nodes.split(",");
         int length = nodesArr.length;
         Set<HostAndPort> hostAndPortSet = new HashSet<>(length);
@@ -59,5 +59,38 @@ public class RedisUtil {
             }
         }
         return hostAndPortSet;
+    }
+
+    public static BigDecimal avg(List<BigDecimal> bigDecimalList) {
+        BigDecimal summation = new BigDecimal(bigDecimalList.size());
+        BigDecimal size = new BigDecimal(bigDecimalList.size());
+        for (BigDecimal bigDecimal : bigDecimalList) {
+            summation.add(bigDecimal);
+        }
+        return summation.divide(size);
+    }
+
+    public static BigDecimal max(List<BigDecimal> bigDecimalList) {
+        BigDecimal maxBigDecimal = null;
+        for (BigDecimal bigDecimal : bigDecimalList) {
+            if (maxBigDecimal == null) {
+                maxBigDecimal = bigDecimal;
+                continue;
+            }
+            maxBigDecimal = maxBigDecimal.max(bigDecimal);
+        }
+        return maxBigDecimal;
+    }
+
+    public static BigDecimal min(List<BigDecimal> bigDecimalList) {
+        BigDecimal minBigDecimal = null;
+        for (BigDecimal bigDecimal : bigDecimalList) {
+            if (minBigDecimal == null) {
+                minBigDecimal = bigDecimal;
+                continue;
+            }
+            minBigDecimal = minBigDecimal.min(bigDecimal);
+        }
+        return minBigDecimal;
     }
 }

@@ -10,15 +10,23 @@ spring:
       enabled: true
       force: true
       charset: UTF-8
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/redis_manager?useUnicode=true&characterEncoding=utf-8
-#    username: xxx
-#    password: xxx
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://10.16.50.209:3306/redis_manager_2?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: Newegg@1234
+
+mybatis:
+  configuration:
+    mapUnderscoreToCamelCase: true
 
 # http://download.redis.io/releases/
 # redis manager configuration
 redis-manager:
+  # monitor configuration
+  monitor:
+    # 数据保存天数，1-30天, default: 15
+    reserved-days: 15
   # installation configuration
   install:
     # physics machine
@@ -29,4 +37,4 @@ redis-manager:
       package-path: /redis/docker/
   alert:
   analysis:
-  monitor:
+    enabled: false

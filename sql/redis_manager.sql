@@ -15,6 +15,10 @@ create TABLE IF NOT EXISTS `group` (
     UNIQUE KEY (group_name)
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
+create TABLE IF NOT EXISTS `user_test`(
+    user_name varchar(255) NOT NULL,
+    user_role varchar(50) NOT NULL
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 -- user
 create TABLE IF NOT EXISTS `user`(
     user_id integer(4) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
@@ -74,6 +78,7 @@ create TABLE IF NOT EXISTS `node_info_0`(
     `node` varchar(50) NOT NULL,
     `data_type` varchar(50) NOT NULL,
     `time_type` varchar(50) NOT NULL,
+    `last_time` tinyint(1) NOT NULL,
     `response_time` integer(4) NOT NULL,
     `connected_clients` integer(4) NOT NULL,
     `client_longest_output_list` integer(4) NOT NULL,

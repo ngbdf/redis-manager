@@ -17,9 +17,9 @@ public interface IRedisService {
 
     List<RedisNode> getNodeList(Set<HostAndPort> hostAndPortSet, String redisPassword);
 
-    List<NodeInfo> getNodeInfoList(Set<HostAndPort> hostAndPortSet, String redisPassword);
+    List<NodeInfo> getNodeInfoList(int clusterId, Set<HostAndPort> hostAndPortSet, String redisPassword);
 
-    NodeInfo getNodeInfo(HostAndPort hostAndPort, String redisPassword);
+    NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword);
 
     Cluster getClusterInfo(Set<HostAndPort> hostAndPortSet, String redisPassword);
 

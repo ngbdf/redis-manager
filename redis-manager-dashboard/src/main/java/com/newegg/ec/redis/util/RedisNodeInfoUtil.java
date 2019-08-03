@@ -13,20 +13,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- *  Redis info util
+ * Redis info util
  *
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
-public class RedisInfoUtil {
+public class RedisNodeInfoUtil {
 
-    /**
-     * Desc: 数据存放上次获取的集群 NodeInfo
-     * Cause: 为了通过一些累加的数据计算出一分钟的变化量
-     * Data: <clusterName, <host, nodeInfo>>
-     */
-    private static final Map<String, Map<String, NodeInfo>> LAST_TIME_NODE_INFO = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, Object>> LIMITE_VALUE_MAP = new ConcurrentHashMap<>();
 
+    public static final String NODE_INFO_TABLE_PREFIX = "node_info_";
+
+    public static final String RESPONSE_TIME = "response_time";
     /**
      * Server
      */
@@ -67,6 +65,10 @@ public class RedisInfoUtil {
      */
     public static final String TOTAL_CONNECTIONS_RECEIVED = "total_connections_received";
     public static final String TOTAL_COMMANDS_PROCESSED = "total_commands_processed";
+    public static final String TOTAL_NET_INPUT_BYTES = "total_net_input_bytes";
+    public static final String TOTAL_NET_OUTPUT_BYTES = "total_net_output_bytes";
+    public static final String INSTANTANEOUS_INPUT_KBPS = "instantaneous_input_kbps";
+    public static final String INSTANTANEOUS_OUTPUT_KBPS = "instantaneous_output_kbps";
     public static final String REJECTED_CONNECTIONS = "rejected_connections";
     public static final String SYNC_FULL = "sync_full";
     public static final String SYNC_PARTIAL_OK = "sync_partial_ok";
@@ -75,6 +77,11 @@ public class RedisInfoUtil {
     public static final String KEYSPACE_HITS = "keyspace_hits";
     public static final String KEYSPACE_MISSES = "keyspace_misses";
 
+    public static final String CONNECTIONS_RECEIVED = "connections_received";
+    public static final String COMMANDS_PROCESSED = "commands_processed";
+    public static final String NET_INPUT_BYTES = "net_input_bytes";
+    public static final String NET_OUTPUT_BYTES = "net_output_bytes";
+    public static final String KEYSPACE_HITS_RATIO = "keyspaceHitsRatio";
     /**
      * Replication
      */
@@ -91,21 +98,15 @@ public class RedisInfoUtil {
     public static final String KEYS = "keys";
     public static final String EXPIRES = "expires";
 
-
-    private RedisInfoUtil() {
+    private RedisNodeInfoUtil() {
     }
 
     private static final BigDecimal BIG_DECIMAL_1024 = new BigDecimal(1024);
 
-    public static final NodeInfo parseInfoToObject(String clusterId, String host, String info) throws IOException {
+    public static final NodeInfo parseInfoToObject(String info, NodeInfo lastTimeNodeInfo) throws IOException {
         JSONObject infoJSONObject = new JSONObject();
         long keys = 0;
         long expires = 0;
-        NodeInfo lastTimeNodeInfo = null;
-        Map<String, NodeInfo> nodeInfoMap = LAST_TIME_NODE_INFO.get(clusterId);
-        if (nodeInfoMap != null && !nodeInfoMap.isEmpty()) {
-            lastTimeNodeInfo = nodeInfoMap.get(host);
-        }
         Map<String, String> infoMap = RedisUtil.parseInfoToMap(info);
         for (Map.Entry<String, String> entry : infoMap.entrySet()) {
             String key = entry.getKey();
@@ -147,12 +148,8 @@ public class RedisInfoUtil {
         NodeInfo nodeInfo = infoJSONObject.toJavaObject(NodeInfo.class);
         nodeInfo.setKeys(keys);
         nodeInfo.setExpires(expires);
-        NodeInfo nodeInfoWithCalculation = finalCalculation(lastTimeNodeInfo, nodeInfo);
-        return nodeInfoWithCalculation;
-    }
-
-    public static final void refreshLastTimeNodeInfoMap(String clusterId, Map<String, NodeInfo> infoMap) {
-        LAST_TIME_NODE_INFO.put(clusterId, infoMap);
+        calculateCumulativeData(nodeInfo, lastTimeNodeInfo);
+        return nodeInfo;
     }
 
     /**
@@ -204,14 +201,15 @@ public class RedisInfoUtil {
     }
 
     /**
-     * 计算一些字段的一分钟变化量
+     * 累计值计算
      * keyspace_hits
      * command_processed
+     *
      * @param lastTimeNodeInfo
      * @param nodeInfo
      * @return
      */
-    private static final NodeInfo finalCalculation(NodeInfo lastTimeNodeInfo, NodeInfo nodeInfo) {
+    public static final NodeInfo calculateCumulativeData(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
         if (lastTimeNodeInfo == null) {
             nodeInfo.setUsedCpuSys(0);
             nodeInfo.setTotalCommandsProcessed(0);
@@ -225,11 +223,19 @@ public class RedisInfoUtil {
         return nodeInfo;
     }
 
-    private static final double calculateKeyspaceHitRatio(NodeInfo lastTimeNodeInfo, NodeInfo nodeInfo) {
+    private static final double calculateKeyspaceHitRatio(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
         long minuteKeyspaceHit = nodeInfo.getKeyspaceHits() - lastTimeNodeInfo.getKeyspaceHits();
         long minuteKeyspaceMisses = nodeInfo.getKeyspaceMisses() - lastTimeNodeInfo.getKeyspaceMisses();
         BigDecimal divide = BigDecimal.valueOf(minuteKeyspaceHit).divide(BigDecimal.valueOf(minuteKeyspaceHit + minuteKeyspaceMisses));
         return divide.doubleValue();
+    }
+
+    public static void updateLimitValueMap(String clusterId, Map<String, Object> limitValue) {
+        LIMITE_VALUE_MAP.put(clusterId, limitValue);
+    }
+
+    public static Map<String, Object> getLimitValue(String clusterId) {
+        return LIMITE_VALUE_MAP.get(clusterId);
     }
 
 }

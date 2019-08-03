@@ -5,21 +5,24 @@ import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClusterClient;
 import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.RedisClusterInfoUtil;
-import com.newegg.ec.redis.util.RedisInfoUtil;
+import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.HostAndPort;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.newegg.ec.redis.util.RedisInfoUtil.OS;
-import static com.newegg.ec.redis.util.RedisInfoUtil.REDIS_MODE;
+import static com.newegg.ec.redis.util.RedisNodeInfoUtil.OS;
+import static com.newegg.ec.redis.util.RedisNodeInfoUtil.REDIS_MODE;
 
 /**
  * @author Jay.H.Zou
@@ -28,6 +31,9 @@ import static com.newegg.ec.redis.util.RedisInfoUtil.REDIS_MODE;
 public class RedisService implements IRedisService {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisService.class);
+
+    @Autowired
+    private INodeInfoService nodeInfoService;
 
     @Override
     public List<String> getDBList(Set<HostAndPort> hostAndPortSet, String redisPassword) {
@@ -43,27 +49,49 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public List<NodeInfo> getNodeInfoList(Set<HostAndPort> hostAndPortSet, String redisPassword) {
-        return null;
+    public List<NodeInfo> getNodeInfoList(int clusterId, Set<HostAndPort> hostAndPortSet, String redisPassword) {
+        List<NodeInfo> nodeInfoList = new ArrayList<>(hostAndPortSet.size());
+        for (HostAndPort hostAndPort : hostAndPortSet) {
+            NodeInfo nodeInfo = getNodeInfo(clusterId, hostAndPort, redisPassword);
+            if (nodeInfo == null) {
+                continue;
+            }
+            nodeInfoList.add(nodeInfo);
+        }
+        return nodeInfoList;
     }
 
     @Override
-    public NodeInfo getNodeInfo(HostAndPort hostAndPort, String redisPassword) {
-        RedisURI redisURI = new RedisURI(hostAndPort, redisPassword);
-        RedisClient redisClient = ClientFactory.buildRedisClient(redisURI);
-        String info = redisClient.getInfo();
-        return null;
+    public NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword) {
+        NodeInfo nodeInfo = null;
+        String node = hostAndPort.getHost() + ":" + hostAndPort.getPort();
+        try {
+            RedisURI redisURI = new RedisURI(hostAndPort, redisPassword);
+            RedisClient redisClient = ClientFactory.buildRedisClient(redisURI);
+            String info = redisClient.getInfo();
+            // 获取上一次的 NodeInfo 来计算某些字段的差值
+            NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.DataType.NODE, NodeInfoType.TimeType.MINUTE, node);
+            NodeInfo lastTimeNodeInfo = nodeInfoService.getLastTimeNodeInfo(nodeInfoParam);
+            nodeInfo = RedisNodeInfoUtil.parseInfoToObject(info, lastTimeNodeInfo);
+            nodeInfo.setDataType(NodeInfoType.DataType.NODE);
+            nodeInfo.setTimeType(NodeInfoType.TimeType.MINUTE);
+            nodeInfo.setLastTime(true);
+        } catch (IOException e) {
+            logger.error("Build node info failed, node = " + node, e);
+        }
+        return nodeInfo;
     }
 
     @Override
     public Cluster getClusterInfo(Set<HostAndPort> hostAndPortSet, String redisPassword) {
-        Cluster cluster = null;
+        Cluster cluster = new Cluster();
         RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
         RedisClusterClient redisClusterClient = ClientFactory.buildRedisClusterClient(redisURI);
         String serverInfo = redisClusterClient.getInfo(RedisClient.SERVER);
         try {
             Map<String, String> serverInfoMap = RedisUtil.parseInfoToMap(serverInfo);
-            cluster = infoMapToCluster(serverInfoMap);
+            cluster.setRedisMode(serverInfoMap.get(REDIS_MODE));
+            cluster.setOs(serverInfoMap.get(OS));
         } catch (IOException e) {
             logger.error("Parse server info failed.", e);
         }
@@ -97,14 +125,6 @@ public class RedisService implements IRedisService {
     @Override
     public boolean forget() {
         return false;
-    }
-
-
-    private Cluster infoMapToCluster(Map<String, String> infoMap) {
-        Cluster cluster = new Cluster();
-        cluster.setRedisMode(infoMap.get(REDIS_MODE));
-        cluster.setOs(infoMap.get(OS));
-        return cluster;
     }
 
 }
