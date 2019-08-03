@@ -42,12 +42,13 @@ public class TimeRangeUtil {
         return new Timestamp(System.currentTimeMillis());
     }
 
-    public static Timestamp getEndTime(long duration) {
+
+    public static Timestamp getTime(long duration) {
         return new Timestamp(System.currentTimeMillis() - duration);
     }
 
-    public static Timestamp getDefaultEndTime() {
-        return getEndTime(ONE_HOUR);
+    public static Timestamp getLastHourTimestamp() {
+        return getTime(ONE_HOUR);
     }
 
     public static boolean moreThanTwoDays(Timestamp startTime, Timestamp endTime) {

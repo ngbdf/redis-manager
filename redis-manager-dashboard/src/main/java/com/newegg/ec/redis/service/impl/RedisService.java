@@ -49,10 +49,10 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public List<NodeInfo> getNodeInfoList(int clusterId, Set<HostAndPort> hostAndPortSet, String redisPassword) {
+    public List<NodeInfo> getNodeInfoList(int clusterId, Set<HostAndPort> hostAndPortSet, String redisPassword, NodeInfoType.TimeType timeType) {
         List<NodeInfo> nodeInfoList = new ArrayList<>(hostAndPortSet.size());
         for (HostAndPort hostAndPort : hostAndPortSet) {
-            NodeInfo nodeInfo = getNodeInfo(clusterId, hostAndPort, redisPassword);
+            NodeInfo nodeInfo = getNodeInfo(clusterId, hostAndPort, redisPassword, timeType);
             if (nodeInfo == null) {
                 continue;
             }
@@ -62,7 +62,7 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword) {
+    public NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword, NodeInfoType.TimeType timeType) {
         NodeInfo nodeInfo = null;
         String node = hostAndPort.getHost() + ":" + hostAndPort.getPort();
         try {
@@ -70,12 +70,12 @@ public class RedisService implements IRedisService {
             RedisClient redisClient = ClientFactory.buildRedisClient(redisURI);
             String info = redisClient.getInfo();
             // 获取上一次的 NodeInfo 来计算某些字段的差值
-            NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.DataType.NODE, NodeInfoType.TimeType.MINUTE, node);
+            NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.DataType.NODE, timeType, node);
             NodeInfo lastTimeNodeInfo = nodeInfoService.getLastTimeNodeInfo(nodeInfoParam);
             nodeInfo = RedisNodeInfoUtil.parseInfoToObject(info, lastTimeNodeInfo);
             nodeInfo.setDataType(NodeInfoType.DataType.NODE);
-            nodeInfo.setTimeType(NodeInfoType.TimeType.MINUTE);
             nodeInfo.setLastTime(true);
+            nodeInfo.setTimeType(timeType);
         } catch (IOException e) {
             logger.error("Build node info failed, node = " + node, e);
         }

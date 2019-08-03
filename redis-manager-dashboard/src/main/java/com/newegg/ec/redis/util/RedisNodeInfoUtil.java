@@ -93,6 +93,8 @@ public class RedisNodeInfoUtil {
      * CPU
      */
     public static final String USED_CPU_SYS = "used_cpu_sys";
+    public static final String USED_CPU_USER = "used_cpu_user";
+
     public static final String CLUSTER_ENABLED = "cluster_enabled";
     public static final String DB_PREFIX = "db";
     public static final String KEYS = "keys";
@@ -182,7 +184,7 @@ public class RedisNodeInfoUtil {
      * @param originalData
      * @return
      */
-    private static long byteToMB(String originalData) {
+    public static long byteToMB(String originalData) {
         if (Strings.isNullOrEmpty(originalData)) {
             return 0;
         }
@@ -191,7 +193,7 @@ public class RedisNodeInfoUtil {
         return divide.longValue();
     }
 
-    private static double truncatedPercentSign(String originalData) {
+    public static double truncatedPercentSign(String originalData) {
         double percent = 0;
         if (!Strings.isNullOrEmpty(originalData) && originalData.contains("%")) {
             String replace = originalData.replace("%", "");
@@ -213,7 +215,6 @@ public class RedisNodeInfoUtil {
         if (lastTimeNodeInfo == null) {
             nodeInfo.setUsedCpuSys(0);
             nodeInfo.setTotalCommandsProcessed(0);
-            return nodeInfo;
         } else {
             double keyspaceHitRatio = calculateKeyspaceHitRatio(lastTimeNodeInfo, nodeInfo);
             nodeInfo.setKeyspaceHitsRatio(keyspaceHitRatio);
@@ -223,10 +224,10 @@ public class RedisNodeInfoUtil {
         return nodeInfo;
     }
 
-    private static final double calculateKeyspaceHitRatio(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
-        long minuteKeyspaceHit = nodeInfo.getKeyspaceHits() - lastTimeNodeInfo.getKeyspaceHits();
-        long minuteKeyspaceMisses = nodeInfo.getKeyspaceMisses() - lastTimeNodeInfo.getKeyspaceMisses();
-        BigDecimal divide = BigDecimal.valueOf(minuteKeyspaceHit).divide(BigDecimal.valueOf(minuteKeyspaceHit + minuteKeyspaceMisses));
+    public static final double calculateKeyspaceHitRatio(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
+        long keyspaceHit = nodeInfo.getKeyspaceHits() - lastTimeNodeInfo.getKeyspaceHits();
+        long keyspaceMisses = nodeInfo.getKeyspaceMisses() - lastTimeNodeInfo.getKeyspaceMisses();
+        BigDecimal divide = BigDecimal.valueOf(keyspaceHit).divide(BigDecimal.valueOf(keyspaceHit + keyspaceMisses));
         return divide.doubleValue();
     }
 

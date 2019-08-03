@@ -156,6 +156,8 @@ public class NodeInfo {
     /** CPU */
     private double usedCpuSys;
 
+    private double usedCpuUser;
+
     /** Keyspace */
     /**
      * 当前节点所有db的 key 总数
@@ -396,6 +398,14 @@ public class NodeInfo {
 
     public void setUsedCpuSys(double usedCpuSys) {
         this.usedCpuSys = usedCpuSys;
+    }
+
+    public double getUsedCpuUser() {
+        return usedCpuUser;
+    }
+
+    public void setUsedCpuUser(double usedCpuUser) {
+        this.usedCpuUser = usedCpuUser;
     }
 
     public long getKeys() {

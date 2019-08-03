@@ -26,7 +26,7 @@ redis-manager:
   # monitor configuration
   monitor:
     # 数据保存天数，1-30天, default: 15
-    reserved-days: 15
+    keep-days: 15
   # installation configuration
   install:
     # physics machine

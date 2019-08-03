@@ -8,6 +8,7 @@ import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.RedisUtil;
+import com.newegg.ec.redis.util.TimeRangeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,25 +129,15 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
         public void run() {
             try {
                 int clusterId = cluster.getClusterId();
-                String nodes = cluster.getNodes();
                 String redisPassword = cluster.getRedisPassword();
-                Set<HostAndPort> seed = RedisUtil.nodesToHostAndPortSet(nodes);
-                List<RedisNode> redisNodeList = redisService.getNodeList(seed, redisPassword);
-                Set<HostAndPort> hostAndPortSet = new HashSet<>();
-                for (RedisNode redisNode : redisNodeList) {
-                    hostAndPortSet.add(new HostAndPort(redisNode.getHost(), redisNode.getPort()));
-                }
-                List<NodeInfo> nodeInfoList = redisService.getNodeInfoList(clusterId, hostAndPortSet, redisPassword);
+                Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
+                List<NodeInfo> nodeInfoList = redisService.getNodeInfoList(clusterId, hostAndPortSet, redisPassword, NodeInfoType.TimeType.MINUTE);
                 // 计算 AVG、MAX、MIN
-                Map<String, List<BigDecimal>> dataMap = nodeInfoCalculate(nodeInfoList);
-                List<NodeInfo> specialNodeInfo = buildSpecialNodeInfo(dataMap);
-                for (NodeInfo nodeInfo : specialNodeInfo) {
-                    nodeInfo.setTimeType(NodeInfoType.TimeType.MINUTE);
-                }
+                Map<String, List<BigDecimal>> nodeInfoDataMap = nodeInfoDataToMap(nodeInfoList);
+                List<NodeInfo> specialNodeInfo = buildNodeInfoForSpecialDataType(nodeInfoDataMap);
                 nodeInfoList.addAll(specialNodeInfo);
                 // clean minute last time data and save new data to db
-                NodeInfoParam nodeInfoParam = new NodeInfoParam();
-                nodeInfoParam.setClusterId(clusterId);
+                NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.TimeType.MINUTE);
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
                 // TODO: 更新cluster 中某些信息：total keys
             } catch (Exception e) {
@@ -156,6 +147,10 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
         }
     }
 
+    /**
+     * AVG、MAX、MIN 复用 MINUTE 数据
+     * NODE 从 redis 获取
+     */
     private class CollectHourNodeInfoTask implements Runnable {
 
         private Cluster cluster;
@@ -167,13 +162,67 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
         @Override
         public void run() {
             try {
+                int clusterId = cluster.getClusterId();
+                String redisPassword = cluster.getRedisPassword();
+                Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
+                List<NodeInfo> nodeInfoList = redisService.getNodeInfoList(clusterId, hostAndPortSet, redisPassword, NodeInfoType.TimeType.HOUR);
+                Map<String, List<BigDecimal>> nodeInfoDataMap = nodeInfoDataToMap(nodeInfoList);
+                List<NodeInfo> specialNodeInfo = buildNodeInfoForSpecialDataType(nodeInfoDataMap);
+                // VG、MAX、MIN 复用 MINUTE 数据
+                NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, TimeRangeUtil.getLastHourTimestamp(), TimeRangeUtil.getCurrentTimestamp());
+                nodeInfoParam.setTimeType(NodeInfoType.TimeType.MINUTE);
+                nodeInfoParam.setDataType(NodeInfoType.DataType.AVG);
+                List<NodeInfo> nodeInfoHistoryAvgList = nodeInfoService.getNodeInfoList(nodeInfoParam);
+                Map<String, List<BigDecimal>> nodeInfoHistoryAvgDataMap = nodeInfoDataToMap(nodeInfoHistoryAvgList);
+                nodeInfoParam.setDataType(NodeInfoType.DataType.MAX);
+                List<NodeInfo> nodeInfoHistoryMaxList = nodeInfoService.getNodeInfoList(nodeInfoParam);
+                Map<String, List<BigDecimal>> nodeInfoHistoryMaxDataMap = nodeInfoDataToMap(nodeInfoHistoryMaxList);
+                nodeInfoParam.setDataType(NodeInfoType.DataType.MIN);
+                List<NodeInfo> nodeInfoHistoryMinList = nodeInfoService.getNodeInfoList(nodeInfoParam);
+                Map<String, List<BigDecimal>> nodeInfoHistoryMinDataMap = nodeInfoDataToMap(nodeInfoHistoryMinList);
+                NodeInfo nodeInfoAvg = buildNodeINfoHour(nodeInfoHistoryAvgDataMap, NodeInfoType.DataType.AVG);
+                NodeInfo nodeInfoMax = buildNodeINfoHour(nodeInfoHistoryMaxDataMap, NodeInfoType.DataType.MAX);
+                NodeInfo nodeInfoMin = buildNodeINfoHour(nodeInfoHistoryMinDataMap, NodeInfoType.DataType.MIN);
+                nodeInfoList.add(nodeInfoAvg);
+                nodeInfoList.add(nodeInfoMax);
+                nodeInfoList.add(nodeInfoMin);
+                // 一些累计字段重新赋值
+                fillSpecialValue(specialNodeInfo, nodeInfoAvg, nodeInfoMax, nodeInfoMin);
+                // save to db
+                NodeInfoParam nodeInfoParamForSave = new NodeInfoParam(clusterId, NodeInfoType.TimeType.HOUR);
+                nodeInfoService.addNodeInfo(nodeInfoParamForSave, nodeInfoList);
             } catch (Exception e) {
                 logger.error("Collect hour data for " + cluster.getClusterName() + " failed.", e);
             }
         }
     }
 
-    private Map<String, List<BigDecimal>> nodeInfoCalculate(List<NodeInfo> nodeInfoList) {
+    /**
+     * 一些累计字段重新赋值
+     *
+     * @param specialNodeInfo
+     * @param nodeInfoAvg
+     * @param nodeInfoMax
+     * @param nodeInfoMin
+     */
+    private void fillSpecialValue(List<NodeInfo> specialNodeInfo, NodeInfo nodeInfoAvg, NodeInfo nodeInfoMax, NodeInfo nodeInfoMin) {
+
+    }
+
+    private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
+        String nodes = cluster.getNodes();
+        String redisPassword = cluster.getRedisPassword();
+        Set<HostAndPort> seed = RedisUtil.nodesToHostAndPortSet(nodes);
+        // TODO: 还未实现
+        List<RedisNode> redisNodeList = redisService.getNodeList(seed, redisPassword);
+        Set<HostAndPort> hostAndPortSet = new HashSet<>();
+        for (RedisNode redisNode : redisNodeList) {
+            hostAndPortSet.add(new HostAndPort(redisNode.getHost(), redisNode.getPort()));
+        }
+        return hostAndPortSet;
+    }
+
+    private Map<String, List<BigDecimal>> nodeInfoDataToMap(List<NodeInfo> nodeInfoList) {
         int size = nodeInfoList.size();
         Map<String, List<BigDecimal>> dataMap = new HashMap<>();
         List<BigDecimal> responseTime = new ArrayList<>(size);
@@ -199,6 +248,7 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
         List<BigDecimal> keyspaceMisses = new ArrayList<>(size);
         List<BigDecimal> keyspaceHitsRatio = new ArrayList<>(size);
         List<BigDecimal> usedCpuSys = new ArrayList<>(size);
+        List<BigDecimal> usedCpuUser = new ArrayList<>(size);
         List<BigDecimal> keys = new ArrayList<>(size);
         List<BigDecimal> expires = new ArrayList<>(size);
         for (NodeInfo nodeInfo : nodeInfoList) {
@@ -225,6 +275,7 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
             keyspaceMisses.add(new BigDecimal(nodeInfo.getKeyspaceMisses()));
             keyspaceHitsRatio.add(new BigDecimal(nodeInfo.getKeyspaceHitsRatio()));
             usedCpuSys.add(new BigDecimal(nodeInfo.getUsedCpuSys()));
+            usedCpuUser.add(new BigDecimal(nodeInfo.getUsedCpuUser()));
             keys.add(new BigDecimal(nodeInfo.getKeys()));
             expires.add(new BigDecimal(nodeInfo.getExpires()));
         }
@@ -251,12 +302,35 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
         dataMap.put(KEYSPACE_MISSES, keyspaceMisses);
         dataMap.put(KEYSPACE_HITS_RATIO, keyspaceHitsRatio);
         dataMap.put(USED_CPU_SYS, usedCpuSys);
+        dataMap.put(USED_CPU_USER, usedCpuUser);
         dataMap.put(KEYS, keys);
         dataMap.put(EXPIRES, expires);
         return dataMap;
     }
 
-    private List<NodeInfo> buildSpecialNodeInfo(Map<String, List<BigDecimal>> dataMap) {
+    private NodeInfo buildNodeINfoHour(Map<String, List<BigDecimal>> historyDataMap, NodeInfoType.DataType dataType) {
+        JSONObject jsonObject = new JSONObject();
+        historyDataMap.forEach((key, list) -> {
+            String nodeInfoField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, key);
+            BigDecimal bigDecimal = null;
+            if (Objects.equals(NodeInfoType.DataType.AVG, dataType)) {
+                bigDecimal = RedisUtil.avg(list);
+            } else if (Objects.equals(NodeInfoType.DataType.MAX, dataType)) {
+                bigDecimal = RedisUtil.max(list);
+            } else if (Objects.equals(NodeInfoType.DataType.MIN, dataType)) {
+                bigDecimal = RedisUtil.min(list);
+            }
+            if (bigDecimal != null) {
+                jsonObject.put(nodeInfoField, bigDecimal.doubleValue());
+            }
+        });
+        NodeInfo nodeInfo = jsonObject.toJavaObject(NodeInfo.class);
+        nodeInfo.setDataType(dataType);
+        return nodeInfo;
+
+    }
+
+    private List<NodeInfo> buildNodeInfoForSpecialDataType(Map<String, List<BigDecimal>> dataMap) {
         List<NodeInfo> nodeInfoList = new ArrayList<>(3);
         JSONObject avgObject = new JSONObject();
         JSONObject maxObject = new JSONObject();

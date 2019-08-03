@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.entity;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 
 /**
@@ -15,6 +16,8 @@ public class NodeInfoParam {
 
     private NodeInfoType.TimeType timeType;
 
+    private List<String> columnList;
+
     private Timestamp startTime;
 
     private Timestamp endTime;
@@ -24,8 +27,16 @@ public class NodeInfoParam {
     public NodeInfoParam() {
     }
 
+    public NodeInfoParam(int clusterId, NodeInfoType.TimeType timeType) {
+        this(clusterId, null, timeType, null);
+    }
+
     public NodeInfoParam(int clusterId, NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, String node) {
         this(clusterId, dataType, timeType, null, null, node);
+    }
+
+    public NodeInfoParam(int clusterId, Timestamp startTime, Timestamp endTime) {
+        this(clusterId, null, null, startTime, endTime, null);
     }
 
     public NodeInfoParam(int clusterId, NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, Timestamp startTime, Timestamp endTime, String node) {
@@ -61,6 +72,14 @@ public class NodeInfoParam {
         this.timeType = timeType;
     }
 
+    public List<String> getColumnList() {
+        return columnList;
+    }
+
+    public void setColumnList(List<String> columnList) {
+        this.columnList = columnList;
+    }
+
     public Timestamp getStartTime() {
         return startTime;
     }
@@ -85,17 +104,16 @@ public class NodeInfoParam {
         this.node = node;
     }
 
-
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("NodeInfoParam{");
-        sb.append("clusterId=").append(clusterId);
-        sb.append(", dataType=").append(dataType);
-        sb.append(", timeType=").append(timeType);
-        sb.append(", startTime=").append(startTime);
-        sb.append(", endTime=").append(endTime);
-        sb.append(", node='").append(node).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "NodeInfoParam{" +
+                "clusterId=" + clusterId +
+                ", dataType=" + dataType +
+                ", timeType=" + timeType +
+                ", columnList=" + columnList +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", node='" + node + '\'' +
+                '}';
     }
 }

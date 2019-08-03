@@ -25,21 +25,23 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
 
     private static final Logger logger = LoggerFactory.getLogger(NodeInfoService.class);
 
-    @Value("redis-manager.monitor.reserved-days")
-    private int reservedDays;
+    @Value("redis-manager.monitor.keep-days")
+    private int keepDays;
+
+    private static final int MAX_KEEP_DAYS = 30;
 
     @Autowired
     private INodeInfoDao nodeInfoDao;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        if (reservedDays <= 0 || reservedDays > 30) {
-            throw new ConfigurationException("reserved-days parameter is invalid, the value must be between 1 and 30.");
+        if (keepDays <= 0 || keepDays > MAX_KEEP_DAYS) {
+            throw new ConfigurationException("keep-days parameter is invalid, the value must be between 1 and 30.");
         }
     }
 
     /**
-     * 暂时不用
+     * 传入不同的 param 获取相应的数据
      *
      * @param nodeInfoParam
      * @return
@@ -75,13 +77,6 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
     }
 
     @Override
-    public List<NodeInfo> getLastHourNodeInfoList(int clusterId) {
-        NodeInfoParam nodeInfoParam = new NodeInfoParam();
-        nodeInfoParam.setClusterId(clusterId);
-        return null;
-    }
-
-    @Override
     public boolean addNodeInfo(NodeInfoParam nodeInfoParam, List<NodeInfo> nodeInfoList) {
         if (!verifyParam(nodeInfoParam) || nodeInfoList == null || nodeInfoList.isEmpty()) {
             return false;
@@ -89,6 +84,9 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         int clusterId = nodeInfoParam.getClusterId();
         try {
             nodeInfoDao.updateLastTimeStatus(clusterId, nodeInfoParam.getTimeType());
+            for (NodeInfo nodeInfo : nodeInfoList) {
+                nodeInfo.setTimeType(nodeInfoParam.getTimeType());
+            }
             int row = nodeInfoDao.insertNodeInfo(clusterId, nodeInfoList);
             if (row == nodeInfoList.size()) {
                 return true;
@@ -101,9 +99,9 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
 
     @Override
     public boolean cleanupNodeInfo(int clusterId) {
-        Timestamp endTime = TimeRangeUtil.getEndTime(reservedDays * TimeRangeUtil.ONE_DAY);
+        Timestamp oldestTime = TimeRangeUtil.getTime(keepDays * TimeRangeUtil.ONE_DAY);
         try {
-            nodeInfoDao.deleteNodeInfoByTime(clusterId, endTime);
+            nodeInfoDao.deleteNodeInfoByTime(clusterId, oldestTime);
             return true;
         } catch (Exception e) {
             logger.error("Clean up node info data failed, cluster id = " + clusterId, e);
@@ -130,13 +128,13 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
     private NodeInfoParam parameterCorrection(NodeInfoParam nodeInfoParam) {
         Timestamp startTime = nodeInfoParam.getStartTime();
         Timestamp endTime = nodeInfoParam.getEndTime();
-        if (startTime == null) {
-            startTime = TimeRangeUtil.getCurrentTimestamp();
-            nodeInfoParam.setStartTime(startTime);
-        }
         if (endTime == null) {
-            endTime = TimeRangeUtil.getDefaultEndTime();
-            nodeInfoParam.setStartTime(endTime);
+            endTime = TimeRangeUtil.getCurrentTimestamp();
+            nodeInfoParam.setEndTime(endTime);
+        }
+        if (startTime == null) {
+            startTime = TimeRangeUtil.getLastHourTimestamp();
+            nodeInfoParam.setStartTime(startTime);
         }
         if (TimeRangeUtil.moreThanTwoDays(startTime, endTime)) {
             nodeInfoParam.setTimeType(NodeInfoType.TimeType.HOUR);

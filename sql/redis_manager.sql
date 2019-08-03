@@ -102,6 +102,7 @@ create TABLE IF NOT EXISTS `node_info_0`(
     `keyspace_misses` integer(4) NOT NULL,
     `keyspace_hits_ratio` double(6, 2) NOT NULL,
     `used_cpu_sys` double(6, 2) NOT NULL,
+    `used_cpu_user` double(6, 2) NOT NULL,
     `keys` integer(4) NOT NULL,
     `expires` integer(4) NOT NULL,
     `update_time` datetime(0) NOT NULL,

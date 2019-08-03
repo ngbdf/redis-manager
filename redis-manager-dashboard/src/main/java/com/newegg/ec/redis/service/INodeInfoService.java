@@ -15,8 +15,6 @@ public interface INodeInfoService {
 
     NodeInfo getLastTimeNodeInfo(NodeInfoParam nodeInfoParam);
 
-    List<NodeInfo> getLastHourNodeInfoList(int clusterId);
-
     boolean addNodeInfo(NodeInfoParam nodeInfoParam, List<NodeInfo> nodeInfoList);
 
     boolean cleanupNodeInfo(int clusterId);
