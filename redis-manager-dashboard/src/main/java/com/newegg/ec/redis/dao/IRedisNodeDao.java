@@ -19,7 +19,7 @@ public interface IRedisNodeDao {
      * @param clusterId
      * @return
      */
-    List<RedisNode> selectSimpleRedisNode(int clusterId);
+    List<RedisNode> selectSimpleRedisNodeList(int clusterId);
 
     /**
      * 获取节点详细信息
@@ -27,7 +27,7 @@ public interface IRedisNodeDao {
      * @param clusterId
      * @return
      */
-    List<RedisInstance> selectRedisNode(int clusterId);
+    List<RedisInstance> selectRedisNodeList(int clusterId);
 
     int updateRedisNode(RedisInstance redisInstance);
 

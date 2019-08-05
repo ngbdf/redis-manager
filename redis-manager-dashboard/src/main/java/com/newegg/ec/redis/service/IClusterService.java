@@ -18,7 +18,7 @@ public interface IClusterService {
 
     Cluster getClusterById(int clusterId);
 
-    boolean saveCluster(Cluster cluster);
+    boolean addCluster(Cluster cluster);
 
     boolean updateCluster(Cluster cluster);
 

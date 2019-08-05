@@ -66,7 +66,7 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
-    public boolean saveCluster(Cluster cluster) {
+    public boolean addCluster(Cluster cluster) {
         String nodes = cluster.getNodes();
         Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(nodes);
         RedisURI redisURI = new RedisURI(hostAndPortSet, cluster.getRedisPassword());
