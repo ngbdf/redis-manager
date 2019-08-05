@@ -1,9 +1,7 @@
 package com.newegg.ec.redis.service.impl;
 
-import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.Group;
 import com.newegg.ec.redis.service.IClusterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -36,11 +33,8 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
-    public List<Cluster> getClusterListByGroupId(String groupId) {
+    public List<Cluster> getClusterListByGroupId(int groupId) {
         List<Cluster> clusterList = new ArrayList<>();
-        if (Strings.isNullOrEmpty(groupId)) {
-            return clusterList;
-        }
         try {
             return clusterDao.selectClusterByGroupId(groupId);
         } catch (Exception e) {
@@ -50,10 +44,7 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
-    public Cluster getClusterById(String clusterId) {
-        if (Strings.isNullOrEmpty(clusterId)) {
-            return null;
-        }
+    public Cluster getClusterById(int clusterId) {
         try {
             return clusterDao.selectClusterById(clusterId);
         } catch (Exception e) {
@@ -69,6 +60,15 @@ public class ClusterService implements IClusterService {
 
     @Override
     public boolean updateCluster(Cluster cluster) {
+        return false;
+    }
+
+    @Override
+    public boolean updateClusterKeys(Cluster cluster) {
+        int clusterId = cluster.getClusterId();
+        clusterDao.updateTotalKey(clusterId, cluster.getTotalKeys());
+
+        clusterDao.updateTotalExpires(clusterId, cluster.getTotalExpires());
         return false;
     }
 

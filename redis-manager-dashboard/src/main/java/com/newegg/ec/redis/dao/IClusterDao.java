@@ -16,7 +16,7 @@ public interface IClusterDao {
     List<Cluster> selectAllCluster();
 
     @Select("SELECT * FROM cluster WHERE group_id = #{groupId}")
-    List<Cluster> selectClusterByGroupId(String groupId);
+    List<Cluster> selectClusterByGroupId(int groupId);
 
     @Select("<script>" +
             "SELECT * FROM cluster WHERE group_id IN " +
@@ -27,7 +27,7 @@ public interface IClusterDao {
     List<Cluster> selectClusterByGroupIdList(@Param("groupIdList") List<String> groupIdList);
 
     @Select("SELECT * FROM cluster WHERE cluster_id = #{clusterId}")
-    Cluster selectClusterById(String clusterId);
+    Cluster selectClusterById(int clusterId);
 
     @Select("SELECT * FROM cluster WHERE cluster_name = #{clusterName}")
     Cluster selectClusterByName(String clusterName);
@@ -62,21 +62,21 @@ public interface IClusterDao {
     int updateCluster(Cluster cluster);
 
     @Update("UPDATE cluster SET total_key = #{totalKey}, update_time = NOW() WHERE cluster_id = #{clusterId}")
-    int updateTotalKey(@Param("clusterId") String clusterId, @Param("totalKeys") long totalKeys);
+    int updateTotalKey(@Param("clusterId") int clusterId, @Param("totalKeys") long totalKeys);
 
     @Update("UPDATE cluster SET total_expires = #{totalExpires}, update_time = NOW() WHERE cluster_id = #{clusterId}")
-    int updateTotalExpires(@Param("clusterId") String clusterId, @Param("totalExpires") long totalExpires);
+    int updateTotalExpires(@Param("clusterId") int clusterId, @Param("totalExpires") long totalExpires);
 
     @Update("UPDATE cluster SET user_ids = #{userIds}, update_time = NOW() WHERE cluster_id = #{clusterId}")
-    int updateUserIds(@Param("clusterId") String clusterId, @Param("userIds") String userIds);
+    int updateUserIds(@Param("clusterId") int clusterId, @Param("userIds") String userIds);
 
     @Update("UPDATE cluster SET redis_password = #{redisPassword}, update_time = NOW() WHERE cluster_id = #{clusterId}")
-    int updateRedisPassword(@Param("clusterId") String clusterId, @Param("redisPassword") String redisPassword);
+    int updateRedisPassword(@Param("clusterId") int clusterId, @Param("redisPassword") String redisPassword);
 
     @Update("UPDATE cluster SET nodes = #{nodes}, update_time = NOW() WHERE cluster_id = #{clusterId}")
-    int updateNodes(@Param("clusterId") String clusterId, @Param("nodes") String nodes);
+    int updateNodes(@Param("clusterId") int clusterId, @Param("nodes") String nodes);
 
     @Delete("DELETE FROM cluster WHERE cluster_id = #{clusterId}")
-    int deleteClusterById(String clusterId);
+    int deleteClusterById(int clusterId);
 
 }

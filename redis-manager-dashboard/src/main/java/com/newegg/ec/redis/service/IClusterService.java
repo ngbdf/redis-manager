@@ -14,13 +14,15 @@ public interface IClusterService {
 
     List<Cluster> getAllClusterList();
 
-    List<Cluster> getClusterListByGroupId(String groupId);
+    List<Cluster> getClusterListByGroupId(int groupId);
 
-    Cluster getClusterById(String clusterId);
+    Cluster getClusterById(int clusterId);
 
     boolean saveCluster(Cluster cluster);
 
     boolean updateCluster(Cluster cluster);
+
+    boolean updateClusterKeys(Cluster cluster);
 
     boolean deleteCluster(Cluster cluster);
 

@@ -44,7 +44,6 @@ public class RedisService implements IRedisService {
     public List<RedisNode> getNodeList(Set<HostAndPort> hostAndPortSet, String redisPassword) {
         RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
         RedisClusterClient redisClusterClient = ClientFactory.buildRedisClusterClient(redisURI);
-        redisClusterClient.getNodeList();
         return null;
     }
 

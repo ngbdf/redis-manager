@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.client;
 
+import com.newegg.ec.redis.exception.InvalidCommandException;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
@@ -44,82 +45,22 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
-    public String getNodeList() {
-        Map<String, JedisPool> clusterNodes = jedisCluster.getClusterNodes();
-        System.err.println(clusterNodes);
-        String nodes = redisClient.nodes();
-        System.err.println(nodes);
-        return null;
-    }
-
-
-    @Override
-    public String getMasterList() {
-        return null;
+    public boolean exists(String key) {
+        return jedisCluster.exists(key);
     }
 
     @Override
-    public String getSlaveList() {
-        return null;
+    public String type(String key) {
+        return jedisCluster.type(key);
     }
 
     @Override
-    public Jedis getJedisClient() {
-        return redisClient.getJedisClient();
+    public Long del(String key) {
+        return jedisCluster.del(key);
     }
 
     @Override
-    public String ping() {
-        return null;
-    }
-
-    @Override
-    public boolean auth() {
-        return false;
-    }
-
-    @Override
-    public String getConfig() {
-        return null;
-    }
-
-    @Override
-    public String getConfig(String... keys) {
-        return null;
-    }
-
-    @Override
-    public boolean rewriteConfig() {
-        return false;
-    }
-
-    @Override
-    public String getInfo() {
-        return null;
-    }
-
-    @Override
-    public String getInfo(String subKey) {
-        return redisClient.getInfo(subKey);
-    }
-
-    @Override
-    public String getMemory() {
-        return null;
-    }
-
-    @Override
-    public String getMemory(String subKey) {
-        return null;
-    }
-
-    @Override
-    public String getVersion() {
-        return null;
-    }
-
-    @Override
-    public String getSlowLog() {
+    public Object query(String key) {
         return null;
     }
 
@@ -129,32 +70,7 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
-    public String nodes() {
-        return null;
-    }
-
-    @Override
-    public Object query(String key) {
-        return null;
-    }
-
-    @Override
-    public List<Slowlog> getSlowLog(int size) {
-        return null;
-    }
-
-    @Override
-    public String clusterMeet(String ip, int port) {
-        return null;
-    }
-
-    @Override
-    public String clusterReplicate(String masterId) {
-        return null;
-    }
-
-    @Override
-    public String clusterFailover() {
+    public String object(String type) {
         return null;
     }
 
@@ -167,4 +83,5 @@ public class RedisClusterClient implements IRedisClusterClient {
             jedisCluster.close();
         }
     }
+
 }

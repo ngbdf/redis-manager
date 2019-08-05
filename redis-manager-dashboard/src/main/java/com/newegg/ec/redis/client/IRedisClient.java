@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.client;
 
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.util.Slowlog;
 
@@ -9,7 +10,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 2019/7/18
  */
-public interface IRedisClient {
+public interface IRedisClient extends IDatabaseCommand {
 
     /**
      * Get jedis client
@@ -17,42 +18,6 @@ public interface IRedisClient {
      * @return
      */
     Jedis getJedisClient();
-
-    /**
-     * Ping redis
-     *
-     * @return
-     */
-    String ping();
-
-    /**
-     * Verify redis password
-     *
-     * @return
-     */
-    boolean auth();
-
-    /**
-     * Get redis configuration
-     *
-     * @return
-     */
-    String getConfig();
-
-    /**
-     * Get redis configuration with sub key
-     *
-     * @param keys
-     * @return
-     */
-    String getConfig(String... keys);
-
-    /**
-     * Rewrite redis configuration
-     *
-     * @return
-     */
-    boolean rewriteConfig();
 
     /**
      * Get redis node info
@@ -64,10 +29,10 @@ public interface IRedisClient {
     /**
      * Get redis node info with sub key
      *
-     * @param subKey
+     * @param section
      * @return
      */
-    String getInfo(String subKey);
+    String getInfo(String section);
 
     /**
      * Get redis memory info
@@ -88,53 +53,88 @@ public interface IRedisClient {
      */
     String getMemory(String subKey);
 
-    /**
-     * Get redis version
-     *
-     * @return
-     */
-    String getVersion();
-
-    /**
-     * Get slow log
-     *
-     * @return
-     */
-    String getSlowLog();
-
-    /**
-     * Scan redis
-     *
-     * @return
-     */
-    List<String> scan(String key);
-
     String nodes();
 
+    Long dbSize();
+
+    /** 持久化 */
+    String bgSave();
+
+    Long lastSave();
+
+    String bgRewriteAof();
+
     /**
-     * Query redis
-     * @param key
+     *  O(N)
+     * @param hostAndPort
+     * @return OK
+     */
+    String slaveOf(HostAndPort hostAndPort);
+
+    String role();
+
+    /** 客户端于服务端 */
+    boolean auth(String password);
+
+    /**
+     *
+     * @return ""
+     */
+    boolean shutdown();
+
+    String clientList();
+
+    /** config */
+    /**
+     * Get redis configuration
+     *
      * @return
      */
-    Object query(String key);
+    List<String> getConfig();
+
+    /**
+     * Get redis configuration with sub key
+     *
+     * @param pattern
+     * @return
+     */
+    List<String> getConfig(String pattern);
+
+    /**
+     * Rewrite redis configuration
+     *
+     * @return
+     */
+    boolean rewriteConfig();
+
+    /** Debug */
+
+    /**
+     * Ping redis
+     *
+     * @return
+     */
+    boolean ping();
 
     /**
      * Get slow log
-     * @param size
+     *
      * @return
      */
     List<Slowlog> getSlowLog(int size);
 
     /**
      *
-     * @param ip
-     * @param port
-     * @return
+     * @return OK
      */
-    String clusterMeet(String ip, int port);
+    String clientSetName(String clientName);
+
+    String clusterMeet(HostAndPort hostAndPort);
 
     /**
      * Be slave
+     * 重新配置一个节点成为指定master的salve节点
+     *
      * @param masterId
      * @return
      */
@@ -142,9 +142,10 @@ public interface IRedisClient {
 
     /**
      * Be master
+     * 该命令只能在群集slave节点执行，让slave节点进行一次人工故障切换
      * @return
      */
-    String clusterFailover();
+    String clusterFailOver();
 
     /**
      * Close client
