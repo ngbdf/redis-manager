@@ -1,5 +1,10 @@
 package com.newegg.ec.redis.dao;
 
+import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.plugin.install.entity.RedisInstance;
+
+import java.util.List;
+
 /**
  * Manage redis nodes in docker
  *
@@ -7,5 +12,29 @@ package com.newegg.ec.redis.dao;
  * @date 7/19/2019
  */
 public interface IRedisNodeDao {
+
+    /**
+     * 获取节点基础信息
+     *
+     * @param clusterId
+     * @return
+     */
+    List<RedisNode> selectSimpleRedisNode(int clusterId);
+
+    /**
+     * 获取节点详细信息
+     *
+     * @param clusterId
+     * @return
+     */
+    List<RedisInstance> selectRedisNode(int clusterId);
+
+    int updateRedisNode(RedisInstance redisInstance);
+
+    int insertRedisNodeList(List<RedisInstance> redisInstanceList);
+
+    int deleteRedisNodeListByClusterId(int clusterId);
+
+    int deleteRedisNodeById(int redisNodeId);
 
 }

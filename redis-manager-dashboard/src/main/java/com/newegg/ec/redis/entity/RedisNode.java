@@ -7,7 +7,7 @@ package com.newegg.ec.redis.entity;
  */
 public class RedisNode {
 
-    private String redisNodeId;
+    private int redisNodeId;
 
     private int clusterId;
 
@@ -17,11 +17,11 @@ public class RedisNode {
 
     private NodeRole nodeRole;
 
-    public String getRedisNodeId() {
+    public int getRedisNodeId() {
         return redisNodeId;
     }
 
-    public void setRedisNodeId(String redisNodeId) {
+    public void setRedisNodeId(int redisNodeId) {
         this.redisNodeId = redisNodeId;
     }
 

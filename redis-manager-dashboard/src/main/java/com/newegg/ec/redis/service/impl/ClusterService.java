@@ -1,14 +1,26 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.newegg.ec.redis.client.RedisClient;
+import com.newegg.ec.redis.client.RedisClientFactory;
+import com.newegg.ec.redis.client.RedisClusterClient;
+import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.service.IClusterService;
+import com.newegg.ec.redis.util.RedisClusterInfoUtil;
+import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import redis.clients.jedis.HostAndPort;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
 
 /**
  * @author Jay.H.Zou
@@ -55,7 +67,34 @@ public class ClusterService implements IClusterService {
 
     @Override
     public boolean saveCluster(Cluster cluster) {
-        return false;
+        String nodes = cluster.getNodes();
+        Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(nodes);
+        RedisURI redisURI = new RedisURI(hostAndPortSet, cluster.getRedisPassword());
+        RedisClient redisClient;
+        try {
+            redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            String clusterInfo = redisClient.getClusterInfo();
+            Cluster clusterInfoObj = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfo);
+            fillClusterInfo(cluster, clusterInfoObj);
+        } catch (Exception e) {
+            logger.error("Fill cluster info failed, " + cluster, e);
+            return false;
+        }
+        try {
+            String info = redisClient.getInfo(RedisClient.SERVER);
+            Map<String, String> infoMap = RedisUtil.parseInfoToMap(info);
+            fillNodeInfo(cluster, infoMap);
+        } catch (Exception e) {
+            logger.error("Fill node info failed, " + cluster, e);
+            return false;
+        }
+        try {
+            int row = clusterDao.insertCluster(cluster);
+            return row > 0;
+        } catch (Exception e) {
+            logger.error("Save cluster failed, " + cluster, e);
+            return false;
+        }
     }
 
     @Override
@@ -66,14 +105,41 @@ public class ClusterService implements IClusterService {
     @Override
     public boolean updateClusterKeys(Cluster cluster) {
         int clusterId = cluster.getClusterId();
-        clusterDao.updateTotalKey(clusterId, cluster.getTotalKeys());
-
-        clusterDao.updateTotalExpires(clusterId, cluster.getTotalExpires());
-        return false;
+        try {
+            clusterDao.updateTotalKey(clusterId, cluster.getTotalKeys());
+            clusterDao.updateTotalExpires(clusterId, cluster.getTotalExpires());
+            return true;
+        } catch (Exception e) {
+            logger.error("Update cluster keys failed, " + cluster, e);
+            return false;
+        }
     }
 
+    /**
+     * drop node_info_{clusterId}
+     * delete redis_node in this cluster
+     *
+     * @param cluster
+     * @return
+     */
     @Override
     public boolean deleteCluster(Cluster cluster) {
         return false;
+    }
+
+    private void fillClusterInfo(Cluster cluster, Cluster clusterInfoObj) {
+        cluster.setClusterState(cluster.getClusterState());
+        cluster.setClusterSlotsAssigned(clusterInfoObj.getClusterSlotsAssigned());
+        cluster.setClusterSlotsFail(clusterInfoObj.getClusterSlotsPfail());
+        cluster.setClusterSlotsPfail(clusterInfoObj.getClusterSlotsPfail());
+        cluster.setClusterSlotsOk(clusterInfoObj.getClusterSlotsOk());
+        cluster.setClusterSize(clusterInfoObj.getClusterSize());
+        cluster.setClusterKnownNodes(clusterInfoObj.getClusterKnownNodes());
+    }
+
+    private void fillNodeInfo(Cluster cluster, Map<String, String> infoMap) {
+        cluster.setOs(infoMap.get(OS));
+        cluster.setRedisMode(infoMap.get(REDIS_MODE));
+        cluster.setRedisVersion(infoMap.get(REDIS_VERSION));
     }
 }

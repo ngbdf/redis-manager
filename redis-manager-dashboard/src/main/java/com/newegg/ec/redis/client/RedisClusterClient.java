@@ -1,15 +1,11 @@
 package com.newegg.ec.redis.client;
 
-import com.newegg.ec.redis.exception.InvalidCommandException;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,18 +26,12 @@ public class RedisClusterClient implements IRedisClusterClient {
         Set<HostAndPort> hostAndPortSet = redisURI.getHostAndPortSet();
         String redisPassword = redisURI.getRequirePass();
         jedisCluster = new JedisCluster(hostAndPortSet, TIMEOUT, TIMEOUT, MAX_ATTEMPTS, redisPassword, new GenericObjectPoolConfig());
-        redisClient = ClientFactory.buildRedisClient(redisURI);
+        redisClient = RedisClientFactory.buildRedisClient(redisURI);
     }
 
     @Override
     public JedisCluster getRedisClusterClient() {
         return jedisCluster;
-    }
-
-    @Override
-    public String getClusterInfo() {
-        Jedis jedis = redisClient.getJedisClient();
-        return jedis.clusterInfo();
     }
 
     @Override

@@ -140,8 +140,15 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
                 // clean last time data and save new data to db
                 NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType);
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
-                // TODO: 更新cluster 中某些信息：total keys
-                // TODO: total key 使用 dbSize；
+                long totalKeys = 0;
+                long totalExpires = 0;
+                for (NodeInfo nodeInfo : nodeInfoList) {
+                    totalKeys += nodeInfo.getKeys();
+                    totalExpires += nodeInfo.getExpires();
+                }
+                cluster.setTotalKeys(totalKeys);
+                cluster.setTotalExpires(totalExpires);
+                clusterService.updateClusterKeys(cluster);
             } catch (Exception e) {
                 logger.error("Collect " + timeType + " data for " + cluster.getClusterName() + " failed.", e);
             }

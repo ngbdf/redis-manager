@@ -1,6 +1,6 @@
 package com.newegg.ec.redis.service.impl;
 
-import com.newegg.ec.redis.client.ClientFactory;
+import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClusterClient;
 import com.newegg.ec.redis.client.RedisURI;
@@ -43,7 +43,7 @@ public class RedisService implements IRedisService {
     @Override
     public List<RedisNode> getNodeList(Set<HostAndPort> hostAndPortSet, String redisPassword) {
         RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
-        RedisClusterClient redisClusterClient = ClientFactory.buildRedisClusterClient(redisURI);
+        RedisClusterClient redisClusterClient = RedisClientFactory.buildRedisClusterClient(redisURI);
         return null;
     }
 
@@ -66,7 +66,7 @@ public class RedisService implements IRedisService {
         String node = hostAndPort.getHost() + ":" + hostAndPort.getPort();
         try {
             RedisURI redisURI = new RedisURI(hostAndPort, redisPassword);
-            RedisClient redisClient = ClientFactory.buildRedisClient(redisURI);
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
             String info = redisClient.getInfo();
             // 获取上一次的 NodeInfo 来计算某些字段的差值
             NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.DataType.NODE, timeType, node);
@@ -85,8 +85,8 @@ public class RedisService implements IRedisService {
     public Cluster getClusterInfo(Set<HostAndPort> hostAndPortSet, String redisPassword) {
         Cluster cluster = new Cluster();
         RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
-        RedisClusterClient redisClusterClient = ClientFactory.buildRedisClusterClient(redisURI);
-        String serverInfo = redisClusterClient.getInfo(RedisClient.SERVER);
+        RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+        String serverInfo = redisClient.getInfo(RedisClient.SERVER);
         try {
             Map<String, String> serverInfoMap = RedisUtil.parseInfoToMap(serverInfo);
             cluster.setRedisMode(serverInfoMap.get(REDIS_MODE));
@@ -101,8 +101,8 @@ public class RedisService implements IRedisService {
     public Cluster getServerInfo(Set<HostAndPort> hostAndPortSet, String redisPassword) {
         Cluster cluster = null;
         RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
-        RedisClusterClient redisClusterClient = ClientFactory.buildRedisClusterClient(redisURI);
-        String clusterInfo = redisClusterClient.getClusterInfo();
+        RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+        String clusterInfo = redisClient.getClusterInfo();
         try {
             cluster = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfo);
         } catch (IOException e) {

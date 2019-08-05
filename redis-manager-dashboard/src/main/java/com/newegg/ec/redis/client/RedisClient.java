@@ -52,6 +52,11 @@ public class RedisClient implements IRedisClient {
         return jedis.info(section);
     }
 
+    @Override
+    public String getClusterInfo() {
+        return jedis.clusterInfo();
+    }
+
     /**
      * redis 4, 4+
      * memory info

@@ -34,6 +34,8 @@ public interface IRedisClient extends IDatabaseCommand {
      */
     String getInfo(String section);
 
+    String getClusterInfo();
+
     /**
      * Get redis memory info
      * <p>
