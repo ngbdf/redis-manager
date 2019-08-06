@@ -55,12 +55,14 @@ public class RedisClusterClient implements IRedisClusterClient {
             String[] item = line.split(" ");
             String nodeId = item[0].trim();
             String ipPort = item[1].trim();
+            String flags;
             String role = item[2].trim();
             String masterId = item[4].trim();
             String state = item[8].trim();
-            String slot;
+            String slotRange;
             if (line.contains(NodeRole.MASTER.getValue())) {
-                slot = item[9].trim();
+                flags =
+                slotRange = item[9].trim();
             }
         }
         return null;
