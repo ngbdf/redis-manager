@@ -23,6 +23,7 @@ repl_backlog_size:1048576
 repl_backlog_first_byte_offset:151124762
 repl_backlog_histlen:1048576
 
+http://www.redis.cn/commands/cluster-nodes.html
 # cluster: cluster nodes
 a85e35874d9a3a07757575725311a554b027b6d1 10.10.10.555:8201@18201 master - 0 1565074817000 7 connected 3278-4916
 ca0a7b10da098c6d49315d499e2e901270865117 10.10.10.555:8202@18202 slave e17b4097700a99746f9a4e2380f6b4bd6ac59f8a 0 1565074820694 17 connected

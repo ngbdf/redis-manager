@@ -10,8 +10,7 @@ import redis.clients.jedis.util.Slowlog;
 
 import java.util.*;
 
-import static com.newegg.ec.redis.util.RedisUtil.IP;
-import static com.newegg.ec.redis.util.RedisUtil.PORT;
+import static com.newegg.ec.redis.util.RedisUtil.*;
 
 /**
  * @author Jay.H.Zou
@@ -29,12 +28,6 @@ public class RedisClient implements IRedisClient {
     public static final String SERVER = "server";
 
     public static final String REPLICATION = "replication";
-
-    public static final String ROLE = "role";
-
-    public static final String MASTER_HOST = "master_host";
-
-    public static final String MASTER_PORT = "master_port";
 
     private Jedis jedis;
 

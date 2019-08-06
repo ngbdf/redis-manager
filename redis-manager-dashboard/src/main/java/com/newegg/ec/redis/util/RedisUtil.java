@@ -21,6 +21,12 @@ public class RedisUtil {
 
     public static final String PORT = "port";
 
+    public static final String ROLE = "role";
+
+    public static final String MASTER_HOST = "master_host";
+
+    public static final String MASTER_PORT = "master_port";
+
     private RedisUtil() {
     }
 

@@ -1,6 +1,10 @@
 package com.newegg.ec.redis.client;
 
+import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.JedisCluster;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -10,7 +14,7 @@ public interface IRedisClusterClient extends IDatabaseCommand {
 
     JedisCluster getRedisClusterClient();
 
-    String clusterNodes();
+    Map<RedisNode, List<RedisNode>> clusterNodes() throws Exception;
 
     void close();
 }

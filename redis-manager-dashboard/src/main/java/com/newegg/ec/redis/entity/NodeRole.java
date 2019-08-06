@@ -21,7 +21,9 @@ public enum NodeRole {
     /**
      * replicate: for redis 5
      */
-    REPLICA("replica");
+    REPLICA("replica"),
+
+    UNKNOWN();
 
     private String value;
 
@@ -41,7 +43,7 @@ public enum NodeRole {
                 return nodeRole;
             }
         }
-        return MASTER;
+        return UNKNOWN;
     }
 
 }

@@ -1,11 +1,19 @@
 package com.newegg.ec.redis.client;
 
+import com.google.common.base.Strings;
+import com.newegg.ec.redis.entity.NodeRole;
+import com.newegg.ec.redis.entity.RedisNode;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -35,7 +43,26 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
-    public String clusterNodes() {
+    public Map<RedisNode, List<RedisNode>> clusterNodes() throws Exception {
+        Jedis jedis = redisClient.getJedisClient();
+        String nodes = jedis.clusterNodes();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(nodes.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            if (Strings.isNullOrEmpty(line)) {
+                continue;
+            }
+            String[] item = line.split(" ");
+            String nodeId = item[0].trim();
+            String ipPort = item[1].trim();
+            String role = item[2].trim();
+            String masterId = item[4].trim();
+            String state = item[8].trim();
+            String slot;
+            if (line.contains(NodeRole.MASTER.getValue())) {
+                slot = item[9].trim();
+            }
+        }
         return null;
     }
 
