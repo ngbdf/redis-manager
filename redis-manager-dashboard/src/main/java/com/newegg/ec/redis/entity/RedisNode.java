@@ -2,6 +2,7 @@ package com.newegg.ec.redis.entity;
 
 /**
  * For
+ *
  * @author Jay.H.Zou
  * @date 7/25/2019
  */
@@ -16,6 +17,15 @@ public class RedisNode {
     private int port;
 
     private NodeRole nodeRole;
+
+    public RedisNode() {
+    }
+
+    public RedisNode(String host, int port, NodeRole nodeRole) {
+        this.host = host;
+        this.port = port;
+        this.nodeRole = nodeRole;
+    }
 
     public int getRedisNodeId() {
         return redisNodeId;

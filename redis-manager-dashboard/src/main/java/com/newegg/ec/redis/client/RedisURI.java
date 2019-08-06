@@ -48,7 +48,6 @@ public class RedisURI {
         this.database = database;
     }
 
-
     public String getToken() {
         return token;
     }

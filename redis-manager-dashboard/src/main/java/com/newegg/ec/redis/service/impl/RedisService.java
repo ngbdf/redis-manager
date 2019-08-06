@@ -67,15 +67,16 @@ public class RedisService implements IRedisService {
         try {
             RedisURI redisURI = new RedisURI(hostAndPort, redisPassword);
             RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
-            String info = redisClient.getInfo();
+            Map<String, String> infoMap = redisClient.getInfo();
+
             // 获取上一次的 NodeInfo 来计算某些字段的差值
             NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.DataType.NODE, timeType, node);
             NodeInfo lastTimeNodeInfo = nodeInfoService.getLastTimeNodeInfo(nodeInfoParam);
-            nodeInfo = RedisNodeInfoUtil.parseInfoToObject(info, lastTimeNodeInfo);
+            nodeInfo = RedisNodeInfoUtil.parseInfoToObject(infoMap, lastTimeNodeInfo);
             nodeInfo.setDataType(NodeInfoType.DataType.NODE);
             nodeInfo.setLastTime(true);
             nodeInfo.setTimeType(timeType);
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Build node info failed, node = " + node, e);
         }
         return nodeInfo;
@@ -86,12 +87,11 @@ public class RedisService implements IRedisService {
         Cluster cluster = new Cluster();
         RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
         RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
-        String serverInfo = redisClient.getInfo(RedisClient.SERVER);
         try {
-            Map<String, String> serverInfoMap = RedisUtil.parseInfoToMap(serverInfo);
+            Map<String, String> serverInfoMap = redisClient.getInfo(RedisClient.SERVER);
             cluster.setRedisMode(serverInfoMap.get(REDIS_MODE));
             cluster.setOs(serverInfoMap.get(OS));
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Parse server info failed.", e);
         }
         return cluster;

@@ -35,6 +35,11 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
+    public String clusterNodes() {
+        return null;
+    }
+
+    @Override
     public boolean exists(String key) {
         return jedisCluster.exists(key);
     }

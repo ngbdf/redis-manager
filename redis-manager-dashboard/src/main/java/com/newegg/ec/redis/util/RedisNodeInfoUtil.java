@@ -105,12 +105,11 @@ public class RedisNodeInfoUtil {
 
     private static final BigDecimal BIG_DECIMAL_1024 = new BigDecimal(1024);
 
-    public static final NodeInfo parseInfoToObject(String info, NodeInfo lastTimeNodeInfo) throws IOException {
+    public static final NodeInfo parseInfoToObject(Map<String, String> info, NodeInfo lastTimeNodeInfo) throws IOException {
         JSONObject infoJSONObject = new JSONObject();
         long keys = 0;
         long expires = 0;
-        Map<String, String> infoMap = RedisUtil.parseInfoToMap(info);
-        for (Map.Entry<String, String> entry : infoMap.entrySet()) {
+        for (Map.Entry<String, String> entry : info.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (Strings.isNullOrEmpty(key) || Strings.isNullOrEmpty(value)) {

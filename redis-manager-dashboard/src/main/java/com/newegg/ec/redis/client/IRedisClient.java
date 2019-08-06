@@ -1,10 +1,13 @@
 package com.newegg.ec.redis.client;
 
+import com.newegg.ec.redis.entity.NodeRole;
+import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -24,7 +27,7 @@ public interface IRedisClient extends IDatabaseCommand {
      *
      * @return
      */
-    String getInfo();
+    Map<String, String> getInfo() throws Exception;
 
     /**
      * Get redis node info with sub key
@@ -32,7 +35,7 @@ public interface IRedisClient extends IDatabaseCommand {
      * @param section
      * @return
      */
-    String getInfo(String section);
+    Map<String, String> getInfo(String section) throws Exception;
 
     String getClusterInfo();
 
@@ -55,7 +58,11 @@ public interface IRedisClient extends IDatabaseCommand {
      */
     String getMemory(String subKey);
 
-    String nodes();
+    /**
+     * just for standalone mode
+     * @return
+     */
+    List<RedisNode> nodes() throws Exception;
 
     Long dbSize();
 
@@ -73,13 +80,18 @@ public interface IRedisClient extends IDatabaseCommand {
      */
     String slaveOf(HostAndPort hostAndPort);
 
-    String role();
+    NodeRole role() throws Exception;
 
     /** 客户端于服务端 */
+    /**
+     * 测试密码是否正确
+     * @param password
+     * @return
+     */
     boolean auth(String password);
 
     /**
-     *
+     * stop node
      * @return ""
      */
     boolean shutdown();
@@ -92,7 +104,7 @@ public interface IRedisClient extends IDatabaseCommand {
      *
      * @return
      */
-    List<String> getConfig();
+    Map<String, String> getConfig();
 
     /**
      * Get redis configuration with sub key
@@ -100,7 +112,7 @@ public interface IRedisClient extends IDatabaseCommand {
      * @param pattern
      * @return
      */
-    List<String> getConfig(String pattern);
+    Map<String, String> getConfig(String pattern);
 
     /**
      * Rewrite redis configuration
@@ -129,7 +141,7 @@ public interface IRedisClient extends IDatabaseCommand {
      *
      * @return OK
      */
-    String clientSetName(String clientName);
+    boolean clientSetName(String clientName);
 
     String clusterMeet(HostAndPort hostAndPort);
 
@@ -137,10 +149,10 @@ public interface IRedisClient extends IDatabaseCommand {
      * Be slave
      * 重新配置一个节点成为指定master的salve节点
      *
-     * @param masterId
+     * @param nodeId
      * @return
      */
-    String clusterReplicate(String masterId);
+    String clusterReplicate(String nodeId);
 
     /**
      * Be master
@@ -148,6 +160,12 @@ public interface IRedisClient extends IDatabaseCommand {
      * @return
      */
     String clusterFailOver();
+
+    String clusterAddSlots(int... slots);
+
+    String clusterForget(String nodeId);
+
+    String clusterSlaves(String nodeId);
 
     /**
      * Close client

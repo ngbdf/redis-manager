@@ -1,15 +1,17 @@
 package com.newegg.ec.redis.client;
 
 import com.google.common.base.Strings;
-import redis.clients.jedis.Client;
+import com.newegg.ec.redis.entity.NodeRole;
+import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.util.RedisUtil;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisMonitor;
 import redis.clients.jedis.util.Slowlog;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
+import static com.newegg.ec.redis.util.RedisUtil.IP;
+import static com.newegg.ec.redis.util.RedisUtil.PORT;
 
 /**
  * @author Jay.H.Zou
@@ -26,9 +28,20 @@ public class RedisClient implements IRedisClient {
      */
     public static final String SERVER = "server";
 
+    public static final String REPLICATION = "replication";
+
+    public static final String ROLE = "role";
+
+    public static final String MASTER_HOST = "master_host";
+
+    public static final String MASTER_PORT = "master_port";
+
     private Jedis jedis;
 
+    private RedisURI redisURI;
+
     public RedisClient(RedisURI redisURI) {
+        this.redisURI = redisURI;
         String redisPassword = redisURI.getRequirePass();
         Set<HostAndPort> hostAndPortSet = redisURI.getHostAndPortSet();
         jedis = new Jedis(hostAndPortSet.iterator().next());
@@ -43,13 +56,13 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String getInfo() {
-        return jedis.info();
+    public Map<String, String> getInfo() throws Exception {
+        return RedisUtil.parseInfoToMap(jedis.info());
     }
 
     @Override
-    public String getInfo(String section) {
-        return jedis.info(section);
+    public Map<String, String> getInfo(String section) throws Exception {
+        return RedisUtil.parseInfoToMap(jedis.info(section));
     }
 
     @Override
@@ -80,13 +93,62 @@ public class RedisClient implements IRedisClient {
     }
 
     /**
-     * master-slave 自己实现
+     * standalone nodes
+     * <p>
+     * role:master
+     * connected_slaves:2
+     * slave0:ip=127.0.0.1,port=8801,state=online,offset=152173185,lag=1
+     * slave1:ip=127.0.0.1,port=8802,state=online,offset=152173185,lag=1
+     * <p>
+     * role:slave
+     * master_host:127.0.0.1
+     * master_port:8800
+     * master_link_status:up
      *
      * @return
      */
     @Override
-    public String nodes() {
-        return null;
+    public List<RedisNode> nodes() throws Exception {
+        List<RedisNode> nodeList = new ArrayList<>();
+        Map<String, String> infoMap = getInfo(REPLICATION);
+        String role = infoMap.get(ROLE);
+        String host = infoMap.get(MASTER_HOST);
+        int port = Integer.valueOf(infoMap.get(MASTER_PORT));
+        // 使用 master node 进行连接
+        if (Objects.equals(role, NodeRole.SLAVE.getValue())) {
+            host = infoMap.get(MASTER_HOST);
+            port = Integer.valueOf(infoMap.get(MASTER_PORT));
+            RedisURI masterURI = new RedisURI(new HostAndPort(host, port), redisURI.getRequirePass());
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(masterURI);
+            infoMap = redisClient.getInfo(REPLICATION);
+        }
+        nodeList.add(new RedisNode(host, port, NodeRole.MASTER));
+        for (Map.Entry<String, String> node : infoMap.entrySet()) {
+            if (!node.getKey().contains(NodeRole.SLAVE.getValue())) {
+                continue;
+            }
+            String[] keyAndValues = node.getValue().split(",");
+            if (keyAndValues.length < 2) {
+                return nodeList;
+            }
+            String slaveIp = null;
+            String slavePort = null;
+            for (String keyAndValue : keyAndValues) {
+                String[] keyAndValueArray = keyAndValue.split("=");
+                String key = keyAndValueArray[0];
+                String val = keyAndValueArray[1];
+                if (Objects.equals(key, IP)) {
+                    slaveIp = val;
+                } else if (Objects.equals(key, PORT)) {
+                    slavePort = val;
+                }
+            }
+            if (!Strings.isNullOrEmpty(slaveIp) && !Strings.isNullOrEmpty(slavePort)) {
+                RedisNode redisNode = new RedisNode(slaveIp, Integer.valueOf(slavePort), NodeRole.SLAVE);
+                nodeList.add(redisNode);
+            }
+        }
+        return nodeList;
     }
 
     @Override
@@ -140,9 +202,10 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String role() {
-        // TODO: 自己实现
-        return null;
+    public NodeRole role() throws Exception {
+        Map<String, String> infoMap = getInfo(REPLICATION);
+        String role = infoMap.get(ROLE);
+        return NodeRole.value(role);
     }
 
     @Override
@@ -159,6 +222,7 @@ public class RedisClient implements IRedisClient {
      * addr=127.0.0.1:43143 fd=6 age=183 idle=0 flags=N db=0 sub=0 psub=0 multi=-1 qbuf=0 qbuf-free=32768 obl=0 oll=0 omem=0 events=r cmd=client
      * addr=127.0.0.1:43163 fd=5 age=35 idle=15 flags=N db=0 sub=0 psub=0 multi=-1 qbuf=0 qbuf-free=0 obl=0 oll=0 omem=0 events=r cmd=ping
      * addr=127.0.0.1:43167 fd=7 age=24 idle=6 flags=N db=0 sub=0 psub=0 multi=-1 qbuf=0 qbuf-free=0 obl=0 oll=0 omem=0 events=r cmd=get
+     *
      * @return
      */
     @Override
@@ -167,13 +231,17 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public List<String> getConfig() {
-        return jedis.configGet("*");
+    public Map<String, String> getConfig() {
+        Map<String, String> configMap = getConfig("*");
+        return configMap;
     }
 
     @Override
-    public List<String> getConfig(String pattern) {
-        return jedis.configGet(pattern);
+    public Map<String, String> getConfig(String pattern) {
+        List<String> configList = jedis.configGet(pattern);
+        Map<String, String> configMap = new LinkedHashMap<>();
+        // TODO: process
+        return configMap;
     }
 
     @Override
@@ -197,8 +265,8 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String clientSetName(String clientName) {
-        return jedis.clientSetname(clientName);
+    public boolean clientSetName(String clientName) {
+        return Objects.equals(jedis.clientSetname(clientName), OK);
     }
 
     @Override
@@ -207,13 +275,28 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String clusterReplicate(String masterId) {
-        return jedis.clusterReplicate(masterId);
+    public String clusterReplicate(String nodeId) {
+        return jedis.clusterReplicate(nodeId);
     }
 
     @Override
     public String clusterFailOver() {
         return jedis.clusterFailover();
+    }
+
+    @Override
+    public String clusterAddSlots(int... slots) {
+        return jedis.clusterAddSlots(slots);
+    }
+
+    @Override
+    public String clusterForget(String nodeId) {
+        return null;
+    }
+
+    @Override
+    public String clusterSlaves(String nodeId) {
+        return null;
     }
 
 

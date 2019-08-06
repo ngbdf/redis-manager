@@ -81,8 +81,7 @@ public class ClusterService implements IClusterService {
             return false;
         }
         try {
-            String info = redisClient.getInfo(RedisClient.SERVER);
-            Map<String, String> infoMap = RedisUtil.parseInfoToMap(info);
+            Map<String, String> infoMap = redisClient.getInfo(RedisClient.SERVER);
             fillNodeInfo(cluster, infoMap);
         } catch (Exception e) {
             logger.error("Fill node info failed, " + cluster, e);

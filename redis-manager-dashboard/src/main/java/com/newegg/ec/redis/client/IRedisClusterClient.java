@@ -10,5 +10,7 @@ public interface IRedisClusterClient extends IDatabaseCommand {
 
     JedisCluster getRedisClusterClient();
 
+    String clusterNodes();
+
     void close();
 }

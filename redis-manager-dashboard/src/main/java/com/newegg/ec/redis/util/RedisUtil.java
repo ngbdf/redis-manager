@@ -17,6 +17,10 @@ import java.util.*;
  */
 public class RedisUtil {
 
+    public static final String IP = "ip";
+
+    public static final String PORT = "port";
+
     private RedisUtil() {
     }
 
