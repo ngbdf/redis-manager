@@ -1,7 +1,10 @@
 package com.newegg.ec.redis.entity;
 
+
+import redis.clients.jedis.ScanParams;
+
 /**
- * Created by gl49 on 2018/5/4.
+ * @author Jay
  */
 public class RedisQueryParam {
 
@@ -9,7 +12,18 @@ public class RedisQueryParam {
 
     private int database;
 
+    private String cursor;
+
+    private int count;
+
     private String key;
+
+    public ScanParams buildScanParams() {
+        ScanParams scanParams = new ScanParams();
+        scanParams.count(this.getCount());
+        scanParams.match(this.getKey());
+        return scanParams;
+    }
 
     public int getClusterId() {
         return clusterId;
@@ -25,6 +39,22 @@ public class RedisQueryParam {
 
     public void setDatabase(int database) {
         this.database = database;
+    }
+
+    public String getCursor() {
+        return cursor;
+    }
+
+    public void setCursor(String cursor) {
+        this.cursor = cursor;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public String getKey() {

@@ -1,7 +1,5 @@
 package com.newegg.ec.redis.client;
 
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.entity.RedisQueryParam;
@@ -9,15 +7,15 @@ import com.newegg.ec.redis.entity.RedisQueryResult;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SplitUtil;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.*;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static com.newegg.ec.redis.client.RedisURI.MAX_ATTEMPTS;
 import static com.newegg.ec.redis.client.RedisURI.TIMEOUT;
@@ -109,6 +107,7 @@ public class RedisClusterClient implements IRedisClusterClient {
     @Override
     public RedisQueryResult query(RedisQueryParam redisQueryParam) {
         String key = redisQueryParam.getKey();
+        int count = redisQueryParam.getCount();
         String type = type(key);
         long ttl = ttl(key);
         Object value = null;
@@ -120,13 +119,13 @@ public class RedisClusterClient implements IRedisClusterClient {
                 value = jedisCluster.hgetAll(key);
                 break;
             case LIST:
-                value = jedisCluster.lrange(key, 0, 100);
+                value = jedisCluster.lrange(key, 0, count);
                 break;
             case SET:
-                value = jedisCluster.srandmember(key, 100);
+                value = jedisCluster.srandmember(key, count);
                 break;
             case ZSET:
-                value = jedisCluster.zrange(key, 0, 100);
+                value = jedisCluster.zrange(key, 0, count);
                 break;
             default:
                 break;
@@ -135,13 +134,10 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
-    public List<String> scan(String key) {
-        return null;
-    }
-
-    @Override
-    public String object(String type) {
-        return null;
+    public RedisQueryResult scan(RedisQueryParam redisQueryParam) {
+        ScanParams scanParams = redisQueryParam.buildScanParams();
+        ScanResult<String> scanResult = jedisCluster.scan(redisQueryParam.getCursor(), scanParams);
+        return new RedisQueryResult(scanResult);
     }
 
     @Override

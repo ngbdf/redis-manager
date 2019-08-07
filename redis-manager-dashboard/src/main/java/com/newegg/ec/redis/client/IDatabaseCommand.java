@@ -3,8 +3,6 @@ package com.newegg.ec.redis.client;
 import com.newegg.ec.redis.entity.RedisQueryParam;
 import com.newegg.ec.redis.entity.RedisQueryResult;
 
-import java.util.List;
-
 /**
  * 数据相关操作
  *
@@ -46,7 +44,6 @@ public interface IDatabaseCommand {
      *
      * @return
      */
-    List<String> scan(String key);
+    RedisQueryResult scan(RedisQueryParam redisQueryParam);
 
-    String object(String type);
 }

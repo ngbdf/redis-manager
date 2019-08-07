@@ -4,7 +4,6 @@ import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.JedisCluster;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Jay.H.Zou

@@ -8,7 +8,8 @@ import com.newegg.ec.redis.entity.RedisQueryResult;
 import com.newegg.ec.redis.util.RedisUtil;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.commands.JedisCommands;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.util.Slowlog;
 
@@ -185,14 +186,39 @@ public class RedisClient implements IRedisClient {
     @Override
     public RedisQueryResult query(RedisQueryParam redisQueryParam) {
         String key = redisQueryParam.getKey();
+        int count = redisQueryParam.getCount();
         int database = redisQueryParam.getDatabase();
+        String type = type(key);
+        long ttl = ttl(key);
         jedis.select(database);
-        return null;
+        Object value = null;
+        switch (type) {
+            case STRING:
+                value = jedis.get(key);
+                break;
+            case HASH:
+                value = jedis.hgetAll(key);
+                break;
+            case LIST:
+                value = jedis.lrange(key, 0, count);
+                break;
+            case SET:
+                value = jedis.srandmember(key, count);
+                break;
+            case ZSET:
+                value = jedis.zrange(key, 0, count);
+                break;
+            default:
+                break;
+        }
+        return new RedisQueryResult(ttl, type, value);
     }
 
     @Override
-    public List<String> scan(String key) {
-        return null;
+    public RedisQueryResult scan(RedisQueryParam redisQueryParam) {
+        ScanParams scanParams = redisQueryParam.buildScanParams();
+        ScanResult<String> scanResult = jedis.scan(redisQueryParam.getCursor(), scanParams);
+        return new RedisQueryResult(scanResult);
     }
 
     @Override
@@ -279,11 +305,6 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String object(String type) {
-        return null;
-    }
-
-    @Override
     public List<Slowlog> getSlowLog(int size) {
         return jedis.slowlogGet(size);
     }
@@ -322,7 +343,6 @@ public class RedisClient implements IRedisClient {
     public String clusterSlaves(String nodeId) {
         return jedis.clusterReplicate(nodeId);
     }
-
 
     @Override
     public void close() {

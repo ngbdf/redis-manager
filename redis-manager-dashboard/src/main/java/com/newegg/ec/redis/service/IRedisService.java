@@ -13,10 +13,31 @@ import java.util.Set;
  */
 public interface IRedisService {
 
+    /**
+     *
+     * @param hostAndPortSet
+     * @param redisPassword
+     * @return
+     */
     List<String> getDBList(Set<HostAndPort> hostAndPortSet, String redisPassword);
 
+    /**
+     * 获取集群节点
+     *
+     * @param hostAndPortSet
+     * @param redisPassword
+     * @return
+     */
     List<RedisNode> getNodeList(Set<HostAndPort> hostAndPortSet, String redisPassword);
 
+    /**
+     * 获取集群
+     * @param clusterId
+     * @param hostAndPortSet
+     * @param redisPassword
+     * @param timeType
+     * @return
+     */
     List<NodeInfo> getNodeInfoList(int clusterId, Set<HostAndPort> hostAndPortSet, String redisPassword, NodeInfoType.TimeType timeType);
 
     NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword, NodeInfoType.TimeType timeType);

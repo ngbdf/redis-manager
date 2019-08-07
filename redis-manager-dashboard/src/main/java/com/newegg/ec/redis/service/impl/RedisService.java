@@ -12,9 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.commands.JedisCommands;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.newegg.ec.redis.client.IDatabaseCommand.*;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.OS;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.REDIS_MODE;
 import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
