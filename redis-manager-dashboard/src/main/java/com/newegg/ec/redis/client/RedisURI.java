@@ -15,6 +15,10 @@ import static com.newegg.ec.redis.entity.RedisClientName.REDIS_MANAGER_ClIENT;
  */
 public class RedisURI {
 
+    public static final int TIMEOUT = 5000;
+
+    public static final int MAX_ATTEMPTS = 3;
+
     private String token;
 
     private Set<HostAndPort> hostAndPortSet;

@@ -1,8 +1,13 @@
 package com.newegg.ec.redis.client;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.entity.RedisQueryParam;
+import com.newegg.ec.redis.entity.RedisQueryResult;
+import com.newegg.ec.redis.util.RedisUtil;
+import com.newegg.ec.redis.util.SplitUtil;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
@@ -12,9 +17,10 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static com.newegg.ec.redis.client.RedisURI.MAX_ATTEMPTS;
+import static com.newegg.ec.redis.client.RedisURI.TIMEOUT;
 
 /**
  * @author Jay.H.Zou
@@ -25,10 +31,6 @@ public class RedisClusterClient implements IRedisClusterClient {
     private JedisCluster jedisCluster;
 
     private RedisClient redisClient;
-
-    private static final int TIMEOUT = 5000;
-
-    private static final int MAX_ATTEMPTS = 3;
 
     public RedisClusterClient(RedisURI redisURI) {
         Set<HostAndPort> hostAndPortSet = redisURI.getHostAndPortSet();
@@ -42,30 +44,46 @@ public class RedisClusterClient implements IRedisClusterClient {
         return jedisCluster;
     }
 
+    /**
+     * <id> <ip:port> <flags> <master> <ping-sent> <pong-recv> <config-epoch> <link-state> <slot> ... <slot>
+     *
+     * @return
+     * @throws Exception
+     */
     @Override
-    public Map<RedisNode, List<RedisNode>> clusterNodes() throws Exception {
+    public List<RedisNode> clusterNodes() throws Exception {
         Jedis jedis = redisClient.getJedisClient();
         String nodes = jedis.clusterNodes();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(nodes.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
         String line;
+        List<RedisNode> redisNodeList = new ArrayList<>();
         while ((line = bufferedReader.readLine()) != null) {
-            if (Strings.isNullOrEmpty(line)) {
-                continue;
+            List<String> item = SplitUtil.splitBySpace(line);
+            String nodeId = item.get(0).trim();
+            String ipPort = item.get(1);
+            Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(SplitUtil.splitByAite(ipPort).get(0));
+            HostAndPort hostAndPort = hostAndPortSet.iterator().next();
+            String flags = item.get(2);
+            String masterId = item.get(3);
+            String linkState = item.get(7);
+            RedisNode redisNode = new RedisNode(nodeId, hostAndPort.getHost(), hostAndPort.getPort(), null);
+            redisNode.setFlags(flags);
+            redisNode.setMasterId(masterId);
+            redisNode.setLinkState(linkState);
+            if (item.size() > 8) {
+                String slotRang = item.get(8);
+                redisNode.setSlotRange(slotRang);
             }
-            String[] item = line.split(" ");
-            String nodeId = item[0].trim();
-            String ipPort = item[1].trim();
-            String flags;
-            String role = item[2].trim();
-            String masterId = item[4].trim();
-            String state = item[8].trim();
-            String slotRange;
-            if (line.contains(NodeRole.MASTER.getValue())) {
-                flags =
-                slotRange = item[9].trim();
+            if (flags.contains(NodeRole.MASTER.getValue())) {
+                redisNode.setNodeRole(NodeRole.MASTER);
+            } else if (flags.contains(NodeRole.SLAVE.getValue())) {
+                redisNode.setNodeRole(NodeRole.SLAVE);
+            } else {
+                redisNode.setNodeRole(NodeRole.UNKNOWN);
             }
+            redisNodeList.add(redisNode);
         }
-        return null;
+        return redisNodeList;
     }
 
     @Override
@@ -79,13 +97,41 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
+    public long ttl(String key) {
+        return jedisCluster.ttl(key);
+    }
+
+    @Override
     public Long del(String key) {
         return jedisCluster.del(key);
     }
 
     @Override
-    public Object query(String key) {
-        return null;
+    public RedisQueryResult query(RedisQueryParam redisQueryParam) {
+        String key = redisQueryParam.getKey();
+        String type = type(key);
+        long ttl = ttl(key);
+        Object value = null;
+        switch (type) {
+            case STRING:
+                value = jedisCluster.get(key);
+                break;
+            case HASH:
+                value = jedisCluster.hgetAll(key);
+                break;
+            case LIST:
+                value = jedisCluster.lrange(key, 0, 100);
+                break;
+            case SET:
+                value = jedisCluster.srandmember(key, 100);
+                break;
+            case ZSET:
+                value = jedisCluster.zrange(key, 0, 100);
+                break;
+            default:
+                break;
+        }
+        return new RedisQueryResult(ttl, type, value);
     }
 
     @Override

@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.RedisNode;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -13,7 +15,7 @@ import java.util.Objects;
  * @author Jay.H.Zou
  * @date 8/2/2019
  */
-public class RedisClusterInfoUtil {
+public class RedisClusterUtil {
 
     public static final String OK = "ok";
 
@@ -58,6 +60,11 @@ public class RedisClusterInfoUtil {
         infoJSONObject.put(stateField, state);
         Cluster cluster = infoJSONObject.toJavaObject(Cluster.class);
         return cluster;
+    }
+
+    public static final Map<RedisNode, List<RedisNode>> getClusterNodes(String nodes) {
+
+        return null;
     }
 
 }

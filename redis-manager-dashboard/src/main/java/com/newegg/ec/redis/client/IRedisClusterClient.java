@@ -14,7 +14,7 @@ public interface IRedisClusterClient extends IDatabaseCommand {
 
     JedisCluster getRedisClusterClient();
 
-    Map<RedisNode, List<RedisNode>> clusterNodes() throws Exception;
+    List<RedisNode> clusterNodes() throws Exception;
 
     void close();
 }

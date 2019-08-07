@@ -7,6 +7,8 @@ import com.newegg.ec.redis.entity.NodeInfo;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RedisNodeInfoUtil {
 
-    private static final Map<String, Map<String, Object>> LIMITE_VALUE_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, NodeInfo>> LIMITE_VALUE_MAP = new ConcurrentHashMap<>();
 
     public static final String NODE_INFO_TABLE_PREFIX = "node_info_";
 
@@ -230,11 +232,53 @@ public class RedisNodeInfoUtil {
         return divide.doubleValue();
     }
 
-    public static void updateLimitValueMap(String clusterId, Map<String, Object> limitValue) {
-        LIMITE_VALUE_MAP.put(clusterId, limitValue);
+    public static void updateLimitValueMap(String clusterId, List<NodeInfo> nodeInfoList) {
+        boolean start = false;
+        NodeInfo maxResponseTime = null;
+        NodeInfo maxConnectedClients = null;
+        NodeInfo maxKeys = null;
+        NodeInfo minKeys = null;
+        NodeInfo maxUsedMemory = null;
+        NodeInfo minUsedMemory = null;
+        for (NodeInfo nodeInfo : nodeInfoList) {
+            if (!start) {
+                maxResponseTime = nodeInfo;
+                maxConnectedClients = nodeInfo;
+                maxKeys = nodeInfo;
+                minKeys = nodeInfo;
+                maxUsedMemory = nodeInfo;
+                minUsedMemory = nodeInfo;
+                start = true;
+                continue;
+            }
+            if (nodeInfo.getResponseTime() > maxResponseTime.getResponseTime()) {
+                maxResponseTime = nodeInfo;
+            }
+            if (nodeInfo.getConnectedClients() > maxConnectedClients.getConnectedClients()) {
+                maxConnectedClients = nodeInfo;
+            }
+            if (nodeInfo.getKeys() > maxKeys.getKeys()) {
+                maxKeys = nodeInfo;
+            } else {
+                minKeys = nodeInfo;
+            }
+            if (nodeInfo.getUsedMemory() > maxUsedMemory.getUsedMemory()) {
+                maxUsedMemory = nodeInfo;
+            } else {
+                minUsedMemory = nodeInfo;
+            }
+        }
+        Map<String, NodeInfo> nodeInfoMap = new HashMap<>();
+        nodeInfoMap.put("maxResponseTime", maxResponseTime);
+        nodeInfoMap.put("maxConnectedClients", maxConnectedClients);
+        nodeInfoMap.put("maxKeys", maxKeys);
+        nodeInfoMap.put("minKeys", minKeys);
+        nodeInfoMap.put("maxUsedMemory", maxUsedMemory);
+        nodeInfoMap.put("minUsedMemory", minUsedMemory);
+        LIMITE_VALUE_MAP.put(clusterId, nodeInfoMap);
     }
 
-    public static Map<String, Object> getLimitValue(String clusterId) {
+    public static Map<String, NodeInfo> getLimitValue(String clusterId) {
         return LIMITE_VALUE_MAP.get(clusterId);
     }
 

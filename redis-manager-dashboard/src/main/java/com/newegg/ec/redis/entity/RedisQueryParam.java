@@ -5,28 +5,18 @@ package com.newegg.ec.redis.entity;
  */
 public class RedisQueryParam {
 
-    private String clusterId;
-
-    private String nodes;
+    private int clusterId;
 
     private int database;
 
     private String key;
 
-    public String getClusterId() {
+    public int getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(String clusterId) {
+    public void setClusterId(int clusterId) {
         this.clusterId = clusterId;
-    }
-
-    public String getNodes() {
-        return nodes;
-    }
-
-    public void setNodes(String nodes) {
-        this.nodes = nodes;
     }
 
     public int getDatabase() {

@@ -3,13 +3,18 @@ package com.newegg.ec.redis.client;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.entity.RedisQueryParam;
+import com.newegg.ec.redis.entity.RedisQueryResult;
 import com.newegg.ec.redis.util.RedisUtil;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.commands.JedisCommands;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.util.Slowlog;
 
 import java.util.*;
 
+import static com.newegg.ec.redis.client.RedisURI.TIMEOUT;
 import static com.newegg.ec.redis.util.RedisUtil.*;
 
 /**
@@ -36,10 +41,23 @@ public class RedisClient implements IRedisClient {
     public RedisClient(RedisURI redisURI) {
         this.redisURI = redisURI;
         String redisPassword = redisURI.getRequirePass();
+        String clientName = redisURI.getClientName();
         Set<HostAndPort> hostAndPortSet = redisURI.getHostAndPortSet();
-        jedis = new Jedis(hostAndPortSet.iterator().next());
-        if (!Strings.isNullOrEmpty(redisPassword)) {
-            jedis.auth(redisPassword);
+        for (HostAndPort hostAndPort : hostAndPortSet) {
+            try {
+                jedis = new Jedis(hostAndPort.getHost(), hostAndPort.getPort(), TIMEOUT, TIMEOUT);
+                if (redisPassword != null) {
+                    jedis.auth(redisPassword);
+                }
+                if (!Strings.isNullOrEmpty(clientName)) {
+                    jedis.clientSetname(clientName);
+                }
+                if (ping()) {
+                    break;
+                }
+            } catch (JedisConnectionException e) {
+                // try next nodes
+            }
         }
     }
 
@@ -155,12 +173,20 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
+    public long ttl(String key) {
+        return 0;
+    }
+
+    @Override
     public Long del(String key) {
         return jedis.del(key);
     }
 
     @Override
-    public Object query(String key) {
+    public RedisQueryResult query(RedisQueryParam redisQueryParam) {
+        String key = redisQueryParam.getKey();
+        int database = redisQueryParam.getDatabase();
+        jedis.select(database);
         return null;
     }
 
@@ -225,15 +251,20 @@ public class RedisClient implements IRedisClient {
 
     @Override
     public Map<String, String> getConfig() {
-        Map<String, String> configMap = getConfig("*");
-        return configMap;
+        return getConfig("*");
     }
 
     @Override
     public Map<String, String> getConfig(String pattern) {
         List<String> configList = jedis.configGet(pattern);
         Map<String, String> configMap = new LinkedHashMap<>();
-        // TODO: process
+        for (int i = 0, length = configList.size(); i < length; i += 2) {
+            String key = configList.get(i);
+            if (Strings.isNullOrEmpty(key)) {
+                continue;
+            }
+            configMap.put(key, configList.get(i + 1));
+        }
         return configMap;
     }
 
@@ -284,12 +315,12 @@ public class RedisClient implements IRedisClient {
 
     @Override
     public String clusterForget(String nodeId) {
-        return null;
+        return jedis.clusterForget(nodeId);
     }
 
     @Override
     public String clusterSlaves(String nodeId) {
-        return null;
+        return jedis.clusterReplicate(nodeId);
     }
 
 

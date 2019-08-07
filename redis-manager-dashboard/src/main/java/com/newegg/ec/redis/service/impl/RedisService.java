@@ -1,19 +1,20 @@
 package com.newegg.ec.redis.service.impl;
 
-import com.newegg.ec.redis.client.RedisClientFactory;
-import com.newegg.ec.redis.client.RedisClient;
-import com.newegg.ec.redis.client.RedisClusterClient;
-import com.newegg.ec.redis.client.RedisURI;
+import com.newegg.ec.redis.client.*;
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
-import com.newegg.ec.redis.util.RedisClusterInfoUtil;
+import com.newegg.ec.redis.util.RedisClusterUtil;
 import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.commands.JedisCommands;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,8 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.newegg.ec.redis.client.IDatabaseCommand.*;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.OS;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.REDIS_MODE;
+import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
+import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 
 /**
  * @author Jay.H.Zou
@@ -34,6 +38,9 @@ public class RedisService implements IRedisService {
 
     @Autowired
     private INodeInfoService nodeInfoService;
+
+    @Autowired
+    private IClusterService clusterService;
 
     @Override
     public List<String> getDBList(Set<HostAndPort> hostAndPortSet, String redisPassword) {
@@ -104,7 +111,7 @@ public class RedisService implements IRedisService {
         RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
         String clusterInfo = redisClient.getClusterInfo();
         try {
-            cluster = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfo);
+            cluster = RedisClusterUtil.parseClusterInfoToObject(clusterInfo);
         } catch (IOException e) {
             logger.error("Parse cluster info failed.", e);
         }
@@ -118,6 +125,17 @@ public class RedisService implements IRedisService {
 
     @Override
     public RedisQueryResult query(RedisQueryParam redisQueryParam) {
+        // standalone or cluster
+        Cluster cluster = clusterService.getClusterById(redisQueryParam.getClusterId());
+        String nodes = cluster.getNodes();
+        IDatabaseCommand jedisCommands = null;
+        String redisMode = cluster.getRedisMode();
+        RedisURI redisURI = new RedisURI(RedisUtil.nodesToHostAndPortSet(nodes), cluster.getRedisPassword());
+        if (STANDALONE.equalsIgnoreCase(redisMode)) {
+            jedisCommands = RedisClientFactory.buildRedisClient(redisURI);
+        } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
+            jedisCommands = RedisClientFactory.buildRedisClusterClient(redisURI);
+        }
         return null;
     }
 

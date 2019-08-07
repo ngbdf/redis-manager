@@ -17,11 +17,41 @@ import java.util.*;
  */
 public class RedisUtil {
 
+    public static final String STANDALONE = "standalone";
+
+    public static final String CLUSTER = "cluster";
+
+    /** nodes 相关 */
     public static final String IP = "ip";
 
     public static final String PORT = "port";
 
     public static final String ROLE = "role";
+
+    /**
+     *  还未取得信任的节点，当前正在与其进行握手
+     */
+    public static final String HANDSHAKE = "handshake";
+
+    /**
+     *  节点处于FAIL 状态, 大部分节点都无法与其取得联系将会将改节点由 PFAIL 状态升级至FAIL状态
+     */
+    public static final String FAIL = "fail";
+
+    /**
+     * 节点处于PFAIL 状态, 当前节点无法联系，但逻辑上是可达的 (非 FAIL 状态).
+     */
+    public static final String PFAIL = "fail?";
+
+    /**
+     * 没有地址的节点(No address known for this node)
+     */
+    public static final String NOADDR = "noaddr";
+
+    /**
+     * 没有地址的节点(No address known for this node)
+     */
+    public static final String NOFLAGS = "noflags";
 
     public static final String MASTER_HOST = "master_host";
 
@@ -43,12 +73,12 @@ public class RedisUtil {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(info.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
         String line;
         while ((line = bufferedReader.readLine()) != null) {
-            String[] keyValue = line.split(":");
-            if (keyValue.length != 2) {
+            List<String> keyValue = SplitUtil.splitByColon(line);
+            if (keyValue.size() != 2) {
                 continue;
             }
-            String key = keyValue[0];
-            String value = keyValue[1];
+            String key = keyValue.get(0);
+            String value = keyValue.get(1);
             if (Strings.isNullOrEmpty(key) || Strings.isNullOrEmpty(value)) {
                 continue;
             }
@@ -58,13 +88,13 @@ public class RedisUtil {
     }
 
     public static final Set<HostAndPort> nodesToHostAndPortSet(String nodes) {
-        String[] nodesArr = nodes.split(",");
-        int length = nodesArr.length;
+        List<String> nodeList = SplitUtil.splitByCommas(nodes);
+        int length = nodeList.size();
         Set<HostAndPort> hostAndPortSet = new HashSet<>(length);
         if (length > 0) {
-            for (String node : nodesArr) {
-                String[] ipAndPort = node.split(":");
-                HostAndPort hostAndPort = new HostAndPort(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
+            for (String node : nodeList) {
+                List<String> ipAndPort = SplitUtil.splitByColon(node);
+                HostAndPort hostAndPort = new HostAndPort(ipAndPort.get(0), Integer.parseInt(ipAndPort.get(1)));
                 hostAndPortSet.add(hostAndPort);
             }
         }
@@ -103,4 +133,5 @@ public class RedisUtil {
         }
         return minBigDecimal;
     }
+
 }

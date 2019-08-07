@@ -2,19 +2,17 @@ package com.newegg.ec.redis.service.impl;
 
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
-import com.newegg.ec.redis.client.RedisClusterClient;
 import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.service.IClusterService;
-import com.newegg.ec.redis.util.RedisClusterInfoUtil;
+import com.newegg.ec.redis.util.RedisClusterUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.HostAndPort;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +72,7 @@ public class ClusterService implements IClusterService {
         try {
             redisClient = RedisClientFactory.buildRedisClient(redisURI);
             String clusterInfo = redisClient.getClusterInfo();
-            Cluster clusterInfoObj = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfo);
+            Cluster clusterInfoObj = RedisClusterUtil.parseClusterInfoToObject(clusterInfo);
             fillClusterInfo(cluster, clusterInfoObj);
         } catch (Exception e) {
             logger.error("Fill cluster info failed, " + cluster, e);
