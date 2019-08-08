@@ -26,7 +26,7 @@ redis-manager:
   # monitor configuration
   monitor:
     # 数据保存天数，1-30天, default: 15
-    keep-days: 15
+    data-keep-days: 15
     # node-number < 200, 建议 20 以内, node-number > 200, 建议 5 以内, default: 5
     slow-log-limit-all: 50
     # slow log limit of one node, default: 100

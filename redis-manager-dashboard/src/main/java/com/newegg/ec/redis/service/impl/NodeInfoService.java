@@ -25,8 +25,8 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
 
     private static final Logger logger = LoggerFactory.getLogger(NodeInfoService.class);
 
-    @Value("redis-manager.monitor.keep-days")
-    private int keepDays;
+    @Value("redis-manager.monitor.data-keep-days")
+    private int dataKeepDays;
 
     private static final int MAX_KEEP_DAYS = 30;
 
@@ -35,7 +35,7 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        if (keepDays <= 0 || keepDays > MAX_KEEP_DAYS) {
+        if (dataKeepDays <= 0 || dataKeepDays > MAX_KEEP_DAYS) {
             throw new ConfigurationException("keep-days parameter is invalid, the value must be between 1 and 30.");
         }
     }
@@ -101,7 +101,7 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
 
     @Override
     public boolean cleanupNodeInfo(int clusterId) {
-        Timestamp oldestTime = TimeRangeUtil.getTime(keepDays * TimeRangeUtil.ONE_DAY);
+        Timestamp oldestTime = TimeRangeUtil.getTime(dataKeepDays * TimeRangeUtil.ONE_DAY);
         try {
             nodeInfoDao.deleteNodeInfoByTime(clusterId, oldestTime);
             return true;
