@@ -55,11 +55,11 @@ public interface IRedisService {
 
     List<RedisSlowLog> getRedisSlowLog(Cluster cluster, SlowLogParam slowLogParam);
 
-    List<String> scan(DataCommandsParam dataCommandsParam);
+    AutoCommandResult scan(Cluster cluster, AutoCommandParam autoCommandParam);
 
-    AutoCommandResult query(AutoCommandParam autoCommandParam);
+    AutoCommandResult query(Cluster cluster, AutoCommandParam autoCommandParam);
 
-    Object console(DataCommandsParam dataCommandsParam);
+    Object console(Cluster cluster, DataCommandsParam dataCommandsParam);
 
     boolean forget();
 

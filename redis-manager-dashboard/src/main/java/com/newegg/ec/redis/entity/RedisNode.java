@@ -61,6 +61,10 @@ public class RedisNode {
         this.nodeRole = nodeRole;
     }
 
+    public RedisNode(String host, int port) {
+        this(host, port, NodeRole.UNKNOWN);
+    }
+
     public static RedisNode masterRedisNode(String host, int port) {
         return new RedisNode(host, port, NodeRole.MASTER);
     }

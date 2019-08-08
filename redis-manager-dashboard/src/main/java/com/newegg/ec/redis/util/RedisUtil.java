@@ -65,7 +65,7 @@ public class RedisUtil {
      * @throws IOException
      */
     public static final Map<String, String> parseInfoToMap(String info) throws IOException {
-        Map<String, String> infoMap = new HashMap<>();
+        Map<String, String> infoMap = new LinkedHashMap<>();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(info.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
         String line;
         while ((line = bufferedReader.readLine()) != null) {
@@ -95,6 +95,11 @@ public class RedisUtil {
             }
         }
         return hostAndPortSet;
+    }
+
+    public static final HostAndPort nodesToHostAndPort(String node) {
+        Set<HostAndPort> hostAndPortSet = nodesToHostAndPortSet(node);
+        return hostAndPortSet.iterator().next();
     }
 
     public static BigDecimal avg(List<BigDecimal> bigDecimalList) {

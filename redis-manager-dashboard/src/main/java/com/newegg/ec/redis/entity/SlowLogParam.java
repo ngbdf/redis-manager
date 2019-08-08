@@ -1,9 +1,5 @@
 package com.newegg.ec.redis.entity;
 
-import redis.clients.jedis.HostAndPort;
-
-import java.util.List;
-
 /**
  * @author Jay.H.Zou
  * @date 7/26/2019
@@ -12,8 +8,22 @@ public class SlowLogParam {
 
     private String clusterId;
 
-    private List<HostAndPort> hostAndPortList;
+    private String node;
 
-    private int limit;
+    public String getClusterId() {
+        return clusterId;
+    }
+
+    public void setClusterId(String clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
+    }
 
 }

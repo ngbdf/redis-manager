@@ -37,4 +37,12 @@ public class DataCommandsParam {
         this.command = command;
     }
 
+    @Override
+    public String toString() {
+        return "DataCommandsParam{" +
+                "clusterId=" + clusterId +
+                ", database=" + database +
+                ", command='" + command + '\'' +
+                '}';
+    }
 }
