@@ -6,7 +6,7 @@ import redis.clients.jedis.ScanResult;
  * @author Jay.H.Zou
  * @date 7/26/2019
  */
-public class RedisQueryResult {
+public class AutoCommandResult {
 
     private long ttl;
 
@@ -18,23 +18,23 @@ public class RedisQueryResult {
 
     private Object value;
 
-    public RedisQueryResult() {
+    public AutoCommandResult() {
     }
 
-    public RedisQueryResult(ScanResult<String> scanResult) {
+    public AutoCommandResult(ScanResult<String> scanResult) {
         this.cursor = scanResult.getCursor();
         this.completeIteration = scanResult.isCompleteIteration();
         this.value = scanResult.getResult();
     }
 
 
-    public RedisQueryResult(String cursor, boolean completeIteration, Object value) {
+    public AutoCommandResult(String cursor, boolean completeIteration, Object value) {
         this.cursor = cursor;
         this.completeIteration = completeIteration;
         this.value = value;
     }
 
-    public RedisQueryResult(long ttl, String type, Object value) {
+    public AutoCommandResult(long ttl, String type, Object value) {
         this.ttl = ttl;
         this.type = type;
         this.value = value;
@@ -78,5 +78,17 @@ public class RedisQueryResult {
 
     public void setValue(Object value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("AutoCommandResult{");
+        sb.append("ttl=").append(ttl);
+        sb.append(", type='").append(type).append('\'');
+        sb.append(", cursor='").append(cursor).append('\'');
+        sb.append(", completeIteration=").append(completeIteration);
+        sb.append(", value=").append(value);
+        sb.append('}');
+        return sb.toString();
     }
 }

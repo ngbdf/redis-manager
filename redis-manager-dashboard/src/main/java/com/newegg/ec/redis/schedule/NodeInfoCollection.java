@@ -124,15 +124,15 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
 
         public CollectMinuteNodeInfoTask(Cluster cluster, NodeInfoType.TimeType timeType) {
             this.cluster = cluster;
+            this.timeType = timeType;
         }
 
         @Override
         public void run() {
             try {
                 int clusterId = cluster.getClusterId();
-                String redisPassword = cluster.getRedisPassword();
-                Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
-                List<NodeInfo> nodeInfoList = redisService.getNodeInfoList(clusterId, hostAndPortSet, redisPassword, timeType);
+                String redisMode = cluster.getRedisMode();
+                List<NodeInfo> nodeInfoList = redisService.getNodeInfoList(cluster, timeType);
                 // 计算 AVG、MAX、MIN
                 Map<String, List<BigDecimal>> nodeInfoDataMap = nodeInfoDataToMap(nodeInfoList);
                 List<NodeInfo> specialNodeInfo = buildNodeInfoForSpecialDataType(nodeInfoDataMap);
@@ -140,11 +140,21 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
                 // clean last time data and save new data to db
                 NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType);
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
+                // 计算 total keys 和 total expires, 这里不适用 dbsize 命令
                 long totalKeys = 0;
                 long totalExpires = 0;
-                for (NodeInfo nodeInfo : nodeInfoList) {
-                    totalKeys += nodeInfo.getKeys();
-                    totalExpires += nodeInfo.getExpires();
+                if (STANDALONE.equalsIgnoreCase(redisMode)) {
+                    for (NodeInfo nodeInfo : nodeInfoList) {
+                        if (NodeRole.MASTER.equals(nodeInfo.getRole())) {
+                            totalKeys = nodeInfo.getKeys();
+                            totalExpires = nodeInfo.getExpires();
+                        }
+                    }
+                } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
+                    for (NodeInfo nodeInfo : nodeInfoList) {
+                        totalKeys += nodeInfo.getKeys();
+                        totalExpires += nodeInfo.getExpires();
+                    }
                 }
                 cluster.setTotalKeys(totalKeys);
                 cluster.setTotalExpires(totalExpires);
@@ -157,70 +167,8 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
     }
 
     /**
-     * AVG、MAX、MIN 复用 MINUTE 数据，此逻辑废弃掉，较难理解和维护
-     * 改：NODE 从 redis 获取
-     */
-    /*private class CollectHourNodeInfoTask implements Runnable {
-
-        private Cluster cluster;
-
-        public CollectHourNodeInfoTask(Cluster cluster) {
-            this.cluster = cluster;
-        }
-
-        @Override
-        public void run() {
-            try {
-                int clusterId = cluster.getClusterId();
-                String redisPassword = cluster.getRedisPassword();
-                Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
-                List<NodeInfo> nodeInfoList = redisService.getNodeInfoList(clusterId, hostAndPortSet, redisPassword, NodeInfoType.TimeType.HOUR);
-                Map<String, List<BigDecimal>> nodeInfoDataMap = nodeInfoDataToMap(nodeInfoList);
-                List<NodeInfo> specialNodeInfo = buildNodeInfoForSpecialDataType(nodeInfoDataMap);
-                // VG、MAX、MIN 复用 MINUTE 数据
-                NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, TimeRangeUtil.getLastHourTimestamp(), TimeRangeUtil.getCurrentTimestamp());
-                nodeInfoParam.setTimeType(NodeInfoType.TimeType.MINUTE);
-                nodeInfoParam.setDataType(NodeInfoType.DataType.AVG);
-                List<NodeInfo> nodeInfoHistoryAvgList = nodeInfoService.getNodeInfoList(nodeInfoParam);
-                Map<String, List<BigDecimal>> nodeInfoHistoryAvgDataMap = nodeInfoDataToMap(nodeInfoHistoryAvgList);
-                nodeInfoParam.setDataType(NodeInfoType.DataType.MAX);
-                List<NodeInfo> nodeInfoHistoryMaxList = nodeInfoService.getNodeInfoList(nodeInfoParam);
-                Map<String, List<BigDecimal>> nodeInfoHistoryMaxDataMap = nodeInfoDataToMap(nodeInfoHistoryMaxList);
-                nodeInfoParam.setDataType(NodeInfoType.DataType.MIN);
-                List<NodeInfo> nodeInfoHistoryMinList = nodeInfoService.getNodeInfoList(nodeInfoParam);
-                Map<String, List<BigDecimal>> nodeInfoHistoryMinDataMap = nodeInfoDataToMap(nodeInfoHistoryMinList);
-                NodeInfo nodeInfoAvg = buildNodeINfoHour(nodeInfoHistoryAvgDataMap, NodeInfoType.DataType.AVG);
-                NodeInfo nodeInfoMax = buildNodeINfoHour(nodeInfoHistoryMaxDataMap, NodeInfoType.DataType.MAX);
-                NodeInfo nodeInfoMin = buildNodeINfoHour(nodeInfoHistoryMinDataMap, NodeInfoType.DataType.MIN);
-                nodeInfoList.add(nodeInfoAvg);
-                nodeInfoList.add(nodeInfoMax);
-                nodeInfoList.add(nodeInfoMin);
-                // 一些累计字段重新赋值
-                fillSpecialValue(specialNodeInfo, nodeInfoAvg, nodeInfoMax, nodeInfoMin);
-                // save to db
-                NodeInfoParam nodeInfoParamForSave = new NodeInfoParam(clusterId, NodeInfoType.TimeType.HOUR);
-                nodeInfoService.addNodeInfo(nodeInfoParamForSave, nodeInfoList);
-            } catch (Exception e) {
-                logger.error("Collect hour data for " + cluster.getClusterName() + " failed.", e);
-            }
-        }
-    }*/
-
-    private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
-        String nodes = cluster.getNodes();
-        String redisPassword = cluster.getRedisPassword();
-        Set<HostAndPort> seed = RedisUtil.nodesToHostAndPortSet(nodes);
-        // TODO: 还未实现
-        List<RedisNode> redisNodeList = redisService.getNodeList(seed, redisPassword);
-        Set<HostAndPort> hostAndPortSet = new HashSet<>();
-        for (RedisNode redisNode : redisNodeList) {
-            hostAndPortSet.add(new HostAndPort(redisNode.getHost(), redisNode.getPort()));
-        }
-        return hostAndPortSet;
-    }
-
-    /**
-     * 数据转换成Map
+     * Convert objects to a map
+     *
      * @param nodeInfoList
      * @return
      */

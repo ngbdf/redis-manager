@@ -12,10 +12,12 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * TODO: move to clusterService
+ *
  * @author Jay.H.Zou
  * @date 8/2/2019
  */
-public class RedisClusterUtil {
+public class RedisClusterInfoUtil {
 
     public static final String OK = "ok";
 
@@ -36,9 +38,8 @@ public class RedisClusterUtil {
     public static final String CLUSTER_SIZE = "cluster_size";
 
 
-    public static final Cluster parseClusterInfoToObject(String clusterInfo) throws IOException {
+    public static final Cluster parseClusterInfoToObject(Map<String, String> clusterInfoMap) throws IOException {
         JSONObject infoJSONObject = new JSONObject();
-        Map<String, String> clusterInfoMap = RedisUtil.parseInfoToMap(clusterInfo);
         for (Map.Entry<String, String> entry : clusterInfoMap.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -48,7 +49,21 @@ public class RedisClusterUtil {
             String field = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, key);
             infoJSONObject.put(field, value);
         }
+        // 计算集群状态
+        Cluster.ClusterState state = calculateClusterState(clusterInfoMap);
+        String stateField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, CLUSTER_STATE);
+        infoJSONObject.put(stateField, state);
+        Cluster cluster = infoJSONObject.toJavaObject(Cluster.class);
+        return cluster;
+    }
 
+    /**
+     * 目前以 cluster info 为标准
+     *
+     * @param clusterInfoMap
+     * @return
+     */
+    private static Cluster.ClusterState calculateClusterState(Map<String, String> clusterInfoMap) {
         Cluster.ClusterState state = Cluster.ClusterState.UNKNOWN;
         String clusterState = clusterInfoMap.get(CLUSTER_STATE);
         if (Objects.equals(clusterState, OK)) {
@@ -56,10 +71,7 @@ public class RedisClusterUtil {
         } else if (Objects.equals(clusterState, FAIL)) {
             state = Cluster.ClusterState.BAD;
         }
-        String stateField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, CLUSTER_STATE);
-        infoJSONObject.put(stateField, state);
-        Cluster cluster = infoJSONObject.toJavaObject(Cluster.class);
-        return cluster;
+        return state;
     }
 
     public static final Map<RedisNode, List<RedisNode>> getClusterNodes(String nodes) {

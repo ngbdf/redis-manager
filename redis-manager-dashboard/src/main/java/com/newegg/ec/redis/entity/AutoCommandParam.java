@@ -1,16 +1,13 @@
 package com.newegg.ec.redis.entity;
 
-
+import com.google.common.base.Strings;
 import redis.clients.jedis.ScanParams;
 
 /**
- * @author Jay
+ * @author Jay.H.Zou
+ * @date 8/8/2019
  */
-public class RedisQueryParam {
-
-    private int clusterId;
-
-    private int database;
+public class AutoCommandParam extends DataCommandsParam {
 
     private String cursor;
 
@@ -20,25 +17,15 @@ public class RedisQueryParam {
 
     public ScanParams buildScanParams() {
         ScanParams scanParams = new ScanParams();
+        if (Strings.isNullOrEmpty(this.getCursor())) {
+            this.setCursor("0");
+        }
         scanParams.count(this.getCount());
+        if (Strings.isNullOrEmpty(this.getKey())) {
+            this.setKey("*");
+        }
         scanParams.match(this.getKey());
         return scanParams;
-    }
-
-    public int getClusterId() {
-        return clusterId;
-    }
-
-    public void setClusterId(int clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    public int getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(int database) {
-        this.database = database;
     }
 
     public String getCursor() {

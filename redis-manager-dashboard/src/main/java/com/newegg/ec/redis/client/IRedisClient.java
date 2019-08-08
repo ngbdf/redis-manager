@@ -2,10 +2,13 @@ package com.newegg.ec.redis.client;
 
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
+import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.util.Slowlog;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +40,7 @@ public interface IRedisClient extends IDatabaseCommand {
      */
     Map<String, String> getInfo(String section) throws Exception;
 
-    String getClusterInfo();
+    Map<String, String> getClusterInfo() throws Exception;
 
     /**
      * Get redis memory info
@@ -164,6 +167,8 @@ public interface IRedisClient extends IDatabaseCommand {
     String clusterAddSlots(int... slots);
 
     String clusterForget(String nodeId);
+
+    String clusterReset(ClusterReset reset);
 
     String clusterSlaves(String nodeId);
 

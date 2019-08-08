@@ -1,15 +1,10 @@
 package com.newegg.ec.redis.client;
 
 import com.google.common.base.Strings;
-import com.newegg.ec.redis.entity.NodeRole;
-import com.newegg.ec.redis.entity.RedisNode;
-import com.newegg.ec.redis.entity.RedisQueryParam;
-import com.newegg.ec.redis.entity.RedisQueryResult;
+import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisUtil;
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
+import com.newegg.ec.redis.util.SplitUtil;
+import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.util.Slowlog;
 
@@ -32,6 +27,8 @@ public class RedisClient implements IRedisClient {
      * info subkey
      */
     public static final String SERVER = "server";
+
+    public static final String KEYSPACE = "keyspace";
 
     public static final String REPLICATION = "replication";
 
@@ -78,8 +75,8 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String getClusterInfo() {
-        return jedis.clusterInfo();
+    public Map<String, String> getClusterInfo() throws Exception {
+        return RedisUtil.parseInfoToMap(jedis.clusterInfo());
     }
 
     /**
@@ -139,14 +136,14 @@ public class RedisClient implements IRedisClient {
             if (!node.getKey().contains(NodeRole.SLAVE.getValue())) {
                 continue;
             }
-            String[] keyAndValues = node.getValue().split(",");
+            String[] keyAndValues = SplitUtil.splitByCommas(node.getValue());
             if (keyAndValues.length < 2) {
                 return nodeList;
             }
             String slaveIp = null;
             String slavePort = null;
             for (String keyAndValue : keyAndValues) {
-                String[] keyAndValueArray = keyAndValue.split("=");
+                String[] keyAndValueArray = SplitUtil.splitByEqualSign(keyAndValue);
                 String key = keyAndValueArray[0];
                 String val = keyAndValueArray[1];
                 if (Objects.equals(key, IP)) {
@@ -175,7 +172,7 @@ public class RedisClient implements IRedisClient {
 
     @Override
     public long ttl(String key) {
-        return 0;
+        return jedis.ttl(key);
     }
 
     @Override
@@ -184,41 +181,166 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public RedisQueryResult query(RedisQueryParam redisQueryParam) {
-        String key = redisQueryParam.getKey();
-        int count = redisQueryParam.getCount();
-        int database = redisQueryParam.getDatabase();
+    public AutoCommandResult query(AutoCommandParam autoCommandParam) {
+        String key = autoCommandParam.getKey();
+        int count = autoCommandParam.getCount();
+        int database = autoCommandParam.getDatabase();
         String type = type(key);
         long ttl = ttl(key);
         jedis.select(database);
         Object value = null;
         switch (type) {
-            case STRING:
+            case TYPE_STRING:
                 value = jedis.get(key);
                 break;
-            case HASH:
+            case TYPE_HASH:
                 value = jedis.hgetAll(key);
                 break;
-            case LIST:
+            case TYPE_LIST:
                 value = jedis.lrange(key, 0, count);
                 break;
-            case SET:
+            case TYPE_SET:
                 value = jedis.srandmember(key, count);
                 break;
-            case ZSET:
-                value = jedis.zrange(key, 0, count);
+            case TYPE_ZSET:
+                value = jedis.zrangeWithScores(key, 0, count);
                 break;
             default:
                 break;
         }
-        return new RedisQueryResult(ttl, type, value);
+        return new AutoCommandResult(ttl, type, value);
     }
 
     @Override
-    public RedisQueryResult scan(RedisQueryParam redisQueryParam) {
-        ScanParams scanParams = redisQueryParam.buildScanParams();
-        ScanResult<String> scanResult = jedis.scan(redisQueryParam.getCursor(), scanParams);
-        return new RedisQueryResult(scanResult);
+    public AutoCommandResult scan(AutoCommandParam autoCommandParam) {
+        ScanParams scanParams = autoCommandParam.buildScanParams();
+        ScanResult<String> scanResult = jedis.scan(autoCommandParam.getCursor(), scanParams);
+        return new AutoCommandResult(scanResult);
+    }
+
+    @Override
+    public Object string(DataCommandsParam dataCommandsParam) {
+        jedis.select(dataCommandsParam.getDatabase());
+        String command = dataCommandsParam.getCommand();
+        String[] list = SplitUtil.splitBySpace(command);
+        String cmd = command.toUpperCase();
+        String key = list[1];
+        Object result = null;
+        if (cmd.startsWith(GET)) {
+            result = jedis.get(key);
+        } else if (cmd.startsWith(SET)) {
+            result = jedis.set(key, list[2]);
+        }
+        return result;
+    }
+
+    @Override
+    public Object hash(DataCommandsParam dataCommandsParam) {
+        jedis.select(dataCommandsParam.getDatabase());
+        AutoCommandResult autoCommandResult = new AutoCommandResult();
+        String command = dataCommandsParam.getCommand();
+        String[] list = SplitUtil.splitBySpace(command);
+        String cmd = command.toUpperCase();
+        String key = list[1];
+        Object result = null;
+        if (cmd.startsWith(HGETALL)) {
+            result = jedis.hgetAll(key);
+        } else if (cmd.startsWith(HGET)) {
+            result = jedis.hget(key, list[2]);
+        } else if (cmd.startsWith(HMGET)) {
+            String[] items = removeCommandAndKey(list);
+            result = jedis.hmget(key, items);
+        } else if (cmd.startsWith(HKEYS)) {
+            result = jedis.hkeys(key);
+        } else if (cmd.startsWith(HSET)) {
+            Map<String, String> hash = new HashMap<>();
+            String[] items = removeCommandAndKey(list);
+            for (int i = 0; i < items.length; i += 2) {
+                hash.put(items[i], items[i + 1]);
+            }
+            result = jedis.hset(key, hash);
+        }
+        autoCommandResult.setValue(result);
+        return autoCommandResult;
+    }
+
+    @Override
+    public Object list(DataCommandsParam dataCommandsParam) {
+        jedis.select(dataCommandsParam.getDatabase());
+        String command = dataCommandsParam.getCommand();
+        String[] list = SplitUtil.splitBySpace(command);
+        String cmd = command.toUpperCase();
+        String key = list[1];
+        String[] items = removeCommandAndKey(list);
+        Object result = null;
+        if (cmd.startsWith(LPUSH)) {
+            result = jedis.lpush(key, items);
+        } else if (cmd.startsWith(RPUSH)) {
+            result = jedis.rpush(key, items);
+        } else if (cmd.startsWith(LINDEX)) {
+            result = jedis.lindex(key, Integer.valueOf(list[2]));
+        } else if (cmd.startsWith(LLEN)) {
+            result = jedis.llen(key);
+        } else if (cmd.startsWith(LRANGE)) {
+            int start = Integer.valueOf(list[2]);
+            int stop = Integer.valueOf(list[3]);
+            result = jedis.lrange(key, start, stop);
+        }
+        return result;
+    }
+
+    @Override
+    public Object set(DataCommandsParam dataCommandsParam) {
+        jedis.select(dataCommandsParam.getDatabase());
+        String command = dataCommandsParam.getCommand();
+        String[] list = SplitUtil.splitBySpace(command);
+        String cmd = command.toUpperCase();
+        String key = list[1];
+        Object result = null;
+        if (cmd.startsWith(SCARD)) {
+            result = jedis.scard(key);
+        } else if (cmd.startsWith(SADD)) {
+            result = jedis.sadd(key, removeCommandAndKey(list));
+        } else if (cmd.startsWith(SMEMBERS)) {
+            result = jedis.smembers(key);
+        } else if (cmd.startsWith(SRANDMEMBER)) {
+            int count = 1;
+            if (list.length > 2) {
+                count = Integer.valueOf(list[2]);
+            }
+            result = jedis.srandmember(key, count);
+        }
+        return result;
+    }
+
+    @Override
+    public Object zset(DataCommandsParam dataCommandsParam) {
+        jedis.select(dataCommandsParam.getDatabase());
+        String command = dataCommandsParam.getCommand();
+        String[] list = SplitUtil.splitBySpace(command);
+        String cmd = command.toUpperCase();
+        String key = list[1];
+        String param1 = list[2];
+        String param2 = list[3];
+        Object result = null;
+        if (cmd.startsWith(ZCARD)) {
+            result = jedis.zcard(key);
+        } else if (cmd.startsWith(ZSCORE)) {
+            result = jedis.zscore(key, param1);
+        } else if (cmd.startsWith(ZCOUNT)) {
+            result = jedis.zcount(key, param1, param2);
+        } else if (cmd.startsWith(ZRANGE)) {
+            int start = Integer.valueOf(param1);
+            int stop = Integer.valueOf(param2);
+            if (list.length > 4) {
+                result = jedis.zrangeWithScores(key, start, stop);
+            } else {
+                result = jedis.zrange(key, start, stop);
+            }
+        } else if (cmd.startsWith(ZADD)) {
+            result = jedis.zadd(key, Double.valueOf(param1), param2);
+        }
+        return result;
     }
 
     @Override
@@ -337,6 +459,11 @@ public class RedisClient implements IRedisClient {
     @Override
     public String clusterForget(String nodeId) {
         return jedis.clusterForget(nodeId);
+    }
+
+    @Override
+    public String clusterReset(ClusterReset reset) {
+        return jedis.clusterReset(reset);
     }
 
     @Override

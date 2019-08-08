@@ -17,10 +17,6 @@ import java.util.*;
  */
 public class RedisUtil {
 
-    public static final String STANDALONE = "standalone";
-
-    public static final String CLUSTER = "cluster";
-
     /** nodes 相关 */
     public static final String IP = "ip";
 
@@ -73,12 +69,12 @@ public class RedisUtil {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(info.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
         String line;
         while ((line = bufferedReader.readLine()) != null) {
-            List<String> keyValue = SplitUtil.splitByColon(line);
-            if (keyValue.size() != 2) {
+            String[] keyValue = SplitUtil.splitByColon(line);
+            if (keyValue.length != 2) {
                 continue;
             }
-            String key = keyValue.get(0);
-            String value = keyValue.get(1);
+            String key = keyValue[0];
+            String value = keyValue[1];
             if (Strings.isNullOrEmpty(key) || Strings.isNullOrEmpty(value)) {
                 continue;
             }
@@ -88,13 +84,13 @@ public class RedisUtil {
     }
 
     public static final Set<HostAndPort> nodesToHostAndPortSet(String nodes) {
-        List<String> nodeList = SplitUtil.splitByCommas(nodes);
-        int length = nodeList.size();
+        String[] nodeList = SplitUtil.splitByCommas(nodes);
+        int length = nodeList.length;
         Set<HostAndPort> hostAndPortSet = new HashSet<>(length);
         if (length > 0) {
             for (String node : nodeList) {
-                List<String> ipAndPort = SplitUtil.splitByColon(node);
-                HostAndPort hostAndPort = new HostAndPort(ipAndPort.get(0), Integer.parseInt(ipAndPort.get(1)));
+                String[] ipAndPort = SplitUtil.splitByColon(node);
+                HostAndPort hostAndPort = new HostAndPort(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
                 hostAndPortSet.add(hostAndPort);
             }
         }
@@ -132,6 +128,15 @@ public class RedisUtil {
             minBigDecimal = minBigDecimal.min(bigDecimal);
         }
         return minBigDecimal;
+    }
+
+    public static String[] removeCommandAndKey(String[] list) {
+        int length = list.length;
+        String[] items = new String[length];
+        for (int i = 2, j = 0; i < length; i++, j++) {
+            items[j] = list[i];
+        }
+        return items;
     }
 
 }

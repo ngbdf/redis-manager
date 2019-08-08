@@ -14,6 +14,8 @@ public class RedisNode {
 
     private String nodeId;
 
+    private int order;
+
     /***
      * 如果节点是slave，并且已知master节点，则这里列出master节点ID,否则的话这里列出"-"
      */

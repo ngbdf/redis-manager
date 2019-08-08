@@ -83,9 +83,11 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         }
         int clusterId = nodeInfoParam.getClusterId();
         try {
+            // 移除掉上一次集群记录
             nodeInfoDao.updateLastTimeStatus(clusterId, nodeInfoParam.getTimeType());
+            NodeInfoType.TimeType timeType = nodeInfoParam.getTimeType();
             for (NodeInfo nodeInfo : nodeInfoList) {
-                nodeInfo.setTimeType(nodeInfoParam.getTimeType());
+                nodeInfo.setTimeType(timeType);
             }
             int row = nodeInfoDao.insertNodeInfo(clusterId, nodeInfoList);
             if (row == nodeInfoList.size()) {

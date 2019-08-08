@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Redis info util
- *
+ * TODO: move to NodeInfoService
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
@@ -24,7 +24,9 @@ public class RedisNodeInfoUtil {
 
     private static final Map<String, Map<String, NodeInfo>> LIMITE_VALUE_MAP = new ConcurrentHashMap<>();
 
-    public static final String NODE_INFO_TABLE_PREFIX = "node_info_";
+    public static final String STANDALONE = "standalone";
+
+    public static final String CLUSTER = "cluster";
 
     public static final String RESPONSE_TIME = "response_time";
     /**
@@ -107,11 +109,11 @@ public class RedisNodeInfoUtil {
 
     private static final BigDecimal BIG_DECIMAL_1024 = new BigDecimal(1024);
 
-    public static final NodeInfo parseInfoToObject(Map<String, String> info, NodeInfo lastTimeNodeInfo) throws IOException {
+    public static final NodeInfo parseInfoToObject(Map<String, String> infoMap, NodeInfo lastTimeNodeInfo) throws IOException {
         JSONObject infoJSONObject = new JSONObject();
         long keys = 0;
         long expires = 0;
-        for (Map.Entry<String, String> entry : info.entrySet()) {
+        for (Map.Entry<String, String> entry : infoMap.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (Strings.isNullOrEmpty(key) || Strings.isNullOrEmpty(value)) {
@@ -121,9 +123,9 @@ public class RedisNodeInfoUtil {
             String nodeInfoField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, key);
             // for keys and expires
             if (key.startsWith(DB_PREFIX)) {
-                String[] subContents = value.split(",");
+                String[] subContents = SplitUtil.splitByCommas(value);
                 for (String subContent : subContents) {
-                    String[] split = subContent.split("=");
+                    String[] split = SplitUtil.splitByEqualSign(subContent);
                     if (split.length != 2) {
                         continue;
                     }

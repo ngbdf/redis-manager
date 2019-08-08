@@ -6,7 +6,7 @@ import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.service.IClusterService;
-import com.newegg.ec.redis.util.RedisClusterUtil;
+import com.newegg.ec.redis.util.RedisClusterInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,18 +71,18 @@ public class ClusterService implements IClusterService {
         RedisClient redisClient;
         try {
             redisClient = RedisClientFactory.buildRedisClient(redisURI);
-            String clusterInfo = redisClient.getClusterInfo();
-            Cluster clusterInfoObj = RedisClusterUtil.parseClusterInfoToObject(clusterInfo);
-            fillClusterInfo(cluster, clusterInfoObj);
-        } catch (Exception e) {
-            logger.error("Fill cluster info failed, " + cluster, e);
-            return false;
-        }
-        try {
             Map<String, String> infoMap = redisClient.getInfo(RedisClient.SERVER);
             fillNodeInfo(cluster, infoMap);
         } catch (Exception e) {
             logger.error("Fill node info failed, " + cluster, e);
+            return false;
+        }
+        try {
+            Map<String, String> clusterInfoMap = redisClient.getClusterInfo();
+            Cluster clusterInfoObj = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfoMap);
+            fillClusterInfo(cluster, clusterInfoObj);
+        } catch (Exception e) {
+            logger.error("Fill cluster info failed, " + cluster, e);
             return false;
         }
         try {

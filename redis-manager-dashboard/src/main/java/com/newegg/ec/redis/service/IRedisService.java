@@ -3,8 +3,10 @@ package com.newegg.ec.redis.service;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -14,41 +16,50 @@ import java.util.Set;
 public interface IRedisService {
 
     /**
+     * Get database
+     * <p>
+     * eg: db1 = 12345
      *
-     * @param hostAndPortSet
-     * @param redisPassword
+     * @param cluster
      * @return
      */
-    List<String> getDBList(Set<HostAndPort> hostAndPortSet, String redisPassword);
+    Map<String, Long> getDatabase(Cluster cluster);
 
     /**
-     * 获取集群节点
+     * Get node list
      *
-     * @param hostAndPortSet
-     * @param redisPassword
+     * @param cluster
      * @return
      */
-    List<RedisNode> getNodeList(Set<HostAndPort> hostAndPortSet, String redisPassword);
+    List<RedisNode> getNodeList(Cluster cluster);
 
     /**
-     * 获取集群
+     * Node info list after calculating
+     *
+     * @param cluster
+     * @param timeType
+     * @return
+     */
+    List<NodeInfo> getNodeInfoList(Cluster cluster, NodeInfoType.TimeType timeType);
+
+    /**
+     * Node info after calculating
+     *
      * @param clusterId
-     * @param hostAndPortSet
+     * @param hostAndPort
      * @param redisPassword
      * @param timeType
      * @return
      */
-    List<NodeInfo> getNodeInfoList(int clusterId, Set<HostAndPort> hostAndPortSet, String redisPassword, NodeInfoType.TimeType timeType);
-
     NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword, NodeInfoType.TimeType timeType);
 
-    Cluster getClusterInfo(Set<HostAndPort> hostAndPortSet, String redisPassword);
+    List<RedisSlowLog> getRedisSlowLog(Cluster cluster, SlowLogParam slowLogParam);
 
-    Cluster getServerInfo(Set<HostAndPort> hostAndPortSet, String redisPassword);
+    List<String> scan(DataCommandsParam dataCommandsParam);
 
-    List<String> scan(RedisQueryParam redisQueryParam);
+    AutoCommandResult query(AutoCommandParam autoCommandParam);
 
-    RedisQueryResult query(RedisQueryParam redisQueryParam);
+    Object console(DataCommandsParam dataCommandsParam);
 
     boolean forget();
 

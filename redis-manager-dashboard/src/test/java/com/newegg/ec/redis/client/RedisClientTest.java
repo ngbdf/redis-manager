@@ -1,15 +1,18 @@
 package com.newegg.ec.redis.client;
 
+import com.newegg.ec.redis.entity.AutoCommandResult;
+import com.newegg.ec.redis.entity.DataCommandsParam;
+import com.newegg.ec.redis.entity.NodeInfo;
+import com.newegg.ec.redis.entity.NodeRole;
+import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import org.junit.Test;
 import redis.clients.jedis.HostAndPort;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
-
 public class RedisClientTest {
 
-    private static RedisURI redisURI = new RedisURI(new HostAndPort("172.16.35.77", 8012), null);
+    private static RedisURI redisURI = new RedisURI(new HostAndPort("10.16.50.223", 8018), null);
 
     private static RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
 
@@ -18,11 +21,8 @@ public class RedisClientTest {
     }
 
     @Test
-    public void getInfo() {
-        Map<String, String> configMap = redisClient.getConfig();
-        configMap.forEach((key, val) -> {
-            System.err.println(key + "=" + val);
-        });
+    public void getInfo() throws Exception {
+        Map<String, String> infoMap = redisClient.getInfo();
     }
 
     @Test
@@ -30,7 +30,11 @@ public class RedisClientTest {
     }
 
     @Test
-    public void getClusterInfo() {
+    public void getClusterInfo() throws Exception {
+        Map<String, String> info = redisClient.getInfo();
+        NodeInfo nodeInfo = RedisNodeInfoUtil.parseInfoToObject(info, null);
+        NodeRole role = nodeInfo.getRole();
+        System.err.println(role);
     }
 
     @Test
@@ -61,6 +65,9 @@ public class RedisClientTest {
     public void query() {
     }
 
+    /**
+     * *, ? ,[]
+     */
     @Test
     public void scan() {
     }

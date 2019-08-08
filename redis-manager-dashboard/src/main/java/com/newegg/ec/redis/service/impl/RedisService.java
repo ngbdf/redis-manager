@@ -5,7 +5,6 @@ import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
-import com.newegg.ec.redis.util.RedisClusterUtil;
 import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
@@ -13,16 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.HostAndPort;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static com.newegg.ec.redis.util.RedisNodeInfoUtil.OS;
-import static com.newegg.ec.redis.util.RedisNodeInfoUtil.REDIS_MODE;
-import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
-import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
+import static com.newegg.ec.redis.util.RedisNodeInfoUtil.CLUSTER;
+import static com.newegg.ec.redis.util.RedisNodeInfoUtil.STANDALONE;
 
 /**
  * @author Jay.H.Zou
@@ -39,20 +32,49 @@ public class RedisService implements IRedisService {
     private IClusterService clusterService;
 
     @Override
-    public List<String> getDBList(Set<HostAndPort> hostAndPortSet, String redisPassword) {
+    public Map<String, Long> getDatabase(Cluster cluster) {
+        RedisURI redisURI = new RedisURI(cluster.getNodes(), cluster.getRedisPassword());
+        String redisMode = cluster.getRedisMode();
+        if (STANDALONE.equalsIgnoreCase(redisMode)) {
+            try {
+                RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+                Map<String, String> infoKeyspace = redisClient.getInfo(RedisClient.KEYSPACE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return null;
     }
 
     @Override
-    public List<RedisNode> getNodeList(Set<HostAndPort> hostAndPortSet, String redisPassword) {
-        RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
-        RedisClusterClient redisClusterClient = RedisClientFactory.buildRedisClusterClient(redisURI);
-        return null;
+    public List<RedisNode> getNodeList(Cluster cluster) {
+        RedisURI redisURI = new RedisURI(cluster.getNodes(), cluster.getRedisPassword());
+        String redisMode = cluster.getRedisMode();
+        List<RedisNode> nodeList = null;
+        if (STANDALONE.equalsIgnoreCase(redisMode)) {
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            try {
+                nodeList = redisClient.nodes();
+            } catch (Exception e) {
+                logger.error("Get redis node list failed, " + cluster, e);
+            }
+        } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
+            RedisClusterClient redisClusterClient = RedisClientFactory.buildRedisClusterClient(redisURI);
+            try {
+                nodeList = redisClusterClient.clusterNodes();
+            } catch (Exception e) {
+                logger.error("Get redis node list failed, " + cluster, e);
+            }
+        }
+        return nodeList;
     }
 
     @Override
-    public List<NodeInfo> getNodeInfoList(int clusterId, Set<HostAndPort> hostAndPortSet, String redisPassword, NodeInfoType.TimeType timeType) {
+    public List<NodeInfo> getNodeInfoList(Cluster cluster, NodeInfoType.TimeType timeType) {
+        String redisPassword = cluster.getRedisPassword();
+        Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
         List<NodeInfo> nodeInfoList = new ArrayList<>(hostAndPortSet.size());
+        int clusterId = cluster.getClusterId();
         for (HostAndPort hostAndPort : hostAndPortSet) {
             NodeInfo nodeInfo = getNodeInfo(clusterId, hostAndPort, redisPassword, timeType);
             if (nodeInfo == null) {
@@ -71,10 +93,10 @@ public class RedisService implements IRedisService {
             RedisURI redisURI = new RedisURI(hostAndPort, redisPassword);
             RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
             Map<String, String> infoMap = redisClient.getInfo();
-
             // 获取上一次的 NodeInfo 来计算某些字段的差值
             NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.DataType.NODE, timeType, node);
             NodeInfo lastTimeNodeInfo = nodeInfoService.getLastTimeNodeInfo(nodeInfoParam);
+            // 指标计算处理
             nodeInfo = RedisNodeInfoUtil.parseInfoToObject(infoMap, lastTimeNodeInfo);
             nodeInfo.setDataType(NodeInfoType.DataType.NODE);
             nodeInfo.setLastTime(true);
@@ -86,52 +108,51 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public Cluster getClusterInfo(Set<HostAndPort> hostAndPortSet, String redisPassword) {
-        Cluster cluster = new Cluster();
-        RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
-        RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
-        try {
-            Map<String, String> serverInfoMap = redisClient.getInfo(RedisClient.SERVER);
-            cluster.setRedisMode(serverInfoMap.get(REDIS_MODE));
-            cluster.setOs(serverInfoMap.get(OS));
-        } catch (Exception e) {
-            logger.error("Parse server info failed.", e);
+    public List<RedisSlowLog> getRedisSlowLog(Cluster cluster, SlowLogParam slowLogParam) {
+        return null;
+    }
+
+    private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
+        List<RedisNode> redisNodeList = getNodeList(cluster);
+        Set<HostAndPort> hostAndPortSet = new HashSet<>();
+        for (RedisNode redisNode : redisNodeList) {
+            hostAndPortSet.add(new HostAndPort(redisNode.getHost(), redisNode.getPort()));
         }
-        return cluster;
+        return hostAndPortSet;
     }
 
     @Override
-    public Cluster getServerInfo(Set<HostAndPort> hostAndPortSet, String redisPassword) {
-        Cluster cluster = null;
-        RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
-        RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
-        String clusterInfo = redisClient.getClusterInfo();
-        try {
-            cluster = RedisClusterUtil.parseClusterInfoToObject(clusterInfo);
-        } catch (IOException e) {
-            logger.error("Parse cluster info failed.", e);
-        }
-        return cluster;
-    }
-
-    @Override
-    public List<String> scan(RedisQueryParam redisQueryParam) {
+    public List<String> scan(DataCommandsParam dataCommandsParam) {
         return null;
     }
 
     @Override
-    public RedisQueryResult query(RedisQueryParam redisQueryParam) {
+    public AutoCommandResult query(AutoCommandParam autoCommandParam) {
         // standalone or cluster
-        Cluster cluster = clusterService.getClusterById(redisQueryParam.getClusterId());
-        String nodes = cluster.getNodes();
-        IDatabaseCommand jedisCommands = null;
-        String redisMode = cluster.getRedisMode();
-        RedisURI redisURI = new RedisURI(RedisUtil.nodesToHostAndPortSet(nodes), cluster.getRedisPassword());
-        if (STANDALONE.equalsIgnoreCase(redisMode)) {
-            jedisCommands = RedisClientFactory.buildRedisClient(redisURI);
-        } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
-            jedisCommands = RedisClientFactory.buildRedisClusterClient(redisURI);
+        AutoCommandResult result = null;
+        Cluster cluster = clusterService.getClusterById(autoCommandParam.getClusterId());
+        try {
+            if (cluster == null) {
+                return null;
+            }
+            String nodes = cluster.getNodes();
+            IDatabaseCommand client = null;
+            String redisMode = cluster.getRedisMode();
+            RedisURI redisURI = new RedisURI(RedisUtil.nodesToHostAndPortSet(nodes), cluster.getRedisPassword());
+            if (STANDALONE.equalsIgnoreCase(redisMode)) {
+                client = RedisClientFactory.buildRedisClient(redisURI);
+            } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
+                client = RedisClientFactory.buildRedisClusterClient(redisURI);
+            }
+            result = client.query(autoCommandParam);
+        } catch (Exception e) {
+            logger.error("Auto query failed, " + cluster.getClusterName(), e);
         }
+        return result;
+    }
+
+    @Override
+    public Object console(DataCommandsParam dataCommandsParam) {
         return null;
     }
 

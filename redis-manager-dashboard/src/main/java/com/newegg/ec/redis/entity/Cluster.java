@@ -4,6 +4,7 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment;
 
 /**
  * 描述集群基本情况
+ *
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
@@ -53,8 +54,8 @@ public class Cluster {
     private int clusterSlotsOk;
 
     /**
-     *  哈希槽状态是 PFAIL的数量。只要哈希槽状态没有被升级到FAIL状态，这些哈希槽仍然可以被正常处理。
-     *  PFAIL状态表示我们当前不能和节点进行交互，但这种状态只是临时的错误状态。
+     * 哈希槽状态是 PFAIL的数量。只要哈希槽状态没有被升级到FAIL状态，这些哈希槽仍然可以被正常处理。
+     * PFAIL状态表示我们当前不能和节点进行交互，但这种状态只是临时的错误状态。
      */
     private int clusterSlotsPfail;
 
@@ -88,6 +89,8 @@ public class Cluster {
      * 1: other way
      */
     private int installationType;
+
+    private long dbSize;
 
     public enum ClusterState {
         UNKNOWN,
@@ -274,5 +277,13 @@ public class Cluster {
 
     public void setInstallationType(int installationType) {
         this.installationType = installationType;
+    }
+
+    public long getDbSize() {
+        return dbSize;
+    }
+
+    public void setDbSize(long dbSize) {
+        this.dbSize = dbSize;
     }
 }

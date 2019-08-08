@@ -23,32 +23,31 @@ public class SplitUtil {
 
     private SplitUtil(){}
 
-    public static final List<String> splitByCommas(String str) {
+    public static final String[] splitByCommas(String str) {
         return splitBySign(str, COMMAS);
     }
 
-    public static final List<String> splitByEqualSign(String str) {
+    public static final String[] splitByEqualSign(String str) {
         return splitBySign(str, EQUAL_SIGN);
     }
 
-    public static final List<String> splitByColon(String str) {
+    public static final String[] splitByColon(String str) {
         return splitBySign(str, COLON);
     }
 
-    public static final List<String> splitBySemicolon(String str) {
+    public static final String[] splitBySemicolon(String str) {
         return splitBySign(str, SEMICOLON);
     }
 
-    public static final List<String> splitByAite(String str) {
+    public static final String[] splitByAite(String str) {
         return splitBySign(str, AITE);
     }
 
-    public static final List<String> splitBySpace(String str) {
+    public static final String[] splitBySpace(String str) {
         return splitBySign(str, SPACE);
     }
 
-    public static final List<String> splitBySign(String str, String sign) {
-        String[] split = str.split(sign);
-        return Arrays.asList(split);
+    public static final String[] splitBySign(String str, String sign) {
+        return str.split(sign);
     }
 }

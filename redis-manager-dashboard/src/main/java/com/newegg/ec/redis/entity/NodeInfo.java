@@ -43,6 +43,8 @@ public class NodeInfo {
 
     private String infoId;
 
+    private NodeRole role;
+
     private String node;
 
     private NodeInfoType.DataType dataType;
@@ -182,6 +184,14 @@ public class NodeInfo {
 
     public void setInfoId(String infoId) {
         this.infoId = infoId;
+    }
+
+    public NodeRole getRole() {
+        return role;
+    }
+
+    public void setRole(NodeRole role) {
+        this.role = role;
     }
 
     public String getNode() {

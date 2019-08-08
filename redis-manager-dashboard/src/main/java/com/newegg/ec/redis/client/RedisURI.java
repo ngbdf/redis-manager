@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static com.newegg.ec.redis.entity.RedisClientName.REDIS_MANAGER_ClIENT;
+import static com.newegg.ec.redis.util.RedisUtil.nodesToHostAndPortSet;
 
 /**
  * Redis connection param
@@ -33,6 +34,12 @@ public class RedisURI {
 
     public RedisURI(HostAndPort hostAndPort, String requirePass) {
         this(Collections.singleton(hostAndPort), requirePass);
+    }
+
+    public RedisURI(String nodes, String requirePass) {
+        Set<HostAndPort> hostAndPortSet = nodesToHostAndPortSet(nodes);
+        this.hostAndPortSet = hostAndPortSet;
+        this.requirePass = requirePass;
     }
 
     public RedisURI(Set<HostAndPort> hostAndPortSet, String requirePass) {
