@@ -255,6 +255,7 @@ public class RedisClusterClient implements IRedisClusterClient {
         }
         return result;
     }
+
     @Override
     public void close() {
         if (redisClient != null) {

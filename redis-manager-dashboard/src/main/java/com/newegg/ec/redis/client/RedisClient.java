@@ -364,11 +364,6 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String slaveOf(HostAndPort hostAndPort) {
-        return jedis.slaveof(hostAndPort.getHost(), hostAndPort.getPort());
-    }
-
-    @Override
     public NodeRole role() throws Exception {
         Map<String, String> infoMap = getInfo(REPLICATION);
         String role = infoMap.get(ROLE);
@@ -437,8 +432,8 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String clusterMeet(HostAndPort hostAndPort) {
-        return jedis.clusterMeet(hostAndPort.getHost(), hostAndPort.getPort());
+    public String clusterMeet(String host, int port) {
+        return jedis.clusterMeet(host, port);
     }
 
     @Override
@@ -457,6 +452,26 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
+    public String clusterSetSlotImporting(int slot, String nodeId) {
+        return null;
+    }
+
+    @Override
+    public String clusterSetSlotMigrating(int slot, String nodeId) {
+        return null;
+    }
+
+    @Override
+    public String clusterGetKeysInSlot(int slot, int count) {
+        return null;
+    }
+
+    @Override
+    public String clusterSetSlotStable(int slot) {
+        return null;
+    }
+
+    @Override
     public String clusterForget(String nodeId) {
         return jedis.clusterForget(nodeId);
     }
@@ -467,8 +482,23 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
+    public String migrate(String host, int port, String key, int destinationDb, int timeout) {
+        return null;
+    }
+
+    @Override
     public String clusterSlaves(String nodeId) {
         return jedis.clusterReplicate(nodeId);
+    }
+
+    @Override
+    public String replicaOf(String host, int port) {
+        return jedis.slaveof(host, port);
+    }
+
+    @Override
+    public String replicaNoOne() {
+        return jedis.slaveofNoOne();
     }
 
     @Override

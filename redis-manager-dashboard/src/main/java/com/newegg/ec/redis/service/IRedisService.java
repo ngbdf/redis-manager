@@ -1,13 +1,11 @@
 package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.*;
-import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.util.SlotBalanceUtil;
 import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Jay.H.Zou
@@ -31,7 +29,15 @@ public interface IRedisService {
      * @param cluster
      * @return
      */
-    List<RedisNode> getNodeList(Cluster cluster);
+    List<RedisNode> getRedisNodeList(Cluster cluster);
+
+    /**
+     * Get node list
+     *
+     * @param cluster
+     * @return
+     */
+    List<RedisNode> getRedisMasterNodeList(Cluster cluster);
 
     /**
      * Node info list after calculating
@@ -61,7 +67,40 @@ public interface IRedisService {
 
     Object console(Cluster cluster, DataCommandsParam dataCommandsParam);
 
-    boolean forget();
+    boolean clusterForget(Cluster cluster, RedisNode forgetNode);
 
+    /**
+     * change master
+     *
+     * @param cluster
+     * @param replicaNode: masterId 已被替换
+     * @return
+     */
+    boolean clusterReplicate(Cluster cluster, RedisNode replicaNode);
+
+    boolean clusterFailOver(Cluster cluster, RedisNode newMasterNode);
+
+    /**
+     * cluster install & cluster expansion
+     * <p>
+     * Important thing: change require-pass config before cluster meet
+     * <p>
+     * if failed, please try it
+     *
+     * @param cluster
+     * @param redisNodeList
+     * @return
+     */
+    boolean clusterMeet(Cluster cluster, List<RedisNode> redisNodeList);
+
+    String clusterAddSlots(Cluster cluster, RedisNode masterNode, SlotBalanceUtil.Shade shade);
+
+    String clusterAddSlotsBatch(Cluster cluster, Map<RedisNode, SlotBalanceUtil.Shade> masterNodeAndShade);
+
+    String clusterMoveSlots(Cluster cluster, RedisNode masterNode, SlotBalanceUtil.Shade shade);
+
+    boolean standaloneReplicaOf(Cluster cluster, RedisNode masterNode, RedisNode redisNode);
+
+    boolean standaloneReplicaNoOne(Cluster cluster, RedisNode redisNode);
 
 }

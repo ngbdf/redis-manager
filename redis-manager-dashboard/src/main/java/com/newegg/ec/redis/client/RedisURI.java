@@ -36,6 +36,10 @@ public class RedisURI {
         this(Collections.singleton(hostAndPort), requirePass);
     }
 
+    public RedisURI(String host, int port, String requirePass) {
+        this(new HostAndPort(host, port), requirePass);
+    }
+
     public RedisURI(String nodes, String requirePass) {
         Set<HostAndPort> hostAndPortSet = nodesToHostAndPortSet(nodes);
         this.hostAndPortSet = hostAndPortSet;

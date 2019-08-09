@@ -8,6 +8,9 @@ package com.newegg.ec.redis.entity;
  */
 public class RedisNode {
 
+    /**
+     * mysql table id
+     */
     private int redisNodeId;
 
     private int clusterId;

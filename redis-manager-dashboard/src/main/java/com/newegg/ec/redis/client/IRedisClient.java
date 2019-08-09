@@ -3,12 +3,9 @@ package com.newegg.ec.redis.client;
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.ClusterReset;
-import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.util.Slowlog;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -63,31 +60,28 @@ public interface IRedisClient extends IDatabaseCommand {
 
     /**
      * just for standalone mode
+     *
      * @return
      */
     List<RedisNode> nodes() throws Exception;
 
     Long dbSize();
 
-    /** 持久化 */
+    /**
+     * 持久化
+     */
     String bgSave();
 
     Long lastSave();
 
     String bgRewriteAof();
 
-    /**
-     *  O(N)
-     * @param hostAndPort
-     * @return OK
-     */
-    String slaveOf(HostAndPort hostAndPort);
-
     NodeRole role() throws Exception;
 
     /** 客户端于服务端 */
     /**
      * 测试密码是否正确
+     *
      * @param password
      * @return
      */
@@ -95,6 +89,7 @@ public interface IRedisClient extends IDatabaseCommand {
 
     /**
      * stop node
+     *
      * @return ""
      */
     boolean shutdown();
@@ -141,12 +136,11 @@ public interface IRedisClient extends IDatabaseCommand {
     List<Slowlog> getSlowLog(int size);
 
     /**
-     *
      * @return OK
      */
     boolean clientSetName(String clientName);
 
-    String clusterMeet(HostAndPort hostAndPort);
+    String clusterMeet(String host, int port);
 
     /**
      * Be slave
@@ -160,17 +154,44 @@ public interface IRedisClient extends IDatabaseCommand {
     /**
      * Be master
      * 该命令只能在群集slave节点执行，让slave节点进行一次人工故障切换
+     *
      * @return
      */
     String clusterFailOver();
 
     String clusterAddSlots(int... slots);
 
+    String clusterSetSlotImporting(int slot, String nodeId);
+
+    String clusterSetSlotMigrating(int slot, String nodeId);
+
+    String clusterGetKeysInSlot(int slot, int count);
+
+    String clusterSetSlotStable(int slot);
+
     String clusterForget(String nodeId);
 
     String clusterReset(ClusterReset reset);
 
+    String migrate(String host, int port, String key, int destinationDb, int timeout);
+
     String clusterSlaves(String nodeId);
+
+    /**
+     * old name: slaveOf
+     *
+     * @param host
+     * @param port
+     * @return OK
+     */
+    String replicaOf(String host, int port);
+
+    /**
+     * standalone forget this node
+     *
+     * @return
+     */
+    String replicaNoOne();
 
     /**
      * Close client
