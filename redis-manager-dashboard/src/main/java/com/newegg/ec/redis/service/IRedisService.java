@@ -97,7 +97,7 @@ public interface IRedisService {
 
     String clusterAddSlotsBatch(Cluster cluster, Map<RedisNode, SlotBalanceUtil.Shade> masterNodeAndShade);
 
-    String clusterMoveSlots(Cluster cluster, RedisNode masterNode, SlotBalanceUtil.Shade shade);
+    void clusterMoveSlots(Cluster cluster, RedisNode targetNode, SlotBalanceUtil.Shade shade);
 
     boolean standaloneReplicaOf(Cluster cluster, RedisNode masterNode, RedisNode redisNode);
 

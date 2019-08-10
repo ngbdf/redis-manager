@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.params.MigrateParams;
 import redis.clients.jedis.util.Slowlog;
 
 import java.util.*;
@@ -381,14 +382,99 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public String clusterMoveSlots(Cluster cluster, RedisNode masterNode, SlotBalanceUtil.Shade shade) {
+    public void clusterMoveSlots(Cluster cluster, RedisNode targetNode, SlotBalanceUtil.Shade shade) {
         String clusterName = cluster.getClusterName();
-        List<RedisNode> redisMasterNodeList = getRedisMasterNodeList(cluster);
-        if (redisMasterNodeList == null || redisMasterNodeList.isEmpty()) {
-            return "failed";
+        String redisPassword = cluster.getRedisPassword();
+        Map<RedisNode, List<SlotBalanceUtil.Shade>> masterNodeAndShadeMap = getSlotSpread(cluster);
+        String targetNodeId = targetNode.getNodeId();
+        // 目标节点
+        RedisURI targetRedisURI = new RedisURI(targetNode.getHost(), targetNode.getPort(), cluster.getRedisPassword());
+
+        for (int slot = shade.getStartSlot(); slot <= shade.getEndSlot(); slot++) {
+            RedisClient targetRedisClient = RedisClientFactory.buildRedisClient(targetRedisURI);
+            // 改槽位已被分配
+            RedisNode masterNodeAssigned = getMasterNodeAssigned(masterNodeAndShadeMap, slot);
+            if (masterNodeAssigned == null) {
+                // 直接分配此 slot
+                targetRedisClient.clusterAddSlots(slot);
+                continue;
+            } else {
+                RedisClient sourceRedisClient = RedisClientFactory.buildRedisClient(masterNodeAssigned, redisPassword);
+                try {
+                    // 源节点导出槽道
+                    sourceRedisClient.clusterSetSlotImporting(slot, masterNodeAssigned.getNodeId());
+                    // 目标节点导入槽道
+                    targetRedisClient.clusterSetSlotMigrating(slot, targetNodeId);
+                    // 数据迁移
+                    List<String> keyList = null;
+                    do {
+                        keyList = sourceRedisClient.clusterGetKeysInSlot(slot, 50);
+                        String[] keys = keyList.toArray(new String[0]);
+                        sourceRedisClient.migrate(masterNodeAssigned.getHost(), masterNodeAssigned.getPort(),
+                                0, 100000, MigrateParams.migrateParams().replace(), keys);
+                    } while (!keyList.isEmpty());
+                } catch (Exception e) {
+                    logger.error(clusterName + " move slot error.", e);
+                    targetRedisClient.clusterSetSlotStable(slot);
+                    sourceRedisClient.clusterSetSlotStable(slot);
+                } finally {
+                    // set slot to target node
+                    targetRedisClient.clusterSetSlotNode(slot, targetNodeId);
+                    //？ 这个很奇怪如果没有设置 stable 它的迁移状态会一直在的
+                    sourceRedisClient.clusterSetSlotStable(slot);
+                    sourceRedisClient.close();
+                    targetRedisClient.close();
+                }
+            }
         }
-        RedisURI redisURI = new RedisURI(masterNode.getHost(), masterNode.getPort(), cluster.getRedisPassword());
-        RedisClientFactory.buildRedisClient(redisURI);
+    }
+
+    /**
+     * 获取所有节点的shade分布情况
+     *
+     * @param cluster
+     * @return
+     */
+    private Map<RedisNode, List<SlotBalanceUtil.Shade>> getSlotSpread(Cluster cluster) {
+        List<RedisNode> redisMasterNodeList = getRedisMasterNodeList(cluster);
+        Map<RedisNode, List<SlotBalanceUtil.Shade>> nodeIdAndShadeMap = new HashMap<>(redisMasterNodeList.size() - 1);
+        redisMasterNodeList.forEach(masterNode -> {
+            String slotRanges = masterNode.getSlotRange();
+            String[] slotRangeArr = SplitUtil.splitByCommas(slotRanges);
+            int length = slotRangeArr.length;
+            List<SlotBalanceUtil.Shade> shadeList = new ArrayList<>(length);
+            if (length == 1) {
+                shadeList.add(new SlotBalanceUtil.Shade(slotRanges));
+                nodeIdAndShadeMap.put(masterNode, shadeList);
+            } else if (length > 1) {
+                for (String slotRange : slotRangeArr) {
+                    shadeList.add(new SlotBalanceUtil.Shade(slotRange));
+                }
+                nodeIdAndShadeMap.put(masterNode, shadeList);
+            } else {
+                nodeIdAndShadeMap.put(masterNode, null);
+            }
+        });
+        return nodeIdAndShadeMap;
+    }
+
+    private RedisNode getMasterNodeAssigned(Map<RedisNode, List<SlotBalanceUtil.Shade>> nodeIdAndShadeMap, int slot) {
+        for (Map.Entry<RedisNode, List<SlotBalanceUtil.Shade>> nodeIdAndShade : nodeIdAndShadeMap.entrySet()) {
+            RedisNode redisNode = nodeIdAndShade.getKey();
+            List<SlotBalanceUtil.Shade> shadeList = nodeIdAndShade.getValue();
+            // 判断 i 是否在在此master上
+            for (SlotBalanceUtil.Shade startEnd : shadeList) {
+                if (startEnd == null) {
+                    continue;
+                }
+                int slotCount = startEnd.getSlotCount();
+                int start = startEnd.getStartSlot();
+                int end = startEnd.getEndSlot();
+                if (slotCount > 0 && (slot >= start || slot <= end)) {
+                    return redisNode;
+                }
+            }
+        }
         return null;
     }
 
@@ -398,8 +484,7 @@ public class RedisService implements IRedisService {
         String masterHost = masterNode.getHost();
         int masterPort = masterNode.getPort();
         try {
-            RedisURI redisURI = new RedisURI(redisNode.getHost(), redisNode.getPort(), cluster.getRedisPassword());
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
             redisClient.replicaOf(masterHost, masterPort);
             redisClient.close();
             redisClient.replicaOf(masterHost, masterPort);
@@ -413,15 +498,12 @@ public class RedisService implements IRedisService {
     @Override
     public boolean standaloneReplicaNoOne(Cluster cluster, RedisNode redisNode) {
         String clusterName = cluster.getClusterName();
-        String host = redisNode.getHost();
-        int port = redisNode.getPort();
         try {
-            RedisURI redisURI = new RedisURI(host, port, cluster.getRedisPassword());
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
             redisClient.replicaNoOne();
             return true;
         } catch (Exception e) {
-            logger.error(host + ":" + port + " replica no one failed, cluster name: " + clusterName, e);
+            logger.error(redisNode.getHost() + ":" + redisNode.getPort() + " replica no one failed, cluster name: " + clusterName, e);
             return false;
         }
     }

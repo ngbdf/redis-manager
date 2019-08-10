@@ -6,6 +6,7 @@ import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SplitUtil;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
+import redis.clients.jedis.params.MigrateParams;
 import redis.clients.jedis.util.Slowlog;
 
 import java.util.*;
@@ -452,23 +453,28 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
+    public String clusterSetSlotNode(int slot, String nodeId) {
+        return jedis.clusterSetSlotNode(slot, nodeId);
+    }
+
+    @Override
     public String clusterSetSlotImporting(int slot, String nodeId) {
-        return null;
+        return jedis.clusterSetSlotImporting(slot, nodeId);
     }
 
     @Override
     public String clusterSetSlotMigrating(int slot, String nodeId) {
-        return null;
+        return jedis.clusterSetSlotMigrating(slot, nodeId);
     }
 
     @Override
-    public String clusterGetKeysInSlot(int slot, int count) {
-        return null;
+    public List<String> clusterGetKeysInSlot(int slot, int count) {
+        return jedis.clusterGetKeysInSlot(slot, count);
     }
 
     @Override
     public String clusterSetSlotStable(int slot) {
-        return null;
+        return jedis.clusterSetSlotStable(slot);
     }
 
     @Override
@@ -483,7 +489,13 @@ public class RedisClient implements IRedisClient {
 
     @Override
     public String migrate(String host, int port, String key, int destinationDb, int timeout) {
-        return null;
+        return jedis.migrate(host, port, key, 0, timeout);
+    }
+
+    @Override
+    public String migrate(String host, int port, int destinationDB,
+                          int timeout, MigrateParams params, String... keys) {
+        return jedis.migrate(host, port, destinationDB, timeout, params, keys);
     }
 
     @Override

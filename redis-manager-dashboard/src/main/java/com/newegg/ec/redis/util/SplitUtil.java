@@ -11,6 +11,8 @@ public class SplitUtil {
 
     public static final String COMMAS = ",";
 
+    public static final String MINUS = "-";
+
     public static final String EQUAL_SIGN = "=";
 
     public static final String COLON = ":";
@@ -21,7 +23,12 @@ public class SplitUtil {
 
     public static final String SPACE = " ";
 
-    private SplitUtil(){}
+    private SplitUtil() {
+    }
+
+    public static final String[] splitByMinus(String str) {
+        return splitBySign(str, MINUS);
+    }
 
     public static final String[] splitByCommas(String str) {
         return splitBySign(str, COMMAS);

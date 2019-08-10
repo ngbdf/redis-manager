@@ -4,6 +4,7 @@ import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.params.MigrateParams;
 import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
@@ -161,11 +162,13 @@ public interface IRedisClient extends IDatabaseCommand {
 
     String clusterAddSlots(int... slots);
 
+    String clusterSetSlotNode(int slot, String nodeId);
+
     String clusterSetSlotImporting(int slot, String nodeId);
 
     String clusterSetSlotMigrating(int slot, String nodeId);
 
-    String clusterGetKeysInSlot(int slot, int count);
+    List<String> clusterGetKeysInSlot(int slot, int count);
 
     String clusterSetSlotStable(int slot);
 
@@ -174,6 +177,9 @@ public interface IRedisClient extends IDatabaseCommand {
     String clusterReset(ClusterReset reset);
 
     String migrate(String host, int port, String key, int destinationDb, int timeout);
+
+    String migrate(String host, int port, int destinationDB,
+                   int timeout, MigrateParams params, String... keys);
 
     String clusterSlaves(String nodeId);
 
