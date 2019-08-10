@@ -402,11 +402,11 @@ public class RedisService implements IRedisService {
                 RedisClient sourceRedisClient = RedisClientFactory.buildRedisClient(masterNodeAssigned, redisPassword);
                 try {
                     // 源节点导出槽道
-                    sourceRedisClient.clusterSetSlotImporting(slot, masterNodeAssigned.getNodeId());
+                    sourceRedisClient.clusterSetSlotImporting(slot, targetNodeId);
                     // 目标节点导入槽道
-                    targetRedisClient.clusterSetSlotMigrating(slot, targetNodeId);
+                    targetRedisClient.clusterSetSlotMigrating(slot, masterNodeAssigned.getNodeId());
                     // 数据迁移
-                    List<String> keyList = null;
+                    List<String> keyList;
                     do {
                         keyList = sourceRedisClient.clusterGetKeysInSlot(slot, 50);
                         String[] keys = keyList.toArray(new String[0]);
@@ -415,18 +415,36 @@ public class RedisService implements IRedisService {
                     } while (!keyList.isEmpty());
                 } catch (Exception e) {
                     logger.error(clusterName + " move slot error.", e);
+                    // 出现异常则恢复 slot
                     targetRedisClient.clusterSetSlotStable(slot);
                     sourceRedisClient.clusterSetSlotStable(slot);
                 } finally {
                     // set slot to target node
                     targetRedisClient.clusterSetSlotNode(slot, targetNodeId);
                     //？ 这个很奇怪如果没有设置 stable 它的迁移状态会一直在的
-                    sourceRedisClient.clusterSetSlotStable(slot);
+                    //sourceRedisClient.clusterSetSlotStable(slot);
+                    disseminate(masterNodeAndShadeMap.keySet(), redisPassword, slot);
                     sourceRedisClient.close();
                     targetRedisClient.close();
                 }
             }
         }
+    }
+
+    /**
+     * 所有主节点通知更新数据(槽道迁移)
+     *
+     * @param masterNodeList
+     * @param requirePass
+     * @param slot
+     */
+    private void disseminate(Set<RedisNode> masterNodeList, String requirePass, int slot) {
+        for (RedisNode redisNode : masterNodeList) {
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, requirePass);
+            redisClient.clusterSetSlotNode(slot, redisNode.getNodeId());
+            redisClient.close();
+        }
+
     }
 
     /**
