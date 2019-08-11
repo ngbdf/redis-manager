@@ -74,9 +74,4 @@ public class RedisClusterInfoUtil {
         return state;
     }
 
-    public static final Map<RedisNode, List<RedisNode>> getClusterNodes(String nodes) {
-
-        return null;
-    }
-
 }

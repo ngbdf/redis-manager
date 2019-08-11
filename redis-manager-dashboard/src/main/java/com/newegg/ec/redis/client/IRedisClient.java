@@ -2,6 +2,7 @@ package com.newegg.ec.redis.client;
 
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
+import javafx.util.Pair;
 import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.MigrateParams;
@@ -97,6 +98,14 @@ public interface IRedisClient extends IDatabaseCommand {
 
     String clientList();
 
+    /**
+     * change config
+     *
+     * @param keyAndValue
+     * @return
+     */
+    boolean setConfig(Pair<String, String> keyAndValue);
+
     /** config */
     /**
      * Get redis configuration
@@ -119,6 +128,12 @@ public interface IRedisClient extends IDatabaseCommand {
      * @return
      */
     boolean rewriteConfig();
+
+    /**
+     * 该命令主要用于nodes.conf节点状态文件丢失或被删除的情况下重新生成文件。
+     * @return
+     */
+    String clusterSaveConfig();
 
     /** Debug */
 

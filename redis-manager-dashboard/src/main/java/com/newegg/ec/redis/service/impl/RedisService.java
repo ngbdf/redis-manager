@@ -10,6 +10,7 @@ import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
 import com.newegg.ec.redis.util.SplitUtil;
+import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -526,6 +527,53 @@ public class RedisService implements IRedisService {
         }
     }
 
+    @Override
+    public Map<String, String> getConfig(Cluster cluster, RedisNode redisNode) {
+        String clusterName = cluster.getClusterName();
+        String redisPassword = cluster.getRedisPassword();
+        RedisClient redisClient = null;
+        try {
+            redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
+            return redisClient.getConfig();
+        } catch (Exception e) {
+            logger.error(clusterName + " get config failed.", e);
+            return null;
+        } finally {
+            close(redisClient);
+        }
+    }
+
+    @Override
+    public boolean setConfigBatch(Cluster cluster, Pair<String, String> config) {
+        List<RedisNode> redisNodeList = getRedisNodeList(cluster);
+        redisNodeList.forEach(redisNode -> setConfig(cluster, redisNode, config));
+        return true;
+    }
+
+    @Override
+
+    public boolean setConfig(Cluster cluster, RedisNode redisNode, Pair<String, String> config) {
+        String clusterName = cluster.getClusterName();
+        String redisPassword = cluster.getRedisPassword();
+        RedisClient redisClient = null;
+        try {
+            // TODO: special config, like `save`
+            redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
+            redisClient.rewriteConfig();
+            return redisClient.setConfig(config);
+        } catch (Exception e) {
+            logger.error(clusterName + " change config failed, config: " + config, e);
+            return false;
+        } finally {
+            close(redisClient);
+        }
+    }
+
+    @Override
+    public void autoGenerateConfigFile(Cluster cluster) {
+
+    }
+
     private IDatabaseCommand buildDatabaseCommandClient(Cluster cluster) {
         String nodes = cluster.getNodes();
         IDatabaseCommand client = null;
@@ -537,6 +585,12 @@ public class RedisService implements IRedisService {
             client = RedisClientFactory.buildRedisClusterClient(redisURI);
         }
         return client;
+    }
+
+    private void close(IRedisClient redisClient) {
+        if (redisClient != null) {
+            redisClient.close();
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SplitUtil;
+import javafx.util.Pair;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.MigrateParams;
@@ -394,6 +395,12 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
+    public boolean setConfig(Pair<String, String> keyAndValue) {
+        String result = jedis.configSet(keyAndValue.getKey(), keyAndValue.getValue());
+        return Objects.equals(result, OK);
+    }
+
+    @Override
     public Map<String, String> getConfig() {
         return getConfig("*");
     }
@@ -415,6 +422,11 @@ public class RedisClient implements IRedisClient {
     @Override
     public boolean rewriteConfig() {
         return Objects.equals(jedis.configRewrite(), OK);
+    }
+
+    @Override
+    public String clusterSaveConfig() {
+        return jedis.clusterSaveConfig();
     }
 
     @Override

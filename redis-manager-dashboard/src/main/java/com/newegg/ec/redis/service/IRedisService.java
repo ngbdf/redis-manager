@@ -2,6 +2,7 @@ package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
+import javafx.util.Pair;
 import redis.clients.jedis.HostAndPort;
 
 import java.util.List;
@@ -102,5 +103,34 @@ public interface IRedisService {
     boolean standaloneReplicaOf(Cluster cluster, RedisNode masterNode, RedisNode redisNode);
 
     boolean standaloneReplicaNoOne(Cluster cluster, RedisNode redisNode);
+
+    Map<String, String> getConfig(Cluster cluster, RedisNode redisNode);
+
+    /**
+     * 修改Redis配置
+     *
+     * @param cluster
+     * @param config
+     * @return
+     */
+    boolean setConfigBatch(Cluster cluster, Pair<String, String> config);
+
+    /**
+     * 修改Redis配置
+     *
+     * @param cluster
+     * @param redisNode
+     * @param config
+     * @return
+     */
+    boolean setConfig(Cluster cluster, RedisNode redisNode, Pair<String, String> config);
+
+    /**
+     * 自动生成配置文件
+     *
+     * @param cluster
+     */
+    void autoGenerateConfigFile(Cluster cluster);
+
 
 }
