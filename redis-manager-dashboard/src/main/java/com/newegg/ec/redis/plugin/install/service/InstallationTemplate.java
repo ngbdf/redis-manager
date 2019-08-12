@@ -35,13 +35,19 @@ public class InstallationTemplate {
         Cluster cluster = installationParam.getCluster();
         // TODO: 用于标记是否是新建集群
         int clusterId = cluster.getClusterId();
-        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
-        String machineGroup = installationParam.getMachineGroup();
-        List<Machine> machineByMachineGroup = machineService.getMachineByMachineGroup(machineGroup);
-        boolean checkEnvironmentPass = checkEnvironment(installationParam, installationOperation, machineByMachineGroup);
+        // 用于 websocket
+        String clusterName = cluster.getClusterName();
+
+
+        List<String> machineIdList = installationParam.getMachineIdList();
+        List<Machine> machineList = machineService.getMachineListByIds(machineIdList);
+
+
+        boolean checkEnvironmentPass = checkEnvironment(installationOperation, installationParam, machineList);
         if (!checkEnvironmentPass) {
             return false;
         }
+        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
         boolean pullImageSuccess = installationOperation.pullImage();
         if (!pullImageSuccess) {
             return false;
@@ -50,7 +56,7 @@ public class InstallationTemplate {
         if (!buildRedisConfigSuccess) {
             return false;
         }
-        Map<RedisNode, List<RedisNode>> redisNodeListMap = buildTopology(installationParam, machineByMachineGroup);
+        Map<RedisNode, List<RedisNode>> redisNodeListMap = buildTopology(installationParam, machineList);
         Set<RedisNode> redisMasterNodes = redisNodeListMap.keySet();
         if (redisMasterNodes.isEmpty()) {
             return false;
@@ -78,10 +84,10 @@ public class InstallationTemplate {
      * @param installationParam
      * @return
      */
-    public boolean checkEnvironment(InstallationParam installationParam, InstallationOperation installationOperation, List<Machine> machineByMachineGroup) {
+    public boolean checkEnvironment(InstallationOperation installationOperation, InstallationParam installationParam, List<Machine> machineByMachineGroup) {
         //检查机器内存CPU资源
         // 不同安装方式的环境监测
-        installationOperation.checkEnvironment();
+        installationOperation.checkEnvironment(installationParam, machineByMachineGroup);
         // 检查所有机器之间是否网络相通, n! 次
         return true;
     }
@@ -105,6 +111,7 @@ public class InstallationTemplate {
 
     /**
      * Get all node
+     *
      * @param installationParam
      * @param redisNodeListMap
      * @return
@@ -131,15 +138,28 @@ public class InstallationTemplate {
     /**
      * cluster master meet
      * slave build
+     *
      * @param redisNodeListMap
      * @return
      */
-    public boolean buildCluster(Map<RedisNode, List<RedisNode>>  redisNodeListMap) {
+    public boolean buildCluster(Map<RedisNode, List<RedisNode>> redisNodeListMap) {
+        return false;
+    }
+
+    /**
+     * standalone node meet
+     * slave build
+     *
+     * @param redisNodeListMap
+     * @return
+     */
+    public boolean buildStandalone(Map<RedisNode, List<RedisNode>> redisNodeListMap) {
         return false;
     }
 
     /**
      * Slot distribution for redis cluster
+     *
      * @param installationParam
      * @param redisMasterNodes
      * @return
@@ -148,7 +168,7 @@ public class InstallationTemplate {
         return true;
     }
 
-    public boolean saveToDB(InstallationParam installationParam, Map<RedisNode, List<RedisNode>>  redisNodeListMap) {
+    public boolean saveToDB(InstallationParam installationParam, Map<RedisNode, List<RedisNode>> redisNodeListMap) {
         return true;
     }
 }

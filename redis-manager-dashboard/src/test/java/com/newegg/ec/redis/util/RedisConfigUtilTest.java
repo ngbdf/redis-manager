@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.util;
 
+import org.junit.Test;
+
 import java.io.IOException;
 
 import static com.newegg.ec.redis.util.RedisConfigUtil.NORMAL;
@@ -10,7 +12,8 @@ import static com.newegg.ec.redis.util.RedisConfigUtil.NORMAL;
  */
 public class RedisConfigUtilTest {
 
-    public static void main(String[] args) throws IOException {
-        RedisConfigUtil.createRedisConfig("E:/", 5, NORMAL);
+    @Test
+    public void createConf() throws IOException {
+        RedisConfigUtil.generateRedisConfig("E:/", 5, NORMAL, null);
     }
 }

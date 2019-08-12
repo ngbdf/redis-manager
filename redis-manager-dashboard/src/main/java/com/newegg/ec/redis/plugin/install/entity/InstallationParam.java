@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.plugin.install.entity;
 
+import com.github.dockerjava.api.DockerClient;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
 
@@ -13,7 +14,7 @@ public class InstallationParam {
 
     private Cluster cluster;
 
-    private String machineGroup;
+    private List<String> machineIdList;
 
     private boolean autoBuild;
 
@@ -25,6 +26,10 @@ public class InstallationParam {
 
     List<RedisNode> redisNodeList;
 
+    private InstallationEnvironment installationEnvironment;
+
+    private DockerClient dockerClient;
+
     public Cluster getCluster() {
         return cluster;
     }
@@ -33,12 +38,12 @@ public class InstallationParam {
         this.cluster = cluster;
     }
 
-    public String getMachineGroup() {
-        return machineGroup;
+    public List<String> getMachineIdList() {
+        return machineIdList;
     }
 
-    public void setMachineGroup(String machineGroup) {
-        this.machineGroup = machineGroup;
+    public void setMachineIdList(List<String> machineIdList) {
+        this.machineIdList = machineIdList;
     }
 
     public boolean isAutoBuild() {

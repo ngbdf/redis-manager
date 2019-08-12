@@ -1,12 +1,12 @@
 package com.newegg.ec.redis.util;
 
-import com.sun.org.apache.regexp.internal.RE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * redis.conf
@@ -24,6 +24,8 @@ public class RedisConfigUtil {
 
     public static final String REDIS_CONF = "redis.conf";
 
+    private static final String REQUIRE_PASS = "requirepass";
+
     public static final int NORMAL = 0;
 
     public static final int CLUSTER = 1;
@@ -31,7 +33,23 @@ public class RedisConfigUtil {
     public RedisConfigUtil() {
     }
 
-    public static void createRedisConfig(String path, int version, int mode) throws IOException {
+    public static void generateRedis4ClusterConfig(String path, String requirePass) throws IOException {
+        generateRedisConfig(path, 4, CLUSTER, requirePass);
+    }
+
+    public static void generateRedis4NormalConfig(String path, String requirePass) throws IOException {
+        generateRedisConfig(path, 4, NORMAL, requirePass);
+    }
+
+    public static void generateRedis5ClusterConfig(String path, String requirePass) throws IOException {
+        generateRedisConfig(path, 5, CLUSTER, requirePass);
+    }
+
+    public static void generateRedis5NormalConfig(String path, String requirePass) throws IOException {
+        generateRedisConfig(path, 5, NORMAL, requirePass);
+    }
+
+    public static void generateRedisConfig(String path, int version, int mode, String requirePass) throws IOException {
         File file = new File(path + REDIS_CONF);
         if (file.exists()) {
             file.delete();
@@ -40,8 +58,13 @@ public class RedisConfigUtil {
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(file, true), "UTF-8"));
         for (RedisConfig redisConfig : REDIS_CONFIG_LIST) {
+            String configKey = redisConfig.getConfigKey();
+            String configValue = redisConfig.getConfigValue();
+            if (Objects.equals(REQUIRE_PASS, configKey)) {
+                configValue = requirePass;
+            }
             if (version >= redisConfig.getVersion() && redisConfig.getMode() == mode) {
-                String itemConfig = redisConfig.getConfigKey() + " " + redisConfig.getConfigValue();
+                String itemConfig = configKey + " " + configValue;
                 try {
                     bufferedWriter.write(itemConfig);
                     bufferedWriter.newLine();

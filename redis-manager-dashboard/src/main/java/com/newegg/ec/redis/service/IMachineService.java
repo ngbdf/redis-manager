@@ -22,10 +22,15 @@ public interface IMachineService {
 
     /**
      * 获取一个机器集群
+     *
      * @param machineGroup
      * @return
      */
     List<Machine> getMachineByMachineGroup(String machineGroup);
+
+    List<Machine> getMachineListByIds(List<String> machineIdList);
+
+    List<Machine> checkMachineConnection(List<String> machineIdList);
 
     int addMachine(Machine machine);
 
@@ -33,6 +38,6 @@ public interface IMachineService {
 
     int deleteMachineById(String machineId);
 
-    int deleteMachineByIdBatch(List<String>  machineIdList);
+    int deleteMachineByIdBatch(List<String> machineIdList);
 
 }

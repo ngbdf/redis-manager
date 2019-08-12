@@ -99,6 +99,11 @@
             <version>262</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>3.1.2</version>
+        </dependency>
     </dependencies>
 
     <build>

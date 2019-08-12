@@ -36,17 +36,26 @@ public class LinuxUtil {
     private LinuxUtil() {
     }
 
-    public static final boolean login(Machine machine) {
+    public static final boolean login(Machine machine) throws Exception {
         Connection connection = new Connection(machine.getHost());
         try {
             connection.connect();
             connection.authenticateWithPassword(machine.getUserName(), machine.getPassword());
-        } catch (IOException e) {
-            e.printStackTrace();
         } finally {
             connection.close();
         }
         return true;
+    }
+
+    public static String localExecute(String command) throws Exception {
+        String result;
+        String[] cmds = {"/bin/sh", "-c", command};
+        Process ps = Runtime.getRuntime().exec(cmds);
+        InputStream in = ps.getInputStream();
+        result = processStandardOutput(in);
+        InputStream errorIn = ps.getErrorStream();
+        result += processStandardOutput(errorIn);
+        return result;
     }
 
     /**
@@ -56,8 +65,8 @@ public class LinuxUtil {
      * @param commands
      * @return
      */
-    public static String execute(Machine machine, String commands) {
-        String result = "";
+    public static String execute(Machine machine, String commands) throws Exception {
+        String result;
         Connection connection = new Connection(machine.getHost());
         try {
             connection.connect();
@@ -69,30 +78,13 @@ public class LinuxUtil {
             result = processStandardOutput(in);
             InputStream errorIn = session.getStderr();
             result += processStandardOutput(errorIn);
-        } catch (IOException e) {
-            e.printStackTrace();
         } finally {
             connection.close();
         }
         return result;
     }
 
-    public static String localExecute(String command) {
-        String result = "";
-        try {
-            String[] cmds = {"/bin/sh", "-c", command};
-            Process ps = Runtime.getRuntime().exec(cmds);
-            InputStream in = ps.getInputStream();
-            result = processStandardOutput(in);
-            InputStream errorIn = ps.getErrorStream();
-            result += processStandardOutput(errorIn);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    public static final Map<String, String> getLinuxInfo(Machine machine) {
+    public static final Map<String, String> getLinuxInfo(Machine machine) throws Exception {
         String result = execute(machine, getInfoCommand());
         Map<String, String> machineResourceInfoMap = formatResult(result);
         return machineResourceInfoMap;
@@ -103,17 +95,15 @@ public class LinuxUtil {
      *
      * @return
      */
-    private static String processStandardOutput(InputStream inputStream) {
+    private static String processStandardOutput(InputStream inputStream) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         StringBuilder sb = new StringBuilder();
-        String line = null;
+        String line;
         try {
             while ((line = reader.readLine()) != null) {
                 sb.append(line + "\n");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         } finally {
             try {
                 inputStream.close();

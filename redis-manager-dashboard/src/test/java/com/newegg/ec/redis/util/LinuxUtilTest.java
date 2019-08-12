@@ -18,7 +18,7 @@ public class LinuxUtilTest {
     }
 
     @Test
-    public void getMachineResourceInfo() {
+    public void getMachineResourceInfo() throws Exception {
         Machine machine = new Machine();
         machine.setHost("127.0.0.1");
         machine.setUserName("xxx");

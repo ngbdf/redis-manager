@@ -39,6 +39,7 @@ redis-manager:
     # docker
     docker:
       package-path: /redis/docker/
+      docker-host: tcp://%s:2375
   alert:
   analysis:
     enabled: false

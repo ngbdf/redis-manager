@@ -102,7 +102,6 @@ public class Cluster {
         WARN;
     }
 
-
     public int getClusterId() {
         return clusterId;
     }
