@@ -22,6 +22,11 @@ public class DockerOperation implements InstallationOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(DockerOperation.class);
 
+    @Override
+    public List<String> getPackageList() {
+        return null;
+    }
+
     /**
      * 检测连接是否正常
      * 检查机器内存Memory资源

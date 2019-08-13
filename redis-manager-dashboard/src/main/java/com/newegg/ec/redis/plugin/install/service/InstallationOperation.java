@@ -15,6 +15,12 @@ public interface InstallationOperation {
     int MIN_MEMORY_FREE = 10;
 
     /**
+     *
+     * @return
+     */
+    List<String> getPackageList();
+
+    /**
      * 检查机器内存CPU资源
      * 不同安装方式的环境监测
      * 检查所有机器之间是否网络相通, n! 次
