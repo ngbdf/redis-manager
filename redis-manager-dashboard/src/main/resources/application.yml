@@ -40,6 +40,11 @@ redis-manager:
     docker:
       package-path: /redis/docker/
       docker-host: tcp://%s:2375
+      api-version: 2.0
+      registry:
+        url: https://index.docker.io/v1/
+        username:
+        password:
   alert:
   analysis:
     enabled: false

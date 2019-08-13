@@ -1,0 +1,10 @@
+STD=-std=c99 -pedantic -DREDIS_STATIC=
+WARN=-Wall -W -Wno-missing-field-initializers
+OPT=-O2
+MALLOC=libc
+CFLAGS=
+LDFLAGS=
+REDIS_CFLAGS=
+REDIS_LDFLAGS=
+PREV_FINAL_CFLAGS=-std=c99 -pedantic -DREDIS_STATIC= -Wall -W -Wno-missing-field-initializers -O2 -g -ggdb -I../deps/hiredis -I../deps/linenoise -I../deps/lua/src
+PREV_FINAL_LDFLAGS= -g -ggdb -rdynamic
