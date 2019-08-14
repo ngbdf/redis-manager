@@ -1,8 +1,7 @@
 package com.newegg.ec.redis.plugin.install.service;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.DockerCmdExecFactory;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -11,6 +10,8 @@ import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.PushImageResultCallback;
 import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.util.SplitUtil;
+import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -30,10 +31,10 @@ public class DockerClientOperation {
     private String dockerHost = "tcp://%s:2375";
 
     @Value("${redis-manager.install.docker.registry.username}")
-    private String userName;
+    private String userName = "admin";
 
     @Value("${redis-manager.install.docker.registry.password}")
-    private String password;
+    private String password = "Newegg@1234";
 
     @Value("${redis-manager.install.docker.api-version:2.0}")
     private String apiVersion;
@@ -55,9 +56,8 @@ public class DockerClientOperation {
                 // "tcp://%s:2375"
                 .withDockerHost(String.format(dockerHost, ip));
         //.withDockerTlsVerify(true);
-        // optional
         if (!Strings.isNullOrEmpty(userName) && !Strings.isNullOrEmpty(password)) {
-            builder.withRegistryUsername(userName).withRegistryPassword(password).withRegistryEmail("jay.h.zou@newegg.com").withRegistryUrl("humpback-hub.newegg.org");
+            builder.withRegistryUsername(userName).withRegistryPassword(password);
         }
         if (!Strings.isNullOrEmpty(apiVersion)) {
             builder.withApiVersion(apiVersion);
@@ -74,13 +74,13 @@ public class DockerClientOperation {
 
     /**
      * @param ip
-     * @param image
+     * @param repository
      * @return repoTags, imageId
      */
-    public List<String> searchImages(String ip, String image) {
+    public List<String> searchImages(String ip, String repository) {
         DockerClient dockerClient = getDockerClient(ip);
         List<String> searchImages = new ArrayList<>();
-        List<SearchItem> searchItems = dockerClient.searchImagesCmd(image).exec();
+        List<SearchItem> searchItems = dockerClient.searchImagesCmd(repository).exec();
         for (SearchItem searchItem : searchItems) {
             String name = searchItem.getName();
             searchImages.add(name);
@@ -90,21 +90,24 @@ public class DockerClientOperation {
 
     /**
      * @param ip
-     * @param image
+     * @param imageName
      * @return repoTags, imageId
      */
-    public Map<String, String> getImages(String ip, String image) {
+    public Map<String, String> getImages(String ip, String imageName) {
         DockerClient dockerClient = getDockerClient(ip);
-        List<Image> images = dockerClient.listImagesCmd().exec();
+
+        ListImagesCmd listImagesCmd = dockerClient.listImagesCmd();
+        if (!Strings.isNullOrEmpty(imageName)) {
+            listImagesCmd.withImageNameFilter(imageName);
+        }
+        List<Image> images = listImagesCmd.exec();
         Map<String, String> imageMap = new HashMap<>();
         Iterator<Image> iterator = images.iterator();
         while (iterator.hasNext()) {
             Image next = iterator.next();
             String[] repoTags = next.getRepoTags();
             for (String repoTag : repoTags) {
-                if (repoTag.contains(image)) {
-                    imageMap.put(repoTag, next.getId());
-                }
+                imageMap.put(repoTag, next.getId());
             }
         }
         return imageMap;
@@ -124,7 +127,7 @@ public class DockerClientOperation {
 
     /**
      * Start docker container  with expose port
-     *
+     *  sudo docker run --net host -d -v /data/8001:/data --name redis-test 857c4ab5f029 redis-server --daemonize no --cluster-enabled yes --port 8001 --bind xxx
      * @param ip
      * @param port
      * @param image
@@ -161,32 +164,77 @@ public class DockerClientOperation {
      * Build docker image
      *
      * @param ip
-     * @param path
-     * @param image
+     * @param imageNameWithRepository
      */
-    public void buildImage(String ip, String path, String image) {
+    public boolean tagImage(String ip, String imageId, String imageNameWithRepository, String tag) {
         DockerClient dockerClient = getDockerClient(ip);
-        dockerClient.buildImageCmd(new File(path)).exec(new BuildImageResultCallback() {
+        dockerClient.tagImageCmd(imageId, imageNameWithRepository, tag).exec();
+        return true;
+    }
+
+    /**
+     * Build docker image
+     *
+     * @param ip
+     * @param path
+     * @return repositoryAndTag
+     */
+    /*public Pair<String, String> buildImage(String ip, String path, String imageNameWithRepository, String tag) {
+        DockerClient dockerClient = getDockerClient(ip);
+        final String[] repoTag = {null};
+        String imageId = dockerClient.buildImageCmd(new File(path)).exec(new BuildImageResultCallback() {
+            // 完成后
             @Override
             public void onNext(BuildResponseItem item) {
-                System.out.println("" + item);
+                if (!Strings.isNullOrEmpty(imageNameWithRepository) && !Strings.isNullOrEmpty(tag)) {
+                    tagImage(ip, item.getImageId(), imageNameWithRepository, tag);
+                    repoTag[0] = imageNameWithRepository + ":" + tag;
+                }
                 super.onNext(item);
             }
-        });
+        }).awaitImageId();
+
+        return new Pair<>(imageId, repoTag[0]);
     }
 
-    public void pullImage(String ip, String repository, String tag) throws InterruptedException {
+    public Pair<String, String> buildImage(String ip, String path) {
+        return buildImage(ip, path, null, null);
+    }*/
+
+    /**
+     * @param ip
+     * @param repository
+     * @param tag
+     * @return
+     * @throws InterruptedException
+     */
+    public boolean pullImage(String ip, String repository, String tag) throws InterruptedException {
         DockerClient dockerClient = getDockerClient(ip);
-        dockerClient.pullImageCmd(repository).withTag(tag).exec(new PullImageResultCallback()).awaitCompletion();
+        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(repository);
+        if (!Strings.isNullOrEmpty(tag)) {
+            pullImageCmd.withTag(tag);
+        }
+        AuthConfig authConfig = dockerClient.authConfig();
+        if (authConfig != null) {
+            pullImageCmd.withAuthConfig(authConfig);
+        }
+        pullImageCmd.exec(new PullImageResultCallback()).awaitCompletion();
+        return true;
     }
 
-    public void pullImage2(String ip, String image) {
+    /**
+     * push 镜像
+     * @param ip
+     * @param repositoryAndTag
+     * @throws InterruptedException
+     */
+    public void pushImage(String ip, String repositoryAndTag) throws InterruptedException {
         DockerClient dockerClient = getDockerClient(ip);
-        dockerClient.pullImageCmd(image).withAuthConfig(dockerClient.authConfig()).exec(new PullImageResultCallback());
-    }
-
-    public void pushImage(String ip, String image) {
-        DockerClient dockerClient = getDockerClient(ip);
-        dockerClient.pushImageCmd(image).exec(new PushImageResultCallback());
+        AuthConfig authConfig = dockerClient.authConfig();
+        PushImageCmd pushImageCmd = dockerClient.pushImageCmd(repositoryAndTag);
+        if (authConfig != null) {
+            pushImageCmd.withAuthConfig(authConfig);
+        }
+        pushImageCmd.exec(new PushImageResultCallback()).awaitCompletion();
     }
 }

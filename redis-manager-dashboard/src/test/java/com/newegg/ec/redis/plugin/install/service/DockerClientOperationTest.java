@@ -10,7 +10,7 @@ public class DockerClientOperationTest {
 
     DockerClientOperation dockerClientOperation = new DockerClientOperation();
 
-    String IP = "";
+    String IP = "10.16.46.171";
 
     @Test
     public void getDockerClient() {
@@ -30,7 +30,7 @@ public class DockerClientOperationTest {
 
     @Test
     public void getImages() {
-        Map<String, String> imageMap = dockerClientOperation.getImages(IP, "redis");
+        Map<String, String> imageMap = dockerClientOperation.getImages(IP, "harbor.shec.bigdata/shec/centos");
         System.err.println(imageMap.size());
         imageMap.forEach((key, val) -> {
             System.err.println(key + " = " + val);
@@ -52,16 +52,22 @@ public class DockerClientOperationTest {
     }
 
     @Test
-    public void buildImage() {
-        dockerClientOperation.buildImage(IP, "/opt/app/redis/Dockerfile", "redis-4-test:v1");
-    }
-
-    @Test
     public void pullImage() throws InterruptedException {
-        dockerClientOperation.pullImage(IP, "https://index.docker.io/v1/redis/", "latest");
+        dockerClientOperation.pullImage(IP, "harbor.shec.bigdata/shec/itemservice-spring-dev", "1.3.5.0");
     }
 
     @Test
-    public void pushImage() {
+    public void tagImage() {
+        dockerClientOperation.tagImage(IP, "docker.neg/shec/redis-4.0.10:v3", "harbor.shec.bigdata/shec/redis-4.0.10", "1.0");
+    }
+
+    /*@Test
+    public void buildImage() {
+        dockerClientOperation.buildImage(IP, "/opt/app/docker/redis-4.0.8/Dockerfile", "redis-4-test", "v1");
+    }*/
+
+    @Test
+    public void pushImage() throws InterruptedException {
+        dockerClientOperation.pushImage(IP, "harbor.shec.bigdata/shec/redis-4.0.10:1.0");
     }
 }
