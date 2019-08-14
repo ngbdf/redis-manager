@@ -31,7 +31,7 @@ public class InstallationTemplate {
      * @param installationParam
      * @return
      */
-    public boolean install(InstallationOperation installationOperation, InstallationParam installationParam) {
+    public boolean install(AbstractInstallationOperation installationOperation, InstallationParam installationParam) {
         Cluster cluster = installationParam.getCluster();
         // TODO: 用于标记是否是新建集群
         int clusterId = cluster.getClusterId();
@@ -84,16 +84,14 @@ public class InstallationTemplate {
      * @param installationParam
      * @return
      */
-    public boolean checkEnvironment(InstallationOperation installationOperation, InstallationParam installationParam, List<Machine> machineByMachineGroup) {
+    public boolean checkEnvironment(AbstractInstallationOperation installationOperation, InstallationParam installationParam, List<Machine> machineByMachineGroup) {
         //检查机器内存CPU资源
         // 不同安装方式的环境监测
-        installationOperation.checkEnvironment(installationParam, machineByMachineGroup);
-        // 检查所有机器之间是否网络相通, n! 次
-        return true;
+        return installationOperation.checkInstallationEnv(installationParam, machineByMachineGroup);
     }
 
 
-    public boolean buildRedisConfig(InstallationOperation installationOperation) {
+    public boolean buildRedisConfig(AbstractInstallationOperation installationOperation) {
         installationOperation.buildConfig();
         return true;
     }

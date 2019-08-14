@@ -56,18 +56,4 @@ public class DockerClientOperationTest {
         dockerClientOperation.pullImage(IP, "harbor.shec.bigdata/shec/itemservice-spring-dev", "1.3.5.0");
     }
 
-    @Test
-    public void tagImage() {
-        dockerClientOperation.tagImage(IP, "docker.neg/shec/redis-4.0.10:v3", "harbor.shec.bigdata/shec/redis-4.0.10", "1.0");
-    }
-
-    /*@Test
-    public void buildImage() {
-        dockerClientOperation.buildImage(IP, "/opt/app/docker/redis-4.0.8/Dockerfile", "redis-4-test", "v1");
-    }*/
-
-    @Test
-    public void pushImage() throws InterruptedException {
-        dockerClientOperation.pushImage(IP, "harbor.shec.bigdata/shec/redis-4.0.10:1.0");
-    }
 }

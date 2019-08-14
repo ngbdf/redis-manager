@@ -4,22 +4,21 @@ import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
-import com.newegg.ec.redis.plugin.install.service.InstallationOperation;
+import com.newegg.ec.redis.plugin.install.service.AbstractInstallationOperation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * @author Jay.H.Zou
  * @date 2019/8/13
  */
-public class MachineOperation implements InstallationOperation {
+@Component
+public class MachineInstallationOperation extends AbstractInstallationOperation {
 
     @Value("${redis-manager.install.machine.package-path: /redis/machine/}")
     private String packagePath;
@@ -29,33 +28,36 @@ public class MachineOperation implements InstallationOperation {
         if (Strings.isNullOrEmpty(packagePath)) {
             throw new RuntimeException("Machine package config is empty!");
         }
-        Path path = Paths.get(packagePath);
-        if (!Files.exists(path)) {
+        File file = new File(packagePath);
+        if (!file.exists()) {
             throw new RuntimeException(packagePath + " not exist!");
         }
-        if (!Files.isDirectory(path)) {
+        if (!file.isDirectory()) {
             throw new RuntimeException(packagePath + " is not directory!");
         }
-        List<String> packages = new ArrayList<>();
-        try {
-            Stream<Path> list = Files.list(path);
-            list.forEach(subPath -> {
-                if (!Files.isDirectory(subPath)) {
-                    packages.add(subPath.getFileName().toString());
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
+        List<String> packageNameList = new ArrayList<>();
+        File[] packageFiles = file.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File item) {
+                String name = item.getName();
+                return item.isFile() && (name.endsWith("tar") || name.endsWith("tar.gz"));
+            }
+        });
+        for (File packageFile : packageFiles) {
+            packageNameList.add(packageFile.getName());
         }
-
-        return null;
+        return packageNameList;
     }
 
     @Override
     public boolean checkEnvironment(InstallationParam installationParam, List<Machine> machineList) {
-        return false;
+        return true;
     }
 
+    /**
+     * 从本机copy到目标机器上
+     * @return
+     */
     @Override
     public boolean pullImage() {
         return false;

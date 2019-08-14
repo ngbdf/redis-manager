@@ -1,6 +1,5 @@
 package com.newegg.ec.redis.plugin.install.entity;
 
-import com.github.dockerjava.api.DockerClient;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
 
@@ -27,8 +26,6 @@ public class InstallationParam {
     List<RedisNode> redisNodeList;
 
     private InstallationEnvironment installationEnvironment;
-
-    private DockerClient dockerClient;
 
     public Cluster getCluster() {
         return cluster;

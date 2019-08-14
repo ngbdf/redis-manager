@@ -97,7 +97,6 @@ public class LinuxUtil {
      */
     private static String processStandardOutput(InputStream inputStream) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
         StringBuilder sb = new StringBuilder();
         String line;
         try {
@@ -140,7 +139,7 @@ public class LinuxUtil {
     }
 
     private static Map<String, String> formatResult(String result) {
-        Map<String, String> infoMap = new HashMap();
+        Map<String, String> infoMap = new HashMap(16);
         String[] lines = result.split("\n");
         for (String line : lines) {
             if (Strings.isNullOrEmpty(line)) {

@@ -22,7 +22,7 @@ public class NetworkUtil {
     private NetworkUtil() {
     }
 
-    public static final boolean ping(String ip) {
+    /*public static final boolean ping(String ip) {
         try {
             InetAddress address = InetAddress.getByName(ip);
             return address.isReachable(TIMEOUT);
@@ -30,7 +30,7 @@ public class NetworkUtil {
             logger.error(ip + " unreachable.", e);
         }
         return false;
-    }
+    }*/
 
     /**
      * 监测端口是否在使用

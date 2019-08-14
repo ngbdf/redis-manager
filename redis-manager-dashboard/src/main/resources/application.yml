@@ -12,9 +12,9 @@ spring:
       charset: UTF-8
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.16.50.209:3306/redis_manager_2?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://localhost:3306/redis_manager?useUnicode=true&characterEncoding=utf-8
     username: root
-    password: Newegg@1234
+    password:
 
 mybatis:
   configuration:
@@ -38,13 +38,10 @@ redis-manager:
       package-path: /redis/machine/
     # docker
     docker:
-      package-path: /redis/docker/
+      # 默认从官方镜像库拉取
+      images: redis:4.0.10,redis:4.0.14,redis:5.0.5
       docker-host: tcp://%s:2375
-      api-version: 2.0
-      registry:
-        url: https://index.docker.io/v1/
-        username:
-        password:
   alert:
+    enabled: true
   analysis:
     enabled: false
