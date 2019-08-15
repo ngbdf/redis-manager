@@ -35,9 +35,9 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
         if (Strings.isNullOrEmpty(images)) {
             throw new RuntimeException("images not allow empty!");
         }
-        List<String> iamgeList = new ArrayList<>();
-        iamgeList.addAll(Arrays.asList(SplitUtil.splitByCommas(images.replace(" ", ""))));
-        return iamgeList;
+        List<String> imageList = new ArrayList<>();
+        imageList.addAll(Arrays.asList(SplitUtil.splitByCommas(images.replace(" ", ""))));
+        return imageList;
     }
 
     /**
@@ -51,7 +51,6 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
      */
     @Override
     public boolean checkEnvironment(InstallationParam installationParam, List<Machine> machineList) {
-
         return true;
     }
 

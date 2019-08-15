@@ -102,8 +102,27 @@
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java</artifactId>
-            <version>3.1.2</version>
+            <version>3.0.14</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.27</version>
+        </dependency>
+
+        <!-- <dependency>
+             <groupId>com.jcraft</groupId>
+             <artifactId>jsch</artifactId>
+             <version>0.1.55</version>
+         </dependency>-->
+
     </dependencies>
 
     <build>

@@ -1,10 +1,7 @@
 package com.newegg.ec.redis.plugin.install.service;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.DockerCmdExecFactory;
-import com.github.dockerjava.api.command.ListImagesCmd;
-import com.github.dockerjava.api.command.PullImageCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -27,6 +24,9 @@ public class DockerClientOperation {
 
     @Value("${redis-manager.install.docker.docker-host:tcp://%s:2375}")
     private String dockerHost = "tcp://%s:2375";
+
+    private static final String VOLUME = "/data/redis/%d:/data";
+
 
     static DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
             .withReadTimeout(10000)
@@ -106,28 +106,54 @@ public class DockerClientOperation {
         return images != null && !images.isEmpty();
     }
 
+
+    public InspectContainerResponse inspectContainer(String ip, String containerId) {
+        DockerClient dockerClient = getDockerClient(ip);
+        return dockerClient.inspectContainerCmd(containerId).exec();
+    }
+
     /**
      * Start docker container  with expose port
-     * sudo docker run --net host -d -v /data/8001:/data --name redis-test 857c4ab5f029 redis-server --daemonize no --cluster-enabled yes --port 8001 --bind xxx
+     * sudo docker run \
+     * --name redis-instance-8000 \
+     * --net host \
+     * -d -v /data/redis/8000:/data \
+     * redis:4.0.14 \
+     * redis-server --daemonize no --cluster-enabled yes --port 8000 --bind 192.168.1.15
      *
      * @param ip
      * @param port
      * @param image
      * @return
      */
-    public String startContainer(String ip, int port, String image, String containerPath, String hostPath) {
+    public String runContainer(String ip, int port, String image, String containerName, List<String> command) {
         DockerClient dockerClient = getDockerClient(ip);
-        Volume volume = new Volume(hostPath);
+        Volume volume = new Volume(String.format(VOLUME, port));
         CreateContainerResponse container = dockerClient.createContainerCmd(image)
-                // TODO: 挂载
-                //.withCmd("/bin/bash")
-                .withName(image + "-" + port)
-                //.withBinds(new Bind("/src/webapp1", volume, true))
-                //.withVolumes(volume)
+                // container name
+                .withName(containerName.replace(" ", "-") + "-" + port)
+                // host 模式启动
+                .withHostConfig(new HostConfig().withNetworkMode("host"))
+                // 挂载
+                .withBinds(Bind.parse(String.format(VOLUME, port)))
+                // 命令参数
+                .withCmd(command)
                 .exec();
         String containerId = container.getId();
         dockerClient.startContainerCmd(containerId).exec();
         return containerId;
+    }
+
+    /**
+     * Stop docker container
+     *
+     * @param ip
+     * @param containerId
+     * @return
+     */
+    public void restartContainer(String ip, String containerId) {
+        DockerClient dockerClient = getDockerClient(ip);
+        dockerClient.restartContainerCmd(containerId).exec();
     }
 
     /**
@@ -143,6 +169,18 @@ public class DockerClientOperation {
     }
 
     /**
+     * Remove docker container
+     *
+     * @param ip
+     * @param containerId
+     * @return
+     */
+    public void removeContainer(String ip, String containerId) {
+        DockerClient dockerClient = getDockerClient(ip);
+        dockerClient.removeContainerCmd(containerId).exec();
+    }
+
+    /**
      * @param ip
      * @param repository
      * @param tag
@@ -154,10 +192,6 @@ public class DockerClientOperation {
         PullImageCmd pullImageCmd = dockerClient.pullImageCmd(repository);
         if (!Strings.isNullOrEmpty(tag)) {
             pullImageCmd.withTag(tag);
-        }
-        AuthConfig authConfig = dockerClient.authConfig();
-        if (authConfig != null) {
-            pullImageCmd.withAuthConfig(authConfig);
         }
         pullImageCmd.exec(new PullImageResultCallback()).awaitCompletion();
         return true;
