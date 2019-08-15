@@ -1,18 +1,23 @@
 package com.newegg.ec.redis.plugin.install.service;
 
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
-import com.newegg.ec.redis.util.LinuxUtil;
+import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.NetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-import static com.newegg.ec.redis.util.LinuxUtil.MEMORY_FREE;
+import static com.newegg.ec.redis.util.LinuxInfoUtil.MEMORY_FREE;
 
 /**
  * @author Jay.H.Zou
@@ -21,6 +26,13 @@ import static com.newegg.ec.redis.util.LinuxUtil.MEMORY_FREE;
 public abstract class AbstractInstallationOperation implements InstallationOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractInstallationOperation.class);
+
+
+
+    protected static ExecutorService threadPool = new ThreadPoolExecutor(10, 20, 60L, TimeUnit.SECONDS,
+            new SynchronousQueue<>(),
+            new ThreadFactoryBuilder().setNameFormat("pull-image-pool-thread-%d").build(),
+            new ThreadPoolExecutor.AbortPolicy());
 
     /**
      * Check free memory of machine
@@ -35,7 +47,7 @@ public abstract class AbstractInstallationOperation implements InstallationOpera
         for (Machine machine : machineList) {
             Map<String, String> info = null;
             try {
-                info = LinuxUtil.getLinuxInfo(machine);
+                info = LinuxInfoUtil.getLinuxInfo(machine);
             } catch (Exception e) {
                 // TODO: websocket
                 logger.error("Get " + machine.getHost() + " failed", e);

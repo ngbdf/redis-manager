@@ -5,9 +5,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
-
-public class LinuxUtilTest {
+public class LinuxInfoUtilTest {
 
     @Test
     public void login() {
@@ -23,7 +21,7 @@ public class LinuxUtilTest {
         machine.setHost("127.0.0.1");
         machine.setUserName("xxx");
         machine.setPassword("xxx");
-        Map<String, String> machineResourceInfo = LinuxUtil.getLinuxInfo(machine);
+        Map<String, String> machineResourceInfo = LinuxInfoUtil.getLinuxInfo(machine);
         System.err.println(machineResourceInfo);
     }
 }

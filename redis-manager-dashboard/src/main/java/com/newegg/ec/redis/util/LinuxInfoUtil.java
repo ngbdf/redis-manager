@@ -22,9 +22,9 @@ import java.util.Map;
  * @author Jay.H.Zou
  * @date 7/20/2019
  */
-public class LinuxUtil {
+public class LinuxInfoUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(LinuxUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxInfoUtil.class);
 
     public static final String MEMORY_FREE = "memory_free";
 
@@ -33,7 +33,7 @@ public class LinuxUtil {
     private static final int TIMEOUT = 2000;
 
 
-    private LinuxUtil() {
+    private LinuxInfoUtil() {
     }
 
     public static final boolean login(Machine machine) throws Exception {

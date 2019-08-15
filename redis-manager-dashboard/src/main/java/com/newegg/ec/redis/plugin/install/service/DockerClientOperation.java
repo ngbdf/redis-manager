@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import static com.newegg.ec.redis.plugin.install.service.InstallationOperation.DEFAULT_INSTALL_PATH;
+
 /**
  * docker-java api: https://github.com/docker-java/docker-java/wiki
  *
@@ -25,7 +27,7 @@ public class DockerClientOperation {
     @Value("${redis-manager.install.docker.docker-host:tcp://%s:2375}")
     private String dockerHost = "tcp://%s:2375";
 
-    private static final String VOLUME = "/data/redis/%d:/data";
+    private static final String VOLUME = DEFAULT_INSTALL_PATH + ":/data";
 
 
     static DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()

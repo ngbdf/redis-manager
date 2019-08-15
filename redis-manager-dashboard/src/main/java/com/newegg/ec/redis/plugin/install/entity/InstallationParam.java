@@ -23,6 +23,8 @@ public class InstallationParam {
 
     private int endPort;
 
+    private String image;
+
     List<RedisNode> redisNodeList;
 
     private InstallationEnvironment installationEnvironment;
@@ -75,11 +77,27 @@ public class InstallationParam {
         this.endPort = endPort;
     }
 
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
     public List<RedisNode> getRedisNodeList() {
         return redisNodeList;
     }
 
     public void setRedisNodeList(List<RedisNode> redisNodeList) {
         this.redisNodeList = redisNodeList;
+    }
+
+    public InstallationEnvironment getInstallationEnvironment() {
+        return installationEnvironment;
+    }
+
+    public void setInstallationEnvironment(InstallationEnvironment installationEnvironment) {
+        this.installationEnvironment = installationEnvironment;
     }
 }

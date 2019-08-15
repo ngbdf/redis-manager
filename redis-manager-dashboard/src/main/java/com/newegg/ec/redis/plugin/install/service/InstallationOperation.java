@@ -14,11 +14,13 @@ public interface InstallationOperation {
 
     int MIN_MEMORY_FREE = 10;
 
+    String DEFAULT_INSTALL_PATH = "/data/redis/%d";
+
     /**
      *
      * @return
      */
-    List<String> getPackageList();
+    List<String> getImageList();
 
     /**
      * 检查机器内存CPU资源
@@ -31,7 +33,7 @@ public interface InstallationOperation {
      */
     boolean checkEnvironment(InstallationParam installationParam, List<Machine> machineList);
 
-    boolean pullImage();
+    boolean pullImage(InstallationParam installationParam, List<Machine> machineList);
 
     /**
      * 1.从DB中获取相应版本的配置

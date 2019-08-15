@@ -4,18 +4,19 @@ import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
 import com.newegg.ec.redis.entity.Machine;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
  * @author Jay.H.Zou
  * @date 8/15/2019
  */
-public class RemoteFeileUtil {
+public class RemoteFileUtil {
 
-    private RemoteFeileUtil() {
+    private RemoteFileUtil() {
     }
 
-    public static boolean scp(Machine machine, String localPath, String targetPath) throws IOException {
+    public static void scp(Machine machine, String localPath, String targetPath) throws IOException {
         String userName = machine.getUserName();
         String password = machine.getPassword();
         String host = machine.getHost();
@@ -23,11 +24,11 @@ public class RemoteFeileUtil {
         connection.connect();
         boolean success = connection.authenticateWithPassword(userName, password);
         if (!success) {
-            return false;
+            throw new RuntimeException(host + " login failed.");
         }
         SCPClient scpClient = connection.createSCPClient();
-        scpClient.put(localPath, 100, targetPath, "0644");
-        return true;
+        File file = new File(localPath);
+        scpClient.put(localPath, file.length(), targetPath, "0644");
     }
 
 }

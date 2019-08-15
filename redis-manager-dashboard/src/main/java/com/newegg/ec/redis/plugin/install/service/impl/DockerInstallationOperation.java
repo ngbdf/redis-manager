@@ -31,7 +31,7 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
     private DockerClientOperation dockerClientOperation;
 
     @Override
-    public List<String> getPackageList() {
+    public List<String> getImageList() {
         if (Strings.isNullOrEmpty(images)) {
             throw new RuntimeException("images not allow empty!");
         }
@@ -51,11 +51,12 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
      */
     @Override
     public boolean checkEnvironment(InstallationParam installationParam, List<Machine> machineList) {
+
         return true;
     }
 
     @Override
-    public boolean pullImage() {
+    public boolean pullImage(InstallationParam installationParam, List<Machine> machineList) {
         return false;
     }
 
