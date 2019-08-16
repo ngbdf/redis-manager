@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static com.newegg.ec.redis.plugin.install.service.InstallationOperation.DEFAULT_INSTALL_PATH;
+import static com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH;
+
 
 /**
  * docker-java api: https://github.com/docker-java/docker-java/wiki
@@ -27,8 +28,7 @@ public class DockerClientOperation {
     @Value("${redis-manager.install.docker.docker-host:tcp://%s:2375}")
     private String dockerHost = "tcp://%s:2375";
 
-    private static final String VOLUME = DEFAULT_INSTALL_PATH + ":/data";
-
+    private static final String VOLUME = DOCKER_INSTALL_BASE_PATH + ":/data";
 
     static DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
             .withReadTimeout(10000)
@@ -115,6 +115,7 @@ public class DockerClientOperation {
     }
 
     /**
+     * TODO: 此命令需要修改，无 redis.conf
      * Start docker container  with expose port
      * sudo docker run \
      * --name redis-instance-8000 \
@@ -130,7 +131,6 @@ public class DockerClientOperation {
      */
     public String runContainer(String ip, int port, String image, String containerName, List<String> command) {
         DockerClient dockerClient = getDockerClient(ip);
-        Volume volume = new Volume(String.format(VOLUME, port));
         CreateContainerResponse container = dockerClient.createContainerCmd(image)
                 // container name
                 .withName(containerName.replace(" ", "-") + "-" + port)

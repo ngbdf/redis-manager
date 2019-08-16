@@ -14,8 +14,6 @@ public interface InstallationOperation {
 
     int MIN_MEMORY_FREE = 10;
 
-    String DEFAULT_INSTALL_PATH = "/data/redis/%d";
-
     /**
      *
      * @return

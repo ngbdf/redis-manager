@@ -34,6 +34,10 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
     @Value("${redis-manager.install.docker.images}")
     private String images;
 
+    public static final String DOCKER_INSTALL_BASE_PATH = "/data/redis/docker/";
+
+    public static final String DOCKER_TEMP_CONFIG_PATH = "/data/redis/docker/temp/";
+
     @Autowired
     private DockerClientOperation dockerClientOperation;
 
@@ -121,6 +125,12 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
 
     @Override
     public boolean install(List<RedisNode> redisNodeList) {
+        /*
+         * 远程机器：创建容器
+         * 本机：拷贝配置文件至远程机器，删除本地临时配置文件
+         * 远程机器：拷贝到端口目录，并修改配置文件
+         * 启动
+         * */
         return false;
     }
 }

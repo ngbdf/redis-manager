@@ -27,8 +27,6 @@ public abstract class AbstractInstallationOperation implements InstallationOpera
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractInstallationOperation.class);
 
-
-
     protected static ExecutorService threadPool = new ThreadPoolExecutor(10, 20, 60L, TimeUnit.SECONDS,
             new SynchronousQueue<>(),
             new ThreadFactoryBuilder().setNameFormat("pull-image-pool-thread-%d").build(),

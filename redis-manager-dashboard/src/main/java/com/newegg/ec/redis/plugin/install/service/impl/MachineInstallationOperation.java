@@ -27,6 +27,10 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
     @Value("${redis-manager.install.machine.package-path: /redis/machine/}")
     private String packagePath;
 
+    public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
+
+    public static final String MACHINE_TEMP_CONFIG_PATH = "/data/redis/machine/temp/";
+
     @Override
     public List<String> getImageList() {
         if (Strings.isNullOrEmpty(packagePath)) {
@@ -79,6 +83,9 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
                 @Override
                 public Boolean call() throws Exception {
                     try {
+                        /*
+                         * 本机执行：安装包、redis.conf 拷贝到远程机器临时目录
+                         * */
                         RemoteFileUtil.scp(machine, localImagePath, "");
                         return true;
                     } catch (IOException e) {
@@ -103,6 +110,11 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
 
     @Override
     public boolean install(List<RedisNode> redisNodeList) {
+        /*
+         * 远程机器执行：创建相应的端口目录，将安装包；redis.conf拷贝至端口目录；解压；删除安装包
+         * 远程机器执行：修改配置文件
+         * 远程机器执行：启动
+         */
         return false;
     }
 }
