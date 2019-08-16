@@ -4,6 +4,7 @@ import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -26,6 +27,10 @@ public class InstallationParam {
     private String image;
 
     List<RedisNode> redisNodeList;
+
+    Map<String, String> configMap;
+
+    private String redisMode;
 
     private InstallationEnvironment installationEnvironment;
 
@@ -91,6 +96,22 @@ public class InstallationParam {
 
     public void setRedisNodeList(List<RedisNode> redisNodeList) {
         this.redisNodeList = redisNodeList;
+    }
+
+    public Map<String, String> getConfigMap() {
+        return configMap;
+    }
+
+    public void setConfigMap(Map<String, String> configMap) {
+        this.configMap = configMap;
+    }
+
+    public String getRedisMode() {
+        return redisMode;
+    }
+
+    public void setRedisMode(String redisMode) {
+        this.redisMode = redisMode;
     }
 
     public InstallationEnvironment getInstallationEnvironment() {

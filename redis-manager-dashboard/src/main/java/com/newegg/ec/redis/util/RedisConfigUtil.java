@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.util;
 
+import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,27 +27,27 @@ public class RedisConfigUtil {
 
     private static final String REQUIRE_PASS = "requirepass";
 
-    public static final int NORMAL = 0;
+    public static final int NORMAL_TYPE = 0;
 
-    public static final int CLUSTER = 1;
+    public static final int CLUSTER_TYPE = 1;
 
     public RedisConfigUtil() {
     }
 
     public static void generateRedis4ClusterConfig(String path, String requirePass) throws IOException {
-        generateRedisConfig(path, 4, CLUSTER, requirePass);
+        generateRedisConfig(path, 4, CLUSTER_TYPE, requirePass);
     }
 
     public static void generateRedis4NormalConfig(String path, String requirePass) throws IOException {
-        generateRedisConfig(path, 4, NORMAL, requirePass);
+        generateRedisConfig(path, 4, NORMAL_TYPE, requirePass);
     }
 
     public static void generateRedis5ClusterConfig(String path, String requirePass) throws IOException {
-        generateRedisConfig(path, 5, CLUSTER, requirePass);
+        generateRedisConfig(path, 5, CLUSTER_TYPE, requirePass);
     }
 
     public static void generateRedis5NormalConfig(String path, String requirePass) throws IOException {
-        generateRedisConfig(path, 5, NORMAL, requirePass);
+        generateRedisConfig(path, 5, NORMAL_TYPE, requirePass);
     }
 
     public static void generateRedisConfig(String path, int version, int mode, String requirePass) throws IOException {
@@ -64,6 +65,9 @@ public class RedisConfigUtil {
                 configValue = requirePass;
             }
             if (version >= redisConfig.getVersion() && redisConfig.getMode() == mode) {
+                if (Strings.isNullOrEmpty(configValue)) {
+                    configValue = "\"\"";
+                }
                 String itemConfig = configKey + " " + configValue;
                 try {
                     bufferedWriter.write(itemConfig);
@@ -169,8 +173,8 @@ public class RedisConfigUtil {
         REDIS_CONFIG_LIST.add(new RedisConfig("repl-backlog-ttl", "3600", 4, 0));
         // 客户端最大连接数
         REDIS_CONFIG_LIST.add(new RedisConfig("maxclients", "10000", 4, 0));
-        //
-        REDIS_CONFIG_LIST.add(new RedisConfig("watchdog-period", "0", 4, 0));
+       /* //
+        REDIS_CONFIG_LIST.add(new RedisConfig("watchdog-period", "0", 4, 0));*/
         // slave的优先级,影响sentinel/cluster晋升master操作,0永远不晋升
         REDIS_CONFIG_LIST.add(new RedisConfig("slave-priority", "100", 4, 0));
         //
@@ -201,8 +205,8 @@ public class RedisConfigUtil {
         REDIS_CONFIG_LIST.add(new RedisConfig("slave-serve-stale-data", "yes", 4, 0));
         // slave服务器节点是否只读,cluster的slave节点默认读写都不可用,需要调用readonly开启可读模式
         REDIS_CONFIG_LIST.add(new RedisConfig("slave-read-only", "yes", 4, 0));
-        // 当bgsave快照操作出错时停止写数据到磁盘
-        REDIS_CONFIG_LIST.add(new RedisConfig("stop-writes-on-bgsave-error", "", 4, 0));
+        /*// 当bgsave快照操作出错时停止写数据到磁盘
+        REDIS_CONFIG_LIST.add(new RedisConfig("stop-writes-on-bgsave-error", "", 4, 0));*/
         // 是否守护进程, 默认no
         REDIS_CONFIG_LIST.add(new RedisConfig("daemonize", "no", 4, 0));
         // rdb是否压缩

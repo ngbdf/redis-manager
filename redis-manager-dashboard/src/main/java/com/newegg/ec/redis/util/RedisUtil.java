@@ -17,6 +17,10 @@ import java.util.*;
  */
 public class RedisUtil {
 
+    public static final String STANDALONE = "standalone";
+
+    public static final String CLUSTER = "cluster";
+
     /** nodes 相关 */
     public static final String IP = "ip";
 

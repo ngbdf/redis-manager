@@ -24,9 +24,7 @@ import java.util.*;
 
 import static com.newegg.ec.redis.client.IDatabaseCommand.*;
 import static com.newegg.ec.redis.util.RedisClusterInfoUtil.OK;
-import static com.newegg.ec.redis.util.RedisNodeInfoUtil.CLUSTER;
-import static com.newegg.ec.redis.util.RedisNodeInfoUtil.STANDALONE;
-import static com.newegg.ec.redis.util.RedisUtil.nodesToHostAndPort;
+import static com.newegg.ec.redis.util.RedisUtil.*;
 
 /**
  * @author Jay.H.Zou

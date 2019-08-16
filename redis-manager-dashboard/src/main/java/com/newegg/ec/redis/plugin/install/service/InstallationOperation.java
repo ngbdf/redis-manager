@@ -33,16 +33,16 @@ public interface InstallationOperation {
      */
     boolean checkEnvironment(InstallationParam installationParam, List<Machine> machineList);
 
-    boolean pullImage(InstallationParam installationParam, List<Machine> machineList);
-
     /**
-     * 1.从DB中获取相应版本的配置
+     * 1.从内存中获取相应版本的配置
      * 2.根据不同安装方式更改相应的配置
      * 3.根据安装的集群模式更改配置
      *
      * @return
      */
-    boolean buildConfig();
+    boolean buildConfig(InstallationParam installationParam);
+
+    boolean pullImage(InstallationParam installationParam, List<Machine> machineList);
 
     boolean install(List<RedisNode> redisNodeList);
 

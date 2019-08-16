@@ -56,6 +56,11 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
         return true;
     }
 
+    @Override
+    public boolean buildConfig(InstallationParam installationParam) {
+        return false;
+    }
+
     /**
      * 从本机copy到目标机器上
      *
@@ -85,19 +90,15 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
         }
         for (Future<Boolean> resultFuture : resultFutureList) {
             try {
-                if (!resultFuture.get(60, TimeUnit.SECONDS)) {
+                if (!resultFuture.get(300, TimeUnit.SECONDS)) {
                     return false;
                 }
             } catch (Exception e) {
                 // TODO: websocket
+                return false;
             }
         }
         return true;
-    }
-
-    @Override
-    public boolean buildConfig() {
-        return false;
     }
 
     @Override

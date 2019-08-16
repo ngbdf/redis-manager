@@ -25,6 +25,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
+import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
+import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 
 /**
  * @author Jay.H.Zou

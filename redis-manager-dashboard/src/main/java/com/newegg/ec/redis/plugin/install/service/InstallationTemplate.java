@@ -48,11 +48,11 @@ public class InstallationTemplate {
             return false;
         }
         List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
-        boolean pullImageSuccess = installationOperation.pullImage();
+        boolean pullImageSuccess = installationOperation.pullImage(installationParam, machineList);
         if (!pullImageSuccess) {
             return false;
         }
-        boolean buildRedisConfigSuccess = buildRedisConfig(installationOperation);
+        boolean buildRedisConfigSuccess = buildRedisConfig(installationOperation, installationParam);
         if (!buildRedisConfigSuccess) {
             return false;
         }
@@ -91,8 +91,8 @@ public class InstallationTemplate {
     }
 
 
-    public boolean buildRedisConfig(AbstractInstallationOperation installationOperation) {
-        installationOperation.buildConfig();
+    public boolean buildRedisConfig(AbstractInstallationOperation installationOperation, InstallationParam installationParam) {
+        installationOperation.buildConfig(installationParam);
         return true;
     }
 

@@ -24,10 +24,6 @@ public class RedisNodeInfoUtil {
 
     private static final Map<String, Map<String, NodeInfo>> LIMITE_VALUE_MAP = new ConcurrentHashMap<>();
 
-    public static final String STANDALONE = "standalone";
-
-    public static final String CLUSTER = "cluster";
-
     public static final String RESPONSE_TIME = "response_time";
     /**
      * Server

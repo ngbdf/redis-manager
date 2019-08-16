@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static com.newegg.ec.redis.util.RedisConfigUtil.NORMAL;
 
 /**
  * @author Jay.H.Zou
@@ -14,6 +13,6 @@ public class RedisConfigUtilTest {
 
     @Test
     public void createConf() throws IOException {
-        RedisConfigUtil.generateRedisConfig("E:/", 5, NORMAL, null);
+        RedisConfigUtil.generateRedisConfig("E:/", 5, RedisConfigUtil.NORMAL_TYPE, null);
     }
 }
