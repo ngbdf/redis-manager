@@ -1,10 +1,12 @@
 package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractInstallationOperation;
+import com.newegg.ec.redis.util.RedisConfigUtil;
 import com.newegg.ec.redis.util.RemoteFileUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,9 +15,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import static com.newegg.ec.redis.util.RedisConfigUtil.CLUSTER_TYPE;
+import static com.newegg.ec.redis.util.RedisConfigUtil.STANDALONE_TYPE;
+import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
+import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 
 /**
  * @author Jay.H.Zou
@@ -29,6 +36,9 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
 
     public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
 
+    /**
+     * 存放redis.conf的临时目录
+     */
     public static final String MACHINE_TEMP_CONFIG_PATH = "/data/redis/machine/temp/";
 
     @Override
@@ -62,7 +72,29 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
 
     @Override
     public boolean buildConfig(InstallationParam installationParam) {
-        return false;
+        // redis 集群模式
+        String redisMode = installationParam.getRedisMode();
+        int mode = -1;
+        if (Objects.equals(redisMode, STANDALONE)) {
+            mode = STANDALONE_TYPE;
+        } else {
+            // default: cluster
+            mode = CLUSTER_TYPE;
+        }
+        // 判断redis version
+        int version = installationParam.getVersion();
+        if (version == 0) {
+            return false;
+        }
+        Cluster cluster = installationParam.getCluster();
+        String redisPassword = cluster.getRedisPassword();
+        try {
+            RedisConfigUtil.generateRedisConfig(MACHINE_TEMP_CONFIG_PATH, version, mode, redisPassword);
+        } catch (Exception e) {
+            // TODO: websocket
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -79,19 +111,16 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
         String localImagePath = packagePath + image;
         List<Future<Boolean>> resultFutureList = new ArrayList<>();
         for (Machine machine : machineList) {
-            resultFutureList.add(threadPool.submit(new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws Exception {
-                    try {
-                        /*
-                         * 本机执行：安装包、redis.conf 拷贝到远程机器临时目录
-                         * */
-                        RemoteFileUtil.scp(machine, localImagePath, "");
-                        return true;
-                    } catch (IOException e) {
-                        // TODO: websocket
-                        return false;
-                    }
+            resultFutureList.add(threadPool.submit(() -> {
+                try {
+                    /*
+                     * 本机执行：安装包、redis.conf 拷贝到远程机器临时目录
+                     * */
+                    RemoteFileUtil.scp(machine, localImagePath, "");
+                    return true;
+                } catch (IOException e) {
+                    // TODO: websocket
+                    return false;
                 }
             }));
         }

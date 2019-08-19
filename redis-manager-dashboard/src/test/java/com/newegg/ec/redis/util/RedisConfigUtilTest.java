@@ -13,6 +13,6 @@ public class RedisConfigUtilTest {
 
     @Test
     public void createConf() throws IOException {
-        RedisConfigUtil.generateRedisConfig("E:/", 5, RedisConfigUtil.NORMAL_TYPE, null);
+        RedisConfigUtil.generateRedisConfig("E:/", 5, RedisConfigUtil.CLUSTER_TYPE, null);
     }
 }

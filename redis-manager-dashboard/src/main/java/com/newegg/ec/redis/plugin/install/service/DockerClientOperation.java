@@ -116,6 +116,7 @@ public class DockerClientOperation {
 
     /**
      * TODO: 此命令需要修改，无 redis.conf
+     * <p>
      * Start docker container  with expose port
      * sudo docker run \
      * --name redis-instance-8000 \
