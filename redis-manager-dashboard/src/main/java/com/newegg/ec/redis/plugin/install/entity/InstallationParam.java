@@ -26,8 +26,6 @@ public class InstallationParam {
 
     private String image;
 
-    private int version;
-
     List<RedisNode> redisNodeList;
 
     Map<String, String> configMap;
@@ -124,11 +122,4 @@ public class InstallationParam {
         this.installationEnvironment = installationEnvironment;
     }
 
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
 }

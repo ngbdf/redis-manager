@@ -6,6 +6,7 @@ import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractInstallationOperation;
+import com.newegg.ec.redis.util.CommonUtil;
 import com.newegg.ec.redis.util.RedisConfigUtil;
 import com.newegg.ec.redis.util.RemoteFileUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.util.RedisConfigUtil.CLUSTER_TYPE;
 import static com.newegg.ec.redis.util.RedisConfigUtil.STANDALONE_TYPE;
-import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
 import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 
 /**
@@ -74,7 +74,7 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
     public boolean buildConfig(InstallationParam installationParam) {
         // redis 集群模式
         String redisMode = installationParam.getRedisMode();
-        int mode = -1;
+        int mode;
         if (Objects.equals(redisMode, STANDALONE)) {
             mode = STANDALONE_TYPE;
         } else {
@@ -82,14 +82,11 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
             mode = CLUSTER_TYPE;
         }
         // 判断redis version
-        int version = installationParam.getVersion();
-        if (version == 0) {
-            return false;
-        }
         Cluster cluster = installationParam.getCluster();
         String redisPassword = cluster.getRedisPassword();
         try {
-            RedisConfigUtil.generateRedisConfig(MACHINE_TEMP_CONFIG_PATH, version, mode, redisPassword);
+            // 配置文件写入本地机器
+            RedisConfigUtil.generateRedisConfig(MACHINE_TEMP_CONFIG_PATH + CommonUtil.replaceSpace(cluster.getClusterName()), mode, redisPassword);
         } catch (Exception e) {
             // TODO: websocket
             return false;
@@ -116,7 +113,7 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
                     /*
                      * 本机执行：安装包、redis.conf 拷贝到远程机器临时目录
                      * */
-                    RemoteFileUtil.scp(machine, localImagePath, "");
+                    RemoteFileUtil.scp(machine, localImagePath, MACHINE_INSTALL_BASE_PATH);
                     return true;
                 } catch (IOException e) {
                     // TODO: websocket
