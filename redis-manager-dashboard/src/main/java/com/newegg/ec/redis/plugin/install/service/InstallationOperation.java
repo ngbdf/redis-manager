@@ -42,6 +42,6 @@ public interface InstallationOperation {
 
     boolean pullImage(InstallationParam installationParam, List<Machine> machineList);
 
-    boolean install(List<RedisNode> redisNodeList);
+    boolean install(InstallationParam installationParam, List<Machine> machineList, List<RedisNode> redisNodeList);
 
 }

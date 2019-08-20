@@ -8,7 +8,9 @@ import java.sql.Timestamp;
  */
 public class TimeRangeUtil {
 
-    public static final long TEN_MINUTES = 10 * 60 * 1000;
+    public static final long FIVE_MINUTES = 5 * 60 * 1000;
+
+    public static final long TEN_MINUTES = 2 * FIVE_MINUTES;
 
     public static final long HALF_HOUR = 3 * TEN_MINUTES;
 

@@ -8,6 +8,8 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.util.CommonUtil;
+import com.newegg.ec.redis.util.SplitUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -134,7 +136,7 @@ public class DockerClientOperation {
         DockerClient dockerClient = getDockerClient(ip);
         CreateContainerResponse container = dockerClient.createContainerCmd(image)
                 // container name
-                .withName(containerName.replace(" ", "-") + "-" + port)
+                .withName(CommonUtil.replaceSpace(containerName) + "-" + port)
                 // host 模式启动
                 .withHostConfig(new HostConfig().withNetworkMode("host"))
                 // 挂载
@@ -200,4 +202,19 @@ public class DockerClientOperation {
         return true;
     }
 
+    /**
+     * @param ip
+     * @param repositoryAndTag
+     * @return
+     * @throws InterruptedException
+     */
+    public boolean pullImage(String ip, String repositoryAndTag) throws InterruptedException {
+        String[] repoAndTag = SplitUtil.splitByColon(repositoryAndTag);
+        String tag = "lastest";
+        if (repoAndTag.length > 1) {
+            tag = repoAndTag[1];
+        }
+        String repository = repoAndTag[0];
+        return pullImage(ip, repository, tag);
+    }
 }

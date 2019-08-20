@@ -135,7 +135,7 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
     }
 
     @Override
-    public boolean install(List<RedisNode> redisNodeList) {
+    public boolean install(InstallationParam installationParam, List<Machine> machineList, List<RedisNode> redisNodeList) {
         /*
          * 远程机器执行：创建相应的端口目录，将安装包；redis.conf拷贝至端口目录；解压；删除安装包
          * 远程机器执行：修改配置文件

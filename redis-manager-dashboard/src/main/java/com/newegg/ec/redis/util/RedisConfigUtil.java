@@ -36,13 +36,13 @@ public class RedisConfigUtil {
     public RedisConfigUtil() {
     }
 
-    public static void generateRedis5ClusterConfig(String path, String requirePass) throws IOException {
+    /*public static void generateRedis5ClusterConfig(String path, String requirePass) throws IOException {
         generateRedisConfig(path, CLUSTER_TYPE, requirePass);
     }
 
     public static void generateRedisStandaloneConfig(String path, String requirePass) throws IOException {
         generateRedisConfig(path, STANDALONE_TYPE, requirePass);
-    }
+    }*/
 
     public static void generateRedisConfig(String path, int mode, String requirePass) throws IOException {
         File file = new File(path + REDIS_CONF);
