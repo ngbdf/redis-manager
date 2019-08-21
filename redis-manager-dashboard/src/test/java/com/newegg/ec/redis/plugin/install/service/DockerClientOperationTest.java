@@ -2,6 +2,7 @@ package com.newegg.ec.redis.plugin.install.service;
 
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.Info;
+import com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -11,11 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
+
 public class DockerClientOperationTest {
 
     DockerClientOperation dockerClientOperation = new DockerClientOperation();
 
-    String IP = "10.1.1.1";
+    String IP = "101.456.510.456";
 
     @Test
     public void getDockerClient() {
@@ -50,7 +53,7 @@ public class DockerClientOperationTest {
 
     @Test
     public void inspectContainer() throws ParseException {
-        InspectContainerResponse inspectContainerResponse = dockerClientOperation.inspectContainer(IP, "55a8eb71b888");
+        InspectContainerResponse inspectContainerResponse = dockerClientOperation.inspectContainer(IP, "a9079e77d1d800e88b525269d88a528fd19b86a0aa54010c04b5494cead8f7cf");
         Boolean running = inspectContainerResponse.getState().getRunning();
         String created = inspectContainerResponse.getCreated();
         System.err.println(created);
@@ -58,13 +61,20 @@ public class DockerClientOperationTest {
     }
 
     @Test
-    public void runContainer() {
+    public void createContainer() {
+        int port = 8000;
         List<String> command = new ArrayList<>();
-        command.add("--daemonize no");
-        command.add("--cluster-enabled yes");
-        command.add("--port 8007");
-        command.add("--bind 10.16.50.217");
-        dockerClientOperation.runContainer(IP, 8007, "redis:4.0.14", "redis-instance", command);
+        command.add(DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH + port + "/" + REDIS_CONF);
+        String containerId = dockerClientOperation.createContainer(IP, port, "redis:4.0.14", "redis-instance");
+        containerId = dockerClientOperation.runContainer(IP, containerId);
+        System.err.println(containerId);
+    }
+
+    @Test
+    public void runContainer() {
+        String containerId = "ff842c9a946f";
+        String container = dockerClientOperation.runContainer(IP, containerId);
+        System.err.println(container);
     }
 
     @Test

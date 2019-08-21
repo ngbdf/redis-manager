@@ -8,7 +8,7 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractInstallationOperation;
 import com.newegg.ec.redis.util.CommonUtil;
 import com.newegg.ec.redis.util.RedisConfigUtil;
-import com.newegg.ec.redis.util.RemoteFileUtil;
+import com.newegg.ec.redis.util.SSH2Util;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -86,7 +86,7 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
         String redisPassword = cluster.getRedisPassword();
         try {
             // 配置文件写入本地机器
-            RedisConfigUtil.generateRedisConfig(MACHINE_TEMP_CONFIG_PATH + CommonUtil.replaceSpace(cluster.getClusterName()), mode, redisPassword);
+            RedisConfigUtil.generateRedisConfig(MACHINE_TEMP_CONFIG_PATH + CommonUtil.replaceSpace(cluster.getClusterName()), mode);
         } catch (Exception e) {
             // TODO: websocket
             return false;
@@ -113,7 +113,7 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
                     /*
                      * 本机执行：安装包、redis.conf 拷贝到远程机器临时目录
                      * */
-                    RemoteFileUtil.scp(machine, localImagePath, MACHINE_INSTALL_BASE_PATH);
+                    SSH2Util.scp(machine, localImagePath, MACHINE_INSTALL_BASE_PATH);
                     return true;
                 } catch (IOException e) {
                     // TODO: websocket

@@ -30,87 +30,25 @@ public class LinuxInfoUtil {
 
     public static final String VERSION = "version";
 
-    private static final int TIMEOUT = 2000;
-
-
     private LinuxInfoUtil() {
     }
 
     public static final boolean login(Machine machine) throws Exception {
-        Connection connection = new Connection(machine.getHost());
+        Connection connection = null;
         try {
-            connection.connect();
-            connection.authenticateWithPassword(machine.getUserName(), machine.getPassword());
+            connection = SSH2Util.getConnection(machine);
         } finally {
-            connection.close();
+            if (connection != null) {
+                connection.close();
+            }
         }
         return true;
     }
 
-    public static String localExecute(String command) throws Exception {
-        String result;
-        String[] cmds = {"/bin/sh", "-c", command};
-        Process ps = Runtime.getRuntime().exec(cmds);
-        InputStream in = ps.getInputStream();
-        result = processStandardOutput(in);
-        InputStream errorIn = ps.getErrorStream();
-        result += processStandardOutput(errorIn);
-        return result;
-    }
-
-    /**
-     * 执行Shell脚本或命令
-     *
-     * @param machine
-     * @param commands
-     * @return
-     */
-    public static String execute(Machine machine, String commands) throws Exception {
-        String result;
-        Connection connection = new Connection(machine.getHost());
-        try {
-            connection.connect();
-            connection.authenticateWithPassword(machine.getUserName(), machine.getPassword());
-            // 打开一个会话
-            Session session = connection.openSession();
-            session.execCommand(commands);
-            InputStream in = session.getStdout();
-            result = processStandardOutput(in);
-            InputStream errorIn = session.getStderr();
-            result += processStandardOutput(errorIn);
-        } finally {
-            connection.close();
-        }
-        return result;
-    }
-
     public static final Map<String, String> getLinuxInfo(Machine machine) throws Exception {
-        String result = execute(machine, getInfoCommand());
+        String result = SSH2Util.execute(machine, getInfoCommand());
         Map<String, String> machineResourceInfoMap = formatResult(result);
         return machineResourceInfoMap;
-    }
-
-    /**
-     * 解析流获取字符串信息
-     *
-     * @return
-     */
-    private static String processStandardOutput(InputStream inputStream) throws Exception {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        StringBuilder sb = new StringBuilder();
-        String line;
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return sb.toString();
     }
 
     private static String getInfoCommand() {

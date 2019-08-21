@@ -9,7 +9,7 @@ import com.newegg.ec.redis.plugin.install.service.AbstractInstallationOperation;
 import com.newegg.ec.redis.plugin.install.service.DockerClientOperation;
 import com.newegg.ec.redis.util.CommonUtil;
 import com.newegg.ec.redis.util.RedisConfigUtil;
-import com.newegg.ec.redis.util.RemoteFileUtil;
+import com.newegg.ec.redis.util.SSH2Util;
 import com.newegg.ec.redis.util.SplitUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
 
     public static final String DOCKER_TEMP_CONFIG_PATH = "/data/redis/docker/temp/";
 
-    private static final int TIMEOUT = 5 * 60;
+    private static final int TIMEOUT = 300;
 
     @Autowired
     private DockerClientOperation dockerClientOperation;
@@ -97,7 +97,7 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
         try {
             // 配置文件写入本地机器
             String tempPath = DOCKER_TEMP_CONFIG_PATH + CommonUtil.replaceSpace(cluster.getClusterName());
-            RedisConfigUtil.generateRedisConfig(tempPath, mode, redisPassword);
+            RedisConfigUtil.generateRedisConfig(tempPath, mode);
         } catch (Exception e) {
             // TODO: websocket
             return false;
@@ -108,18 +108,11 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
     @Override
     public boolean pullImage(InstallationParam installationParam, List<Machine> machineList) {
         String image = installationParam.getImage();
-        String[] repoAndTag = SplitUtil.splitByColon(image);
-        String repository = repoAndTag[0];
-        String tag = null;
-        if (repoAndTag.length > 1) {
-            tag = repoAndTag[1];
-        }
         List<Future<Boolean>> resultFutureList = new ArrayList<>(machineList.size());
         for (Machine machine : machineList) {
-            String finalTag = tag;
             resultFutureList.add(threadPool.submit(() -> {
                 try {
-                    dockerClientOperation.pullImage(machine.getHost(), repository, finalTag);
+                    dockerClientOperation.pullImage(machine.getHost(), image);
                 } catch (InterruptedException e) {
                     // TODO: websocket
                     return false;
@@ -129,7 +122,7 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
         }
         for (Future<Boolean> resultFuture : resultFutureList) {
             try {
-                if (!resultFuture.get(300, TimeUnit.SECONDS)) {
+                if (!resultFuture.get(TIMEOUT, TimeUnit.SECONDS)) {
                     return false;
                 }
             } catch (Exception e) {
@@ -148,38 +141,13 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
          * 远程机器：拷贝到端口目录，并修改配置文件
          * 启动
          * */
-        List<Future<Boolean>> resultFutureList = new ArrayList<>(machineList.size());
-        for (Machine machine : machineList) {
-            String host = machine.getHost();
-            resultFutureList.add(threadPool.submit(() -> {
-                try {
-                    dockerClientOperation.pullImage(host, installationParam.getImage());
-                    // TODO: websocket
-                    return true;
-                } catch (Exception e) {
-                    // TODO: websocket
-                    return false;
-                }
-            }));
-        }
-        for (Future<Boolean> resultFuture : resultFutureList) {
-            try {
-                Boolean result = resultFuture.get(TIMEOUT, TimeUnit.SECONDS);
-                if (!result) {
-                    return false;
-                }
-            } catch (Exception e) {
-                // TODO: websocket
-                return false;
-            }
-        }
         Cluster cluster = installationParam.getCluster();
         String tempName = CommonUtil.replaceSpace(cluster.getClusterName());
         String tempPath = DOCKER_TEMP_CONFIG_PATH + tempName;
         for (Machine machine : machineList) {
             try {
-                RemoteFileUtil.scp(machine, tempPath, tempPath);
-            } catch (IOException e) {
+                SSH2Util.scp(machine, tempPath, tempPath);
+            } catch (Exception e) {
                 // TODO: websocket
                 return false;
             }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH;
+import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
 
 
 /**
@@ -30,7 +31,7 @@ public class DockerClientOperation {
     @Value("${redis-manager.install.docker.docker-host:tcp://%s:2375}")
     private String dockerHost = "tcp://%s:2375";
 
-    private static final String VOLUME = DOCKER_INSTALL_BASE_PATH + ":/data";
+    private static final String VOLUME = DOCKER_INSTALL_BASE_PATH + "%d:/data";
 
     static DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
             .withReadTimeout(10000)
@@ -125,26 +126,32 @@ public class DockerClientOperation {
      * --net host \
      * -d -v /data/redis/8000:/data \
      * redis:4.0.14 \
-     * redis-server --daemonize no --cluster-enabled yes --port 8000 --bind 192.168.1.15
+     * redis-server /data/redis/docker/8000/redis.conf
      *
      * @param ip
      * @param port
      * @param image
      * @return
      */
-    public String runContainer(String ip, int port, String image, String containerName, List<String> command) {
+    public String createContainer(String ip, int port, String image, String containerName) {
         DockerClient dockerClient = getDockerClient(ip);
+        String bind = String.format(VOLUME, port);
         CreateContainerResponse container = dockerClient.createContainerCmd(image)
                 // container name
                 .withName(CommonUtil.replaceSpace(containerName) + "-" + port)
                 // host 模式启动
                 .withHostConfig(new HostConfig().withNetworkMode("host"))
                 // 挂载
-                .withBinds(Bind.parse(String.format(VOLUME, port)))
+                .withBinds(Bind.parse(bind))
+                .withRestartPolicy(RestartPolicy.alwaysRestart())
                 // 命令参数
-                .withCmd(command)
+                .withCmd("/data/" + REDIS_CONF)
                 .exec();
-        String containerId = container.getId();
+        return container.getId();
+    }
+
+    public String runContainer(String ip, String containerId) {
+        DockerClient dockerClient = getDockerClient(ip);
         dockerClient.startContainerCmd(containerId).exec();
         return containerId;
     }
@@ -210,7 +217,7 @@ public class DockerClientOperation {
      */
     public boolean pullImage(String ip, String repositoryAndTag) throws InterruptedException {
         String[] repoAndTag = SplitUtil.splitByColon(repositoryAndTag);
-        String tag = "lastest";
+        String tag = null;
         if (repoAndTag.length > 1) {
             tag = repoAndTag[1];
         }

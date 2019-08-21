@@ -92,6 +92,12 @@
             <version>4.12</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-core</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+
         <!-- ssh2 -->
         <dependency>
             <groupId>ch.ethz.ganymed</groupId>

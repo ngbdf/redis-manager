@@ -62,7 +62,7 @@ public class InstallationTemplate {
             return false;
         }
         redisNodeList = getAllNode(installationParam, redisNodeListMap);
-        boolean installSuccess = installationOperation.install(redisNodeList);
+        boolean installSuccess = installationOperation.install(installationParam, machineList, redisNodeList);
         if (!installSuccess) {
             return false;
         }

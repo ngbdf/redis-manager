@@ -1,5 +1,8 @@
 package com.newegg.ec.redis.util;
 
+import com.google.common.base.Strings;
+import com.newegg.ec.redis.entity.Machine;
+import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +30,8 @@ public class RedisConfigUtil {
 
     private static final String REQUIRE_PASS = "requirepass";
 
+    private static final String MASTER_AUTH = "masterauth";
+
     public static final int NORMAL_TYPE = 0;
 
     public static final int STANDALONE_TYPE = 1;
@@ -36,15 +41,37 @@ public class RedisConfigUtil {
     public RedisConfigUtil() {
     }
 
-    /*public static void generateRedis5ClusterConfig(String path, String requirePass) throws IOException {
-        generateRedisConfig(path, CLUSTER_TYPE, requirePass);
+    /**
+     * dir, bind, port 等变量赋值
+     *
+     * @param machine
+     * @param path
+     * @return
+     */
+    public static void variableAssignment(Machine machine, String path, List<Pair<String, String>> configList, boolean sudo) throws Exception {
+        StringBuffer commands = new StringBuffer();
+        // 进入配置文件所在目录
+        commands.append("cd " + path).append(";");
+        String cd = SSH2Util.execute(machine, commands.toString());
+        if (!Strings.isNullOrEmpty(cd)) {
+            throw new RuntimeException(cd);
+        }
+        for (Pair<String, String> configPair : configList) {
+            String key = configPair.getKey();
+            String value = configPair.getValue();
+            if (sudo) {
+                commands.append("sudo ");
+            }
+            commands.append("sed -i 's#{" + key + "}#" + value + "#g' " + REDIS_CONF + ";");
+        }
+        String result = SSH2Util.execute(machine, commands.toString());
+        if (!Strings.isNullOrEmpty(result)) {
+            throw new RuntimeException(result);
+        }
     }
 
-    public static void generateRedisStandaloneConfig(String path, String requirePass) throws IOException {
-        generateRedisConfig(path, STANDALONE_TYPE, requirePass);
-    }*/
 
-    public static void generateRedisConfig(String path, int mode, String requirePass) throws IOException {
+    public static void generateRedisConfig(String path, int mode) throws IOException {
         File file = new File(path + REDIS_CONF);
         if (file.exists()) {
             file.delete();
@@ -55,8 +82,8 @@ public class RedisConfigUtil {
         for (RedisConfig redisConfig : REDIS_CONFIG_LIST) {
             String configKey = redisConfig.getConfigKey();
             String configValue = redisConfig.getConfigValue();
-            if (Objects.equals(REQUIRE_PASS, configKey)) {
-                configValue = requirePass;
+            if (Objects.equals(REQUIRE_PASS, configKey) || Objects.equals(MASTER_AUTH, configKey)) {
+                continue;
             }
             int item = redisConfig.getMode();
             if (item == mode || item == NORMAL_TYPE) {
@@ -125,7 +152,7 @@ public class RedisConfigUtil {
 
         /** 同步 */
         // 主从同步配置
-        REDIS_CONFIG_LIST.add(new RedisConfig("slaveof", "", NORMAL_TYPE));
+        /*REDIS_CONFIG_LIST.add(new RedisConfig("slaveof", "\"\"", NORMAL_TYPE));*/
         // master 密码, 与 requirepass 一致
         REDIS_CONFIG_LIST.add(new RedisConfig("masterauth", "", NORMAL_TYPE));
         // slave 丢失连接时是否继续处理请求
@@ -222,8 +249,7 @@ public class RedisConfigUtil {
         REDIS_CONFIG_LIST.add(new RedisConfig("cluster-migration-barrier", "1", CLUSTER_TYPE));
         // 集群检测到至少有 1 个 hash slot 不可用，则停止查询服务
         REDIS_CONFIG_LIST.add(new RedisConfig("cluster-require-full-coverage", "yes", CLUSTER_TYPE));
-        //
-        REDIS_CONFIG_LIST.add(new RedisConfig("cluster-slave-no-failover", "no", CLUSTER_TYPE));
+        /*REDIS_CONFIG_LIST.add(new RedisConfig("cluster-slave-no-failover", "no", CLUSTER_TYPE));*/
 
         /** 集群 Docker/NAT 支持 */
         /*REDIS_CONFIG_LIST.add(new RedisConfig("cluster-announce-ip", "", NORMAL_TYPE));*/
@@ -262,11 +288,11 @@ public class RedisConfigUtil {
         // 是否激活重置哈希,默认:yes
         REDIS_CONFIG_LIST.add(new RedisConfig("activerehashing", "yes", NORMAL_TYPE));
         // 客户端输出缓冲区限制(客户端)
-        REDIS_CONFIG_LIST.add(new RedisConfig("client-output-buffer-limit", "normal", NORMAL_TYPE));
+        /*REDIS_CONFIG_LIST.add(new RedisConfig("client-output-buffer-limit", "normal", NORMAL_TYPE));*/
         // 客户端输出缓冲区限制(复制)
-        REDIS_CONFIG_LIST.add(new RedisConfig("client-output-buffer-limit", "slave 268435456 67108864 60", NORMAL_TYPE));
+        /*REDIS_CONFIG_LIST.add(new RedisConfig("client-output-buffer-limit", "slave 268435456 67108864 60", NORMAL_TYPE));*/
         // 客户端输出缓冲区限制(发布订阅)
-        REDIS_CONFIG_LIST.add(new RedisConfig("client-output-buffer-limit", "pubsub 33554432 8388608 60", NORMAL_TYPE));
+        /*REDIS_CONFIG_LIST.add(new RedisConfig("client-output-buffer-limit", "pubsub 33554432 8388608 60", NORMAL_TYPE));*/
         // redis4,单个客户端查询缓冲区的最大大小,默认 1gb
         REDIS_CONFIG_LIST.add(new RedisConfig("client-query-buffer-limit", "1gb", NORMAL_TYPE));
         // redis4,批量请求的单个 string 的长度限制在512MB
@@ -304,13 +330,13 @@ public class RedisConfigUtil {
         REDIS_CONFIG_LIST.add(new RedisConfig("stream-node-max-bytes", "100", NORMAL_TYPE));
         // redis5,将从主字典扫描中处理的最大 set/hash/zset/list 字段数
         REDIS_CONFIG_LIST.add(new RedisConfig("active-defrag-max-scan-fields", "1000", NORMAL_TYPE));
-        // redis5,是否始终在 Lua 脚本中启用 Lua 效果复制
+        /*// redis5,是否始终在 Lua 脚本中启用 Lua 效果复制
         REDIS_CONFIG_LIST.add(new RedisConfig("lua-replicate-commands", "yes", NORMAL_TYPE));
         // redis5,确定副本是否通过不移出独立于主实例的项来忽略 maxmemory 设置
-        REDIS_CONFIG_LIST.add(new RedisConfig("replica-ignore-maxmemory", "yes", NORMAL_TYPE));
+        REDIS_CONFIG_LIST.add(new RedisConfig("replica-ignore-maxmemory", "yes", NORMAL_TYPE));*/
         // 重命名
 
-        // redis5,在副本同步期间执行异步 flushDB
+        /*// redis5,在副本同步期间执行异步 flushDB
         REDIS_CONFIG_LIST.add(new RedisConfig("replica-lazy-flush", "no", NORMAL_TYPE));
         // redis5,对于 Redis 只读副本：如果客户端的输出缓冲区达到指定字节数，则客户端将断开连接
         REDIS_CONFIG_LIST.add(new RedisConfig("client-output-buffer-limit-replica-hard-limit", "1024000", NORMAL_TYPE));
@@ -327,11 +353,11 @@ public class RedisConfigUtil {
         //如果此参数或 min-replicas-to-write 是 0，则主节点始终接受写入请求（即使无副本可用）
         REDIS_CONFIG_LIST.add(new RedisConfig("min-replicas-max-lag", "10", NORMAL_TYPE));
         // redis5,如果启用，尝试写入只读副本的客户端将会断开连接
-        REDIS_CONFIG_LIST.add(new RedisConfig("close-on-replica-write", "yes", NORMAL_TYPE));
+        REDIS_CONFIG_LIST.add(new RedisConfig("close-on-replica-write", "yes", NORMAL_TYPE));*/
 
         /** 自定义配置 */
         // ip
-        REDIS_CONFIG_LIST.add(new RedisConfig("bind", "{ip}", NORMAL_TYPE));
+        REDIS_CONFIG_LIST.add(new RedisConfig("bind", "{bind}", NORMAL_TYPE));
         // 工作目录
         REDIS_CONFIG_LIST.add(new RedisConfig("dir", "{dir}", NORMAL_TYPE));
         // 端口
