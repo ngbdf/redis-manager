@@ -2,7 +2,7 @@ package com.newegg.ec.redis.client;
 
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisUtil;
-import com.newegg.ec.redis.util.SplitUtil;
+import com.newegg.ec.redis.util.SignUtil;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.*;
 
@@ -52,10 +52,10 @@ public class RedisClusterClient implements IRedisClusterClient {
         String line;
         List<RedisNode> redisNodeList = new ArrayList<>();
         while ((line = bufferedReader.readLine()) != null) {
-            String[] item = SplitUtil.splitBySpace(line);
+            String[] item = SignUtil.splitBySpace(line);
             String nodeId = item[0].trim();
             String ipPort = item[1];
-            Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(SplitUtil.splitByAite(ipPort)[0]);
+            Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(SignUtil.splitByAite(ipPort)[0]);
             HostAndPort hostAndPort = hostAndPortSet.iterator().next();
             String flags = item[2];
             String masterId = item[3];
@@ -139,7 +139,7 @@ public class RedisClusterClient implements IRedisClusterClient {
     @Override
     public Object string(DataCommandsParam dataCommandsParam) {
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         Object result = null;
@@ -155,7 +155,7 @@ public class RedisClusterClient implements IRedisClusterClient {
     public Object hash(DataCommandsParam dataCommandsParam) {
         AutoCommandResult autoCommandResult = new AutoCommandResult();
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         Object result = null;
@@ -183,7 +183,7 @@ public class RedisClusterClient implements IRedisClusterClient {
     @Override
     public Object list(DataCommandsParam dataCommandsParam) {
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         String[] items = removeCommandAndKey(list);
@@ -207,7 +207,7 @@ public class RedisClusterClient implements IRedisClusterClient {
     @Override
     public Object set(DataCommandsParam dataCommandsParam) {
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         Object result = null;
@@ -230,7 +230,7 @@ public class RedisClusterClient implements IRedisClusterClient {
     @Override
     public Object zset(DataCommandsParam dataCommandsParam) {
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         String param1 = list[2];

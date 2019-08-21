@@ -10,22 +10,20 @@ import com.newegg.ec.redis.plugin.install.service.DockerClientOperation;
 import com.newegg.ec.redis.util.CommonUtil;
 import com.newegg.ec.redis.util.RedisConfigUtil;
 import com.newegg.ec.redis.util.SSH2Util;
-import com.newegg.ec.redis.util.SplitUtil;
+import com.newegg.ec.redis.util.SignUtil;
+import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 
-import static com.newegg.ec.redis.util.RedisConfigUtil.CLUSTER_TYPE;
-import static com.newegg.ec.redis.util.RedisConfigUtil.STANDALONE_TYPE;
+import static com.newegg.ec.redis.plugin.install.service.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
+import static com.newegg.ec.redis.util.RedisConfigUtil.*;
 import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
+import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
  * @author Jay.H.Zou
@@ -53,7 +51,7 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
             throw new RuntimeException("images not allow empty!");
         }
         List<String> imageList = new ArrayList<>();
-        imageList.addAll(Arrays.asList(SplitUtil.splitByCommas(images.replace(" ", ""))));
+        imageList.addAll(Arrays.asList(SignUtil.splitByCommas(images.replace(SPACE, ""))));
         return imageList;
     }
 
@@ -93,7 +91,6 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
         }
         // 判断redis version
         Cluster cluster = installationParam.getCluster();
-        String redisPassword = cluster.getRedisPassword();
         try {
             // 配置文件写入本地机器
             String tempPath = DOCKER_TEMP_CONFIG_PATH + CommonUtil.replaceSpace(cluster.getClusterName());
@@ -141,17 +138,59 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
          * 远程机器：拷贝到端口目录，并修改配置文件
          * 启动
          * */
+        boolean sudo = installationParam.isSudo();
         Cluster cluster = installationParam.getCluster();
-        String tempName = CommonUtil.replaceSpace(cluster.getClusterName());
-        String tempPath = DOCKER_TEMP_CONFIG_PATH + tempName;
+        String tempClusterName = CommonUtil.replaceSpace(cluster.getClusterName());
+        String tempPath = DOCKER_TEMP_CONFIG_PATH + tempClusterName;
+        Map<Machine, List<RedisNode>> machineAndRedisNodeList = new HashMap<>(machineList.size());
         for (Machine machine : machineList) {
-            try {
-                SSH2Util.scp(machine, tempPath, tempPath);
-            } catch (Exception e) {
-                // TODO: websocket
-                return false;
+            List<RedisNode> machineNodes = machineAndRedisNodeList.get(machine);
+            if (machineNodes == null) {
+                machineNodes = new ArrayList<>();
+            }
+            for (RedisNode redisNode : redisNodeList) {
+                if (Objects.equals(machine.getHost(), redisNode.getHost())) {
+                    machineNodes.add(redisNode);
+                }
+            }
+            machineAndRedisNodeList.put(machine, machineNodes);
+        }
+        // 分发配置文件
+        for (Map.Entry<Machine, List<RedisNode>> entry : machineAndRedisNodeList.entrySet()) {
+            Machine machine = entry.getKey();
+            List<RedisNode> redisNodes = entry.getValue();
+            for (RedisNode redisNode : redisNodes) {
+                String targetPath = DOCKER_INSTALL_BASE_PATH + redisNode.getPort();
+                try {
+                    // create directory
+                    SSH2Util.mkdir(machine, targetPath, sudo);
+                    // TODO: 测试非sudo能否scp
+                    // 本机拷贝至安装机器节点
+                    SSH2Util.scp(machine, tempPath, targetPath);
+                    // 修改配置文件
+                    List<Pair<String, String>> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort(), REDIS_DEFAULT_WORK_DIR);
+                    RedisConfigUtil.variableAssignment(machine, targetPath, configs, sudo);
+                } catch (Exception e) {
+                    // TODO: websocket
+                    return false;
+                }
+                // run docker
+                try {
+
+                } catch (Exception e) {
+
+                }
             }
         }
+
         return false;
+    }
+
+    private List<Pair<String, String>> getBaseConfigs(String bind, int port, String dir) {
+        List<Pair<String, String>> configs = new ArrayList<>();
+        configs.add(new Pair<>(BIND, bind));
+        configs.add(new Pair<>(PORT, port + ""));
+        configs.add(new Pair<>(DIR, dir));
+        return configs;
     }
 }

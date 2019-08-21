@@ -73,7 +73,7 @@ public class RedisUtil {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(info.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
         String line;
         while ((line = bufferedReader.readLine()) != null) {
-            String[] keyValue = SplitUtil.splitByColon(line);
+            String[] keyValue = SignUtil.splitByColon(line);
             if (keyValue.length != 2) {
                 continue;
             }
@@ -88,12 +88,12 @@ public class RedisUtil {
     }
 
     public static final Set<HostAndPort> nodesToHostAndPortSet(String nodes) {
-        String[] nodeList = SplitUtil.splitByCommas(nodes);
+        String[] nodeList = SignUtil.splitByCommas(nodes);
         int length = nodeList.length;
         Set<HostAndPort> hostAndPortSet = new HashSet<>(length);
         if (length > 0) {
             for (String node : nodeList) {
-                String[] ipAndPort = SplitUtil.splitByColon(node);
+                String[] ipAndPort = SignUtil.splitByColon(node);
                 HostAndPort hostAndPort = new HostAndPort(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
                 hostAndPortSet.add(hostAndPort);
             }

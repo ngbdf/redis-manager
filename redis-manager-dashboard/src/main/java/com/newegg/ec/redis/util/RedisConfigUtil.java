@@ -28,9 +28,15 @@ public class RedisConfigUtil {
 
     public static final String REDIS_CONF = "redis.conf";
 
-    private static final String REQUIRE_PASS = "requirepass";
+    public static final String REQUIRE_PASS = "requirepass";
 
-    private static final String MASTER_AUTH = "masterauth";
+    public static final String MASTER_AUTH = "masterauth";
+
+    public static final String BIND = "bind";
+
+    public static final String PORT = "port";
+
+    public static final String DIR = "dir";
 
     public static final int NORMAL_TYPE = 0;
 

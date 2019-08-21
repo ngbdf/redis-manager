@@ -20,6 +20,8 @@ public class InstallationParam {
 
     private boolean autoInit;
 
+    private boolean sudo;
+
     private int startPort;
 
     private int endPort;
@@ -64,6 +66,14 @@ public class InstallationParam {
 
     public void setAutoInit(boolean autoInit) {
         this.autoInit = autoInit;
+    }
+
+    public boolean isSudo() {
+        return sudo;
+    }
+
+    public void setSudo(boolean sudo) {
+        this.sudo = sudo;
     }
 
     public int getStartPort() {

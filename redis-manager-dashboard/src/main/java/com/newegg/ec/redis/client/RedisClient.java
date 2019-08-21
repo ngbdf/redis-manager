@@ -3,7 +3,7 @@ package com.newegg.ec.redis.client;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisUtil;
-import com.newegg.ec.redis.util.SplitUtil;
+import com.newegg.ec.redis.util.SignUtil;
 import javafx.util.Pair;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -138,14 +138,14 @@ public class RedisClient implements IRedisClient {
             if (!node.getKey().contains(NodeRole.SLAVE.getValue())) {
                 continue;
             }
-            String[] keyAndValues = SplitUtil.splitByCommas(node.getValue());
+            String[] keyAndValues = SignUtil.splitByCommas(node.getValue());
             if (keyAndValues.length < 2) {
                 return nodeList;
             }
             String slaveIp = null;
             String slavePort = null;
             for (String keyAndValue : keyAndValues) {
-                String[] keyAndValueArray = SplitUtil.splitByEqualSign(keyAndValue);
+                String[] keyAndValueArray = SignUtil.splitByEqualSign(keyAndValue);
                 String key = keyAndValueArray[0];
                 String val = keyAndValueArray[1];
                 if (Objects.equals(key, IP)) {
@@ -224,7 +224,7 @@ public class RedisClient implements IRedisClient {
     public Object string(DataCommandsParam dataCommandsParam) {
         jedis.select(dataCommandsParam.getDatabase());
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         Object result = null;
@@ -241,7 +241,7 @@ public class RedisClient implements IRedisClient {
         jedis.select(dataCommandsParam.getDatabase());
         AutoCommandResult autoCommandResult = new AutoCommandResult();
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         Object result = null;
@@ -270,7 +270,7 @@ public class RedisClient implements IRedisClient {
     public Object list(DataCommandsParam dataCommandsParam) {
         jedis.select(dataCommandsParam.getDatabase());
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         String[] items = removeCommandAndKey(list);
@@ -295,7 +295,7 @@ public class RedisClient implements IRedisClient {
     public Object set(DataCommandsParam dataCommandsParam) {
         jedis.select(dataCommandsParam.getDatabase());
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         Object result = null;
@@ -319,7 +319,7 @@ public class RedisClient implements IRedisClient {
     public Object zset(DataCommandsParam dataCommandsParam) {
         jedis.select(dataCommandsParam.getDatabase());
         String command = dataCommandsParam.getCommand();
-        String[] list = SplitUtil.splitBySpace(command);
+        String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
         String param1 = list[2];

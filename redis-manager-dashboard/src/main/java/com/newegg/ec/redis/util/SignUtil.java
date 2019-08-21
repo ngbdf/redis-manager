@@ -1,13 +1,10 @@
 package com.newegg.ec.redis.util;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author Jay.H.Zou
  * @date 8/7/2019
  */
-public class SplitUtil {
+public class SignUtil {
 
     public static final String COMMAS = ",";
 
@@ -23,7 +20,7 @@ public class SplitUtil {
 
     public static final String SPACE = " ";
 
-    private SplitUtil() {
+    private SignUtil() {
     }
 
     public static final String[] splitByMinus(String str) {

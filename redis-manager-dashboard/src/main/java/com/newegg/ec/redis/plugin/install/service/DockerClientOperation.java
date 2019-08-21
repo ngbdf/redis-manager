@@ -9,7 +9,7 @@ import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.util.CommonUtil;
-import com.newegg.ec.redis.util.SplitUtil;
+import com.newegg.ec.redis.util.SignUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +17,7 @@ import java.util.*;
 
 import static com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
+import static com.newegg.ec.redis.util.SignUtil.MINUS;
 
 
 /**
@@ -32,6 +33,8 @@ public class DockerClientOperation {
     private String dockerHost = "tcp://%s:2375";
 
     private static final String VOLUME = DOCKER_INSTALL_BASE_PATH + "%d:/data";
+
+    public static final String REDIS_DEFAULT_WORK_DIR = "/data/";
 
     static DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
             .withReadTimeout(10000)
@@ -138,14 +141,15 @@ public class DockerClientOperation {
         String bind = String.format(VOLUME, port);
         CreateContainerResponse container = dockerClient.createContainerCmd(image)
                 // container name
-                .withName(CommonUtil.replaceSpace(containerName) + "-" + port)
+                .withName(CommonUtil.replaceSpace(containerName) + MINUS + port)
                 // host 模式启动
                 .withHostConfig(new HostConfig().withNetworkMode("host"))
                 // 挂载
                 .withBinds(Bind.parse(bind))
+                // 自动启动
                 .withRestartPolicy(RestartPolicy.alwaysRestart())
-                // 命令参数
-                .withCmd("/data/" + REDIS_CONF)
+                // 配置文件
+                .withCmd(REDIS_DEFAULT_WORK_DIR + REDIS_CONF)
                 .exec();
         return container.getId();
     }
@@ -216,7 +220,7 @@ public class DockerClientOperation {
      * @throws InterruptedException
      */
     public boolean pullImage(String ip, String repositoryAndTag) throws InterruptedException {
-        String[] repoAndTag = SplitUtil.splitByColon(repositoryAndTag);
+        String[] repoAndTag = SignUtil.splitByColon(repositoryAndTag);
         String tag = null;
         if (repoAndTag.length > 1) {
             tag = repoAndTag[1];

@@ -44,7 +44,7 @@ public class SSH2Util {
         if (sudo) {
             command.append("sudo ");
         }
-        command.append("cp ").append(file).append(SplitUtil.SPACE).append(targetPath);
+        command.append("cp ").append(file).append(SignUtil.SPACE).append(targetPath);
         System.err.println(command.toString());
         String result = execute(machine, command.toString());
         if (!Strings.isNullOrEmpty(result)) {

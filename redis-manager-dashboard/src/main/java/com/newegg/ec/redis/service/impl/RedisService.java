@@ -9,7 +9,7 @@ import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
-import com.newegg.ec.redis.util.SplitUtil;
+import com.newegg.ec.redis.util.SignUtil;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +64,8 @@ public class RedisService implements IRedisService {
                     if (Strings.isNullOrEmpty(value)) {
                         continue;
                     }
-                    String[] subContents = SplitUtil.splitByCommas(value);
-                    String[] keyAndNumber = SplitUtil.splitByEqualSign(subContents[0]);
+                    String[] subContents = SignUtil.splitByCommas(value);
+                    String[] keyAndNumber = SignUtil.splitByEqualSign(subContents[0]);
                     long number = Long.valueOf(keyAndNumber[1]);
                     database.put(dbIndex, number);
                 }
@@ -457,7 +457,7 @@ public class RedisService implements IRedisService {
         Map<RedisNode, List<SlotBalanceUtil.Shade>> nodeIdAndShadeMap = new HashMap<>(redisMasterNodeList.size() - 1);
         redisMasterNodeList.forEach(masterNode -> {
             String slotRanges = masterNode.getSlotRange();
-            String[] slotRangeArr = SplitUtil.splitByCommas(slotRanges);
+            String[] slotRangeArr = SignUtil.splitByCommas(slotRanges);
             int length = slotRangeArr.length;
             List<SlotBalanceUtil.Shade> shadeList = new ArrayList<>(length);
             if (length == 1) {

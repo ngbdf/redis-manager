@@ -119,9 +119,9 @@ public class RedisNodeInfoUtil {
             String nodeInfoField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, key);
             // for keys and expires
             if (key.startsWith(DB_PREFIX)) {
-                String[] subContents = SplitUtil.splitByCommas(value);
+                String[] subContents = SignUtil.splitByCommas(value);
                 for (String subContent : subContents) {
-                    String[] split = SplitUtil.splitByEqualSign(subContent);
+                    String[] split = SignUtil.splitByEqualSign(subContent);
                     if (split.length != 2) {
                         continue;
                     }

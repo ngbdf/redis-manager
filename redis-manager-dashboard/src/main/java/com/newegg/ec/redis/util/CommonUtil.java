@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.util;
 
-import static com.newegg.ec.redis.util.SplitUtil.MINUS;
-import static com.newegg.ec.redis.util.SplitUtil.SPACE;
+import static com.newegg.ec.redis.util.SignUtil.MINUS;
+import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
  * @author Jay.H.Zou
