@@ -16,18 +16,23 @@ public class SSH2UtilTest {
     @Before
     public void buildMachine() {
         machine.setHost("");
-        machine.setUserName("hadoop");
-        machine.setPassword("123@1234");
+        machine.setUserName("root");
+        machine.setPassword("");
     }
 
     @Test
     public void scp() throws Exception {
-        SSH2Util.scp(machine, "redis.conf", "/home/hadoop/jay");
+        SSH2Util.scp(machine, "E:\\redis.conf", "/data/");
     }
 
     @Test
     public void cp() throws Exception {
         SSH2Util.copy(machine, "/home/hadoop/jay/redis.conf", DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH + port, true);
+    }
+
+    @Test
+    public void createFile() throws Exception {
+        SSH2Util.createFile(machine, "/data/", true);
     }
 
     @Test

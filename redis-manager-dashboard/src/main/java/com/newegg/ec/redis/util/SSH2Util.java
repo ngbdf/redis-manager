@@ -2,13 +2,15 @@ package com.newegg.ec.redis.util;
 
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
+import ch.ethz.ssh2.SCPOutputStream;
 import ch.ethz.ssh2.Session;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
-import com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation;
-import com.newegg.ec.redis.plugin.install.service.impl.MachineInstallationOperation;
 
 import java.io.*;
+
+import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
+import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
  * @author Jay.H.Zou
@@ -25,7 +27,16 @@ public class SSH2Util {
             connection = getConnection(machine);
             SCPClient scpClient = connection.createSCPClient();
             File file = new File(localPath);
-            scpClient.put(localPath, file.length(), targetPath, "0755");
+            SCPOutputStream outputStream = scpClient.put(localPath, file.length(), targetPath, null);
+            /*byte[] b = new byte[1024];
+            FileInputStream fis = new FileInputStream(file);
+            int i;
+            while ((i = fis.read(b)) != -1) {
+                outputStream.write(b, 0, i);
+            }
+            outputStream.flush();
+            fis.close();
+            outputStream.close();*/
         } finally {
             close(connection);
         }
@@ -44,7 +55,7 @@ public class SSH2Util {
         if (sudo) {
             command.append("sudo ");
         }
-        command.append("cp ").append(file).append(SignUtil.SPACE).append(targetPath);
+        command.append("cp ").append(file).append(SPACE).append(targetPath);
         System.err.println(command.toString());
         String result = execute(machine, command.toString());
         if (!Strings.isNullOrEmpty(result)) {
@@ -57,13 +68,10 @@ public class SSH2Util {
         if (sudo) {
             command.append("sudo ");
         }
-        if (file.startsWith(DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH)
-                || file.startsWith(MachineInstallationOperation.MACHINE_INSTALL_BASE_PATH)) {
-            command.append("rm -rf ").append(file);
-            String result = execute(machine, command.toString());
-            if (!Strings.isNullOrEmpty(result)) {
-                throw new RuntimeException(result);
-            }
+        command.append("rm -rf ").append(file);
+        String result = execute(machine, command.toString());
+        if (!Strings.isNullOrEmpty(result)) {
+            throw new RuntimeException(result);
         }
 
     }
@@ -85,6 +93,23 @@ public class SSH2Util {
         if (!Strings.isNullOrEmpty(result)) {
             throw new RuntimeException(result);
         }
+    }
+
+    public static void createFile(Machine machine, String path, boolean sudo) throws Exception {
+        rm(machine, path + REDIS_CONF, sudo);
+        StringBuffer command = new StringBuffer();
+        command.append("cd ").append(path).append(";");
+        if (sudo) {
+            command.append("sudo ");
+        }
+        command.append("touch ").append("redis.conf;");
+        if (sudo) {
+            command.append("sudo ");
+        }
+        command.append("echo '#redis config'>>redis.conf;echo 'bind 10.1.1.1'>>redis.conf;");
+        System.err.println(command.toString());
+        String execute = execute(machine, command.toString());
+        System.err.println(execute);
     }
 
     /**

@@ -76,6 +76,40 @@ public class RedisConfigUtil {
         }
     }
 
+    /**
+     *
+     * @param path
+     * @param mode
+     * @throws IOException
+     */
+    public static void generateRedisConfig2(String path, int mode) throws IOException {
+        File file = new File(path + REDIS_CONF);
+        if (file.exists()) {
+            file.delete();
+        }
+        file.createNewFile();
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(file, true), "UTF-8"));
+        for (RedisConfig redisConfig : REDIS_CONFIG_LIST) {
+            String configKey = redisConfig.getConfigKey();
+            String configValue = redisConfig.getConfigValue();
+            if (Objects.equals(REQUIRE_PASS, configKey) || Objects.equals(MASTER_AUTH, configKey)) {
+                continue;
+            }
+            int item = redisConfig.getMode();
+            if (item == mode || item == NORMAL_TYPE) {
+                String itemConfig = configKey + " " + configValue;
+                try {
+                    bufferedWriter.write(itemConfig);
+                    bufferedWriter.newLine();
+                } catch (IOException e) {
+                    logger.error("Writer config failed, " + itemConfig, e);
+                }
+            }
+        }
+        bufferedWriter.flush();
+        bufferedWriter.close();
+    }
 
     public static void generateRedisConfig(String path, int mode) throws IOException {
         File file = new File(path + REDIS_CONF);
