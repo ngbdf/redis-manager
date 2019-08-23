@@ -109,16 +109,13 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
         List<Future<Boolean>> resultFutureList = new ArrayList<>();
         for (Machine machine : machineList) {
             resultFutureList.add(threadPool.submit(() -> {
-                try {
-                    /*
-                     * 本机执行：安装包、redis.conf 拷贝到远程机器临时目录
-                     * */
-                    SSH2Util.scp(machine, localImagePath, MACHINE_INSTALL_BASE_PATH);
-                    return true;
-                } catch (IOException e) {
-                    // TODO: websocket
-                    return false;
-                }
+                /*
+                 * 本机执行：安装包、redis.conf 拷贝到远程机器临时目录
+                 * */
+                //SSH2Util.scp(machine, localImagePath, MACHINE_INSTALL_BASE_PATH);
+                return true;
+                // TODO: websocket
+                //return false;
             }));
         }
         for (Future<Boolean> resultFuture : resultFutureList) {

@@ -166,7 +166,7 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
                     SSH2Util.mkdir(machine, targetPath, sudo);
                     // TODO: 测试非sudo能否scp
                     // 本机拷贝至安装机器节点
-                    SSH2Util.scp(machine, tempPath, targetPath);
+                    //SSH2Util.scp(machine, tempPath, targetPath);
                     // 修改配置文件
                     List<Pair<String, String>> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort(), REDIS_DEFAULT_WORK_DIR);
                     RedisConfigUtil.variableAssignment(machine, targetPath, configs, sudo);

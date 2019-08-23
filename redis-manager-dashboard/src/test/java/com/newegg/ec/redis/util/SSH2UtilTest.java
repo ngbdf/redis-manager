@@ -16,13 +16,8 @@ public class SSH2UtilTest {
     @Before
     public void buildMachine() {
         machine.setHost("");
-        machine.setUserName("root");
-        machine.setPassword("");
-    }
-
-    @Test
-    public void scp() throws Exception {
-        SSH2Util.scp(machine, "E:\\redis.conf", "/data/");
+        machine.setUserName("");
+        machine.setPassword("1234");
     }
 
     @Test
@@ -31,8 +26,8 @@ public class SSH2UtilTest {
     }
 
     @Test
-    public void createFile() throws Exception {
-        SSH2Util.createFile(machine, "/data/", true);
+    public void remoteCopy() throws Exception {
+        SSH2Util.remoteCopy(machine, "/data/test/", "redis3.0.6.tar", "http://10.16.50.209:8182/package/redis3.0.6.tar", true);
     }
 
     @Test
@@ -42,6 +37,6 @@ public class SSH2UtilTest {
 
     @Test
     public void rm() throws Exception {
-        SSH2Util.rm(machine, DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH + port, true);
+        SSH2Util.rm(machine, "/data/test/redis3.0.6.tar.1", true);
     }
 }

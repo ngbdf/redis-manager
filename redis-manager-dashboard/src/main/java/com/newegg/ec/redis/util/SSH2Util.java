@@ -1,9 +1,6 @@
 package com.newegg.ec.redis.util;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.SCPClient;
-import ch.ethz.ssh2.SCPOutputStream;
-import ch.ethz.ssh2.Session;
+import ch.ethz.ssh2.*;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
 
@@ -21,25 +18,15 @@ public class SSH2Util {
     private SSH2Util() {
     }
 
-    public static void scp(Machine machine, String localPath, String targetPath) throws Exception {
-        Connection connection = null;
-        try {
-            connection = getConnection(machine);
-            SCPClient scpClient = connection.createSCPClient();
-            File file = new File(localPath);
-            SCPOutputStream outputStream = scpClient.put(localPath, file.length(), targetPath, null);
-            /*byte[] b = new byte[1024];
-            FileInputStream fis = new FileInputStream(file);
-            int i;
-            while ((i = fis.read(b)) != -1) {
-                outputStream.write(b, 0, i);
-            }
-            outputStream.flush();
-            fis.close();
-            outputStream.close();*/
-        } finally {
-            close(connection);
+    public static void remoteCopy(Machine machine, String targetPath, String fileName, String remoteUrl, boolean sudo) throws Exception {
+        rm(machine, targetPath + fileName, sudo);
+        StringBuffer command = new StringBuffer();
+        if (sudo) {
+            command.append("sudo ");
         }
+        String template = "/usr/bin/wget -P %s %s";
+        command.append(String.format(template, targetPath, remoteUrl));
+        String execute = execute(machine, command.toString());
     }
 
     /**
@@ -95,7 +82,7 @@ public class SSH2Util {
         }
     }
 
-    public static void createFile(Machine machine, String path, boolean sudo) throws Exception {
+    /*public static void createFile(Machine machine, String path, boolean sudo) throws Exception {
         rm(machine, path + REDIS_CONF, sudo);
         StringBuffer command = new StringBuffer();
         command.append("cd ").append(path).append(";");
@@ -106,11 +93,11 @@ public class SSH2Util {
         if (sudo) {
             command.append("sudo ");
         }
-        command.append("echo '#redis config'>>redis.conf;echo 'bind 10.1.1.1'>>redis.conf;");
+        command.append("sh -c \"echo '#redis config' > redis.conf; echo 'bind 101.1.2.2' >> redis.conf\";");
         System.err.println(command.toString());
         String execute = execute(machine, command.toString());
         System.err.println(execute);
-    }
+    }*/
 
     /**
      * 执行Shell脚本或命令
