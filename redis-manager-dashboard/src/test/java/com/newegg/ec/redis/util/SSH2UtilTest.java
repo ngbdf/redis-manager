@@ -5,8 +5,6 @@ import com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperati
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-
 public class SSH2UtilTest {
 
     Machine machine = new Machine();
@@ -27,7 +25,7 @@ public class SSH2UtilTest {
 
     @Test
     public void remoteCopy() throws Exception {
-        SSH2Util.remoteCopy(machine, "/data/test/", "redis3.0.6.tar", "http://10.16.50.209:8182/package/redis3.0.6.tar", true);
+        SSH2Util.remoteCopy(machine, "/data/test/", "redis3.0.6.tar", "http://121.1.1.1:8182/package/redis3.0.6.tar", true);
     }
 
     @Test

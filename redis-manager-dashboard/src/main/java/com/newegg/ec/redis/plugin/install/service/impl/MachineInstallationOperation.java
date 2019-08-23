@@ -1,28 +1,18 @@
 package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
-import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractInstallationOperation;
-import com.newegg.ec.redis.util.CommonUtil;
-import com.newegg.ec.redis.util.RedisConfigUtil;
-import com.newegg.ec.redis.util.SSH2Util;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import static com.newegg.ec.redis.util.RedisConfigUtil.CLUSTER_TYPE;
-import static com.newegg.ec.redis.util.RedisConfigUtil.STANDALONE_TYPE;
-import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 
 /**
  * @author Jay.H.Zou
@@ -67,30 +57,6 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
     @Override
     public boolean checkEnvironment(InstallationParam installationParam, List<Machine> machineList) {
 
-        return true;
-    }
-
-    @Override
-    public boolean buildConfig(InstallationParam installationParam) {
-        // redis 集群模式
-        String redisMode = installationParam.getRedisMode();
-        int mode;
-        if (Objects.equals(redisMode, STANDALONE)) {
-            mode = STANDALONE_TYPE;
-        } else {
-            // default: cluster
-            mode = CLUSTER_TYPE;
-        }
-        // 判断redis version
-        Cluster cluster = installationParam.getCluster();
-        String redisPassword = cluster.getRedisPassword();
-        try {
-            // 配置文件写入本地机器
-            RedisConfigUtil.generateRedisConfig(MACHINE_TEMP_CONFIG_PATH + CommonUtil.replaceSpace(cluster.getClusterName()), mode);
-        } catch (Exception e) {
-            // TODO: websocket
-            return false;
-        }
         return true;
     }
 

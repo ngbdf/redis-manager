@@ -33,6 +33,7 @@ redis-manager:
     slow-log-limit-single: 100
   # installation configuration
   install:
+    data-dir: /data/redis-manager/
     # physics machine
     machine:
       package-path: /redis/machine/

@@ -20,6 +20,8 @@ public class SignUtil {
 
     public static final String SPACE = " ";
 
+    public static final String SLASH = "/";
+
     private SignUtil() {
     }
 

@@ -18,11 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.plugin.install.service.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
 import static com.newegg.ec.redis.util.RedisConfigUtil.*;
-import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
@@ -76,30 +76,6 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
             }
         }
         return true;
-    }
-
-    @Override
-    public boolean buildConfig(InstallationParam installationParam) {
-        // redis 集群模式
-        String redisMode = installationParam.getRedisMode();
-        int mode;
-        if (Objects.equals(redisMode, STANDALONE)) {
-            mode = STANDALONE_TYPE;
-        } else {
-            // default: cluster
-            mode = CLUSTER_TYPE;
-        }
-        // 判断redis version
-        Cluster cluster = installationParam.getCluster();
-        try {
-            // 配置文件写入本地机器
-            String tempPath = DOCKER_TEMP_CONFIG_PATH + CommonUtil.replaceSpace(cluster.getClusterName());
-            RedisConfigUtil.generateRedisConfig(tempPath, mode);
-        } catch (Exception e) {
-            // TODO: websocket
-            return false;
-        }
-        return false;
     }
 
     @Override
@@ -193,4 +169,5 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
         configs.add(new Pair<>(DIR, dir));
         return configs;
     }
+
 }
