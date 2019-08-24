@@ -26,10 +26,9 @@ public interface InstallationOperation {
      * 检查所有机器之间是否网络相通, n! 次
      *
      * @param installationParam
-     * @param machineList
      * @return
      */
-    boolean checkEnvironment(InstallationParam installationParam, List<Machine> machineList);
+    boolean checkEnvironment(InstallationParam installationParam);
 
     /**
      * 1.从内存中获取相应版本的配置
@@ -40,8 +39,8 @@ public interface InstallationOperation {
      */
     boolean buildConfig(InstallationParam installationParam);
 
-    boolean pullImage(InstallationParam installationParam, List<Machine> machineList);
+    boolean pullImage(InstallationParam installationParam);
 
-    boolean install(InstallationParam installationParam, List<Machine> machineList, List<RedisNode> redisNodeList);
+    boolean install(InstallationParam installationParam);
 
 }

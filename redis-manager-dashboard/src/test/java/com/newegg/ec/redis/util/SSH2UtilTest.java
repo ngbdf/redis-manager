@@ -25,7 +25,7 @@ public class SSH2UtilTest {
 
     @Test
     public void remoteCopy() throws Exception {
-        SSH2Util.remoteCopy(machine, "/data/test/", "redis3.0.6.tar", "http://121.1.1.1:8182/package/redis3.0.6.tar", true);
+        SSH2Util.wget(machine, "/data/test/", "redis3.0.6.tar", "http://121.1.1.1:8182/package/redis3.0.6.tar", true);
     }
 
     @Test

@@ -1,16 +1,14 @@
 package com.newegg.ec.redis.util;
 
 import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.Session;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,13 +22,31 @@ import java.util.Map;
  */
 public class LinuxInfoUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(LinuxInfoUtil.class);
-
     public static final String MEMORY_FREE = "memory_free";
 
     public static final String VERSION = "version";
 
     private LinuxInfoUtil() {
+    }
+
+    public static String getIpAddress() throws SocketException {
+        Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+        InetAddress ip;
+        while (allNetInterfaces.hasMoreElements()) {
+            NetworkInterface netInterface = allNetInterfaces.nextElement();
+            if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
+                continue;
+            } else {
+                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    ip = addresses.nextElement();
+                    if (ip instanceof Inet4Address) {
+                        return ip.getHostAddress();
+                    }
+                }
+            }
+        }
+        return "127.0.0.1";
     }
 
     public static final boolean login(Machine machine) throws Exception {

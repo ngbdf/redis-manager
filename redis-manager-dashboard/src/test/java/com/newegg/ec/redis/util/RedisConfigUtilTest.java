@@ -2,13 +2,12 @@ package com.newegg.ec.redis.util;
 
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation;
-import javafx.util.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -33,11 +32,15 @@ public class RedisConfigUtilTest {
     @Test
     public void variableAssignment() throws Exception {
         String path = DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH + port;
-        List<Pair<String, String>> configList = new ArrayList<>();
-        configList.add(new Pair<>("port", "8000"));
-        configList.add(new Pair<>("dir",path));
-        configList.add(new Pair<>("bind", "10.16.50.217"));
-        RedisConfigUtil.variableAssignment(machine, path, configList, true);
+        Map<String, String> configs = new HashMap<>();
+        configs.put("port", "8000");
+        configs.put("dir", path);
+        configs.put("bind", "10.16.50.217");
+        RedisConfigUtil.variableAssignment(machine, path, configs, true);
     }
 
+    @Test
+    public void copyRedisConfigToRemote() throws Exception {
+        RedisConfigUtil.copyRedisConfigToRemote(machine, "/data/redis/docker/9000/", "172.16.35.219:8000/site/API-Gateway.png", true);
+    }
 }

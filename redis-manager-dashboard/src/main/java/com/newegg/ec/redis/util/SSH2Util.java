@@ -6,6 +6,7 @@ import com.newegg.ec.redis.entity.Machine;
 
 import java.io.*;
 
+import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
 import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
@@ -17,40 +18,33 @@ public class SSH2Util {
     private SSH2Util() {
     }
 
-    /**
-     * @param machine
-     * @param targetPath 目标目录
-     * @param fileName   文件名
-     * @param url        问价下载url
-     * @param sudo
-     * @throws Exception
-     */
-    public static String remoteCopy(Machine machine, String targetPath, String fileName, String url, boolean sudo) throws Exception {
+    @Deprecated
+    public static void wget(Machine machine, String targetPath, String fileName, String remoteUrl, boolean sudo) throws Exception {
         rm(machine, targetPath + fileName, sudo);
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
         }
         String template = "/usr/bin/wget -P %s %s";
-        command.append(String.format(template, targetPath, url));
-        return execute(machine, command.toString());
+        command.append(String.format(template, targetPath, remoteUrl));
+        String execute = execute(machine, command.toString());
     }
 
     /**
      * copy file
      *
      * @param machine
-     * @param filePath
+     * @param file
      * @param targetPath
      * @throws Exception
      */
-    public static void copy(Machine machine, String filePath, String targetPath, boolean sudo) throws Exception {
+    @Deprecated
+    public static void copy(Machine machine, String file, String targetPath, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
         }
-        String template = "cp %s %s";
-        command.append(String.format(template, filePath, targetPath));
+        command.append("cp ").append(file).append(SPACE).append(targetPath);
         System.err.println(command.toString());
         String result = execute(machine, command.toString());
         if (!Strings.isNullOrEmpty(result)) {
@@ -58,13 +52,13 @@ public class SSH2Util {
         }
     }
 
-    public static void rm(Machine machine, String filePath, boolean sudo) throws Exception {
+    @Deprecated
+    public static void rm(Machine machine, String file, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
         }
-        String template = "rm -rf %s";
-        command.append(String.format(template, filePath));
+        command.append("rm -rf ").append(file);
         String result = execute(machine, command.toString());
         if (!Strings.isNullOrEmpty(result)) {
             throw new RuntimeException(result);
@@ -79,14 +73,17 @@ public class SSH2Util {
      * @param path
      * @throws Exception
      */
-    public static String mkdir(Machine machine, String path, boolean sudo) throws Exception {
+    @Deprecated
+    public static void mkdir(Machine machine, String path, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
         }
-        String template = "mkdir -p %s";
-        command.append(String.format(template, path));
-        return execute(machine, command.toString());
+        command.append("mkdir -p ").append(path);
+        String result = execute(machine, command.toString());
+        if (!Strings.isNullOrEmpty(result)) {
+            throw new RuntimeException(result);
+        }
     }
 
     /*public static void createFile(Machine machine, String path, boolean sudo) throws Exception {
@@ -131,10 +128,11 @@ public class SSH2Util {
         return result;
     }
 
+    @Deprecated
     public static String localExecute(String command) throws Exception {
         String result;
-        String[] commands = {"/bin/sh", "-c", command};
-        Process ps = Runtime.getRuntime().exec(commands);
+        String[] cmds = {"/bin/sh", "-c", command};
+        Process ps = Runtime.getRuntime().exec(cmds);
         InputStream in = ps.getInputStream();
         result = processStandardOutput(in);
         InputStream errorIn = ps.getErrorStream();
@@ -159,6 +157,7 @@ public class SSH2Util {
             try {
                 inputStream.close();
             } catch (IOException e) {
+                // e.printStackTrace();
             }
         }
         return sb.toString();

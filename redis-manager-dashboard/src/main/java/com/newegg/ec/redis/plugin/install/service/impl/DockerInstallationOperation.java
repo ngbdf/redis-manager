@@ -1,6 +1,8 @@
 package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
@@ -12,10 +14,12 @@ import com.newegg.ec.redis.util.RedisConfigUtil;
 import com.newegg.ec.redis.util.SSH2Util;
 import com.newegg.ec.redis.util.SignUtil;
 import javafx.util.Pair;
+import org.glassfish.jersey.internal.util.collection.NullableMultivaluedHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.*;
 import java.util.concurrent.Future;
@@ -38,12 +42,15 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
 
     public static final String DOCKER_INSTALL_BASE_PATH = "/data/redis/docker/";
 
-    public static final String DOCKER_TEMP_CONFIG_PATH = "/data/redis/docker/temp/";
-
     private static final int TIMEOUT = 300;
 
     @Autowired
     private DockerClientOperation dockerClientOperation;
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        INSTALL_BASE_PATH = DOCKER_INSTALL_BASE_PATH;
+    }
 
     @Override
     public List<String> getImageList() {
@@ -61,11 +68,11 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
      * 检查 docker 环境(开启docker远程访问), 2375
      *
      * @param installationParam
-     * @param machineList
      * @return
      */
     @Override
-    public boolean checkEnvironment(InstallationParam installationParam, List<Machine> machineList) {
+    public boolean checkEnvironment(InstallationParam installationParam) {
+        List<Machine> machineList = installationParam.getMachineList();
         for (Machine machine : machineList) {
             String host = machine.getHost();
             try {
@@ -79,7 +86,8 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
     }
 
     @Override
-    public boolean pullImage(InstallationParam installationParam, List<Machine> machineList) {
+    public boolean pullImage(InstallationParam installationParam) {
+        List<Machine> machineList = installationParam.getMachineList();
         String image = installationParam.getImage();
         List<Future<Boolean>> resultFutureList = new ArrayList<>(machineList.size());
         for (Machine machine : machineList) {
@@ -107,67 +115,13 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
     }
 
     @Override
-    public boolean install(InstallationParam installationParam, List<Machine> machineList, List<RedisNode> redisNodeList) {
+    public boolean install(InstallationParam installationParam) {
         /*
-         * 远程机器：创建容器
-         * 本机：拷贝配置文件至远程机器，删除本地临时配置文件
-         * 远程机器：拷贝到端口目录，并修改配置文件
-         * 启动
+         * 启动容器
          * */
-        boolean sudo = installationParam.isSudo();
-        Cluster cluster = installationParam.getCluster();
-        String tempClusterName = CommonUtil.replaceSpace(cluster.getClusterName());
-        String tempPath = DOCKER_TEMP_CONFIG_PATH + tempClusterName;
-        Map<Machine, List<RedisNode>> machineAndRedisNodeList = new HashMap<>(machineList.size());
-        for (Machine machine : machineList) {
-            List<RedisNode> machineNodes = machineAndRedisNodeList.get(machine);
-            if (machineNodes == null) {
-                machineNodes = new ArrayList<>();
-            }
-            for (RedisNode redisNode : redisNodeList) {
-                if (Objects.equals(machine.getHost(), redisNode.getHost())) {
-                    machineNodes.add(redisNode);
-                }
-            }
-            machineAndRedisNodeList.put(machine, machineNodes);
-        }
-        // 分发配置文件
-        for (Map.Entry<Machine, List<RedisNode>> entry : machineAndRedisNodeList.entrySet()) {
-            Machine machine = entry.getKey();
-            List<RedisNode> redisNodes = entry.getValue();
-            for (RedisNode redisNode : redisNodes) {
-                String targetPath = DOCKER_INSTALL_BASE_PATH + redisNode.getPort();
-                try {
-                    // create directory
-                    SSH2Util.mkdir(machine, targetPath, sudo);
-                    // TODO: 测试非sudo能否scp
-                    // 本机拷贝至安装机器节点
-                    //SSH2Util.scp(machine, tempPath, targetPath);
-                    // 修改配置文件
-                    List<Pair<String, String>> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort(), REDIS_DEFAULT_WORK_DIR);
-                    RedisConfigUtil.variableAssignment(machine, targetPath, configs, sudo);
-                } catch (Exception e) {
-                    // TODO: websocket
-                    return false;
-                }
-                // run docker
-                try {
-
-                } catch (Exception e) {
-
-                }
-            }
-        }
 
         return false;
     }
 
-    private List<Pair<String, String>> getBaseConfigs(String bind, int port, String dir) {
-        List<Pair<String, String>> configs = new ArrayList<>();
-        configs.add(new Pair<>(BIND, bind));
-        configs.add(new Pair<>(PORT, port + ""));
-        configs.add(new Pair<>(DIR, dir));
-        return configs;
-    }
 
 }

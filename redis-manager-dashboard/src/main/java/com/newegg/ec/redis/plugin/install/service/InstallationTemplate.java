@@ -33,22 +33,14 @@ public class InstallationTemplate {
      */
     public boolean install(AbstractInstallationOperation installationOperation, InstallationParam installationParam) {
         Cluster cluster = installationParam.getCluster();
-        // TODO: 用于标记是否是新建集群
-        int clusterId = cluster.getClusterId();
         // 用于 websocket
         String clusterName = cluster.getClusterName();
-
-
-        List<String> machineIdList = installationParam.getMachineIdList();
-        List<Machine> machineList = machineService.getMachineListByIds(machineIdList);
-
-
-        boolean checkEnvironmentPass = checkEnvironment(installationOperation, installationParam, machineList);
+        getMachineList(installationParam);
+        boolean checkEnvironmentPass = checkEnvironment(installationOperation, installationParam);
         if (!checkEnvironmentPass) {
             return false;
         }
-        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
-        boolean pullImageSuccess = installationOperation.pullImage(installationParam, machineList);
+        boolean pullImageSuccess = installationOperation.pullImage(installationParam);
         if (!pullImageSuccess) {
             return false;
         }
@@ -56,13 +48,12 @@ public class InstallationTemplate {
         if (!buildRedisConfigSuccess) {
             return false;
         }
-        Map<RedisNode, List<RedisNode>> redisNodeListMap = buildTopology(installationParam, machineList);
+        Map<RedisNode, List<RedisNode>> redisNodeListMap = buildTopology(installationParam);
         Set<RedisNode> redisMasterNodes = redisNodeListMap.keySet();
         if (redisMasterNodes.isEmpty()) {
             return false;
         }
-        redisNodeList = getAllNode(installationParam, redisNodeListMap);
-        boolean installSuccess = installationOperation.install(installationParam, machineList, redisNodeList);
+        boolean installSuccess = installationOperation.install(installationParam);
         if (!installSuccess) {
             return false;
         }
@@ -78,16 +69,28 @@ public class InstallationTemplate {
     }
 
     /**
+     * 获取机器列表
+     * 1. 选择机器
+     * 2. 通过文本框获取
+     * @param installationParam
+     */
+    private void getMachineList(InstallationParam installationParam) {
+        List<String> machineIdList = installationParam.getMachineIdList();
+        List<Machine> machineList = machineService.getMachineListByIds(machineIdList);
+        installationParam.setMachineList(machineList);
+    }
+
+    /**
      * 检查安装环境：Machine资源、Docker 环境、Kubernetes 环境
      *
      * @param installationOperation
      * @param installationParam
      * @return
      */
-    public boolean checkEnvironment(AbstractInstallationOperation installationOperation, InstallationParam installationParam, List<Machine> machineByMachineGroup) {
+    public boolean checkEnvironment(AbstractInstallationOperation installationOperation, InstallationParam installationParam) {
         //检查机器内存CPU资源
         // 不同安装方式的环境监测
-        return installationOperation.checkInstallationEnv(installationParam, machineByMachineGroup);
+        return installationOperation.checkInstallationEnv(installationParam);
     }
 
 
@@ -101,7 +104,7 @@ public class InstallationTemplate {
      *
      * @return
      */
-    public Map<RedisNode, List<RedisNode>> buildTopology(InstallationParam installationParam, List<Machine> machineByMachineGroup) {
+    public Map<RedisNode, List<RedisNode>> buildTopology(InstallationParam installationParam) {
         Map<RedisNode, List<RedisNode>> clusterTopology = new HashMap<>();
 
         return clusterTopology;

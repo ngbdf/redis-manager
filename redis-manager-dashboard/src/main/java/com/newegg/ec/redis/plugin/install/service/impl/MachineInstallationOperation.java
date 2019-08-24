@@ -2,10 +2,10 @@ package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
-import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractInstallationOperation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import static com.newegg.ec.redis.util.SignUtil.SLASH;
 
 /**
  * @author Jay.H.Zou
@@ -26,10 +28,10 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
 
     public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
 
-    /**
-     * 存放redis.conf的临时目录
-     */
-    public static final String MACHINE_TEMP_CONFIG_PATH = "/data/redis/machine/temp/";
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        INSTALL_BASE_PATH = MACHINE_INSTALL_BASE_PATH;
+    }
 
     @Override
     public List<String> getImageList() {
@@ -55,8 +57,7 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
     }
 
     @Override
-    public boolean checkEnvironment(InstallationParam installationParam, List<Machine> machineList) {
-
+    public boolean checkEnvironment(InstallationParam installationParam) {
         return true;
     }
 
@@ -66,11 +67,12 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
      * @return
      */
     @Override
-    public boolean pullImage(InstallationParam installationParam, List<Machine> machineList) {
+    public boolean pullImage(InstallationParam installationParam) {
         String image = installationParam.getImage();
-        if (!packagePath.endsWith("/")) {
-            packagePath += "/";
+        if (!packagePath.endsWith(SLASH)) {
+            packagePath += SLASH;
         }
+        List<Machine> machineList = installationParam.getMachineList();
         String localImagePath = packagePath + image;
         List<Future<Boolean>> resultFutureList = new ArrayList<>();
         for (Machine machine : machineList) {
@@ -98,7 +100,7 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
     }
 
     @Override
-    public boolean install(InstallationParam installationParam, List<Machine> machineList, List<RedisNode> redisNodeList) {
+    public boolean install(InstallationParam installationParam) {
         /*
          * 远程机器执行：创建相应的端口目录，将安装包；redis.conf拷贝至端口目录；解压；删除安装包
          * 远程机器执行：修改配置文件
@@ -106,4 +108,5 @@ public class MachineInstallationOperation extends AbstractInstallationOperation 
          */
         return false;
     }
+
 }

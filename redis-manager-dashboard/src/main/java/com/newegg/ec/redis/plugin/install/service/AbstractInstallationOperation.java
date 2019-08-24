@@ -1,8 +1,10 @@
 package com.newegg.ec.redis.plugin.install.service;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.config.SystemConfig;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
@@ -11,11 +13,13 @@ import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisConfigUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import java.io.File;
+import java.net.SocketException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,9 +28,10 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static com.newegg.ec.redis.plugin.install.service.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
 import static com.newegg.ec.redis.util.LinuxInfoUtil.MEMORY_FREE;
 import static com.newegg.ec.redis.util.RedisConfigUtil.*;
-import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
+import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.SLASH;
 
 /**
@@ -42,20 +47,35 @@ public abstract class AbstractInstallationOperation implements InstallationOpera
             new ThreadFactoryBuilder().setNameFormat("pull-image-pool-thread-%d").build(),
             new ThreadPoolExecutor.AbortPolicy());
 
-    @Value("${redis-manager.install.data-dir:/data/redis-manager/}")
-    private String dataDir;
+    @Value("${server.port}")
+    private int serverPort;
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        if (!dataDir.endsWith(SLASH)) {
-            dataDir += SLASH;
-        }
-        File file = new File(dataDir);
-        if (!file.exists()) {
-            if (file.mkdirs()) {
-                throw new RuntimeException(dataDir + " create failed.");
+    /**
+     * redis-manager 数据存放目录
+     */
+    @Autowired
+    private SystemConfig systemConfig;
+
+    /**
+     * 目标机器安装基础目录
+     */
+    protected String INSTALL_BASE_PATH;
+
+    protected AbstractInstallationOperation() {
+    }
+
+    public void installInfoPrepare(InstallationParam installationParam) {
+        Multimap<Machine, RedisNode> machineAndRedisNode = ArrayListMultimap.create();
+        List<Machine> machineList = installationParam.getMachineList();
+        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        for (Machine machine : machineList) {
+            for (RedisNode redisNode : redisNodeList) {
+                if (Objects.equals(machine.getHost(), redisNode.getHost())) {
+                    machineAndRedisNode.put(machine, redisNode);
+                }
             }
         }
+        installationParam.setMachineAndRedisNode(machineAndRedisNode);
     }
 
     /**
@@ -63,11 +83,11 @@ public abstract class AbstractInstallationOperation implements InstallationOpera
      * Check ports
      *
      * @param installationParam
-     * @param machineList
      * @return
      */
-    public boolean checkInstallationEnv(InstallationParam installationParam, List<Machine> machineList) {
+    public boolean checkInstallationEnv(InstallationParam installationParam) {
         boolean commonCheck = true;
+        List<Machine> machineList = installationParam.getMachineList();
         for (Machine machine : machineList) {
             Map<String, String> info = null;
             try {
@@ -100,41 +120,45 @@ public abstract class AbstractInstallationOperation implements InstallationOpera
                 commonCheck = false;
             }
         }
-        return commonCheck && checkEnvironment(installationParam, machineList);
+        return commonCheck && checkEnvironment(installationParam);
     }
 
     @Override
     public boolean buildConfig(InstallationParam installationParam) {
-        // redis 集群模式
-        String redisMode = installationParam.getRedisMode();
-        int mode;
-        if (Objects.equals(redisMode, STANDALONE)) {
-            mode = STANDALONE_TYPE;
-        } else {
-            // default: cluster
-            mode = CLUSTER_TYPE;
-        }
-        // 判断redis version
-        Cluster cluster = installationParam.getCluster();
+        boolean sudo = installationParam.isSudo();
+        String url;
         try {
-            // 配置文件写入本地机器
-            String tempPath = redisConfPath(dataDir, cluster.getClusterName());
-            RedisConfigUtil.generateRedisConfig(tempPath, mode);
-        } catch (Exception e) {
-            // TODO: websocket
+            // 模式
+            String redisMode = installationParam.getRedisMode();
+            // eg: ip:port/config/cluster/redis.conf
+            url = LinuxInfoUtil.getIpAddress() + COLON + serverPort + CONFIG_PATH + redisMode + SLASH + REDIS_CONF;
+        } catch (SocketException e) {
             return false;
+        }
+        Multimap<Machine, RedisNode> machineAndRedisNode = installationParam.getMachineAndRedisNode();
+        // 分发配置文件
+        for (Map.Entry<Machine, RedisNode> entry : machineAndRedisNode.entries()) {
+            Machine machine = entry.getKey();
+            RedisNode redisNode = entry.getValue();
+            String targetPath = INSTALL_BASE_PATH + redisNode.getPort();
+            try {
+                RedisConfigUtil.copyRedisConfigToRemote(machine, targetPath, url, sudo);
+                // 修改配置文件
+                Map<String, String> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort(), REDIS_DEFAULT_WORK_DIR);
+                RedisConfigUtil.variableAssignment(machine, targetPath, configs, sudo);
+            } catch (Exception e) {
+                // TODO: websocket
+                return false;
+            }
         }
         return true;
     }
 
-
-    public void clean(InstallationParam installationParam) {
-        // 删除redis.conf临时目录
-        Cluster cluster = installationParam.getCluster();
-        String tempPath = redisConfDir(dataDir, cluster.getClusterName());
-        File tempRedisConf = new File(tempPath);
-        tempRedisConf.delete();
-
+    private Map<String, String> getBaseConfigs(String bind, int port, String dir) {
+        Map<String, String> configs = new HashMap<>(3);
+        configs.put(BIND, bind);
+        configs.put(PORT, port + "");
+        configs.put(DIR, dir);
+        return configs;
     }
-
 }

@@ -2,13 +2,13 @@ package com.newegg.ec.redis.util;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
-import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.newegg.ec.redis.util.SignUtil.SLASH;
@@ -25,11 +25,11 @@ import static com.newegg.ec.redis.util.SignUtil.SPACE;
  */
 public class RedisConfigUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedisConfigUtil.class);
-
     private static final List<RedisConfig> REDIS_CONFIG_LIST = new ArrayList<>();
 
     private static final String UTF_8 = "UTF-8";
+
+    public static final String CONFIG_PATH = "/config/";
 
     public static final String REDIS_CONF = "redis.conf";
 
@@ -59,7 +59,7 @@ public class RedisConfigUtil {
      * @param path
      * @return
      */
-    public static void variableAssignment(Machine machine, String path, List<Pair<String, String>> configList, boolean sudo) throws Exception {
+    public static void variableAssignment(Machine machine, String path, Map<String, String> configs, boolean sudo) throws Exception {
         StringBuffer commands = new StringBuffer();
         // 进入配置文件所在目录
         commands.append("cd " + path).append(";");
@@ -67,9 +67,9 @@ public class RedisConfigUtil {
         if (!Strings.isNullOrEmpty(cd)) {
             throw new RuntimeException(cd);
         }
-        for (Pair<String, String> configPair : configList) {
-            String key = configPair.getKey();
-            String value = configPair.getValue();
+        for (Map.Entry<String, String> entry : configs.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
             if (sudo) {
                 commands.append("sudo ");
             }
@@ -107,6 +107,29 @@ public class RedisConfigUtil {
         bufferedWriter.close();
     }
 
+    public static String copyRedisConfigToRemote(Machine machine, String targetPath, String url, boolean sudo) throws Exception {
+        StringBuffer command = new StringBuffer();
+        if (sudo) {
+            command.append("sudo ");
+        }
+        // 删除旧的数据，如果有旧数据的话
+        String rmTemplate = "rm -rf %s;";
+        command.append(String.format(rmTemplate, targetPath));
+        if (sudo) {
+            command.append("sudo ");
+        }
+        // create directory
+        String mkdirTemplate = "mkdir -p %s;";
+        command.append(String.format(mkdirTemplate, targetPath));
+        if (sudo) {
+            command.append("sudo ");
+        }
+        // 本机拷贝至安装机器节点
+        String wgetTemplate = "/usr/bin/wget -P %s %s";
+        command.append(String.format(wgetTemplate, targetPath, url));
+        return SSH2Util.execute(machine, command.toString());
+    }
+
     public static List<RedisConfig> getRedisConfig(int mode) {
         List<RedisConfig> configs = new ArrayList<>();
         for (RedisConfig redisConfig : REDIS_CONFIG_LIST) {
@@ -125,16 +148,6 @@ public class RedisConfigUtil {
 
     public static List<RedisConfig> getAllRedisConfig() {
         return REDIS_CONFIG_LIST;
-    }
-
-    public static String redisConfPath(String dataDir, String clusterName) {
-        return redisConfDir(dataDir, clusterName) + REDIS_CONF;
-    }
-
-    public static String redisConfDir(String dataDir, String clusterName) {
-        StringBuffer path = new StringBuffer();
-        path.append(dataDir).append(CommonUtil.replaceSpace(clusterName)).append(SLASH);
-        return path.toString();
     }
 
     /**

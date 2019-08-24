@@ -1,7 +1,10 @@
 package com.newegg.ec.redis.plugin.install.entity;
 
+import com.google.common.collect.Multimap;
 import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
+import org.jvnet.hk2.component.MultiMap;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +17,11 @@ public class InstallationParam {
 
     private Cluster cluster;
 
+    private boolean create;
+
     private List<String> machineIdList;
+
+    private List<Machine> machineList;
 
     private boolean autoBuild;
 
@@ -30,11 +37,14 @@ public class InstallationParam {
 
     List<RedisNode> redisNodeList;
 
+    Multimap<Machine, RedisNode> machineAndRedisNode;
+
     Map<String, String> configMap;
 
     private String redisMode;
 
     private InstallationEnvironment installationEnvironment;
+
 
     public Cluster getCluster() {
         return cluster;
@@ -44,12 +54,28 @@ public class InstallationParam {
         this.cluster = cluster;
     }
 
+    public boolean isCreate() {
+        return create;
+    }
+
+    public void setCreate(boolean create) {
+        this.create = create;
+    }
+
     public List<String> getMachineIdList() {
         return machineIdList;
     }
 
     public void setMachineIdList(List<String> machineIdList) {
         this.machineIdList = machineIdList;
+    }
+
+    public List<Machine> getMachineList() {
+        return machineList;
+    }
+
+    public void setMachineList(List<Machine> machineList) {
+        this.machineList = machineList;
     }
 
     public boolean isAutoBuild() {
@@ -108,6 +134,14 @@ public class InstallationParam {
         this.redisNodeList = redisNodeList;
     }
 
+    public Multimap<Machine, RedisNode> getMachineAndRedisNode() {
+        return machineAndRedisNode;
+    }
+
+    public void setMachineAndRedisNode(Multimap<Machine, RedisNode> machineAndRedisNode) {
+        this.machineAndRedisNode = machineAndRedisNode;
+    }
+
     public Map<String, String> getConfigMap() {
         return configMap;
     }
@@ -131,5 +165,4 @@ public class InstallationParam {
     public void setInstallationEnvironment(InstallationEnvironment installationEnvironment) {
         this.installationEnvironment = installationEnvironment;
     }
-
 }
