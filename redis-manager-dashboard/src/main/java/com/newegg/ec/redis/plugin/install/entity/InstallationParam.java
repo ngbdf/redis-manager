@@ -4,7 +4,6 @@ import com.google.common.collect.Multimap;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
-import org.jvnet.hk2.component.MultiMap;
 
 import java.util.List;
 import java.util.Map;
@@ -39,12 +38,13 @@ public class InstallationParam {
 
     Multimap<Machine, RedisNode> machineAndRedisNode;
 
+    Multimap<RedisNode, RedisNode> topology;
+
     Map<String, String> configMap;
 
     private String redisMode;
 
     private InstallationEnvironment installationEnvironment;
-
 
     public Cluster getCluster() {
         return cluster;
@@ -140,6 +140,14 @@ public class InstallationParam {
 
     public void setMachineAndRedisNode(Multimap<Machine, RedisNode> machineAndRedisNode) {
         this.machineAndRedisNode = machineAndRedisNode;
+    }
+
+    public Multimap<RedisNode, RedisNode> getTopology() {
+        return topology;
+    }
+
+    public void setTopology(Multimap<RedisNode, RedisNode> topology) {
+        this.topology = topology;
     }
 
     public Map<String, String> getConfigMap() {

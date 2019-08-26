@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.newegg.ec.redis.client.RedisURI.MAX_ATTEMPTS;
@@ -48,7 +49,7 @@ public class RedisClusterClient implements IRedisClusterClient {
     public List<RedisNode> clusterNodes() throws Exception {
         Jedis jedis = redisClient.getJedisClient();
         String nodes = jedis.clusterNodes();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(nodes.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(nodes.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
         String line;
         List<RedisNode> redisNodeList = new ArrayList<>();
         while ((line = bufferedReader.readLine()) != null) {

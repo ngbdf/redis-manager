@@ -7,6 +7,7 @@ import redis.clients.jedis.HostAndPort;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Jay.H.Zou
@@ -74,10 +75,11 @@ public interface IRedisService {
      * change master
      *
      * @param cluster
-     * @param replicaNode: masterId 已被替换
+     * @param masterNode
+     * @param slaveNode
      * @return
      */
-    boolean clusterReplicate(Cluster cluster, RedisNode replicaNode);
+    String clusterReplicate(Cluster cluster, RedisNode masterNode, RedisNode slaveNode);
 
     boolean clusterFailOver(Cluster cluster, RedisNode newMasterNode);
 
@@ -89,10 +91,11 @@ public interface IRedisService {
      * if failed, please try it
      *
      * @param cluster
+     * @param firstNode
      * @param redisNodeList
      * @return
      */
-    boolean clusterMeet(Cluster cluster, List<RedisNode> redisNodeList);
+    String clusterMeet(Cluster cluster, RedisNode firstNode, List<RedisNode> redisNodeList);
 
     String clusterAddSlots(Cluster cluster, RedisNode masterNode, SlotBalanceUtil.Shade shade);
 
@@ -132,5 +135,6 @@ public interface IRedisService {
      */
     void autoGenerateConfigFile(Cluster cluster);
 
+    String updateRedisPassword(Cluster cluster);
 
 }

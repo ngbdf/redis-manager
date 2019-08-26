@@ -8,8 +8,8 @@ import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
-import com.newegg.ec.redis.util.SlotBalanceUtil;
 import com.newegg.ec.redis.util.SignUtil;
+import com.newegg.ec.redis.util.SlotBalanceUtil;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +24,8 @@ import java.util.*;
 
 import static com.newegg.ec.redis.client.IDatabaseCommand.*;
 import static com.newegg.ec.redis.util.RedisClusterInfoUtil.OK;
+import static com.newegg.ec.redis.util.RedisConfigUtil.MASTER_AUTH;
+import static com.newegg.ec.redis.util.RedisConfigUtil.REQUIRE_PASS;
 import static com.newegg.ec.redis.util.RedisUtil.*;
 
 /**
@@ -80,7 +82,7 @@ public class RedisService implements IRedisService {
     public List<RedisNode> getRedisNodeList(Cluster cluster) {
         RedisURI redisURI = new RedisURI(cluster.getNodes(), cluster.getRedisPassword());
         String redisMode = cluster.getRedisMode();
-        List<RedisNode> nodeList = null;
+        List<RedisNode> nodeList = new ArrayList<>();
         if (STANDALONE.equalsIgnoreCase(redisMode)) {
             RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
             try {
@@ -290,21 +292,21 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public boolean clusterReplicate(Cluster cluster, RedisNode replicaNode) {
-        String newMasterId = replicaNode.getMasterId();
+    public String clusterReplicate(Cluster cluster, RedisNode masterNode, RedisNode slaveNode) {
+        String newMasterId = masterNode.getMasterId();
         String redisPassword = cluster.getRedisPassword();
         if (Strings.isNullOrEmpty(newMasterId)) {
-            return false;
+            return "master node id empty!";
         }
         try {
-            RedisURI redisURI = new RedisURI(replicaNode.getHost(), replicaNode.getPort(), redisPassword);
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(slaveNode, redisPassword);
             redisClient.clusterReplicate(newMasterId);
             redisClient.close();
-            return true;
+            return null;
         } catch (Exception e) {
-            logger.error(replicaNode.getHost() + ":" + replicaNode.getPort() + " replicate " + newMasterId + " failed.", e);
-            return false;
+            String message = slaveNode.getHost() + ":" + slaveNode.getPort() + " replicate " + newMasterId + " failed.";
+            logger.error(message, e);
+            return message + e.getMessage();
         }
     }
 
@@ -324,29 +326,30 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public boolean clusterMeet(Cluster cluster, List<RedisNode> redisNodeList) {
-        String nodes = cluster.getNodes();
-        String clusterName = cluster.getClusterName();
-        String redisPassword = cluster.getRedisPassword();
+    public String clusterMeet(Cluster cluster, RedisNode firstNode, List<RedisNode> redisNodeList) {
+        StringBuffer result = new StringBuffer();
         RedisClient redisClient;
         try {
-            RedisURI redisURI = new RedisURI(nodes, redisPassword);
-            redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            redisClient = RedisClientFactory.buildRedisClient(firstNode);
         } catch (Exception e) {
-            logger.error("Create redis client failed, cluster name: " + clusterName, e);
-            return false;
+            String message = "Create redis client failed.";
+            logger.error(message, e);
+            result.append(message).append(e.getMessage());
+            return result.toString();
         }
         for (RedisNode redisNode : redisNodeList) {
             String host = redisNode.getHost();
             int port = redisNode.getPort();
             try {
                 redisClient.clusterMeet(host, port);
+                redisClient.close();
             } catch (Exception e) {
-                logger.error("Cluster meet " + host + ":" + port + " failed, cluster name: " + clusterName, e);
+                String message = "Cluster meet " + host + ":" + port + " failed.";
+                logger.error(message, e);
+                result.append(message).append(e.getMessage());
             }
         }
-        redisClient.close();
-        return true;
+        return result.toString();
     }
 
     @Override
@@ -358,8 +361,7 @@ public class RedisService implements IRedisService {
             slots[j] = i;
         }
         try {
-            RedisURI redisURI = new RedisURI(masterNode.getHost(), masterNode.getPort(), cluster.getRedisPassword());
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(masterNode, cluster.getRedisPassword());
             String result = redisClient.clusterAddSlots(slots);
             return Objects.equals(result, OK) ? result : null;
         } catch (Exception e) {
@@ -570,6 +572,30 @@ public class RedisService implements IRedisService {
     @Override
     public void autoGenerateConfigFile(Cluster cluster) {
 
+    }
+
+    @Override
+    public String updateRedisPassword(Cluster cluster) {
+        String redisPassword = cluster.getRedisPassword();
+        StringBuffer result = new StringBuffer();
+        if (!Strings.isNullOrEmpty(redisPassword)) {
+            List<RedisNode> redisNodeList = getRedisNodeList(cluster);
+
+            redisNodeList.forEach(redisNode -> {
+                try {
+                    RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode);
+                    redisClient.setConfig(new Pair<>(MASTER_AUTH, redisPassword));
+                    redisClient.setConfig(new Pair<>(REQUIRE_PASS, redisPassword));
+                    redisClient.rewriteConfig();
+                    redisClient.close();
+                } catch (Exception e) {
+                    String message = "Update redis password failed, host=" + redisNode.getHost() + ", port=" + redisNode.getPort() + ".";
+                    logger.error(message, e);
+                    result.append(message + e.getMessage());
+                }
+            });
+        }
+        return result.toString();
     }
 
     private IDatabaseCommand buildDatabaseCommandClient(Cluster cluster) {

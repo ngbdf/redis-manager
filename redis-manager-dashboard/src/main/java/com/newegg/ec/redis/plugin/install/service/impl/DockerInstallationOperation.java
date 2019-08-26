@@ -1,32 +1,26 @@
 package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractInstallationOperation;
 import com.newegg.ec.redis.plugin.install.service.DockerClientOperation;
-import com.newegg.ec.redis.util.CommonUtil;
-import com.newegg.ec.redis.util.RedisConfigUtil;
-import com.newegg.ec.redis.util.SSH2Util;
 import com.newegg.ec.redis.util.SignUtil;
-import javafx.util.Pair;
-import org.glassfish.jersey.internal.util.collection.NullableMultivaluedHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static com.newegg.ec.redis.plugin.install.service.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
-import static com.newegg.ec.redis.util.RedisConfigUtil.*;
+import static com.newegg.ec.redis.util.SignUtil.MINUS;
 import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
@@ -94,11 +88,11 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
             resultFutureList.add(threadPool.submit(() -> {
                 try {
                     dockerClientOperation.pullImage(machine.getHost(), image);
+                    return true;
                 } catch (InterruptedException e) {
                     // TODO: websocket
                     return false;
                 }
-                return true;
             }));
         }
         for (Future<Boolean> resultFuture : resultFutureList) {
@@ -114,14 +108,31 @@ public class DockerInstallationOperation extends AbstractInstallationOperation {
         return true;
     }
 
+    /**
+     * run container
+     *
+     * @param installationParam
+     * @return
+     */
     @Override
     public boolean install(InstallationParam installationParam) {
-        /*
-         * 启动容器
-         * */
-
-        return false;
+        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        String image = installationParam.getImage();
+        Cluster cluster = installationParam.getCluster();
+        String clusterName = cluster.getClusterName();
+        String containerNamePrefix = SignUtil.replaceSpaceToMinus(clusterName);
+        for (RedisNode redisNode : redisNodeList) {
+            int port = redisNode.getPort();
+            String host = redisNode.getHost();
+            String containerName = containerNamePrefix + MINUS + port;
+            try {
+                String containerId = dockerClientOperation.createContainer(host, port, image, containerName);
+                dockerClientOperation.runContainer(host, containerId);
+            } catch (Exception e) {
+                // TODO: websocket
+                return false;
+            }
+        }
+        return true;
     }
-
-
 }

@@ -25,6 +25,10 @@ public class SignUtil {
     private SignUtil() {
     }
 
+    public static final String replaceSpaceToMinus(String str) {
+        return str.replace(SPACE, MINUS);
+    }
+
     public static final String[] splitByMinus(String str) {
         return splitBySign(str, MINUS);
     }

@@ -53,14 +53,14 @@ public class SlotBalanceUtil {
         public Shade(String slotRange) {
             String[] startAndEnd = SignUtil.splitByMinus(slotRange);
             int length = startAndEnd.length;
-            int start = Integer.valueOf(startAndEnd[0]);
+            int start = Integer.parseInt(startAndEnd[0]);
             this.startSlot = start;
             if (length == 1) {
                 this.endSlot = start;
                 this.slotCount = 1;
             }
             if (length == 2) {
-                int end = Integer.valueOf(startAndEnd[1]);
+                int end = Integer.parseInt(startAndEnd[1]);
                 this.endSlot = end;
                 this.slotCount = end - start + 1;
             }

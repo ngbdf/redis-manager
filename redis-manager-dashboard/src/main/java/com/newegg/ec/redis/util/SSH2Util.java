@@ -18,7 +18,6 @@ public class SSH2Util {
     private SSH2Util() {
     }
 
-    @Deprecated
     public static void wget(Machine machine, String targetPath, String fileName, String remoteUrl, boolean sudo) throws Exception {
         rm(machine, targetPath + fileName, sudo);
         StringBuffer command = new StringBuffer();
@@ -34,31 +33,30 @@ public class SSH2Util {
      * copy file
      *
      * @param machine
-     * @param file
+     * @param originalPath
      * @param targetPath
      * @throws Exception
      */
-    @Deprecated
-    public static void copy(Machine machine, String file, String targetPath, boolean sudo) throws Exception {
+    public static void copy(Machine machine, String originalPath, String targetPath, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
         }
-        command.append("cp ").append(file).append(SPACE).append(targetPath);
-        System.err.println(command.toString());
+        String template = "cp %s %s";
+        command.append(String.format(template, originalPath, targetPath));
         String result = execute(machine, command.toString());
         if (!Strings.isNullOrEmpty(result)) {
             throw new RuntimeException(result);
         }
     }
 
-    @Deprecated
-    public static void rm(Machine machine, String file, boolean sudo) throws Exception {
+    public static void rm(Machine machine, String filePath, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
         }
-        command.append("rm -rf ").append(file);
+        String template = "rm -rf %s";
+        command.append(String.format(template, filePath));
         String result = execute(machine, command.toString());
         if (!Strings.isNullOrEmpty(result)) {
             throw new RuntimeException(result);
@@ -73,7 +71,6 @@ public class SSH2Util {
      * @param path
      * @throws Exception
      */
-    @Deprecated
     public static void mkdir(Machine machine, String path, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {

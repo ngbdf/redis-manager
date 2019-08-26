@@ -107,26 +107,26 @@ public class RedisConfigUtil {
         bufferedWriter.close();
     }
 
-    public static String copyRedisConfigToRemote(Machine machine, String targetPath, String url, boolean sudo) throws Exception {
+    public static String copyRedisConfigToRemote(Machine machine, String tempPath, String url, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
         }
         // 删除旧的数据，如果有旧数据的话
         String rmTemplate = "rm -rf %s;";
-        command.append(String.format(rmTemplate, targetPath));
+        command.append(String.format(rmTemplate, tempPath));
         if (sudo) {
             command.append("sudo ");
         }
         // create directory
         String mkdirTemplate = "mkdir -p %s;";
-        command.append(String.format(mkdirTemplate, targetPath));
+        command.append(String.format(mkdirTemplate, tempPath));
         if (sudo) {
             command.append("sudo ");
         }
         // 本机拷贝至安装机器节点
         String wgetTemplate = "/usr/bin/wget -P %s %s";
-        command.append(String.format(wgetTemplate, targetPath, url));
+        command.append(String.format(wgetTemplate, tempPath, url));
         return SSH2Util.execute(machine, command.toString());
     }
 

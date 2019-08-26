@@ -2,13 +2,15 @@ package com.newegg.ec.redis.util;
 
 import java.sql.Timestamp;
 
+import static javax.management.timer.Timer.ONE_MINUTE;
+
 /**
  * @author Jay.H.Zou
  * @date 8/3/2019
  */
 public class TimeRangeUtil {
 
-    public static final long FIVE_MINUTES = 5 * 60 * 1000;
+    public static final long FIVE_MINUTES = 5 * ONE_MINUTE;
 
     public static final long TEN_MINUTES = 2 * FIVE_MINUTES;
 

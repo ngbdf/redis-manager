@@ -1,14 +1,28 @@
 package com.newegg.ec.redis.plugin.install.service;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.newegg.ec.redis.client.RedisClientFactory;
+import com.newegg.ec.redis.client.RedisClusterClient;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.service.IMachineService;
 import com.newegg.ec.redis.service.IRedisService;
+import com.newegg.ec.redis.util.NetworkUtil;
+import com.newegg.ec.redis.util.SlotBalanceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+
+import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
+import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
+import static com.newegg.ec.redis.util.SignUtil.COLON;
+import static com.newegg.ec.redis.util.SignUtil.COMMAS;
+import static javax.management.timer.Timer.ONE_MINUTE;
+import static javax.management.timer.Timer.ONE_SECOND;
 
 /**
  * 集群安装模板
@@ -35,141 +49,225 @@ public class InstallationTemplate {
         Cluster cluster = installationParam.getCluster();
         // 用于 websocket
         String clusterName = cluster.getClusterName();
-        getMachineList(installationParam);
-        boolean checkEnvironmentPass = checkEnvironment(installationOperation, installationParam);
+        // 获取机器列表
+        buildMachineList(installationParam);
+        // 构建集群拓扑图
+        buildTopology(installationParam);
+        // 检查机器列表和节点列表
+        boolean checkResult = prepareCheck(installationParam);
+        if (checkResult) {
+            return false;
+        }
+        // 检查安装环境
+        boolean checkEnvironmentPass = installationOperation.checkInstallationEnv(installationParam);
         if (!checkEnvironmentPass) {
             return false;
         }
+        // 拉取安装包
         boolean pullImageSuccess = installationOperation.pullImage(installationParam);
         if (!pullImageSuccess) {
             return false;
         }
-        boolean buildRedisConfigSuccess = buildRedisConfig(installationOperation, installationParam);
-        if (!buildRedisConfigSuccess) {
+        // 分发配置文件
+        boolean buildConfigSuccess = installationOperation.buildConfig(installationParam);
+        if (!buildConfigSuccess) {
             return false;
         }
-        Map<RedisNode, List<RedisNode>> redisNodeListMap = buildTopology(installationParam);
-        Set<RedisNode> redisMasterNodes = redisNodeListMap.keySet();
-        if (redisMasterNodes.isEmpty()) {
-            return false;
-        }
+        // 节点安装
         boolean installSuccess = installationOperation.install(installationParam);
         if (!installSuccess) {
             return false;
         }
-        boolean buildClusterSuccess = buildCluster(redisNodeListMap);
+        boolean buildClusterSuccess = buildCluster(installationParam);
         if (!buildClusterSuccess) {
             return false;
         }
-        boolean initClusterSuccess = initCluster(installationParam, redisMasterNodes);
-        if (!initClusterSuccess) {
-            // TODO: logger, websocket
-        }
-        return saveToDB(installationParam, redisNodeListMap);
+        initSlot(cluster);
+        return saveToDB(installationParam);
     }
 
     /**
      * 获取机器列表
      * 1. 选择机器
      * 2. 通过文本框获取
+     *
      * @param installationParam
      */
-    private void getMachineList(InstallationParam installationParam) {
+    private void buildMachineList(InstallationParam installationParam) {
         List<String> machineIdList = installationParam.getMachineIdList();
         List<Machine> machineList = machineService.getMachineListByIds(machineIdList);
         installationParam.setMachineList(machineList);
     }
 
     /**
-     * 检查安装环境：Machine资源、Docker 环境、Kubernetes 环境
-     *
-     * @param installationOperation
-     * @param installationParam
-     * @return
-     */
-    public boolean checkEnvironment(AbstractInstallationOperation installationOperation, InstallationParam installationParam) {
-        //检查机器内存CPU资源
-        // 不同安装方式的环境监测
-        return installationOperation.checkInstallationEnv(installationParam);
-    }
-
-
-    public boolean buildRedisConfig(AbstractInstallationOperation installationOperation, InstallationParam installationParam) {
-        installationOperation.buildConfig(installationParam);
-        return true;
-    }
-
-    /**
      * 构建集群拓扑图
+     * 1. 用户自定义
+     * 2. 系统生成
      *
      * @return
      */
-    public Map<RedisNode, List<RedisNode>> buildTopology(InstallationParam installationParam) {
-        Map<RedisNode, List<RedisNode>> clusterTopology = new HashMap<>();
+    private void buildTopology(InstallationParam installationParam) {
+        boolean autoBuild = installationParam.isAutoBuild();
+        if (autoBuild) {
 
-        return clusterTopology;
+        }
+        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
     }
 
-    /**
-     * Get all node
-     *
-     * @param installationParam
-     * @param redisNodeListMap
-     * @return
-     */
-    public List<RedisNode> getAllNode(InstallationParam installationParam, Map<RedisNode, List<RedisNode>> redisNodeListMap) {
-        boolean autoBuild = installationParam.isAutoBuild();
-        if (!autoBuild) {
-            return installationParam.getRedisNodeList();
-        }
-        List<RedisNode> redisNodeList = new ArrayList<>();
-        Set<Map.Entry<RedisNode, List<RedisNode>>> entries = redisNodeListMap.entrySet();
-        if (entries.isEmpty()) {
-            return redisNodeList;
-        }
-        Iterator<Map.Entry<RedisNode, List<RedisNode>>> iterator = entries.iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<RedisNode, List<RedisNode>> next = iterator.next();
-            redisNodeList.add(next.getKey());
-            redisNodeList.addAll(next.getValue());
-        }
-        return redisNodeList;
+    private boolean prepareCheck(InstallationParam installationParam) {
+        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        List<Machine> machineList = installationParam.getMachineList();
+        return !(redisNodeList.isEmpty() || machineList.isEmpty());
     }
 
     /**
      * cluster master meet
      * slave build
      *
-     * @param redisNodeListMap
+     * @param installationParam
      * @return
      */
-    public boolean buildCluster(Map<RedisNode, List<RedisNode>> redisNodeListMap) {
+    private boolean buildCluster(InstallationParam installationParam) {
+        Cluster cluster = installationParam.getCluster();
+        Multimap<RedisNode, RedisNode> topology = installationParam.getTopology();
+        RedisNode seed = getSeedNode(cluster, topology);
+        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        // TODO: websocket
+        String result = redisService.clusterMeet(cluster, seed, redisNodeList);
+        List<RedisNode> redisNodeListWithInfo = waitClusterMeet(installationParam, seed, redisNodeList);
+        replicate(cluster, topology, redisNodeListWithInfo);
+        // 获取连接节点
+        generateConnectionNodes(cluster);
+        // 设置密码
+        String updateRedisPasswordResult = redisService.updateRedisPassword(cluster);
+        boolean autoInit = installationParam.isAutoInit();
+        if (autoInit) {
+            initSlot(cluster);
+        }
         return false;
+    }
+
+    /**
+     * Wait for cluster meeting
+     *
+     * @param installationParam
+     * @param seed
+     * @param redisNodeList
+     * @return
+     */
+    private List<RedisNode> waitClusterMeet(InstallationParam installationParam, RedisNode seed, List<RedisNode> redisNodeList) {
+        // 获取集群节点
+        RedisClusterClient redisClusterClient = RedisClientFactory.buildRedisClusterClient(seed);
+        List<RedisNode> redisNodeListWithInfo = new ArrayList<>();
+        long timeout = 0;
+        long tenSeconds = 10 * ONE_SECOND;
+        // 超过一分钟则认为完成
+        while (timeout < ONE_MINUTE) {
+            try {
+                redisNodeListWithInfo = redisClusterClient.clusterNodes();
+                if (redisNodeListWithInfo.size() < redisNodeList.size()) {
+                    Thread.sleep(tenSeconds);
+                    timeout += tenSeconds;
+                }
+            } catch (Exception e) {
+                // TODO: websocket
+            }
+        }
+        if (redisNodeListWithInfo.size() < redisNodeList.size()) {
+            installationParam.setAutoInit(false);
+            // TODO: websocket 告知用户少了 node
+        }
+        return redisNodeListWithInfo;
+    }
+
+    private RedisNode getSeedNode(Cluster cluster, Multimap<RedisNode, RedisNode> topology) {
+        Iterator<RedisNode> iterator = topology.keySet().iterator();
+        RedisNode seed = iterator.next();
+        if (!NetworkUtil.telnet(seed.getHost(), seed.getPort())) {
+            while (iterator.hasNext()) {
+                if (NetworkUtil.telnet(seed.getHost(), seed.getPort())) {
+                    seed = iterator.next();
+                    break;
+                }
+            }
+        }
+        cluster.setNodes(seed.getHost() + COLON + seed.getPort());
+        return seed;
+    }
+
+    private void replicate(Cluster cluster, Multimap<RedisNode, RedisNode> topology, List<RedisNode> redisNodeListWithInfo) {
+        Multimap<RedisNode, RedisNode> realTopology = ArrayListMultimap.create();
+        // 将 master 替换掉
+        for (Map.Entry<RedisNode, RedisNode> entry : topology.entries()) {
+            RedisNode masterNode = entry.getKey();
+            String host = masterNode.getHost();
+            int port = masterNode.getPort();
+            for (RedisNode redisNodeWithInfo : redisNodeListWithInfo) {
+                if (Objects.equals(host, redisNodeWithInfo.getHost()) && port == redisNodeWithInfo.getPort()) {
+                    realTopology.put(masterNode, entry.getValue());
+                }
+            }
+        }
+        realTopology.forEach((masterNode, slaveNode) -> {
+            String replicateResult = redisService.clusterReplicate(cluster, masterNode, slaveNode);
+            if (!Strings.isNullOrEmpty(replicateResult)) {
+                // TODO: websocket
+            }
+        });
+        try {
+            Thread.sleep(5 * ONE_SECOND);
+        } catch (InterruptedException e) {
+        }
+    }
+
+    private void generateConnectionNodes(Cluster cluster) {
+        List<RedisNode> allRedisNodeList = redisService.getRedisNodeList(cluster);
+        // 随机选前3个节点
+        StringBuffer nodes = new StringBuffer();
+        int size = allRedisNodeList.size();
+        RedisNode redisNode1 = allRedisNodeList.get(0);
+        nodes.append(redisNode1.getHost()).append(COLON).append(redisNode1.getPort());
+        if (size > 3) {
+            RedisNode redisNode2 = allRedisNodeList.get(1);
+            RedisNode redisNode3 = allRedisNodeList.get(2);
+            nodes.append(COMMAS).append(redisNode2.getHost()).append(COLON).append(redisNode2.getPort())
+                    .append(COMMAS).append(redisNode3.getHost()).append(COLON).append(redisNode3.getPort());
+        }
+        cluster.setNodes(nodes.toString());
+    }
+
+    /**
+     * Slot distribution for redis cluster
+     *
+     * @param cluster
+     * @return
+     */
+    private void initSlot(Cluster cluster) {
+        List<RedisNode> masterNodeList = redisService.getRedisMasterNodeList(cluster);
+        List<SlotBalanceUtil.Shade> balanceSlots = SlotBalanceUtil.balanceSlot(masterNodeList.size());
+        Map<RedisNode, SlotBalanceUtil.Shade> masterNodeShadeMap = new LinkedHashMap<>();
+        for (int i = 0; i < masterNodeList.size(); i++) {
+            RedisNode redisNode = masterNodeList.get(i);
+            SlotBalanceUtil.Shade shade = balanceSlots.get(i);
+            masterNodeShadeMap.put(redisNode, shade);
+        }
+        String result = redisService.clusterAddSlotsBatch(cluster, masterNodeShadeMap);
     }
 
     /**
      * standalone node meet
      * slave build
      *
-     * @param redisNodeListMap
+     * @param installationParam
      * @return
      */
-    public boolean buildStandalone(Map<RedisNode, List<RedisNode>> redisNodeListMap) {
+    private boolean buildStandalone(InstallationParam installationParam) {
         return false;
     }
 
-    /**
-     * Slot distribution for redis cluster
-     *
-     * @param installationParam
-     * @param redisMasterNodes
-     * @return
-     */
-    public boolean initCluster(InstallationParam installationParam, Set<RedisNode> redisMasterNodes) {
-        return true;
-    }
 
-    public boolean saveToDB(InstallationParam installationParam, Map<RedisNode, List<RedisNode>> redisNodeListMap) {
+
+    private boolean saveToDB(InstallationParam installationParam) {
         return true;
     }
 }

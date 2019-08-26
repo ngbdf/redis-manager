@@ -11,6 +11,7 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisConfigUtil;
+import com.newegg.ec.redis.util.SSH2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,22 +128,35 @@ public abstract class AbstractInstallationOperation implements InstallationOpera
     public boolean buildConfig(InstallationParam installationParam) {
         boolean sudo = installationParam.isSudo();
         String url;
+        // 模式
+        String redisMode = installationParam.getRedisMode();
         try {
-            // 模式
-            String redisMode = installationParam.getRedisMode();
             // eg: ip:port/config/cluster/redis.conf
             url = LinuxInfoUtil.getIpAddress() + COLON + serverPort + CONFIG_PATH + redisMode + SLASH + REDIS_CONF;
         } catch (SocketException e) {
             return false;
         }
-        Multimap<Machine, RedisNode> machineAndRedisNode = installationParam.getMachineAndRedisNode();
+        List<Machine> machineList = installationParam.getMachineList();
+        String tempPath = INSTALL_BASE_PATH + redisMode;
         // 分发配置文件
+        String tempRedisConf = tempPath + SLASH + REDIS_CONF;
+        for (Machine machine : machineList) {
+            try {
+                // 将 redis.conf 分发到目标机器的临时目录
+                RedisConfigUtil.copyRedisConfigToRemote(machine, tempPath, url, sudo);
+            } catch (Exception e) {
+                // TODO: websocket
+                return false;
+            }
+        }
+        Multimap<Machine, RedisNode> machineAndRedisNode = installationParam.getMachineAndRedisNode();
         for (Map.Entry<Machine, RedisNode> entry : machineAndRedisNode.entries()) {
             Machine machine = entry.getKey();
             RedisNode redisNode = entry.getValue();
             String targetPath = INSTALL_BASE_PATH + redisNode.getPort();
             try {
-                RedisConfigUtil.copyRedisConfigToRemote(machine, targetPath, url, sudo);
+                // 本地复制
+                SSH2Util.copy(machine, tempRedisConf, targetPath, sudo);
                 // 修改配置文件
                 Map<String, String> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort(), REDIS_DEFAULT_WORK_DIR);
                 RedisConfigUtil.variableAssignment(machine, targetPath, configs, sudo);
