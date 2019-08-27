@@ -39,6 +39,17 @@ public class InstallationTemplate {
     private IRedisService redisService;
 
     /**
+     * 校验参数
+     *
+     * @param installationParam
+     * @return
+     */
+    public boolean verify(InstallationParam installationParam) {
+
+        return true;
+    }
+
+    /**
      * 模板通用，调用方传入不同的策略
      *
      * @param installationOperation
@@ -46,6 +57,10 @@ public class InstallationTemplate {
      * @return
      */
     public boolean install(AbstractInstallationOperation installationOperation, InstallationParam installationParam) {
+        boolean verify = verify(installationParam);
+        if (verify) {
+            return false;
+        }
         Cluster cluster = installationParam.getCluster();
         // 用于 websocket
         String clusterName = cluster.getClusterName();
