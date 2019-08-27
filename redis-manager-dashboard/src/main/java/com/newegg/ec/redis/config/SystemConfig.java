@@ -2,13 +2,7 @@ package com.newegg.ec.redis.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.io.File;
-
-import static com.newegg.ec.redis.util.RedisConfigUtil.CONFIG_PATH;
-import static com.newegg.ec.redis.util.SignUtil.SLASH;
 
 /**
  * @author Jay.H.Zou
@@ -17,22 +11,12 @@ import static com.newegg.ec.redis.util.SignUtil.SLASH;
 @Configuration
 public class SystemConfig implements WebMvcConfigurer {
 
-    @Value("${redis-manager.install.data-dir:/data/redis-manager/}")
-    private String dataDir;
+    public static final String CONFIG_ORIGINAL_PATH = "/redis/config/";
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        if (!dataDir.endsWith(SLASH)) {
-            dataDir += SLASH;
-        }
-        File file = new File(dataDir);
-        if (!file.exists()) {
-            if (file.mkdirs()) {
-                throw new RuntimeException(dataDir + " create failed.");
-            }
-        }
-        registry.addResourceHandler(CONFIG_PATH + "**").addResourceLocations("file:" + dataDir);
-    }
+    public static final String MACHINE_PACKAGE_ORIGINAL_PATH = "/redis/machine/";
+
+    @Value("${server.port}")
+    private int serverPort;
 
    /* @Bean
     public MultipartConfigElement multipartConfigElement() {
@@ -44,8 +28,9 @@ public class SystemConfig implements WebMvcConfigurer {
         return factory.createMultipartConfig();
     }*/
 
-   public String getDataDir() {
-       return dataDir;
+   public int getServerPort(){
+       return serverPort;
    }
+
 
 }

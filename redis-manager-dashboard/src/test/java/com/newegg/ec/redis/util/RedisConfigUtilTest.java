@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.util;
 
 import com.newegg.ec.redis.entity.Machine;
-import com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation;
+import com.newegg.ec.redis.plugin.install.service.impl.DockerOperationManage;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,7 +31,7 @@ public class RedisConfigUtilTest {
 
     @Test
     public void variableAssignment() throws Exception {
-        String path = DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH + port;
+        String path = DockerOperationManage.DOCKER_INSTALL_BASE_PATH + port;
         Map<String, String> configs = new HashMap<>();
         configs.put("port", "8000");
         configs.put("dir", path);

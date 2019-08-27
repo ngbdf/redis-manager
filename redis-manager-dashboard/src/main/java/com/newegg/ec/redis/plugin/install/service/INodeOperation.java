@@ -1,17 +1,21 @@
 package com.newegg.ec.redis.plugin.install.service;
 
+import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.Machine;
+import com.newegg.ec.redis.entity.RedisNode;
+
 /**
  * @author Jay.H.Zou
  * @date 2019/7/19
  */
 public interface INodeOperation {
 
-    boolean start();
+    boolean start(Cluster cluster, Machine machine, RedisNode redisNode);
 
-    boolean stop();
+    boolean stop(Cluster cluster, Machine machine, RedisNode redisNode);
 
-    boolean restart();
+    boolean restart(Cluster cluster, Machine machine, RedisNode redisNode);
 
-    boolean remove();
+    boolean remove(Cluster cluster, Machine machine, RedisNode redisNode);
 
 }

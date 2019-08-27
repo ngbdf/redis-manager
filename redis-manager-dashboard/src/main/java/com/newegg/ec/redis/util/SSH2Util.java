@@ -7,6 +7,7 @@ import com.newegg.ec.redis.entity.Machine;
 import java.io.*;
 
 import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
+import static com.newegg.ec.redis.util.SignUtil.SEMICOLON;
 import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
@@ -50,6 +51,29 @@ public class SSH2Util {
         }
     }
 
+    public static String copyFileToRemote(Machine machine, String tempPath, String url, boolean sudo) throws Exception {
+        StringBuffer command = new StringBuffer();
+        if (sudo) {
+            command.append("sudo ");
+        }
+        // 删除旧的数据，如果有旧数据的话
+        String rmTemplate = "rm -rf %s;";
+        command.append(String.format(rmTemplate, tempPath));
+        if (sudo) {
+            command.append("sudo ");
+        }
+        // create directory
+        String mkdirTemplate = "mkdir -p %s;";
+        command.append(String.format(mkdirTemplate, tempPath));
+        if (sudo) {
+            command.append("sudo ");
+        }
+        // 本机拷贝至安装机器节点
+        String wgetTemplate = "/usr/bin/wget -P %s %s";
+        command.append(String.format(wgetTemplate, tempPath, url));
+        return SSH2Util.execute(machine, command.toString());
+    }
+
     public static void rm(Machine machine, String filePath, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
@@ -61,7 +85,19 @@ public class SSH2Util {
         if (!Strings.isNullOrEmpty(result)) {
             throw new RuntimeException(result);
         }
+    }
 
+    public static void unzipToTargetPath(Machine machine, String filePath, String targetPath, boolean sudo) throws Exception {
+        StringBuffer command = new StringBuffer();
+        if (sudo) {
+            command.append("sudo ");
+        }
+        String template = "tar -xvf %s -C %s --strip-components 1";
+        command.append(String.format(template, filePath, targetPath));
+        String result = execute(machine, command.toString());
+        if (!Strings.isNullOrEmpty(result)) {
+            throw new RuntimeException(result);
+        }
     }
 
     /**

@@ -28,6 +28,8 @@ public class Cluster {
 
     private String redisVersion;
 
+    private String image;
+
     /**
      * 集群 key 总数
      */
@@ -172,6 +174,14 @@ public class Cluster {
 
     public void setRedisVersion(String redisVersion) {
         this.redisVersion = redisVersion;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public long getTotalKeys() {

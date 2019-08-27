@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
-import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
-import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.COMMAS;
 import static javax.management.timer.Timer.ONE_MINUTE;
@@ -56,7 +54,7 @@ public class InstallationTemplate {
      * @param installationParam
      * @return
      */
-    public boolean install(AbstractInstallationOperation installationOperation, InstallationParam installationParam) {
+    public boolean install(AbstractOperationManage installationOperation, InstallationParam installationParam) {
         boolean verify = verify(installationParam);
         if (verify) {
             return false;

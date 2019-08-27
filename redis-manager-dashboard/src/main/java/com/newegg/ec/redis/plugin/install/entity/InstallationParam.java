@@ -32,8 +32,6 @@ public class InstallationParam {
 
     private int endPort;
 
-    private String image;
-
     List<RedisNode> redisNodeList;
 
     Multimap<Machine, RedisNode> machineAndRedisNode;
@@ -116,14 +114,6 @@ public class InstallationParam {
 
     public void setEndPort(int endPort) {
         this.endPort = endPort;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
     }
 
     public List<RedisNode> getRedisNodeList() {
