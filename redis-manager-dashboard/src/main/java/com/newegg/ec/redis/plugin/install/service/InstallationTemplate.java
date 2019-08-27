@@ -7,6 +7,7 @@ import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.client.RedisClusterClient;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
+import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.service.IMachineService;
@@ -17,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
+import static com.newegg.ec.redis.entity.NodeRole.MASTER;
+import static com.newegg.ec.redis.entity.NodeRole.SLAVE;
 import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
 import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
@@ -89,14 +92,17 @@ public class InstallationTemplate {
     /**
      * 获取机器列表
      * 1. 选择机器
-     * 2. 通过文本框获取
+     * 2. 通过文本框获取(js 解析后传入后台)
      *
      * @param installationParam
      */
     private void buildMachineList(InstallationParam installationParam) {
-        List<String> machineIdList = installationParam.getMachineIdList();
-        List<Machine> machineList = machineService.getMachineListByIds(machineIdList);
-        installationParam.setMachineList(machineList);
+        boolean autoBuild = installationParam.isAutoBuild();
+        if (autoBuild) {
+            List<String> machineIdList = installationParam.getMachineIdList();
+            List<Machine> machineList = machineService.getMachineListByIds(machineIdList);
+            installationParam.setMachineList(machineList);
+        }
     }
 
     /**
@@ -106,12 +112,70 @@ public class InstallationTemplate {
      *
      * @return
      */
-    private void buildTopology(InstallationParam installationParam) {
+    private boolean buildTopology(InstallationParam installationParam) {
         boolean autoBuild = installationParam.isAutoBuild();
+        // TODO: 前台校验 masterNumber + replicationNumber < startPort - endPort + 1
+        int masterNumber = installationParam.getMasterNumber();
+        int replicationNumber = installationParam.getReplicationNumber();
+        Multimap<RedisNode, RedisNode> topology = ArrayListMultimap.create();
         if (autoBuild) {
+            int nodeNumber = masterNumber + replicationNumber;
+            // TODO: check 端口可用
+            Multimap<Machine, Integer> machinePortMap = getMachinePortMap(installationParam);
+            Map<Machine, Collection<Integer>> machinePortCollection = machinePortMap.asMap();
+            for (Map.Entry<Machine, Collection<Integer>> machineCollectionEntry : machinePortCollection.entrySet()) {
+                if (machineCollectionEntry.getValue().size() < nodeNumber) {
+                    // TODO: websocket 端口不够用了
+                    return false;
+                }
+            }
 
+        } else {
+            List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+            RedisNode masterNode = null;
+            for (RedisNode redisNode : redisNodeList) {
+                if (Objects.equals(redisNode.getNodeRole(), MASTER)) {
+                    masterNode = redisNode;
+                }
+                if (Objects.equals(redisNode.getNodeRole(), SLAVE)) {
+                    Collection<RedisNode> slaves = topology.get(masterNode);
+                    if (slaves == null || slaves.isEmpty()) {
+                        redisNode.setNodeRole(MASTER);
+                        topology.put(redisNode, null);
+                    } else {
+                        topology.put(masterNode, redisNode);
+                    }
+                }
+            }
         }
-        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        installationParam.setTopology(topology);
+        return true;
+    }
+
+    /**
+     * Check port
+     * @param installationParam
+     * @return
+     */
+    private Multimap<Machine, Integer> getMachinePortMap(InstallationParam installationParam) {
+        int startPort = installationParam.getStartPort();
+        int endPort = installationParam.getEndPort();
+        List<Machine> machineList = installationParam.getMachineList();
+        Multimap<Machine, Integer> machinePortMap = ArrayListMultimap.create();
+        for (Machine machine : machineList) {
+            for (int port = startPort; port <= endPort; port++) {
+                try {
+                    if (!NetworkUtil.telnet(machine.getHost(), port)) {
+                        machinePortMap.put(machine, port);
+                    } else {
+                        // TODO: websocket 告知用户哪台机器的哪个端口被占用
+                    }
+                } catch (Exception e) {
+                    // TODO: websocket
+                }
+            }
+        }
+        return machinePortMap;
     }
 
     private boolean prepareCheck(InstallationParam installationParam) {
@@ -264,8 +328,6 @@ public class InstallationTemplate {
     private boolean buildStandalone(InstallationParam installationParam) {
         return false;
     }
-
-
 
     private boolean saveToDB(InstallationParam installationParam) {
         return true;

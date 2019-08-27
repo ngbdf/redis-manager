@@ -38,6 +38,16 @@ public class InstallationParam {
 
     Multimap<Machine, RedisNode> machineAndRedisNode;
 
+    /**
+     * master 个数
+     */
+    private int masterNumber;
+
+    /**
+     * 每个 master 下的副本个数
+     */
+    private int replicationNumber;
+
     Multimap<RedisNode, RedisNode> topology;
 
     Map<String, String> configMap;
@@ -172,5 +182,21 @@ public class InstallationParam {
 
     public void setInstallationEnvironment(InstallationEnvironment installationEnvironment) {
         this.installationEnvironment = installationEnvironment;
+    }
+
+    public int getMasterNumber() {
+        return masterNumber;
+    }
+
+    public void setMasterNumber(int masterNumber) {
+        this.masterNumber = masterNumber;
+    }
+
+    public int getReplicationNumber() {
+        return replicationNumber;
+    }
+
+    public void setReplicationNumber(int replicationNumber) {
+        this.replicationNumber = replicationNumber;
     }
 }
