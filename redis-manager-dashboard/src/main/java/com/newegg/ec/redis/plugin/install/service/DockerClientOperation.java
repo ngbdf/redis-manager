@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH;
+import static com.newegg.ec.redis.plugin.install.service.impl.DockerOperationManage.DOCKER_INSTALL_BASE_PATH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
 import static com.newegg.ec.redis.util.SignUtil.MINUS;
 
@@ -127,9 +127,9 @@ public class DockerClientOperation {
      * sudo docker run \
      * --name redis-instance-8000 \
      * --net host \
-     * -d -v /data/redis/8000:/data \
+     * -d -v /data/redis/docker/8000:/data \
      * redis:4.0.14 \
-     * redis-server /data/redis/docker/8000/redis.conf
+     * redis-server /data/redis.conf
      *
      * @param ip
      * @param port

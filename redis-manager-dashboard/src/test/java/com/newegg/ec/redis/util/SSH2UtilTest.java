@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.util;
 
 import com.newegg.ec.redis.entity.Machine;
-import com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation;
+import com.newegg.ec.redis.plugin.install.service.impl.DockerOperationManage;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,7 +20,7 @@ public class SSH2UtilTest {
 
     @Test
     public void cp() throws Exception {
-        SSH2Util.copy(machine, "/home/hadoop/jay/redis.conf", DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH + port, true);
+        SSH2Util.copy(machine, "/home/hadoop/jay/redis.conf", DockerOperationManage.DOCKER_INSTALL_BASE_PATH + port, true);
     }
 
     @Test
@@ -30,7 +30,7 @@ public class SSH2UtilTest {
 
     @Test
     public void mkdir() throws Exception {
-        SSH2Util.mkdir(machine, DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH + port, false);
+        SSH2Util.mkdir(machine, DockerOperationManage.DOCKER_INSTALL_BASE_PATH + port, false);
     }
 
     @Test

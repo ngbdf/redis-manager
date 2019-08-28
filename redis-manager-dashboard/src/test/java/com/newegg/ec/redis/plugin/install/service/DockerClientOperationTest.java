@@ -2,12 +2,10 @@ package com.newegg.ec.redis.plugin.install.service;
 
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.Info;
-import com.newegg.ec.redis.plugin.install.service.impl.DockerInstallationOperation;
+import com.newegg.ec.redis.plugin.install.service.impl.DockerOperationManage;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +62,7 @@ public class DockerClientOperationTest {
     public void createContainer() {
         int port = 8000;
         List<String> command = new ArrayList<>();
-        command.add(DockerInstallationOperation.DOCKER_INSTALL_BASE_PATH + port + "/" + REDIS_CONF);
+        command.add(DockerOperationManage.DOCKER_INSTALL_BASE_PATH + port + "/" + REDIS_CONF);
         String containerId = dockerClientOperation.createContainer(IP, port, "redis:4.0.14", "redis-instance");
         containerId = dockerClientOperation.runContainer(IP, containerId);
         System.err.println(containerId);

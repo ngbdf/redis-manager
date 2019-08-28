@@ -375,7 +375,7 @@ public class RedisService implements IRedisService {
         StringBuffer results = new StringBuffer();
         masterNodeAndShade.forEach((masterNode, shade) -> {
             String result = clusterAddSlots(cluster, masterNode, shade);
-            if (Strings.isNullOrEmpty(result)) {
+            if (!Strings.isNullOrEmpty(result)) {
                 results.append(result).append("\n");
             }
         });

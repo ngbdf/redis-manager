@@ -29,8 +29,6 @@ public class RedisConfigUtil {
 
     private static final String UTF_8 = "UTF-8";
 
-    public static final String CONFIG_PATH = "/config/";
-
     public static final String REDIS_CONF = "redis.conf";
 
     public static final String REQUIRE_PASS = "requirepass";
@@ -105,29 +103,6 @@ public class RedisConfigUtil {
         }
         bufferedWriter.flush();
         bufferedWriter.close();
-    }
-
-    public static String copyRedisConfigToRemote(Machine machine, String tempPath, String url, boolean sudo) throws Exception {
-        StringBuffer command = new StringBuffer();
-        if (sudo) {
-            command.append("sudo ");
-        }
-        // 删除旧的数据，如果有旧数据的话
-        String rmTemplate = "rm -rf %s;";
-        command.append(String.format(rmTemplate, tempPath));
-        if (sudo) {
-            command.append("sudo ");
-        }
-        // create directory
-        String mkdirTemplate = "mkdir -p %s;";
-        command.append(String.format(mkdirTemplate, tempPath));
-        if (sudo) {
-            command.append("sudo ");
-        }
-        // 本机拷贝至安装机器节点
-        String wgetTemplate = "/usr/bin/wget -P %s %s";
-        command.append(String.format(wgetTemplate, tempPath, url));
-        return SSH2Util.execute(machine, command.toString());
     }
 
     public static List<RedisConfig> getRedisConfig(int mode) {
