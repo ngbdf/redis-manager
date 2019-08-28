@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.newegg.ec.redis.util.SignUtil.SLASH;
-import static com.newegg.ec.redis.util.SignUtil.SPACE;
+import static com.newegg.ec.redis.util.SignUtil.*;
 
 /**
  * redis.conf
@@ -41,6 +40,12 @@ public class RedisConfigUtil {
 
     public static final String DIR = "dir";
 
+    public static final String DAEMONIZE = "daemonize";
+
+    public static final String YES = "yes";
+
+    public static final String NO = "no";
+
     public static final int NORMAL_TYPE = 0;
 
     public static final int STANDALONE_TYPE = 1;
@@ -60,7 +65,7 @@ public class RedisConfigUtil {
     public static void variableAssignment(Machine machine, String path, Map<String, String> configs, boolean sudo) throws Exception {
         StringBuffer commands = new StringBuffer();
         // 进入配置文件所在目录
-        commands.append("cd " + path).append(";");
+        commands.append("cd " + path).append(SEMICOLON);
         String cd = SSH2Util.execute(machine, commands.toString());
         if (!Strings.isNullOrEmpty(cd)) {
             throw new RuntimeException(cd);
@@ -79,6 +84,7 @@ public class RedisConfigUtil {
         }
     }
 
+    @Deprecated
     public static void generateRedisConfig(String path, int mode) throws IOException {
         File tempPath = new File(path);
         if (!tempPath.mkdir()) {
@@ -105,6 +111,7 @@ public class RedisConfigUtil {
         bufferedWriter.close();
     }
 
+    @Deprecated
     public static List<RedisConfig> getRedisConfig(int mode) {
         List<RedisConfig> configs = new ArrayList<>();
         for (RedisConfig redisConfig : REDIS_CONFIG_LIST) {
@@ -143,7 +150,7 @@ public class RedisConfigUtil {
 
         /** 通用 */
         // 是否守护进程, 默认 no
-        REDIS_CONFIG_LIST.add(new RedisConfig(true, "daemonize", "no", NORMAL_TYPE));
+        REDIS_CONFIG_LIST.add(new RedisConfig(true, "daemonize", "{daemonize}", NORMAL_TYPE));
         // 是否通过 upstart 或 systemd 管理守护进程,默认no没有服务监控
         REDIS_CONFIG_LIST.add(new RedisConfig(true, "supervised", "no", NORMAL_TYPE));
         // pid 文件路径(redis 会在启动时创建,退出时删除)

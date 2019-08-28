@@ -1,7 +1,6 @@
 package com.newegg.ec.redis.plugin.install.service;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.newegg.ec.redis.client.RedisClient;
@@ -25,7 +24,6 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -63,23 +61,6 @@ public abstract class AbstractOperationManage implements InstallationOperation, 
      * 目标机器安装基础目录
      */
     protected String INSTALL_BASE_PATH;
-
-    protected AbstractOperationManage() {
-    }
-
-    public void installInfoPrepare(InstallationParam installationParam) {
-        Multimap<Machine, RedisNode> machineAndRedisNode = ArrayListMultimap.create();
-        List<Machine> machineList = installationParam.getMachineList();
-        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
-        for (Machine machine : machineList) {
-            for (RedisNode redisNode : redisNodeList) {
-                if (Objects.equals(machine.getHost(), redisNode.getHost())) {
-                    machineAndRedisNode.put(machine, redisNode);
-                }
-            }
-        }
-        installationParam.setMachineAndRedisNode(machineAndRedisNode);
-    }
 
     /**
      * Check free memory of machine

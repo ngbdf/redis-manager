@@ -445,7 +445,6 @@ public class RedisService implements IRedisService {
             redisClient.clusterSetSlotNode(slot, redisNode.getNodeId());
             redisClient.close();
         }
-
     }
 
     /**

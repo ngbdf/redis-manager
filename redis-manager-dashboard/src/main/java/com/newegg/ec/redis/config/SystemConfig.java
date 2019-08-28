@@ -1,7 +1,9 @@
 package com.newegg.ec.redis.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -9,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @date 7/6/2019
  */
 @Configuration
-public class SystemConfig implements WebMvcConfigurer {
+public class SystemConfig implements WebMvcConfigurer, ApplicationListener<ContextRefreshedEvent> {
 
     public static final String CONFIG_ORIGINAL_PATH = "/redis/config/";
 
@@ -18,19 +20,12 @@ public class SystemConfig implements WebMvcConfigurer {
     @Value("${server.port}")
     private int serverPort;
 
-   /* @Bean
-    public MultipartConfigElement multipartConfigElement() {
-        MultipartConfigFactory factory = new MultipartConfigFactory();
-        //文件最大KB,MB
-        factory.setMaxFileSize(DataSize.ofBytes(10485760));
-        //设置总上传数据总大小
-        factory.setMaxRequestSize(DataSize.ofBytes(10485760));
-        return factory.createMultipartConfig();
-    }*/
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+
+    }
 
    public int getServerPort(){
        return serverPort;
    }
-
-
 }

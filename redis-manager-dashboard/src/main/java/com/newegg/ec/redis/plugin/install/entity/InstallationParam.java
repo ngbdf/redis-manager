@@ -52,6 +52,8 @@ public class InstallationParam {
 
     private String redisMode;
 
+    private String policy;
+
     private InstallationEnvironment installationEnvironment;
 
     public Cluster getCluster() {
@@ -188,5 +190,13 @@ public class InstallationParam {
 
     public void setReplicationNumber(int replicationNumber) {
         this.replicationNumber = replicationNumber;
+    }
+
+    public String getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(String policy) {
+        this.policy = policy;
     }
 }
