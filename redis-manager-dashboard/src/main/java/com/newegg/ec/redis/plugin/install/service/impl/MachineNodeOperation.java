@@ -2,8 +2,6 @@ package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
-import com.newegg.ec.redis.client.RedisClient;
-import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
@@ -33,7 +31,7 @@ import static com.newegg.ec.redis.util.SignUtil.SLASH;
  * @date 2019/8/13
  */
 @Component
-public class MachineOperationManage extends AbstractOperationManage implements INodeOperation {
+public class MachineNodeOperation extends AbstractOperationManage implements INodeOperation {
 
     @Value("${redis-manager.install.machine.package-path: /redis/machine/}")
     private String packagePath;

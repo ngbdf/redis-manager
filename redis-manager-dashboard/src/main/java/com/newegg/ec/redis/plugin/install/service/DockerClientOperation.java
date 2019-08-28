@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static com.newegg.ec.redis.plugin.install.service.impl.DockerOperationManage.DOCKER_INSTALL_BASE_PATH;
+import static com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation.DOCKER_INSTALL_BASE_PATH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
 import static com.newegg.ec.redis.util.SignUtil.MINUS;
 

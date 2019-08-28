@@ -1,8 +1,6 @@
 package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
-import com.newegg.ec.redis.client.RedisClient;
-import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
@@ -30,9 +28,9 @@ import static com.newegg.ec.redis.util.SignUtil.SPACE;
  * @author Jay.H.Zou
  * @date 2019/8/12
  */
-public class DockerOperationManage extends AbstractOperationManage implements INodeOperation {
+public class DockerNodeOperation extends AbstractOperationManage implements INodeOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(DockerOperationManage.class);
+    private static final Logger logger = LoggerFactory.getLogger(DockerNodeOperation.class);
 
     @Value("${redis-manager.install.docker.images}")
     private String images;
