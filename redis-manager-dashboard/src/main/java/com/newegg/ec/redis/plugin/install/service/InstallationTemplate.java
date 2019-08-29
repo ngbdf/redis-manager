@@ -28,7 +28,8 @@ import static javax.management.timer.Timer.ONE_MINUTE;
 /**
  * 集群安装模板
  * <p>
- * 机器列表：
+ * TODO:
+ * 1.最大
  *
  * @author Jay.H.Zou
  * @date 2019/7/26
@@ -44,6 +45,8 @@ public class InstallationTemplate {
     private static final String CIRCLE_POLICY = "circle";
 
     private static final String RANDOM_POLICY = "random";
+
+    private static final int MAX_PORT = 65535;
 
     /**
      * 模板通用，调用方传入不同的策略
@@ -141,27 +144,26 @@ public class InstallationTemplate {
      */
     private boolean buildTopology(InstallationParam installationParam) {
         boolean autoBuild = installationParam.isAutoBuild();
-        // TODO: 前台校验 masterNumber + replicationNumber < startPort - endPort + 1
-        int masterNumber = installationParam.getMasterNumber();
-        int replicationNumber = installationParam.getReplicationNumber();
         Multimap<RedisNode, RedisNode> topology = ArrayListMultimap.create();
         if (autoBuild) {
+            List<Machine> machineList = installationParam.getMachineList();
+            int masterNumber = installationParam.getMasterNumber();
+            int replicationNumber = installationParam.getReplicationNumber();
             int nodeNumber = masterNumber + replicationNumber;
-            // TODO: check 端口可用
-            Multimap<Machine, Integer> machinePortMap = buildMachinePortMap(installationParam);
-            Map<Machine, Collection<Integer>> machinePortCollection = machinePortMap.asMap();
-            for (Map.Entry<Machine, Collection<Integer>> machineCollectionEntry : machinePortCollection.entrySet()) {
-                if (machineCollectionEntry.getValue().size() < nodeNumber) {
-                    // TODO: websocket 端口不够用了
-                    return false;
-                }
-            }
+            int port = installationParam.getStartPort();
+            Multimap<Machine, Integer> machinePortsMap = buildMachinePortsMap(machineList, port, nodeNumber);
             String policy = installationParam.getPolicy();
+            Map<RedisNode, List<RedisNode>> tempTopology;
             if (Objects.equals(policy, CIRCLE_POLICY)) {
-                topology = circlePolicy(installationParam);
+                tempTopology = circlePolicy(machinePortsMap, masterNumber, replicationNumber);
             } else {
-                topology = randomPolicy(installationParam);
+                tempTopology = randomPolicy(machinePortsMap, masterNumber, replicationNumber);
             }
+            tempTopology.forEach((masterNode, slaveNodes) -> {
+                slaveNodes.forEach(slaveNode -> {
+                    topology.put(masterNode, slaveNode);
+                });
+            });
         } else {
             List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
             RedisNode masterNode = null;
@@ -184,39 +186,112 @@ public class InstallationTemplate {
         return true;
     }
 
-    private Multimap<RedisNode, RedisNode> randomPolicy(InstallationParam installationParam) {
-        return null;
+    private Map<RedisNode, List<RedisNode>> randomPolicy(Multimap<Machine, Integer> machinePortsMap, int masterNumber, int replicationNumber) {
+        Map<RedisNode, List<RedisNode>> topology = buildMasterNodes(machinePortsMap, masterNumber);
+        Set<Machine> machines = machinePortsMap.keySet();
+        List<RedisNode> allSlaveNodes = new ArrayList<>();
+        machines.forEach(machine -> {
+            Collection<Integer> ports = machinePortsMap.get(machine);
+            for (Integer port : ports) {
+                allSlaveNodes.add(new RedisNode(machine.getHost(), port, SLAVE));
+            }
+        });
+        topology.forEach((masterNode, slaveNodeList)-> {
+            System.err.println("=======");
+            if (slaveNodeList == null) {
+                return;
+            }
+            while (slaveNodeList.size() < replicationNumber) {
+                if (allSlaveNodes.size() == 0) {
+                    break;
+                }
+                Random random = new Random();
+                int size = allSlaveNodes.size();
+                int index = random.nextInt(size);
+                RedisNode slaveNode = allSlaveNodes.get(index);
+                slaveNodeList.add(slaveNode);
+                allSlaveNodes.remove(index);
+            }
+        });
+        return topology;
     }
 
-    private Multimap<RedisNode, RedisNode> circlePolicy(InstallationParam installationParam) {
-        return null;
+
+    private Map<RedisNode, List<RedisNode>> circlePolicy(Multimap<Machine, Integer> machinePortsMap, int masterNumber, int replicationNumber) {
+        Map<RedisNode, List<RedisNode>> topology = buildMasterNodes(machinePortsMap, masterNumber);
+        Set<Machine> machines = machinePortsMap.keySet();
+        return topology;
+    }
+
+    public static void main(String[] args) {
+        Multimap<Machine, Integer> machinePortsMap = ArrayListMultimap.create();
+        machinePortsMap.put(new Machine("11"), 1);
+        machinePortsMap.put(new Machine("11"), 2);
+        machinePortsMap.put(new Machine("22"), 1);
+        machinePortsMap.put(new Machine("22"), 2);
+        machinePortsMap.put(new Machine("33"), 1);
+        machinePortsMap.put(new Machine("33"), 2);
+        InstallationTemplate installationTemplate = new InstallationTemplate();
+        Map<RedisNode, List<RedisNode>> redisNodeListMap = installationTemplate.randomPolicy(machinePortsMap, 3, 1);
+        redisNodeListMap.forEach((master, slaves) -> {
+            System.err.println(master.getHost() + ":" + master.getPort() + " master");
+            slaves.forEach(slave -> {
+                System.err.println(slave.getHost() + ":" + slave.getPort());
+            });
+        });
+
+
+    }
+
+    private Map<RedisNode, List<RedisNode>> buildMasterNodes(Multimap<Machine, Integer> machinePortsMap, int masterNumber) {
+        List<Machine> machines = new ArrayList<>(machinePortsMap.keySet());
+        Map<RedisNode, List<RedisNode>> topology = new LinkedHashMap<>();
+        // 固定 master
+        int machineAvgNodeNumber = masterNumber < machines.size() ? 1 : masterNumber / machines.size();
+        machines.forEach(machine -> {
+            if (topology.keySet().size() >= masterNumber) {
+                return;
+            }
+            Collection<Integer> ports = machinePortsMap.get(machine);
+            Iterator<Integer> iterator = ports.iterator();
+            int master = 0;
+            while (iterator.hasNext() && master < machineAvgNodeNumber) {
+                RedisNode masterNode = new RedisNode(machine.getHost(), iterator.next(), MASTER);
+                topology.put(masterNode, new ArrayList<>());
+                iterator.remove();
+                master++;
+            }
+        });
+        return topology;
     }
 
     /**
-     * Check port
+     * Get useful ports
      *
-     * @param installationParam
+     * @param machineList
+     * @param nodeNumber
+     * @param port
      * @return
      */
-    private Multimap<Machine, Integer> buildMachinePortMap(InstallationParam installationParam) {
-        int startPort = installationParam.getStartPort();
-        int endPort = installationParam.getEndPort();
-        List<Machine> machineList = installationParam.getMachineList();
-        Multimap<Machine, Integer> machinePortMap = ArrayListMultimap.create();
+    private Multimap<Machine, Integer> buildMachinePortsMap(List<Machine> machineList, int port, int nodeNumber) {
+        Multimap<Machine, Integer> machinePortsMap = ArrayListMultimap.create();
         for (Machine machine : machineList) {
-            for (int port = startPort; port <= endPort; port++) {
+            Collection<Integer> ports = machinePortsMap.get(machine);
+            while (nodeNumber < ports.size()) {
+                if (port >= MAX_PORT) {
+                    break;
+                }
                 try {
                     if (!NetworkUtil.telnet(machine.getHost(), port)) {
-                        machinePortMap.put(machine, port);
-                    } else {
-                        // TODO: websocket 告知用户哪台机器的哪个端口被占用
+                        machinePortsMap.put(machine, port);
                     }
                 } catch (Exception e) {
                     // TODO: websocket
                 }
+                port++;
             }
         }
-        return machinePortMap;
+        return machinePortsMap;
     }
 
     public void buildMachineRedisNodeMap(InstallationParam installationParam) {
@@ -387,4 +462,5 @@ public class InstallationTemplate {
         generateConnectionNodes(installationParam.getCluster());
         return true;
     }
+
 }

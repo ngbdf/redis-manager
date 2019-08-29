@@ -30,8 +30,6 @@ public class InstallationParam {
 
     private int startPort;
 
-    private int endPort;
-
     List<RedisNode> redisNodeList;
 
     Multimap<Machine, RedisNode> machineAndRedisNode;
@@ -118,14 +116,6 @@ public class InstallationParam {
 
     public void setStartPort(int startPort) {
         this.startPort = startPort;
-    }
-
-    public int getEndPort() {
-        return endPort;
-    }
-
-    public void setEndPort(int endPort) {
-        this.endPort = endPort;
     }
 
     public List<RedisNode> getRedisNodeList() {

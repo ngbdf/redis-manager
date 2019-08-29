@@ -22,6 +22,12 @@ public class Machine {
 
     private String machineInfo;
 
+    public Machine(){}
+
+    public Machine(String host) {
+        this.host = host;
+    }
+
     public String getMachineId() {
         return machineId;
     }
