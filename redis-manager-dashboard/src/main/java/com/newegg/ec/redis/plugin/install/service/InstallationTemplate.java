@@ -24,6 +24,7 @@ import static com.newegg.ec.redis.util.SignUtil.COMMAS;
 import static com.newegg.ec.redis.util.TimeRangeUtil.FIVE_SECONDS;
 import static com.newegg.ec.redis.util.TimeRangeUtil.TEN_SECONDS;
 import static javax.management.timer.Timer.ONE_MINUTE;
+import static org.apache.logging.log4j.ThreadContext.isEmpty;
 
 /**
  * 集群安装模板
@@ -151,11 +152,12 @@ public class InstallationTemplate {
             int replicationNumber = installationParam.getReplicationNumber();
             int nodeNumber = masterNumber + replicationNumber;
             int port = installationParam.getStartPort();
+            // TODO: 修改
             Multimap<Machine, Integer> machinePortsMap = buildMachinePortsMap(machineList, port, nodeNumber);
             String policy = installationParam.getPolicy();
-            Map<RedisNode, List<RedisNode>> tempTopology;
+            /*Map<RedisNode, List<RedisNode>> tempTopology;
             if (Objects.equals(policy, CIRCLE_POLICY)) {
-                tempTopology = circlePolicy(machinePortsMap, masterNumber, replicationNumber);
+                tempTopology = randomPolicy(machinePortsMap, masterNumber, replicationNumber);
             } else {
                 tempTopology = randomPolicy(machinePortsMap, masterNumber, replicationNumber);
             }
@@ -163,7 +165,7 @@ public class InstallationTemplate {
                 slaveNodes.forEach(slaveNode -> {
                     topology.put(masterNode, slaveNode);
                 });
-            });
+            });*/
         } else {
             List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
             RedisNode masterNode = null;
@@ -186,25 +188,21 @@ public class InstallationTemplate {
         return true;
     }
 
-    private Map<RedisNode, List<RedisNode>> randomPolicy(Multimap<Machine, Integer> machinePortsMap, int masterNumber, int replicationNumber) {
-        Map<RedisNode, List<RedisNode>> topology = buildMasterNodes(machinePortsMap, masterNumber);
-        Set<Machine> machines = machinePortsMap.keySet();
+    private Map<RedisNode, List<RedisNode>> randomPolicy(List<MachineAndPorts> machineAndPortsList, int masterNumber, int replicationNumber) {
+        Map<RedisNode, List<RedisNode>> topology = buildMasterNodes(machineAndPortsList, masterNumber);
         List<RedisNode> allSlaveNodes = new ArrayList<>();
-        machines.forEach(machine -> {
-            Collection<Integer> ports = machinePortsMap.get(machine);
+        machineAndPortsList.forEach(machineAndPorts -> {
+            Machine machine = machineAndPorts.getMachine();
+            Set<Integer> ports = machineAndPorts.getPorts();
             for (Integer port : ports) {
                 allSlaveNodes.add(new RedisNode(machine.getHost(), port, SLAVE));
             }
         });
-        topology.forEach((masterNode, slaveNodeList)-> {
-            System.err.println("=======");
+        topology.forEach((masterNode, slaveNodeList) -> {
             if (slaveNodeList == null) {
                 return;
             }
-            while (slaveNodeList.size() < replicationNumber) {
-                if (allSlaveNodes.size() == 0) {
-                    break;
-                }
+            while (slaveNodeList.size() < replicationNumber && !allSlaveNodes.isEmpty()) {
                 Random random = new Random();
                 int size = allSlaveNodes.size();
                 int index = random.nextInt(size);
@@ -216,53 +214,61 @@ public class InstallationTemplate {
         return topology;
     }
 
-
-    private Map<RedisNode, List<RedisNode>> circlePolicy(Multimap<Machine, Integer> machinePortsMap, int masterNumber, int replicationNumber) {
-        Map<RedisNode, List<RedisNode>> topology = buildMasterNodes(machinePortsMap, masterNumber);
-        Set<Machine> machines = machinePortsMap.keySet();
-        return topology;
-    }
-
-    public static void main(String[] args) {
-        Multimap<Machine, Integer> machinePortsMap = ArrayListMultimap.create();
-        machinePortsMap.put(new Machine("11"), 1);
-        machinePortsMap.put(new Machine("11"), 2);
-        machinePortsMap.put(new Machine("22"), 1);
-        machinePortsMap.put(new Machine("22"), 2);
-        machinePortsMap.put(new Machine("33"), 1);
-        machinePortsMap.put(new Machine("33"), 2);
-        InstallationTemplate installationTemplate = new InstallationTemplate();
-        Map<RedisNode, List<RedisNode>> redisNodeListMap = installationTemplate.randomPolicy(machinePortsMap, 3, 1);
-        redisNodeListMap.forEach((master, slaves) -> {
-            System.err.println(master.getHost() + ":" + master.getPort() + " master");
-            slaves.forEach(slave -> {
-                System.err.println(slave.getHost() + ":" + slave.getPort());
-            });
-        });
-
-
-    }
-
-    private Map<RedisNode, List<RedisNode>> buildMasterNodes(Multimap<Machine, Integer> machinePortsMap, int masterNumber) {
-        List<Machine> machines = new ArrayList<>(machinePortsMap.keySet());
-        Map<RedisNode, List<RedisNode>> topology = new LinkedHashMap<>();
-        // 固定 master
-        int machineAvgNodeNumber = masterNumber < machines.size() ? 1 : masterNumber / machines.size();
-        machines.forEach(machine -> {
-            if (topology.keySet().size() >= masterNumber) {
+    // TODO: 未完成
+    /*private Map<RedisNode, List<RedisNode>> circlePolicy(List<MachineAndPorts> machineAndPortsList, int masterNumber, int replicationNumber) {
+        Map<RedisNode, List<RedisNode>> topology = buildMasterNodes(machineAndPortsList, masterNumber);
+        // 排序
+        topology.forEach((masterNode, slaveNodeList) -> {
+            if (getPortNumber(machineAndPortsList) == 0) {
                 return;
             }
-            Collection<Integer> ports = machinePortsMap.get(machine);
-            Iterator<Integer> iterator = ports.iterator();
-            int master = 0;
-            while (iterator.hasNext() && master < machineAvgNodeNumber) {
-                RedisNode masterNode = new RedisNode(machine.getHost(), iterator.next(), MASTER);
-                topology.put(masterNode, new ArrayList<>());
-                iterator.remove();
-                master++;
+            while (getPortNumber(machineAndPortsList) > 0 && slaveNodeList.size() < replicationNumber) {
+                int size = machineAndPortsList.size();
+                for (int i = size - 1; i > 0; i--) {
+                    MachineAndPorts machineAndPorts = machineAndPortsList.get(i);
+                    Machine machine = machineAndPorts.getMachine();
+                    Set<Integer> ports = machineAndPorts.getPorts();
+                    if (slaveNodeList.size() >= replicationNumber || ports.isEmpty()) {
+                        continue;
+                    }
+                    Iterator<Integer> portIterator = ports.iterator();
+                    Integer port = portIterator.next();
+                    slaveNodeList.add(new RedisNode(machine.getHost(), port, SLAVE));
+                    portIterator.remove();
+                }
             }
         });
         return topology;
+    }*/
+
+
+    private Map<RedisNode, List<RedisNode>> buildMasterNodes(List<MachineAndPorts> machineAndPortsList, int masterNumber) {
+        // 排序
+        Map<RedisNode, List<RedisNode>> topology = new LinkedHashMap<>();
+        while (topology.keySet().size() < masterNumber) {
+            if (getPortNumber(machineAndPortsList) == 0) {
+                break;
+            }
+            for (MachineAndPorts machineAndPorts : machineAndPortsList) {
+                Set<Integer> ports = machineAndPorts.getPorts();
+                if (topology.keySet().size() >= masterNumber || ports.isEmpty()) {
+                    break;
+                }
+                Iterator<Integer> portIterator = ports.iterator();
+                RedisNode masterNode = new RedisNode(machineAndPorts.getMachine().getHost(), portIterator.next(), MASTER);
+                topology.put(masterNode, new ArrayList<>());
+                portIterator.remove();
+            }
+        }
+        return topology;
+    }
+
+    private int getPortNumber(List<MachineAndPorts> machineAndPortsList) {
+        int portNumber = 0;
+        for (MachineAndPorts machineAndPorts : machineAndPortsList) {
+            portNumber += machineAndPorts.getPorts().size();
+        }
+        return portNumber;
     }
 
     /**
@@ -292,6 +298,32 @@ public class InstallationTemplate {
             }
         }
         return machinePortsMap;
+    }
+
+    public static void main(String[] args) {
+        List<MachineAndPorts> machinePortsMap = new ArrayList<>();
+        for (int i = 11; i < 88; i += 11) {
+            Machine machine = new Machine(i + "");
+            Set<Integer> ports = new TreeSet<>();
+            for (int j = 0; j < 6; j++) {
+                ports.add(j);
+            }
+            machinePortsMap.add(new MachineAndPorts(machine, ports));
+        }
+        /*Set<Integer> ports = new TreeSet<>();
+
+        for (int i = 0; i < 120; i++) {
+            ports.add(i);
+        }
+        machinePortsMap.add(new MachineAndPorts(new Machine("127.0.0.1"), ports));*/
+        InstallationTemplate installationTemplate = new InstallationTemplate();
+        Map<RedisNode, List<RedisNode>> redisNodeListMap = installationTemplate.randomPolicy(machinePortsMap, 10, 2);
+        redisNodeListMap.forEach((master, slaves) -> {
+            System.err.println(master.getHost() + ":" + master.getPort() + " master");
+            slaves.forEach(slave -> {
+                System.err.println(slave.getHost() + ":" + slave.getPort());
+            });
+        });
     }
 
     public void buildMachineRedisNodeMap(InstallationParam installationParam) {
@@ -461,6 +493,33 @@ public class InstallationTemplate {
         // 获取连接节点
         generateConnectionNodes(installationParam.getCluster());
         return true;
+    }
+
+    private static class MachineAndPorts {
+        private Machine machine;
+
+        private Set<Integer> ports;
+
+        public MachineAndPorts(Machine machine, Set<Integer> ports) {
+            this.machine = machine;
+            this.ports = ports;
+        }
+
+        public Machine getMachine() {
+            return machine;
+        }
+
+        public void setMachine(Machine machine) {
+            this.machine = machine;
+        }
+
+        public Set<Integer> getPorts() {
+            return ports;
+        }
+
+        public void setPorts(Set<Integer> ports) {
+            this.ports = ports;
+        }
     }
 
 }
