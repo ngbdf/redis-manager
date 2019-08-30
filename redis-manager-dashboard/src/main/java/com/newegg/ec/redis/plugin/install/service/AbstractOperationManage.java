@@ -93,7 +93,13 @@ public abstract class AbstractOperationManage implements InstallationOperation, 
                 }
             }
         }
+        return commonCheck && checkEnvironment(installationParam);
+    }
 
+    public boolean checkPorts(InstallationParam installationParam) {
+        if (installationParam.isAutoBuild()) {
+            return true;
+        }
         List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
         for (RedisNode redisNode : redisNodeList) {
             String ip = redisNode.getHost();
@@ -101,10 +107,10 @@ public abstract class AbstractOperationManage implements InstallationOperation, 
             // 如果端口能通，则认为该端口被占用
             if (NetworkUtil.telnet(ip, port)) {
                 // TODO: websocket
-                commonCheck = false;
+                return false;
             }
         }
-        return commonCheck && checkEnvironment(installationParam);
+        return true;
     }
 
     @Override
