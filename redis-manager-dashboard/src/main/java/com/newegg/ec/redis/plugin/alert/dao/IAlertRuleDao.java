@@ -20,7 +20,7 @@ public interface IAlertRuleDao {
 
     int updateAlertRule(AlertRule alertRule);
 
-    int deleteAlertRuleById(String ruleId);
+    int deleteAlertRuleByIdList(List<String> ruleIdList);
 
     int deleteAlertRuleByClusterId(String clusterId);
 

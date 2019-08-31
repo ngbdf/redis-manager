@@ -101,12 +101,40 @@ public interface IRedisService {
 
     String clusterAddSlotsBatch(Cluster cluster, Map<RedisNode, SlotBalanceUtil.Shade> masterNodeAndShade);
 
+    /**
+     * 迁移槽位
+     *
+     * @param cluster
+     * @param targetNode
+     * @param shade
+     */
     void clusterMoveSlots(Cluster cluster, RedisNode targetNode, SlotBalanceUtil.Shade shade);
 
+    /**
+     * slave of
+     *
+     * @param cluster
+     * @param masterNode
+     * @param redisNode
+     * @return
+     */
     boolean standaloneReplicaOf(Cluster cluster, RedisNode masterNode, RedisNode redisNode);
 
+    /**
+     * Forget this node
+     *
+     * @param cluster
+     * @param redisNode
+     * @return
+     */
     boolean standaloneReplicaNoOne(Cluster cluster, RedisNode redisNode);
 
+    /**
+     * Get config
+     * @param cluster
+     * @param redisNode
+     * @return
+     */
     Map<String, String> getConfig(Cluster cluster, RedisNode redisNode);
 
     /**
@@ -135,6 +163,12 @@ public interface IRedisService {
      */
     void autoGenerateConfigFile(Cluster cluster);
 
+    /**
+     * Update redis password
+     *
+     * @param cluster
+     * @return
+     */
     String updateRedisPassword(Cluster cluster);
 
 }

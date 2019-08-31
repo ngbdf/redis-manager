@@ -18,5 +18,5 @@ public interface IAlertRecordDao {
 
     int deleteAlertRecordByIds(List<String> recordIdList);
 
-    int deleteAlertRecordByTime(Timestamp updateTime);
+    int deleteAlertRecordByTime(Timestamp earliestTime);
 }

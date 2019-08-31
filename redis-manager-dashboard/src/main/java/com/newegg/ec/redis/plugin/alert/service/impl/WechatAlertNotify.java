@@ -15,7 +15,6 @@ public class WechatAlertNotify extends AbstractAlertNotify {
     @Override
     public boolean notify(List<AlertRecord> alertRecordList) {
         AlertMessage alertMessage = buildMessageContent(alertRecordList);
-
         // 真正发送消息
         return false;
     }
