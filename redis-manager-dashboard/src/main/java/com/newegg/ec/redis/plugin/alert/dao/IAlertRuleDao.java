@@ -10,9 +10,11 @@ import java.util.List;
  */
 public interface IAlertRuleDao {
 
-    List<AlertRule> selectAlarmRuleListByGroupId(String groupId);
+    List<AlertRule> selectAlertRuleIds(List<String> ruleIdList);
+    
+    List<AlertRule> selectAlertRuleListByGroupId(String groupId);
 
-    List<AlertRule> selectAlarmRuleListByClusterId(String groupId, String clusterId);
+    List<AlertRule> selectAlertRuleListByClusterId(String groupId, String clusterId);
 
     int insertAlertRule(AlertRule alertRule);
 
@@ -23,6 +25,5 @@ public interface IAlertRuleDao {
     int deleteAlertRuleByClusterId(String clusterId);
 
     int deleteAlertRuleByGroupId(String groupId);
-
 
 }

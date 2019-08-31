@@ -2,6 +2,7 @@ package com.newegg.ec.redis.plugin.install.service;
 
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.Info;
+import com.newegg.ec.redis.plugin.install.DockerClientOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
 import org.junit.Test;
 

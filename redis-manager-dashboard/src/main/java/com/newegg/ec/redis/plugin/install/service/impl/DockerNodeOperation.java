@@ -5,8 +5,8 @@ import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
-import com.newegg.ec.redis.plugin.install.service.AbstractOperationManage;
-import com.newegg.ec.redis.plugin.install.service.DockerClientOperation;
+import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
+import com.newegg.ec.redis.plugin.install.DockerClientOperation;
 import com.newegg.ec.redis.plugin.install.service.INodeOperation;
 import com.newegg.ec.redis.util.SignUtil;
 import org.slf4j.Logger;
@@ -15,12 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static com.newegg.ec.redis.util.RedisConfigUtil.*;
 import static com.newegg.ec.redis.util.SignUtil.MINUS;
 import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
@@ -28,7 +27,7 @@ import static com.newegg.ec.redis.util.SignUtil.SPACE;
  * @author Jay.H.Zou
  * @date 2019/8/12
  */
-public class DockerNodeOperation extends AbstractOperationManage implements INodeOperation {
+public class DockerNodeOperation extends AbstractNodeOperation implements INodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(DockerNodeOperation.class);
 
@@ -116,9 +115,9 @@ public class DockerNodeOperation extends AbstractOperationManage implements INod
      */
     @Override
     public boolean install(InstallationParam installationParam) {
-        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
         Cluster cluster = installationParam.getCluster();
-        for (RedisNode redisNode : redisNodeList) {
+        for (RedisNode redisNode : allRedisNodes) {
             boolean start = start(cluster, null, redisNode);
             if (!start) {
                 return false;
@@ -143,5 +142,14 @@ public class DockerNodeOperation extends AbstractOperationManage implements INod
             // TODO: websocket
             return false;
         }
+    }
+
+    @Override
+    public Map<String, String> getBaseConfigs(String bind, int port) {
+        Map<String, String> configs = new HashMap<>(3);
+        configs.put(DAEMONIZE, "no");
+        configs.put(BIND, bind);
+        configs.put(PORT, port + "");
+        return configs;
     }
 }

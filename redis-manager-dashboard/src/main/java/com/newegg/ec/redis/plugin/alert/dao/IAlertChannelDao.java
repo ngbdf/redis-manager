@@ -12,7 +12,7 @@ public interface IAlertChannelDao {
 
     List<AlertChannel> selectAlertChannelByGroupId(String groupId);
 
-    List<AlertChannel> selecctAlertChannelByIds(List<String> channelIdList);
+    List<AlertChannel> selectAlertChannelByIds(List<String> channelIdList);
 
     int insertAlertChannel(AlertChannel alertChannel);
 

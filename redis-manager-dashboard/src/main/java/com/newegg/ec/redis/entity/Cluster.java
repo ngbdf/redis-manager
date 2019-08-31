@@ -31,6 +31,11 @@ public class Cluster {
     private String image;
 
     /**
+     * Just for cluster mode
+     */
+    private boolean init;
+
+    /**
      * 集群 key 总数
      */
     private long totalKeys;
@@ -93,6 +98,8 @@ public class Cluster {
     private int installationType;
 
     private long dbSize;
+
+    private String ruleIds;
 
     public enum ClusterState {
         UNKNOWN,
@@ -182,6 +189,14 @@ public class Cluster {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public boolean isInit() {
+        return init;
+    }
+
+    public void setInit(boolean init) {
+        this.init = init;
     }
 
     public long getTotalKeys() {
@@ -294,5 +309,13 @@ public class Cluster {
 
     public void setDbSize(long dbSize) {
         this.dbSize = dbSize;
+    }
+
+    public String getRuleIds() {
+        return ruleIds;
+    }
+
+    public void setRuleIds(String ruleIds) {
+        this.ruleIds = ruleIds;
     }
 }

@@ -6,7 +6,7 @@ import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
-import com.newegg.ec.redis.plugin.install.service.AbstractOperationManage;
+import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.INodeOperation;
 import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.SSH2Util;
@@ -17,12 +17,14 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.config.SystemConfig.MACHINE_PACKAGE_ORIGINAL_PATH;
+import static com.newegg.ec.redis.util.RedisConfigUtil.*;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.SLASH;
 
@@ -31,7 +33,7 @@ import static com.newegg.ec.redis.util.SignUtil.SLASH;
  * @date 2019/8/13
  */
 @Component
-public class MachineNodeOperation extends AbstractOperationManage implements INodeOperation {
+public class MachineNodeOperation extends AbstractNodeOperation implements INodeOperation {
 
     @Value("${redis-manager.install.machine.package-path: /redis/machine/}")
     private String packagePath;
@@ -162,4 +164,12 @@ public class MachineNodeOperation extends AbstractOperationManage implements INo
         }
     }
 
+    @Override
+    public Map<String, String> getBaseConfigs(String bind, int port) {
+        Map<String, String> configs = new HashMap<>(3);
+        configs.put(DAEMONIZE, "yes");
+        configs.put(BIND, bind);
+        configs.put(PORT, port + "");
+        return configs;
+    }
 }

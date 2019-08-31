@@ -8,8 +8,6 @@ import com.newegg.ec.redis.entity.RedisNode;
  */
 public class RedisInstance extends RedisNode {
 
-    private String image;
-
     private String directory;
 
     private String containerName;

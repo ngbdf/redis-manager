@@ -1,4 +1,4 @@
-package com.newegg.ec.redis.plugin.install.service;
+package com.newegg.ec.redis.plugin.install;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
@@ -121,7 +121,7 @@ public class DockerClientOperation {
     }
 
     /**
-     * TODO: 此命令需要修改，无 redis.conf
+     * redis.conf 由程序生成并修改
      * <p>
      * Start docker container  with expose port
      * sudo docker run \

@@ -21,7 +21,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.net.SocketException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -30,9 +29,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.config.SystemConfig.CONFIG_ORIGINAL_PATH;
-import static com.newegg.ec.redis.plugin.install.service.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
 import static com.newegg.ec.redis.util.LinuxInfoUtil.MEMORY_FREE;
-import static com.newegg.ec.redis.util.RedisConfigUtil.*;
+import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.SLASH;
 
@@ -40,11 +38,11 @@ import static com.newegg.ec.redis.util.SignUtil.SLASH;
  * @author Jay.H.Zou
  * @date 2019/8/14
  */
-public abstract class AbstractOperationManage implements InstallationOperation, INodeOperation, ApplicationListener<ContextRefreshedEvent> {
+public abstract class AbstractNodeOperation implements InstallationOperation, INodeOperation, ApplicationListener<ContextRefreshedEvent> {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractOperationManage.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractNodeOperation.class);
 
-    protected static ExecutorService threadPool = new ThreadPoolExecutor(10, 20, 60L, TimeUnit.SECONDS,
+    protected static ExecutorService threadPool = new ThreadPoolExecutor(4, 10, 60L, TimeUnit.SECONDS,
             new SynchronousQueue<>(),
             new ThreadFactoryBuilder().setNameFormat("pull-image-pool-thread-%d").build(),
             new ThreadPoolExecutor.AbortPolicy());
@@ -100,8 +98,8 @@ public abstract class AbstractOperationManage implements InstallationOperation, 
         if (installationParam.isAutoBuild()) {
             return true;
         }
-        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
-        for (RedisNode redisNode : redisNodeList) {
+        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
+        for (RedisNode redisNode : allRedisNodes) {
             String ip = redisNode.getHost();
             int port = redisNode.getPort();
             // 如果端口能通，则认为该端口被占用
@@ -148,7 +146,7 @@ public abstract class AbstractOperationManage implements InstallationOperation, 
                 // 本地复制
                 SSH2Util.copy(machine, tempRedisConf, targetPath, sudo);
                 // 修改配置文件
-                Map<String, String> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort(), REDIS_DEFAULT_WORK_DIR);
+                Map<String, String> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort());
                 RedisConfigUtil.variableAssignment(machine, targetPath, configs, sudo);
             } catch (Exception e) {
                 // TODO: websocket
@@ -158,13 +156,7 @@ public abstract class AbstractOperationManage implements InstallationOperation, 
         return true;
     }
 
-    private Map<String, String> getBaseConfigs(String bind, int port, String dir) {
-        Map<String, String> configs = new HashMap<>(3);
-        configs.put(BIND, bind);
-        configs.put(PORT, port + "");
-        configs.put(DIR, dir);
-        return configs;
-    }
+    public abstract Map<String, String> getBaseConfigs(String bind, int port);
 
     @Override
     public boolean stop(Cluster cluster, Machine machine, RedisNode redisNode) {

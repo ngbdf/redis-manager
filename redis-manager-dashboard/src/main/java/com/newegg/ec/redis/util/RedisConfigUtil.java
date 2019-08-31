@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.newegg.ec.redis.plugin.install.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
 import static com.newegg.ec.redis.util.SignUtil.*;
 
 /**
@@ -41,10 +42,6 @@ public class RedisConfigUtil {
     public static final String DIR = "dir";
 
     public static final String DAEMONIZE = "daemonize";
-
-    public static final String YES = "yes";
-
-    public static final String NO = "no";
 
     public static final int NORMAL_TYPE = 0;
 
@@ -391,7 +388,7 @@ public class RedisConfigUtil {
         // ip
         REDIS_CONFIG_LIST.add(new RedisConfig(true, "bind", "{bind}", NORMAL_TYPE));
         // 工作目录
-        REDIS_CONFIG_LIST.add(new RedisConfig(true, "dir", "{dir}", NORMAL_TYPE));
+        REDIS_CONFIG_LIST.add(new RedisConfig(true, "dir", REDIS_DEFAULT_WORK_DIR, NORMAL_TYPE));
         // 端口
         REDIS_CONFIG_LIST.add(new RedisConfig(true, "port", "{port}", NORMAL_TYPE, "端口"));
     }
@@ -477,6 +474,5 @@ public class RedisConfigUtil {
             this.desc = desc;
         }
     }
-
 
 }

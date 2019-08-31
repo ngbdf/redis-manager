@@ -30,10 +30,11 @@ public class InstallationParam {
 
     private int startPort;
 
-    List<RedisNode> redisNodeList;
+    List<RedisNode> allRedisNodes;
 
     Multimap<Machine, RedisNode> machineAndRedisNode;
 
+    Multimap<RedisNode, RedisNode> topology;
     /**
      * master 个数
      */
@@ -42,9 +43,7 @@ public class InstallationParam {
     /**
      * 每个 master 下的副本个数
      */
-    private int replicationNumber;
-
-    Multimap<RedisNode, RedisNode> topology;
+    private int replicaNumber;
 
     Map<String, String> configMap;
 
@@ -118,12 +117,12 @@ public class InstallationParam {
         this.startPort = startPort;
     }
 
-    public List<RedisNode> getRedisNodeList() {
-        return redisNodeList;
+    public List<RedisNode> getAllRedisNodes() {
+        return allRedisNodes;
     }
 
-    public void setRedisNodeList(List<RedisNode> redisNodeList) {
-        this.redisNodeList = redisNodeList;
+    public void setAllRedisNodes(List<RedisNode> allRedisNodes) {
+        this.allRedisNodes = allRedisNodes;
     }
 
     public Multimap<Machine, RedisNode> getMachineAndRedisNode() {
@@ -142,6 +141,22 @@ public class InstallationParam {
         this.topology = topology;
     }
 
+    public int getMasterNumber() {
+        return masterNumber;
+    }
+
+    public void setMasterNumber(int masterNumber) {
+        this.masterNumber = masterNumber;
+    }
+
+    public int getReplicaNumber() {
+        return replicaNumber;
+    }
+
+    public void setReplicaNumber(int replicaNumber) {
+        this.replicaNumber = replicaNumber;
+    }
+
     public Map<String, String> getConfigMap() {
         return configMap;
     }
@@ -158,35 +173,19 @@ public class InstallationParam {
         this.redisMode = redisMode;
     }
 
-    public InstallationEnvironment getInstallationEnvironment() {
-        return installationEnvironment;
-    }
-
-    public void setInstallationEnvironment(InstallationEnvironment installationEnvironment) {
-        this.installationEnvironment = installationEnvironment;
-    }
-
-    public int getMasterNumber() {
-        return masterNumber;
-    }
-
-    public void setMasterNumber(int masterNumber) {
-        this.masterNumber = masterNumber;
-    }
-
-    public int getReplicationNumber() {
-        return replicationNumber;
-    }
-
-    public void setReplicationNumber(int replicationNumber) {
-        this.replicationNumber = replicationNumber;
-    }
-
     public String getPolicy() {
         return policy;
     }
 
     public void setPolicy(String policy) {
         this.policy = policy;
+    }
+
+    public InstallationEnvironment getInstallationEnvironment() {
+        return installationEnvironment;
+    }
+
+    public void setInstallationEnvironment(InstallationEnvironment installationEnvironment) {
+        this.installationEnvironment = installationEnvironment;
     }
 }

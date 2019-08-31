@@ -1,4 +1,4 @@
-package com.newegg.ec.redis.plugin.install.service;
+package com.newegg.ec.redis.plugin.install;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
@@ -9,6 +9,7 @@ import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
+import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IMachineService;
 import com.newegg.ec.redis.service.INodeInfoService;
@@ -31,7 +32,8 @@ import static javax.management.timer.Timer.ONE_MINUTE;
  * 集群安装模板
  * <p>
  * TODO:
- * 1.最大
+ * 1.standalone slave of
+ * 2.集群扩容功能
  *
  * @author Jay.H.Zou
  * @date 2019/7/26
@@ -59,7 +61,7 @@ public class InstallationTemplate {
      * @param installationParam
      * @return
      */
-    public boolean install(AbstractOperationManage installationOperation, InstallationParam installationParam) {
+    public boolean install(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
         boolean verify = verify(installationParam);
         if (verify) {
             return false;
@@ -85,8 +87,6 @@ public class InstallationTemplate {
             return false;
         }
         buildCluster(installationParam);
-
-
         return saveToDB(installationParam);
     }
 
@@ -96,11 +96,11 @@ public class InstallationTemplate {
      * @param installationParam
      * @return
      */
-    public boolean verify(InstallationParam installationParam) {
+    private boolean verify(InstallationParam installationParam) {
         return true;
     }
 
-    private boolean prepareForInstallation(AbstractOperationManage installationOperation, InstallationParam installationParam) {
+    private boolean prepareForInstallation(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
         // 获取机器列表
         buildMachineList(installationParam);
         // 构建集群拓扑图
@@ -158,15 +158,15 @@ public class InstallationTemplate {
             // Rest 调用
             /*List<Machine> machineList = installationParam.getMachineList();
             int masterNumber = installationParam.getMasterNumber();
-            int replicationNumber = installationParam.getReplicationNumber();
-            int nodeNumber = masterNumber + replicationNumber;
+            int replicaNumber = installationParam.getReplicaNumber();
+            int nodeNumber = masterNumber + replicaNumber;
             int port = installationParam.getStartPort();
             List<MachineAndPorts> machineAndPortsList = buildMachinePortsMap(machineList, port, nodeNumber);
-            topology = randomPolicy(machineAndPortsList, masterNumber, replicationNumber);*/
+            topology = randomPolicy(machineAndPortsList, masterNumber, replicaNumber);*/
         } else {
-            List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+            List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
             RedisNode masterNode = null;
-            for (RedisNode redisNode : redisNodeList) {
+            for (RedisNode redisNode : allRedisNodes) {
                 if (Objects.equals(redisNode.getNodeRole(), MASTER)) {
                     masterNode = redisNode;
                 }
@@ -188,12 +188,12 @@ public class InstallationTemplate {
     /**
      * rest 调用
      *
-     * @param machineAndPortsList
+     * @param machineAndPortsList machine, ports
      * @param masterNumber
-     * @param replicationNumber
+     * @param replicaNumber
      * @return
      */
-    public Multimap<RedisNode, RedisNode> randomPolicy(List<MachineAndPorts> machineAndPortsList, int masterNumber, int replicationNumber) {
+    public Multimap<RedisNode, RedisNode> randomPolicy(List<MachineAndPorts> machineAndPortsList, int masterNumber, int replicaNumber) {
         Map<RedisNode, List<RedisNode>> tempTopology = buildMasterNodes(machineAndPortsList, masterNumber);
         List<RedisNode> allSlaveNodes = new ArrayList<>();
         machineAndPortsList.forEach(machineAndPorts -> {
@@ -207,7 +207,7 @@ public class InstallationTemplate {
             if (slaveNodeList == null) {
                 return;
             }
-            while (slaveNodeList.size() < replicationNumber && !allSlaveNodes.isEmpty()) {
+            while (slaveNodeList.size() < replicaNumber && !allSlaveNodes.isEmpty()) {
                 Random random = new Random();
                 int size = allSlaveNodes.size();
                 int index = random.nextInt(size);
@@ -291,9 +291,9 @@ public class InstallationTemplate {
     public void buildMachineRedisNodeMap(InstallationParam installationParam) {
         Multimap<Machine, RedisNode> machineAndRedisNode = ArrayListMultimap.create();
         List<Machine> machineList = installationParam.getMachineList();
-        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
         for (Machine machine : machineList) {
-            for (RedisNode redisNode : redisNodeList) {
+            for (RedisNode redisNode : allRedisNodes) {
                 if (Objects.equals(machine.getHost(), redisNode.getHost())) {
                     machineAndRedisNode.put(machine, redisNode);
                 }
@@ -303,9 +303,9 @@ public class InstallationTemplate {
     }
 
     private boolean checkList(InstallationParam installationParam) {
-        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
         List<Machine> machineList = installationParam.getMachineList();
-        return !(redisNodeList.isEmpty() || machineList.isEmpty());
+        return !(allRedisNodes.isEmpty() || machineList.isEmpty());
     }
 
     /**
@@ -319,10 +319,10 @@ public class InstallationTemplate {
         Cluster cluster = installationParam.getCluster();
         Multimap<RedisNode, RedisNode> topology = installationParam.getTopology();
         RedisNode seed = getSeedNode(cluster, topology);
-        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
         // TODO: websocket
-        String result = redisService.clusterMeet(cluster, seed, redisNodeList);
-        List<RedisNode> redisNodeListWithInfo = waitClusterMeet(installationParam, seed, redisNodeList);
+        String result = redisService.clusterMeet(cluster, seed, allRedisNodes);
+        List<RedisNode> redisNodeListWithInfo = waitClusterMeet(installationParam, seed, allRedisNodes);
         replicate(cluster, topology, redisNodeListWithInfo);
 
         // 设置密码
@@ -332,6 +332,9 @@ public class InstallationTemplate {
         if (autoInit) {
             // TODO: websocket
             String initResult = initSlot(cluster);
+            if (Strings.isNullOrEmpty(initResult)) {
+                cluster.setInit(true);
+            }
         }
     }
 
@@ -407,7 +410,7 @@ public class InstallationTemplate {
         }
     }
 
-    private void generateConnectionNodes(Cluster cluster) {
+    private String generateConnectionNodes(Cluster cluster) {
         List<RedisNode> allRedisNodeList = redisService.getRedisNodeList(cluster);
         // 随机选前3个节点
         StringBuffer nodes = new StringBuffer();
@@ -420,7 +423,7 @@ public class InstallationTemplate {
             nodes.append(COMMAS).append(redisNode2.getHost()).append(COLON).append(redisNode2.getPort())
                     .append(COMMAS).append(redisNode3.getHost()).append(COLON).append(redisNode3.getPort());
         }
-        cluster.setNodes(nodes.toString());
+        return nodes.toString();
     }
 
     /**
@@ -442,8 +445,7 @@ public class InstallationTemplate {
     }
 
     /**
-     * standalone node meet
-     * slave build
+     * Standalone: node slave of
      *
      * @param installationParam
      * @return
@@ -454,7 +456,10 @@ public class InstallationTemplate {
 
     private boolean saveToDB(InstallationParam installationParam) {
         // 获取连接节点
-        generateConnectionNodes(installationParam.getCluster());
+        Cluster cluster = installationParam.getCluster();
+        String nodes = generateConnectionNodes(cluster);
+        cluster.setNodes(nodes);
+        clusterService.addCluster(cluster);
         return true;
     }
 
