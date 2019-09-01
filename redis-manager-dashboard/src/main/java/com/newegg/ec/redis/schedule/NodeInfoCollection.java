@@ -64,7 +64,7 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
     @Async
     @Scheduled(cron = "0 0/1 * * * ? ")
     @Override
-    public void collectData() {
+    public void collect() {
         try {
             List<Cluster> allClusterList = clusterService.getAllClusterList();
             if (allClusterList == null || allClusterList.isEmpty()) {

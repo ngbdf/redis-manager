@@ -16,8 +16,6 @@ public class AlertRule {
 
     private String clusterId;
 
-    private String channelIds;
-
     /**
      * 告警配置
      */
@@ -83,14 +81,6 @@ public class AlertRule {
         this.clusterId = clusterId;
     }
 
-    public String getChannelIds() {
-        return channelIds;
-    }
-
-    public void setChannelIds(String channelIds) {
-        this.channelIds = channelIds;
-    }
-
     public String getAlertKey() {
         return alertKey;
     }
@@ -123,7 +113,7 @@ public class AlertRule {
         this.checkCycle = checkCycle;
     }
 
-    public boolean isStatus() {
+    public boolean getStatus() {
         return status;
     }
 

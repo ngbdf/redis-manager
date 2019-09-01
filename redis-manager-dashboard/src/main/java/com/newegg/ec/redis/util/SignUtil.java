@@ -58,6 +58,10 @@ public class SignUtil {
     }
 
     public static final String[] splitBySign(String str, String sign) {
-        return str.split(sign);
+        String[] split = str.split(sign);
+        for (int i = 0; i < split.length; i++) {
+            split[i] = split[i].trim();
+        }
+        return split;
     }
 }

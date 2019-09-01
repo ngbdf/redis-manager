@@ -81,7 +81,8 @@ public class RedisNodeInfoUtil {
     public static final String COMMANDS_PROCESSED = "commands_processed";
     public static final String NET_INPUT_BYTES = "net_input_bytes";
     public static final String NET_OUTPUT_BYTES = "net_output_bytes";
-    public static final String KEYSPACE_HITS_RATIO = "keyspaceHitsRatio";
+    public static final String KEYSPACE_HITS_RATIO = "keyspace_hits_ratio";
+
     /**
      * Replication
      */

@@ -24,8 +24,8 @@ import static com.newegg.ec.redis.entity.NodeRole.MASTER;
 import static com.newegg.ec.redis.entity.NodeRole.SLAVE;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.COMMAS;
-import static com.newegg.ec.redis.util.TimeRangeUtil.FIVE_SECONDS;
-import static com.newegg.ec.redis.util.TimeRangeUtil.TEN_SECONDS;
+import static com.newegg.ec.redis.util.TimeUtil.FIVE_SECONDS;
+import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
 import static javax.management.timer.Timer.ONE_MINUTE;
 
 /**

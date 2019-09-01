@@ -6,7 +6,7 @@ import com.newegg.ec.redis.entity.NodeInfoParam;
 import com.newegg.ec.redis.entity.NodeInfoType;
 import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.service.INodeInfoService;
-import com.newegg.ec.redis.util.TimeRangeUtil;
+import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,16 +64,25 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
 
     @Override
     public NodeInfo getLastTimeNodeInfo(NodeInfoParam nodeInfoParam) {
+        List<NodeInfo> lastTimeNodeInfoList = getLastTimeNodeInfoList(nodeInfoParam);
+        if (lastTimeNodeInfoList == null || lastTimeNodeInfoList.size() != 1){
+            return null;
+        }
+        return lastTimeNodeInfoList.get(0);
+    }
+
+    @Override
+    public List<NodeInfo> getLastTimeNodeInfoList(NodeInfoParam nodeInfoParam) {
         if (!verifyParam(nodeInfoParam)) {
             return null;
         }
-        NodeInfo nodeInfo = null;
+        List<NodeInfo> nodeInfoList = null;
         try {
-            nodeInfo = nodeInfoDao.selectLastTimeNodeInfo(nodeInfoParam);
+            nodeInfoList = nodeInfoDao.selectLastTimeNodeInfo(nodeInfoParam);
         } catch (Exception e) {
             logger.error("Get last time node info failed, " + nodeInfoParam, e);
         }
-        return nodeInfo;
+        return nodeInfoList;
     }
 
     @Override
@@ -101,7 +110,7 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
 
     @Override
     public boolean cleanupNodeInfo(int clusterId) {
-        Timestamp oldestTime = TimeRangeUtil.getTime(dataKeepDays * TimeRangeUtil.ONE_DAY);
+        Timestamp oldestTime = TimeUtil.getTime(dataKeepDays * TimeUtil.ONE_DAY);
         try {
             nodeInfoDao.deleteNodeInfoByTime(clusterId, oldestTime);
             return true;
@@ -131,14 +140,14 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         Timestamp startTime = nodeInfoParam.getStartTime();
         Timestamp endTime = nodeInfoParam.getEndTime();
         if (endTime == null) {
-            endTime = TimeRangeUtil.getCurrentTimestamp();
+            endTime = TimeUtil.getCurrentTimestamp();
             nodeInfoParam.setEndTime(endTime);
         }
         if (startTime == null) {
-            startTime = TimeRangeUtil.getLastHourTimestamp();
+            startTime = TimeUtil.getLastHourTimestamp();
             nodeInfoParam.setStartTime(startTime);
         }
-        if (TimeRangeUtil.moreThanTwoDays(startTime, endTime)) {
+        if (TimeUtil.moreThanTwoDays(startTime, endTime)) {
             nodeInfoParam.setTimeType(NodeInfoType.TimeType.HOUR);
         }
         return nodeInfoParam;

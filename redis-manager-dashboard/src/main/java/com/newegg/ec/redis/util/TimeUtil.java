@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.util;
 
 import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 
 import static javax.management.timer.Timer.ONE_MINUTE;
 import static javax.management.timer.Timer.ONE_SECOND;
@@ -9,7 +10,9 @@ import static javax.management.timer.Timer.ONE_SECOND;
  * @author Jay.H.Zou
  * @date 8/3/2019
  */
-public class TimeRangeUtil {
+public class TimeUtil {
+
+    public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
 
     public static final long FIVE_SECONDS = 5 * ONE_SECOND;
 
@@ -44,7 +47,7 @@ public class TimeRangeUtil {
 
     public static final long FIFTEEN_DAYS = 15 * ONE_DAY;
 
-    private TimeRangeUtil() {
+    private TimeUtil() {
     }
 
     public static Timestamp getCurrentTimestamp() {

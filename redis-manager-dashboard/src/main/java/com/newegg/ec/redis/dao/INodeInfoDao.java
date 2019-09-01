@@ -33,7 +33,7 @@ public interface INodeInfoDao {
             "<if test='node != null'> AND node = #{node} </if> " +
             "AND last_time = 1" +
             "</script>")
-    NodeInfo selectLastTimeNodeInfo(NodeInfoParam nodeInfoParam);
+    List<NodeInfo> selectLastTimeNodeInfo(NodeInfoParam nodeInfoParam);
 
     @Insert("<script>" +
             "INSERT INFO node_info_${clusterId} (info_id, node, data_type, time_type, " +

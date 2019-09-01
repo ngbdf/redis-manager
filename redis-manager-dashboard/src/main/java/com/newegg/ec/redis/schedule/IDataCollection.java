@@ -11,6 +11,6 @@ public interface IDataCollection {
     /**
      * 定期收集
      */
-    void collectData();
+    void collect();
 
 }

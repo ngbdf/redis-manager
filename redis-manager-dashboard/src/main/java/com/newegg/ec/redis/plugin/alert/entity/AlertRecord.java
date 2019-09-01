@@ -1,8 +1,5 @@
 package com.newegg.ec.redis.plugin.alert.entity;
 
-
-import java.sql.Timestamp;
-
 /**
  * @author Jay.H.Zou
  * @date 2019/7/29
@@ -19,9 +16,7 @@ public class AlertRecord extends AlertRule {
 
     private String alertRule;
 
-    private String currentData;
-
-    private Timestamp updateTime;
+    private String actualData;
 
     public int getRecordId() {
         return recordId;
@@ -63,19 +58,11 @@ public class AlertRecord extends AlertRule {
         this.alertRule = alertRule;
     }
 
-    public String getCurrentData() {
-        return currentData;
+    public String getActualData() {
+        return actualData;
     }
 
-    public void setCurrentData(String currentData) {
-        this.currentData = currentData;
-    }
-
-    public Timestamp getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
+    public void setActualData(String actualData) {
+        this.actualData = actualData;
     }
 }
