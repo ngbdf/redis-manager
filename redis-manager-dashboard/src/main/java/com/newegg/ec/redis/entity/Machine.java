@@ -6,9 +6,9 @@ package com.newegg.ec.redis.entity;
  */
 public class Machine {
 
-    private String machineId;
+    private int machineId;
 
-    private String machineGroup;
+    private String machineGroupName;
 
     private String groupId;
 
@@ -28,20 +28,20 @@ public class Machine {
         this.host = host;
     }
 
-    public String getMachineId() {
+    public int getMachineId() {
         return machineId;
     }
 
-    public void setMachineId(String machineId) {
+    public void setMachineId(int machineId) {
         this.machineId = machineId;
     }
 
-    public String getMachineGroup() {
-        return machineGroup;
+    public String getMachineGroupName() {
+        return machineGroupName;
     }
 
-    public void setMachineGroup(String machineGroup) {
-        this.machineGroup = machineGroup;
+    public void setMachineGroupName(String machineGroupName) {
+        this.machineGroupName = machineGroupName;
     }
 
     public String getGroupId() {

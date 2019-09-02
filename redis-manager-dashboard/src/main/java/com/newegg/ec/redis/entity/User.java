@@ -8,7 +8,7 @@ import java.sql.Timestamp;
  */
 public class User {
 
-    private String userId;
+    private int userId;
 
     private String groupId;
 
@@ -24,7 +24,7 @@ public class User {
 
     private String email;
 
-    private String phoneNumber;
+    private String mobile;
 
     /**
      * 0: 系统内部用户

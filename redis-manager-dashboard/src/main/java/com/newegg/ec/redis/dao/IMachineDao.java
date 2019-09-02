@@ -14,14 +14,18 @@ public interface IMachineDao {
 
     List<Machine> selectAllMachine();
 
-    List<Machine> selectMachineByGroupId(String groupId);
+    List<Machine> selectMachineByGroupId(int groupId);
+
+    List<Machine> selectMachineByMachineGroup(String machineGroupName);
+
+    List<Machine> selectMachineByIds(List<Integer> machineIdList);
 
     int insertMachine(Machine machine);
 
     int insertMachineBatch(List<Machine> machineList);
 
-    int deleteMachineById(String machineId);
+    int deleteMachineById(int machineId);
 
-    int deleteMachineByIdBatch(List<String>  machineIdList);
+    int deleteMachineByIdBatch(List<Integer>  machineIdList);
 
 }

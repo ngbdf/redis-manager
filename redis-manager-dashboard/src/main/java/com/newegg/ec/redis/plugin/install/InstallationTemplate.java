@@ -137,7 +137,7 @@ public class InstallationTemplate {
     private void buildMachineList(InstallationParam installationParam) {
         boolean autoBuild = installationParam.isAutoBuild();
         if (autoBuild) {
-            List<String> machineIdList = installationParam.getMachineIdList();
+            List<Integer> machineIdList = installationParam.getMachineIdList();
             List<Machine> machineList = machineService.getMachineListByIds(machineIdList);
             installationParam.setMachineList(machineList);
         }

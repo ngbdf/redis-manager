@@ -18,7 +18,7 @@ public class InstallationParam {
 
     private boolean create;
 
-    private List<String> machineIdList;
+    private List<Integer> machineIdList;
 
     private List<Machine> machineList;
 
@@ -69,11 +69,11 @@ public class InstallationParam {
         this.create = create;
     }
 
-    public List<String> getMachineIdList() {
+    public List<Integer> getMachineIdList() {
         return machineIdList;
     }
 
-    public void setMachineIdList(List<String> machineIdList) {
+    public void setMachineIdList(List<Integer> machineIdList) {
         this.machineIdList = machineIdList;
     }
 

@@ -3,6 +3,7 @@ package com.newegg.ec.redis.service;
 import com.newegg.ec.redis.entity.Machine;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -15,29 +16,34 @@ public interface IMachineService {
     /**
      * 获取多个集群集群
      *
-     * @param machineGroup
+     * @param groupId
      * @return
      */
-    List<List<Machine>> getMachineByMachineListByGroupId(String machineGroup);
+    Map<String, List<Machine>> getMachineByGroupId(int groupId);
 
     /**
      * 获取一个机器集群
      *
-     * @param machineGroup
+     * @param machineGroupName
      * @return
      */
-    List<Machine> getMachineByMachineGroup(String machineGroup);
+    List<Machine> getMachineByMachineGroup(String machineGroupName);
 
-    List<Machine> getMachineListByIds(List<String> machineIdList);
+    List<Machine> getMachineListByIds(List<Integer> machineIdList);
 
-    List<Machine> checkMachineConnection(List<String> machineIdList);
+    /**
+     *
+     * @param machineIdList
+     * @return connection refused list
+     */
+    List<Machine> checkMachineConnection(List<Integer> machineIdList);
 
-    int addMachine(Machine machine);
+    boolean addMachine(Machine machine);
 
-    int addMachineBatch(List<Machine> machineList);
+    boolean addMachineBatch(List<Machine> machineList);
 
-    int deleteMachineById(String machineId);
+    boolean deleteMachineById(Integer machineId);
 
-    int deleteMachineByIdBatch(List<String> machineIdList);
+    boolean deleteMachineByIdBatch(List<Integer> machineIdList);
 
 }

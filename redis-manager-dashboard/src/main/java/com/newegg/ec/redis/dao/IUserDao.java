@@ -14,7 +14,7 @@ public interface IUserDao {
 
     List<User> selectAllUser();
 
-    List<User> selectUserByGroupId(String groupId);
+    List<User> selectUserByGroupId(int groupId);
 
     User selectUserByNameAndPassword(User user);
 
@@ -24,5 +24,7 @@ public interface IUserDao {
 
     int updateUser(User user);
 
-    int deleteUserById(String userId);
+    int deleteUserById(int userId);
+
+    int deleteUserByGroupId(int groupId);
 }

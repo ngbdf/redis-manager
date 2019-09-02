@@ -14,9 +14,11 @@ public interface IGroupDao {
 
     List<Group> selectAllGroup();
 
-    List<Group> selectGroupByUserId(String userId);
+    List<Group> selectGroupByUserId(int userId);
 
-    Group getGroupById(int groupId);
+    Group selectGroupByGroupName(String groupName);
+
+    Group selectGroupById(int groupId);
 
     int insertGroup(Group group);
 

@@ -16,6 +16,9 @@ public class Cluster {
 
     private String admins;
 
+    /**
+     * 通过 token 连接
+     */
     private String clusterToken;
 
     private String clusterName;

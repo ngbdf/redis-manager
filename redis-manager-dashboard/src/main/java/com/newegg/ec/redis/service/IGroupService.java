@@ -12,14 +12,16 @@ public interface IGroupService {
 
     List<Group> getAllGroup();
 
-    List<Group> getGroupByUserId(String userId);
+    List<Group> getGroupByUserId(int userId);
 
     Group getGroupById(int groupId);
 
     boolean addGroup(Group group);
 
+    boolean groupExist(String groupName);
+
     boolean updateGroup(Group group);
 
-    boolean deleteGroupById(String groupId);
+    boolean deleteGroupById(int groupId);
 
 }

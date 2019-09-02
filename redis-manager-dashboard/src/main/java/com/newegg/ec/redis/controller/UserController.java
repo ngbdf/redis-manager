@@ -5,4 +5,5 @@ package com.newegg.ec.redis.controller;
  * @date 7/20/2019
  */
 public class UserController {
+
 }
