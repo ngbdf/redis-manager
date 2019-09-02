@@ -10,11 +10,11 @@ import java.sql.Timestamp;
  */
 public class AlertRule {
 
-    private String ruleId;
+    private int ruleId;
 
-    private String groupId;
+    private int groupId;
 
-    private String clusterId;
+    private int clusterId;
 
     /**
      * 告警配置
@@ -57,27 +57,27 @@ public class AlertRule {
 
     private Timestamp lastCheckTime;
 
-    public String getRuleId() {
+    public int getRuleId() {
         return ruleId;
     }
 
-    public void setRuleId(String ruleId) {
+    public void setRuleId(int ruleId) {
         this.ruleId = ruleId;
     }
 
-    public String getGroupId() {
+    public int getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(int groupId) {
         this.groupId = groupId;
     }
 
-    public String getClusterId() {
+    public int getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(String clusterId) {
+    public void setClusterId(int clusterId) {
         this.clusterId = clusterId;
     }
 
@@ -129,7 +129,7 @@ public class AlertRule {
         this.atAll = atAll;
     }
 
-    public boolean isGlobal() {
+    public boolean getGlobal() {
         return global;
     }
 

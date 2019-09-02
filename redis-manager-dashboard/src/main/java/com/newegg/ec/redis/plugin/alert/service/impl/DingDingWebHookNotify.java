@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 
@@ -41,17 +43,15 @@ public class DingDingWebHookNotify extends AbstractAlertNotify {
 
     private static final String IS_AT_ALL = "isAtAll";
 
-    private static final String AT_MOBILES = "atMobiles";
-
     @Override
-    public void notify(List<AlertChannel> alertChannelList, List<AlertRecord> alertRecordList) {
+    public void notify(Collection<AlertChannel> alertChannelList, List<AlertRecord> alertRecordList) {
         JSONObject requestBody = buildRequestBody(alertRecordList);
         alertChannelList.forEach(alertChannel -> {
             String webhook = alertChannel.getWebhook();
             try {
                 HttpClientUtil.post(webhook, requestBody);
             } catch (IOException e) {
-                logger.error("DingDing notify failed, " + alertChannel + alertChannel, e);
+                logger.error("DingDing notify failed, " + alertChannel, e);
             }
         });
 
@@ -68,7 +68,7 @@ public class DingDingWebHookNotify extends AbstractAlertNotify {
         at.put(IS_AT_ALL, true);
         requestBody.put(MARKDOWN, markdown);
         requestBody.put(AT, at);
-        return null;
+        return requestBody;
     }
 
 }

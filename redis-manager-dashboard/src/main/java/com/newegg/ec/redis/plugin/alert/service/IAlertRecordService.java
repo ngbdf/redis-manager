@@ -11,11 +11,11 @@ import java.util.List;
  */
 public interface IAlertRecordService {
 
-    List<AlertRecord> getAlertRecordByClusterId(String clusterId);
+    List<AlertRecord> getAlertRecordByClusterId(int clusterId);
 
-    boolean addAlertRecord(AlertRecord alertRecord);
+    boolean addAlertRecord(List<AlertRecord> alertRecordList);
 
-    boolean deleteAlertRecordByIds(List<String> recordIdList);
+    boolean deleteAlertRecordByIds(List<Integer> recordIdList);
 
     boolean deleteAlertRecordByTime(Timestamp earliestTime);
 }

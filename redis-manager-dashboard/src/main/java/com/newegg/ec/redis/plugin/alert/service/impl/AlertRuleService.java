@@ -1,6 +1,5 @@
 package com.newegg.ec.redis.plugin.alert.service.impl;
 
-import com.google.common.base.Strings;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRuleDao;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRule;
 import com.newegg.ec.redis.plugin.alert.service.IAlertRuleService;
@@ -22,7 +21,7 @@ public class AlertRuleService implements IAlertRuleService {
     private IAlertRuleDao alertRuleDao;
 
     @Override
-    public List<AlertRule> getAlertRuleIds(List<String> ruleIdList) {
+    public List<AlertRule> getAlertRuleIds(List<Integer> ruleIdList) {
         try {
             return alertRuleDao.selectAlertRuleIds(ruleIdList);
         } catch (Exception e) {
@@ -32,10 +31,7 @@ public class AlertRuleService implements IAlertRuleService {
     }
 
     @Override
-    public List<AlertRule> getAlertRuleListByGroupId(String groupId) {
-        if (Strings.isNullOrEmpty(groupId)) {
-            return null;
-        }
+    public List<AlertRule> getAlertRuleListByGroupId(int groupId) {
         try {
             return alertRuleDao.selectAlertRuleListByGroupId(groupId);
         } catch (Exception e) {
@@ -45,10 +41,7 @@ public class AlertRuleService implements IAlertRuleService {
     }
 
     @Override
-    public List<AlertRule> getAlertRuleListByClusterId(String groupId, String clusterId) {
-        if (Strings.isNullOrEmpty(groupId) || Strings.isNullOrEmpty(clusterId)) {
-            return null;
-        }
+    public List<AlertRule> getAlertRuleListByClusterId(int groupId, int clusterId) {
         try {
             return alertRuleDao.selectAlertRuleListByClusterId(groupId, clusterId);
         } catch (Exception e) {
@@ -80,7 +73,18 @@ public class AlertRuleService implements IAlertRuleService {
     }
 
     @Override
-    public boolean deleteAlertRuleByIds(List<String> ruleIdList) {
+    public boolean updateAlertRuleLastCheckTime(List<Integer> ruleIdList) {
+        try {
+            int row = alertRuleDao.updateAlertRuleLastCheckTime(ruleIdList);
+            return row > 0;
+        } catch (Exception e) {
+            logger.error("Update alert rule failed, rule id = " + ruleIdList, e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean deleteAlertRuleByIds(List<Integer> ruleIdList) {
         try {
             alertRuleDao.deleteAlertRuleByIdList(ruleIdList);
             return true;
@@ -91,7 +95,7 @@ public class AlertRuleService implements IAlertRuleService {
     }
 
     @Override
-    public boolean deleteAlertRuleByGroupId(String groupId) {
+    public boolean deleteAlertRuleByGroupId(int groupId) {
         try {
             int row = alertRuleDao.deleteAlertRuleByGroupId(groupId);
             return row > 0;

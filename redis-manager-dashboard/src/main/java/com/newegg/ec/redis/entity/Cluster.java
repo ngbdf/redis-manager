@@ -12,7 +12,7 @@ public class Cluster {
 
     private int clusterId;
 
-    private String groupId;
+    private int groupId;
 
     private String admins;
 
@@ -101,6 +101,8 @@ public class Cluster {
 
     private String ruleIds;
 
+    private String channelIds;
+
     public enum ClusterState {
         UNKNOWN,
 
@@ -119,11 +121,11 @@ public class Cluster {
         this.clusterId = clusterId;
     }
 
-    public String getGroupId() {
+    public int getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(int groupId) {
         this.groupId = groupId;
     }
 
@@ -317,5 +319,13 @@ public class Cluster {
 
     public void setRuleIds(String ruleIds) {
         this.ruleIds = ruleIds;
+    }
+
+    public String getChannelIds() {
+        return channelIds;
+    }
+
+    public void setChannelIds(String channelIds) {
+        this.channelIds = channelIds;
     }
 }

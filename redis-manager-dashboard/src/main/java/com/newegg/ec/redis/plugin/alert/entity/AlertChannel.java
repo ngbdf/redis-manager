@@ -54,7 +54,7 @@ public class AlertChannel {
      * 3: dingding web hook
      *
      */
-    private int type;
+    private int channelType;
 
     public String getChannelId() {
         return channelId;
@@ -152,4 +152,11 @@ public class AlertChannel {
         this.corpSecret = corpSecret;
     }
 
+    public int getChannelType() {
+        return channelType;
+    }
+
+    public void setChannelType(int channelType) {
+        this.channelType = channelType;
+    }
 }

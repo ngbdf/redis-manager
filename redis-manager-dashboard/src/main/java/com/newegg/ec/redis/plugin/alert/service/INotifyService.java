@@ -3,6 +3,7 @@ package com.newegg.ec.redis.plugin.alert.service;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,9 +14,9 @@ public interface INotifyService {
 
     /**
      * 通知
-     * @param alertChannelList 此列表是根据不同的通知方式分类后的
+     * @param alertChannelList 此列表是全部的 channel, 需要过滤
      * @param alertRecordList
      */
-    void notify(List<AlertChannel> alertChannelList, List<AlertRecord> alertRecordList);
+    void notify(Collection<AlertChannel> alertChannelList, List<AlertRecord> alertRecordList);
 
 }

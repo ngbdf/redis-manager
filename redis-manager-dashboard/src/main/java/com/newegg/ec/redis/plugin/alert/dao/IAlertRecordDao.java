@@ -12,11 +12,11 @@ import java.util.List;
  */
 public interface IAlertRecordDao {
 
-    List<AlertRecord> selectAlertRecordByClusterId(String clusterId);
+    List<AlertRecord> selectAlertRecordByClusterId(int clusterId);
 
-    int insertAlertRecord(AlertRecord alertRecord);
+    int insertAlertRecord(List<AlertRecord> alertRecordList);
 
-    int deleteAlertRecordByIds(List<String> recordIdList);
+    int deleteAlertRecordByIds(List<Integer> recordIdList);
 
     int deleteAlertRecordByTime(Timestamp earliestTime);
 }

@@ -23,10 +23,7 @@ public class AlertRecordService implements IAlertRecordService {
     private IAlertRecordDao alertRecordDao;
 
     @Override
-    public List<AlertRecord> getAlertRecordByClusterId(String clusterId) {
-        if (Strings.isNullOrEmpty(clusterId)) {
-            return null;
-        }
+    public List<AlertRecord> getAlertRecordByClusterId(int clusterId) {
         try {
             return alertRecordDao.selectAlertRecordByClusterId(clusterId);
         } catch (Exception e) {
@@ -36,18 +33,18 @@ public class AlertRecordService implements IAlertRecordService {
     }
 
     @Override
-    public boolean addAlertRecord(AlertRecord alertRecord) {
+    public boolean addAlertRecord(List<AlertRecord> alertRecordList) {
         try {
-            int row = alertRecordDao.insertAlertRecord(alertRecord);
+            int row = alertRecordDao.insertAlertRecord(alertRecordList);
             return row > 0;
         } catch (Exception e) {
-            logger.error("Add alert record  failed, " + alertRecord, e);
+            logger.error("Add alert record  failed, " + alertRecordList, e);
             return false;
         }
     }
 
     @Override
-    public boolean deleteAlertRecordByIds(List<String> recordIdList) {
+    public boolean deleteAlertRecordByIds(List<Integer> recordIdList) {
         try {
             alertRecordDao.deleteAlertRecordByIds(recordIdList);
             return true;

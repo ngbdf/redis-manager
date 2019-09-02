@@ -16,12 +16,12 @@ public interface IGroupDao {
 
     List<Group> selectGroupByUserId(String userId);
 
-    Group getGroupById(String groupId);
+    Group getGroupById(int groupId);
 
     int insertGroup(Group group);
 
     int updateGroup(Group group);
 
-    int deleteGroupById(String groupId);
+    int deleteGroupById(int groupId);
 
 }

@@ -44,5 +44,6 @@ redis-manager:
       docker-host: tcp://%s:2375
   alert:
     enabled: true
+    data-keep-days: 15
   analysis:
     enabled: false

@@ -10,18 +10,20 @@ import java.util.List;
  */
 public interface IAlertRuleService {
 
-    List<AlertRule> getAlertRuleIds(List<String> ruleIdList);
+    List<AlertRule> getAlertRuleIds(List<Integer> ruleIdList);
     
-    List<AlertRule> getAlertRuleListByGroupId(String groupId);
+    List<AlertRule> getAlertRuleListByGroupId(int groupId);
 
-    List<AlertRule> getAlertRuleListByClusterId(String groupId, String clusterId);
+    List<AlertRule> getAlertRuleListByClusterId(int groupId, int clusterId);
 
     boolean addAlertRule(AlertRule alertRule);
 
     boolean updateAlertRule(AlertRule alertRule);
 
-    boolean deleteAlertRuleByIds(List<String> ruleIdList);
+    boolean updateAlertRuleLastCheckTime(List<Integer> ruleIdList);
 
-    boolean deleteAlertRuleByGroupId(String groupId);
+    boolean deleteAlertRuleByIds(List<Integer> ruleIdList);
+
+    boolean deleteAlertRuleByGroupId(int groupId);
 
 }
