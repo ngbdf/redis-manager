@@ -20,7 +20,7 @@ import java.sql.Timestamp;
  *      response_time: √
  *
  *      connected_clients: √
- *      blocked_clients:
+ *      blocked_clients: √
  *
  *      mem_fragmentation_ratio: √
  *      used_memory: √
@@ -32,7 +32,7 @@ import java.sql.Timestamp;
  *      keys: √
  *      expires: √
  *
- *      keyspaceHitsRatio:  √
+ *      keyspace_hits_ratio:  √
  *
  *      used_cpu_sys: √
  * Scalable
@@ -41,7 +41,7 @@ import java.sql.Timestamp;
  */
 public class NodeInfo {
 
-    private String infoId;
+    private Integer infoId;
 
     private NodeRole role;
 
@@ -109,7 +109,7 @@ public class NodeInfo {
     private long connectionsReceived;
 
     /**
-     * redis 处理的命令数
+     * redis处理的命令数 (total_commands_processed): 监控采集周期内的平均qps
      */
     private long totalCommandsProcessed;
 
@@ -117,6 +117,11 @@ public class NodeInfo {
      * redis 每分钟或每小时处理的命令数
      */
     private long commandsProcessed;
+
+    /**
+     * redis当前的qps (instantaneous_ops_per_sec): redis内部较实时的每秒执行的命令数
+     */
+    private long instantaneousOpsPerSec;
     /**
      * redis 网络入口流量字节数
      */
@@ -178,11 +183,11 @@ public class NodeInfo {
         this.lastTime = lastTime;
     }
 
-    public String getInfoId() {
+    public Integer getInfoId() {
         return infoId;
     }
 
-    public void setInfoId(String infoId) {
+    public void setInfoId(Integer infoId) {
         this.infoId = infoId;
     }
 
@@ -344,6 +349,14 @@ public class NodeInfo {
 
     public void setCommandsProcessed(long commandsProcessed) {
         this.commandsProcessed = commandsProcessed;
+    }
+
+    public long getInstantaneousOpsPerSec() {
+        return instantaneousOpsPerSec;
+    }
+
+    public void setInstantaneousOpsPerSec(long instantaneousOpsPerSec) {
+        this.instantaneousOpsPerSec = instantaneousOpsPerSec;
     }
 
     public long getTotalNetInputBytes() {

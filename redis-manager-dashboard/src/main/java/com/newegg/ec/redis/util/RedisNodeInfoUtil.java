@@ -65,6 +65,7 @@ public class RedisNodeInfoUtil {
      */
     public static final String TOTAL_CONNECTIONS_RECEIVED = "total_connections_received";
     public static final String TOTAL_COMMANDS_PROCESSED = "total_commands_processed";
+    public static final String INSTANTANEOUS_OPS_PER_SEC = "instantaneous_ops_per_sec";
     public static final String TOTAL_NET_INPUT_BYTES = "total_net_input_bytes";
     public static final String TOTAL_NET_OUTPUT_BYTES = "total_net_output_bytes";
     public static final String INSTANTANEOUS_INPUT_KBPS = "instantaneous_input_kbps";
