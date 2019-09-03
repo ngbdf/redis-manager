@@ -24,10 +24,7 @@ public class AlertChannelService implements IAlertChannelService {
     private IAlertChannelDao alertChannelDao;
 
     @Override
-    public List<AlertChannel> getAlertChannelByGroupId(String groupId) {
-        if (Strings.isNullOrEmpty(groupId)) {
-            return null;
-        }
+    public List<AlertChannel> getAlertChannelByGroupId(Integer groupId) {
         try {
             return alertChannelDao.selectAlertChannelByGroupId(groupId);
         } catch (Exception e) {
@@ -37,7 +34,7 @@ public class AlertChannelService implements IAlertChannelService {
     }
 
     @Override
-    public List<AlertChannel> getAlertChannelByIds(List<String> channelIdList) {
+    public List<AlertChannel> getAlertChannelByIds(List<Integer> channelIdList) {
         if (channelIdList == null || channelIdList.isEmpty()) {
             return null;
         }
@@ -72,7 +69,7 @@ public class AlertChannelService implements IAlertChannelService {
     }
 
     @Override
-    public boolean deleteAlertChannelById(String channelId) {
+    public boolean deleteAlertChannelById(Integer channelId) {
         try {
             int row = alertChannelDao.deleteAlertChannelById(channelId);
             return row == 1;
@@ -83,7 +80,7 @@ public class AlertChannelService implements IAlertChannelService {
     }
 
     @Override
-    public boolean deleteAlertChannelByGroupId(String groupId) {
+    public boolean deleteAlertChannelByGroupId(Integer groupId) {
         try {
             int row = alertChannelDao.deleteAlertChannelById(groupId);
             return row > 0;

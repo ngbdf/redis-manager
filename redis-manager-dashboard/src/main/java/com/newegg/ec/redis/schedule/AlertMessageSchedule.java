@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -148,19 +149,32 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         @Override
         public void run() {
             try {
-                List<Integer> updateRuleIdList = new ArrayList<>();
+                int groupId = group.getGroupId();
+                // 获取有效的规则
+                List<AlertRule> validAlertRuleList = getValidAlertRule(groupId);
+                if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
+                    return;
+                }
+                // 更新规则
+                updateRuleLastCheckTime(validAlertRuleList);
+                // 获取 AlertChannel
+                List<AlertChannel> validAlertChannel = getValidAlertChannel(groupId);
+                if (validAlertChannel == null || validAlertChannel.isEmpty()) {
+                    return;
+                }
+
                 // 获取 cluster
-                List<Cluster> clusterList = clusterService.getClusterListByGroupId(group.getGroupId());
+                List<Cluster> clusterList = clusterService.getClusterListByGroupId(groupId);
                 if (clusterList == null || clusterList.isEmpty()) {
                     return;
                 }
                 clusterList.forEach(cluster -> {
-                    List<Integer> ruleIdList = getRuleIdList(cluster);
-                    if (ruleIdList.isEmpty()) {
+                    List<Integer> ruleIdList = getRuleIdList(cluster.getRuleIds());
+                    if (ruleIdList == null || ruleIdList.isEmpty()) {
                         return;
                     }
                     // 获取集群规则
-                    List<AlertRule> alertRuleList = alertRuleService.getAlertRuleIds(ruleIdList);
+                    List<AlertRule> alertRuleList = getAlertRuleByIds(validAlertRuleList, ruleIdList);
                     int clusterId = cluster.getClusterId();
                     // 获取 node info 列表
                     NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.DataType.NODE, NodeInfoType.TimeType.MINUTE, null);
@@ -172,46 +186,78 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                             if (isNotify(nodeInfo, alertRule)) {
                                 alertRecordList.add(buildAlertRecord(group, cluster, nodeInfo, alertRule));
                                 alertRule.setLastCheckTime(TimeUtil.getCurrentTimestamp());
-                                updateRuleIdList.add(alertRule.getRuleId());
                             }
                         });
                     });
                     // 获取告警通道并发送消息
-                    Multimap<Integer, AlertChannel> channelMultimap = getChannelClassification(cluster);
-                    if (channelMultimap != null && !channelMultimap.isEmpty()) {
+                    List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
+                    Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
+                    if (!channelMultimap.isEmpty()) {
                         sendMessage(channelMultimap, alertRecordList);
                     }
                     saveRecordToDB(cluster.getClusterName(), alertRecordList);
                 });
-                // 更新 alert rule
-                updateRuleLastCheckTime(updateRuleIdList);
+
             } catch (Exception e) {
                 logger.error("Alert task failed, " + group, e);
             }
         }
     }
 
-
-    private List<Integer> getRuleIdList(Cluster cluster) {
-        List<Integer> ruleIdList = new ArrayList<>();
-        String ruleIds = cluster.getRuleIds();
-        String[] ruleIdArr = SignUtil.splitByCommas(ruleIds);
-        for (String ruleId : ruleIdArr) {
-            ruleIdList.add(Integer.parseInt(ruleId));
+    /**
+     * 获取 group 下没有冻结(valid==true)且满足时间周期(lastCheckTime - nowTime >= cycleTime)的规则
+     *
+     * @param groupId
+     * @return
+     */
+    private List<AlertRule> getValidAlertRule(int groupId) {
+        List<AlertRule> validAlertRuleList = alertRuleService.getAlertRuleListByGroupId(groupId);
+        if (validAlertRuleList == null) {
+            return null;
         }
-        return ruleIdList;
+        validAlertRuleList.removeIf(alertRule -> !isValid(alertRule));
+        return validAlertRuleList;
     }
 
-    private Multimap<Integer, AlertChannel> getChannelClassification(Cluster cluster) {
-        String channelIds = cluster.getChannelIds();
-        if (Strings.isNullOrEmpty(channelIds)) {
+    private List<AlertRule> getAlertRuleByIds(List<AlertRule> validAlertRuleList, List<Integer> ruleIdList) {
+        List<AlertRule> alertRuleList = new ArrayList<>();
+        validAlertRuleList.forEach(alertRule -> {
+            if (ruleIdList.contains(alertRule.getRuleId())) {
+                alertRuleList.add(alertRule);
+            }
+        });
+        return alertRuleList;
+    }
+
+    private List<Integer> getRuleIdList(String ruleIds) {
+        return ids2IntegerList(ruleIds);
+    }
+
+    /**
+     * 获取 group 下所有的 alert channel
+     *
+     * @param groupId
+     * @return
+     */
+    private List<AlertChannel> getValidAlertChannel(int groupId) {
+        List<AlertChannel> validAlertChannelList = alertChannelService.getAlertChannelByGroupId(groupId);
+        if (validAlertChannelList == null) {
             return null;
         }
-        List<String> channelIdList = Arrays.asList(SignUtil.splitByCommas(channelIds));
-        List<AlertChannel> alertChannelList = alertChannelService.getAlertChannelByIds(channelIdList);
-        if (alertChannelList == null || alertChannelList.isEmpty()) {
-            return null;
-        }
+        return validAlertChannelList;
+    }
+
+    private List<Integer> getAlertChannelIdList(String channelIds) {
+        return ids2IntegerList(channelIds);
+    }
+
+    private Multimap<Integer, AlertChannel> getAlertChannelByIds(List<AlertChannel> validAlertChannelList, List<Integer> channelIdList) {
+        List<AlertChannel> alertChannelList = new ArrayList<>();
+        validAlertChannelList.forEach(alertChannel -> {
+            if (channelIdList.contains(alertChannel.getChannelId())) {
+                alertChannelList.add(alertChannel);
+            }
+        });
         return classifyChannel(alertChannelList);
     }
 
@@ -224,6 +270,24 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     }
 
     /**
+     * "1,2,3,4" => [1, 2, 3, 4]
+     *
+     * @param ids
+     * @return
+     */
+    private List<Integer> ids2IntegerList(String ids) {
+        if (Strings.isNullOrEmpty(ids)) {
+            return null;
+        }
+        List<Integer> idList = new ArrayList<>();
+        String[] idArr = SignUtil.splitByCommas(ids);
+        for (String id : idArr) {
+            idList.add(Integer.parseInt(id));
+        }
+        return idList;
+    }
+
+    /**
      * 校验是否需要告警
      *
      * @param nodeInfo
@@ -232,14 +296,6 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
      */
     private boolean isNotify(NodeInfo nodeInfo, AlertRule alertRule) {
         JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(nodeInfo));
-        // 是否生效
-        if (!alertRule.getStatus()) {
-            return false;
-        }
-        // 未到检测时间
-        if (System.currentTimeMillis() - alertRule.getLastCheckTime().getTime() < alertRule.getCheckCycle() * ONE_MINUTE) {
-            return false;
-        }
         String alertKey = alertRule.getAlertKey();
         double alertValue = alertRule.getAlertValue();
         String nodeInfoField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, alertKey);
@@ -249,6 +305,21 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         }
         int compareType = alertRule.getCompareType();
         return compare(alertValue, actualVal, compareType);
+    }
+
+    /**
+     * 检验规则是否可用
+     *
+     * @param alertRule
+     * @return
+     */
+    private boolean isValid(AlertRule alertRule) {
+        // 规则状态是否有效
+        if (!alertRule.getValid()) {
+            return false;
+        }
+        // 检测时间
+        return System.currentTimeMillis() - alertRule.getLastCheckTime().getTime() >= alertRule.getCheckCycle() * ONE_MINUTE;
     }
 
     /**
@@ -310,11 +381,15 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         }
     }
 
-    private void updateRuleLastCheckTime(List<Integer> ruleIdList) {
+    private void updateRuleLastCheckTime(List<AlertRule> validAlertRuleList) {
         try {
+            List<Integer> ruleIdList = new ArrayList<>();
+            validAlertRuleList.forEach(alertRule -> {
+                ruleIdList.add(alertRule.getRuleId());
+            });
             alertRuleService.updateAlertRuleLastCheckTime(ruleIdList);
         } catch (Exception e) {
-            logger.error("Update alert rule last check time, " + ruleIdList, e);
+            logger.error("Update alert rule last check time, " + validAlertRuleList, e);
         }
     }
 

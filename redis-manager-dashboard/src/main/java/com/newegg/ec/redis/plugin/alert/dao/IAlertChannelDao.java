@@ -10,16 +10,16 @@ import java.util.List;
  */
 public interface IAlertChannelDao {
 
-    List<AlertChannel> selectAlertChannelByGroupId(String groupId);
+    List<AlertChannel> selectAlertChannelByGroupId(Integer groupId);
 
-    List<AlertChannel> selectAlertChannelByIds(List<String> channelIdList);
+    List<AlertChannel> selectAlertChannelByIds(List<Integer> channelIdList);
 
     int insertAlertChannel(AlertChannel alertChannel);
 
     int updateAlertChannel(AlertChannel alertChannel);
 
-    int deleteAlertChannelById(String channelId);
+    int deleteAlertChannelById(Integer channelId);
 
-    int deleteAlertChannelByGroupId(String groupId);
+    int deleteAlertChannelByGroupId(Integer groupId);
 
 }

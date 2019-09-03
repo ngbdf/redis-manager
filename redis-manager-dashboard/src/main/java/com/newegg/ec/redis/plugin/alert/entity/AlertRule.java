@@ -42,7 +42,7 @@ public class AlertRule {
     /**
      * 规则是否可用
      */
-    private boolean status;
+    private boolean valid;
 
     private boolean atAll;
 
@@ -113,12 +113,12 @@ public class AlertRule {
         this.checkCycle = checkCycle;
     }
 
-    public boolean getStatus() {
-        return status;
+    public boolean getValid() {
+        return valid;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 
     public boolean isAtAll() {

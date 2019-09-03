@@ -10,16 +10,16 @@ import java.util.List;
  */
 public interface IAlertChannelService {
 
-    List<AlertChannel> getAlertChannelByGroupId(String groupId);
+    List<AlertChannel> getAlertChannelByGroupId(Integer groupId);
 
-    List<AlertChannel> getAlertChannelByIds(List<String> channelIdList);
+    List<AlertChannel> getAlertChannelByIds(List<Integer> channelIdList);
 
     boolean addAlertChannel(AlertChannel alertChannel);
 
     boolean updateAlertChannel(AlertChannel alertChannel);
 
-    boolean deleteAlertChannelById(String channelId);
+    boolean deleteAlertChannelById(Integer channelId);
 
-    boolean deleteAlertChannelByGroupId(String groupId);
+    boolean deleteAlertChannelByGroupId(Integer groupId);
 
 }
