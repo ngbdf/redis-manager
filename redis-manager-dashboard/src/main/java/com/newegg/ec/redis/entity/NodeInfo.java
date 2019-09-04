@@ -4,38 +4,39 @@ import java.sql.Timestamp;
 
 /**
  * Important: 此类中的字段并非与 info 命令返回的字段一一对应，有些做过计算或截断
- *
- * Redis Info for monitor:
- *      Server
- *      Clients
- *      Memory
- *      Persistence
- *      Stats
- *      Replication
- *      CPU
- *      Cluster
- *      Keyspace
- *
+ * <p>
+ * Redis Info
+ * Server, Clients, Memory, Persistence, Stats, Replication, CPU, Cluster, Keyspace
+ * <p>
+ * <p>
  * Monitor metrics:
- *      response_time: √
- *
- *      connected_clients: √
- *      blocked_clients: √
- *
- *      mem_fragmentation_ratio: √
- *      used_memory: √
- *      used_memory_rss: √
- *      used_memory_dataset: √
- *
- *      total_commands_processed: √
- *
- *      keys: √
- *      expires: √
- *
- *      keyspace_hits_ratio:  √
- *
- *      used_cpu_sys: √
+ * <p>
+ *     response_time: √
+ * <p>
+ *     connected_clients: √
+ *     blocked_clients: √
+ * <p>
+ *     mem_fragmentation_ratio: √
+ *     used_memory: √
+ *     used_memory_rss: √
+ *     used_memory_dataset: √
+ * <p>
+ *     total_connections_received: √
+ *     total_commands_processed: √
+ *     instantaneous_ops_per_sec: √
+ *     rejected_connections: √
+ *     sync_full: √
+ *     sync_partial_ok: √
+ *     sync_partial_err: √
+ * <p>
+ *     keys: √
+ *     expires: √
+ * <p>
+ *     keyspace_hits_ratio:  √
+ * <p>
+ *     used_cpu_sys: √
  * Scalable
+ *
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
@@ -142,6 +143,14 @@ public class NodeInfo {
      */
     private long netOutputBytes;
 
+    private long rejectedConnections;
+
+    private long syncFull;
+
+    private long syncPartialOk;
+
+    private long syncPartialErr;
+
     /**
      * keyspace_hits
      */
@@ -160,7 +169,9 @@ public class NodeInfo {
     /** Replication */
     // 计算主从复制情况
 
-    /** CPU */
+    /**
+     * CPU
+     */
     private double usedCpuSys;
 
     private double usedCpuUser;
@@ -175,7 +186,8 @@ public class NodeInfo {
 
     private Timestamp updateTime;
 
-    public NodeInfo() {}
+    public NodeInfo() {
+    }
 
     public NodeInfo(NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, boolean lastTime) {
         this.dataType = dataType;
@@ -389,6 +401,38 @@ public class NodeInfo {
 
     public void setNetOutputBytes(long netOutputBytes) {
         this.netOutputBytes = netOutputBytes;
+    }
+
+    public long getRejectedConnections() {
+        return rejectedConnections;
+    }
+
+    public void setRejectedConnections(long rejectedConnections) {
+        this.rejectedConnections = rejectedConnections;
+    }
+
+    public long getSyncFull() {
+        return syncFull;
+    }
+
+    public void setSyncFull(long syncFull) {
+        this.syncFull = syncFull;
+    }
+
+    public long getSyncPartialOk() {
+        return syncPartialOk;
+    }
+
+    public void setSyncPartialOk(long syncPartialOk) {
+        this.syncPartialOk = syncPartialOk;
+    }
+
+    public long getSyncPartialErr() {
+        return syncPartialErr;
+    }
+
+    public void setSyncPartialErr(long syncPartialErr) {
+        this.syncPartialErr = syncPartialErr;
     }
 
     public long getKeyspaceHits() {

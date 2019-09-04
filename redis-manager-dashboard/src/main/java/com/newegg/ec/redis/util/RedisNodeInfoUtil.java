@@ -63,6 +63,7 @@ public class RedisNodeInfoUtil {
     /**
      * Stats
      */
+    // 服务器已经接受的连接请求数量
     public static final String TOTAL_CONNECTIONS_RECEIVED = "total_connections_received";
     public static final String TOTAL_COMMANDS_PROCESSED = "total_commands_processed";
     public static final String INSTANTANEOUS_OPS_PER_SEC = "instantaneous_ops_per_sec";
@@ -207,6 +208,13 @@ public class RedisNodeInfoUtil {
      * 累计值计算
      * keyspace_hits
      * command_processed
+     * used_cpu_sys
+     *
+     * PS:以下信息虽然是累积值，但是不进行差值计算
+     * rejected_connections: 拒绝的连接个数，redis连接个数达到 maxclients 限制，拒绝新连接的个数
+     * sync_full: 主从完全同步成功次数
+     * sync_partial_ok: 主从部分同步成功次数
+     * sync_partial_err: 主从部分同步失败次数
      *
      * @param lastTimeNodeInfo
      * @param nodeInfo
