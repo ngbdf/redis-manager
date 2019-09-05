@@ -2,12 +2,14 @@
   <el-container id="index">
     <el-header class="header">
       <el-row type="flex" class="header-wrapper" justify="space-between">
-        <el-col class="logo-wrapper">
-          <div class="grid-content bg-purple logo">REDIS MANAGER</div>
+        <el-col class="grid-content logo-wrapper">
+          <i class="el-icon-s-operation aside-operation"></i>
+          <span class="logo">REDIS MANAGER</span>
         </el-col>
+
         <el-col>
-          <div class="grid-content bg-purple-light right-content">
-            <el-select v-model="value" placeholder="Select Group" size="small">
+          <div class="grid-content right-content">
+            <el-select v-model="value" placeholder="Select Group" size="mini" class="group-select">
               <el-option
                 v-for="item in options"
                 :key="item.value"
@@ -15,11 +17,31 @@
                 :value="item.value"
               ></el-option>
             </el-select>
-
+            <span class="links">
+              <el-link :underline="false">Github</el-link>
+              <el-divider direction="vertical"></el-divider>
+              <el-link :underline="false">Document</el-link>
+              <el-divider direction="vertical"></el-divider>
+              <el-link :underline="false">Feedback</el-link>
+            </span>
             <div class="user-info">
-              <el-avatar :size="36" src="../assets/logo.png" @error="errorHandler">
-                <img src="../assets/logo.png" />
-              </el-avatar>
+              <!-- <span class="user-name">Redis</span> -->
+              <el-dropdown>
+                <span>
+                  <el-avatar :size="36" src="../assets/head.jpg" @error="errorHandler">
+                    <img src="../assets/head.jpg" class="image-overflow" />
+                  </el-avatar>
+                </span>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item disabled>
+                    Signed in as
+                    <b>Redis</b>
+                  </el-dropdown-item>
+                  <el-dropdown-item divided>Profile</el-dropdown-item>
+                  <el-dropdown-item>Help</el-dropdown-item>
+                  <el-dropdown-item divided>Sign out</el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
             </div>
           </div>
         </el-col>
@@ -29,15 +51,19 @@
       </el-row>
     </el-header>
     <el-container class="aside-main-wrapper">
-      <el-aside width="200px">
+      <el-aside>
+        <el-radio-group v-model="isCollapse" style="margin-bottom: 20px;">
+          <el-radio-button :label="false">展开</el-radio-button>
+          <el-radio-button :label="true">收起</el-radio-button>
+        </el-radio-group>
         <el-row class="tac">
           <el-col :span="24">
-            <!-- <h5>默认颜色</h5> -->
             <el-menu
               default-active="1"
               class="el-menu-vertical-demo"
               @open="handleOpen"
               @close="handleClose"
+              :collapse="isCollapse"
             >
               <el-menu-item index="1">
                 <i class="el-icon-discover"></i>
@@ -65,7 +91,17 @@
                   <el-menu-item index="3-2">Rule Manage</el-menu-item>
                 </el-menu-item-group>
               </el-submenu>
-              <el-menu-item index="4">
+              <el-submenu index="4">
+                <template slot="title">
+                  <i class="el-icon-takeaway-box"></i>
+                  <span>Tools</span>
+                </template>
+                <el-menu-item-group>
+                  <el-menu-item index="4-1">Console</el-menu-item>
+                  <el-menu-item index="4-2">Other</el-menu-item>
+                </el-menu-item-group>
+              </el-submenu>
+              <el-menu-item index="5">
                 <i class="el-icon-user"></i>
                 <span slot="title">User Manage</span>
               </el-menu-item>
@@ -94,7 +130,8 @@ export default {
           label: "Test"
         }
       ],
-      value: ""
+      value: "",
+      isCollapse: false
     };
   },
   methods: {
@@ -128,10 +165,17 @@ export default {
 .logo-wrapper {
   width: 200px;
   min-width: 200px;
+  padding-left: 22px;
+}
+
+.aside-operation {
+  font-size: 18px;
+  cursor: pointer;
 }
 
 .logo {
-  padding-left: 20px;
+  padding-left: 5px;
+  cursor: pointer;
 }
 
 .right-content {
@@ -139,10 +183,28 @@ export default {
   justify-content: flex-end;
 }
 
+.links {
+  padding: 0 1rem;
+}
+
+.group-select {
+  margin: 0 1rem;
+}
+
 .user-info {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   margin: 0 20px;
+}
+
+.el-avatar {
+  display: flex;
+}
+
+.image-overflow {
+  flex: 1;
+  overflow: hidden;
 }
 
 /*页面下拉，header固定不动*/
@@ -164,23 +226,7 @@ export default {
   min-width: 400px;
 }
 
-.bg-purple-dark {
-  background: #99a9bf;
-}
-
-.bg-purple {
-  background: #d3dce6;
-}
-
-.bg-purple-light {
-  background: #e5e9f2;
-}
-
 .grid-content {
   min-height: 40px;
-}
-
-.row-bg {
-  background-color: #f9fafc;
 }
 </style>
