@@ -3,10 +3,9 @@
     <el-header class="header">
       <el-row type="flex" class="header-wrapper" justify="space-between">
         <el-col class="grid-content logo-wrapper">
-          <i class="el-icon-s-operation aside-operation"></i>
+          <i class="el-icon-s-operation aside-operation" @click="collapseHandler"></i>
           <span class="logo">REDIS MANAGER</span>
         </el-col>
-
         <el-col>
           <div class="grid-content right-content">
             <el-select v-model="value" placeholder="Select Group" size="mini" class="group-select">
@@ -32,7 +31,7 @@
                     <img src="../assets/head.jpg" class="image-overflow" />
                   </el-avatar>
                 </span>
-                <el-dropdown-menu slot="dropdown">
+                <el-dropdown-menu slot="dropdown" style="min-width: 180px">
                   <el-dropdown-item disabled>
                     Signed in as
                     <b>Redis</b>
@@ -51,19 +50,15 @@
       </el-row>
     </el-header>
     <el-container class="aside-main-wrapper">
-      <el-aside>
-        <el-radio-group v-model="isCollapse" style="margin-bottom: 20px;">
-          <el-radio-button :label="false">展开</el-radio-button>
-          <el-radio-button :label="true">收起</el-radio-button>
-        </el-radio-group>
-        <el-row class="tac">
+      <el-aside :class="{'is-collapse':isCollapse} " style="width: 200px;">
+        <el-row>
           <el-col :span="24">
             <el-menu
               default-active="1"
-              class="el-menu-vertical-demo"
               @open="handleOpen"
               @close="handleClose"
               :collapse="isCollapse"
+              :collapse-transition="false"
             >
               <el-menu-item index="1">
                 <i class="el-icon-discover"></i>
@@ -110,7 +105,7 @@
         </el-row>
       </el-aside>
       <el-main class="main">
-        <div></div>
+        <router-view></router-view>
       </el-main>
     </el-container>
   </el-container>
@@ -143,7 +138,15 @@ export default {
     },
     errorHandler() {
       return true;
+    },
+    collapseHandler() {
+      this.isCollapse = !this.isCollapse;
     }
+  },
+  mounted() {
+    this.$router.push({
+      name: "cluster-cards"
+    });
   }
 };
 </script>
@@ -151,6 +154,7 @@ export default {
 <style>
 #index {
   height: 100%;
+  min-width: 800px;
 }
 
 .header {
@@ -159,23 +163,19 @@ export default {
 }
 .header-wrapper {
   padding: 10px 0;
-  min-width: 600px;
+  overflow: hidden;
 }
 
 .logo-wrapper {
   width: 200px;
   min-width: 200px;
+  cursor: pointer;
   padding-left: 22px;
 }
 
 .aside-operation {
   font-size: 18px;
-  cursor: pointer;
-}
-
-.logo {
-  padding-left: 5px;
-  cursor: pointer;
+  margin-right: 5px;
 }
 
 .right-content {
@@ -224,6 +224,10 @@ export default {
 .main {
   background-color: #f1f2f7;
   min-width: 400px;
+}
+
+.is-collapse {
+  width: auto !important;
 }
 
 .grid-content {
