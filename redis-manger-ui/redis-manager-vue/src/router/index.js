@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Index from '@/components/Index'
-import ClusterCards from '@/components/dashboard/ClusterCards'
+import Dashboard from '@/components/dashboard/Dashboard'
 
 Vue.use(Router)
 
@@ -13,10 +13,10 @@ export default new Router({
       component: Index,
       children: [
         {
-          name: 'cluster-cards',
-          path: '/cluster-cards',
-          component: ClusterCards
-      },
+          name: 'dashboard',
+          path: '/dashboard',
+          component: Dashboard
+        }
       ]
     }
   ]

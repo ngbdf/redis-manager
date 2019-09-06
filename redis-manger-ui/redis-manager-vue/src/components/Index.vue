@@ -144,9 +144,7 @@ export default {
     }
   },
   mounted() {
-    this.$router.push({
-      name: "cluster-cards"
-    });
+    this.$router.push({name: "dashboard"});
   }
 };
 </script>
