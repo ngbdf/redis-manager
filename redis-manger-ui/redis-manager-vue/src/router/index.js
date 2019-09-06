@@ -5,11 +5,16 @@ import Dashboard from '@/components/dashboard/Dashboard'
 
 Vue.use(Router)
 
+const originalPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
+
 export default new Router({
   routes: [
     {
-      path: '/',
-      name: 'Index',
+      path: '/index',
+      name: 'index',
       component: Index,
       children: [
         {

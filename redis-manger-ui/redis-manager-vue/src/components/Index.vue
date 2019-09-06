@@ -220,7 +220,7 @@ export default {
 }
 
 .main {
-  background-color: #f1f2f7;
+  background-color: #f0f2f5;
   min-width: 400px;
 }
 
