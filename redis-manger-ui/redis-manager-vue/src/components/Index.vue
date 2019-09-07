@@ -3,7 +3,7 @@
     <el-header class="header">
       <el-row type="flex" class="header-wrapper" justify="space-between">
         <el-col class="grid-content logo-wrapper">
-          <i class="el-icon-s-operation aside-operation" @click="collapseHandler"></i>
+          <i class="el-icon-s-fold aside-operation" @click="collapseHandler"></i>
           <span class="logo">REDIS MANAGER</span>
         </el-col>
         <el-col>

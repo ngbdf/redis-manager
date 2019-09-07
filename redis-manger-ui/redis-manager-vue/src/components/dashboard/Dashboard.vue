@@ -38,7 +38,7 @@
       </el-col>
       <el-col :xl="6" :lg="12" :md="12" :sm="12">
         <div class="card-panel">
-          <div class="card-panel-icon-wrapper card-panel-icon-other">
+          <div class="card-panel-icon-wrapper card-panel-icon-alert">
             <i class="el-icon-bell"></i>
           </div>
 
@@ -49,14 +49,61 @@
         </div>
       </el-col>
     </el-row>
-    <el-row>
-      <el-row :gutter="24" id="cluster-list-wrapper">
-        <el-col :xl="4" :lg="6" :md="8" :sm="12">
-          <div class="redis-card-wrapper">
-              
+    <el-row :gutter="24" id="cluster-list-wrapper">
+      <el-col :xl="6" :lg="8" :md="12" :sm="12">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>Shanghai</span>
+            <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
           </div>
-        </el-col>
-      </el-row>
+          <div class="text item">
+            State:
+            <b>ok</b>
+          </div>
+          <div class="text item">
+            Master:
+            <b>4</b>
+          </div>
+          <div class="text item">
+            Nodes:
+            <b>12</b>
+          </div>
+          <div class="text item">
+            Version:
+            <b>4.0.14</b>
+          </div>
+          <div class="text item">
+            Model:
+            <b>cluster</b>
+          </div>
+          <div class="text item">
+            Slots Assigned(ok/all):
+            <b>16384/16384</b>
+          </div>
+          <div class="text item">
+            Install:
+            <b>docker</b>
+          </div>
+          <div class="card-bottom">
+            <!-- <el-button type="text" class="button">
+              <i class="el-icon-view"></i> Monitor
+            </el-button>
+            <el-button type="text" class="button">
+              <i class="el-icon-search"></i> Query
+            </el-button>
+            <el-button type="text" class="button">
+              <i class="el-icon-setting"></i> Manage
+            </el-button>
+            <el-button type="text" class="button">
+              <i class="el-icon-bell"></i> Alert
+            </el-button>-->
+            <el-button size="mini" title="Query" icon="el-icon-search" circle></el-button>
+            <el-button size="mini" title="Monitor" type="primary" icon="el-icon-view" circle></el-button>
+            <el-button size="mini" title="Alert" type="warning" icon="el-icon-bell" circle></el-button>
+            <el-button size="mini" title="Manage" type="danger" icon="el-icon-setting" circle></el-button>
+          </div>
+        </el-card>
+      </el-col>
     </el-row>
   </div>
 </template>
@@ -66,6 +113,7 @@ export default {};
 </script>
 
 <style scoped>
+
 .card-panel {
   margin-bottom: 1.5rem;
   padding: 1rem;
@@ -89,7 +137,6 @@ export default {};
   /* 背景色变化动画 */
   transition: all 0.38s ease-out;
 }
-
 
 .card-panel-icon-user {
   color: #36a3f7;
@@ -118,7 +165,7 @@ export default {};
   color: #ffffff;
 }
 
-.card-panel-icon-other {
+.card-panel-icon-alert {
   color: #ffb980;
 }
 
@@ -126,7 +173,6 @@ export default {};
   background-color: #ffb980;
   color: #ffffff;
 }
-
 
 .card-panel-info-wrapper {
   padding: 0 0.5rem;
@@ -146,9 +192,34 @@ export default {};
   font-size: 20px;
 }
 
-.redis-card-wrapper {
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)
+/* cluster card */
+.text {
+  font-size: 13px;
 }
+
+.item {
+  margin-bottom: 16px;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+.box-card {
+  margin-bottom: 1.5rem;
+}
+
+.card-bottom {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .el-row {
   margin-bottom: 20px;
 }
