@@ -43,7 +43,7 @@
           </div>
 
           <div class="card-panel-info-wrapper">
-            <div class="card-panel-info-key">Other Number</div>
+            <div class="card-panel-info-key">Alertz Number</div>
             <div class="card-panel-info-value">18</div>
           </div>
         </div>
@@ -52,9 +52,9 @@
     <el-row :gutter="24" id="cluster-list-wrapper">
       <el-col :xl="6" :lg="8" :md="12" :sm="12">
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
+          <div slot="header" class="clearfix box-card-title">
             <span>Shanghai</span>
-            <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+            <i class="el-icon-sunny health" style="float: right; padding: 3px 0"></i>
           </div>
           <div class="text item">
             State:
@@ -98,9 +98,24 @@
               <i class="el-icon-bell"></i> Alert
             </el-button>-->
             <el-button size="mini" title="Query" icon="el-icon-search" circle></el-button>
-            <el-button size="mini" title="Monitor" type="primary" icon="el-icon-view" circle></el-button>
+            <el-button
+              size="mini"
+              title="Monitor"
+              type="primary"
+              icon="el-icon-view"
+              circle
+              @click="monitorHandler(1)"
+            ></el-button>
             <el-button size="mini" title="Alert" type="warning" icon="el-icon-bell" circle></el-button>
             <el-button size="mini" title="Manage" type="danger" icon="el-icon-setting" circle></el-button>
+
+            <el-dropdown trigger="click" class="more-operation">
+              <el-button size="mini" title="Edit or delete" type="info" icon="el-icon-more" circle></el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item icon="el-icon-edit-outline" class="edit">Edit</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-delete" class="delete">Delete</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </div>
         </el-card>
       </el-col>
@@ -109,11 +124,16 @@
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    monitorHandler(clusterId) {
+      this.$router.push({ name: "monitor" });
+    }
+  }
+};
 </script>
 
 <style scoped>
-
 .card-panel {
   margin-bottom: 1.5rem;
   padding: 1rem;
@@ -147,8 +167,14 @@ export default {};
   color: #ffffff;
 }
 
-.card-panel-icon-health {
+.card-panel-icon-health,
+.health {
   color: #40c9c6;
+}
+
+.health,
+.bad {
+  font-weight: bold;
 }
 
 .card-panel-icon-health:hover {
@@ -156,7 +182,8 @@ export default {};
   color: #ffffff;
 }
 
-.card-panel-icon-bad {
+.card-panel-icon-bad,
+.bad {
   color: #f4516c;
 }
 
@@ -169,7 +196,7 @@ export default {};
   color: #ffb980;
 }
 
-.card-panel-icon-other:hover {
+.card-panel-icon-alert:hover {
   background-color: #ffb980;
   color: #ffffff;
 }
@@ -215,9 +242,29 @@ export default {};
   margin-bottom: 1.5rem;
 }
 
+.box-card-title {
+  font-weight: bold;
+}
+
 .card-bottom {
   display: flex;
   justify-content: flex-end;
+}
+
+.more-operation {
+  margin-left: 12px;
+}
+
+.edit {
+  color: #409eff;
+}
+
+.delete {
+  color: #f56c6c;
+}
+.delete:hover {
+  background-color: rgba(245, 108, 108, 0.1);
+  color: #f56c6c;
 }
 
 .el-row {

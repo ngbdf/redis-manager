@@ -1,6 +1,6 @@
 <template>
   <el-container id="index">
-    <el-header class="header">
+    <el-header>
       <el-row type="flex" class="header-wrapper" justify="space-between">
         <el-col class="grid-content logo-wrapper">
           <i class="el-icon-s-fold aside-operation" @click="collapseHandler"></i>
@@ -155,10 +155,22 @@ export default {
   min-width: 800px;
 }
 
-.header {
+/*页面下拉，header固定不动*/
+.el-header {
+  position: fixed;
+  /* position: fixed; */
+  width: 100%;
+  z-index: 100;
+  overflow: hidden; 
   padding: 0;
   line-height: 40px;
+  -webkit-box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
+  -moz-box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
+  box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
+  border-bottom: 1px solid #dcdfe6;
+  background-color: #ffffff;
 }
+
 .header-wrapper {
   padding: 10px 0;
   overflow: hidden;
@@ -205,18 +217,12 @@ export default {
   overflow: hidden;
 }
 
-/*页面下拉，header固定不动*/
-.header {
-  /* position: fixed; */
-  width: 100%;
-  /* text-align: center;
-  z-index: 100;
-  font-size: 16px;
-  overflow: hidden; */
-  -webkit-box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
-  -moz-box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
-  box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
-  border-bottom: 1px solid #dcdfe6;
+.aside-main-wrapper {
+  margin-top: 60px; 
+}
+
+.el-aside {
+  
 }
 
 .main {
