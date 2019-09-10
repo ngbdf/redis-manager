@@ -104,8 +104,19 @@
           </el-col>
         </el-row>
       </el-aside>
+      <div
+        class="keep-alive-wrapper"
+        :class="{'main-margin':isCollapse}"
+        style="margin-left: 200px;"
+      >
+        <div style="display: flex; align-items: center;min-height: 36px; padding-left: 20px;">
+          <el-tag key="1" closable :disable-transitions="false" size="medium">Dashboard</el-tag>
+        </div>
+      </div>
       <el-main class="main" :class="{'main-margin':isCollapse}" style="margin-left: 200px;">
-        <router-view></router-view>
+        <transition name="fade" mode="out-in">
+          <router-view></router-view>
+        </transition>
       </el-main>
     </el-container>
   </el-container>
@@ -161,7 +172,6 @@ export default {
 /*页面下拉，header固定不动*/
 .el-header {
   position: fixed;
-  /* position: fixed; */
   width: 100%;
   z-index: 100;
   overflow: hidden;
@@ -172,6 +182,14 @@ export default {
   box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
   border-bottom: 1px solid #dcdfe6;
   background-color: #ffffff;
+}
+
+.keep-alive-wrapper {
+  position: fixed;
+  width: 100%;
+  z-index: 100;
+  overflow: hidden;
+  padding: 0;
 }
 
 .header-wrapper {
@@ -232,6 +250,7 @@ export default {
 .main {
   background-color: #f0f2f5;
   min-width: 400px;
+  margin-top: 36px;
 }
 
 .is-collapse {

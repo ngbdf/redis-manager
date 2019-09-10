@@ -21,12 +21,24 @@ export default new Router({
         {
           name: 'dashboard',
           path: '/dashboard',
-          component: Dashboard
+          component: Dashboard,
+          meta: {
+            title: 'Dashboard',
+            icon: 'el-icon-discover',
+            noCache: false,
+            affix: true
+          }
         },
         {
           name: 'monitor',
           path: '/monitor',
-          component: Monitor
+          component: Monitor,
+          meta: {
+            title: 'Monitor',
+            icon: 'el-icon-view',
+            noCache: false,
+            affix: true
+          }
         }
       ]
     }
