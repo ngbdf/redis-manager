@@ -50,7 +50,7 @@
       </el-row>
     </el-header>
     <el-container class="aside-main-wrapper">
-      <el-aside :class="{'is-collapse':isCollapse} " style="width: 200px;">
+      <el-aside :class="{'is-collapse':isCollapse}" style="width: 200px;">
         <el-row>
           <el-col :span="24">
             <el-menu
@@ -60,7 +60,7 @@
               :collapse="isCollapse"
               :collapse-transition="false"
             >
-              <el-menu-item index="1">
+              <el-menu-item index="1" @click="toDashboard()">
                 <i class="el-icon-discover"></i>
                 <span slot="title">Dashboard</span>
               </el-menu-item>
@@ -104,7 +104,7 @@
           </el-col>
         </el-row>
       </el-aside>
-      <el-main class="main">
+      <el-main class="main" :class="{'main-margin':isCollapse}" style="margin-left: 200px;">
         <router-view></router-view>
       </el-main>
     </el-container>
@@ -130,6 +130,9 @@ export default {
     };
   },
   methods: {
+    toDashboard() {
+      this.$router.push({ name: "dashboard" });
+    },
     handleOpen(key, keyPath) {
       console.log(key, keyPath);
     },
@@ -144,7 +147,7 @@ export default {
     }
   },
   mounted() {
-    this.$router.push({name: "dashboard"});
+    this.$router.push({ name: "dashboard" });
   }
 };
 </script>
@@ -161,7 +164,7 @@ export default {
   /* position: fixed; */
   width: 100%;
   z-index: 100;
-  overflow: hidden; 
+  overflow: hidden;
   padding: 0;
   line-height: 40px;
   -webkit-box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
@@ -218,11 +221,12 @@ export default {
 }
 
 .aside-main-wrapper {
-  margin-top: 60px; 
+  margin-top: 60px;
 }
 
 .el-aside {
-  
+  position: fixed;
+  height: 100%;
 }
 
 .main {
@@ -232,6 +236,10 @@ export default {
 
 .is-collapse {
   width: auto !important;
+}
+
+.main-margin {
+  margin-left: 65px !important;
 }
 
 .grid-content {
