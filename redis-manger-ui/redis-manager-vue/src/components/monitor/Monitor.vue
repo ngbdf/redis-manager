@@ -117,7 +117,7 @@
       </div>
       <i class="el-icon-refresh-left refresh"></i>
     </div>
-    <el-row class="echart-wrapper">
+    <el-row class="echart-wrapper" id="monitor-charts">
       <el-col :xl="12" :lg="12" :md="24" :sm="24">
         <div id="memory" class="chart"></div>
       </el-col>
@@ -150,6 +150,7 @@
 </template>
 
 <script>
+var elementResizeDetectorMaker = require("element-resize-detector");
 // vue文件中引入echarts工具
 var echarts = require("echarts/lib/echarts");
 require("echarts/lib/chart/line");
@@ -419,11 +420,13 @@ export default {
         "rgba(250, 0, 90, 0.1)",
         "rgba(64, 201, 198, 0.1)",
         "rgba(255, 185, 128, 0.1)"
-      ]
+      ],
+      chartList: []
     };
   },
   methods: {
     initCharts() {
+      var erd = elementResizeDetectorMaker();
       let echartsData = this.echartsData;
       echartsData.forEach(echartsDataGroup => {
         let series = this.buildSeries(echartsDataGroup.data);
@@ -468,7 +471,15 @@ export default {
           },
           series: series
         });
-
+        // 监听容器宽度变化
+        erd.listenTo(document.getElementById("monitor-charts"), function(
+          element
+        ) {
+          setTimeout(function() {
+            chart.resize();
+          }, 100);
+        });
+        // 监听窗口变化
         window.addEventListener("resize", function() {
           setTimeout(function() {
             chart.resize();
@@ -720,9 +731,6 @@ export default {
 .monitor-condition-wrapper {
   padding: 20px 0;
   font-size: 14px;
-}
-
-.monitor-condition-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -733,6 +741,7 @@ export default {
   cursor: pointer;
   color: #909399;
 }
+
 .refresh:hover {
   color: #2c3e50;
 }

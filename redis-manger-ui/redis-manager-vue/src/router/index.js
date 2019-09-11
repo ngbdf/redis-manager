@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Index from '@/components/Index'
 import Dashboard from '@/components/dashboard/Dashboard'
 import Monitor from '@/components/monitor/Monitor'
+import Installation from '@/components/install/Installation'
 
 Vue.use(Router)
 
@@ -37,6 +38,17 @@ export default new Router({
             title: 'Monitor',
             icon: 'el-icon-view',
             noCache: false,
+            affix: true
+          }
+        },
+        {
+          name: 'installation',
+          path: '/installation',
+          component: Installation,
+          meta: {
+            title: 'Installation',
+            icon: 'el-icon-view',
+            noCache: true,
             affix: true
           }
         }

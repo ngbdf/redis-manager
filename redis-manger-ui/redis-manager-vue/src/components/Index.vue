@@ -7,7 +7,7 @@
           <span class="logo">REDIS MANAGER</span>
         </el-col>
         <el-col>
-          <div class="grid-content right-content">
+          <div class="grid-content right-content" id="right-content">
             <el-select v-model="value" placeholder="Select Group" size="mini" class="group-select">
               <el-option
                 v-for="item in options"
@@ -16,12 +16,12 @@
                 :value="item.value"
               ></el-option>
             </el-select>
-            <span class="links">
-              <el-link :underline="false">Github</el-link>
+            <span class="links" id="links">
+              <el-link :underline="false"><i class="el-icon-ali-git link-icon" title="Github"></i></el-link>
               <el-divider direction="vertical"></el-divider>
-              <el-link :underline="false">Document</el-link>
+              <el-link :underline="false"><i class="el-icon-tickets link-icon" title="Document"></i></el-link>
               <el-divider direction="vertical"></el-divider>
-              <el-link :underline="false">Feedback</el-link>
+              <el-link :underline="false"><i class="el-icon-ali-feedback link-icon" title="Feedback"></i></el-link>
             </span>
             <div class="user-info">
               <!-- <span class="user-name">Redis</span> -->
@@ -71,7 +71,7 @@
                   <span>Install</span>
                 </template>
                 <el-menu-item-group>
-                  <el-menu-item index="2-1">Docker Install</el-menu-item>
+                  <el-menu-item index="2-1"  @click="toInstallation()">Docker Install</el-menu-item>
                   <el-menu-item index="2-2">Machine Install</el-menu-item>
                   <el-menu-item index="2-3">Kubernetes Install</el-menu-item>
                 </el-menu-item-group>
@@ -104,15 +104,6 @@
           </el-col>
         </el-row>
       </el-aside>
-      <div
-        class="keep-alive-wrapper"
-        :class="{'main-margin':isCollapse}"
-        style="margin-left: 200px;"
-      >
-        <div style="display: flex; align-items: center;min-height: 36px; padding-left: 20px;">
-          <el-tag key="1" closable :disable-transitions="false" size="medium">Dashboard</el-tag>
-        </div>
-      </div>
       <el-main class="main" :class="{'main-margin':isCollapse}" style="margin-left: 200px;">
         <transition name="fade" mode="out-in">
           <router-view></router-view>
@@ -123,6 +114,7 @@
 </template>
 
 <script>
+var elementResizeDetectorMaker = require("element-resize-detector");
 export default {
   data() {
     return {
@@ -144,6 +136,9 @@ export default {
     toDashboard() {
       this.$router.push({ name: "dashboard" });
     },
+    toInstallation(){
+      this.$router.push({ name: "installation" });
+    },
     handleOpen(key, keyPath) {
       console.log(key, keyPath);
     },
@@ -155,10 +150,23 @@ export default {
     },
     collapseHandler() {
       this.isCollapse = !this.isCollapse;
+    },
+    // 监听顶栏宽度
+    listenHeaderWidth() {
+      var erd = elementResizeDetectorMaker();
+      erd.listenTo(document.getElementById("right-content"), function(element) {
+        var width = element.offsetWidth;
+        var links = document.getElementById("links");
+        if (width > 500) {
+          links.style.display = "block";
+        } else {
+          links.style.display = "none";
+        }
+      });
     }
   },
   mounted() {
-    this.$router.push({ name: "dashboard" });
+    this.listenHeaderWidth();
   }
 };
 </script>
@@ -166,7 +174,6 @@ export default {
 <style>
 #index {
   height: 100%;
-  min-width: 800px;
 }
 
 /*页面下拉，header固定不动*/
@@ -182,14 +189,6 @@ export default {
   box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
   border-bottom: 1px solid #dcdfe6;
   background-color: #ffffff;
-}
-
-.keep-alive-wrapper {
-  position: fixed;
-  width: 100%;
-  z-index: 100;
-  overflow: hidden;
-  padding: 0;
 }
 
 .header-wrapper {
@@ -216,6 +215,10 @@ export default {
 
 .links {
   padding: 0 1rem;
+}
+
+.link-icon {
+  font-size: 16px;
 }
 
 .group-select {
@@ -245,12 +248,13 @@ export default {
 .el-aside {
   position: fixed;
   height: 100%;
+  z-index: 100;
+  overflow: hidden;
+  background-color: #ffffff;
 }
 
 .main {
   background-color: #f0f2f5;
-  min-width: 400px;
-  margin-top: 36px;
 }
 
 .is-collapse {

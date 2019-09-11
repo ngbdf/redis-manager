@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "echarts": "^4.2.1",
+    "element-resize-detector": "^1.1.15",
     "element-ui": "^2.12.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.7"

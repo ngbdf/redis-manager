@@ -58,31 +58,32 @@
           </div>
           <div class="text item">
             State:
-            <b>ok</b>
-          </div>
-          <div class="text item">
-            Master:
-            <b>4</b>
-          </div>
-          <div class="text item">
-            Nodes:
-            <b>12</b>
-          </div>
-          <div class="text item">
-            Version:
-            <b>4.0.14</b>
+            <el-tag size="mini">ok</el-tag>
           </div>
           <div class="text item">
             Model:
-            <b>cluster</b>
+            <el-tag size="mini">cluster</el-tag>
           </div>
           <div class="text item">
+            Master:
+            <el-tag size="mini">4</el-tag>
+          </div>
+          <div class="text item">
+            Nodes:
+            <el-tag size="mini">12</el-tag>
+          </div>
+          <div class="text item">
+            Version:
+            <el-tag size="mini">4.0.14</el-tag>
+          </div>
+
+          <div class="text item">
             Slots Assigned(ok/all):
-            <b>16384/16384</b>
+            <el-tag size="mini">16384/16384</el-tag>
           </div>
           <div class="text item">
             Install:
-            <b>docker</b>
+            <el-tag size="mini">docker</el-tag>
           </div>
           <div class="card-bottom">
             <!-- <el-button type="text" class="button">
