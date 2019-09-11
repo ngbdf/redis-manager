@@ -108,6 +108,7 @@
               @click="monitorHandler(1)"
             ></el-button>
             <el-button size="mini" title="Alert" type="warning" icon="el-icon-bell" circle></el-button>
+
             <el-button size="mini" title="Manage" type="danger" icon="el-icon-setting" circle></el-button>
 
             <el-dropdown trigger="click" class="more-operation">

@@ -18,36 +18,34 @@
               <el-form-item label="Cluster Name" prop="clusterName">
                 <el-input v-model="ruleForm.name"></el-input>
               </el-form-item>
-              <el-form-item label="活动区域" prop="region">
-                <el-select v-model="ruleForm.region" placeholder="请选择活动区域">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+              <el-form-item label="Environment" prop="clusterName">
+                <el-radio-group v-model="installationEnvironment">
+                  <el-radio-button label="Docker"></el-radio-button>
+                  <el-radio-button label="Machine"></el-radio-button>
+                  <!-- <el-radio-button label="Kubernetes"></el-radio-button> -->
+                </el-radio-group>
+              </el-form-item>
+              <!-- image start -->
+              <el-form-item label="Image" prop="image" v-if="installationEnvironment == 'Docker'">
+                <el-select v-model="ruleForm.region" placeholder="Please choose image">
+                  <el-option label="redis:4.0.10" value="redis:4.0.10"></el-option>
+                  <el-option label="redis:4.0.14" value="redis:4.0.14"></el-option>
+                </el-select>
+                <el-popover placement="bottom" title="Customize Image" width="200" trigger="click">
+                  <el-input v-model="ruleForm.iamge"></el-input>
+                  <el-button slot="reference" size="mini" title="Customize Image" icon="el-icon-plus" circle></el-button>
+                </el-popover>
+              </el-form-item>
+              <el-form-item label="Image" prop="image" v-if="installationEnvironment == 'Machine'">
+                <el-select v-model="ruleForm.region" placeholder="Please choose image">
+                  <el-option label="4.0.10" value="4.0.10"></el-option>
+                  <el-option label="4.0.14" value="4.0.14"></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="活动时间" required>
-                <el-col :span="11">
-                  <el-form-item prop="date1">
-                    <el-date-picker
-                      type="date"
-                      placeholder="选择日期"
-                      v-model="ruleForm.date1"
-                      style="width: 100%;"
-                    ></el-date-picker>
-                  </el-form-item>
-                </el-col>
-                <el-col class="line" :span="2">-</el-col>
-                <el-col :span="11">
-                  <el-form-item prop="date2">
-                    <el-time-picker
-                      placeholder="选择时间"
-                      v-model="ruleForm.date2"
-                      style="width: 100%;"
-                    ></el-time-picker>
-                  </el-form-item>
-                </el-col>
-              </el-form-item>
-              <el-form-item label="即时配送" prop="delivery">
-                <el-switch v-model="ruleForm.delivery"></el-switch>
+              <!-- image end -->
+
+              <el-form-item label="Auto Build" prop="auto">
+                <el-switch v-model="ruleForm.auto"></el-switch>
               </el-form-item>
               <el-form-item label="活动性质" prop="type">
                 <el-checkbox-group v-model="ruleForm.type">
@@ -88,6 +86,7 @@
 export default {
   data() {
     return {
+      installationEnvironment: "Docker",
       ruleForm: {
         name: "",
         region: "",
