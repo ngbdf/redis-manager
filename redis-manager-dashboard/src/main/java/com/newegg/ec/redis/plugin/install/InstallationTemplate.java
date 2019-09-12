@@ -164,7 +164,7 @@ public class InstallationTemplate {
             List<MachineAndPorts> machineAndPortsList = buildMachinePortsMap(machineList, port, nodeNumber);
             topology = randomPolicy(machineAndPortsList, masterNumber, replicaNumber);*/
         } else {
-            List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
+            List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
             RedisNode masterNode = null;
             for (RedisNode redisNode : allRedisNodes) {
                 if (Objects.equals(redisNode.getNodeRole(), MASTER)) {
@@ -291,7 +291,7 @@ public class InstallationTemplate {
     public void buildMachineRedisNodeMap(InstallationParam installationParam) {
         Multimap<Machine, RedisNode> machineAndRedisNode = ArrayListMultimap.create();
         List<Machine> machineList = installationParam.getMachineList();
-        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
+        List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
         for (Machine machine : machineList) {
             for (RedisNode redisNode : allRedisNodes) {
                 if (Objects.equals(machine.getHost(), redisNode.getHost())) {
@@ -303,7 +303,7 @@ public class InstallationTemplate {
     }
 
     private boolean checkList(InstallationParam installationParam) {
-        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
+        List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
         List<Machine> machineList = installationParam.getMachineList();
         return !(allRedisNodes.isEmpty() || machineList.isEmpty());
     }
@@ -319,7 +319,7 @@ public class InstallationTemplate {
         Cluster cluster = installationParam.getCluster();
         Multimap<RedisNode, RedisNode> topology = installationParam.getTopology();
         RedisNode seed = getSeedNode(cluster, topology);
-        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
+        List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
         // TODO: websocket
         String result = redisService.clusterMeet(cluster, seed, allRedisNodes);
         List<RedisNode> redisNodeListWithInfo = waitClusterMeet(installationParam, seed, allRedisNodes);

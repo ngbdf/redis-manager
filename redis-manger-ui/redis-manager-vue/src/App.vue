@@ -20,6 +20,13 @@ body {
   height: 100%;
   width: 100%;
 }
+
+.el-textarea__inner,
+.el-textarea__inner::-webkit-input-placeholder {
+  font-family: "Microsoft YaHei", sans-serif, "微软雅黑", Arial,
+    "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB" !important;
+}
+
 #app {
   font-family: "Microsoft YaHei", sans-serif, "微软雅黑", Arial,
     "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB";

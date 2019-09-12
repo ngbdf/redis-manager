@@ -26,8 +26,8 @@ export default new Router({
           meta: {
             title: 'Dashboard',
             icon: 'el-icon-discover',
-            noCache: false,
-            affix: true
+            noCache: true,
+            affix: false
           }
         },
         {
@@ -37,8 +37,8 @@ export default new Router({
           meta: {
             title: 'Monitor',
             icon: 'el-icon-view',
-            noCache: false,
-            affix: true
+            noCache: true,
+            affix: false
           }
         },
         {
@@ -49,7 +49,7 @@ export default new Router({
             title: 'Installation',
             icon: 'el-icon-view',
             noCache: true,
-            affix: true
+            affix: false
           }
         }
       ]

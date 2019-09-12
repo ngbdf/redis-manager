@@ -30,7 +30,10 @@ public class InstallationParam {
 
     private int startPort;
 
-    List<RedisNode> allRedisNodes;
+    /**
+     * all nodes
+     */
+    List<RedisNode> redisNodeList;
 
     Multimap<Machine, RedisNode> machineAndRedisNode;
 
@@ -117,12 +120,12 @@ public class InstallationParam {
         this.startPort = startPort;
     }
 
-    public List<RedisNode> getAllRedisNodes() {
-        return allRedisNodes;
+    public List<RedisNode> getRedisNodeList() {
+        return redisNodeList;
     }
 
-    public void setAllRedisNodes(List<RedisNode> allRedisNodes) {
-        this.allRedisNodes = allRedisNodes;
+    public void setRedisNodeList(List<RedisNode> redisNodeList) {
+        this.redisNodeList = redisNodeList;
     }
 
     public Multimap<Machine, RedisNode> getMachineAndRedisNode() {

@@ -92,7 +92,7 @@ public class Cluster {
 
     private String redisPassword;
 
-    private InstallationEnvironment installationEnv;
+    private InstallationEnvironment installationEnvironment;
 
     /**
      * 0: install by redis manager
@@ -292,12 +292,12 @@ public class Cluster {
         this.redisPassword = redisPassword;
     }
 
-    public InstallationEnvironment getInstallationEnv() {
-        return installationEnv;
+    public InstallationEnvironment getInstallationEnvironment() {
+        return installationEnvironment;
     }
 
-    public void setInstallationEnv(InstallationEnvironment installationEnv) {
-        this.installationEnv = installationEnv;
+    public void setInstallationEnvironment(InstallationEnvironment installationEnvironment) {
+        this.installationEnvironment = installationEnvironment;
     }
 
     public int getInstallationType() {

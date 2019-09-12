@@ -98,7 +98,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
         if (installationParam.isAutoBuild()) {
             return true;
         }
-        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
+        List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
         for (RedisNode redisNode : allRedisNodes) {
             String ip = redisNode.getHost();
             int port = redisNode.getPort();

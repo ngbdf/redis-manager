@@ -115,7 +115,7 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
      */
     @Override
     public boolean install(InstallationParam installationParam) {
-        List<RedisNode> allRedisNodes = installationParam.getAllRedisNodes();
+        List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
         Cluster cluster = installationParam.getCluster();
         for (RedisNode redisNode : allRedisNodes) {
             boolean start = start(cluster, null, redisNode);
