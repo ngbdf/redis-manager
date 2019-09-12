@@ -105,11 +105,18 @@
               type="primary"
               icon="el-icon-view"
               circle
-              @click="monitorHandler(1)"
+              @click="toMonitor(1)"
             ></el-button>
             <el-button size="mini" title="Alert" type="warning" icon="el-icon-bell" circle></el-button>
 
-            <el-button size="mini" title="Manage" type="danger" icon="el-icon-setting" circle></el-button>
+            <el-button
+              size="mini"
+              title="Manage"
+              type="danger"
+              icon="el-icon-setting"
+              circle
+              @click="toManage(1)"
+            ></el-button>
 
             <el-dropdown trigger="click" class="more-operation">
               <el-button size="mini" title="Edit or delete" type="info" icon="el-icon-more" circle></el-button>
@@ -128,8 +135,11 @@
 <script>
 export default {
   methods: {
-    monitorHandler(clusterId) {
+    toMonitor(clusterId) {
       this.$router.push({ name: "monitor" });
+    },
+    toManage(clusterId) {
+      this.$router.push({ name: "manage" });
     }
   }
 };
@@ -169,14 +179,8 @@ export default {
   color: #ffffff;
 }
 
-.card-panel-icon-health,
-.health {
+.card-panel-icon-health {
   color: #40c9c6;
-}
-
-.health,
-.bad {
-  font-weight: bold;
 }
 
 .card-panel-icon-health:hover {
@@ -184,8 +188,7 @@ export default {
   color: #ffffff;
 }
 
-.card-panel-icon-bad,
-.bad {
+.card-panel-icon-bad {
   color: #f4516c;
 }
 

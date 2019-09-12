@@ -21,6 +21,11 @@ body {
   width: 100%;
 }
 
+.body-wrapper {
+  padding: 20px;
+  background-color: #ffffff;
+}
+
 .el-textarea__inner,
 .el-textarea__inner::-webkit-input-placeholder {
   font-family: "Microsoft YaHei", sans-serif, "微软雅黑", Arial,
@@ -49,5 +54,21 @@ a:hover {
 }
 li {
   list-style: none;
+}
+
+.health {
+  color: #40c9c6;
+}
+.bad {
+  color: #f4516c;
+}
+
+.health,
+.bad {
+  font-weight: bold;
+}
+
+.pointer {
+  cursor: pointer;
 }
 </style>

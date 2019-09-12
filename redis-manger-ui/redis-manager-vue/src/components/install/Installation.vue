@@ -1,5 +1,5 @@
 <template>
-  <div id="installation">
+  <div id="installation" class="body-wrapper">
     <div class="step-wrapper">
       <el-steps :active="1" finish-status="success">
         <el-step title="Environment Check"></el-step>

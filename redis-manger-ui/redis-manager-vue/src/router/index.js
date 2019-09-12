@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Index from '@/components/Index'
 import Dashboard from '@/components/dashboard/Dashboard'
 import Monitor from '@/components/monitor/Monitor'
+import Manage from '@/components/manage/ClusterManage'
 import Installation from '@/components/install/Installation'
 
 Vue.use(Router)
@@ -36,6 +37,17 @@ export default new Router({
           component: Monitor,
           meta: {
             title: 'Monitor',
+            icon: 'el-icon-view',
+            noCache: true,
+            affix: false
+          }
+        },
+        {
+          name: 'manage',
+          path: '/manage',
+          component: Manage,
+          meta: {
+            title: 'Cluster Manage',
             icon: 'el-icon-view',
             noCache: true,
             affix: false

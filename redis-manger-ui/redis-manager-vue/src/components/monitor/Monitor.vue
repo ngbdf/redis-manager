@@ -1,5 +1,5 @@
 <template>
-  <div id="monitor">
+  <div id="monitor" class="body-wrapper">
     <el-row>
       <el-col :span="24">
         <div class="monitor-title">
@@ -678,11 +678,6 @@ export default {
 </script>
 
 <style scoped>
-#monitor {
-  padding: 20px;
-  background-color: #ffffff;
-}
-
 .monitor-title {
   display: flex;
   justify-content: space-between;
@@ -694,11 +689,9 @@ export default {
 .cluster-name,
 .health {
   font-size: 18px;
-  font-weight: bold;
 }
 
 .health {
-  color: #40c9c6;
   margin-left: 10px;
 }
 
