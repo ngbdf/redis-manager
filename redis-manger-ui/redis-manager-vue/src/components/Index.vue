@@ -37,7 +37,7 @@
             </span>
             <div class="user-info">
               <!-- <span class="user-name">Redis</span> -->
-              <el-dropdown>
+              <el-dropdown @command="handleCommand">
                 <span>
                   <el-avatar :size="36" src="../assets/head.jpg" @error="errorHandler">
                     <img src="../assets/head.jpg" class="image-overflow" />
@@ -48,7 +48,7 @@
                     Signed in as
                     <b>Redis</b>
                   </el-dropdown-item>
-                  <el-dropdown-item divided>Profile</el-dropdown-item>
+                  <el-dropdown-item command="profile" divided>Profile</el-dropdown-item>
                   <el-dropdown-item>Help</el-dropdown-item>
                   <el-dropdown-item divided>Sign out</el-dropdown-item>
                 </el-dropdown-menu>
@@ -200,6 +200,14 @@ export default {
     },
     toUserManage() {
       this.$router.push({ name: "user-manage" });
+    },
+    handleCommand(command) {
+      if (command == "profile") {
+        this.toUserProfile();
+      }
+    },
+    toUserProfile() {
+      this.$router.push({ name: "profile" });
     },
     toDataOperation() {
       this.$router.push({ name: "data-operation" });

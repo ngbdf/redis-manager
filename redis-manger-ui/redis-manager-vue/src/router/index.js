@@ -10,6 +10,7 @@ import RuleManage from '@/components/alert/RuleManage'
 import AlertManage from '@/components/alert/AlertManage'
 import GroupManage from '@/components/group/GroupManage'
 import UserManage from '@/components/user/UserManage'
+import Profile from '@/components/user/Profile'
 import DataOperation from '@/components/tool/DataOperation'
 
 Vue.use(Router)
@@ -116,6 +117,17 @@ export default new Router({
           component: UserManage,
           meta: {
             title: 'User Manage',
+            icon: 'el-icon-view',
+            noCache: true,
+            affix: false
+          }
+        },
+        {
+          name: 'profile',
+          path: '/profile',
+          component: Profile,
+          meta: {
+            title: 'User Profile',
             icon: 'el-icon-view',
             noCache: true,
             affix: false

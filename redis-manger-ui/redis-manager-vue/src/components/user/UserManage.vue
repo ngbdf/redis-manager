@@ -41,17 +41,17 @@
 
     <el-dialog title="Create User" :visible.sync="createUserVisible">
       <el-form :model="user">
-        <el-form-item label="User Name" label-width="100px">
-          <el-input size="small" v-model="user.userName"></el-input>
-        </el-form-item>
-        <el-form-item label="Password" label-width="100px">
-          <el-input size="small" v-model="user.password"></el-input>
-        </el-form-item>
         <el-form-item label="User Role" label-width="100px">
           <el-select size="small" v-model="user.userRole" placeholder="Please select user role">
             <el-option label="Member" value="member"></el-option>
             <el-option label="Admin" value="admin"></el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="User Name" label-width="100px">
+          <el-input size="small" v-model="user.userName"></el-input>
+        </el-form-item>
+        <el-form-item label="Password" label-width="100px">
+          <el-input size="small" v-model="user.password"></el-input>
         </el-form-item>
         <el-form-item label="Email" label-width="100px">
           <el-input size="small" v-model="user.email"></el-input>

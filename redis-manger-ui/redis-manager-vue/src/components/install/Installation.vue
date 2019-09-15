@@ -127,12 +127,16 @@
               >
                 <el-input
                   v-model="installationParam.machineUser"
-                  style="width:  48%; margin-right: 20px;"
                   placeholder="Machine user name"
                 ></el-input>
+              </el-form-item>
+              <el-form-item
+                label="Machine Password"
+                prop="machinePassword"
+                v-if="!installationParam.autoBuild"
+              >
                 <el-input
                   v-model="installationParam.machinePassword"
-                  style="width: 48%;"
                   placeholder="Machine password"
                 ></el-input>
               </el-form-item>
