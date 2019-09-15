@@ -49,17 +49,16 @@
           style="width: 100%; margin-bottom: 10px;"
           row-key="nodeId"
           size="medium"
-          border
           default-expand-all
           :row-class-name="tableRowClassName"
           @selection-change="handleSelectionChange"
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
         >
-          <el-table-column type="selection" width="55"></el-table-column>
+          <el-table-column type="selection" width="55px"></el-table-column>
           <!-- status 有多种 -->
-          <el-table-column prop="status" label="Status" sortable width="180"></el-table-column>
-          <el-table-column prop="role" label="Role" width="180"></el-table-column>
-          <el-table-column prop="address" label="Address" sortable></el-table-column>
+          <el-table-column prop="status" label="Status" sortable width="120"></el-table-column>
+          <el-table-column prop="role" label="Role" width="100px"></el-table-column>
+          <el-table-column prop="address" label="Address" sortable width="200px"></el-table-column>
           <el-table-column label="Slot">
             <template slot-scope="scope" v-if="scope.row.slot">
               {{ scope.row.slot }}
@@ -71,12 +70,12 @@
               <el-tag size="small" class="pointer" v-else type="warning">{{ scope.row.slotNumber }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="Meta">
+          <el-table-column label="Meta" width="130px;">
             <el-tag size="small" class="pointer">Info</el-tag>
             <el-tag size="small" class="pointer">Config</el-tag>
           </el-table-column>
           <el-table-column prop="updateTime" label="time"></el-table-column>
-          <el-table-column label="Operation">
+          <el-table-column label="Operation" width="220px">
             <template slot="header">
               <el-input v-model="search" size="mini" placeholder="Search" />
             </template>
@@ -216,7 +215,7 @@ export default {
 }
 
 .base-info-item {
-  margin-right: 10px;
+  margin-right: 20px;
 }
 
 .batch-title {

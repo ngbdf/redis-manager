@@ -182,12 +182,12 @@
               </el-form-item>
               <el-form-item>
                 <el-button
-                  type="success"
+                  type="primary"
                   @click="installationCheck('installationParam')"
                   v-if="!checkPass"
                 >Check</el-button>
                 <el-button
-                  type="primary"
+                  type="success"
                   @click="submitForm('installationParam')"
                   v-if="checkPass"
                 >Create</el-button>
@@ -370,7 +370,7 @@ export default {
 }
 
 .console {
-  min-height: 500px;
+  min-height: 600px;
   padding: 10px 20px;
   background-color: black;
   color: #ffffff;

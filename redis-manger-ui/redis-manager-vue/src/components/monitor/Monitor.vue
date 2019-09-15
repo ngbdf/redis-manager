@@ -8,8 +8,8 @@
             <i class="el-icon-sunny health"></i>
           </span>
           <div>
-            <el-button size="mini" type="primary" title="Query" icon="el-icon-search" circle></el-button>
-            <el-button size="mini" type="warning" title="Slow log" icon="el-icon-ali-slow" circle></el-button>
+            <el-button size="mini" type="primary" title="Query" icon="el-icon-search" @click="handleQuery()">Query</el-button>
+            <el-button size="mini" type="warning" icon="el-icon-search" title="Slow log">Slow Log</el-button>
           </div>
         </div>
       </el-col>
@@ -146,6 +146,9 @@
         <div id="cpu" class="chart"></div>
       </el-col>
     </el-row>
+    <el-dialog title="Query" :visible.sync="queryVisible" width="60%">
+      <query :clusterId="clusterId"></query>
+    </el-dialog>
   </div>
 </template>
 
@@ -158,10 +161,15 @@ require("echarts/lib/chart/line");
 require("echarts/lib/component/tooltip"); // tooltip组件
 require("echarts/lib/component/title"); //  title组件
 require("echarts/lib/component/legend"); // legend组件
-
+import query from "@/components/tool/Query";
 export default {
+  components: {
+    query
+  },
   data() {
     return {
+      queryVisible: false,
+      clusterId: "222",
       nodeList: [
         {
           value: "192.168.5.12:8651",
@@ -425,6 +433,9 @@ export default {
     };
   },
   methods: {
+    handleQuery() {
+      this.queryVisible = true;
+    },
     initCharts() {
       var erd = elementResizeDetectorMaker();
       let echartsData = this.echartsData;

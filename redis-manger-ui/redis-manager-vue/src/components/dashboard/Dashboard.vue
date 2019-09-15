@@ -86,19 +86,13 @@
             <el-tag size="mini">docker</el-tag>
           </div>
           <div class="card-bottom">
-            <!-- <el-button type="text" class="button">
-              <i class="el-icon-view"></i> Monitor
-            </el-button>
-            <el-button type="text" class="button">
-              <i class="el-icon-search"></i> Query
-            </el-button>
-            <el-button type="text" class="button">
-              <i class="el-icon-setting"></i> Manage
-            </el-button>
-            <el-button type="text" class="button">
-              <i class="el-icon-bell"></i> Alert
-            </el-button>-->
-            <el-button size="mini" title="Query" icon="el-icon-search" circle></el-button>
+            <el-button
+              size="mini"
+              title="Query"
+              icon="el-icon-search"
+              circle
+              @click="handleQuery()"
+            ></el-button>
             <el-button
               size="mini"
               title="Monitor"
@@ -107,7 +101,7 @@
               circle
               @click="toMonitor(1)"
             ></el-button>
-            <el-button size="mini" title="Alert" type="warning" icon="el-icon-bell" circle></el-button>
+            <el-button size="mini" title="Alert" type="warning" icon="el-icon-bell" circle @click="toAlertManage(22)"></el-button>
 
             <el-button
               size="mini"
@@ -129,17 +123,37 @@
         </el-card>
       </el-col>
     </el-row>
+    <el-dialog title="Query" :visible.sync="queryVisible" width="60%">
+      <query :clusterId="clusterId"></query>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import query from "@/components/tool/Query";
 export default {
+  components: {
+    query
+  },
+  data() {
+    return {
+      queryVisible: false,
+      clusterId: "11111111111"
+    };
+  },
+
   methods: {
     toMonitor(clusterId) {
       this.$router.push({ name: "monitor" });
     },
     toManage(clusterId) {
       this.$router.push({ name: "manage" });
+    },
+    toAlertManage(clusterId) {
+      this.$router.push({ name: "alert-manage" });
+    },
+    handleQuery() {
+      this.queryVisible = true;
     }
   }
 };

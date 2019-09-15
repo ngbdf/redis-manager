@@ -30,7 +30,6 @@ public class AlertRule {
      * 0: 相等
      * 1: 大于
      * -1: 小于
-     * 2: 不等于
      */
     private int compareType;
 
@@ -43,8 +42,6 @@ public class AlertRule {
      * 规则是否可用
      */
     private boolean valid;
-
-    private boolean atAll;
 
     /**
      * 是否是全组
@@ -119,14 +116,6 @@ public class AlertRule {
 
     public void setValid(boolean valid) {
         this.valid = valid;
-    }
-
-    public boolean isAtAll() {
-        return atAll;
-    }
-
-    public void setAtAll(boolean atAll) {
-        this.atAll = atAll;
     }
 
     public boolean getGlobal() {

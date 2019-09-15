@@ -17,11 +17,17 @@
               ></el-option>
             </el-select>
             <span class="links" id="links">
-              <el-link :underline="false"><i class="el-icon-ali-git link-icon" title="Github"></i></el-link>
+              <el-link :underline="false">
+                <i class="el-icon-ali-git link-icon" title="Github"></i>
+              </el-link>
               <el-divider direction="vertical"></el-divider>
-              <el-link :underline="false"><i class="el-icon-tickets link-icon" title="Document"></i></el-link>
+              <el-link :underline="false">
+                <i class="el-icon-tickets link-icon" title="Document"></i>
+              </el-link>
               <el-divider direction="vertical"></el-divider>
-              <el-link :underline="false"><i class="el-icon-ali-feedback link-icon" title="Feedback"></i></el-link>
+              <el-link :underline="false">
+                <i class="el-icon-ali-feedback link-icon" title="Feedback"></i>
+              </el-link>
             </span>
             <div class="user-info">
               <!-- <span class="user-name">Redis</span> -->
@@ -71,7 +77,7 @@
                   <span>Install</span>
                 </template>
                 <el-menu-item-group>
-                  <el-menu-item index="2-1"  @click="toInstallation()">Docker Install</el-menu-item>
+                  <el-menu-item index="2-1" @click="toInstallation()">Docker Install</el-menu-item>
                   <el-menu-item index="2-2">Machine Install</el-menu-item>
                   <el-menu-item index="2-3">Kubernetes Install</el-menu-item>
                 </el-menu-item-group>
@@ -82,8 +88,8 @@
                   <span>Alert Manage</span>
                 </template>
                 <el-menu-item-group>
-                  <el-menu-item index="3-1">Channel Manage</el-menu-item>
-                  <el-menu-item index="3-2">Rule Manage</el-menu-item>
+                  <el-menu-item index="3-1" @click="toChannelManage()">Channel Manage</el-menu-item>
+                  <el-menu-item index="3-2" @click="toRuleManage()">Rule Manage</el-menu-item>
                 </el-menu-item-group>
               </el-submenu>
               <el-submenu index="4">
@@ -92,7 +98,7 @@
                   <span>Tools</span>
                 </template>
                 <el-menu-item-group>
-                  <el-menu-item index="4-1">Console</el-menu-item>
+                  <el-menu-item index="4-1" @click="toDataOperation()">Data Operation</el-menu-item>
                   <el-menu-item index="4-2">Other</el-menu-item>
                 </el-menu-item-group>
               </el-submenu>
@@ -136,8 +142,17 @@ export default {
     toDashboard() {
       this.$router.push({ name: "dashboard" });
     },
-    toInstallation(){
+    toInstallation() {
       this.$router.push({ name: "installation" });
+    },
+    toChannelManage() {
+      this.$router.push({ name: "channel-manage" });
+    },
+    toRuleManage() {
+      this.$router.push({ name: "rule-manage" });
+    },
+    toDataOperation() {
+      this.$router.push({ name: "data-operation" });
     },
     handleOpen(key, keyPath) {
       console.log(key, keyPath);

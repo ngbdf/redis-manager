@@ -5,6 +5,10 @@ import Dashboard from '@/components/dashboard/Dashboard'
 import Monitor from '@/components/monitor/Monitor'
 import Manage from '@/components/manage/ClusterManage'
 import Installation from '@/components/install/Installation'
+import ChannelManage from '@/components/alert/ChannelManage'
+import RuleManage from '@/components/alert/RuleManage'
+import AlertManage from '@/components/alert/AlertManage'
+import DataOperation from '@/components/tool/DataOperation'
 
 Vue.use(Router)
 
@@ -59,6 +63,48 @@ export default new Router({
           component: Installation,
           meta: {
             title: 'Installation',
+            icon: 'el-icon-view',
+            noCache: true,
+            affix: false
+          }
+        },
+        {
+          name: 'channel-manage',
+          path: '/channel-manage',
+          component: ChannelManage,
+          meta: {
+            title: 'Channel Manage',
+            icon: 'el-icon-view',
+            noCache: true,
+            affix: false
+          }
+        }, {
+          name: 'rule-manage',
+          path: '/rule-manage',
+          component: RuleManage,
+          meta: {
+            title: 'Rule Manage',
+            icon: 'el-icon-view',
+            noCache: true,
+            affix: false
+          }
+        }, {
+          name: 'alert-manage',
+          path: '/alert-manage',
+          component: AlertManage,
+          meta: {
+            title: 'Alert Manage',
+            icon: 'el-icon-view',
+            noCache: true,
+            affix: false
+          }
+        },
+        {
+          name: 'data-operation',
+          path: '/data-operation',
+          component: DataOperation,
+          meta: {
+            title: 'Data Operation',
             icon: 'el-icon-view',
             noCache: true,
             affix: false
