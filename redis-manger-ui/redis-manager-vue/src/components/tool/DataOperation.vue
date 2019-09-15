@@ -2,7 +2,7 @@
   <div id="data-operation" class="body-wrapper">
     <el-row>
       <el-col :xl="24" :lg="24" :md="24" :sm="24" class="select-wrapper">
-        <el-select v-model="cluster" placeholder="Select cluster">
+        <el-select size="small" v-model="cluster" placeholder="Select cluster">
           <el-option
             v-for="item in clusterList"
             :key="item.value"
@@ -10,7 +10,7 @@
             :value="item.value"
           ></el-option>
         </el-select>
-        <el-select v-model="db" placeholder="Select db">
+        <el-select size="small" v-model="db" placeholder="Select db">
           <el-option
             v-for="item in dbList"
             :key="item.value"

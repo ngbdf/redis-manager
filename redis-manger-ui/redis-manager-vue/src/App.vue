@@ -71,4 +71,12 @@ li {
 .pointer {
   cursor: pointer;
 }
+
+.title-wrapper {
+  font-size: 18px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #dcdfe6;
+}
+
 </style>

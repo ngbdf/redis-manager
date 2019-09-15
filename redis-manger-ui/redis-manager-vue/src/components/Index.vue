@@ -16,7 +16,13 @@
                 :value="item.value"
               ></el-option>
             </el-select>
+            <div>
+              <el-divider direction="vertical"></el-divider>
+              <el-button size="mini" type="text" @click="importVisible = true">Import Cluster</el-button>
+            </div>
+
             <span class="links" id="links">
+              <el-divider direction="vertical"></el-divider>
               <el-link :underline="false">
                 <i class="el-icon-ali-git link-icon" title="Github"></i>
               </el-link>
@@ -70,18 +76,10 @@
                 <i class="el-icon-discover"></i>
                 <span slot="title">Dashboard</span>
               </el-menu-item>
-
-              <el-submenu index="2">
-                <template slot="title">
-                  <i class="el-icon-setting"></i>
-                  <span>Install</span>
-                </template>
-                <el-menu-item-group>
-                  <el-menu-item index="2-1" @click="toInstallation()">Docker Install</el-menu-item>
-                  <el-menu-item index="2-2">Machine Install</el-menu-item>
-                  <el-menu-item index="2-3">Kubernetes Install</el-menu-item>
-                </el-menu-item-group>
-              </el-submenu>
+              <el-menu-item index="2" @click="toInstallation()">
+                <i class="el-icon-setting"></i>
+                <span slot="title">Installation</span>
+              </el-menu-item>
               <el-submenu index="3">
                 <template slot="title">
                   <i class="el-icon-bell"></i>
@@ -99,10 +97,14 @@
                 </template>
                 <el-menu-item-group>
                   <el-menu-item index="4-1" @click="toDataOperation()">Data Operation</el-menu-item>
-                  <el-menu-item index="4-2">Other</el-menu-item>
+                  <!-- <el-menu-item index="4-2">Other</el-menu-item> -->
                 </el-menu-item-group>
               </el-submenu>
-              <el-menu-item index="5">
+              <el-menu-item index="5" @click="toGroupManage()">
+                <i class="el-icon-user"></i>
+                <span slot="title">Group Manage</span>
+              </el-menu-item>
+              <el-menu-item index="6" @click="toUserManage()">
                 <i class="el-icon-user"></i>
                 <span slot="title">User Manage</span>
               </el-menu-item>
@@ -116,6 +118,43 @@
         </transition>
       </el-main>
     </el-container>
+    <el-dialog title="Import Cluster" :visible.sync="importVisible">
+      <el-form :model="cluster">
+        <el-form-item label="Group Name" label-width="120px">
+          <el-tag size="small">Bigdata</el-tag>
+        </el-form-item>
+        <el-form-item label="Cluster Name" label-width="120px">
+          <el-input size="small" v-model="cluster.clusterName"></el-input>
+        </el-form-item>
+        <el-form-item label="Redis Password" label-width="120px">
+          <el-input size="small" v-model="cluster.redisPassword"></el-input>
+        </el-form-item>
+        <el-form-item
+          v-for="(node, index) in cluster.nodeList"
+          :label="'Node ' + index"
+          :key="node.key"
+          label-width="120px"
+        >
+          <el-input size="small" v-model="node.value">
+            <el-button slot="append" @click.prevent="removeNode(node)" icon="el-icon-delete"></el-button>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item label="Environment" label-width="120px">
+          <el-radio-group v-model="cluster.installationEnvironment">
+            <el-radio label="docker">Docker</el-radio>
+            <el-radio label="machine">Machine</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="Cluster Info" label-width="120px">
+          <el-input size="small" v-model="cluster.clusterInfo"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button size="small" @click="addNode()">New Node</el-button>
+        <el-button size="small" type="primary">Confirm</el-button>
+      </div>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -135,7 +174,12 @@ export default {
         }
       ],
       value: "",
-      isCollapse: false
+      isCollapse: false,
+      importVisible: false,
+      cluster: {
+        clusterName: "",
+        nodeList: [{ value: "" }]
+      }
     };
   },
   methods: {
@@ -150,6 +194,12 @@ export default {
     },
     toRuleManage() {
       this.$router.push({ name: "rule-manage" });
+    },
+    toGroupManage() {
+      this.$router.push({ name: "group-manage" });
+    },
+    toUserManage() {
+      this.$router.push({ name: "user-manage" });
     },
     toDataOperation() {
       this.$router.push({ name: "data-operation" });
@@ -177,6 +227,21 @@ export default {
         } else {
           links.style.display = "none";
         }
+      });
+    },
+    removeNode(item) {
+      var index = this.cluster.nodeList.indexOf(item);
+      if (index !== -1) {
+        this.cluster.nodeList.splice(index, 1);
+      }
+    },
+    addNode() {
+      if (this.cluster.nodeList.length >= 5) {
+        return;
+      }
+      this.cluster.nodeList.push({
+        value: "",
+        key: Date.now()
       });
     }
   },
@@ -229,7 +294,7 @@ export default {
 }
 
 .links {
-  padding: 0 1rem;
+  padding-right: 1rem;
 }
 
 .link-icon {

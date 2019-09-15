@@ -1,14 +1,20 @@
 <template>
   <div id="query" class="query-wrapper">
     <div class="input-wrapper">
-      <el-input placeholder="Redis Key" v-model="key" class="input-with-select">
+      <el-input size="small" placeholder="Redis Key" v-model="key" class="input-with-select">
         <el-select v-model="select" slot="prepend" placeholder="SELECT DB">
           <el-option label="db0" value="1"></el-option>
           <el-option label="db1" value="2"></el-option>
           <el-option label="db1" value="3"></el-option>
         </el-select>
       </el-input>
-      <el-button type="primary" icon="el-icon-search" @click="queryRedis()" style="margin-left: 20px;">Query</el-button>
+      <el-button
+        size="small"
+        type="primary"
+        icon="el-icon-search"
+        @click="queryRedis()"
+        style="margin-left: 20px;"
+      >Query</el-button>
     </div>
     <div class="tip-wrapper">
       <span>Limit 100</span>

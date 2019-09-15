@@ -40,12 +40,15 @@
       </el-row>
     </div>
     <div class="body-wrapper">
+      <div class="title-wrapper">
+        <span>Shanghai online</span>
+        <i class="el-icon-sunny health" title="Status"></i>
+      </div>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="Alert Record" name="record">
           <div class="operation-wrapper">
-            <el-row>
-              <el-button size="mini" type="danger">Delete</el-button>
-            </el-row>
+            <div class="batch-title">Batch Operation</div>
+            <el-button size="mini" type="danger">Delete</el-button>
           </div>
           <el-table :data="recordList">
             <el-table-column type="selection" width="55"></el-table-column>
@@ -75,10 +78,9 @@
         </el-tab-pane>
         <el-tab-pane label="Alert Rule" name="rule">
           <div class="operation-wrapper">
-            <el-row>
-              <el-button size="mini" type="primary" @click="addAlertRuleVisible = true">Add</el-button>
-              <el-button size="mini" type="danger">Delete</el-button>
-            </el-row>
+            <div class="batch-title">Batch Operation</div>
+            <el-button size="mini" type="success" @click="addAlertRuleVisible = true">Add</el-button>
+            <el-button size="mini" type="danger">Delete</el-button>
           </div>
           <el-table :data="ruleList">
             <el-table-column type="index" width="50"></el-table-column>
@@ -115,10 +117,9 @@
         </el-tab-pane>
         <el-tab-pane label="Alert Channel" name="channel">
           <div class="operation-wrapper">
-            <el-row>
-              <el-button size="mini" type="primary" @click="addAlertChannelVisible = true">Add</el-button>
-              <el-button size="mini" type="danger">Delete</el-button>
-            </el-row>
+            <div class="batch-title">Batch Operation</div>
+            <el-button size="mini" type="success" @click="addAlertChannelVisible = true">Add</el-button>
+            <el-button size="mini" type="danger">Delete</el-button>
           </div>
           <el-table :data="channelList" style="width: 100%">
             <el-table-column type="index" width="50"></el-table-column>
@@ -320,5 +321,11 @@ export default {
   padding-bottom: 20px;
   margin-bottom: 20px;
   border-bottom: 1px solid #dcdfe6;
+}
+
+.batch-title {
+  margin-bottom: 10px;
+  color: #909399;
+  font-size: 14px;
 }
 </style>

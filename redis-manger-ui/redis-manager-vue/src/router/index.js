@@ -8,6 +8,8 @@ import Installation from '@/components/install/Installation'
 import ChannelManage from '@/components/alert/ChannelManage'
 import RuleManage from '@/components/alert/RuleManage'
 import AlertManage from '@/components/alert/AlertManage'
+import GroupManage from '@/components/group/GroupManage'
+import UserManage from '@/components/user/UserManage'
 import DataOperation from '@/components/tool/DataOperation'
 
 Vue.use(Router)
@@ -94,6 +96,26 @@ export default new Router({
           component: AlertManage,
           meta: {
             title: 'Alert Manage',
+            icon: 'el-icon-view',
+            noCache: true,
+            affix: false
+          }
+        }, {
+          name: 'group-manage',
+          path: '/group-manage',
+          component: GroupManage,
+          meta: {
+            title: 'Group Manage',
+            icon: 'el-icon-view',
+            noCache: true,
+            affix: false
+          }
+        },{
+          name: 'user-manage',
+          path: '/user-manage',
+          component: UserManage,
+          meta: {
+            title: 'User Manage',
             icon: 'el-icon-view',
             noCache: true,
             affix: false

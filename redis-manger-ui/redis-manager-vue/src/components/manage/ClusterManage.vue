@@ -2,8 +2,8 @@
   <div id="cluster-manage" class="body-wrapper">
     <div class="manage-header-wrapper">
       <div class="title-wrapper">
-        Shanghai online
-        <i class="el-icon-sunny health" title="St"></i>
+        <span>Shanghai online</span>
+        <i class="el-icon-sunny health" title="Status"></i>
       </div>
 
       <div class="base-info-operation-wrapper">
@@ -30,17 +30,17 @@
       <div class="batch-operation-wrapper">
         <div class="batch-title">Batch Operation</div>
         <el-row>
-          <el-button size="mini" type="text" icon="el-icon-finished">Purge</el-button>
+          <el-button size="small" type="text" icon="el-icon-finished">Purge</el-button>
           <el-divider direction="vertical"></el-divider>
-          <el-button size="mini" type="text" icon="el-icon-zoom-out">Forget</el-button>
+          <el-button size="small" type="text" icon="el-icon-zoom-out">Forget</el-button>
           <el-divider direction="vertical"></el-divider>
-          <el-button size="mini" type="text" icon="el-icon-video-play">Start</el-button>
-          <el-button size="mini" type="text" icon="el-icon-switch-button">Stop</el-button>
-          <el-button size="mini" type="text" icon="el-icon-refresh-left">Restart</el-button>
+          <el-button size="small" type="text" icon="el-icon-video-play">Start</el-button>
+          <el-button size="small" type="text" icon="el-icon-switch-button">Stop</el-button>
+          <el-button size="small" type="text" icon="el-icon-refresh-left">Restart</el-button>
           <el-divider direction="vertical"></el-divider>
-          <el-button size="mini" type="text" icon="el-icon-circle-close">Delete</el-button>
+          <el-button size="small" type="text" icon="el-icon-circle-close">Delete</el-button>
           <el-divider direction="vertical"></el-divider>
-          <el-button size="mini" type="text" icon="el-icon-edit">Edit Config</el-button>
+          <el-button size="small" type="text" icon="el-icon-edit">Edit Config</el-button>
         </el-row>
       </div>
       <div class="table-wrapper">
@@ -199,9 +199,6 @@ export default {
 .manage-header-wrapper {
   padding-bottom: 20px;
   border-bottom: 1px solid #dcdfe6;
-}
-.title-wrapper {
-  font-size: 18px;
 }
 
 .base-info-operation-wrapper {

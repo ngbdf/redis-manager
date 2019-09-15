@@ -4,12 +4,24 @@
       <el-col :span="24">
         <div class="monitor-title">
           <span>
-            <span class="cluster-name">Shanghai</span>
+            <span class="cluster-name">Shanghai Online</span>
             <i class="el-icon-sunny health"></i>
           </span>
           <div>
-            <el-button size="mini" type="primary" title="Query" icon="el-icon-search" @click="handleQuery()">Query</el-button>
-            <el-button size="mini" type="warning" icon="el-icon-search" title="Slow log">Slow Log</el-button>
+            <el-button
+              size="mini"
+              type="primary"
+              title="Query"
+              icon="el-icon-search"
+              @click="handleQuery()"
+            >Query</el-button>
+            <el-button
+              size="mini"
+              type="warning"
+              icon="el-icon-ali-slow"
+              title="Slow log"
+              @click="slowLogVisible = true"
+            >Slow Log</el-button>
           </div>
         </div>
       </el-col>
@@ -148,6 +160,16 @@
     </el-row>
     <el-dialog title="Query" :visible.sync="queryVisible" width="60%">
       <query :clusterId="clusterId"></query>
+    </el-dialog>
+
+    <el-dialog title="Slow Log" :visible.sync="slowLogVisible">
+      <el-table :data="slowLogList">
+        <el-table-column property="node" label="Node"></el-table-column>
+        <el-table-column property="updateTime" label="Time"></el-table-column>
+        <el-table-column property="runTime" label="Run Time"></el-table-column>
+        <el-table-column property="type" label="Type"></el-table-column>
+        <el-table-column property="command" label="Command"></el-table-column>
+      </el-table>
     </el-dialog>
   </div>
 </template>
@@ -429,7 +451,9 @@ export default {
         "rgba(64, 201, 198, 0.1)",
         "rgba(255, 185, 128, 0.1)"
       ],
-      chartList: []
+      chartList: [],
+      slowLogVisible: false,
+      slowLogList: []
     };
   },
   methods: {
