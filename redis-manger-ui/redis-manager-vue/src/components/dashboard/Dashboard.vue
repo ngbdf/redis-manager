@@ -144,10 +144,10 @@ export default {
 
   methods: {
     toMonitor(clusterId) {
-      this.$router.push({ name: "monitor" });
+      this.$router.push({ name: "redis-monitor" });
     },
     toManage(clusterId) {
-      this.$router.push({ name: "manage" });
+      this.$router.push({ name: "redis-manage" });
     },
     toAlertManage(clusterId) {
       this.$router.push({ name: "alert-manage" });

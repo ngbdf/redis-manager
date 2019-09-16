@@ -2,12 +2,13 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Index from '@/components/Index'
 import Dashboard from '@/components/dashboard/Dashboard'
-import Monitor from '@/components/monitor/Monitor'
-import Manage from '@/components/manage/ClusterManage'
+import RedisMonitor from '@/components/monitor/RedisMonitor'
+import RedisManage from '@/components/manage/RedisManage'
 import Installation from '@/components/install/Installation'
 import ChannelManage from '@/components/alert/ChannelManage'
 import RuleManage from '@/components/alert/RuleManage'
 import AlertManage from '@/components/alert/AlertManage'
+import MachineManage from '@/components/machine/MachineManage'
 import GroupManage from '@/components/group/GroupManage'
 import UserManage from '@/components/user/UserManage'
 import Profile from '@/components/user/Profile'
@@ -39,9 +40,9 @@ export default new Router({
           }
         },
         {
-          name: 'monitor',
-          path: '/monitor',
-          component: Monitor,
+          name: 'redis-monitor',
+          path: '/redis-monitor',
+          component: RedisMonitor,
           meta: {
             title: 'Monitor',
             icon: 'el-icon-view',
@@ -50,11 +51,11 @@ export default new Router({
           }
         },
         {
-          name: 'manage',
-          path: '/manage',
-          component: Manage,
+          name: 'redis-manage',
+          path: '/redis-manage',
+          component: RedisManage,
           meta: {
-            title: 'Cluster Manage',
+            title: 'Redis Manage',
             icon: 'el-icon-view',
             noCache: true,
             affix: false
@@ -102,6 +103,16 @@ export default new Router({
             affix: false
           }
         }, {
+          name: 'machine-manage',
+          path: '/machine-manage',
+          component: MachineManage,
+          meta: {
+            title: 'Machine Manage',
+            icon: 'el-icon-view',
+            noCache: true,
+            affix: false
+          }
+        }, {
           name: 'group-manage',
           path: '/group-manage',
           component: GroupManage,
@@ -111,7 +122,8 @@ export default new Router({
             noCache: true,
             affix: false
           }
-        },{
+        },
+        {
           name: 'user-manage',
           path: '/user-manage',
           component: UserManage,

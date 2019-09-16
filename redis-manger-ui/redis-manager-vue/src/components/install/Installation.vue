@@ -40,8 +40,8 @@
               <!-- environment start -->
               <el-form-item label="Environment" prop="installationEnvironment">
                 <el-radio-group v-model="installationParam.installationEnvironment">
-                  <el-radio-button label="Docker"></el-radio-button>
-                  <el-radio-button label="Machine"></el-radio-button>
+                  <el-radio label="Docker"></el-radio>
+                  <el-radio label="Machine"></el-radio>
                   <!-- <el-radio-button label="Kubernetes"></el-radio-button> -->
                 </el-radio-group>
               </el-form-item>

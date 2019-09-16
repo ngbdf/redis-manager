@@ -90,21 +90,25 @@
                   <el-menu-item index="3-2" @click="toRuleManage()">Rule Manage</el-menu-item>
                 </el-menu-item-group>
               </el-submenu>
-              <el-submenu index="4">
+              <el-menu-item index="4" @click="toMachineManage()">
+                <i class="el-icon-monitor"></i>
+                <span slot="title">Machine Manage</span>
+              </el-menu-item>
+              <el-submenu index="5">
                 <template slot="title">
                   <i class="el-icon-takeaway-box"></i>
                   <span>Tools</span>
                 </template>
                 <el-menu-item-group>
-                  <el-menu-item index="4-1" @click="toDataOperation()">Data Operation</el-menu-item>
-                  <!-- <el-menu-item index="4-2">Other</el-menu-item> -->
+                  <el-menu-item index="5-1" @click="toDataOperation()">Data Operation</el-menu-item>
+                  <!-- <el-menu-item index="5-2">Other</el-menu-item> -->
                 </el-menu-item-group>
               </el-submenu>
-              <el-menu-item index="5" @click="toGroupManage()">
-                <i class="el-icon-user"></i>
+              <el-menu-item index="6" @click="toGroupManage()">
+                <i class="el-icon-user-solid"></i>
                 <span slot="title">Group Manage</span>
               </el-menu-item>
-              <el-menu-item index="6" @click="toUserManage()">
+              <el-menu-item index="7" @click="toUserManage()">
                 <i class="el-icon-user"></i>
                 <span slot="title">User Manage</span>
               </el-menu-item>
@@ -119,34 +123,34 @@
       </el-main>
     </el-container>
     <el-dialog title="Import Cluster" :visible.sync="importVisible">
-      <el-form :model="cluster">
-        <el-form-item label="Group Name" label-width="120px">
+      <el-form :model="cluster" ref="clusterForm" :rules="rules" label-width="120px">
+        <el-form-item label="Group Name">
           <el-tag size="small">Bigdata</el-tag>
         </el-form-item>
-        <el-form-item label="Cluster Name" label-width="120px">
-          <el-input size="small" v-model="cluster.clusterName"></el-input>
+        <el-form-item label="Cluster Name" prop="clusterName">
+          <el-input size="small" v-model="cluster.clusterName" maxlength="30" show-word-limit></el-input>
         </el-form-item>
-        <el-form-item label="Redis Password" label-width="120px">
-          <el-input size="small" v-model="cluster.redisPassword"></el-input>
+        <el-form-item label="Redis Password">
+          <el-input size="small" v-model="cluster.redisPassword" maxlength="255"></el-input>
         </el-form-item>
         <el-form-item
           v-for="(node, index) in cluster.nodeList"
-          :label="'Node ' + index"
+          :label="'Redis Node ' + index"
           :key="node.key"
-          label-width="120px"
+          :prop="'nodeList.' + index + '.value'"
         >
           <el-input size="small" v-model="node.value">
             <el-button slot="append" @click.prevent="removeNode(node)" icon="el-icon-delete"></el-button>
           </el-input>
         </el-form-item>
 
-        <el-form-item label="Environment" label-width="120px">
+        <el-form-item label="Environment" prop="installationEnvironment">
           <el-radio-group v-model="cluster.installationEnvironment">
             <el-radio label="docker">Docker</el-radio>
             <el-radio label="machine">Machine</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="Cluster Info" label-width="120px">
+        <el-form-item label="Cluster Info">
           <el-input size="small" v-model="cluster.clusterInfo"></el-input>
         </el-form-item>
       </el-form>
@@ -160,8 +164,30 @@
 
 <script>
 var elementResizeDetectorMaker = require("element-resize-detector");
+import { isEmpty } from "@/utils/validate.js";
 export default {
   data() {
+    var validateClusterName = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter cluster name."));
+      } else {
+        callback();
+      }
+    };
+    var validateRedisNode = (rule, value, callback) => {
+      console.log(value)
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter redis node."));
+      } else {
+        callback();
+      }
+    };
+    var validateConnection = (rule, value, callback) => {};
+    var validateInstallationEnvironment = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please select environment."));
+      }
+    };
     return {
       options: [
         {
@@ -179,6 +205,21 @@ export default {
       cluster: {
         clusterName: "",
         nodeList: [{ value: "" }]
+      },
+      rules: {
+        clusterName: [
+          { require: true, validator: validateClusterName, trigger: "change" }
+        ],
+        redisNode: [
+          { require: true, validator: validateRedisNode, trigger: "change" }
+        ],
+        installationEnvironment: [
+          {
+            require: true,
+            validator: validateInstallationEnvironment,
+            trigger: "change"
+          }
+        ]
       }
     };
   },
@@ -194,6 +235,9 @@ export default {
     },
     toRuleManage() {
       this.$router.push({ name: "rule-manage" });
+    },
+    toMachineManage() {
+      this.$router.push({ name: "machine-manage" });
     },
     toGroupManage() {
       this.$router.push({ name: "group-manage" });
