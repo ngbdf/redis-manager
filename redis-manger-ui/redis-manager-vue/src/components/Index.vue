@@ -10,10 +10,10 @@
           <div class="grid-content right-content" id="right-content">
             <el-select v-model="value" placeholder="Select Group" size="mini" class="group-select">
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                v-for="group in groupList"
+                :key="group.value"
+                :label="group.label"
+                :value="group.value"
               ></el-option>
             </el-select>
             <div>
@@ -138,12 +138,12 @@
           :label="'Redis Node ' + index"
           :key="node.key"
           :prop="'nodeList.' + index + '.value'"
+          :rules="rules.redisNode"
         >
           <el-input size="small" v-model="node.value">
             <el-button slot="append" @click.prevent="removeNode(node)" icon="el-icon-delete"></el-button>
           </el-input>
         </el-form-item>
-
         <el-form-item label="Environment" prop="installationEnvironment">
           <el-radio-group v-model="cluster.installationEnvironment">
             <el-radio label="docker">Docker</el-radio>
@@ -175,7 +175,7 @@ export default {
       }
     };
     var validateRedisNode = (rule, value, callback) => {
-      console.log(value)
+      console.log(value);
       if (isEmpty(value) || isEmpty(value.trim())) {
         return callback(new Error("Please enter redis node."));
       } else {
@@ -189,7 +189,7 @@ export default {
       }
     };
     return {
-      options: [
+      groupList: [
         {
           value: "Bigdata",
           label: "Bigdata"
@@ -211,7 +211,8 @@ export default {
           { require: true, validator: validateClusterName, trigger: "change" }
         ],
         redisNode: [
-          { require: true, validator: validateRedisNode, trigger: "change" }
+          { require: true, validator: validateRedisNode, trigger: "change" },
+          { require: true, validator: validateConnection, trigger: "blur" }
         ],
         installationEnvironment: [
           {
