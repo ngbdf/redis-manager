@@ -208,15 +208,15 @@ export default {
       },
       rules: {
         clusterName: [
-          { require: true, validator: validateClusterName, trigger: "change" }
+          { required: true, validator: validateClusterName, trigger: "change" }
         ],
         redisNode: [
-          { require: true, validator: validateRedisNode, trigger: "change" },
-          { require: true, validator: validateConnection, trigger: "blur" }
+          { required: true, validator: validateRedisNode, trigger: "change" },
+          { required: true, validator: validateConnection, trigger: "blur" }
         ],
         installationEnvironment: [
           {
-            require: true,
+            required: true,
             validator: validateInstallationEnvironment,
             trigger: "change"
           }

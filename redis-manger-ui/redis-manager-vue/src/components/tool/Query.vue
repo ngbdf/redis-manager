@@ -15,10 +15,12 @@
         @click="queryRedis()"
         style="margin-left: 20px;"
       >Query</el-button>
+      <el-button size="small" icon="el-icon-search">Scan</el-button>
     </div>
     <div class="tip-wrapper">
       <span>Limit 100</span>
     </div>
+    
     <div class="result-wrapper"></div>
   </div>
 </template>
