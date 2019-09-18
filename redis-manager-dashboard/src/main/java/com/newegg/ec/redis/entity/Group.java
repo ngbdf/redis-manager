@@ -9,25 +9,19 @@ import java.sql.Timestamp;
  */
 public class Group {
 
-    private int groupId;
+    private Integer groupId;
 
     private String groupName;
-
-    private int clusterNumber;
-
-    private int goodClusterNumber;
-
-    private int userNumber;
 
     private String groupInfo;
 
     private Timestamp updateTime;
 
-    public int getGroupId() {
+    public Integer getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(int groupId) {
+    public void setGroupId(Integer groupId) {
         this.groupId = groupId;
     }
 
@@ -37,30 +31,6 @@ public class Group {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
-    }
-
-    public int getClusterNumber() {
-        return clusterNumber;
-    }
-
-    public void setClusterNumber(int clusterNumber) {
-        this.clusterNumber = clusterNumber;
-    }
-
-    public int getGoodClusterNumber() {
-        return goodClusterNumber;
-    }
-
-    public void setGoodClusterNumber(int goodClusterNumber) {
-        this.goodClusterNumber = goodClusterNumber;
-    }
-
-    public int getUserNumber() {
-        return userNumber;
-    }
-
-    public void setUserNumber(int userNumber) {
-        this.userNumber = userNumber;
     }
 
     public String getGroupInfo() {

@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.dao;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Update;
 
 /**
@@ -19,6 +20,7 @@ import org.apache.ibatis.annotations.Update;
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
+@Mapper
 public interface InitializationDao {
 
     @Update("")

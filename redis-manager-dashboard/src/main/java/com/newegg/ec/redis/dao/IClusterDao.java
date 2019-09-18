@@ -10,6 +10,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 2019/7/18
  */
+@Mapper
 public interface IClusterDao {
 
     @Select("SELECT * FROM cluster;")

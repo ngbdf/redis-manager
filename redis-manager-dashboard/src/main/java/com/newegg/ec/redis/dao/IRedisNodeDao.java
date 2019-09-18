@@ -2,6 +2,7 @@ package com.newegg.ec.redis.dao;
 
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.RedisInstance;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
+@Mapper
 public interface IRedisNodeDao {
 
     /**
