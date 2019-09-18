@@ -6,7 +6,6 @@ import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
-import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
@@ -26,6 +25,8 @@ import static com.newegg.ec.redis.client.IDatabaseCommand.*;
 import static com.newegg.ec.redis.util.RedisClusterInfoUtil.OK;
 import static com.newegg.ec.redis.util.RedisConfigUtil.MASTER_AUTH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REQUIRE_PASS;
+import static com.newegg.ec.redis.util.RedisNodeInfoUtil.EXPIRES;
+import static com.newegg.ec.redis.util.RedisNodeInfoUtil.KEYS;
 import static com.newegg.ec.redis.util.RedisUtil.*;
 
 /**
@@ -48,33 +49,59 @@ public class RedisService implements IRedisService {
     @Value("${redis-manager.monitor.slow-log-limit-single:100}")
     private int slowLogLimitSingle;
 
+    /**
+     * db0:keys=31,expires=1,avg_ttl=1
+     *
+     * @param cluster
+     * @return
+     */
+    @Override
+    public Map<String, Map<String, Long>> getKeyspaceInfo(Cluster cluster) {
+        List<RedisNode> redisMasterNodeList = getRedisMasterNodeList(cluster);
+        Map<String, Map<String, Long>> keyspaceInfoMap = new LinkedHashMap<>();
+        redisMasterNodeList.forEach(redisNode -> {
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
+            try {
+                Map<String, String> keyspaceInfo = redisClient.getInfo(RedisClient.KEYSPACE);
+                if (keyspaceInfo.isEmpty()) {
+                    return;
+                }
+                // key: db0, val: keys=31,expires=1,avg_ttl=1
+                keyspaceInfo.forEach((key, val) -> {
+                    Map<String, Long> nodeKeyspaceInfoMap = new LinkedHashMap<>();
+                    String[] subContents = SignUtil.splitByCommas(val);
+                    for (String subContent : subContents) {
+                        String[] split = SignUtil.splitByEqualSign(subContent);
+                        if (split.length != 2) {
+                            continue;
+                        }
+                        String subContentKey = split[0];
+                        String subContentVal = split[1];
+                        if (Strings.isNullOrEmpty(subContentVal)) {
+                            continue;
+                        }
+                        if (Objects.equals(subContentKey, KEYS)) {
+                            nodeKeyspaceInfoMap.put(KEYS, Long.parseLong(subContentKey));
+                        } else if (Objects.equals(subContentKey, EXPIRES)) {
+                            nodeKeyspaceInfoMap.put(EXPIRES, Long.parseLong(subContentKey));
+                        }
+                    }
+                    keyspaceInfoMap.put(key, nodeKeyspaceInfoMap);
+                });
+            } catch (Exception e) {
+                logger.error("Get keyspace info failed, redis node = " + redisNode.getHost() + ":" + redisNode.getPort(), e);
+            }
+        });
+        return null;
+    }
+
     @Override
     public Map<String, Long> getDatabase(Cluster cluster) {
-        RedisURI redisURI = new RedisURI(cluster.getNodes(), cluster.getRedisPassword());
-        String redisMode = cluster.getRedisMode();
         Map<String, Long> database = new LinkedHashMap<>();
-        if (STANDALONE.equalsIgnoreCase(redisMode)) {
-            try {
-                RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
-                Map<String, String> infoKeyspace = redisClient.getInfo(RedisClient.KEYSPACE);
-                if (infoKeyspace.isEmpty()) {
-                    return null;
-                }
-                for (Map.Entry<String, String> entry : infoKeyspace.entrySet()) {
-                    String dbIndex = entry.getKey();
-                    String value = entry.getValue();
-                    if (Strings.isNullOrEmpty(value)) {
-                        continue;
-                    }
-                    String[] subContents = SignUtil.splitByCommas(value);
-                    String[] keyAndNumber = SignUtil.splitByEqualSign(subContents[0]);
-                    long number = Long.valueOf(keyAndNumber[1]);
-                    database.put(dbIndex, number);
-                }
-            } catch (Exception e) {
-                logger.error("Get database map failed, " + cluster, e);
-            }
-        }
+        Map<String, Map<String, Long>> keyspaceInfo = getKeyspaceInfo(cluster);
+        keyspaceInfo.forEach((key, val) -> {
+            database.put(key, val.get(KEYS));
+        });
         return database;
     }
 
@@ -103,11 +130,11 @@ public class RedisService implements IRedisService {
 
     @Override
     public List<RedisNode> getRedisMasterNodeList(Cluster cluster) {
+        List<RedisNode> masterNodeList = new ArrayList<>();
         List<RedisNode> redisNodeList = getRedisNodeList(cluster);
         if (redisNodeList == null) {
-            return null;
+            return masterNodeList;
         }
-        List<RedisNode> masterNodeList = new ArrayList<>();
         redisNodeList.forEach(redisNode -> {
             if (Objects.equals(NodeRole.MASTER, redisNode.getNodeRole())) {
                 masterNodeList.add(redisNode);
@@ -116,43 +143,19 @@ public class RedisService implements IRedisService {
         return masterNodeList;
     }
 
-
     @Override
-    public List<NodeInfo> getNodeInfoList(Cluster cluster, NodeInfoType.TimeType timeType) {
-        String redisPassword = cluster.getRedisPassword();
-        Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
-        List<NodeInfo> nodeInfoList = new ArrayList<>(hostAndPortSet.size());
-        int clusterId = cluster.getClusterId();
-        for (HostAndPort hostAndPort : hostAndPortSet) {
-            NodeInfo nodeInfo = getNodeInfo(clusterId, hostAndPort, redisPassword, timeType);
-            if (nodeInfo == null) {
-                continue;
-            }
-            nodeInfoList.add(nodeInfo);
-        }
-        return nodeInfoList;
-    }
-
-    @Override
-    public NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword, NodeInfoType.TimeType timeType) {
-        NodeInfo nodeInfo = null;
-        String node = hostAndPort.toString();
+    public Map<String, String> getClusterInfo(Cluster cluster) {
         try {
-            RedisURI redisURI = new RedisURI(hostAndPort, redisPassword);
+            String redisPassword = cluster.getRedisPassword();
+            Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
+            RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
             RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
-            Map<String, String> infoMap = redisClient.getInfo();
-            // 获取上一次的 NodeInfo 来计算某些字段的差值
-            NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.DataType.NODE, timeType, node);
-            NodeInfo lastTimeNodeInfo = nodeInfoService.getLastTimeNodeInfo(nodeInfoParam);
-            // 指标计算处理
-            nodeInfo = RedisNodeInfoUtil.parseInfoToObject(infoMap, lastTimeNodeInfo);
-            nodeInfo.setDataType(NodeInfoType.DataType.NODE);
-            nodeInfo.setLastTime(true);
-            nodeInfo.setTimeType(timeType);
+            Map<String, String> clusterInfo = redisClient.getClusterInfo();
+            return clusterInfo;
         } catch (Exception e) {
-            logger.error("Build node info failed, node = " + node, e);
+            logger.error("Get cluster info failed, " + cluster, e);
+            return null;
         }
-        return nodeInfo;
     }
 
     @Override

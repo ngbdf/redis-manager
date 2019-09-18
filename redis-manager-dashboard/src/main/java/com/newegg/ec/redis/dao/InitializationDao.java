@@ -24,4 +24,7 @@ public interface InitializationDao {
     @Update("")
     void createGroupTable();
 
+    @Update("")
+    void createUserTable();
+
 }

@@ -52,27 +52,26 @@
                 prop="image"
                 v-if="installationParam.installationEnvironment == 'Docker'"
               >
-                <el-select v-model="installationParam.region" placeholder="Please choose image">
-                  <el-option label="redis:4.0.10" value="redis:4.0.10"></el-option>
-                  <el-option label="redis:4.0.14" value="redis:4.0.14"></el-option>
+                <el-select
+                  allow-create
+                  filterable
+                  v-model="installationParam.image"
+                  placeholder="Please choose image"
+                >
+                  <el-option
+                    v-for="image in dockerImages"
+                    :key="image.value"
+                    :label="image.label"
+                    :value="image.value"
+                  ></el-option>
                 </el-select>
-                <el-popover placement="bottom" title="Customize Image" width="200" trigger="click">
-                  <el-input v-model="installationParam.iamge"></el-input>
-                  <el-button
-                    slot="reference"
-                    size="mini"
-                    title="Customize Image"
-                    icon="el-icon-plus"
-                    circle
-                  ></el-button>
-                </el-popover>
               </el-form-item>
               <el-form-item
                 label="Image"
                 prop="image"
                 v-if="installationParam.installationEnvironment == 'Machine'"
               >
-                <el-select v-model="installationParam.image" placeholder="Please choose image">
+                <el-select v-model="installationParam.package" placeholder="Please choose image">
                   <el-option label="4.0.10" value="4.0.10"></el-option>
                   <el-option label="4.0.14" value="4.0.14"></el-option>
                 </el-select>
@@ -125,10 +124,7 @@
                 prop="machineUser"
                 v-if="!installationParam.autoBuild"
               >
-                <el-input
-                  v-model="installationParam.machineUser"
-                  placeholder="Machine user name"
-                ></el-input>
+                <el-input v-model="installationParam.machineUser" placeholder="Machine user name"></el-input>
               </el-form-item>
               <el-form-item
                 label="Machine Password"
@@ -215,6 +211,20 @@
 export default {
   data() {
     return {
+      dockerImages: [
+        {
+          value: "redis:4.0.10",
+          label: "redis:4.0.10"
+        },
+        {
+          value: "redis:4.0.14",
+          label: "redis:4.0.14"
+        },
+        {
+          value: "redis:5.0.5",
+          label: "redis:5.0.5"
+        }
+      ],
       checkPass: false,
       installationParam: {
         cluster: {

@@ -3,10 +3,14 @@ package com.newegg.ec.redis.schedule;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.newegg.ec.redis.client.RedisClient;
+import com.newegg.ec.redis.client.RedisClientFactory;
+import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
+import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +36,12 @@ import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
-public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDataCleanup, ApplicationListener<ContextRefreshedEvent> {
+public abstract class NodeInfoCollectionAbstract implements IDataCollection, ApplicationListener<ContextRefreshedEvent> {
 
-    private static final Logger logger = LoggerFactory.getLogger(NodeInfoCollection.class);
+    private static final Logger logger = LoggerFactory.getLogger(NodeInfoCollectionAbstract.class);
 
     @Autowired
-    private IClusterService clusterService;
+    IClusterService clusterService;
 
     @Autowired
     private IRedisService redisService;
@@ -47,7 +51,7 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
 
     private int coreSize;
 
-    private static ExecutorService threadPool;
+    static ExecutorService threadPool;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
@@ -58,73 +62,13 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
                 new ThreadPoolExecutor.AbortPolicy());
     }
 
-    /**
-     * 一分钟收集一次RedisNode数据，并计算以 MINUTE 为单位的 avg, max, min
-     */
-    @Async
-    @Scheduled(cron = "0 0/1 * * * ? ")
-    @Override
-    public void collect() {
-        try {
-            List<Cluster> allClusterList = clusterService.getAllClusterList();
-            if (allClusterList == null || allClusterList.isEmpty()) {
-                return;
-            }
-            for (Cluster cluster : allClusterList) {
-                threadPool.submit(new CollectMinuteNodeInfoTask(cluster, NodeInfoType.TimeType.MINUTE));
-            }
-        } catch (Exception e) {
-            logger.error("Collect node info data failed.", e);
-        }
-    }
-
-    /**
-     * 一个小时跑一次，获取DB数据，计算所有节点以 HOUR 为单位的 avg, max, min
-     */
-    @Async
-    @Scheduled(cron = "0 0 0/1 * * ? ")
-    @Override
-    public void calculate() {
-        try {
-            List<Cluster> allClusterList = clusterService.getAllClusterList();
-            if (allClusterList == null || allClusterList.isEmpty()) {
-                return;
-            }
-            for (Cluster cluster : allClusterList) {
-                threadPool.submit(new CollectMinuteNodeInfoTask(cluster, NodeInfoType.TimeType.HOUR));
-            }
-        } catch (Exception e) {
-            logger.error("Collect node info data failed.", e);
-        }
-    }
-
-    /**
-     * 每周星期天凌晨1点实行一次，清理数据
-     */
-    @Async
-    @Scheduled(cron = "0 0 1 ? * L")
-    @Override
-    public void cleanup() {
-        try {
-            List<Cluster> allClusterList = clusterService.getAllClusterList();
-            if (allClusterList == null || allClusterList.isEmpty()) {
-                return;
-            }
-            for (Cluster cluster : allClusterList) {
-                nodeInfoService.cleanupNodeInfo(cluster.getClusterId());
-            }
-        } catch (Exception e) {
-            logger.error("Cleanup node info schedule failed.", e);
-        }
-    }
-
-    private class CollectMinuteNodeInfoTask implements Runnable {
+    protected class CollectNodeInfoTask implements Runnable {
 
         private Cluster cluster;
 
         private NodeInfoType.TimeType timeType;
 
-        public CollectMinuteNodeInfoTask(Cluster cluster, NodeInfoType.TimeType timeType) {
+        public CollectNodeInfoTask(Cluster cluster, NodeInfoType.TimeType timeType) {
             this.cluster = cluster;
             this.timeType = timeType;
         }
@@ -134,7 +78,7 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
             try {
                 int clusterId = cluster.getClusterId();
                 String redisMode = cluster.getRedisMode();
-                List<NodeInfo> nodeInfoList = redisService.getNodeInfoList(cluster, timeType);
+                List<NodeInfo> nodeInfoList = getNodeInfoList(cluster, timeType);
                 // 计算 AVG、MAX、MIN
                 Map<String, List<BigDecimal>> nodeInfoDataMap = nodeInfoDataToMap(nodeInfoList);
                 List<NodeInfo> specialNodeInfo = buildNodeInfoForSpecialDataType(nodeInfoDataMap);
@@ -166,6 +110,51 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
             }
 
         }
+    }
+
+    private List<NodeInfo> getNodeInfoList(Cluster cluster, NodeInfoType.TimeType timeType) {
+        String redisPassword = cluster.getRedisPassword();
+        Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
+        List<NodeInfo> nodeInfoList = new ArrayList<>(hostAndPortSet.size());
+        int clusterId = cluster.getClusterId();
+        for (HostAndPort hostAndPort : hostAndPortSet) {
+            NodeInfo nodeInfo = getNodeInfo(clusterId, hostAndPort, redisPassword, timeType);
+            if (nodeInfo == null) {
+                continue;
+            }
+            nodeInfoList.add(nodeInfo);
+        }
+        return nodeInfoList;
+    }
+
+    private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
+        List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
+        Set<HostAndPort> hostAndPortSet = new HashSet<>();
+        for (RedisNode redisNode : redisNodeList) {
+            hostAndPortSet.add(new HostAndPort(redisNode.getHost(), redisNode.getPort()));
+        }
+        return hostAndPortSet;
+    }
+
+    private NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword, NodeInfoType.TimeType timeType) {
+        NodeInfo nodeInfo = null;
+        String node = hostAndPort.toString();
+        try {
+            RedisURI redisURI = new RedisURI(hostAndPort, redisPassword);
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            Map<String, String> infoMap = redisClient.getInfo();
+            // 获取上一次的 NodeInfo 来计算某些字段的差值
+            NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, NodeInfoType.DataType.NODE, timeType, node);
+            NodeInfo lastTimeNodeInfo = nodeInfoService.getLastTimeNodeInfo(nodeInfoParam);
+            // 指标计算处理
+            nodeInfo = RedisNodeInfoUtil.parseInfoToObject(infoMap, lastTimeNodeInfo);
+            nodeInfo.setDataType(NodeInfoType.DataType.NODE);
+            nodeInfo.setLastTime(true);
+            nodeInfo.setTimeType(timeType);
+        } catch (Exception e) {
+            logger.error("Build node info failed, node = " + node, e);
+        }
+        return nodeInfo;
     }
 
     /**
@@ -295,29 +284,6 @@ public class NodeInfoCollection implements IDataCollection, IDataCalculate, IDat
         nodeInfoList.add(maxNodeInfo);
         nodeInfoList.add(minNodeInfo);
         return nodeInfoList;
-    }
-
-    @Deprecated
-    private NodeInfo buildNodeINfoHour(Map<String, List<BigDecimal>> historyDataMap, NodeInfoType.DataType dataType) {
-        JSONObject jsonObject = new JSONObject();
-        historyDataMap.forEach((key, list) -> {
-            String nodeInfoField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, key);
-            BigDecimal bigDecimal = null;
-            if (Objects.equals(NodeInfoType.DataType.AVG, dataType)) {
-                bigDecimal = RedisUtil.avg(list);
-            } else if (Objects.equals(NodeInfoType.DataType.MAX, dataType)) {
-                bigDecimal = RedisUtil.max(list);
-            } else if (Objects.equals(NodeInfoType.DataType.MIN, dataType)) {
-                bigDecimal = RedisUtil.min(list);
-            }
-            if (bigDecimal != null) {
-                jsonObject.put(nodeInfoField, bigDecimal.doubleValue());
-            }
-        });
-        NodeInfo nodeInfo = jsonObject.toJavaObject(NodeInfo.class);
-        nodeInfo.setDataType(dataType);
-        return nodeInfo;
-
     }
 
 }

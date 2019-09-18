@@ -1,6 +1,5 @@
 package com.newegg.ec.redis.plugin.alert.service.impl;
 
-import com.google.common.base.Strings;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRecordDao;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 import com.newegg.ec.redis.plugin.alert.service.IAlertRecordService;
@@ -63,5 +62,10 @@ public class AlertRecordService implements IAlertRecordService {
             logger.error("Delete alert record by earliest time failed", e);
             return false;
         }
+    }
+
+    @Override
+    public Integer getAlertNumber() {
+        return 9;
     }
 }

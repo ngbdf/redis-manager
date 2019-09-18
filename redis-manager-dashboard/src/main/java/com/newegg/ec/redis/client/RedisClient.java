@@ -124,11 +124,11 @@ public class RedisClient implements IRedisClient {
         Map<String, String> infoMap = getInfo(REPLICATION);
         String role = infoMap.get(ROLE);
         String host = infoMap.get(MASTER_HOST);
-        int port = Integer.valueOf(infoMap.get(MASTER_PORT));
+        int port = Integer.parseInt(infoMap.get(MASTER_PORT));
         // 使用 master node 进行连接
         if (Objects.equals(role, NodeRole.SLAVE.getValue())) {
             host = infoMap.get(MASTER_HOST);
-            port = Integer.valueOf(infoMap.get(MASTER_PORT));
+            port = Integer.parseInt(infoMap.get(MASTER_PORT));
             RedisURI masterURI = new RedisURI(new HostAndPort(host, port), redisURI.getRequirePass());
             RedisClient redisClient = RedisClientFactory.buildRedisClient(masterURI);
             infoMap = redisClient.getInfo(REPLICATION);
@@ -155,7 +155,7 @@ public class RedisClient implements IRedisClient {
                 }
             }
             if (!Strings.isNullOrEmpty(slaveIp) && !Strings.isNullOrEmpty(slavePort)) {
-                RedisNode redisNode = new RedisNode(slaveIp, Integer.valueOf(slavePort), NodeRole.SLAVE);
+                RedisNode redisNode = new RedisNode(slaveIp, Integer.parseInt(slavePort), NodeRole.SLAVE);
                 nodeList.add(redisNode);
             }
         }

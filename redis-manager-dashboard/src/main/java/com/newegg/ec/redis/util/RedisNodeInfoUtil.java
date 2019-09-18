@@ -134,9 +134,9 @@ public class RedisNodeInfoUtil {
                         continue;
                     }
                     if (Objects.equals(subContentKey, KEYS)) {
-                        keys += Long.valueOf(subContentVal);
+                        keys += Long.parseLong(subContentVal);
                     } else if (Objects.equals(subContentKey, EXPIRES)) {
-                        expires += Long.valueOf(subContentVal);
+                        expires += Long.parseLong(subContentVal);
                     }
                 }
             } else if (isByteToMBKeyField(key)) {

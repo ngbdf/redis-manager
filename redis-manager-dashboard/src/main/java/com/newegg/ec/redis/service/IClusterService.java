@@ -1,10 +1,8 @@
 package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.Group;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -18,6 +16,8 @@ public interface IClusterService {
 
     Cluster getClusterById(int clusterId);
 
+    Cluster getClusterByName(String clusterName);
+
     boolean addCluster(Cluster cluster);
 
     boolean updateCluster(Cluster cluster);
@@ -26,4 +26,15 @@ public interface IClusterService {
 
     boolean deleteCluster(Cluster cluster);
 
+    boolean fillClusterInfo(Cluster cluster);
+
+    boolean fillStandaloneInfo(Cluster cluster);
+
+    void fillBaseInfo(Cluster cluster);
+
+    void fillKeyspaceInfo(Cluster cluster);
+
+    Integer getHealthNumber();
+
+    Integer getBadNumber();
 }

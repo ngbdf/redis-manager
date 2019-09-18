@@ -7,13 +7,22 @@ import redis.clients.jedis.HostAndPort;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
 public interface IRedisService {
+
+    /**
+     * Get keyspace info
+     * <p>
+     * eg: db1: [keys: 12345, expire: 1234]
+     *
+     * @param cluster
+     * @return
+     */
+    Map<String, Map<String, Long>> getKeyspaceInfo(Cluster cluster);
 
     /**
      * Get database
@@ -41,25 +50,7 @@ public interface IRedisService {
      */
     List<RedisNode> getRedisMasterNodeList(Cluster cluster);
 
-    /**
-     * Node info list after calculating
-     *
-     * @param cluster
-     * @param timeType
-     * @return
-     */
-    List<NodeInfo> getNodeInfoList(Cluster cluster, NodeInfoType.TimeType timeType);
-
-    /**
-     * Node info after calculating
-     *
-     * @param clusterId
-     * @param hostAndPort
-     * @param redisPassword
-     * @param timeType
-     * @return
-     */
-    NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword, NodeInfoType.TimeType timeType);
+    Map<String, String> getClusterInfo(Cluster cluster);
 
     List<RedisSlowLog> getRedisSlowLog(Cluster cluster, SlowLogParam slowLogParam);
 

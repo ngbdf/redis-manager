@@ -4,10 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.RedisNode;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 

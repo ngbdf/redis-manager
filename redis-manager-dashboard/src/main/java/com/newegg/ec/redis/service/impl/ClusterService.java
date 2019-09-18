@@ -1,11 +1,14 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.service.IClusterService;
+import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.RedisClusterInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
@@ -13,12 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.HostAndPort;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import static com.newegg.ec.redis.client.RedisClient.SERVER;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
+import static com.newegg.ec.redis.util.RedisUtil.*;
 
 /**
  * @author Jay.H.Zou
@@ -31,26 +33,27 @@ public class ClusterService implements IClusterService {
     @Autowired
     private IClusterDao clusterDao;
 
+    @Autowired
+    private IRedisService redisService;
+
     @Override
     public List<Cluster> getAllClusterList() {
-        List<Cluster> clusterList = new ArrayList<>();
         try {
-            clusterList = clusterDao.selectAllCluster();
+            return clusterDao.selectAllCluster();
         } catch (Exception e) {
             logger.error("Get all cluster failed.", e);
+            return null;
         }
-        return clusterList;
     }
 
     @Override
     public List<Cluster> getClusterListByGroupId(int groupId) {
-        List<Cluster> clusterList = new ArrayList<>();
         try {
             return clusterDao.selectClusterByGroupId(groupId);
         } catch (Exception e) {
             logger.error("Get cluster list by group id failed, group id = " + groupId, e);
+            return null;
         }
-        return clusterList;
     }
 
     @Override
@@ -64,25 +67,45 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
-    public boolean addCluster(Cluster cluster) {
-        String nodes = cluster.getNodes();
-        Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(nodes);
-        RedisURI redisURI = new RedisURI(hostAndPortSet, cluster.getRedisPassword());
-        RedisClient redisClient;
-        try {
-            redisClient = RedisClientFactory.buildRedisClient(redisURI);
-            Map<String, String> infoMap = redisClient.getInfo(RedisClient.SERVER);
-            fillNodeInfo(cluster, infoMap);
-        } catch (Exception e) {
-            logger.error("Fill node info failed, " + cluster, e);
-            return false;
+    public Cluster getClusterByName(String clusterName) {
+        if (Strings.isNullOrEmpty(clusterName)) {
+            return null;
         }
         try {
-            Map<String, String> clusterInfoMap = redisClient.getClusterInfo();
-            Cluster clusterInfoObj = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfoMap);
-            fillClusterInfo(cluster, clusterInfoObj);
+            return clusterDao.selectClusterByName(clusterName);
         } catch (Exception e) {
-            logger.error("Fill cluster info failed, " + cluster, e);
+            logger.error("Get cluster by name failed, cluster name = " + clusterName, e);
+            return new Cluster();
+        }
+    }
+
+    /**
+     * 不仅需要
+     *
+     * @param cluster
+     * @return
+     */
+    @Override
+    public boolean addCluster(Cluster cluster) {
+        String redisMode;
+        try {
+            fillBaseInfo(cluster);
+            redisMode = cluster.getRedisMode();
+            if (redisMode == null) {
+                logger.error("Fill base info failed, " + cluster);
+                return false;
+            }
+            fillKeyspaceInfo(cluster);
+            if (Objects.equals(redisMode, CLUSTER)) {
+                if (!fillClusterInfo(cluster)) {
+                    logger.error("Fill cluster info failed, " + cluster);
+                    return false;
+                }
+            } else if (Objects.equals(redisMode, STANDALONE)) {
+                fillStandaloneInfo(cluster);
+            }
+        } catch (Exception e) {
+            logger.error("Fill base info failed, " + cluster, e);
             return false;
         }
         try {
@@ -124,19 +147,74 @@ public class ClusterService implements IClusterService {
         return false;
     }
 
-    private void fillClusterInfo(Cluster cluster, Cluster clusterInfoObj) {
-        cluster.setClusterState(cluster.getClusterState());
-        cluster.setClusterSlotsAssigned(clusterInfoObj.getClusterSlotsAssigned());
-        cluster.setClusterSlotsFail(clusterInfoObj.getClusterSlotsPfail());
-        cluster.setClusterSlotsPfail(clusterInfoObj.getClusterSlotsPfail());
-        cluster.setClusterSlotsOk(clusterInfoObj.getClusterSlotsOk());
-        cluster.setClusterSize(clusterInfoObj.getClusterSize());
-        cluster.setClusterKnownNodes(clusterInfoObj.getClusterKnownNodes());
+    /**
+     * @param cluster
+     * @return
+     */
+    public boolean fillClusterInfo(Cluster cluster) {
+        try {
+            Map<String, String> clusterInfo = redisService.getClusterInfo(cluster);
+            if (clusterInfo == null) {
+                logger.warn("Cluster info is empty.");
+                return true;
+            }
+            Cluster clusterInfoObj = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfo);
+            cluster.setClusterState(clusterInfoObj.getClusterState());
+            cluster.setClusterSlotsAssigned(clusterInfoObj.getClusterSlotsAssigned());
+            cluster.setClusterSlotsFail(clusterInfoObj.getClusterSlotsPfail());
+            cluster.setClusterSlotsPfail(clusterInfoObj.getClusterSlotsPfail());
+            cluster.setClusterSlotsOk(clusterInfoObj.getClusterSlotsOk());
+            cluster.setClusterSize(clusterInfoObj.getClusterSize());
+            cluster.setClusterKnownNodes(clusterInfoObj.getClusterKnownNodes());
+            return true;
+        } catch (Exception e) {
+            logger.error("Fill cluster info failed, " + cluster, e);
+            return false;
+        }
     }
 
-    private void fillNodeInfo(Cluster cluster, Map<String, String> infoMap) {
-        cluster.setOs(infoMap.get(OS));
-        cluster.setRedisMode(infoMap.get(REDIS_MODE));
-        cluster.setRedisVersion(infoMap.get(REDIS_VERSION));
+    public boolean fillStandaloneInfo(Cluster cluster) {
+        List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
+        cluster.setClusterSize(1);
+        cluster.setClusterKnownNodes(redisNodeList.size());
+        return true;
+    }
+
+    public void fillBaseInfo(Cluster cluster) {
+
+        try {
+            String nodes = cluster.getNodes();
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes), cluster.getRedisPassword());
+            Map<String, String> serverInfo = redisClient.getInfo(SERVER);
+            // Server
+            cluster.setOs(serverInfo.get(OS));
+            cluster.setRedisMode(serverInfo.get(REDIS_MODE));
+            cluster.setRedisVersion(serverInfo.get(REDIS_VERSION));
+        } catch (Exception e) {
+            logger.error("Fill redis base info failed, " + cluster, e);
+        }
+    }
+
+    public void fillKeyspaceInfo(Cluster cluster) {
+        Map<String, Map<String, Long>> keyspaceInfoMap = redisService.getKeyspaceInfo(cluster);
+        cluster.setDbNumber(keyspaceInfoMap.size());
+        long totalKeys = 0;
+        long totalExpires = 0;
+        for (Map<String, Long> value : keyspaceInfoMap.values()) {
+            totalKeys += value.get(KEYS);
+            totalExpires += value.get(EXPIRES);
+        }
+        cluster.setTotalKeys(totalKeys);
+        cluster.setTotalExpires(totalExpires);
+    }
+
+    @Override
+    public Integer getHealthNumber() {
+        return 2;
+    }
+
+    @Override
+    public Integer getBadNumber() {
+        return 0;
     }
 }

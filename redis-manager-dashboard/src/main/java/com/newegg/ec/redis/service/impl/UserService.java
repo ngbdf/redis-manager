@@ -31,7 +31,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> getUserByGroupId(int groupId) {
+    public List<User> getUserByGroupId(Integer groupId) {
         try {
             return userDao.selectUserByGroupId(groupId);
         } catch (Exception e) {
@@ -84,7 +84,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean deleteUserById(int userId) {
+    public boolean deleteUserById(Integer userId) {
         try {
             int row = userDao.deleteUserById(userId);
             return row > 0;
@@ -95,7 +95,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean deleteUserByGroupId(int groupId) {
+    public boolean deleteUserByGroupId(Integer groupId) {
         try {
             userDao.deleteUserByGroupId(groupId);
             return true;
@@ -103,5 +103,10 @@ public class UserService implements IUserService {
             logger.error("Delete users by group id failed, group id = " + groupId, e);
             return false;
         }
+    }
+
+    @Override
+    public Integer getUserNumber(Integer groupId) {
+        return 0;
     }
 }

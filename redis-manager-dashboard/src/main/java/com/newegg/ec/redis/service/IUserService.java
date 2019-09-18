@@ -12,7 +12,7 @@ public interface IUserService {
 
     List<User> getAllUser();
 
-    List<User> getUserByGroupId(int groupId);
+    List<User> getUserByGroupId(Integer groupId);
 
     User getUserByNameAndPassword(User user);
 
@@ -22,8 +22,9 @@ public interface IUserService {
 
     boolean updateUser(User user);
 
-    boolean deleteUserById(int userId);
+    boolean deleteUserById(Integer userId);
 
-    boolean deleteUserByGroupId(int groupId);
+    boolean deleteUserByGroupId(Integer groupId);
 
+    Integer getUserNumber(Integer groupId);
 }
