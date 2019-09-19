@@ -8,12 +8,18 @@
         </el-col>
         <el-col>
           <div class="grid-content right-content" id="right-content">
-            <el-select v-model="value" placeholder="Select Group" size="mini" class="group-select">
+            <el-select
+              v-model="groupId"
+              placeholder="Select Group"
+              size="mini"
+              class="group-select"
+              @change="selectGroup()"
+            >
               <el-option
                 v-for="group in groupList"
-                :key="group.value"
-                :label="group.label"
-                :value="group.value"
+                :key="group.groupId"
+                :label="group.groupName"
+                :value="group.groupId"
               ></el-option>
             </el-select>
             <div>
@@ -46,7 +52,7 @@
                 <el-dropdown-menu slot="dropdown" style="min-width: 180px">
                   <el-dropdown-item disabled>
                     Signed in as
-                    <b>Redis</b>
+                    <b>{{ user.userName }}</b>
                   </el-dropdown-item>
                   <el-dropdown-item command="profile" divided>Profile</el-dropdown-item>
                   <el-dropdown-item>Help</el-dropdown-item>
@@ -123,7 +129,7 @@
       </el-main>
     </el-container>
     <el-dialog title="Import Cluster" :visible.sync="importVisible">
-      <el-form :model="cluster" ref="clusterForm" :rules="rules" label-width="120px">
+      <el-form :model="cluster" ref="cluster" :rules="rules" label-width="120px">
         <el-form-item label="Group Name">
           <el-tag size="small">Bigdata</el-tag>
         </el-form-item>
@@ -156,7 +162,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="addNode()">New Node</el-button>
-        <el-button size="small" type="primary">Confirm</el-button>
+        <el-button size="small" type="primary" @click="importCluster('cluster')">Confirm</el-button>
       </div>
     </el-dialog>
   </el-container>
@@ -164,7 +170,9 @@
 
 <script>
 var elementResizeDetectorMaker = require("element-resize-detector");
+import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
+import { get, post } from "@/api/api.js";
 export default {
   data() {
     var validateClusterName = (rule, value, callback) => {
@@ -189,17 +197,20 @@ export default {
       }
     };
     return {
+      groupId: "",
       groupList: [
         {
-          value: "Bigdata",
-          label: "Bigdata"
+          groupId: 1,
+          groupName: "Bigdata",
+          groupInfo: "bigdata team"
         },
         {
-          value: "Test",
-          label: "Test"
+          groupId: 2,
+          groupName: "Test",
+          groupInfo: "Test team"
         }
       ],
-      value: "",
+      user: store.getters.getUser,
       isCollapse: false,
       importVisible: false,
       cluster: {
@@ -245,6 +256,10 @@ export default {
     },
     toUserManage() {
       this.$router.push({ name: "user-manage" });
+    },
+    selectGroup() {
+      console.log("== " + this.groupId);
+      store.dispatch("setGroupId", this.groupId);
     },
     handleCommand(command) {
       if (command == "profile") {
@@ -296,8 +311,18 @@ export default {
         value: "",
         key: Date.now()
       });
+    },
+    getUserGroup(userId) {
+      let user = store.getters.user;
+    },
+    importCluster(cluster) {
+      this.$refs[cluster].validate(valid => {
+        if (valid) {
+        }
+      });
     }
   },
+  watch: {},
   mounted() {
     this.listenHeaderWidth();
   }
