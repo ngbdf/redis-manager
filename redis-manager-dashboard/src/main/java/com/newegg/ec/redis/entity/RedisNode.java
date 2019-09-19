@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.entity;
 
+import java.sql.Timestamp;
+
 /**
  * For
  *
@@ -11,11 +13,12 @@ public class RedisNode {
     /**
      * mysql table id
      */
-    private int redisNodeId;
+    private Integer redisNodeId;
 
-    private int clusterId;
+    private Integer clusterId;
 
     private String nodeId;
+
 
     private int order;
 
@@ -41,14 +44,18 @@ public class RedisNode {
      * noaddr: 没有地址的节点（No address known for this node）.
      * noflags: 连个标记都没有（No flags at all）.
      */
-    String flags;
+    private String flags;
 
     /**
      * link-state: node-to-node 集群总线使用的链接的状态，我们使用这个链接与集群中其他节点进行通信.值可以是 connected 和 disconnected.
      */
-    String linkState;
+    private String linkState;
 
-    String slotRange;
+    private String slotRange;
+
+    private String containerName;
+
+    private Timestamp updateTime;
 
     public RedisNode() {
     }
@@ -84,19 +91,19 @@ public class RedisNode {
         return new RedisNode(nodeId, host, port, NodeRole.SLAVE);
     }
 
-    public int getRedisNodeId() {
+    public Integer getRedisNodeId() {
         return redisNodeId;
     }
 
-    public void setRedisNodeId(int redisNodeId) {
+    public void setRedisNodeId(Integer redisNodeId) {
         this.redisNodeId = redisNodeId;
     }
 
-    public int getClusterId() {
+    public Integer getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(int clusterId) {
+    public void setClusterId(Integer clusterId) {
         this.clusterId = clusterId;
     }
 
@@ -106,6 +113,14 @@ public class RedisNode {
 
     public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     public String getMasterId() {
@@ -164,20 +179,19 @@ public class RedisNode {
         this.slotRange = slotRange;
     }
 
-    @Override
-    public String toString() {
-        final StringBuffer sb = new StringBuffer("RedisNode{");
-        sb.append("redisNodeId=").append(redisNodeId);
-        sb.append(", clusterId=").append(clusterId);
-        sb.append(", nodeId='").append(nodeId).append('\'');
-        sb.append(", masterId='").append(masterId).append('\'');
-        sb.append(", host='").append(host).append('\'');
-        sb.append(", port=").append(port);
-        sb.append(", nodeRole=").append(nodeRole);
-        sb.append(", flags='").append(flags).append('\'');
-        sb.append(", linkState='").append(linkState).append('\'');
-        sb.append(", slotRange='").append(slotRange).append('\'');
-        sb.append('}');
-        return sb.toString();
+    public String getContainerName() {
+        return containerName;
+    }
+
+    public void setContainerName(String containerName) {
+        this.containerName = containerName;
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 }

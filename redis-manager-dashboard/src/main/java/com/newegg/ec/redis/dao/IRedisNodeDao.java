@@ -1,18 +1,18 @@
 package com.newegg.ec.redis.dao;
 
 import com.newegg.ec.redis.entity.RedisNode;
-import com.newegg.ec.redis.plugin.install.entity.RedisInstance;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
 /**
- * Manage redis nodes in docker
+ * Manage redis nodes
+ * 可能不需要
  *
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
-@Mapper
+@Deprecated
 public interface IRedisNodeDao {
 
     /**
@@ -21,7 +21,7 @@ public interface IRedisNodeDao {
      * @param clusterId
      * @return
      */
-    List<RedisNode> selectSimpleRedisNodeList(int clusterId);
+    List<RedisNode> selectSimpleRedisNodeList(Integer clusterId);
 
     /**
      * 获取节点详细信息
@@ -29,14 +29,14 @@ public interface IRedisNodeDao {
      * @param clusterId
      * @return
      */
-    List<RedisInstance> selectRedisNodeList(int clusterId);
+    List<RedisNode> selectRedisNodeList(Integer clusterId);
 
-    int updateRedisNode(RedisInstance redisInstance);
+    int updateRedisNode(RedisNode redisInstance);
 
-    int insertRedisNodeList(List<RedisInstance> redisInstanceList);
+    int insertRedisNodeList(List<RedisNode> redisInstanceList);
 
-    int deleteRedisNodeListByClusterId(int clusterId);
+    int deleteRedisNodeListByClusterId(Integer clusterId);
 
-    int deleteRedisNodeById(int redisNodeId);
+    int deleteRedisNodeById(Integer redisNodeId);
 
 }

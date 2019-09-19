@@ -13,25 +13,22 @@ import java.util.List;
 @Mapper
 public interface IGroupUserDao {
 
-    @Select("SELECT " +
-            "group.group_id AS group_id, " +
-            "group.group_name AS group_name, " +
-            "group.group_info AS group_info, " +
-            "group.update_time AS update_time " +
-            "FROM group, group_user " +
-            "WHERE group_user.group_id = group.group_id " +
-            "AND user_id = #{userId}")
-    List<Group> selectGroupByUserId(Integer userId);
-
     @Insert("INSERT INFO group_user (group_id, user_id, user_role, update_time) " +
             "VALUES (#{groupId}, #{userId}, #{userRole}, NOW())")
     int insertGroupUser(User user);
 
-    @Update("UPDATE user SET user_name = #{userName}, password = #{password}, #{user_role} = #{userRole}, " +
-            "head_pic = #{headPic}, email = #{email}, mobile = #{mobile}, update_time = NOW()")
+    @Update("UPDATE user SET #{user_role} = #{userRole} WHERE group_id = #{groupId} AND user_id = #{userId}")
     int updateUserRole(User user);
 
     @Delete("DELETE FROM group_user WHERE group_id = #{groupId} AND user_id = #{userId}")
     int deleteGroupUser(@Param("groupId") Integer groupId, @Param("userId") Integer userId);
 
+    @Delete("DELETE FROM group_user WHERE user_id = #{userId}")
+    int deleteGroupUserByUserId( @Param("userId") Integer userId);
+
+    @Delete("DELETE FROM group_user WHERE user_id = #{userId}")
+    int deleteGroupUserByGroupId( @Param("groupId") Integer groupId);
+
+    @Select("SELECT COUNT(user_id) FROM group_user WHERE group_id = #{groupId}")
+    Integer getUserNumber(Integer groupId);
 }

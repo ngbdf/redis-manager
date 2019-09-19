@@ -18,6 +18,16 @@ public interface IGroupDao {
     @Select("SELECT * FROM group")
     List<Group> selectAllGroup();
 
+    @Select("SELECT " +
+            "group.group_id AS group_id, " +
+            "group.group_name AS group_name, " +
+            "group.group_info AS group_info, " +
+            "group.update_time AS update_time " +
+            "FROM group, group_user " +
+            "WHERE group_user.group_id = group.group_id " +
+            "AND group_user.user_id = #{userId}")
+    List<Group> selectGroupByUserId(Integer userId);
+
     @Select("SELECT * FROM group WHERE group_name = #{groupName}")
     Group selectGroupByGroupName(String groupName);
 

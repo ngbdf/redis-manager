@@ -3,18 +3,15 @@ package com.newegg.ec.redis.service.impl;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
-import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.RedisClusterInfoUtil;
-import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import redis.clients.jedis.HostAndPort;
 
 import java.util.*;
 
@@ -126,8 +123,7 @@ public class ClusterService implements IClusterService {
     public boolean updateClusterKeys(Cluster cluster) {
         int clusterId = cluster.getClusterId();
         try {
-            clusterDao.updateTotalKey(clusterId, cluster.getTotalKeys());
-            clusterDao.updateTotalExpires(clusterId, cluster.getTotalExpires());
+            clusterDao.updateKeyspace(clusterId, cluster.getTotalKeys(), cluster.getTotalExpires());
             return true;
         } catch (Exception e) {
             logger.error("Update cluster keys failed, " + cluster, e);
@@ -197,7 +193,7 @@ public class ClusterService implements IClusterService {
 
     public void fillKeyspaceInfo(Cluster cluster) {
         Map<String, Map<String, Long>> keyspaceInfoMap = redisService.getKeyspaceInfo(cluster);
-        cluster.setDbNumber(keyspaceInfoMap.size());
+        cluster.setDbSize(keyspaceInfoMap.size());
         long totalKeys = 0;
         long totalExpires = 0;
         for (Map<String, Long> value : keyspaceInfoMap.values()) {
@@ -208,13 +204,4 @@ public class ClusterService implements IClusterService {
         cluster.setTotalExpires(totalExpires);
     }
 
-    @Override
-    public Integer getHealthNumber() {
-        return 2;
-    }
-
-    @Override
-    public Integer getBadNumber() {
-        return 0;
-    }
 }

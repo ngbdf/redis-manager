@@ -6,15 +6,15 @@ package com.newegg.ec.redis.entity;
  */
 public class SlowLogParam {
 
-    private String clusterId;
+    private Integer clusterId;
 
     private String node;
 
-    public String getClusterId() {
+    public Integer getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(String clusterId) {
+    public void setClusterId(Integer clusterId) {
         this.clusterId = clusterId;
     }
 

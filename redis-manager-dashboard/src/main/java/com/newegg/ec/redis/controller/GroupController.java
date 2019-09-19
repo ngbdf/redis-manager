@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.ws.rs.PathParam;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,19 +33,19 @@ public class GroupController {
 
     private static final String USER_NUMBER = "user";
 
-    private static final String HEALTH_NUMBER = "health";
-
-    private static final String BAD_NUMBER = "bad";
-
     private static final String ALERT_NUMBER = "alert";
 
-    @RequestMapping(value = "/overview", method = RequestMethod.GET)
+    /**
+     * Health cluster number and bad cluster number calculating from cluster list info
+     *
+     * @param groupId
+     * @return
+     */
+    @RequestMapping(value = "/overview/{groupId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getGroupOverview() {
+    public Result getGroupPartOverview(@PathParam("groupId") Integer groupId) {
         Map<String, Integer> overviewMap = new HashMap<>();
-        overviewMap.put(USER_NUMBER, userService.getUserNumber());
-        overviewMap.put(HEALTH_NUMBER, clusterService.getHealthNumber());
-        overviewMap.put(BAD_NUMBER, clusterService.getBadNumber());
+        overviewMap.put(USER_NUMBER, userService.getUserNumber(groupId));
         overviewMap.put(ALERT_NUMBER, alertRecordService.getAlertNumber());
         return Result.successResult(overviewMap);
     }

@@ -11,8 +11,6 @@ import java.util.Map;
  */
 public interface IMachineService {
 
-    List<Machine> getAllMachine();
-
     /**
      * 获取多个集群集群
      *
@@ -37,8 +35,6 @@ public interface IMachineService {
      * @return connection refused list
      */
     List<Machine> checkMachineConnection(List<Integer> machineIdList);
-
-    boolean addMachine(Machine machine);
 
     boolean addMachineBatch(List<Machine> machineList);
 

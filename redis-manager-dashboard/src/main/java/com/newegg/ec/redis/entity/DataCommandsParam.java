@@ -7,17 +7,17 @@ package com.newegg.ec.redis.entity;
  */
 public class DataCommandsParam {
 
-    private int clusterId;
+    private Integer clusterId;
 
     private int database;
 
     private String command;
 
-    public int getClusterId() {
+    public Integer getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(int clusterId) {
+    public void setClusterId(Integer clusterId) {
         this.clusterId = clusterId;
     }
 

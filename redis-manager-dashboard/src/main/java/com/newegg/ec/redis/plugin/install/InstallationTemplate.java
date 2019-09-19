@@ -333,7 +333,7 @@ public class InstallationTemplate {
             // TODO: websocket
             String initResult = initSlot(cluster);
             if (Strings.isNullOrEmpty(initResult)) {
-                cluster.setInit(true);
+                cluster.setInitialized(true);
             }
         }
     }

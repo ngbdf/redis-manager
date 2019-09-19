@@ -34,7 +34,4 @@ public interface IClusterService {
 
     void fillKeyspaceInfo(Cluster cluster);
 
-    Integer getHealthNumber();
-
-    Integer getBadNumber();
 }

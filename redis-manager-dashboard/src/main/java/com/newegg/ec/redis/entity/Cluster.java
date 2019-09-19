@@ -10,11 +10,9 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment;
  */
 public class Cluster {
 
-    private int clusterId;
+    private Integer clusterId;
 
-    private int groupId;
-
-    private String admins;
+    private Integer groupId;
 
     /**
      * 通过 token 连接
@@ -36,7 +34,7 @@ public class Cluster {
     /**
      * Just for cluster mode
      */
-    private boolean init;
+    private boolean initialized;
 
     /**
      * 集群 key 总数
@@ -47,6 +45,8 @@ public class Cluster {
      * 集群 expire 总数
      */
     private long totalExpires;
+
+    private int dbSize;
 
     /**
      *
@@ -85,11 +85,6 @@ public class Cluster {
      */
     private int clusterSize;
 
-    /**
-     * db number
-     */
-    private int dbNumber;
-
     private String redisPassword;
 
     private InstallationEnvironment installationEnvironment;
@@ -99,8 +94,6 @@ public class Cluster {
      * 1: other way
      */
     private int installationType;
-
-    private long dbSize;
 
     private String ruleIds;
 
@@ -116,28 +109,20 @@ public class Cluster {
         WARN;
     }
 
-    public int getClusterId() {
+    public Integer getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(int clusterId) {
+    public void setClusterId(Integer clusterId) {
         this.clusterId = clusterId;
     }
 
-    public int getGroupId() {
+    public Integer getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(int groupId) {
+    public void setGroupId(Integer groupId) {
         this.groupId = groupId;
-    }
-
-    public String getAdmins() {
-        return admins;
-    }
-
-    public void setAdmins(String admins) {
-        this.admins = admins;
     }
 
     public String getClusterToken() {
@@ -196,12 +181,12 @@ public class Cluster {
         this.image = image;
     }
 
-    public boolean isInit() {
-        return init;
+    public boolean isInitialized() {
+        return initialized;
     }
 
-    public void setInit(boolean init) {
-        this.init = init;
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
     }
 
     public long getTotalKeys() {
@@ -218,6 +203,14 @@ public class Cluster {
 
     public void setTotalExpires(long totalExpires) {
         this.totalExpires = totalExpires;
+    }
+
+    public int getDbSize() {
+        return dbSize;
+    }
+
+    public void setDbSize(int dbSize) {
+        this.dbSize = dbSize;
     }
 
     public ClusterState getClusterState() {
@@ -276,14 +269,6 @@ public class Cluster {
         this.clusterSize = clusterSize;
     }
 
-    public int getDbNumber() {
-        return dbNumber;
-    }
-
-    public void setDbNumber(int dbNumber) {
-        this.dbNumber = dbNumber;
-    }
-
     public String getRedisPassword() {
         return redisPassword;
     }
@@ -306,14 +291,6 @@ public class Cluster {
 
     public void setInstallationType(int installationType) {
         this.installationType = installationType;
-    }
-
-    public long getDbSize() {
-        return dbSize;
-    }
-
-    public void setDbSize(long dbSize) {
-        this.dbSize = dbSize;
     }
 
     public String getRuleIds() {

@@ -8,7 +8,7 @@ import java.sql.Timestamp;
  */
 public class User {
 
-    private int userId;
+    private Integer userId;
 
     private String groupId;
 

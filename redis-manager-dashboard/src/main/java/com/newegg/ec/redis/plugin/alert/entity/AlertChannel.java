@@ -11,9 +11,9 @@ package com.newegg.ec.redis.plugin.alert.entity;
  */
 public class AlertChannel {
 
-    private int channelId;
+    private Integer channelId;
 
-    private int groupId;
+    private Integer groupId;
 
     /**
      * 通道名
@@ -64,19 +64,19 @@ public class AlertChannel {
      */
     private int channelType;
 
-    public int getChannelId() {
+    public Integer getChannelId() {
         return channelId;
     }
 
-    public void setChannelId(int channelId) {
+    public void setChannelId(Integer channelId) {
         this.channelId = channelId;
     }
 
-    public int getGroupId() {
+    public Integer getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(int groupId) {
+    public void setGroupId(Integer groupId) {
         this.groupId = groupId;
     }
 

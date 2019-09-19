@@ -11,30 +11,30 @@ import java.sql.Timestamp;
  * <p>
  * Monitor metrics:
  * <p>
- *     response_time: √
+ * response_time: √
  * <p>
- *     connected_clients: √
- *     blocked_clients: √
+ * connected_clients: √
+ * blocked_clients: √
  * <p>
- *     mem_fragmentation_ratio: √
- *     used_memory: √
- *     used_memory_rss: √
- *     used_memory_dataset: √
+ * mem_fragmentation_ratio: √
+ * used_memory: √
+ * used_memory_rss: √
+ * used_memory_dataset: √
  * <p>
- *     total_connections_received: √
- *     total_commands_processed: √
- *     instantaneous_ops_per_sec: √
- *     rejected_connections: √
- *     sync_full: √
- *     sync_partial_ok: √
- *     sync_partial_err: √
+ * total_connections_received: √
+ * total_commands_processed: √
+ * instantaneous_ops_per_sec: √
+ * rejected_connections: √
+ * sync_full: √
+ * sync_partial_ok: √
+ * sync_partial_err: √
  * <p>
- *     keys: √
- *     expires: √
+ * keys: √
+ * expires: √
  * <p>
- *     keyspace_hits_ratio:  √
+ * keyspace_hits_ratio:  √
  * <p>
- *     used_cpu_sys: √
+ * used_cpu_sys: √
  * Scalable
  *
  * @author Jay.H.Zou
@@ -109,6 +109,8 @@ public class NodeInfo {
      */
     private long connectionsReceived;
 
+    private long rejectedConnections;
+
     /**
      * redis处理的命令数 (total_commands_processed): 监控采集周期内的平均qps
      */
@@ -143,7 +145,6 @@ public class NodeInfo {
      */
     private long netOutputBytes;
 
-    private long rejectedConnections;
 
     private long syncFull;
 
@@ -347,6 +348,14 @@ public class NodeInfo {
         this.connectionsReceived = connectionsReceived;
     }
 
+    public long getRejectedConnections() {
+        return rejectedConnections;
+    }
+
+    public void setRejectedConnections(long rejectedConnections) {
+        this.rejectedConnections = rejectedConnections;
+    }
+
     public long getTotalCommandsProcessed() {
         return totalCommandsProcessed;
     }
@@ -401,14 +410,6 @@ public class NodeInfo {
 
     public void setNetOutputBytes(long netOutputBytes) {
         this.netOutputBytes = netOutputBytes;
-    }
-
-    public long getRejectedConnections() {
-        return rejectedConnections;
-    }
-
-    public void setRejectedConnections(long rejectedConnections) {
-        this.rejectedConnections = rejectedConnections;
     }
 
     public long getSyncFull() {

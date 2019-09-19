@@ -56,7 +56,7 @@ public interface IUserDao {
             "VALUES (#{userName}, #{password}, #{userRole}, #{headPic}, #{email}, #{mobile}, NOW())")
     int insertUser(User user);
 
-    @Update("UPDATE user SET user_name = #{userName}, password = #{password}, #{user_role} = #{userRole}, " +
+    @Update("UPDATE user SET user_name = #{userName}, password = #{password}, " +
             "head_pic = #{headPic}, email = #{email}, mobile = #{mobile}, update_time = NOW()")
     int updateUser(User user);
 
@@ -66,6 +66,4 @@ public interface IUserDao {
     @Delete("DELETE FROM user WHERE group_id = #{groupId}")
     int deleteUserByGroupId(Integer groupId);
 
-    @Select("SELECT COUNT(user_id) WHERE group_id = #{groupId}")
-    Integer getUserNumber(Integer groupId);
 }

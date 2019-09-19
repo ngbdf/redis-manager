@@ -6,7 +6,7 @@ package com.newegg.ec.redis.plugin.alert.entity;
  */
 public class AlertRecord extends AlertRule {
 
-    private int recordId;
+    private Integer recordId;
 
     private String groupName;
 
@@ -18,11 +18,11 @@ public class AlertRecord extends AlertRule {
 
     private String actualData;
 
-    public int getRecordId() {
+    public Integer getRecordId() {
         return recordId;
     }
 
-    public void setRecordId(int recordId) {
+    public void setRecordId(Integer recordId) {
         this.recordId = recordId;
     }
 

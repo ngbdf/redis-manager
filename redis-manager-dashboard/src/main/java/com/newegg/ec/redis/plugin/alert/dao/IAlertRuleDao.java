@@ -12,9 +12,9 @@ public interface IAlertRuleDao {
 
     List<AlertRule> selectAlertRuleIds(List<Integer> ruleIdList);
     
-    List<AlertRule> selectAlertRuleListByGroupId(int groupId);
+    List<AlertRule> selectAlertRuleListByGroupId(Integer groupId);
 
-    List<AlertRule> selectAlertRuleListByClusterId(int groupId, int clusterId);
+    List<AlertRule> selectAlertRuleListByClusterId(Integer groupId, Integer clusterId);
 
     int insertAlertRule(AlertRule alertRule);
 

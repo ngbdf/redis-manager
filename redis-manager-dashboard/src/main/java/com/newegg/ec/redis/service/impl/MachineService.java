@@ -23,16 +23,6 @@ public class MachineService implements IMachineService {
     private IMachineDao machineDao;
 
     @Override
-    public List<Machine> getAllMachine() {
-        try {
-            return machineDao.selectAllMachine();
-        } catch (Exception e) {
-            logger.error("Get all machine failed.", e);
-            return null;
-        }
-    }
-
-    @Override
     public Map<String, List<Machine>> getMachineByGroupId(int groupId) {
         try {
             List<Machine> machines = machineDao.selectMachineByGroupId(groupId);
@@ -86,20 +76,9 @@ public class MachineService implements IMachineService {
     }
 
     @Override
-    public boolean addMachine(Machine machine) {
-        try {
-            int row = machineDao.insertMachine(machine);
-            return row > 0;
-        } catch (Exception e) {
-            logger.error("Add machine failed, " + machine, e);
-            return false;
-        }
-    }
-
-    @Override
     public boolean addMachineBatch(List<Machine> machineList) {
         try {
-            machineDao.insertMachineBatch(machineList);
+            machineDao.insertMachine(machineList);
             return true;
         } catch (Exception e) {
             logger.error("Add batch machine failed, " + machineList, e);

@@ -1,12 +1,14 @@
 package com.newegg.ec.redis.entity;
 
+import java.sql.Timestamp;
+
 /**
  * @author Jay.H.Zou
  * @date 2019/7/19
  */
 public class Machine {
 
-    private int machineId;
+    private Integer machineId;
 
     private String machineGroupName;
 
@@ -22,17 +24,19 @@ public class Machine {
 
     private String machineInfo;
 
+    private Timestamp updateTime;
+
     public Machine(){}
 
     public Machine(String host) {
         this.host = host;
     }
 
-    public int getMachineId() {
+    public Integer getMachineId() {
         return machineId;
     }
 
-    public void setMachineId(int machineId) {
+    public void setMachineId(Integer machineId) {
         this.machineId = machineId;
     }
 
@@ -90,5 +94,13 @@ public class Machine {
 
     public void setMachineInfo(String machineInfo) {
         this.machineInfo = machineInfo;
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 }

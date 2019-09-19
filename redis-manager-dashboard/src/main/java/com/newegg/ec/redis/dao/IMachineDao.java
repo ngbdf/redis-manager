@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.dao;
 
 import com.newegg.ec.redis.entity.Machine;
-import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -14,20 +14,42 @@ import java.util.List;
 @Mapper
 public interface IMachineDao {
 
-    List<Machine> selectAllMachine();
+    @Select("SELECT * FROM machine WHERE group_id = #{groupId}")
+    List<Machine> selectMachineByGroupId(Integer groupId);
 
-    List<Machine> selectMachineByGroupId(int groupId);
-
+    @Select("SELECT * FROM machine WHERE machine_group_name = #{machineGroupName}")
     List<Machine> selectMachineByMachineGroup(String machineGroupName);
 
+    @Select("<script>" +
+            "SELECT * FROM machine WHERE machine_id IN (" +
+            "<foreach item='machineId' collection='machineIdList' open='(' separator=',' close=')'>" +
+            "#{machineId}" +
+            "</foreach>)" +
+            "</script>")
     List<Machine> selectMachineByIds(List<Integer> machineIdList);
 
-    int insertMachine(Machine machine);
+    @Update("UPDATE machine SET machine_group_name = #{machineGroupName}, host = #{host}, password = #{password}, " +
+            "token = #{token}, machine_info = #{machineInfo}, update_time = NOW() " +
+            "WHERE machine_id = #{machineId}")
+    int updateMachine(Machine machine);
 
-    int insertMachineBatch(List<Machine> machineList);
+    @Insert("<script>" +
+            "INSERT INTO machine (machine_group_name, group_id, host, user_name, password, token, machine_info, update_time) " +
+            "VALUE <foreach item='machine' collection='machineList' separator=','>" +
+            "(#{machineGroupName}, #{groupId}, #{host}, #{password}, #{token}, #{machineInfo}, NOW())" +
+            "</foreach>" +
+            "</script>")
+    int insertMachine(List<Machine> machineList);
 
-    int deleteMachineById(int machineId);
+    @Delete("DELETE FROM machine WHERE machine_id = #{machineId}")
+    int deleteMachineById(Integer machineId);
 
+    @Delete("<script>" +
+            "DELETE FROM machine WHERE machine_id IN (" +
+            "<foreach item='machineId' collection='machineIdList' open='(' separator=',' close=')'>" +
+            "#{machineId}" +
+            "</foreach>)" +
+            "</script>")
     int deleteMachineByIdBatch(List<Integer>  machineIdList);
 
 }

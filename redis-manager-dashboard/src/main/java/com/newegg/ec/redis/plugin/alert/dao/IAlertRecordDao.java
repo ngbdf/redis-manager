@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface IAlertRecordDao {
 
-    List<AlertRecord> selectAlertRecordByClusterId(int clusterId);
+    List<AlertRecord> selectAlertRecordByClusterId(Integer clusterId);
 
     int insertAlertRecord(List<AlertRecord> alertRecordList);
 

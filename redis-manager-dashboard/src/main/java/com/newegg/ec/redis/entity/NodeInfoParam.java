@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class NodeInfoParam {
 
-    private int clusterId;
+    private Integer clusterId;
 
     private NodeInfoType.DataType dataType;
 
@@ -27,19 +27,19 @@ public class NodeInfoParam {
     public NodeInfoParam() {
     }
 
-    public NodeInfoParam(int clusterId, NodeInfoType.TimeType timeType) {
+    public NodeInfoParam(Integer clusterId, NodeInfoType.TimeType timeType) {
         this(clusterId, null, timeType, null);
     }
 
-    public NodeInfoParam(int clusterId, NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, String node) {
+    public NodeInfoParam(Integer clusterId, NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, String node) {
         this(clusterId, dataType, timeType, null, null, node);
     }
 
-    public NodeInfoParam(int clusterId, Timestamp startTime, Timestamp endTime) {
+    public NodeInfoParam(Integer clusterId, Timestamp startTime, Timestamp endTime) {
         this(clusterId, null, null, startTime, endTime, null);
     }
 
-    public NodeInfoParam(int clusterId, NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, Timestamp startTime, Timestamp endTime, String node) {
+    public NodeInfoParam(Integer clusterId, NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, Timestamp startTime, Timestamp endTime, String node) {
         this.clusterId = clusterId;
         this.dataType = dataType;
         this.timeType = timeType;
@@ -48,11 +48,11 @@ public class NodeInfoParam {
         this.node = node;
     }
 
-    public int getClusterId() {
+    public Integer getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(int clusterId) {
+    public void setClusterId(Integer clusterId) {
         this.clusterId = clusterId;
     }
 
