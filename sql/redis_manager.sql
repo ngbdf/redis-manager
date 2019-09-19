@@ -1,4 +1,4 @@
-create DATABASE `redis_manager` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+create DATABASE `redis_manager_refactor` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 -- 最后创建索引和唯一键
 

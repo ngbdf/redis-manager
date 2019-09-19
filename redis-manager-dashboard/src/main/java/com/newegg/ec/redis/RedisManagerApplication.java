@@ -1,5 +1,7 @@
 package com.newegg.ec.redis;
 
+import org.mybatis.spring.annotation.MapperScan;
+import org.mybatis.spring.annotation.MapperScans;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Jay.H.Zou
  * @date 2019/7/17
  */
+@MapperScan({"com.newegg.ec.redis.dao"})
 @SpringBootApplication
 public class RedisManagerApplication {
 

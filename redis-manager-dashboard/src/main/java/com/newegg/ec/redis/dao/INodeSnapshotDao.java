@@ -8,6 +8,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @author Jay.H.Zou
  * @date 2019/7/18
  */
-@Mapper
 public interface INodeSnapshotDao {
 }
