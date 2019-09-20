@@ -33,7 +33,7 @@ public class GroupService implements IGroupService {
     }
 
     @Override
-    public List<Group> getGroupByUserId(int userId) {
+    public List<Group> getGroupByUserId(Integer userId) {
         try {
             return groupDao.selectGroupByUserId(userId);
         } catch (Exception e) {
@@ -44,7 +44,7 @@ public class GroupService implements IGroupService {
     }
 
     @Override
-    public Group getGroupById(int groupId) {
+    public Group getGroupById(Integer groupId) {
         try {
             return groupDao.selectGroupById(groupId);
         } catch (Exception e) {
@@ -89,7 +89,7 @@ public class GroupService implements IGroupService {
     }
 
     @Override
-    public boolean deleteGroupById(int groupId) {
+    public boolean deleteGroupById(Integer groupId) {
         try {
             int row = groupDao.deleteGroupById(groupId);
             return row > 0;

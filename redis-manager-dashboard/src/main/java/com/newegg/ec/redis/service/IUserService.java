@@ -16,6 +16,8 @@ public interface IUserService {
 
     User getUserByNameAndPassword(User user);
 
+    User getUserRole(Integer groupId, Integer userId);
+
     boolean addUser(User user);
 
     boolean userNameExist(String userName);

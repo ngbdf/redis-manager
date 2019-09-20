@@ -1,10 +1,7 @@
 package com.newegg.ec.redis.dao;
 
-import com.newegg.ec.redis.entity.Group;
 import com.newegg.ec.redis.entity.User;
 import org.apache.ibatis.annotations.*;
-
-import java.util.List;
 
 /**
  * @author Jay.H.Zou

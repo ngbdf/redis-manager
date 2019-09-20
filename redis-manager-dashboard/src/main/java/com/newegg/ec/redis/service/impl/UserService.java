@@ -51,6 +51,16 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public User getUserRole(Integer groupId, Integer userId) {
+        try {
+            return userDao.selectUserRole(groupId, userId);
+        } catch (Exception e) {
+            logger.error("Get user by group id and user id failed.", e);
+            return null;
+        }
+    }
+
+    @Override
     public boolean addUser(User user) {
         try {
             int row = userDao.insertUser(user);

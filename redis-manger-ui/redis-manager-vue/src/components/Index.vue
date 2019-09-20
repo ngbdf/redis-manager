@@ -22,7 +22,7 @@
                 :value="group.groupId"
               ></el-option>
             </el-select>
-            <div>
+            <div v-if="permission">
               <el-divider direction="vertical"></el-divider>
               <el-button size="mini" type="text" @click="importVisible = true">Import Cluster</el-button>
             </div>
@@ -52,7 +52,7 @@
                 <el-dropdown-menu slot="dropdown" style="min-width: 180px">
                   <el-dropdown-item disabled>
                     Signed in as
-                    <b>{{ user.userName }}</b>
+                    <b>{{ currentUser.userName }}</b>
                   </el-dropdown-item>
                   <el-dropdown-item command="profile" divided>Profile</el-dropdown-item>
                   <el-dropdown-item>Help</el-dropdown-item>
@@ -129,41 +129,7 @@
       </el-main>
     </el-container>
     <el-dialog title="Import Cluster" :visible.sync="importVisible">
-      <el-form :model="cluster" ref="cluster" :rules="rules" label-width="120px">
-        <el-form-item label="Group Name">
-          <el-tag size="small">Bigdata</el-tag>
-        </el-form-item>
-        <el-form-item label="Cluster Name" prop="clusterName">
-          <el-input size="small" v-model="cluster.clusterName" maxlength="30" show-word-limit></el-input>
-        </el-form-item>
-        <el-form-item label="Redis Password">
-          <el-input size="small" v-model="cluster.redisPassword" maxlength="255"></el-input>
-        </el-form-item>
-        <el-form-item
-          v-for="(node, index) in cluster.nodeList"
-          :label="'Redis Node ' + index"
-          :key="node.key"
-          :prop="'nodeList.' + index + '.value'"
-          :rules="rules.redisNode"
-        >
-          <el-input size="small" v-model="node.value">
-            <el-button slot="append" @click.prevent="removeNode(node)" icon="el-icon-delete"></el-button>
-          </el-input>
-        </el-form-item>
-        <el-form-item label="Environment" prop="installationEnvironment">
-          <el-radio-group v-model="cluster.installationEnvironment">
-            <el-radio label="docker">Docker</el-radio>
-            <el-radio label="machine">Machine</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="Cluster Info">
-          <el-input size="small" v-model="cluster.clusterInfo"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="addNode()">New Node</el-button>
-        <el-button size="small" type="primary" @click="importCluster('cluster')">Confirm</el-button>
-      </div>
+      <importCluster></importCluster>
     </el-dialog>
   </el-container>
 </template>
@@ -172,32 +138,19 @@
 var elementResizeDetectorMaker = require("element-resize-detector");
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
-import { get, post } from "@/api/api.js";
+import CONSTANT from "@/utils/constant.js";
+import API from "@/api/api.js";
+import importCluster from "@/components/manage/ImportCluster";
 export default {
+  components: {
+    importCluster
+  },
   data() {
-    var validateClusterName = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter cluster name."));
-      } else {
-        callback();
-      }
-    };
-    var validateRedisNode = (rule, value, callback) => {
-      console.log(value);
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter redis node."));
-      } else {
-        callback();
-      }
-    };
-    var validateConnection = (rule, value, callback) => {};
-    var validateInstallationEnvironment = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please select environment."));
-      }
-    };
     return {
-      groupId: "",
+      isCollapse: false,
+      group: store.getters.getGroup,
+      groupId: store.getters.getGroupId,
+      permission: true,
       groupList: [
         {
           groupId: 1,
@@ -210,29 +163,7 @@ export default {
           groupInfo: "Test team"
         }
       ],
-      user: store.getters.getUser,
-      isCollapse: false,
-      importVisible: false,
-      cluster: {
-        clusterName: "",
-        nodeList: [{ value: "" }]
-      },
-      rules: {
-        clusterName: [
-          { required: true, validator: validateClusterName, trigger: "change" }
-        ],
-        redisNode: [
-          { required: true, validator: validateRedisNode, trigger: "change" },
-          { required: true, validator: validateConnection, trigger: "blur" }
-        ],
-        installationEnvironment: [
-          {
-            required: true,
-            validator: validateInstallationEnvironment,
-            trigger: "change"
-          }
-        ]
-      }
+      importVisible: false
     };
   },
   methods: {
@@ -258,8 +189,20 @@ export default {
       this.$router.push({ name: "user-manage" });
     },
     selectGroup() {
-      console.log("== " + this.groupId);
-      store.dispatch("setGroupId", this.groupId);
+      let currentGroup = {};
+      this.groupList.forEach(group => {
+        if (group.groupId === this.groupId) {
+          currentGroup = group;
+          this.group = group;
+        }
+      });
+      if (!isEmpty(currentGroup)) {
+        store.dispatch("setGroup", currentGroup);
+        //this.setUserRole();
+      } else {
+        // TODO 报错
+        console.log("============ select group failed!");
+      }
     },
     handleCommand(command) {
       if (command == "profile") {
@@ -297,32 +240,30 @@ export default {
         }
       });
     },
-    removeNode(item) {
-      var index = this.cluster.nodeList.indexOf(item);
-      if (index !== -1) {
-        this.cluster.nodeList.splice(index, 1);
-      }
-    },
-    addNode() {
-      if (this.cluster.nodeList.length >= 5) {
-        return;
-      }
-      this.cluster.nodeList.push({
-        value: "",
-        key: Date.now()
-      });
-    },
-    getUserGroup(userId) {
-      let user = store.getters.user;
-    },
-    importCluster(cluster) {
-      this.$refs[cluster].validate(valid => {
-        if (valid) {
+    setUserRole() {
+      let url =
+        "/user/getUserRole?groupId=" + this.groupId + "&userId=" + this.userId;
+      API.get(
+        url,
+        param,
+        response => {
+          let userRole = response.data.data;
+          store.dispatch("setUserRole", userRole);
+        },
+        err => {
+          store.dispatch("setUserRole", CONSTANT.USER_ROLE.MEMBER);
         }
-      });
+      );
     }
   },
-  watch: {},
+  computed: {
+    currentUser() {
+      return store.getters.getUser;
+    }
+  },
+  watch: {
+    userRole() {}
+  },
   mounted() {
     this.listenHeaderWidth();
   }

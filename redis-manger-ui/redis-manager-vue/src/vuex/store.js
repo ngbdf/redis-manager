@@ -6,41 +6,62 @@ Vue.use(Vuex)
 
 // 应用初始状态
 const state = {
-    groupId: '',
+    group: {
+        groupId: 2,
+        groupName: "Test"
+    },
     user: {
+        userId: 1,
+        groupId: 2,
         userName: "Jay",
-        userRole: "ADMIN",
         headPic: "/user/image/jay.png"
-    }
+    },
+    userRole: 'ADMIN'
 }
 
 // 定义所需的 mutations，状态变更操作
 const mutations = {
-    setGroupId(state, groupId) {
-        state.groupId = groupId
+    setGroup(state, group) {
+        console.log(group)
+        state.group = group
     },
     setUser(state, user) {
         state.user = user
+    },
+    setUserRole(state, userRole) {
+        state.userRole = userRole
     }
 }
 
 // 获取数据操作
 const getters = {
+    getGroup: state => {
+        return state.group
+    },
     getGroupId: state => {
-        return state.groupId
+        return state.group.groupId
     },
     getUser: state => {
         return state.user
+    },
+    getUserId: state => {
+        return state.user.userId
+    },
+    getUserRole: state => {
+        return state.userRole
     }
 }
 
 // 分发 Action
 const actions = {
-    setGroupId(context, groupId) {
-        context.commit('setGroupId', groupId)
+    setGroup(context, group) {
+        context.commit('setGroup', group)
     },
     setUser(context, user) {
         context.commit('setUser', user)
+    },
+    setUserRole(context, userRole) {
+        context.commit('setUserRole', userRole)
     }
 }
 

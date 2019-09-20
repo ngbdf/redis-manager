@@ -12,9 +12,9 @@ public interface IGroupService {
 
     List<Group> getAllGroup();
 
-    List<Group> getGroupByUserId(int userId);
+    List<Group> getGroupByUserId(Integer userId);
 
-    Group getGroupById(int groupId);
+    Group getGroupById(Integer groupId);
 
     boolean addGroup(Group group);
 
@@ -22,6 +22,6 @@ public interface IGroupService {
 
     boolean updateGroup(Group group);
 
-    boolean deleteGroupById(int groupId);
+    boolean deleteGroupById(Integer groupId);
 
 }

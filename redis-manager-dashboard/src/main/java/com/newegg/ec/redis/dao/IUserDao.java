@@ -18,8 +18,6 @@ public interface IUserDao {
             "user.user_id AS user_id, " +
             "user.group_id AS group_id, " +
             "user.user_name AS user_name, " +
-            "user.password AS password, " +
-            "user.token AS token, " +
             "group_user.user_role AS user_role, " +
             "user.head_pic AS head_pic, " +
             "user.email AS email, " +
@@ -33,8 +31,6 @@ public interface IUserDao {
             "user.user_id AS user_id, " +
             "user.group_id AS group_id, " +
             "user.user_name AS user_name, " +
-            "user.password AS password, " +
-            "user.token AS token, " +
             "group_user.user_role AS user_role, " +
             "user.head_pic AS head_pic, " +
             "user.email AS email, " +
@@ -45,6 +41,16 @@ public interface IUserDao {
             "WHERE group_user.group_id = user.group_id " +
             "AND group_user.group_id = #{groupId}")
     List<User> selectUserByGroupId(Integer groupId);
+
+    @Select("SELECT " +
+            "user.user_id AS user_id, " +
+            "user.group_id AS group_id, " +
+            "group_user.user_role AS user_role, " +
+            "FROM user, group_user " +
+            "WHERE group_user.user_id = user.user_id " +
+            "AND group_user.group_id = #{groupId} " +
+            "AND group_user.user_id = #{userId}")
+    User selectUserRole(@Param("groupId") Integer groupId, @Param("userId") Integer userId);
 
     @Select("SELECT * FROM user WHERE user_name = #{userName} AND password = #{password}")
     User selectUserByNameAndPassword(User user);

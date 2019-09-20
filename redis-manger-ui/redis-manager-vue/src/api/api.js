@@ -17,6 +17,14 @@ function apiAxios(method, url, params, successHandler, failureHandler) {
     })
 }
 
+export function get (url, params, successHandler, failureHandler) {
+    return apiAxios('GET', url, params, successHandler, failureHandler)
+}
+
+export function post (url, params, successHandler, failureHandler) {
+    return apiAxios('POST', url, params, successHandler, failureHandler)
+}
+
 export default {
     get: function (url, params, successHandler, failureHandler) {
         return apiAxios('GET', url, params, successHandler, failureHandler)

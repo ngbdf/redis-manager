@@ -50,40 +50,57 @@
       </el-col>
     </el-row>
     <el-row :gutter="24" id="cluster-list-wrapper">
-      <el-col :xl="6" :lg="8" :md="12" :sm="12">
+      <el-col
+        :xl="6"
+        :lg="8"
+        :md="12"
+        :sm="12"
+        v-for="cluster in clusterList"
+        :key="cluster.clusterId"
+      >
         <el-card class="box-card">
           <div slot="header" class="clearfix box-card-title">
-            <span>Shanghai</span>
-            <i class="el-icon-sunny health" style="float: right; padding: 3px 0"></i>
+            <span>{{ cluster.clusterName }}</span>
+            <i class="el-icon-sunny health" style="float: right; padding: 3px 0" v-if="cluster.clusterStatus == 'HEALTH'"></i>
+            <i class="el-icon-heavy-rain bad" style="float: right; padding: 3px 0" v-else-if="cluster.clusterStatus == 'BAD'"></i>
           </div>
           <div class="text item">
             State:
-            <el-tag size="mini">ok</el-tag>
+            <el-tag size="mini">{{ cluster.clusterStatus }}</el-tag>
           </div>
           <div class="text item">
             Model:
-            <el-tag size="mini">cluster</el-tag>
+            <el-tag size="mini">{{ cluster.redisMode }}</el-tag>
           </div>
           <div class="text item">
             Master:
-            <el-tag size="mini">4</el-tag>
+            <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
           </div>
           <div class="text item">
             Nodes:
-            <el-tag size="mini">12</el-tag>
+            <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
           </div>
           <div class="text item">
             Version:
-            <el-tag size="mini">4.0.14</el-tag>
+            <el-tag size="mini">{{ cluster.redisVersion }}</el-tag>
           </div>
 
           <div class="text item">
-            Slots Assigned(ok/all):
-            <el-tag size="mini">16384/16384</el-tag>
+            Slots Assigned(ok/assigned):
+            <el-tag size="mini">{{ cluster.clusterSlotsOk }}/{{ cluster.clusterSlotsAssigned }}</el-tag>
           </div>
           <div class="text item">
-            Install:
-            <el-tag size="mini">docker</el-tag>
+            Slots Bad(pfail/fail):
+            <el-tag size="mini">{{ cluster.clusterSlotsPfail }}/{{ cluster.clusterSlotsFail }}</el-tag>
+          </div>
+          <div class="text item">
+            Environment:
+            <el-tag size="mini">{{ cluster.installationEnvironment }}</el-tag>
+          </div>
+          <div class="text item">
+            From:
+            <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Redis Manager</el-tag>
+            <el-tag size="mini" v-else>Import</el-tag>
           </div>
           <div class="card-bottom">
             <el-button
@@ -101,7 +118,14 @@
               circle
               @click="toMonitor(1)"
             ></el-button>
-            <el-button size="mini" title="Alert" type="warning" icon="el-icon-bell" circle @click="toAlertManage(22)"></el-button>
+            <el-button
+              size="mini"
+              title="Alert"
+              type="warning"
+              icon="el-icon-bell"
+              circle
+              @click="toAlertManage(22)"
+            ></el-button>
 
             <el-button
               size="mini"
@@ -124,13 +148,16 @@
       </el-col>
     </el-row>
     <el-dialog title="Query" :visible.sync="queryVisible" width="60%">
-      <query :clusterId="clusterId"></query>
+      <query :clusterId="currentGroupId"></query>
     </el-dialog>
   </div>
 </template>
 
 <script>
 import query from "@/components/tool/Query";
+import { store } from "@/vuex/store.js";
+import { isEmpty } from "@/utils/validate.js";
+import API from "@/api/api.js";
 export default {
   components: {
     query
@@ -138,7 +165,33 @@ export default {
   data() {
     return {
       queryVisible: false,
-      clusterId: "11111111111"
+      clusterList: [
+        {
+          clusterId: 1,
+          groupId: 1,
+          userId: 1,
+          clusterName: "Shanghai",
+          clusterToken: "ajsGako;3an;fnKS12a",
+          redisMode: "cluster",
+          os: "Linux 3.10.0-327.36.3.el7.x86_64 x86_64",
+          redisVersion: "4.0.10",
+          image: "redis:4.0.10",
+          nodes: "127.0.0.1:8001,127.0.0.1:8002,127.0.0.1:8003",
+          totalKeys: 345435,
+          totalExpires: 342,
+          dbSize: 1,
+          clusterStatus: "HEALTH",
+          clusterSlotsAssigned: 16384,
+          clusterSlotsOk: 16384,
+          clusterSlotsPfail: 0,
+          clusterSlotsFail: 0,
+          clusterKnownNodes: 120,
+          clusterSize: 40,
+          redisPassword: "1234",
+          installationEnvironment: "docker",
+          installationType: 0
+        }
+      ]
     };
   },
 
@@ -154,6 +207,24 @@ export default {
     },
     handleQuery() {
       this.queryVisible = true;
+    },
+    getClusterList(groupId) {
+      let url = "/cluster/getClusterList/" + groupId;
+      if (!isEmpty(groupId)) {
+        get(
+          url,
+          null,
+          response => {
+            return;
+          },
+          err => {}
+        );
+      }
+    }
+  },
+  computed: {
+    currentGroupId() {
+      return store.getters.getGroupId;
     }
   }
 };
@@ -244,7 +315,7 @@ export default {
 }
 
 .item {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .clearfix:before,

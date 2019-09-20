@@ -4,7 +4,22 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment;
 
 /**
  * 描述集群基本情况
- *
+ * cluster info:
+ * cluster_state:ok
+ * cluster_slots_assigned:16384
+ * cluster_slots_ok:16384
+ * cluster_slots_pfail:0
+ * cluster_slots_fail:0
+ * cluster_known_nodes:6
+ * cluster_size:3
+ * cluster_current_epoch:4
+ * cluster_my_epoch:0
+ * cluster_stats_messages_ping_sent:1492419
+ * cluster_stats_messages_pong_sent:1538939
+ * cluster_stats_messages_sent:3031358
+ * cluster_stats_messages_ping_received:1538939
+ * cluster_stats_messages_pong_received:1492419
+ * cluster_stats_messages_received:3031358
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
@@ -13,6 +28,8 @@ public class Cluster {
     private Integer clusterId;
 
     private Integer groupId;
+
+    private Integer userId;
 
     /**
      * 通过 token 连接
@@ -51,7 +68,7 @@ public class Cluster {
     /**
      *
      */
-    private ClusterState clusterState;
+    private ClusterState clusterStatus;
 
     /**
      * 已分配到集群节点的哈希槽数量（不是没有被绑定的数量）。16384个哈希槽全部被分配到集群节点是集群正常运行的必要条件
@@ -102,7 +119,7 @@ public class Cluster {
     public enum ClusterState {
         UNKNOWN,
 
-        GOOD,
+        HEALTH,
 
         BAD,
 
@@ -213,12 +230,12 @@ public class Cluster {
         this.dbSize = dbSize;
     }
 
-    public ClusterState getClusterState() {
-        return clusterState;
+    public ClusterState getClusterStatus() {
+        return clusterStatus;
     }
 
-    public void setClusterState(ClusterState clusterState) {
-        this.clusterState = clusterState;
+    public void setClusterStatus(ClusterState clusterStatus) {
+        this.clusterStatus = clusterStatus;
     }
 
     public int getClusterSlotsAssigned() {

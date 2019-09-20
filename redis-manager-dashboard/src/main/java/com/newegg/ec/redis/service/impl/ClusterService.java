@@ -155,7 +155,7 @@ public class ClusterService implements IClusterService {
                 return true;
             }
             Cluster clusterInfoObj = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfo);
-            cluster.setClusterState(clusterInfoObj.getClusterState());
+            cluster.setClusterStatus(clusterInfoObj.getClusterStatus());
             cluster.setClusterSlotsAssigned(clusterInfoObj.getClusterSlotsAssigned());
             cluster.setClusterSlotsFail(clusterInfoObj.getClusterSlotsPfail());
             cluster.setClusterSlotsPfail(clusterInfoObj.getClusterSlotsPfail());

@@ -65,7 +65,7 @@ public class RedisClusterInfoUtil {
         Cluster.ClusterState state = Cluster.ClusterState.UNKNOWN;
         String clusterState = clusterInfoMap.get(CLUSTER_STATE);
         if (Objects.equals(clusterState, OK)) {
-            state = Cluster.ClusterState.GOOD;
+            state = Cluster.ClusterState.HEALTH;
         } else if (Objects.equals(clusterState, FAIL)) {
             state = Cluster.ClusterState.BAD;
         }

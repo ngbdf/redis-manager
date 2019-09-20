@@ -28,16 +28,19 @@ public class ClusterController {
     @Autowired
     private IClusterService clusterService;
 
-    @RequestMapping(value = "/getAllCluster/{groupId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getClusterList/{groupId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getAllCluster(@PathParam("groupId") int groupId) {
+    public Result getAllCluster(@PathParam("groupId") Integer groupId) {
         List<Cluster> clusterList = clusterService.getClusterListByGroupId(groupId);
+        if (clusterList == null || clusterList.isEmpty()) {
+            return Result.failResult();
+        }
         return Result.successResult(clusterList);
     }
 
     @RequestMapping(value = "/getCluster/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getCluster(@PathParam("clusterId") int clusterId) {
+    public Result getCluster(@PathParam("clusterId") Integer clusterId) {
         Cluster cluster = clusterService.getClusterById(clusterId);
         if (cluster != null) {
             return Result.successResult(cluster);
