@@ -61,12 +61,19 @@
         <el-card class="box-card">
           <div slot="header" class="clearfix box-card-title">
             <span>{{ cluster.clusterName }}</span>
-            <i class="el-icon-sunny health" style="float: right; padding: 3px 0" v-if="cluster.clusterStatus == 'HEALTH'"></i>
-            <i class="el-icon-heavy-rain bad" style="float: right; padding: 3px 0" v-else-if="cluster.clusterStatus == 'BAD'"></i>
+            <i
+              class="el-icon-lock health"
+              style="float: right; padding: 3px 0"
+              v-if="cluster.clusterStatus == 'HEALTH'"
+            ></i>
           </div>
           <div class="text item">
             State:
-            <el-tag size="mini">{{ cluster.clusterStatus }}</el-tag>
+            <el-tag
+              size="mini"
+              v-if="cluster.clusterStatus == 'HEALTH'"
+              type="success"
+            >{{ cluster.clusterStatus }}</el-tag>
           </div>
           <div class="text item">
             Model:
@@ -108,7 +115,7 @@
               title="Query"
               icon="el-icon-search"
               circle
-              @click="handleQuery()"
+              @click="handleQuery(cluster.clusterId)"
             ></el-button>
             <el-button
               size="mini"
@@ -116,7 +123,7 @@
               type="primary"
               icon="el-icon-view"
               circle
-              @click="toMonitor(1)"
+              @click="toMonitor(cluster.clusterId)"
             ></el-button>
             <el-button
               size="mini"
@@ -124,7 +131,7 @@
               type="warning"
               icon="el-icon-bell"
               circle
-              @click="toAlertManage(22)"
+              @click="toAlertManage(cluster.clusterId)"
             ></el-button>
 
             <el-button
@@ -133,13 +140,17 @@
               type="danger"
               icon="el-icon-setting"
               circle
-              @click="toManage(1)"
+              @click="toManage(cluster.clusterId)"
             ></el-button>
 
             <el-dropdown trigger="click" class="more-operation">
               <el-button size="mini" title="Edit or delete" type="info" icon="el-icon-more" circle></el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item icon="el-icon-edit-outline" class="edit">Edit</el-dropdown-item>
+                <el-dropdown-item
+                  icon="el-icon-edit-outline"
+                  class="edit"
+                  @click.native="editCluster(cluster.clusterId)"
+                >Edit</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-delete" class="delete">Delete</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -148,19 +159,24 @@
       </el-col>
     </el-row>
     <el-dialog title="Query" :visible.sync="queryVisible" width="60%">
-      <query :clusterId="currentGroupId"></query>
+      <query :clusterId="clusterId"></query>
+    </el-dialog>
+    <el-dialog title="Edit Cluster" :visible.sync="editClusterVisible">
+      <importCluster :clusterId="clusterId"></importCluster>
     </el-dialog>
   </div>
 </template>
 
 <script>
 import query from "@/components/tool/Query";
+import importCluster from "@/components/manage/ImportCluster";
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import API from "@/api/api.js";
 export default {
   components: {
-    query
+    query,
+    importCluster
   },
   data() {
     return {
@@ -191,7 +207,9 @@ export default {
           installationEnvironment: "docker",
           installationType: 0
         }
-      ]
+      ],
+      editClusterVisible: false,
+      clusterId: ""
     };
   },
 
@@ -220,6 +238,10 @@ export default {
           err => {}
         );
       }
+    },
+    editCluster(clusterId) {
+      this.clusterId = clusterId;
+      this.editClusterVisible = true;
     }
   },
   computed: {

@@ -42,6 +42,11 @@
 import { store } from "@/vuex/store.js";
 import { isEmpty, validateIpAndPort } from "@/utils/validate.js";
 export default {
+  props: {
+    clusterId: {
+      type: Number
+    }
+  },
   data() {
     var validateClusterName = (rule, value, callback) => {
       if (isEmpty(value) || isEmpty(value.trim())) {
@@ -131,6 +136,41 @@ export default {
     // 监听group变化
     currentGroup() {
       return store.getters.getGroup;
+    }
+  },
+  mounted() {
+    if (isEmpty(this.clusterId)) {
+      this.cluster = {
+        nodeList: [{ value: "" }]
+      };
+    } else {
+      this.cluster = {
+        clusterId: 1,
+        groupId: 1,
+        userId: 1,
+        clusterName: "Shanghai",
+        clusterToken: "ajsGako;3an;fnKS12a",
+        redisMode: "cluster",
+        os: "Linux 3.10.0-327.36.3.el7.x86_64 x86_64",
+        redisVersion: "4.0.10",
+        image: "redis:4.0.10",
+        nodes: "127.0.0.1:8001,127.0.0.1:8002,127.0.0.1:8003",
+        totalKeys: 345435,
+        totalExpires: 342,
+        dbSize: 1,
+        clusterStatus: "HEALTH",
+        clusterSlotsAssigned: 16384,
+        clusterSlotsOk: 16384,
+        clusterSlotsPfail: 0,
+        clusterSlotsFail: 0,
+        clusterKnownNodes: 120,
+        clusterSize: 40,
+        redisPassword: "1234",
+        installationEnvironment: "docker",
+        installationType: 0,
+        clusterInfo: "hello",
+        nodeList: [{ value: "" }]
+      };
     }
   }
 };

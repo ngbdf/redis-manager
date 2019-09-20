@@ -28,9 +28,7 @@
 <script>
 export default {
   props: {
-    clusterId: {
-      type: Number
-    }
+    clusterId: ""
   },
   data() {
     return { key: "", select: "" };
