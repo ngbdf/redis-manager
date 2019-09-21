@@ -128,8 +128,8 @@
         </transition>
       </el-main>
     </el-container>
-    <el-dialog title="Import Cluster" :visible.sync="importVisible">
-      <importCluster></importCluster>
+    <el-dialog title="Import Cluster" :visible.sync="importVisible" :close-on-click-modal="false">
+      <editCluster></editCluster>
     </el-dialog>
   </el-container>
 </template>
@@ -140,10 +140,10 @@ import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import CONSTANT from "@/utils/constant.js";
 import API from "@/api/api.js";
-import importCluster from "@/components/manage/ImportCluster";
+import editCluster from "@/components/manage/EditCluster";
 export default {
   components: {
-    importCluster
+    editCluster
   },
   data() {
     return {
@@ -153,12 +153,12 @@ export default {
       permission: true,
       groupList: [
         {
-          groupId: 1,
+          groupId: 0,
           groupName: "Bigdata",
           groupInfo: "bigdata team"
         },
         {
-          groupId: 2,
+          groupId: 1,
           groupName: "Test",
           groupInfo: "Test team"
         }

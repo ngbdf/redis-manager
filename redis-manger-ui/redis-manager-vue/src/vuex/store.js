@@ -7,12 +7,13 @@ Vue.use(Vuex)
 // 应用初始状态
 const state = {
     group: {
-        groupId: 2,
+        groupId: 0,
         groupName: "Test"
     },
+    groupList: [],
     user: {
-        userId: 1,
-        groupId: 2,
+        userId: 0,
+        groupId: 0,
         userName: "Jay",
         headPic: "/user/image/jay.png"
     },

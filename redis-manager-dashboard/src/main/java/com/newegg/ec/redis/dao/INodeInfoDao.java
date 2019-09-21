@@ -19,8 +19,8 @@ public interface INodeInfoDao {
 
     @Select("<script>" +
             "SELECT * FROM node_info_${clusterId} " +
-            "WHERE update_time >= #{startTime}" +
-            "AND update_time <= #{endTime}" +
+            "WHERE update_time &gt;= #{startTime}" +
+            "AND update_time &lt;= #{endTime}" +
             "AND data_type = #{dataType}" +
             "AND time_type = #{timeType}" +
             "<if test='node != null'> AND node = #{node} </if>" +
@@ -57,7 +57,7 @@ public interface INodeInfoDao {
             "</script>")
     int insertNodeInfo(@Param("clusterId") Integer clusterId, @Param("nodeInfoList") List<NodeInfo> nodeInfoList);
 
-    @Delete("DELETE FROM node_info_${clusterId} WHERE update_time < #{oldestTime}")
+    @Delete("DELETE FROM node_info_${clusterId} WHERE update_time &lt; #{oldestTime}")
     int deleteNodeInfoByTime(@Param("clusterId") Integer clusterId, @Param("oldestTime") Timestamp oldestTime);
 
     @Update("UPDATE node_info_${clusterId} SET last_time = 0 WHERE last_time = 1 AND time_type = #{timeType}")

@@ -15,6 +15,15 @@ spring:
     url: jdbc:mysql://10.16.50.209:3306/redis_manager_refactor?useUnicode=true&characterEncoding=utf-8
     username: root
     password: Newegg@1234
+    druid:
+      # 初始化时建立物理连接的个数
+      initial-size: 0
+      # 最大连接池数量
+      max-active: 10
+      # 最小连接池数量
+      min-idle: 0
+      # 获取连接时最大等待时间，单位毫秒
+      max-wait: 10000
 
 mybatis:
   configuration:

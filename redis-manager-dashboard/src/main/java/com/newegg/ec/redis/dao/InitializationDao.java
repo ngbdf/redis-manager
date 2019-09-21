@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.dao;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * Create tables
@@ -23,17 +23,17 @@ import org.apache.ibatis.annotations.Update;
 @Mapper
 public interface InitializationDao {
 
-    @Update("create TABLE IF NOT EXISTS `group` (" +
+    @Select("create TABLE IF NOT EXISTS `group` (" +
             "group_id integer(4) NOT NULL AUTO_INCREMENT, " +
             "group_name varchar(255) NOT NULL, " +
-            "group_info varchar(255), " +
+            "group_info varchar(255) DEFAULT NULL, " +
             "update_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (group_id), " +
             "UNIQUE KEY (group_name) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createGroupTable();
 
-    @Update("create TABLE IF NOT EXISTS `user`( " +
+    @Select("create TABLE IF NOT EXISTS `user` ( " +
             "user_id integer(4) NOT NULL AUTO_INCREMENT, " +
             "user_name varchar(255) NOT NULL, " +
             "password varchar(255) DEFAULT NULL, " +
@@ -48,7 +48,7 @@ public interface InitializationDao {
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createUserTable();
     
-    @Update("create TABLE IF NOT EXISTS `group_user`( " +
+    @Select("create TABLE IF NOT EXISTS `group_user`( " +
             "group_user_id integer(4) NOT NULL AUTO_INCREMENT, " +
             "group_id integer(4) NOT NULL, " +
             "user_id integer(4) NOT NULL, " +
@@ -58,9 +58,10 @@ public interface InitializationDao {
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createGroupUserTable();
     
-    @Update("create TABLE IF NOT EXISTS `cluster`( " +
+    @Select("create TABLE IF NOT EXISTS `cluster`( " +
             "cluster_id integer(4) NOT NULL AUTO_INCREMENT COMMENT '自增ID', " +
             "group_id integer(4) NOT NULL, " +
+            "user_id integer(4) NOT NULL, " +
             "cluster_token varchar(255) DEFAULT NULL, " +
             "cluster_name varchar(255) NOT NULL, " +
             "nodes varchar(255) NOT NULL, " +
@@ -88,7 +89,7 @@ public interface InitializationDao {
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createClusterTable();
 
-    @Update("create TABLE IF NOT EXISTS node_info_${clusterId} ( " +
+    @Select("create TABLE IF NOT EXISTS node_info_${clusterId} ( " +
             "info_id integer(4) NOT NULL AUTO_INCREMENT, " +
             "node varchar(50) NOT NULL, " +
             "data_type varchar(50) NOT NULL, " +
@@ -128,7 +129,7 @@ public interface InitializationDao {
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createNodeInfoTable(Integer clusterId);
 
-    @Update("create TABLE IF NOT EXISTS `machine`( " +
+    @Select("create TABLE IF NOT EXISTS `machine`( " +
             "machine_id integer(4) NOT NULL AUTO_INCREMENT, " +
             "machine_group_name varchar(255) NOT NULL, " +
             "group_id integer(4) NOT NULL, " +

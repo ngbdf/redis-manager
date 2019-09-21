@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -21,14 +22,15 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 8/3/2019
  */
+@Service
 public class NodeInfoService implements INodeInfoService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeInfoService.class);
 
-    @Value("redis-manager.monitor.data-keep-days")
+    @Value("${redis-manager.monitor.data-keep-days:15}")
     private int dataKeepDays;
 
-    private static final int MAX_KEEP_DAYS = 30;
+    private static final int MAX_KEEP_DAYS = 365;
 
     @Autowired
     private INodeInfoDao nodeInfoDao;

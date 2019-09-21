@@ -11,6 +11,8 @@ public class Group {
 
     private Integer groupId;
 
+    private Integer userId;
+
     private String groupName;
 
     private String groupInfo;
@@ -23,6 +25,14 @@ public class Group {
 
     public void setGroupId(Integer groupId) {
         this.groupId = groupId;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public String getGroupName() {
@@ -47,5 +57,16 @@ public class Group {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    @Override
+    public String toString() {
+        return "Group{" +
+                "groupId=" + groupId +
+                ", userId=" + userId +
+                ", groupName='" + groupName + '\'' +
+                ", groupInfo='" + groupInfo + '\'' +
+                ", updateTime=" + updateTime +
+                '}';
     }
 }

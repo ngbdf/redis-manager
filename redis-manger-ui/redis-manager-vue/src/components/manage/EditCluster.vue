@@ -41,6 +41,7 @@
 <script>
 import { store } from "@/vuex/store.js";
 import { isEmpty, validateIpAndPort } from "@/utils/validate.js";
+import API from "@/api/api.js";
 export default {
   props: {
     clusterId: {
@@ -50,27 +51,55 @@ export default {
   data() {
     var validateClusterName = (rule, value, callback) => {
       if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter cluster name."));
+        return callback(new Error("Please enter cluster name"));
       } else {
-        callback();
+        let url = "/cluster/validateClusterName/" + value;
+        API.get(
+          url,
+          null,
+          response => {
+            if (response.data.code != 0) {
+              return callback(new Error(value + " has exist"));
+            } else {
+              callback();
+            }
+          },
+          err => {
+            return callback(new Error("Network error, " + err));
+          }
+        );
       }
     };
     var validateRedisNode = (rule, value, callback) => {
       if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter redis node."));
+        return callback(new Error("Please enter redis node"));
       } else {
         if (!validateIpAndPort(value)) {
-          return callback(new Error("Incorrect format."));
+          return callback(new Error("Incorrect format"));
         }
         callback();
       }
     };
     var validateConnection = (rule, value, callback) => {
-      callback();
+      let url = "/validate/address/" + value.trim();
+      API.get(
+        url,
+        null,
+        response => {
+          if (response.data.code != 0) {
+            return callback(new Error("Redis node incorrect"));
+          } else {
+            callback();
+          }
+        },
+        err => {
+          return callback(new Error("Network error, " + err));
+        }
+      );
     };
     var validateInstallationEnvironment = (rule, value, callback) => {
       if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please select environment."));
+        return callback(new Error("Please select environment"));
       }
       callback();
     };
@@ -80,10 +109,11 @@ export default {
       },
       rules: {
         clusterName: [
-          { required: true, validator: validateClusterName, trigger: "change" }
+          { required: true, validator: validateClusterName, trigger: "blur" }
         ],
         redisNode: [
-          { required: true, validator: validateRedisNode, trigger: "blur" }
+          { required: true, validator: validateRedisNode, trigger: "blur" },
+          { required: true, validator: validateConnection, trigger: "blur" }
         ],
         installationEnvironment: [
           {
@@ -130,6 +160,16 @@ export default {
         value: "",
         key: Date.now()
       });
+    },
+    nodesToNodeList(nodes) {
+      let nodeArr = nodes.split(",");
+      let nodeList = [];
+      nodeArr.forEach(node => {
+        if (!isEmpty(node)) {
+          nodeList.push({ value: node });
+        }
+      });
+      return nodeList;
     }
   },
   computed: {
@@ -144,7 +184,7 @@ export default {
         nodeList: [{ value: "" }]
       };
     } else {
-      this.cluster = {
+      let cluster = {
         clusterId: 1,
         groupId: 1,
         userId: 1,
@@ -171,6 +211,9 @@ export default {
         clusterInfo: "hello",
         nodeList: [{ value: "" }]
       };
+      let nodeList = this.nodesToNodeList(cluster.nodes);
+      cluster.nodeList = nodeList;
+      this.cluster = cluster;
     }
   }
 };

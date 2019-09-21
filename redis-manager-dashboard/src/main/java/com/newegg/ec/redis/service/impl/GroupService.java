@@ -2,11 +2,17 @@ package com.newegg.ec.redis.service.impl;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.IGroupDao;
+import com.newegg.ec.redis.dao.IGroupUserDao;
+import com.newegg.ec.redis.dao.IUserDao;
+import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Group;
+import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IGroupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,12 +20,19 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 2019/9/2
  */
+@Service
 public class GroupService implements IGroupService {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
     @Autowired
     private IGroupDao groupDao;
+
+    @Autowired
+    private IGroupUserDao groupUserDao;
+
+    @Autowired
+    private IUserDao userDao;
 
     @Override
     public List<Group> getAllGroup() {
@@ -51,19 +64,29 @@ public class GroupService implements IGroupService {
             logger.error("Get group by id failed, group id = " + groupId, e);
             return null;
         }
-
     }
 
     @Override
-    public boolean addGroup(Group group) {
+    public Group getGroupByName(String groupName) {
         try {
-            int row = groupDao.insertGroup(group);
-            return row > 0;
+            return groupDao.selectGroupByGroupName(groupName);
         } catch (Exception e) {
-            logger.error("Add group failed, " + group, e);
-            return false;
+            logger.error("Get group by name failed, group name = " + groupName, e);
+            return new Group();
         }
+    }
 
+    @Transactional
+    @Override
+    public boolean addGroup(Group group) {
+        groupDao.insertGroup(group);
+        // User user = userDao.selectUserById(group.getUserId());
+        User user = new User();
+        user.setUserId(0);
+        user.setUserRole(User.UserRole.ADMIN);
+        user.setGroupId(group.getGroupId());
+        groupUserDao.insertGroupUser(user);
+        return true;
     }
 
     @Override

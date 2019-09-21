@@ -15,7 +15,6 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 8/31/2019
  */
-@Service
 public class AlertChannelService implements IAlertChannelService {
 
     private static final Logger logger = LoggerFactory.getLogger(AlertChannelService.class);

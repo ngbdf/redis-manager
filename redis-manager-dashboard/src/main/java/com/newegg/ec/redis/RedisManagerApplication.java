@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.annotation.MapperScans;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * start
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Jay.H.Zou
  * @date 2019/7/17
  */
+@EnableTransactionManagement
 @MapperScan({"com.newegg.ec.redis.dao"})
 @SpringBootApplication
 public class RedisManagerApplication {

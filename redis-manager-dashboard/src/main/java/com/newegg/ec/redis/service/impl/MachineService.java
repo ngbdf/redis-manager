@@ -8,6 +8,7 @@ import com.newegg.ec.redis.service.IMachineService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
@@ -15,6 +16,7 @@ import java.util.*;
  * @author Jay.H.Zou
  * @date 2019/9/2
  */
+@Service
 public class MachineService implements IMachineService {
 
     private static final Logger logger = LoggerFactory.getLogger(MachineService.class);

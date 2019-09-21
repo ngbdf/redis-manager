@@ -1,9 +1,11 @@
 package com.newegg.ec.redis.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.Result;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 通用的校验接口，特殊接口则会放在其他对应的 controller 中
@@ -15,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class ValidateController {
 
-    public Result validateAddress(String address) {
-        return Result.successResult();
+    @RequestMapping(value = "/address/{address}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result validateAddress(@PathVariable("address") String address) {
+        return Result.failResult();
     }
 
 }

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.params.MigrateParams;
@@ -33,6 +34,7 @@ import static com.newegg.ec.redis.util.RedisUtil.*;
  * @author Jay.H.Zou
  * @date 7/26/2019
  */
+@Service
 public class RedisService implements IRedisService {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisService.class);

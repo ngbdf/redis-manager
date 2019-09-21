@@ -16,6 +16,8 @@ public interface IGroupService {
 
     Group getGroupById(Integer groupId);
 
+    Group getGroupByName(String groupName);
+
     boolean addGroup(Group group);
 
     boolean groupExist(String groupName);

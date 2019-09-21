@@ -9,7 +9,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import '../theme/index.css'
 import './assets/icon/iconfont.css'
 import axios from 'axios'
-import apiConfig from './api/apiConfig.js'
+import apiConfig from '@/api/apiConfig.js'
 import vuex from 'vuex'
 
 Vue.use(ElementUI, { locale })
@@ -18,6 +18,7 @@ Vue.config.productionTip = false
 Vue.prototype.$axios = axios
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 axios.defaults.baseURL = apiConfig.baseUrl
+axios.defaults.withCredentials = true
 // axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*'
 
 /* eslint-disable no-new */

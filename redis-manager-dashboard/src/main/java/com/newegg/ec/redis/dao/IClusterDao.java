@@ -27,19 +27,19 @@ public interface IClusterDao {
 
 
     @Insert("INSERT INFO cluster " +
-            "(group_id, cluster_token, cluster_name, nodes, redis_mode, " +
+            "(group_id, user_id, cluster_token, cluster_name, nodes, redis_mode, " +
             "os, redis_version, image, initialized, total_keys, total_expires, db_size" +
             "cluster_state, cluster_slots_assigned, cluster_slots_ok, " +
             "cluster_slots_pfail, cluster_slots_fail, cluster_known_nodes, cluster_size, " +
             "redis_password, installation_environment, installation_type, update_time) " +
-            "VALUES (#{groupId}, #{clusterToken}, #{clusterName}, #{nodes}, #{redisMode}, " +
+            "VALUES (#{groupId}, #{userId}, #{clusterToken}, #{clusterName}, #{nodes}, #{redisMode}, " +
             "#{os}, #{redisVersion}, #{image}, #{initialized}, #{totalKeys}, #{totalExpires}, #{dbSize}" +
             "#{clusterState}, #{clusterSlotsAssigned}, #{clusterSlotsOk}, " +
             "#{clusterSlotsPfail}, #{clusterSlotsFail}, #{clusterKnownNodes}, #{clusterSize}, " +
             "#{redisPassword}, #{installationEnvironment}, #{installationType},  NOW())")
     Integer insertCluster(Cluster cluster);
 
-    @Update("UPDATE cluster SET cluster_token = #{clusterToken}, cluster_name = #{clusterName}, nodes = #{nodes}, redis_mode = #{redisMode}, " +
+    @Update("UPDATE cluster SET cluster_token = #{clusterToken}, user_id = #{userId}, cluster_name = #{clusterName}, nodes = #{nodes}, redis_mode = #{redisMode}, " +
             "os = #{os}, redis_version = #{redisVersion}, image = #{image}, initialized = #{initialized}, total_key = #{totalKey}, total_expires = #{totalExpires}, db_size = #{dbSize}" +
             "cluster_state = #{clusterState}, cluster_slots_assigned = #{clusterSlotsAssigned}, cluster_slots_ok = #{clusterSlotsOk}, " +
             "cluster_slots_pfail =  #{clusterSlotsPfail}, cluster_slots_fail = #{clusterSlotsFail}, cluster_known_nodes = #{clusterKnownNodes}, cluster_size = #{clusterSize}, " +

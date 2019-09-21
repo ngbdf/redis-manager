@@ -1,4 +1,6 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable quotes */
+/* eslint-disable indent */
 
-// eslint-disable-next-line quotes
-const baseUrl = ""
+export default {
+    baseUrl: "/apis"
+}

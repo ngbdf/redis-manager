@@ -27,6 +27,9 @@ public interface IUserDao {
             "FROM user, group_user")
     List<User> selectAllUser();
 
+    @Select("SELECT * FROM `user` WHERE user_id = #{userId}")
+    User selectUserById(Integer userId);
+
     @Select("SELECT " +
             "user.user_id AS user_id, " +
             "user.group_id AS group_id, " +
@@ -60,6 +63,7 @@ public interface IUserDao {
 
     @Insert("INSERT INFO user (user_name, password, user_role, head_pic, email, mobile, update_time) " +
             "VALUES (#{userName}, #{password}, #{userRole}, #{headPic}, #{email}, #{mobile}, NOW())")
+    @Options(useGeneratedKeys = true, keyProperty = "userId", keyColumn = "user_id")
     int insertUser(User user);
 
     @Update("UPDATE user SET user_name = #{userName}, password = #{password}, " +

@@ -142,6 +142,14 @@ public class Cluster {
         this.groupId = groupId;
     }
 
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
     public String getClusterToken() {
         return clusterToken;
     }

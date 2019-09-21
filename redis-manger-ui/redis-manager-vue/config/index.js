@@ -6,17 +6,17 @@ const path = require('path')
 
 module.exports = {
   dev: {
-
+    env: require('./prod.env'),
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/apis':{
-        target: 'http://locahost:8182/',  // 后台api
-        changeOrigin: true, 
+      '/apis': {
+        target: 'http://127.0.0.1:8182/',  // 后台api
+        changeOrigin: true,
         // secure: true,
         pathRewrite: {
-          '^/apis': ''   
+          '^/apis': '/'
         }
       }
     },
@@ -53,6 +53,7 @@ module.exports = {
   },
 
   build: {
+    env: require('./prod.env'),
     // Template for index.html
     index: path.resolve(__dirname, '../dist/index.html'),
 

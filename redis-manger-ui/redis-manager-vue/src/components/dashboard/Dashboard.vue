@@ -9,7 +9,7 @@
 
           <div class="card-panel-info-wrapper">
             <div class="card-panel-info-key">User Number</div>
-            <div class="card-panel-info-value">6</div>
+            <div class="card-panel-info-value">{{ overview.userNumber }}</div>
           </div>
         </div>
       </el-col>
@@ -20,7 +20,7 @@
           </div>
           <div class="card-panel-info-wrapper">
             <div class="card-panel-info-key">Health Number</div>
-            <div class="card-panel-info-value">23</div>
+            <div class="card-panel-info-value">{{ overview.healthNumber }}</div>
           </div>
         </div>
       </el-col>
@@ -32,7 +32,7 @@
 
           <div class="card-panel-info-wrapper">
             <div class="card-panel-info-key">Bad Number</div>
-            <div class="card-panel-info-value">1</div>
+            <div class="card-panel-info-value">{{ overview.badNumber }}</div>
           </div>
         </div>
       </el-col>
@@ -43,8 +43,8 @@
           </div>
 
           <div class="card-panel-info-wrapper">
-            <div class="card-panel-info-key">Alertz Number</div>
-            <div class="card-panel-info-value">18</div>
+            <div class="card-panel-info-key">Alert Number</div>
+            <div class="card-panel-info-value">{{ overview.alertNumber }}</div>
           </div>
         </div>
       </el-col>
@@ -162,21 +162,21 @@
       <query :clusterId="clusterId"></query>
     </el-dialog>
     <el-dialog title="Edit Cluster" :visible.sync="editClusterVisible">
-      <importCluster :clusterId="clusterId"></importCluster>
+      <editCluster :clusterId="clusterId"></editCluster>
     </el-dialog>
   </div>
 </template>
 
 <script>
 import query from "@/components/tool/Query";
-import importCluster from "@/components/manage/ImportCluster";
+import editCluster from "@/components/manage/EditCluster";
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import API from "@/api/api.js";
 export default {
   components: {
     query,
-    importCluster
+    editCluster
   },
   data() {
     return {
@@ -209,7 +209,13 @@ export default {
         }
       ],
       editClusterVisible: false,
-      clusterId: ""
+      clusterId: "",
+      overview: {
+        userNumber: 4,
+        healthNumber: 11,
+        badNumber: 0,
+        alertNumber: 32
+      }
     };
   },
 

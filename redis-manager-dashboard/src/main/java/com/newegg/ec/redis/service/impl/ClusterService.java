@@ -12,6 +12,7 @@ import com.newegg.ec.redis.util.RedisClusterInfoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
@@ -23,6 +24,7 @@ import static com.newegg.ec.redis.util.RedisUtil.*;
  * @author Jay.H.Zou
  * @date 8/2/2019
  */
+@Service
 public class ClusterService implements IClusterService {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterService.class);
@@ -65,9 +67,6 @@ public class ClusterService implements IClusterService {
 
     @Override
     public Cluster getClusterByName(String clusterName) {
-        if (Strings.isNullOrEmpty(clusterName)) {
-            return null;
-        }
         try {
             return clusterDao.selectClusterByName(clusterName);
         } catch (Exception e) {

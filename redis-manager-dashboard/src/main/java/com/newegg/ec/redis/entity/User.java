@@ -10,7 +10,7 @@ public class User {
 
     private Integer userId;
 
-    private String groupId;
+    private Integer groupId;
 
     private String userName;
 
@@ -60,11 +60,11 @@ public class User {
         this.userId = userId;
     }
 
-    public String getGroupId() {
+    public Integer getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(Integer groupId) {
         this.groupId = groupId;
     }
 

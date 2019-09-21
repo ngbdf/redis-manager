@@ -32,7 +32,6 @@ import static com.newegg.ec.redis.util.SignUtil.SLASH;
  * @author Jay.H.Zou
  * @date 2019/8/13
  */
-@Component
 public class MachineNodeOperation extends AbstractNodeOperation implements INodeOperation {
 
     @Value("${redis-manager.install.machine.package-path: /redis/machine/}")

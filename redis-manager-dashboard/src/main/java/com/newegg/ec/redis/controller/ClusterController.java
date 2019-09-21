@@ -7,12 +7,14 @@ import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.ws.rs.PathParam;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Jay.H.Zou
@@ -30,7 +32,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/getClusterList/{groupId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getAllCluster(@PathParam("groupId") Integer groupId) {
+    public Result getAllCluster(@PathVariable("groupId") Integer groupId) {
         List<Cluster> clusterList = clusterService.getClusterListByGroupId(groupId);
         if (clusterList == null || clusterList.isEmpty()) {
             return Result.failResult();
@@ -40,7 +42,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/getCluster/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getCluster(@PathParam("clusterId") Integer clusterId) {
+    public Result getCluster(@PathVariable("clusterId") Integer clusterId) {
         Cluster cluster = clusterService.getClusterById(clusterId);
         if (cluster != null) {
             return Result.successResult(cluster);
@@ -69,8 +71,10 @@ public class ClusterController {
         return result ? Result.successResult() : Result.failResult();
     }
 
-    @RequestMapping(value = "/validateClusterName", method = RequestMethod.POST)
-    public Result validateClusterName(String clusterName) {
+    @RequestMapping(value = "/validateClusterName/{clusterName}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result validateClusterName(@PathVariable("clusterName") String clusterName) {
+        System.err.println(clusterName);
         Cluster cluster = clusterService.getClusterByName(clusterName);
         return cluster == null ? Result.successResult() : Result.failResult();
     }
