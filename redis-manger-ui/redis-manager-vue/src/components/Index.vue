@@ -9,7 +9,7 @@
         <el-col>
           <div class="grid-content right-content" id="right-content">
             <el-select
-              v-model="groupId"
+              v-model="selectGroupId"
               placeholder="Select Group"
               size="mini"
               class="group-select"
@@ -138,9 +138,11 @@
 var elementResizeDetectorMaker = require("element-resize-detector");
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
+import { formatTime } from "@/utils/time.js";
 import CONSTANT from "@/utils/constant.js";
 import API from "@/api/api.js";
 import editCluster from "@/components/manage/EditCluster";
+import { getGroupList } from "@/components/group/group.js";
 export default {
   components: {
     editCluster
@@ -148,22 +150,9 @@ export default {
   data() {
     return {
       isCollapse: false,
-      group: store.getters.getGroup,
-      groupId: store.getters.getGroupId,
       permission: true,
-      groupList: [
-        {
-          groupId: 0,
-          groupName: "Bigdata",
-          groupInfo: "bigdata team"
-        },
-        {
-          groupId: 1,
-          groupName: "Test",
-          groupInfo: "Test team"
-        }
-      ],
-      importVisible: false
+      importVisible: false,
+      selectGroupId: store.getters.getCurrentGroup.groupId
     };
   },
   methods: {
@@ -189,16 +178,10 @@ export default {
       this.$router.push({ name: "user-manage" });
     },
     selectGroup() {
-      let currentGroup = {};
-      this.groupList.forEach(group => {
-        if (group.groupId === this.groupId) {
-          currentGroup = group;
-          this.group = group;
-        }
-      });
-      if (!isEmpty(currentGroup)) {
-        store.dispatch("setGroup", currentGroup);
+      if (!isEmpty(this.selectGroupId)) {
+        store.dispatch("setCurrentGroupById", this.selectGroupId);
         //this.setUserRole();
+        console.log(store.getters.getCurrentGroup);
       } else {
         // TODO 报错
         console.log("============ select group failed!");
@@ -254,11 +237,50 @@ export default {
           store.dispatch("setUserRole", CONSTANT.USER_ROLE.MEMBER);
         }
       );
+    },
+    getGroupList() {
+      let userId = store.getters.getUserId;
+      let url = "/group/getGroupList/" + userId;
+      API.get(
+        url,
+        null,
+        response => {
+          if (response.data.code == 0) {
+            let groupList = response.data.data;
+            groupList.forEach(group => {
+              group.updateTime = formatTime(group.updateTime);
+            });
+            store.dispatch("setGroupList", groupList);
+            let currentGroup = store.getters.getCurrentGroup;
+            let user = store.getters.getUser;
+            if (isEmpty(currentGroup) || isEmpty(currentGroup.groupId)) {
+              groupList.forEach(group => {
+                if (group.groupId == user.groupId) {
+                  this.selectGroupId = user.groupId;
+                  store.dispatch("setCurrentGroup", group);
+                }
+              });
+            }
+          } else {
+            console.log("No data");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
   },
   computed: {
     currentUser() {
       return store.getters.getUser;
+    },
+    groupList() {
+      return store.getters.getGroupList;
+    },
+    currentGroup() {
+      console.log(store.getters.getCurrentGroup);
+      return store.getters.getCurrentGroup;
     }
   },
   watch: {
@@ -266,6 +288,7 @@ export default {
   },
   mounted() {
     this.listenHeaderWidth();
+    this.getGroupList();
   }
 };
 </script>

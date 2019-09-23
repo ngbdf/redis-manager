@@ -19,6 +19,7 @@
       title="Create Group"
       :visible.sync="createGroupVisible"
       :close-on-click-modal="false"
+      @close="closeHandler()"
     >
       <el-form :model="group" ref="group" label-width="120px">
         <el-form-item label="Group Name" prop="groupName" :rules="rules.groupName">
@@ -38,7 +39,7 @@
 <script>
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
-import { formatTime } from "@/utils/time.js";
+import { getGroupList } from "@/components/group/group.js";
 import API from "@/api/api.js";
 export default {
   data() {
@@ -51,11 +52,11 @@ export default {
           url,
           null,
           response => {
-           let code =  response.data.code
-           let existGroup = response.data.data;
-           let groupId = this.group.groupId
+            let code = response.data.code;
+            let existGroup = response.data.data;
+            let groupId = this.group.groupId;
             if (code != 0 && groupId != existGroup.groupId) {
-              return  callback(new Error(value + " has exist"));
+              return callback(new Error(value + " has exist"));
             } else {
               callback();
             }
@@ -67,7 +68,6 @@ export default {
       }
     };
     return {
-      groupList: [],
       createGroupVisible: false,
       group: {
         groupName: ""
@@ -80,43 +80,15 @@ export default {
     };
   },
   methods: {
-    getGroupList() {
-      let userId = store.getters.getUserId;
-      let url = "/group/getGroupList/" + userId;
-      API.get(
-        url,
-        null,
-        response => {
-          if (response.data.code == 0) {
-            this.groupList = response.data.data;
-            this.groupList.forEach(group => {
-              group.updateTime = formatTime(group.updateTime)
-            });
-          } else {
-            this.groupList = [
-              {
-                groupName: "Static",
-                groupInfo: "Static",
-                updateTime: "2019-08-25"
-              }
-            ];
-            console.log("No data");
-          }
-        },
-        err => {
-          console.log(err);
-        }
-      );
-    },
     saveGroup(group) {
       this.$refs[group].validate(valid => {
         if (valid) {
           this.group.userId = store.getters.getUserId;
           let url;
-          if(isEmpty(this.group.groupId)) {
-            url =  "/group/addGroup"
+          if (isEmpty(this.group.groupId)) {
+            url = "/group/addGroup";
           } else {
-            url = "/group/updateGroup"
+            url = "/group/updateGroup";
           }
           API.post(
             url,
@@ -125,20 +97,24 @@ export default {
               if (response.data.code == 0) {
                 this.createGroupVisible = false;
                 this.group = {};
-                this.getGroupList();
+                getGroupList();
               } else {
                 console.log("Add group failed.");
               }
             },
             err => {
+              console.log(err);
               console.log("Network error.");
             }
           );
         }
       });
     },
+    closeHandler() {
+      this.group = {};
+    },
     editGroup(index, row) {
-      this.group = row
+      this.group = row;
       this.createGroupVisible = true;
       console.log(index, row);
     },
@@ -146,9 +122,12 @@ export default {
       console.log(index, row);
     }
   },
-  mounted() {
-    this.getGroupList();
-  }
+  computed: {
+    groupList() {
+      return store.getters.getGroupList;
+    }
+  },
+  mounted() {}
 };
 </script>
 

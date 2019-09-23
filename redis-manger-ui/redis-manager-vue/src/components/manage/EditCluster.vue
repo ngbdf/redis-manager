@@ -175,7 +175,7 @@ export default {
   computed: {
     // 监听group变化
     currentGroup() {
-      return store.getters.getGroup;
+      return store.getters.getCurrentGroup;
     }
   },
   mounted() {

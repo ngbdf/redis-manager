@@ -1,19 +1,17 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
+import { isEmpty } from "@/utils/validate.js";
 
 Vue.use(Vuex)
 
 // 应用初始状态
 const state = {
-    group: {
-        groupId: 0,
-        groupName: "Test"
-    },
+    currentGroup: {},
     groupList: [],
     user: {
         userId: 0,
-        groupId: 0,
+        groupId: 1,
         userName: "Jay",
         headPic: "/user/image/jay.png"
     },
@@ -22,9 +20,19 @@ const state = {
 
 // 定义所需的 mutations，状态变更操作
 const mutations = {
-    setGroup(state, group) {
-        console.log(group)
-        state.group = group
+    setCurrentGroup(state, currentGroup) {
+        state.currentGroup = currentGroup
+    },
+    setCurrentGroupById(state, groupId) {
+        state.groupList.forEach(group => {
+            if (groupId == group.groupId) {
+                state.currentGroup = group
+            }
+        });
+    },
+    setGroupList(state, groupList) {
+        
+        state.groupList = groupList
     },
     setUser(state, user) {
         state.user = user
@@ -36,11 +44,11 @@ const mutations = {
 
 // 获取数据操作
 const getters = {
-    getGroup: state => {
-        return state.group
+    getCurrentGroup: state => {
+        return state.currentGroup
     },
-    getGroupId: state => {
-        return state.group.groupId
+    getGroupList: state => {
+        return state.groupList
     },
     getUser: state => {
         return state.user
@@ -55,8 +63,14 @@ const getters = {
 
 // 分发 Action
 const actions = {
-    setGroup(context, group) {
-        context.commit('setGroup', group)
+    setCurrentGroup(context, currentGroup) {
+        context.commit('setCurrentGroup', currentGroup)
+    },
+    setCurrentGroupById(context, groupId) {
+        context.commit('setCurrentGroupById', groupId)
+    },
+    setGroupList(context, groupList) {
+        context.commit('setGroupList', groupList)
     },
     setUser(context, user) {
         context.commit('setUser', user)
