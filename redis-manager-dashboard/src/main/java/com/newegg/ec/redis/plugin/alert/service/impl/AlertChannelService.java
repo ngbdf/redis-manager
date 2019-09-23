@@ -1,17 +1,16 @@
 package com.newegg.ec.redis.plugin.alert.service.impl;
 
-import com.google.common.base.Strings;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertChannelDao;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.service.IAlertChannelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
+ * For test: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=94d09bcf-0e04-4933-b83b-fd34c56b0196
  * @author Jay.H.Zou
  * @date 8/31/2019
  */
