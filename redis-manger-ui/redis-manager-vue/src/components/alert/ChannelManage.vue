@@ -45,7 +45,7 @@
       width="60%"
       :close-on-click-modal="false"
     >
-      <el-form :model="alertChannel" ref="alertChannel" label-width="120px">
+      <el-form :model="alertChannel" ref="alertChannel" :rules="rules" label-width="135px">
         <el-form-item label="Channel Name" prop="channelName">
           <el-input size="small" v-model="alertChannel.channelName" autocomplete="off"></el-input>
         </el-form-item>
@@ -58,30 +58,35 @@
           </el-radio-group>
         </el-form-item>
         <!-- email start -->
-        <el-form-item label="Email From" v-if="alertChannel.channelType == 0">
+        <el-form-item label="SMTP Host" prop="smtpHost" v-if="alertChannel.channelType == 0">
+          <el-input size="small" v-model="alertChannel.smtpHost" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item
+          label="SMTP User Name"
+          prop="smtpUserName"
+          v-if="alertChannel.channelType == 0"
+        >
+          <el-input size="small" v-model="alertChannel.smtpUserName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item
+          label="SMTP Password"
+          prop="smtpPassword"
+          v-if="alertChannel.channelType == 0"
+        >
+          <el-input size="small" v-model="alertChannel.smtpPassword" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Email From" prop="emailFrom" v-if="alertChannel.channelType == 0">
           <el-input size="small" v-model="alertChannel.emailFrom" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="Email From" v-if="alertChannel.channelType == 0">
+        <el-form-item label="Email To" prop="emailTo" v-if="alertChannel.channelType == 0">
           <el-input size="small" v-model="alertChannel.emailTo" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="Host" v-if="alertChannel.channelType == 0">
-          <el-input size="small" v-model="alertChannel.host" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="Port" v-if="alertChannel.channelType == 0">
-          <el-input size="small" v-model="alertChannel.port" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="User Name" v-if="alertChannel.channelType == 0">
-          <el-input size="small" v-model="alertChannel.userName" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="Password" v-if="alertChannel.channelType == 0">
-          <el-input size="small" v-model="alertChannel.password" autocomplete="off"></el-input>
         </el-form-item>
         <!-- email end -->
 
         <!-- wechat web hook start -->
         <el-form-item
           label="Web Hook"
-          label-width="120px"
+          prop="webhook"
           v-if="alertChannel.channelType == 1 || alertChannel.channelType == 2"
         >
           <el-input size="small" v-model="alertChannel.webhook" autocomplete="off"></el-input>
@@ -89,13 +94,13 @@
         <!-- wechat web hook end -->
 
         <!-- wechat app start -->
-        <el-form-item label="Corp Id" v-if="alertChannel.channelType == 3">
+        <el-form-item label="Corp Id" prop="corpId" v-if="alertChannel.channelType == 3">
           <el-input size="small" v-model="alertChannel.corpId" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="Agent Id" v-if="alertChannel.channelType == 3">
+        <el-form-item label="Agent Id" prop="agentId" v-if="alertChannel.channelType == 3">
           <el-input size="small" v-model="alertChannel.agentId" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="Corp Secret" v-if="alertChannel.channelType == 3">
+        <el-form-item label="Corp Secret" prop="corpSecret" v-if="alertChannel.channelType == 3">
           <el-input size="small" v-model="alertChannel.corpSecret" autocomplete="off"></el-input>
         </el-form-item>
         <!-- wechat app end -->
@@ -110,7 +115,7 @@
 
 <script>
 import { store } from "@/vuex/store.js";
-import { isEmpty } from "@/utils/validate.js";
+import { isEmpty, validateURL, validateEmail } from "@/utils/validate.js";
 import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
 export default {
@@ -136,6 +141,54 @@ export default {
         );
       }
     };
+    var validateSMTPHost = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter SMTP Host"));
+      } else if (!validateURL(value)) {
+        return callback(new Error("Incorrect host format"));
+      }
+      callback();
+    };
+    var validateEmailFrom = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter email from"));
+      } else if (!validateEmail(value)) {
+        return callback(new Error("Incorrect email format"));
+      }
+      callback();
+    };
+    var validateEmailTo = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter email to"));
+      }
+      callback();
+    };
+    var validateWebHook = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter web hook"));
+      } else if (!validateURL(value)) {
+        return callback(new Error("Incorrect url format"));
+      }
+      callback();
+    };
+    var validateCorpId = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter corp id"));
+      }
+      callback();
+    };
+    var validateAgentId = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter agent id"));
+      }
+      callback();
+    };
+    var validateCorpSecret = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter corp secret"));
+      }
+      callback();
+    };
     return {
       channelList: [
         {
@@ -152,6 +205,27 @@ export default {
       rules: {
         channelName: [
           { required: true, validator: validateChannelName, trigger: "blur" }
+        ],
+        smtpHost: [
+          { required: true, validator: validateSMTPHost, trigger: "blur" }
+        ],
+        emailFrom: [
+          { required: true, validator: validateEmailFrom, trigger: "blur" }
+        ],
+        emailTo: [
+          { required: true, validator: validateEmailTo, trigger: "blur" }
+        ],
+        webhook: [
+          { required: true, validator: validateWebHook, trigger: "blur" }
+        ],
+        corpId: [
+          { required: true, validator: validateCorpId, trigger: "blur" }
+        ],
+        agentId: [
+          { required: true, validator: validateAgentId, trigger: "blur" }
+        ],
+        corpSecret: [
+          { required: true, validator: validateCorpSecret, trigger: "blur" }
         ]
       }
     };

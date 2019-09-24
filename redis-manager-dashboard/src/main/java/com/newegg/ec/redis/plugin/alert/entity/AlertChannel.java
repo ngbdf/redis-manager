@@ -23,24 +23,15 @@ public class AlertChannel {
     /**
      * email
      */
+    private String smtpHost;
+
+    private String smtpUserName;
+
+    private String smtpPassword;
+
     private String emailFrom;
 
     private String emailTo;
-
-    private String host;
-
-    private String port;
-
-    private String userName;
-
-    private String password;
-
-    private Boolean smtpAuth;
-
-    private Boolean smtpStartTtlEnable;
-
-    private Boolean smtpStartTlsRequired;
-
     /**
      * Wechat & DingDing web hook
      */
@@ -88,6 +79,30 @@ public class AlertChannel {
         this.channelName = channelName;
     }
 
+    public String getSmtpHost() {
+        return smtpHost;
+    }
+
+    public void setSmtpHost(String smtpHost) {
+        this.smtpHost = smtpHost;
+    }
+
+    public String getSmtpUserName() {
+        return smtpUserName;
+    }
+
+    public void setSmtpUserName(String smtpUserName) {
+        this.smtpUserName = smtpUserName;
+    }
+
+    public String getSmtpPassword() {
+        return smtpPassword;
+    }
+
+    public void setSmtpPassword(String smtpPassword) {
+        this.smtpPassword = smtpPassword;
+    }
+
     public String getEmailFrom() {
         return emailFrom;
     }
@@ -102,62 +117,6 @@ public class AlertChannel {
 
     public void setEmailTo(String emailTo) {
         this.emailTo = emailTo;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public String getPort() {
-        return port;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Boolean getSmtpAuth() {
-        return smtpAuth;
-    }
-
-    public void setSmtpAuth(Boolean smtpAuth) {
-        this.smtpAuth = smtpAuth;
-    }
-
-    public Boolean getSmtpStartTtlEnable() {
-        return smtpStartTtlEnable;
-    }
-
-    public void setSmtpStartTtlEnable(Boolean smtpStartTtlEnable) {
-        this.smtpStartTtlEnable = smtpStartTtlEnable;
-    }
-
-    public Boolean getSmtpStartTlsRequired() {
-        return smtpStartTlsRequired;
-    }
-
-    public void setSmtpStartTlsRequired(Boolean smtpStartTlsRequired) {
-        this.smtpStartTlsRequired = smtpStartTlsRequired;
     }
 
     public String getWebhook() {
