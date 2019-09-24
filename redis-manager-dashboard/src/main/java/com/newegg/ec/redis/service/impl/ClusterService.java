@@ -1,20 +1,23 @@
 package com.newegg.ec.redis.service.impl;
 
-import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.service.IClusterService;
+import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.RedisClusterInfoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.newegg.ec.redis.client.RedisClient.SERVER;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
@@ -34,6 +37,9 @@ public class ClusterService implements IClusterService {
 
     @Autowired
     private IRedisService redisService;
+
+    @Autowired
+    private INodeInfoService nodeInfoService;
 
     @Override
     public List<Cluster> getAllClusterList() {
@@ -76,46 +82,47 @@ public class ClusterService implements IClusterService {
     }
 
     /**
-     * 不仅需要
-     *
      * @param cluster
      * @return
      */
+    @Transactional
     @Override
     public boolean addCluster(Cluster cluster) {
         String redisMode;
-        try {
-            fillBaseInfo(cluster);
-            redisMode = cluster.getRedisMode();
-            if (redisMode == null) {
-                logger.error("Fill base info failed, " + cluster);
+        fillBaseInfo(cluster);
+        redisMode = cluster.getRedisMode();
+        if (redisMode == null) {
+            logger.error("Fill base info failed, " + cluster);
+            return false;
+        }
+        fillKeyspaceInfo(cluster);
+        if (Objects.equals(redisMode, CLUSTER)) {
+            if (!fillClusterInfo(cluster)) {
+                logger.error("Fill cluster info failed, " + cluster);
                 return false;
             }
-            fillKeyspaceInfo(cluster);
-            if (Objects.equals(redisMode, CLUSTER)) {
-                if (!fillClusterInfo(cluster)) {
-                    logger.error("Fill cluster info failed, " + cluster);
-                    return false;
-                }
-            } else if (Objects.equals(redisMode, STANDALONE)) {
-                fillStandaloneInfo(cluster);
-            }
-        } catch (Exception e) {
-            logger.error("Fill base info failed, " + cluster, e);
-            return false;
+        } else if (Objects.equals(redisMode, STANDALONE)) {
+            fillStandaloneInfo(cluster);
         }
-        try {
-            int row = clusterDao.insertCluster(cluster);
-            return row > 0;
-        } catch (Exception e) {
-            logger.error("Save cluster failed, " + cluster, e);
-            return false;
+        cluster.setClusterStatus(Cluster.ClusterState.HEALTH);
+        int row = clusterDao.insertCluster(cluster);
+        if (row == 0) {
+            throw new RuntimeException("Save cluster failed.");
         }
+        System.err.println(cluster.getClusterId());
+        nodeInfoService.createNodeInfoTable(cluster.getClusterId());
+        return true;
     }
 
     @Override
     public boolean updateCluster(Cluster cluster) {
-        return false;
+        try {
+            int row = clusterDao.updateCluster(cluster);
+            return row > 0;
+        } catch (Exception e) {
+            logger.error("Update cluster failed.", e);
+            return false;
+        }
     }
 
     @Override
@@ -134,12 +141,18 @@ public class ClusterService implements IClusterService {
      * drop node_info_{clusterId}
      * delete redis_node in this cluster
      *
-     * @param cluster
+     * @param clusterId
      * @return
      */
+    @Transactional
     @Override
-    public boolean deleteCluster(Cluster cluster) {
-        return false;
+    public boolean deleteCluster(Integer clusterId) {
+        if (clusterId == null) {
+            return false;
+        }
+        clusterDao.deleteClusterById(clusterId);
+        nodeInfoService.deleteNodeInfoTable(clusterId);
+        return true;
     }
 
     /**

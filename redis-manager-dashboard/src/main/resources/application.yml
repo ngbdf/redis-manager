@@ -11,6 +11,8 @@ spring:
       force: true
       charset: UTF-8
   datasource:
+    # 必填项，
+    database: redis_manager_refactor
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://10.16.50.209:3306/redis_manager_refactor?useUnicode=true&characterEncoding=utf-8
     username: root

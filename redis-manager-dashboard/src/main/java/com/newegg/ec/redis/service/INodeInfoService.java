@@ -11,6 +11,12 @@ import java.util.List;
  */
 public interface INodeInfoService {
 
+    void createNodeInfoTable(Integer clusterId);
+
+    void deleteNodeInfoTable(Integer clusterId);
+
+    boolean isNodeInfoTableExist(Integer clusterId);
+
     List<NodeInfo> getNodeInfoList(NodeInfoParam nodeInfoParam);
 
     NodeInfo getLastTimeNodeInfo(NodeInfoParam nodeInfoParam);

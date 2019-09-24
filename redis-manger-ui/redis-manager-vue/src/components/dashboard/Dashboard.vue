@@ -64,7 +64,7 @@
             <i
               class="el-icon-lock health"
               style="float: right; padding: 3px 0"
-              v-if="cluster.clusterStatus == 'HEALTH'"
+              v-if="cluster.redisPassword != null && cluster.redisPassword != ''"
             ></i>
           </div>
           <div class="text item">
@@ -151,7 +151,11 @@
                   class="edit"
                   @click.native="editCluster(cluster.clusterId)"
                 >Edit</el-dropdown-item>
-                <el-dropdown-item icon="el-icon-delete" class="delete">Delete</el-dropdown-item>
+                <el-dropdown-item
+                  icon="el-icon-delete"
+                  class="delete"
+                  @click.native="showDeleteCluster(cluster.clusterId)"
+                >Delete</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </div>
@@ -161,8 +165,23 @@
     <el-dialog title="Query" :visible.sync="queryVisible" width="60%">
       <query :clusterId="clusterId"></query>
     </el-dialog>
-    <el-dialog title="Edit Cluster" :visible.sync="editClusterVisible">
-      <editCluster :clusterId="clusterId"></editCluster>
+    <el-dialog
+      title="Edit Cluster"
+      :visible.sync="editClusterVisible"
+      :close-on-click-modal="false"
+      v-if="editClusterVisible"
+    >
+      <editCluster @closeDialog="closeEditClusterDialog" :clusterId="clusterId"></editCluster>
+    </el-dialog>
+    <el-dialog title="Delete Cluster" :visible.sync="deleteClusterVisible" width="30%">
+      <span>
+        Are you sure to delte
+        <b>{{ cluster.clusterName }}</b> ?
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="dialogVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteCluster(cluster.clusterId)">Delete</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -181,41 +200,17 @@ export default {
   data() {
     return {
       queryVisible: false,
-      clusterList: [
-        {
-          clusterId: 1,
-          groupId: 1,
-          userId: 1,
-          clusterName: "Shanghai",
-          clusterToken: "ajsGako;3an;fnKS12a",
-          redisMode: "cluster",
-          os: "Linux 3.10.0-327.36.3.el7.x86_64 x86_64",
-          redisVersion: "4.0.10",
-          image: "redis:4.0.10",
-          nodes: "127.0.0.1:8001,127.0.0.1:8002,127.0.0.1:8003",
-          totalKeys: 345435,
-          totalExpires: 342,
-          dbSize: 1,
-          clusterStatus: "HEALTH",
-          clusterSlotsAssigned: 16384,
-          clusterSlotsOk: 16384,
-          clusterSlotsPfail: 0,
-          clusterSlotsFail: 0,
-          clusterKnownNodes: 120,
-          clusterSize: 40,
-          redisPassword: "1234",
-          installationEnvironment: "docker",
-          installationType: 0
-        }
-      ],
       editClusterVisible: false,
-      clusterId: "",
+      deleteClusterVisible: false,
       overview: {
-        userNumber: 4,
-        healthNumber: 11,
+        userNumber: 0,
+        healthNumber: 0,
         badNumber: 0,
-        alertNumber: 32
-      }
+        alertNumber: 0
+      },
+      clusterList: [],
+      clusterId: "",
+      cluster: {}
     };
   },
 
@@ -232,28 +227,113 @@ export default {
     handleQuery() {
       this.queryVisible = true;
     },
-    getClusterList(groupId) {
-      let url = "/cluster/getClusterList/" + groupId;
+    getOverview(groupId) {
+      let url = "/group/overview/" + groupId;
       if (!isEmpty(groupId)) {
-        get(
+        API.get(
           url,
           null,
           response => {
-            return;
+            let result = response.data;
+            if (result.code == 0) {
+              let overview = result.data;
+              this.overview.userNumber = overview.userNumber;
+              this.overview.alertNumber = overview.alertNumber;
+            } else {
+              console.log("No data");
+            }
           },
-          err => {}
+          err => {
+            console.log(err);
+          }
+        );
+      }
+    },
+    getClusterList(groupId) {
+      let url = "/cluster/getClusterList/" + groupId;
+      if (!isEmpty(groupId)) {
+        API.get(
+          url,
+          null,
+          response => {
+            let result = response.data;
+            if (result.code == 0) {
+              let clusterList = result.data;
+              let healthNumber = 0;
+              let badNumber = 0;
+              clusterList.forEach(cluster => {
+                if (cluster.clusterStatus == "HEALTH") {
+                  healthNumber++;
+                } else {
+                  badNumber++;
+                }
+              });
+              this.overview.healthNumber = healthNumber;
+              this.overview.badNumber = badNumber;
+              this.clusterList = clusterList;
+            } else {
+              console.log("No data");
+            }
+          },
+          err => {
+            console.log(err);
+          }
         );
       }
     },
     editCluster(clusterId) {
       this.clusterId = clusterId;
       this.editClusterVisible = true;
+    },
+    showDeleteCluster(clusterId) {
+      this.clusterList.forEach(cluster => {
+        if (cluster.clusterId == clusterId) {
+          this.cluster = cluster;
+          this.deleteClusterVisible = true;
+        }
+      });
+    },
+    deleteCluster(clusterId) {
+      let url = "/clsuter/deleteCluster";
+      API.post(
+        url,
+        clusterId,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.cluster = {};
+            this.getClusterList(this.currentGroupId);
+            this.deleteClusterVisible = false;
+          } else {
+            console.log("Delete failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    closeEditClusterDialog(editClusterVisible) {
+      this.getClusterList(this.currentGroupId);
+      this.editClusterVisible = editClusterVisible;
     }
   },
+
   computed: {
     currentGroupId() {
-      return store.getters.getGroupId;
+      return store.getters.getCurrentGroupId;
     }
+  },
+  watch: {
+    currentGroupId(groupId) {
+      this.getClusterList(groupId);
+      this.getOverview(groupId);
+    }
+  },
+  mounted() {
+    let groupId = this.$route.params.groupId;
+    this.getClusterList(groupId);
+    this.getOverview(groupId);
   }
 };
 </script>

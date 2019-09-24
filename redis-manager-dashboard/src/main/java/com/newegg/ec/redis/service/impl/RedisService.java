@@ -83,9 +83,9 @@ public class RedisService implements IRedisService {
                             continue;
                         }
                         if (Objects.equals(subContentKey, KEYS)) {
-                            nodeKeyspaceInfoMap.put(KEYS, Long.parseLong(subContentKey));
+                            nodeKeyspaceInfoMap.put(KEYS, Long.parseLong(subContentVal));
                         } else if (Objects.equals(subContentKey, EXPIRES)) {
-                            nodeKeyspaceInfoMap.put(EXPIRES, Long.parseLong(subContentKey));
+                            nodeKeyspaceInfoMap.put(EXPIRES, Long.parseLong(subContentVal));
                         }
                     }
                     keyspaceInfoMap.put(key, nodeKeyspaceInfoMap);
@@ -94,7 +94,7 @@ public class RedisService implements IRedisService {
                 logger.error("Get keyspace info failed, redis node = " + redisNode.getHost() + ":" + redisNode.getPort(), e);
             }
         });
-        return null;
+        return keyspaceInfoMap;
     }
 
     @Override

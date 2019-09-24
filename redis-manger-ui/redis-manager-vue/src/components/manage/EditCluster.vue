@@ -23,8 +23,8 @@
       </el-form-item>
       <el-form-item label="Environment" prop="installationEnvironment">
         <el-radio-group v-model="cluster.installationEnvironment">
-          <el-radio label="docker">Docker</el-radio>
-          <el-radio label="machine">Machine</el-radio>
+          <el-radio label="DOCKER">Docker</el-radio>
+          <el-radio label="MACHINE">Machine</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="Cluster Info" prop="clusterInfo">
@@ -33,7 +33,13 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button size="small" @click="addNode()">New Node</el-button>
-      <el-button size="small" type="primary" @click="importCluster('cluster')">Confirm</el-button>
+      <el-button
+        size="small"
+        type="primary"
+        @click="saveCluster('cluster')"
+        v-if="clusterId == null || clusterId == ''"
+      >Confirm</el-button>
+      <el-button size="small" type="primary" @click="saveCluster('cluster')" v-else>Update</el-button>
     </div>
   </div>
 </template>
@@ -58,7 +64,15 @@ export default {
           url,
           null,
           response => {
-            if (response.data.code != 0) {
+            let result = response.data;
+            if (result.code != 0) {
+              let cluster = result.data;
+              if (
+                this.clusterId == cluster.clusterId &&
+                value == cluster.clusterName
+              ) {
+                callback();
+              }
               return callback(new Error(value + " has exist"));
             } else {
               callback();
@@ -87,7 +101,7 @@ export default {
         null,
         response => {
           if (response.data.code != 0) {
-            return callback(new Error("Redis node incorrect"));
+            return callback(new Error("Connection refused."));
           } else {
             callback();
           }
@@ -127,11 +141,11 @@ export default {
   },
   methods: {
     // 导入外部集群
-    importCluster(cluster) {
+    saveCluster(cluster) {
       this.$refs[cluster].validate(valid => {
         if (valid) {
-          if (isEmpty(this.groupId)) {
-            console.log("Group id is exist!");
+          let currentGroup = this.currentGroup;
+          if (isEmpty(currentGroup) || isEmpty(currentGroup.groupId)) {
             return;
           }
           this.cluster.groupId = currentGroup.groupId;
@@ -141,8 +155,35 @@ export default {
             nodes += node.value + ",";
           });
           this.cluster.nodes = nodes;
+          let installationEnvironment = this.cluster.installationEnvironment.toUpperCase();
+          this.cluster.installationEnvironment = installationEnvironment;
           console.log(this.cluster);
           // axios
+          let url = "";
+          console.log(this.clusterId)
+          if (isEmpty(this.clusterId)) {
+            url = "/cluster/importCluster";
+          } else {
+            url = "/cluster/updateCluster";
+          }
+          console.log(url)
+          API.post(
+            url,
+            this.cluster,
+            response => {
+              let result = response.data;
+              if (result.code == 0) {
+                this.$refs[cluster].resetFields();
+                this.$router.push({ name: "dashboard" });
+                this.$emit("closeDialog", false);
+              } else {
+                console.error(result.message);
+              }
+            },
+            err => {
+              console.error(err);
+            }
+          );
         }
       });
     },
@@ -170,6 +211,27 @@ export default {
         }
       });
       return nodeList;
+    },
+    getClusterById(clusterId) {
+      let url = "/cluster/getCluster/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let cluster = result.data;
+            let nodeList = this.nodesToNodeList(cluster.nodes);
+            cluster.nodeList = nodeList;
+            this.cluster = cluster;
+          } else {
+            console.log("Get clsuter failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
   },
   computed: {
@@ -184,36 +246,7 @@ export default {
         nodeList: [{ value: "" }]
       };
     } else {
-      let cluster = {
-        clusterId: 1,
-        groupId: 1,
-        userId: 1,
-        clusterName: "Shanghai",
-        clusterToken: "ajsGako;3an;fnKS12a",
-        redisMode: "cluster",
-        os: "Linux 3.10.0-327.36.3.el7.x86_64 x86_64",
-        redisVersion: "4.0.10",
-        image: "redis:4.0.10",
-        nodes: "127.0.0.1:8001,127.0.0.1:8002,127.0.0.1:8003",
-        totalKeys: 345435,
-        totalExpires: 342,
-        dbSize: 1,
-        clusterStatus: "HEALTH",
-        clusterSlotsAssigned: 16384,
-        clusterSlotsOk: 16384,
-        clusterSlotsPfail: 0,
-        clusterSlotsFail: 0,
-        clusterKnownNodes: 120,
-        clusterSize: 40,
-        redisPassword: "1234",
-        installationEnvironment: "docker",
-        installationType: 0,
-        clusterInfo: "hello",
-        nodeList: [{ value: "" }]
-      };
-      let nodeList = this.nodesToNodeList(cluster.nodes);
-      cluster.nodeList = nodeList;
-      this.cluster = cluster;
+      this.getClusterById(this.clusterId);
     }
   }
 };

@@ -11,7 +11,7 @@ const state = {
     groupList: [],
     user: {
         userId: 0,
-        groupId: 1,
+        groupId: 10,
         userName: "Jay",
         headPic: "/user/image/jay.png"
     },
@@ -31,7 +31,6 @@ const mutations = {
         });
     },
     setGroupList(state, groupList) {
-        
         state.groupList = groupList
     },
     setUser(state, user) {
@@ -46,6 +45,9 @@ const mutations = {
 const getters = {
     getCurrentGroup: state => {
         return state.currentGroup
+    },
+    getCurrentGroupId: state => {
+        return state.currentGroup.groupId
     },
     getGroupList: state => {
         return state.groupList

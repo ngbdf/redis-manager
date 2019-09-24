@@ -1,6 +1,8 @@
 package com.newegg.ec.redis.controller;
 
 import com.newegg.ec.redis.entity.Result;
+import com.newegg.ec.redis.util.NetworkUtil;
+import com.newegg.ec.redis.util.SignUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +22,13 @@ public class ValidateController {
     @RequestMapping(value = "/address/{address}", method = RequestMethod.GET)
     @ResponseBody
     public Result validateAddress(@PathVariable("address") String address) {
-        return Result.failResult();
+        String[] ipAndPort = SignUtil.splitByColon(address);
+        try {
+            boolean pong = NetworkUtil.telnet(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
+            return pong ? Result.successResult() : Result.failResult();
+        } catch (Exception e) {
+            return Result.failResult();
+        }
     }
 
 }

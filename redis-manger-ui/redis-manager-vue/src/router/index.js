@@ -30,8 +30,9 @@ export default new Router({
       children: [
         {
           name: 'dashboard',
-          path: '/dashboard',
+          path: '/dashboard/:groupId',
           component: Dashboard,
+          props: true,
           meta: {
             title: 'Dashboard',
             icon: 'el-icon-discover',
@@ -41,7 +42,7 @@ export default new Router({
         },
         {
           name: 'redis-monitor',
-          path: '/redis-monitor',
+          path: '/redis-monitor/:clusterId',
           component: RedisMonitor,
           meta: {
             title: 'Monitor',

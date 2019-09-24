@@ -5,7 +5,7 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment;
 /**
  * 描述集群基本情况
  * cluster info:
- * cluster_state:ok
+ * cluster_status:ok
  * cluster_slots_assigned:16384
  * cluster_slots_ok:16384
  * cluster_slots_pfail:0
@@ -125,6 +125,7 @@ public class Cluster {
 
         WARN;
     }
+
 
     public Integer getClusterId() {
         return clusterId;

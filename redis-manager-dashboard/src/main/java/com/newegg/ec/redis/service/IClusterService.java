@@ -24,7 +24,7 @@ public interface IClusterService {
 
     boolean updateClusterKeys(Cluster cluster);
 
-    boolean deleteCluster(Cluster cluster);
+    boolean deleteCluster(Integer clusterId);
 
     boolean fillClusterInfo(Cluster cluster);
 

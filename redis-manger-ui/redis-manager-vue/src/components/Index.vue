@@ -129,7 +129,7 @@
       </el-main>
     </el-container>
     <el-dialog title="Import Cluster" :visible.sync="importVisible" :close-on-click-modal="false">
-      <editCluster></editCluster>
+      <editCluster @closeDialog="closeDialog"></editCluster>
     </el-dialog>
   </el-container>
 </template>
@@ -157,7 +157,10 @@ export default {
   },
   methods: {
     toDashboard() {
-      this.$router.push({ name: "dashboard" });
+      this.$router.push({
+        name: "dashboard",
+        params: { groupId: this.selectGroupId }
+      });
     },
     toInstallation() {
       this.$router.push({ name: "installation" });
@@ -182,6 +185,7 @@ export default {
         store.dispatch("setCurrentGroupById", this.selectGroupId);
         //this.setUserRole();
         console.log(store.getters.getCurrentGroup);
+        this.toDashboard();
       } else {
         // TODO 报错
         console.log("============ select group failed!");
@@ -269,6 +273,10 @@ export default {
           console.log(err);
         }
       );
+    },
+    closeDialog(importVisible) {
+      console.log(importVisible);
+      this.importVisible = importVisible;
     }
   },
   computed: {
@@ -277,11 +285,10 @@ export default {
     },
     groupList() {
       return store.getters.getGroupList;
-    },
-    currentGroup() {
-      console.log(store.getters.getCurrentGroup);
-      return store.getters.getCurrentGroup;
     }
+    // currentGroup() {
+    //   return store.getters.getCurrentGroup;
+    // }
   },
   watch: {
     userRole() {}

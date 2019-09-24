@@ -1,6 +1,6 @@
 package com.newegg.ec.redis.controller;
 
-import com.newegg.ec.redis.entity.Cluster;
+import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.Group;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.service.IGroupService;
@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -37,9 +35,9 @@ public class GroupController {
     /*@Autowired
     private AlertRecordService alertRecordService;*/
 
-    private static final String USER_NUMBER = "user";
+    private static final String USER_NUMBER = "userNumber";
 
-    private static final String ALERT_NUMBER = "alert";
+    private static final String ALERT_NUMBER = "alertNumber";
 
     /**
      * Health cluster number and bad cluster number calculating from cluster list info
@@ -50,10 +48,10 @@ public class GroupController {
     @RequestMapping(value = "/overview/{groupId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getGroupPartOverview(@PathVariable("groupId") Integer groupId) {
-        Map<String, Integer> overviewMap = new HashMap<>();
-        overviewMap.put(USER_NUMBER, userService.getUserNumber(groupId));
-        //overviewMap.put(ALERT_NUMBER, alertRecordService.getAlertNumber());
-        return Result.successResult(overviewMap);
+        JSONObject overview = new JSONObject();
+        overview.put(USER_NUMBER, userService.getUserNumber(groupId));
+        overview.put(ALERT_NUMBER, 13);
+        return Result.successResult(overview);
     }
 
     @RequestMapping(value = "/info/{groupId}", method = RequestMethod.GET)
@@ -71,7 +69,6 @@ public class GroupController {
             return Result.failResult();
         }
         Group group = groupList.get(0);
-        System.err.println(group.getUpdateTime().getTime());
         return Result.successResult(groupList);
     }
 

@@ -119,6 +119,14 @@ public class UserService implements IUserService {
 
     @Override
     public Integer getUserNumber(Integer groupId) {
-        return 0;
+        if (groupId == null) {
+            return 0;
+        }
+        try {
+            return userDao.selectUserNumber(groupId);
+        } catch (Exception e) {
+            logger.error("Get user number failed, ", e);
+            return 0;
+        }
     }
 }

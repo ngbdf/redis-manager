@@ -60,8 +60,9 @@ public class Result {
         return message;
     }
 
-    public void setMessage(String message) {
+    public Result setMessage(String message) {
         this.message = message;
+        return this;
     }
 
     public Object getData() {

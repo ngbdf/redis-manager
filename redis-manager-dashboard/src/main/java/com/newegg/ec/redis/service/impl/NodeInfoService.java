@@ -1,10 +1,12 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.INodeInfoDao;
 import com.newegg.ec.redis.entity.NodeInfo;
 import com.newegg.ec.redis.entity.NodeInfoParam;
 import com.newegg.ec.redis.entity.NodeInfoType;
 import com.newegg.ec.redis.exception.ConfigurationException;
+import com.newegg.ec.redis.exception.ParameterException;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
@@ -30,6 +32,11 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
     @Value("${redis-manager.monitor.data-keep-days:15}")
     private int dataKeepDays;
 
+    @Value("${spring.datasource.database}")
+    private String database;
+
+    private static final String NODE_INFO_TABLE = "node_info_%d";
+
     private static final int MAX_KEEP_DAYS = 365;
 
     @Autowired
@@ -40,6 +47,38 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         if (dataKeepDays <= 0 || dataKeepDays > MAX_KEEP_DAYS) {
             throw new ConfigurationException("keep-days parameter is invalid, the value must be between 1 and 30.");
         }
+        if (Strings.isNullOrEmpty(database)) {
+            throw new ConfigurationException("database parameter can't be empty.");
+        }
+    }
+
+    @Override
+    public void createNodeInfoTable(Integer clusterId) {
+        if (clusterId == null) {
+            throw new ParameterException("Create `node_info_${clusterId}` failed, cause cluster id null.");
+        }
+        if (isNodeInfoTableExist(clusterId)) {
+            throw new RuntimeException("Create `node_info_${clusterId}` failed, "
+                    + String.format(NODE_INFO_TABLE, clusterId) + " exist.");
+        }
+        nodeInfoDao.createNodeInfoTable(clusterId);
+    }
+
+    @Override
+    public void deleteNodeInfoTable(Integer clusterId) {
+        if (clusterId == null) {
+            throw new ParameterException("Delete `node_info_${clusterId}` failed, cause cluster id null.");
+        }
+        if (isNodeInfoTableExist(clusterId)) {
+            nodeInfoDao.deleteNodeInfoTable(clusterId);
+        }
+    }
+
+    @Override
+    public boolean isNodeInfoTableExist(Integer clusterId) {
+        String tableName = String.format(NODE_INFO_TABLE, clusterId);
+        int row = nodeInfoDao.existNodeInfoTable(database, tableName);
+        return row > 0;
     }
 
     /**
@@ -67,7 +106,7 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
     @Override
     public NodeInfo getLastTimeNodeInfo(NodeInfoParam nodeInfoParam) {
         List<NodeInfo> lastTimeNodeInfoList = getLastTimeNodeInfoList(nodeInfoParam);
-        if (lastTimeNodeInfoList == null || lastTimeNodeInfoList.size() != 1){
+        if (lastTimeNodeInfoList == null || lastTimeNodeInfoList.size() != 1) {
             return null;
         }
         return lastTimeNodeInfoList.get(0);

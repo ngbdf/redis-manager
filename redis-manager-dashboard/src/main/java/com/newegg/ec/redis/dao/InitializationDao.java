@@ -72,14 +72,14 @@ public interface InitializationDao {
             "initialized tinyint(1) NOT NULL, " +
             "total_keys integer(4) NOT NULL, " +
             "total_expires integer(4) NOT NULL, " +
-            "db_number integer(4) NOT NULL, " +
-            "cluster_state tinyint(1) NOT NULL, " +
+            "db_size integer(4) NOT NULL, " +
+            "cluster_status varchar(50) NOT NULL, " +
             "cluster_slots_assigned integer(4) NOT NULL, " +
             "cluster_slots_ok integer(4) NOT NULL, " +
             "cluster_slots_pfail integer(4) NOT NULL, " +
             "cluster_slots_fail integer(4) NOT NULL, " +
             "cluster_known_nodes integer(4) NOT NULL, " +
-            "cluster_size integer(2) NOT NULL, " +
+            "cluster_size integer(4) NOT NULL, " +
             "redis_password varchar(25) DEFAULT NULL, " +
             "installation_environment varchar(25) NOT NULL, " +
             "installation_type tinyint(1) NOT NULL, " +
@@ -88,46 +88,6 @@ public interface InitializationDao {
             "UNIQUE KEY (cluster_name) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createClusterTable();
-
-    @Select("create TABLE IF NOT EXISTS node_info_${clusterId} ( " +
-            "info_id integer(4) NOT NULL AUTO_INCREMENT, " +
-            "node varchar(50) NOT NULL, " +
-            "data_type varchar(50) NOT NULL, " +
-            "time_type varchar(50) NOT NULL, " +
-            "last_time tinyint(1) NOT NULL, " +
-            "response_time integer(4) NOT NULL, " +
-            "connected_clients integer(4) NOT NULL, " +
-            "client_longest_output_list integer(4) NOT NULL, " +
-            "client_biggest_input_buf integer(4) NOT NULL, " +
-            "blocked_clients integer(4) NOT NULL, " +
-            "used_memory integer(4) NOT NULL, " +
-            "used_memory_rss integer(4) NOT NULL, " +
-            "used_memory_overhead integer(4) NOT NULL, " +
-            "used_memory_dataset integer(4) NOT NULL, " +
-            "used_memory_dataset_perc integer(4) NOT NULL, " +
-            "mem_fragmentation_ratio double(6, 2) NOT NULL, " +
-            "total_connections_received integer(4) NOT NULL, " +
-            "connections_received integer(4) NOT NULL, " +
-            "rejected_connections integer(4) NOT NULL, " +
-            "total_commands_processed integer(4) NOT NULL, " +
-            "commands_processed integer(4) NOT NULL, " +
-            "instantaneous_ops_per_sec integer(4) NOT NULL, " +
-            "total_net_input_bytes integer(4) NOT NULL, " +
-            "net_input_bytes integer(4) NOT NULL, " +
-            "total_net_output_bytes integer(4) NOT NULL, " +
-            "net_output_bytes integer(4) NOT NULL, " +
-            " integer(4) NOT NULL, " +
-            "keyspace_keyspace_hitsmisses integer(4) NOT NULL, " +
-            "keyspace_hits_ratio double(6, 2) NOT NULL, " +
-            "used_cpu_sys double(6, 2) NOT NULL, " +
-            "used_cpu_user double(6, 2) NOT NULL, " +
-            "keys integer(4) NOT NULL, " +
-            "expires integer(4) NOT NULL, " +
-            "update_time datetime(0) NOT NULL, " +
-            "PRIMARY KEY (node_info_id), " +
-            "INDEX multiple_query (update_time, data_type, time_type, node) " +
-            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
-    void createNodeInfoTable(Integer clusterId);
 
     @Select("create TABLE IF NOT EXISTS `machine`( " +
             "machine_id integer(4) NOT NULL AUTO_INCREMENT, " +
