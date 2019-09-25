@@ -80,6 +80,10 @@
             <el-tag size="mini">{{ cluster.redisMode }}</el-tag>
           </div>
           <div class="text item">
+            Version:
+            <el-tag size="mini">{{ cluster.redisVersion }}</el-tag>
+          </div>
+          <div class="text item">
             Master:
             <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
           </div>
@@ -87,11 +91,6 @@
             Nodes:
             <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
           </div>
-          <div class="text item">
-            Version:
-            <el-tag size="mini">{{ cluster.redisVersion }}</el-tag>
-          </div>
-
           <div class="text item">
             Slots Assigned(ok/assigned):
             <el-tag size="mini">{{ cluster.clusterSlotsOk }}/{{ cluster.clusterSlotsAssigned }}</el-tag>
@@ -216,7 +215,10 @@ export default {
 
   methods: {
     toMonitor(clusterId) {
-      this.$router.push({ name: "redis-monitor" });
+      this.$router.push({
+        name: "redis-monitor",
+        params: { clusterId: clusterId }
+      });
     },
     toManage(clusterId) {
       this.$router.push({ name: "redis-manage" });
@@ -294,10 +296,10 @@ export default {
       });
     },
     deleteCluster(clusterId) {
-      let url = "/clsuter/deleteCluster";
+      let url = "/cluster/deleteCluster";
       API.post(
         url,
-        clusterId,
+        {clusterId: clusterId},
         response => {
           let result = response.data;
           if (result.code == 0) {
@@ -314,7 +316,6 @@ export default {
       );
     },
     closeEditClusterDialog(editClusterVisible) {
-      this.getClusterList(this.currentGroupId);
       this.editClusterVisible = editClusterVisible;
     }
   },

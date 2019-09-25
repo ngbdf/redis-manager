@@ -59,7 +59,7 @@ public class ClusterController {
      */
     @RequestMapping(value = "/importCluster", method = RequestMethod.POST)
     @ResponseBody
-    public Result importCluster(Cluster cluster) {
+    public Result importCluster(@RequestBody Cluster cluster) {
         Group group = groupService.getGroupById(cluster.getGroupId());
         if (group == null) {
             Result result = Result.failResult();
@@ -85,7 +85,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/updateCluster", method = RequestMethod.POST)
     @ResponseBody
-    public Result updateCluster(Cluster cluster) {
+    public Result updateCluster(@RequestBody Cluster cluster) {
         Group group = groupService.getGroupById(cluster.getGroupId());
         if (group == null) {
             Result result = Result.failResult();
@@ -105,9 +105,9 @@ public class ClusterController {
 
     @RequestMapping(value = "/deleteCluster", method = RequestMethod.POST)
     @ResponseBody
-    public Result deleteCluster(@RequestBody Integer clusterId) {
+    public Result deleteCluster(@RequestBody Cluster cluster) {
         try {
-            boolean result = clusterService.deleteCluster(clusterId);
+            boolean result = clusterService.deleteCluster(cluster.getClusterId());
             return result ? Result.successResult() : Result.failResult();
         } catch (Exception e) {
             logger.error("Delete cluster failed.", e);

@@ -1,165 +1,179 @@
 <template>
-  <div id="monitor" class="body-wrapper">
-    <el-row>
-      <el-col :span="24">
-        <div class="monitor-title">
-          <span>
-            <span class="cluster-name">Shanghai Online</span>
-            <i class="el-icon-sunny health"></i>
-          </span>
-          <div>
-            <el-button
-              size="mini"
-              type="primary"
-              title="Query"
-              icon="el-icon-search"
-              @click="handleQuery()"
-            >Query</el-button>
-            <el-button
-              size="mini"
-              type="warning"
-              icon="el-icon-ali-slow"
-              title="Slow log"
-              @click="slowLogVisible = true"
-            >Slow Log</el-button>
-          </div>
-        </div>
-      </el-col>
-    </el-row>
-    <div class="base-info-wrapper">
-      <div class="base-info-title-wrapper">
-        <span class="base-info-title">Base Info</span>
-        <i class="el-icon-refresh-left refresh"></i>
-      </div>
-      <el-row class="base-info">
-        <el-col :xl="6" :lg="8" :md="12" :sm="12">
-          <div class="base-info-item">
-            Mode:
-            <el-tag size="mini">cluster</el-tag>
-          </div>
-        </el-col>
-        <el-col :xl="6" :lg="8" :md="12" :sm="12">
-          <div class="base-info-item">
-            Version:
-            <el-tag size="mini">4.0.10</el-tag>
-          </div>
-        </el-col>
-        <el-col :xl="6" :lg="8" :md="12" :sm="12">
-          <div class="base-info-item">
-            Master:
-            <el-tag size="mini">2</el-tag>
-          </div>
-        </el-col>
-        <el-col :xl="6" :lg="8" :md="12" :sm="12">
-          <div class="base-info-item">
-            Node:
-            <el-tag size="mini">12</el-tag>
-          </div>
-        </el-col>
-        <el-col :xl="6" :lg="8" :md="12" :sm="12">
-          <div class="base-info-item">
-            Totol Keys:
-            <el-tag size="mini">45648</el-tag>
-          </div>
-        </el-col>
-        <el-col :xl="6" :lg="8" :md="12" :sm="12">
-          <div class="base-info-item">
-            Expire Keys:
-            <el-tag size="mini">4898</el-tag>
+  <div id="monitor">
+    <div class="body-wrapper">
+      <el-row>
+        <el-col :span="24">
+          <div class="monitor-title">
+            <span>
+              <span class="cluster-name">{{ cluster.clusterName }}</span>
+              <i class="el-icon-sunny health" v-if="cluster.clusterStatus == 'HEALTH'"></i>
+            </span>
+            <div>
+              <el-button
+                size="mini"
+                type="primary"
+                title="Query"
+                icon="el-icon-search"
+                @click="handleQuery(cluster.clusterId)"
+              >Query</el-button>
+              <el-button
+                size="mini"
+                type="warning"
+                icon="el-icon-ali-slow"
+                title="Slow log"
+                @click="slowLogVisible = true"
+              >Slow Log</el-button>
+            </div>
           </div>
         </el-col>
       </el-row>
-    </div>
-    <div class="monitor-condition-wrapper">
-      <div class="condition-wrapper">
-        <el-select
-          v-model="currentNode"
-          filterable
-          size="small"
-          placeholder="All"
-          class="condition-item"
-        >
-          <el-option
-            v-for="node in nodeList"
-            :key="node.label"
-            :label="node.label"
-            :value="node.value"
-          ></el-option>
-        </el-select>
-        <el-select
-          v-model="currentDataType"
-          size="small"
-          placeholder="Data Type"
-          class="condition-item"
-        >
-          <el-option
-            v-for="dataType in dataTypeList"
-            :key="dataType.label"
-            :label="dataType.label"
-            :value="dataType.value"
-          ></el-option>
-        </el-select>
-
-        <el-select
-          v-model="currentTimeType"
-          size="small"
-          placeholder="Time Type"
-          class="condition-item"
-        >
-          <el-option
-            v-for="timeType in timeTypeList"
-            :key="timeType.label"
-            :label="timeType.label"
-            :value="timeType.value"
-          ></el-option>
-        </el-select>
-        <div class="time-picker-wrapper">
-          <el-date-picker
-            width="1080px"
-            v-model="timeRange"
-            size="small"
-            type="datetimerange"
-            :picker-options="pickerOptions"
-            range-separator="-"
-            start-placeholder="Start Time"
-            end-placeholder="End Time"
-            align="right"
-          ></el-date-picker>
+      <div class="base-info-wrapper">
+        <div class="base-info-title-wrapper">
+          <span class="base-info-title">Base Info</span>
+          <i class="el-icon-refresh-left refresh" @click="getClusterById(nodeInfoParam.clusterId)"></i>
         </div>
+        <el-row class="base-info">
+          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+            <div class="base-info-item">
+              Mode:
+              <el-tag size="mini">{{ cluster.redisMode }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+            <div class="base-info-item">
+              Version:
+              <el-tag size="mini">{{ cluster.redisVersion }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+            <div class="base-info-item">
+              Master:
+              <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+            <div class="base-info-item">
+              Node:
+              <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+            <div class="base-info-item">
+              Total Keys:
+              <el-tag size="mini">{{ cluster.totalKeys }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+            <div class="base-info-item">
+              Total Expires:
+              <el-tag size="mini">{{ cluster.totalExpires }}</el-tag>
+            </div>
+          </el-col>
+        </el-row>
       </div>
-      <i class="el-icon-refresh-left refresh"></i>
     </div>
-    <el-row class="echart-wrapper" id="monitor-charts">
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
-        <div id="memory" class="chart"></div>
-      </el-col>
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
-        <div id="fragmentation-ratio" class="chart"></div>
-      </el-col>
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
-        <div id="connection" class="chart"></div>
-      </el-col>
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
-        <div id="client" class="chart"></div>
-      </el-col>
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
-        <div id="qps" class="chart"></div>
-      </el-col>
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
-        <div id="replica" class="chart"></div>
-      </el-col>
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
-        <div id="keyspace-hits-ration" class="chart"></div>
-      </el-col>
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
-        <div id="keys-expires" class="chart"></div>
-      </el-col>
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
-        <div id="cpu" class="chart"></div>
-      </el-col>
-    </el-row>
+    <div class="body-wrapper" style="margin-top: 20px;">
+      <div class="monitor-condition-wrapper">
+        <div class="condition-wrapper">
+          <el-select
+            v-model="currentNode"
+            filterable
+            size="small"
+            placeholder="All"
+            class="condition-item"
+          >
+            <el-option
+              v-for="node in nodeList"
+              :key="node.label"
+              :label="node.label"
+              :value="node.value"
+            ></el-option>
+          </el-select>
+          <el-select
+            v-model="nodeInfoParam.dataType"
+            size="small"
+            placeholder="Data Type"
+            class="condition-item"
+            style="width: 100px"
+            v-if="showDataType"
+          >
+            <el-option
+              v-for="dataType in dataTypeList"
+              :key="dataType.label"
+              :label="dataType.label"
+              :value="dataType.value"
+            ></el-option>
+          </el-select>
+
+          <el-select
+            v-model="nodeInfoParam.timeType"
+            size="small"
+            placeholder="Time Type"
+            class="condition-item"
+            style="width: 100px"
+          >
+            <el-option
+              v-for="timeType in timeTypeList"
+              :key="timeType.label"
+              :label="timeType.label"
+              :value="timeType.value"
+            ></el-option>
+          </el-select>
+          <div class="time-picker-wrapper">
+            <el-date-picker
+              width="1080px"
+              v-model="nodeInfoParam.timeRange"
+              size="small"
+              type="datetimerange"
+              :picker-options="pickerOptions"
+              range-separator="-"
+              start-placeholder="Start Time"
+              end-placeholder="End Time"
+              align="right"
+              :editable="false"
+              value-format="timestamp"
+              @change="pickerDateTime"
+            ></el-date-picker>
+          </div>
+        </div>
+        <i class="el-icon-refresh-left refresh" @click="getNodeInfoList(nodeInfoParam)"></i>
+      </div>
+      <el-row class="echart-wrapper" id="monitor-charts">
+        <el-col :xl="12" :lg="12" :md="24" :sm="24">
+          <div id="memory" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24">
+          <div id="fragmentation-ratio" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24">
+          <div id="connection" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24">
+          <div id="client" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24">
+          <div id="qps" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24">
+          <div id="replica" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24">
+          <div
+            id="keyspace-hits-ration"
+            class="chart"
+            :class="{ 'chart-no-data' : noNodeInfoData }"
+          ></div>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24">
+          <div id="keys-expires" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24">
+          <div id="cpu" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        </el-col>
+      </el-row>
+    </div>
     <el-dialog title="Query" :visible.sync="queryVisible" width="60%">
-      <query :clusterId="clusterId"></query>
+      <query :clusterId="cluster.clusterId"></query>
     </el-dialog>
 
     <el-dialog title="Slow Log" :visible.sync="slowLogVisible">
@@ -184,6 +198,9 @@ require("echarts/lib/component/tooltip"); // tooltip组件
 require("echarts/lib/component/title"); //  title组件
 require("echarts/lib/component/legend"); // legend组件
 import query from "@/components/tool/Query";
+import API from "@/api/api.js";
+import { formatTimeForChart } from "@/utils/time.js";
+import { isEmpty } from "@/utils/validate.js";
 export default {
   components: {
     query
@@ -191,52 +208,32 @@ export default {
   data() {
     return {
       queryVisible: false,
-      clusterId: "222",
-      nodeList: [
-        {
-          value: "192.168.5.12:8651",
-          label: "192.168.5.12:8651 slave"
-        },
-        {
-          value: "192.168.5.12:8652",
-          label: "192.168.5.12:8652 slave"
-        },
-        {
-          value: "192.168.5.12:8653",
-          label: "192.168.5.12:8653 master"
-        },
-        {
-          value: "192.168.5.12:8654",
-          label: "192.168.5.12:8654 master"
-        }
-      ],
+      cluster: {},
+      nodeList: [{ label: "ALL", value: "" }],
       dataTypeList: [
         {
-          value: "AVG",
-          label: "AVG"
+          value: 1,
+          label: "Avg"
         },
         {
-          value: "MAX",
-          label: "MAX"
+          value: 2,
+          label: "Max"
         },
         {
-          value: "MIN",
-          label: "MIN"
+          value: -1,
+          label: "Min"
         }
       ],
       timeTypeList: [
         {
-          value: "MINUTE",
-          label: "MINUTE"
+          value: 0,
+          label: "Minute"
         },
         {
-          value: "HOUR",
-          label: "HOUR"
+          value: 1,
+          label: "Hour"
         }
       ],
-      currentNode: "",
-      currentDataType: "",
-      currentTimeType: "",
       pickerOptions: {
         shortcuts: [
           {
@@ -340,108 +337,16 @@ export default {
           }
         ]
       },
-      timeRange: "",
-      nodeInfoList: [
-        {
-          connectedClients: 34,
-          clientLongestOutputList: 34,
-          clientBiggestInputBuf: 435,
-          blockedClients: 5,
-          usedMemory: 543,
-          usedMemoryRss: 222,
-          usedMemoryOverhead: 345,
-          usedMemoryDataset: 123,
-          usedMemoryDatasetPerc: 1,
-          memFragmentationRatio: 1,
-          totalConnectionsReceived: 34,
-          connectionsReceived: 534,
-          totalCommandsProcessed: 435,
-          commandsProcessed: 543,
-          instantaneousOpsPerSec: 86,
-          totalNetInputBytes: 2,
-          netInputBytes: 13,
-          totalNetOutputBytes: 352,
-          netOutputBytes: 1,
-          rejectedConnections: 32,
-          syncFull: 32,
-          syncPartialOk: 32,
-          syncPartialErr: 32,
-          keyspaceHits: 32,
-          keyspaceMisses: 32,
-          keyspaceHitsRatio: 0.2,
-          usedCpuSys: 32,
-          usedCpuUser: 32,
-          keys: 32345,
-          expires: 3224,
-          updateTime: "09/20"
-        },
-        {
-          connectedClients: 633,
-          clientLongestOutputList: 32,
-          clientBiggestInputBuf: 32,
-          blockedClients: 32,
-          usedMemory: 32,
-          usedMemoryRss: 32,
-          usedMemoryOverhead: 32,
-          usedMemoryDataset: 32,
-          usedMemoryDatasetPerc: 32,
-          memFragmentationRatio: 32,
-          totalConnectionsReceived: 32,
-          connectionsReceived: 32,
-          totalCommandsProcessed: 32,
-          commandsProcessed: 32,
-          instantaneousOpsPerSec: 32,
-          totalNetInputBytes: 32,
-          netInputBytes: 32,
-          totalNetOutputBytes: 32,
-          netOutputBytes: 32,
-          rejectedConnections: 32,
-          syncFull: 32,
-          syncPartialOk: 32,
-          syncPartialErr: 32,
-          keyspaceHits: 32,
-          keyspaceMisses: 32,
-          keyspaceHitsRatio: 0.5,
-          usedCpuSys: 32,
-          usedCpuUser: 32,
-          keys: 3244,
-          expires: 32,
-          updateTime: "09/21"
-        },
-        {
-          connectedClients: 666,
-          clientLongestOutputList: 32,
-          clientBiggestInputBuf: 32,
-          blockedClients: 32,
-          usedMemory: 32,
-          usedMemoryRss: 32,
-          usedMemoryOverhead: 32,
-          usedMemoryDataset: 32,
-          usedMemoryDatasetPerc: 32,
-          memFragmentationRatio: 32,
-          totalConnectionsReceived: 32,
-          connectionsReceived: 32,
-          totalCommandsProcessed: 32,
-          commandsProcessed: 32,
-          instantaneousOpsPerSec: 32,
-          totalNetInputBytes: 32,
-          netInputBytes: 32,
-          totalNetOutputBytes: 32,
-          netOutputBytes: 32,
-          rejectedConnections: 32,
-          syncFull: 32,
-          syncPartialOk: 32,
-          syncPartialErr: 32,
-          keyspaceHits: 5532,
-          keyspaceMisses: 32,
-          keyspaceHitsRatio: 1,
-          usedCpuSys: 32,
-          usedCpuUser: 32,
-          keys: 32555,
-          expires: 3233,
-          updateTime: "09/23"
-        }
-      ],
+      nodeInfoParam: {
+        node: "",
+        dataType: 1,
+        timeType: 0,
+        timeRange: [new Date() - 3600 * 1000, new Date()]
+      },
+      nodeInfoList: [],
+      currentNode: "",
+      showDataType: true,
+      noNodeInfoData: true,
       xAxis: [],
       echartsData: [],
       lineColor: ["#3888fa", "#FF005A", "#40c9c6", "#ffb980"],
@@ -453,12 +358,91 @@ export default {
       ],
       chartList: [],
       slowLogVisible: false,
-      slowLogList: []
+      slowLogList: [],
+      timer: 0
     };
   },
   methods: {
-    handleQuery() {
+    handleQuery(clusterId) {
       this.queryVisible = true;
+    },
+    pickerDateTime() {
+      let nodeInfoParam = this.nodeInfoParam;
+      let timeRange = nodeInfoParam.timeRange;
+      let startTime = timeRange[0];
+      let endTime = timeRange[1];
+      nodeInfoParam.startTime = startTime;
+      nodeInfoParam.endTime = endTime;
+      this.nodeInfoParam = nodeInfoParam;
+    },
+    getClusterById(clusterId) {
+      let url = "/cluster/getCluster/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.cluster = result.data;
+          } else {
+            console.log("Get cluster failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getAllNodeList(clusterId) {
+      let url = "/nodeManage/getAllNodeList/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            result.data.forEach(node => {
+              var hostAndPort = node.host + ":" + node.port;
+              var role = node.nodeRole.toLowerCase();
+              this.nodeList.push({
+                value: hostAndPort,
+                label: hostAndPort + " " + role
+              });
+            });
+          } else {
+            console.log(result.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getNodeInfoList(nodeInfoParam) {
+      console.log("=========================");
+      let url = "/nodeInfo/getNodeInfoList";
+      API.post(
+        url,
+        nodeInfoParam,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.nodeInfoList = result.data;
+            this.noNodeInfoData = false;
+            this.nodeInfoList.forEach(nodeInfo => {
+              nodeInfo.updateTime = formatTimeForChart(nodeInfo.updateTime);
+            });
+            // init data for echarts
+            this.buildEchartsData();
+            this.initCharts();
+          } else {
+            console.log("Get node info list failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     },
     initCharts() {
       var erd = elementResizeDetectorMaker();
@@ -523,6 +507,7 @@ export default {
       });
     },
     buildEchartsData() {
+      this.xAxis = [];
       let usedMemory = [];
       let usedMemoryRss = [];
       let usedMemoryOverhead = [];
@@ -702,12 +687,59 @@ export default {
         });
       }
       return series;
+    },
+    timedRefresh() {
+      if (this.timer) {
+        clearInterval(this.timer);
+      } else {
+        this.timer = setInterval(() => {
+          let nodeInfoParam = this.nodeInfoParam;
+          let timeRange = nodeInfoParam.timeRange;
+          let range = timeRange[1] - timeRange[0];
+          nodeInfoParam.timeRange = [new Date() - range, new Date()];
+          nodeInfoParam.startTime = new Date() - range;
+          nodeInfoParam.endTime = new Date();
+          this.nodeInfoParam = nodeInfoParam;
+          this.getClusterById(this.nodeInfoParam.clusterId);
+        }, 60000);
+      }
+    }
+  },
+  watch: {
+    // 深度监听 nodeInfoParam 变化
+    nodeInfoParam: {
+      handler: function() {
+        this.getNodeInfoList(this.nodeInfoParam);
+      },
+      deep: true
+    },
+    currentNode: {
+      handler: function() {
+        let nodeInfoParam = this.nodeInfoParam;
+        if (!isEmpty(this.currentNode)) {
+          this.showDataType = false;
+          nodeInfoParam.dataType = 0;
+        } else {
+          this.showDataType = true;
+          nodeInfoParam.dataType = 1;
+        }
+        console.log(this.nodeInfoParam);
+        nodeInfoParam.node = this.currentNode;
+        this.nodeInfoParam = nodeInfoParam;
+      }
     }
   },
   mounted() {
-    // init data for echarts
-    this.buildEchartsData();
-    this.initCharts();
+    let clusterId = this.$route.params.clusterId;
+    this.getClusterById(clusterId);
+    this.getAllNodeList(clusterId);
+    this.nodeInfoParam.clusterId = clusterId;
+    this.pickerDateTime();
+    this.getNodeInfoList(this.nodeInfoParam);
+    this.timedRefresh();
+  },
+  destroyed() {
+    clearInterval(this.timer);
   }
 };
 </script>
@@ -732,8 +764,7 @@ export default {
 
 .base-info-wrapper {
   font-size: 14px;
-  border-bottom: 1px solid #dcdfe6;
-  padding: 20px 0;
+  padding-top: 20px;
 }
 
 .base-info-title-wrapper {
@@ -748,16 +779,12 @@ export default {
   margin-right: 10px;
 }
 
-.base-info {
-  width: 50%;
-}
-
 .base-info-item {
   padding-bottom: 10px;
 }
 
 .monitor-condition-wrapper {
-  padding: 20px 0;
+  padding: 10px 0;
   font-size: 14px;
   display: flex;
   justify-content: space-between;
@@ -792,5 +819,9 @@ export default {
   height: 300px;
   width: 100%;
   padding: 20px 0;
+}
+
+.chart-no-data {
+  height: 0 !important;
 }
 </style>

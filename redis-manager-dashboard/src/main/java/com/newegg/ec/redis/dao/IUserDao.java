@@ -64,7 +64,7 @@ public interface IUserDao {
     @Select("SELECT COUNT(user_id) FROM group_user WHERE group_id = #{groupId}")
     int selectUserNumber(Integer groupId);
 
-    @Insert("INSERT INFO user (user_name, password, user_role, head_pic, email, mobile, update_time) " +
+    @Insert("INSERT INTO user (user_name, password, user_role, head_pic, email, mobile, update_time) " +
             "VALUES (#{userName}, #{password}, #{userRole}, #{headPic}, #{email}, #{mobile}, NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "userId", keyColumn = "user_id")
     int insertUser(User user);

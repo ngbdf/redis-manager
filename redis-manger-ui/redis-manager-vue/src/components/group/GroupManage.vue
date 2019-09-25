@@ -84,6 +84,7 @@ export default {
       this.$refs[group].validate(valid => {
         if (valid) {
           this.group.userId = store.getters.getUserId;
+          this.group.updateTime = new Date(this.group.updateTime);
           let url;
           if (isEmpty(this.group.groupId)) {
             url = "/group/addGroup";

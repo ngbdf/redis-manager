@@ -7,7 +7,8 @@ function apiAxios(method, url, params, successHandler, failureHandler) {
     axios({
         method: method,
         url: url,
-        params: params
+        data: method === 'POST' || method === 'PUT' ? params : null,
+        params: method === 'GET' || method === 'DELETE' ? params : null
         // baseURL: root,
         // withCredentials: true //开启cookies
     }).then(function (res) {
@@ -15,14 +16,6 @@ function apiAxios(method, url, params, successHandler, failureHandler) {
     }).catch(function (err) {
         failureHandler(err)
     })
-}
-
-export function get (url, params, successHandler, failureHandler) {
-    return apiAxios('GET', url, params, successHandler, failureHandler)
-}
-
-export function post (url, params, successHandler, failureHandler) {
-    return apiAxios('POST', url, params, successHandler, failureHandler)
 }
 
 export default {

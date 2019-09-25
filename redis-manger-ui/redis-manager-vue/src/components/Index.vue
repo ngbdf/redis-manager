@@ -124,7 +124,7 @@
       </el-aside>
       <el-main class="main" :class="{'main-margin':isCollapse}" style="margin-left: 200px;">
         <transition name="fade" mode="out-in">
-          <router-view></router-view>
+          <router-view v-if="active"></router-view>
         </transition>
       </el-main>
     </el-container>
@@ -150,6 +150,7 @@ export default {
   data() {
     return {
       isCollapse: false,
+      active: true,
       permission: true,
       importVisible: false,
       selectGroupId: store.getters.getCurrentGroup.groupId
@@ -275,7 +276,8 @@ export default {
       );
     },
     closeDialog(importVisible) {
-      console.log(importVisible);
+      this.active = false;
+      this.$nextTick(() => (this.active = true));
       this.importVisible = importVisible;
     }
   },

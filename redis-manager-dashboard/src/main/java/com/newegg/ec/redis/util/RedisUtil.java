@@ -21,7 +21,9 @@ public class RedisUtil {
 
     public static final String CLUSTER = "cluster";
 
-    /** nodes 相关 */
+    /**
+     * nodes 相关
+     */
     public static final String IP = "ip";
 
     public static final String PORT = "port";
@@ -29,12 +31,12 @@ public class RedisUtil {
     public static final String ROLE = "role";
 
     /**
-     *  还未取得信任的节点，当前正在与其进行握手
+     * 还未取得信任的节点，当前正在与其进行握手
      */
     public static final String HANDSHAKE = "handshake";
 
     /**
-     *  节点处于FAIL 状态, 大部分节点都无法与其取得联系将会将改节点由 PFAIL 状态升级至FAIL状态
+     * 节点处于FAIL 状态, 大部分节点都无法与其取得联系将会将改节点由 PFAIL 状态升级至FAIL状态
      */
     public static final String FAIL = "fail";
 
@@ -107,12 +109,16 @@ public class RedisUtil {
     }
 
     public static BigDecimal avg(List<BigDecimal> bigDecimalList) {
-        BigDecimal summation = new BigDecimal(bigDecimalList.size());
+        BigDecimal summation = new BigDecimal(0);
         BigDecimal size = new BigDecimal(bigDecimalList.size());
-        for (BigDecimal bigDecimal : bigDecimalList) {
-            summation.add(bigDecimal);
+        if (size.intValue() == 0) {
+            return summation;
         }
-        return summation.divide(size);
+        for (BigDecimal bigDecimal : bigDecimalList) {
+            summation = summation.add(bigDecimal);
+        }
+
+        return summation.divide(size, 2, BigDecimal.ROUND_HALF_UP);
     }
 
     public static BigDecimal max(List<BigDecimal> bigDecimalList) {

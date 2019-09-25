@@ -9,10 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -74,7 +71,7 @@ public class GroupController {
 
     @RequestMapping(value = "/addGroup", method = RequestMethod.POST)
     @ResponseBody
-    public Result addGroup(Group group) {
+    public Result addGroup(@RequestBody Group group) {
         try {
             groupService.addGroup(group);
             return Result.successResult();
@@ -86,7 +83,7 @@ public class GroupController {
 
     @RequestMapping(value = "/updateGroup", method = RequestMethod.POST)
     @ResponseBody
-    public Result updateGroup(Group group) {
+    public Result updateGroup(@RequestBody Group group) {
         boolean result = groupService.updateGroup(group);
         return result ? Result.successResult() : Result.failResult();
     }

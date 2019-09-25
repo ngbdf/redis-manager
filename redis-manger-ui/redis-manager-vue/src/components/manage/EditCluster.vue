@@ -160,13 +160,13 @@ export default {
           console.log(this.cluster);
           // axios
           let url = "";
-          console.log(this.clusterId)
+          console.log(this.clusterId);
           if (isEmpty(this.clusterId)) {
             url = "/cluster/importCluster";
           } else {
             url = "/cluster/updateCluster";
           }
-          console.log(url)
+          console.log(url);
           API.post(
             url,
             this.cluster,
@@ -174,7 +174,12 @@ export default {
               let result = response.data;
               if (result.code == 0) {
                 this.$refs[cluster].resetFields();
-                this.$router.push({ name: "dashboard" });
+                this.$router.push({
+                  name: "dashboard",
+                  params: {
+                    groupId: currentGroup.groupId
+                  }
+                });
                 this.$emit("closeDialog", false);
               } else {
                 console.error(result.message);

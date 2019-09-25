@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.annotation.MapperScans;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author Jay.H.Zou
  * @date 2019/7/17
  */
+@EnableScheduling
 @EnableTransactionManagement
 @MapperScan({"com.newegg.ec.redis.dao"})
 @SpringBootApplication

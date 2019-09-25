@@ -12,9 +12,9 @@ public class NodeInfoParam {
 
     private Integer clusterId;
 
-    private NodeInfoType.DataType dataType;
+    private Integer dataType;
 
-    private NodeInfoType.TimeType timeType;
+    private Integer timeType;
 
     private List<String> columnList;
 
@@ -27,11 +27,11 @@ public class NodeInfoParam {
     public NodeInfoParam() {
     }
 
-    public NodeInfoParam(Integer clusterId, NodeInfoType.TimeType timeType) {
+    public NodeInfoParam(Integer clusterId, Integer timeType) {
         this(clusterId, null, timeType, null);
     }
 
-    public NodeInfoParam(Integer clusterId, NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, String node) {
+    public NodeInfoParam(Integer clusterId, Integer dataType, Integer timeType, String node) {
         this(clusterId, dataType, timeType, null, null, node);
     }
 
@@ -39,7 +39,7 @@ public class NodeInfoParam {
         this(clusterId, null, null, startTime, endTime, null);
     }
 
-    public NodeInfoParam(Integer clusterId, NodeInfoType.DataType dataType, NodeInfoType.TimeType timeType, Timestamp startTime, Timestamp endTime, String node) {
+    public NodeInfoParam(Integer clusterId, Integer dataType, Integer timeType, Timestamp startTime, Timestamp endTime, String node) {
         this.clusterId = clusterId;
         this.dataType = dataType;
         this.timeType = timeType;
@@ -56,19 +56,19 @@ public class NodeInfoParam {
         this.clusterId = clusterId;
     }
 
-    public NodeInfoType.DataType getDataType() {
+    public Integer getDataType() {
         return dataType;
     }
 
-    public void setDataType(NodeInfoType.DataType dataType) {
+    public void setDataType(Integer dataType) {
         this.dataType = dataType;
     }
 
-    public NodeInfoType.TimeType getTimeType() {
+    public Integer getTimeType() {
         return timeType;
     }
 
-    public void setTimeType(NodeInfoType.TimeType timeType) {
+    public void setTimeType(Integer timeType) {
         this.timeType = timeType;
     }
 

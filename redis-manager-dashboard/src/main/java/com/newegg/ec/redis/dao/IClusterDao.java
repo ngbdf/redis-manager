@@ -59,7 +59,7 @@ public interface IClusterDao {
             "WHERE cluster_id = #{clusterId}")
     int updateCluster(Cluster cluster);
 
-    @Update("UPDATE cluster SET total_key = #{totalKey}, total_expires = #{totalExpires}, update_time = NOW() WHERE cluster_id = #{clusterId}")
+    @Update("UPDATE cluster SET total_keys = #{totalKeys}, total_expires = #{totalExpires}, update_time = NOW() WHERE cluster_id = #{clusterId}")
     int updateKeyspace(@Param("clusterId") Integer clusterId, @Param("totalKeys") Long totalKeys,  @Param("totalExpires") Long totalExpires);
 
     @Update("UPDATE cluster SET redis_password = #{redisPassword}, update_time = NOW() WHERE cluster_id = #{clusterId}")

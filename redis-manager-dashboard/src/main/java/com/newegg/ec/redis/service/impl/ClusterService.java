@@ -52,7 +52,7 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
-    public List<Cluster> getClusterListByGroupId(int groupId) {
+    public List<Cluster> getClusterListByGroupId(Integer groupId) {
         try {
             return clusterDao.selectClusterByGroupId(groupId);
         } catch (Exception e) {
@@ -62,7 +62,7 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
-    public Cluster getClusterById(int clusterId) {
+    public Cluster getClusterById(Integer clusterId) {
         try {
             return clusterDao.selectClusterById(clusterId);
         } catch (Exception e) {

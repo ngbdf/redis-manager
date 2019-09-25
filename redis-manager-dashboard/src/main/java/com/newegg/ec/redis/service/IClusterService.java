@@ -12,9 +12,9 @@ public interface IClusterService {
 
     List<Cluster> getAllClusterList();
 
-    List<Cluster> getClusterListByGroupId(int groupId);
+    List<Cluster> getClusterListByGroupId(Integer groupId);
 
-    Cluster getClusterById(int clusterId);
+    Cluster getClusterById(Integer clusterId);
 
     Cluster getClusterByName(String clusterName);
 

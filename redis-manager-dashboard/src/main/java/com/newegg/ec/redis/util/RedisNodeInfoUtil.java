@@ -191,7 +191,7 @@ public class RedisNodeInfoUtil {
             return 0;
         }
         BigDecimal bigDecimal = BigDecimal.valueOf(Long.parseLong(originalData));
-        BigDecimal divide = bigDecimal.divide(BIG_DECIMAL_1024).divide(BIG_DECIMAL_1024);
+        BigDecimal divide = bigDecimal.divide(BIG_DECIMAL_1024).divide(BIG_DECIMAL_1024, 3, BigDecimal.ROUND_HALF_UP);
         return divide.longValue();
     }
 
@@ -225,10 +225,12 @@ public class RedisNodeInfoUtil {
             nodeInfo.setUsedCpuSys(0);
             nodeInfo.setTotalCommandsProcessed(0);
         } else {
+            // TODO: 不止这些
             double keyspaceHitRatio = calculateKeyspaceHitRatio(lastTimeNodeInfo, nodeInfo);
             nodeInfo.setKeyspaceHitsRatio(keyspaceHitRatio);
             nodeInfo.setCommandsProcessed(nodeInfo.getTotalCommandsProcessed() - lastTimeNodeInfo.getTotalCommandsProcessed());
             nodeInfo.setUsedCpuSys(nodeInfo.getUsedCpuSys() - lastTimeNodeInfo.getUsedCpuSys());
+            nodeInfo.setUsedCpuUser(nodeInfo.getUsedCpuUser() - lastTimeNodeInfo.getUsedCpuUser());
         }
         return nodeInfo;
     }
@@ -236,7 +238,11 @@ public class RedisNodeInfoUtil {
     public static final double calculateKeyspaceHitRatio(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
         long keyspaceHit = nodeInfo.getKeyspaceHits() - lastTimeNodeInfo.getKeyspaceHits();
         long keyspaceMisses = nodeInfo.getKeyspaceMisses() - lastTimeNodeInfo.getKeyspaceMisses();
-        BigDecimal divide = BigDecimal.valueOf(keyspaceHit).divide(BigDecimal.valueOf(keyspaceHit + keyspaceMisses));
+        BigDecimal hitAndMiss = BigDecimal.valueOf(keyspaceHit + keyspaceMisses);
+        if (hitAndMiss.longValue() == 0) {
+            return 0;
+        }
+        BigDecimal divide = BigDecimal.valueOf(keyspaceHit).divide(hitAndMiss, 2, BigDecimal.ROUND_HALF_UP);
         return divide.doubleValue();
     }
 

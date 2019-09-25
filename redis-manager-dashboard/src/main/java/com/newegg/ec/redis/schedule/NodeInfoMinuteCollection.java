@@ -1,11 +1,12 @@
 package com.newegg.ec.redis.schedule;
 
 import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.NodeInfoType;
+import com.newegg.ec.redis.entity.TimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
+@Component
 public class NodeInfoMinuteCollection extends NodeInfoCollectionAbstract {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeInfoMinuteCollection.class);
@@ -24,13 +26,15 @@ public class NodeInfoMinuteCollection extends NodeInfoCollectionAbstract {
     @Scheduled(cron = "0 0/1 * * * ? ")
     @Override
     public void collect() {
+        logger.info("Start collecting node info (minute)...");
         try {
             List<Cluster> allClusterList = clusterService.getAllClusterList();
             if (allClusterList == null || allClusterList.isEmpty()) {
                 return;
             }
             for (Cluster cluster : allClusterList) {
-                threadPool.submit(new CollectNodeInfoTask(cluster, NodeInfoType.TimeType.MINUTE));
+                logger.info("Start collecting " + cluster.getClusterName() + " node info (minute)...");
+                threadPool.submit(new CollectNodeInfoTask(cluster, TimeType.MINUTE));
             }
         } catch (Exception e) {
             logger.error("Collect node info data failed.", e);

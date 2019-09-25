@@ -1,7 +1,7 @@
 package com.newegg.ec.redis.schedule;
 
 import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.NodeInfoType;
+import com.newegg.ec.redis.entity.TimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -30,7 +30,7 @@ public class NodeInfoHourCollection extends NodeInfoCollectionAbstract {
                 return;
             }
             for (Cluster cluster : allClusterList) {
-                threadPool.submit(new CollectNodeInfoTask(cluster, NodeInfoType.TimeType.HOUR));
+                threadPool.submit(new CollectNodeInfoTask(cluster, TimeType.HOUR));
             }
         } catch (Exception e) {
             logger.error("Collect node info data failed.", e);
