@@ -153,7 +153,7 @@ export default {
       active: true,
       permission: true,
       importVisible: false,
-      selectGroupId: store.getters.getCurrentGroup.groupId
+      selectGroupId: ""
     };
   },
   methods: {

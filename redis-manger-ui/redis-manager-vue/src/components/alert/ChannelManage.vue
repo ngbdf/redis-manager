@@ -12,7 +12,7 @@
         <el-table-column property="channelName" label="Channel Name" width="150px;"></el-table-column>
         <el-table-column label="Channel Type" width="200px;">
           <template slot-scope="scope">
-            <el-tag size="small" type="success" v-if="scope.row.channelType == '1'">WebChat Webhook</el-tag>
+            <el-tag size="small" type="success" v-if="scope.row.channelType == 1">WebChat Webhook</el-tag>
             <!-- <el-popover trigger="hover" placement="top">
               <p>姓名: {{ scope.row.name }}</p>
               <p>住址: {{ scope.row.address }}</p>

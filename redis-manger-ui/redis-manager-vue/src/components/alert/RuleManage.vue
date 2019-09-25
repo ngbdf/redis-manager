@@ -9,18 +9,18 @@
     <div>
       <el-table :data="ruleList">
         <el-table-column type="index" width="50"></el-table-column>
-        <el-table-column label="Alert Rule" width="200px;">
+        <el-table-column label="Alert Rule">
           <template
             slot-scope="scope"
           >{{scope.row.alertKey}}{{scope.row.compareType}}{{scope.row.alertValue}}</template>
         </el-table-column>
-        <el-table-column label="Rule Status" width="100px;">
+        <el-table-column label="Rule Status">
           <template slot-scope="scope">
             <el-tag size="small" type="success" v-if="scope.row.valid">valid</el-tag>
             <el-tag size="small" type="danger" v-else>Invalid</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Is Global" width="100px;">
+        <el-table-column label="Is Global">
           <template slot-scope="scope">
             <el-tag size="small" v-if="scope.row.global">Global</el-tag>
           </template>
@@ -50,7 +50,7 @@
       width="40%"
       :close-on-click-modal="false"
     >
-      <el-form :model="alertRule">
+      <el-form :model="alertRule" :rules="rules">
         <el-form-item label="Rule Key" label-width="120px">
           <el-select size="small" v-model="alertRule.ruleKey" placeholder="Select rule key">
             <el-option
@@ -72,7 +72,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Rule Value" label-width="120px">
-          <el-input size="small" v-model="alertRule.ruleValue" placeholder="Please enter rule value"></el-input>
+          <el-input
+            size="small"
+            v-model="alertRule.ruleValue"
+            placeholder="Please enter rule value"
+          ></el-input>
         </el-form-item>
         <el-form-item label="Check Cycle" label-width="120px">
           <el-select size="small" v-model="alertRule.checkCycle" placeholder="Select check circle">
@@ -106,6 +110,10 @@
 <script>
 export default {
   data() {
+    var validateRuleKey = (rule, value, callback) => {};
+    var validateCompareType = (rule, value, callback) => {};
+    var validateRuleValue = (rule, value, callback) => {};
+    var validateCheckCycle = (rule, value, callback) => {};
     return {
       ruleList: [
         {
@@ -121,8 +129,8 @@ export default {
       ],
       createVisible: false,
       alertRule: {
-          valid: true,
-          global: false
+        valid: true,
+        global: false
       },
       ruleKeyList: [
         {
@@ -141,7 +149,13 @@ export default {
           value: "5",
           label: "5min"
         }
-      ]
+      ],
+      rules: {
+        ruleKey: [],
+        compareType: [],
+        ruleValue: [],
+        checkCycle: []
+      }
     };
   },
   methods: {
