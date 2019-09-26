@@ -70,9 +70,9 @@ public interface InitializationDao {
             "redis_version varchar(25) NOT NULL, " +
             "image varchar(255) DEFAULT NULL, " +
             "initialized tinyint(1) NOT NULL, " +
-            "total_keys integer(4) NOT NULL, " +
-            "total_expires integer(4) NOT NULL, " +
-            "db_size integer(4) NOT NULL, " +
+            "total_keys bigint(20) NOT NULL, " +
+            "total_expires bigint(20) NOT NULL, " +
+            "db_size integer(8) NOT NULL, " +
             "cluster_status varchar(50) NOT NULL, " +
             "cluster_slots_assigned integer(4) NOT NULL, " +
             "cluster_slots_ok integer(4) NOT NULL, " +
@@ -80,7 +80,7 @@ public interface InitializationDao {
             "cluster_slots_fail integer(4) NOT NULL, " +
             "cluster_known_nodes integer(4) NOT NULL, " +
             "cluster_size integer(4) NOT NULL, " +
-            "redis_password varchar(25) DEFAULT NULL, " +
+            "redis_password varchar(50) DEFAULT NULL, " +
             "installation_environment varchar(25) NOT NULL, " +
             "installation_type tinyint(1) NOT NULL, " +
             "update_time datetime(0) NOT NULL, " +

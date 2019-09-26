@@ -33,7 +33,6 @@ public class NodeInfoMinuteCollection extends NodeInfoCollectionAbstract {
                 return;
             }
             for (Cluster cluster : allClusterList) {
-                logger.info("Start collecting " + cluster.getClusterName() + " node info (minute)...");
                 threadPool.submit(new CollectNodeInfoTask(cluster, TimeType.MINUTE));
             }
         } catch (Exception e) {

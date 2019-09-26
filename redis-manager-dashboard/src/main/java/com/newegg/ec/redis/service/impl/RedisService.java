@@ -45,11 +45,8 @@ public class RedisService implements IRedisService {
     @Autowired
     private IClusterService clusterService;
 
-    @Value("${redis-manager.monitor.slow-log-limit-all:5}")
-    private int slowLogLimitAll;
-
-    @Value("${redis-manager.monitor.slow-log-limit-single:100}")
-    private int slowLogLimitSingle;
+    @Value("${redis-manager.monitor.slow-log-limit:100}")
+    private int slowLogLimit;
 
     /**
      * db0:keys=31,expires=1,avg_ttl=1
@@ -162,27 +159,25 @@ public class RedisService implements IRedisService {
 
     @Override
     public List<RedisSlowLog> getRedisSlowLog(Cluster cluster, SlowLogParam slowLogParam) {
-        List<RedisSlowLog> redisSlowLogList = new ArrayList<>();
+
         List<RedisNode> nodeList;
-        int limit;
         String node = slowLogParam.getNode();
         if (Strings.isNullOrEmpty(node)) {
             nodeList = getRedisNodeList(cluster);
-            limit = slowLogLimitAll;
         } else {
             nodeList = new ArrayList<>();
             HostAndPort hostAndPort = nodesToHostAndPort(node);
             RedisNode redisNode = new RedisNode(hostAndPort.getHost(), hostAndPort.getPort());
             nodeList.add(redisNode);
-            limit = slowLogLimitSingle;
         }
+        List<RedisSlowLog> redisSlowLogList = new ArrayList<>();
         for (RedisNode redisNode : nodeList) {
             HostAndPort hostAndPort = null;
             try {
                 hostAndPort = new HostAndPort(redisNode.getHost(), redisNode.getPort());
                 RedisURI redisURI = new RedisURI(hostAndPort, cluster.getRedisPassword());
                 RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
-                List<Slowlog> slowLogs = redisClient.getSlowLog(limit);
+                List<Slowlog> slowLogs = redisClient.getSlowLog(slowLogLimit);
                 for (Slowlog slowLog : slowLogs) {
                     RedisSlowLog redisSlowLog = new RedisSlowLog(hostAndPort, slowLog);
                     redisSlowLogList.add(redisSlowLog);
@@ -220,14 +215,13 @@ public class RedisService implements IRedisService {
     @Override
     public AutoCommandResult query(Cluster cluster, AutoCommandParam autoCommandParam) {
         // standalone or cluster
-        AutoCommandResult result = null;
         try {
             IDatabaseCommand client = buildDatabaseCommandClient(cluster);
-            result = client.query(autoCommandParam);
+            return client.query(autoCommandParam);
         } catch (Exception e) {
-            logger.error("Auto query failed, " + cluster.getClusterName(), e);
+            logger.error("Auto query failed, cluster name = " + cluster.getClusterName(), e);
+            return null;
         }
-        return result;
     }
 
     @Override

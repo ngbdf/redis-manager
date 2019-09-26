@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class RedisSlowLog {
 
-    private HostAndPort hostAndPort;
+    private String node;
 
     private Timestamp dateTime;
 
@@ -25,8 +25,8 @@ public class RedisSlowLog {
     private String command;
 
     public RedisSlowLog(HostAndPort hostAndPort, Slowlog slowlog) {
-        this.hostAndPort = hostAndPort;
-        this.dateTime = new Timestamp(slowlog.getTimeStamp());
+        this.node = hostAndPort.toString();
+        this.dateTime = new Timestamp(slowlog.getTimeStamp() * 1000);
         this.executionTime = slowlog.getExecutionTime();
         List<String> args = slowlog.getArgs();
         this.type = args.get(0);
@@ -34,13 +34,12 @@ public class RedisSlowLog {
         this.command = Joiner.on(" ").skipNulls().join(commands);
     }
 
-
-    public HostAndPort getHostAndPort() {
-        return hostAndPort;
+    public String getNode() {
+        return node;
     }
 
-    public void setHostAndPort(HostAndPort hostAndPort) {
-        this.hostAndPort = hostAndPort;
+    public void setNode(String node) {
+        this.node = node;
     }
 
     public Timestamp getDateTime() {
@@ -73,16 +72,5 @@ public class RedisSlowLog {
 
     public void setCommand(String command) {
         this.command = command;
-    }
-
-    @Override
-    public String toString() {
-        return "RedisSlowLog{" +
-                "hostAndPort=" + hostAndPort +
-                ", dateTime=" + dateTime +
-                ", executionTime=" + executionTime +
-                ", type='" + type + '\'' +
-                ", command='" + command + '\'' +
-                '}';
     }
 }

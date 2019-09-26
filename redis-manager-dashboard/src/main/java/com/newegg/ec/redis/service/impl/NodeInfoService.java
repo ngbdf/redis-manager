@@ -200,9 +200,9 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
             nodeInfoParam.setEndTime(endTime);
             nodeInfoParam.setStartTime(startTime);
         }
-        if (TimeUtil.moreThanTwoDays(startTime, endTime)) {
+        /*if (TimeUtil.moreThanTwoDays(startTime, endTime)) {
             nodeInfoParam.setTimeType(TimeType.HOUR);
-        }
+        }*/
         return nodeInfoParam;
     }
 

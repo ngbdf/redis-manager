@@ -78,36 +78,36 @@ public interface INodeInfoDao {
             "`time_type` integer(2) NOT NULL, " +
             "`last_time` tinyint(1) NOT NULL, " +
             "`response_time` integer(4) NOT NULL, " +
-            "`connected_clients` integer(4) NOT NULL, " +
-            "`client_longest_output_list` integer(4) NOT NULL, " +
-            "`client_biggest_input_buf` integer(4) NOT NULL, " +
-            "`blocked_clients` integer(4) NOT NULL, " +
-            "`used_memory` integer(4) NOT NULL, " +
-            "`used_memory_rss` integer(4) NOT NULL, " +
-            "`used_memory_overhead` integer(4) NOT NULL, " +
-            "`used_memory_dataset` integer(4) NOT NULL, " +
-            "`used_memory_dataset_perc` integer(4) NOT NULL, " +
+            "`connected_clients` bigint(20) NOT NULL, " +
+            "`client_longest_output_list` bigint(20) NOT NULL, " +
+            "`client_biggest_input_buf` bigint(20) NOT NULL, " +
+            "`blocked_clients` bigint(20) NOT NULL, " +
+            "`used_memory` bigint(20) NOT NULL, " +
+            "`used_memory_rss` bigint(20) NOT NULL, " +
+            "`used_memory_overhead` bigint(20) NOT NULL, " +
+            "`used_memory_dataset` bigint(20) NOT NULL, " +
+            "`used_memory_dataset_perc` double(6, 2) NOT NULL, " +
             "`mem_fragmentation_ratio` double(6, 2) NOT NULL, " +
-            "`total_connections_received` integer(4) NOT NULL, " +
-            "`connections_received` integer(4) NOT NULL, " +
-            "`rejected_connections` integer(4) NOT NULL, " +
-            "`total_commands_processed` integer(4) NOT NULL, " +
-            "`commands_processed` integer(4) NOT NULL, " +
-            "`instantaneous_ops_per_sec` integer(4) NOT NULL, " +
-            "`total_net_input_bytes` integer(4) NOT NULL, " +
-            "`net_input_bytes` integer(4) NOT NULL, " +
-            "`total_net_output_bytes` integer(4) NOT NULL, " +
-            "`net_output_bytes` integer(4) NOT NULL, " +
-            "`sync_full` integer(2) NOT NULL, " +
-            "`sync_partial_ok` integer(2) NOT NULL, " +
-            "`sync_partial_err` integer(2) NOT NULL, " +
-            "`keyspace_misses` integer(4) NOT NULL, " +
-            "`keyspace_hits` integer(4) NOT NULL, " +
+            "`total_connections_received` bigint(20) NOT NULL, " +
+            "`connections_received` bigint(20) NOT NULL, " +
+            "`rejected_connections` bigint(20) NOT NULL, " +
+            "`total_commands_processed` bigint(20) NOT NULL, " +
+            "`commands_processed` bigint(20) NOT NULL, " +
+            "`instantaneous_ops_per_sec` bigint(20) NOT NULL, " +
+            "`total_net_input_bytes` bigint(20) NOT NULL, " +
+            "`net_input_bytes` bigint(20) NOT NULL, " +
+            "`total_net_output_bytes` bigint(20) NOT NULL, " +
+            "`net_output_bytes` bigint(20) NOT NULL, " +
+            "`sync_full` integer(4) NOT NULL, " +
+            "`sync_partial_ok` integer(4) NOT NULL, " +
+            "`sync_partial_err` integer(4) NOT NULL, " +
+            "`keyspace_misses` bigint(20) NOT NULL, " +
+            "`keyspace_hits` bigint(20) NOT NULL, " +
             "`keyspace_hits_ratio` double(6, 2) NOT NULL, " +
-            "`used_cpu_sys` double(6, 2) NOT NULL, " +
-            "`used_cpu_user` double(6, 2) NOT NULL, " +
-            "`keys` integer(4) NOT NULL, " +
-            "`expires` integer(4) NOT NULL, " +
+            "`used_cpu_sys` double(20, 2) NOT NULL, " +
+            "`used_cpu_user` double(20, 2) NOT NULL, " +
+            "`keys` integer(8) NOT NULL, " +
+            "`expires` integer(8) NOT NULL, " +
             "`update_time` datetime(0) NOT NULL, " +
             "PRIMARY KEY (info_id), " +
             "INDEX `multiple_query` (`update_time`, `data_type`, `time_type`, `node`) " +

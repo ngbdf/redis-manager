@@ -76,7 +76,6 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         public void run() {
             try {
                 int clusterId = cluster.getClusterId();
-                String redisMode = cluster.getRedisMode();
                 List<NodeInfo> nodeInfoList = getNodeInfoList(cluster, timeType);
                 // 计算 AVG、MAX、MIN
                 Map<String, List<BigDecimal>> nodeInfoDataMap = nodeInfoDataToMap(nodeInfoList);
@@ -86,28 +85,28 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
                 NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType);
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
                 // 计算 total keys 和 total expires, 这里不适用 dbsize 命令
-                long totalKeys = 0;
-                long totalExpires = 0;
-                if (STANDALONE.equalsIgnoreCase(redisMode)) {
-                    for (NodeInfo nodeInfo : nodeInfoList) {
-                        if (NodeRole.MASTER.equals(nodeInfo.getRole())) {
-                            totalKeys = nodeInfo.getKeys();
-                            totalExpires = nodeInfo.getExpires();
-                        }
-                    }
-                } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
-                    for (NodeInfo nodeInfo : nodeInfoList) {
-                        totalKeys += nodeInfo.getKeys();
-                        totalExpires += nodeInfo.getExpires();
-                    }
-                }
-                cluster.setTotalKeys(totalKeys);
-                cluster.setTotalExpires(totalExpires);
-                clusterService.updateClusterKeys(cluster);
+                updateClusterKeyspace(cluster, nodeInfoList);
             } catch (Exception e) {
                 logger.error("Collect " + timeType + " data for " + cluster.getClusterName() + " failed.", e);
             }
+        }
+    }
 
+    private void updateClusterKeyspace(Cluster cluster, List<NodeInfo> nodeInfoList) {
+        try {
+            long totalKeys = 0;
+            long totalExpires = 0;
+            for (NodeInfo nodeInfo : nodeInfoList) {
+                if (NodeRole.MASTER.equals(nodeInfo.getRole())) {
+                    totalKeys += nodeInfo.getKeys();
+                    totalExpires += nodeInfo.getExpires();
+                }
+            }
+            cluster.setTotalKeys(totalKeys);
+            cluster.setTotalExpires(totalExpires);
+            clusterService.updateClusterKeys(cluster);
+        } catch (Exception e) {
+            logger.error("Update cluster keyspace failed, cluster name = " + cluster.getClusterName(), e);
         }
     }
 

@@ -161,8 +161,14 @@
         </el-card>
       </el-col>
     </el-row>
-    <el-dialog title="Query" :visible.sync="queryVisible" width="60%">
-      <query :clusterId="clusterId"></query>
+    <el-dialog
+      title="Query"
+      :visible.sync="queryVisible"
+      v-if="queryVisible"
+      :close-on-click-modal="false"
+      width="60%"
+    >
+      <query :clusterId="queryClusterId"></query>
     </el-dialog>
     <el-dialog
       title="Edit Cluster"
@@ -170,7 +176,7 @@
       :close-on-click-modal="false"
       v-if="editClusterVisible"
     >
-      <editCluster @closeDialog="closeEditClusterDialog" :clusterId="clusterId"></editCluster>
+      <editCluster @closeDialog="closeEditClusterDialog" :clusterId="editClusterId"></editCluster>
     </el-dialog>
     <el-dialog title="Delete Cluster" :visible.sync="deleteClusterVisible" width="30%">
       <span>
@@ -198,9 +204,6 @@ export default {
   },
   data() {
     return {
-      queryVisible: false,
-      editClusterVisible: false,
-      deleteClusterVisible: false,
       overview: {
         userNumber: 0,
         healthNumber: 0,
@@ -208,8 +211,12 @@ export default {
         alertNumber: 0
       },
       clusterList: [],
-      clusterId: "",
-      cluster: {}
+      cluster: {},
+      queryClusterId: "",
+      queryVisible: false,
+      editClusterId: "",
+      editClusterVisible: false,
+      deleteClusterVisible: false
     };
   },
 
@@ -226,7 +233,8 @@ export default {
     toAlertManage(clusterId) {
       this.$router.push({ name: "alert-manage" });
     },
-    handleQuery() {
+    handleQuery(clusterId) {
+      this.queryClusterId = clusterId;
       this.queryVisible = true;
     },
     getOverview(groupId) {
@@ -284,7 +292,7 @@ export default {
       }
     },
     editCluster(clusterId) {
-      this.clusterId = clusterId;
+      this.editClusterId = clusterId;
       this.editClusterVisible = true;
     },
     showDeleteCluster(clusterId) {
@@ -299,7 +307,7 @@ export default {
       let url = "/cluster/deleteCluster";
       API.post(
         url,
-        {clusterId: clusterId},
+        { clusterId: clusterId },
         response => {
           let result = response.data;
           if (result.code == 0) {
@@ -340,6 +348,9 @@ export default {
 </script>
 
 <style scoped>
+.card-panel-group {
+  margin-bottom: 0px !important;
+}
 .card-panel {
   margin-bottom: 1.5rem;
   padding: 1rem;
@@ -438,7 +449,7 @@ export default {
 }
 
 .box-card {
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
 }
 
 .box-card-title {

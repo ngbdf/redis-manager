@@ -185,6 +185,7 @@ public class RedisClient implements IRedisClient {
     @Override
     public AutoCommandResult query(AutoCommandParam autoCommandParam) {
         String key = autoCommandParam.getKey();
+        // for future
         int count = autoCommandParam.getCount();
         int database = autoCommandParam.getDatabase();
         String type = type(key);
@@ -199,13 +200,13 @@ public class RedisClient implements IRedisClient {
                 value = jedis.hgetAll(key);
                 break;
             case TYPE_LIST:
-                value = jedis.lrange(key, 0, count);
+                value = jedis.lrange(key, 0, -1);
                 break;
             case TYPE_SET:
-                value = jedis.srandmember(key, count);
+                value = jedis.srandmember(key, -1);
                 break;
             case TYPE_ZSET:
-                value = jedis.zrangeWithScores(key, 0, count);
+                value = jedis.zrangeWithScores(key, 0, -1);
                 break;
             default:
                 break;

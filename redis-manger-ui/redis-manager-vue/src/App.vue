@@ -24,6 +24,7 @@ body {
 .body-wrapper {
   padding: 20px;
   background-color: #ffffff;
+  border-radius: 4px;
 }
 
 .el-textarea__inner,

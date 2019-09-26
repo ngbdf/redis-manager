@@ -28,42 +28,42 @@
         </el-col>
       </el-row>
       <div class="base-info-wrapper">
-        <div class="base-info-title-wrapper">
+        <!-- <div class="base-info-title-wrapper">
           <span class="base-info-title">Base Info</span>
           <i class="el-icon-refresh-left refresh" @click="getClusterById(nodeInfoParam.clusterId)"></i>
-        </div>
+        </div>-->
         <el-row class="base-info">
-          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
               Mode:
               <el-tag size="mini">{{ cluster.redisMode }}</el-tag>
             </div>
           </el-col>
-          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
               Version:
               <el-tag size="mini">{{ cluster.redisVersion }}</el-tag>
             </div>
           </el-col>
-          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
               Master:
               <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
             </div>
           </el-col>
-          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
               Node:
               <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
             </div>
           </el-col>
-          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
               Total Keys:
               <el-tag size="mini">{{ cluster.totalKeys }}</el-tag>
             </div>
           </el-col>
-          <el-col :xl="2" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
               Total Expires:
               <el-tag size="mini">{{ cluster.totalExpires }}</el-tag>
@@ -72,7 +72,7 @@
         </el-row>
       </div>
     </div>
-    <div class="body-wrapper" style="margin-top: 20px;">
+    <div style="margin-top: 20px;">
       <div class="monitor-condition-wrapper">
         <div class="condition-wrapper">
           <el-select
@@ -139,50 +139,88 @@
         <i class="el-icon-refresh-left refresh" @click="getNodeInfoList(nodeInfoParam)"></i>
       </div>
       <el-row class="echart-wrapper" id="monitor-charts">
-        <el-col :xl="12" :lg="12" :md="24" :sm="24">
-          <div id="memory" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="memory" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
         </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24">
-          <div id="fragmentation-ratio" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div
+              id="fragmentation-ratio"
+              class="chart"
+              :class="{ 'chart-no-data' : noNodeInfoData }"
+            ></div>
+          </el-card>
         </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24">
-          <div id="connection" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="connection" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
         </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24">
-          <div id="client" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="client" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
         </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24">
-          <div id="qps" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="qps" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
         </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24">
-          <div id="replica" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="replica" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
         </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24">
-          <div
-            id="keyspace-hits-ration"
-            class="chart"
-            :class="{ 'chart-no-data' : noNodeInfoData }"
-          ></div>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div
+              id="keyspace-hits-ration"
+              class="chart"
+              :class="{ 'chart-no-data' : noNodeInfoData }"
+            ></div>
+          </el-card>
         </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24">
-          <div id="keys-expires" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="keys-expires" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
         </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24">
-          <div id="cpu" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="cpu" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
         </el-col>
       </el-row>
     </div>
-    <el-dialog title="Query" :visible.sync="queryVisible" width="60%">
+    <el-dialog title="Query" :visible.sync="queryVisible" :close-on-click-modal="false" width="60%">
       <query :clusterId="cluster.clusterId"></query>
     </el-dialog>
 
-    <el-dialog title="Slow Log" :visible.sync="slowLogVisible">
-      <el-table :data="slowLogList">
-        <el-table-column property="node" label="Node"></el-table-column>
-        <el-table-column property="updateTime" label="Time"></el-table-column>
-        <el-table-column property="runTime" label="Run Time"></el-table-column>
-        <el-table-column property="type" label="Type"></el-table-column>
-        <el-table-column property="command" label="Command"></el-table-column>
+    <el-dialog title="Slow Log" :visible.sync="slowLogVisible" :close-on-click-modal="false" width="80%">
+      <el-select
+        v-model="slowLogParam.node"
+        filterable
+        size="small"
+        placeholder="Please select node"
+        class="condition-item"
+        style="margin-bottom: 20px;"
+      >
+        <el-option
+          v-for="node in nodeList"
+          :key="node.label"
+          :label="node.label"
+          :value="node.value"
+        ></el-option>
+      </el-select>
+      <el-table :data="slowLogList" :default-sort="{prop: 'dateTime', order: 'descending'}">
+        <el-table-column type="index" width="50"></el-table-column>
+        <el-table-column prop="node" label="Node" sortable></el-table-column>
+        <el-table-column prop="type" label="Type"></el-table-column>
+        <el-table-column prop="command" label="Command"></el-table-column>
+        <el-table-column prop="executionTime" label="Execution Time(μs)" sortable></el-table-column>
+        <el-table-column prop="dateTime" label="Date Time" sortable></el-table-column>
       </el-table>
     </el-dialog>
   </div>
@@ -199,7 +237,7 @@ require("echarts/lib/component/title"); //  title组件
 require("echarts/lib/component/legend"); // legend组件
 import query from "@/components/tool/Query";
 import API from "@/api/api.js";
-import { formatTimeForChart } from "@/utils/time.js";
+import { formatTime, formatTimeForChart } from "@/utils/time.js";
 import { isEmpty } from "@/utils/validate.js";
 export default {
   components: {
@@ -349,7 +387,7 @@ export default {
       noNodeInfoData: true,
       xAxis: [],
       echartsData: [],
-      lineColor: ["#3888fa", "#FF005A", "#40c9c6", "#ffb980"],
+      lineColor: ["#3888fa", "#FF005A", "#ffb980", "#40c9c6"],
       areaStyleColor: [
         "rgba(56, 136, 250, 0.1)",
         "rgba(250, 0, 90, 0.1)",
@@ -359,7 +397,9 @@ export default {
       chartList: [],
       slowLogVisible: false,
       slowLogList: [],
-      timer: 0
+      timer: 0,
+      slowLogParam: {},
+      slowLogList: []
     };
   },
   methods: {
@@ -419,8 +459,8 @@ export default {
       );
     },
     getNodeInfoList(nodeInfoParam) {
-      console.log("=========================");
-      let url = "/nodeInfo/getNodeInfoList";
+      
+      let url = "/monitor/getNodeInfoList";
       API.post(
         url,
         nodeInfoParam,
@@ -703,6 +743,29 @@ export default {
           this.getClusterById(this.nodeInfoParam.clusterId);
         }, 60000);
       }
+    },
+    getSlowLogList(slowLogParam) {
+      console.log("=========================");
+      let url = "/monitor/getSlowLogList";
+      API.post(
+        url,
+        slowLogParam,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let slowLogList = result.data;
+            slowLogList.forEach(slowLog => {
+             slowLog.dateTime = formatTime(slowLog.dateTime)
+            })
+            this.slowLogList = slowLogList;
+          } else {
+            console.log(result.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
   },
   watch: {
@@ -727,6 +790,12 @@ export default {
         nodeInfoParam.node = this.currentNode;
         this.nodeInfoParam = nodeInfoParam;
       }
+    },
+    slowLogParam: {
+      handler: function() {
+        this.getSlowLogList(this.slowLogParam);
+      },
+      deep: true
     }
   },
   mounted() {
@@ -734,6 +803,7 @@ export default {
     this.getClusterById(clusterId);
     this.getAllNodeList(clusterId);
     this.nodeInfoParam.clusterId = clusterId;
+    this.slowLogParam.clusterId = clusterId;
     this.pickerDateTime();
     this.getNodeInfoList(this.nodeInfoParam);
     this.timedRefresh();
@@ -784,11 +854,13 @@ export default {
 }
 
 .monitor-condition-wrapper {
-  padding: 10px 0;
+  padding: 20px;
   font-size: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: #ffffff;
+  border-radius: 4px;
 }
 
 .refresh {
@@ -815,10 +887,17 @@ export default {
   float: right;
 }
 
+.echart-wrapper {
+  margin: 10px -5px;
+}
+
+.box-card {
+  margin: 5px;
+}
+
 .chart {
   height: 300px;
   width: 100%;
-  padding: 20px 0;
 }
 
 .chart-no-data {
