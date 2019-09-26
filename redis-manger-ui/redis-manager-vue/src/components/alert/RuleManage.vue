@@ -47,11 +47,11 @@
     <el-dialog
       title="Create Rule"
       :visible.sync="createVisible"
-      width="40%"
+      width="50%"
       :close-on-click-modal="false"
     >
-      <el-form :model="alertRule" :rules="rules">
-        <el-form-item label="Rule Key" label-width="120px">
+      <el-form :model="alertRule" ref="alertRule" :rules="rules" label-width="135px">
+        <el-form-item label="Rule Key" prop="ruleKey">
           <el-select size="small" v-model="alertRule.ruleKey" placeholder="Select rule key">
             <el-option
               v-for="item in ruleKeyList"
@@ -61,7 +61,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="Compare Type" label-width="120px">
+        <el-form-item label="Compare Type" prop="compareType">
           <el-select size="small" v-model="alertRule.compareType" placeholder="Select compare type">
             <el-option
               v-for="item in compareTypeList"
@@ -71,14 +71,15 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="Rule Value" label-width="120px">
+        <el-form-item label="Rule Value" prop="ruleValue">
           <el-input
             size="small"
             v-model="alertRule.ruleValue"
             placeholder="Please enter rule value"
+            style="width: 215px;"
           ></el-input>
         </el-form-item>
-        <el-form-item label="Check Cycle" label-width="120px">
+        <el-form-item label="Check Cycle" prop="checkCycle">
           <el-select size="small" v-model="alertRule.checkCycle" placeholder="Select check circle">
             <el-option
               v-for="item in checkCycleList"
@@ -88,32 +89,53 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="Is Valid" label-width="120px">
+        <el-form-item label="Is Valid" prop="isValid">
           <el-switch v-model="alertRule.valid"></el-switch>
         </el-form-item>
-        <el-form-item label="Is Global" label-width="120px">
+        <el-form-item label="Is Global" prop="isGlobal">
           <el-switch v-model="alertRule.global"></el-switch>
         </el-form-item>
-        <el-form-item label="Rule Info" label-width="120px">
+        <el-form-item label="Rule Info" prop="ruleInfo">
           <el-input size="small" v-model="alertRule.ruleInfo" placeholder="Please enter rule info"></el-input>
         </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="createVisible = false">Cancel</el-button>
-        <el-button size="small" type="primary" @click="dialogFormVisible = false">Confirm</el-button>
+        <el-button size="small" type="primary" @click="saveAlertRule('alertRule')">Confirm</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
+import { isEmpty } from "@/utils/validate.js";
 export default {
   data() {
-    var validateRuleKey = (rule, value, callback) => {};
-    var validateCompareType = (rule, value, callback) => {};
-    var validateRuleValue = (rule, value, callback) => {};
-    var validateCheckCycle = (rule, value, callback) => {};
+    var validateRuleKey = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please select rule key"));
+      }
+      callback();
+    };
+    var validateCompareType = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please select compare type"));
+      }
+      callback();
+    };
+    var validateRuleValue = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please select rule value"));
+      }
+      callback();
+    };
+    var validateCheckCycle = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please select check cycle"));
+      }
+      callback();
+    };
     return {
       ruleList: [
         {
@@ -151,10 +173,18 @@ export default {
         }
       ],
       rules: {
-        ruleKey: [],
-        compareType: [],
-        ruleValue: [],
-        checkCycle: []
+        ruleKey: [
+          { required: true, validator: validateRuleKey, trigger: "blur" }
+        ],
+        compareType: [
+          { required: true, validator: validateCompareType, trigger: "blur" }
+        ],
+        ruleValue: [
+          { required: true, validator: validateRuleValue, trigger: "blur" }
+        ],
+        checkCycle: [
+          { required: true, validator: validateCheckCycle, trigger: "blur" }
+        ]
       }
     };
   },
@@ -168,7 +198,15 @@ export default {
     handleDelete(index, row) {
       console.log(index, row);
     },
-    handleClick() {}
+    handleClick() {},
+    saveAlertRule(alertRule) {
+      this.$refs[alertRule].validate(valid => {
+        console.log(valid);
+        if (valid) {
+          console.log(valid);
+        }
+      });
+    }
   }
 };
 </script>

@@ -9,7 +9,7 @@
     <div>
       <el-table :data="channelList" style="width: 100%">
         <el-table-column type="index" width="50"></el-table-column>
-        <el-table-column property="channelName" label="Channel Name" width="150px;"></el-table-column>
+        <el-table-column prop="channelName" label="Channel Name" width="150px;"></el-table-column>
         <el-table-column label="Channel Type" width="200px;">
           <template slot-scope="scope">
             <el-tag size="small" type="success" v-if="scope.row.channelType == 1">WebChat Webhook</el-tag>
@@ -22,8 +22,8 @@
             </el-popover>-->
           </template>
         </el-table-column>
-        <el-table-column property="channelInfo" label="Info"></el-table-column>
-        <el-table-column property="updateTime" label="Time"></el-table-column>
+        <el-table-column prop="channelInfo" label="Info"></el-table-column>
+        <el-table-column prop="updateTime" label="Time"></el-table-column>
         <el-table-column label="Operation" width="250px;">
           <template slot-scope="scope">
             <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button>
@@ -120,75 +120,71 @@ import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
 export default {
   data() {
-    var validateChannelName = (rule, value, callback) => {
+    var validateNotEmpty = (rule, value, callback) => {
       if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter channel name"));
-      } else {
-        let url = "/channel/validateChannelName/" + value;
-        API.get(
-          url,
-          null,
-          response => {
-            if (response.data.code != 0) {
-              return callback(new Error(value + " has exist"));
-            } else {
-              callback();
-            }
-          },
-          err => {
-            return callback(new Error("Network error, " + err));
-          }
-        );
+        return callback(new Error("Value can't be empty"));
       }
+      callback();
+    };
+    var validateChannelName = (rule, value, callback) => {
+      let url = "/channel/validateChannelName/" + value;
+      API.get(
+        url,
+        null,
+        response => {
+          if (response.data.code != 0) {
+            return callback(new Error(value + " has exist"));
+          } else {
+            callback();
+          }
+        },
+        err => {
+          return callback(new Error("Network error, " + err));
+        }
+      );
     };
     var validateSMTPHost = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter SMTP Host"));
-      } else if (!validateURL(value)) {
+      if (!validateURL(value)) {
         return callback(new Error("Incorrect host format"));
       }
       callback();
     };
     var validateEmailFrom = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter email from"));
-      } else if (!validateEmail(value)) {
+      if (!validateEmail(value)) {
         return callback(new Error("Incorrect email format"));
       }
       callback();
     };
-    var validateEmailTo = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter email to"));
-      }
-      callback();
-    };
+    // var validateEmailTo = (rule, value, callback) => {
+    //   if (isEmpty(value) || isEmpty(value.trim())) {
+    //     return callback(new Error("Please enter email to"));
+    //   }
+    //   callback();
+    // };
     var validateWebHook = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter web hook"));
-      } else if (!validateURL(value)) {
+      if (!validateURL(value)) {
         return callback(new Error("Incorrect url format"));
       }
       callback();
     };
-    var validateCorpId = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter corp id"));
-      }
-      callback();
-    };
-    var validateAgentId = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter agent id"));
-      }
-      callback();
-    };
-    var validateCorpSecret = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please enter corp secret"));
-      }
-      callback();
-    };
+    // var validateCorpId = (rule, value, callback) => {
+    //   if (isEmpty(value) || isEmpty(value.trim())) {
+    //     return callback(new Error("Please enter corp id"));
+    //   }
+    //   callback();
+    // };
+    // var validateAgentId = (rule, value, callback) => {
+    //   if (isEmpty(value) || isEmpty(value.trim())) {
+    //     return callback(new Error("Please enter agent id"));
+    //   }
+    //   callback();
+    // };
+    // var validateCorpSecret = (rule, value, callback) => {
+    //   if (isEmpty(value) || isEmpty(value.trim())) {
+    //     return callback(new Error("Please enter corp secret"));
+    //   }
+    //   callback();
+    // };
     return {
       channelList: [
         {
@@ -204,28 +200,32 @@ export default {
       },
       rules: {
         channelName: [
+          { required: true, validator: validateNotEmpty, trigger: "blur" },
           { required: true, validator: validateChannelName, trigger: "blur" }
         ],
         smtpHost: [
+          { required: true, validator: validateNotEmpty, trigger: "blur" },
           { required: true, validator: validateSMTPHost, trigger: "blur" }
         ],
         emailFrom: [
+          { required: true, validator: validateNotEmpty, trigger: "blur" },
           { required: true, validator: validateEmailFrom, trigger: "blur" }
         ],
         emailTo: [
-          { required: true, validator: validateEmailTo, trigger: "blur" }
+          { required: true, validator: validateNotEmpty, trigger: "blur" }
         ],
         webhook: [
+          { required: true, validator: validateNotEmpty, trigger: "blur" },
           { required: true, validator: validateWebHook, trigger: "blur" }
         ],
         corpId: [
-          { required: true, validator: validateCorpId, trigger: "blur" }
+          { required: true, validator: validateNotEmpty, trigger: "blur" }
         ],
         agentId: [
-          { required: true, validator: validateAgentId, trigger: "blur" }
+          { required: true, validator: validateNotEmpty, trigger: "blur" }
         ],
         corpSecret: [
-          { required: true, validator: validateCorpSecret, trigger: "blur" }
+          { required: true, validator: validateNotEmpty, trigger: "blur" }
         ]
       }
     };
@@ -260,7 +260,9 @@ export default {
     },
     saveChannel(alertChannel) {
       this.$refs[alertChannel].validate(valid => {
+        console.log(valid);
         if (valid) {
+          console.log(valid);
         }
       });
     }
