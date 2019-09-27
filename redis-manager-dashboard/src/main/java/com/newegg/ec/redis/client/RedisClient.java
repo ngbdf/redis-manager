@@ -81,6 +81,13 @@ public class RedisClient implements IRedisClient {
         return RedisUtil.parseInfoToMap(jedis.clusterInfo());
     }
 
+    @Override
+    public Set<String> scan(AutoCommandParam autoCommandParam) {
+        ScanParams scanParams = autoCommandParam.buildScanParams();
+        ScanResult<String> scanResult = jedis.scan(autoCommandParam.getCursor(), scanParams);
+        return new LinkedHashSet<>(scanResult.getResult());
+    }
+
     /**
      * redis 4, 4+
      * memory info
@@ -212,13 +219,6 @@ public class RedisClient implements IRedisClient {
                 break;
         }
         return new AutoCommandResult(ttl, type, value);
-    }
-
-    @Override
-    public AutoCommandResult scan(AutoCommandParam autoCommandParam) {
-        ScanParams scanParams = autoCommandParam.buildScanParams();
-        ScanResult<String> scanResult = jedis.scan(autoCommandParam.getCursor(), scanParams);
-        return new AutoCommandResult(scanResult);
     }
 
     @Override

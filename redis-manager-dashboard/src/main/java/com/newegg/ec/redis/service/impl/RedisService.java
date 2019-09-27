@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.HostAndPort;
@@ -35,7 +37,7 @@ import static com.newegg.ec.redis.util.RedisUtil.*;
  * @date 7/26/2019
  */
 @Service
-public class RedisService implements IRedisService {
+public class RedisService implements IRedisService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisService.class);
 
@@ -47,6 +49,11 @@ public class RedisService implements IRedisService {
 
     @Value("${redis-manager.monitor.slow-log-limit:100}")
     private int slowLogLimit;
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+
+    }
 
     /**
      * db0:keys=31,expires=1,avg_ttl=1
@@ -67,7 +74,10 @@ public class RedisService implements IRedisService {
                 }
                 // key: db0, val: keys=31,expires=1,avg_ttl=1
                 keyspaceInfo.forEach((key, val) -> {
-                    Map<String, Long> nodeKeyspaceInfoMap = new LinkedHashMap<>();
+                    Map<String, Long> nodeKeyspaceInfoMap = keyspaceInfoMap.get(key);
+                    if (nodeKeyspaceInfoMap == null) {
+                        nodeKeyspaceInfoMap = new LinkedHashMap<>();
+                    }
                     String[] subContents = SignUtil.splitByCommas(val);
                     for (String subContent : subContents) {
                         String[] split = SignUtil.splitByEqualSign(subContent);
@@ -79,10 +89,15 @@ public class RedisService implements IRedisService {
                         if (Strings.isNullOrEmpty(subContentVal)) {
                             continue;
                         }
+                        long nodeCount = Long.parseLong(subContentVal);
                         if (Objects.equals(subContentKey, KEYS)) {
-                            nodeKeyspaceInfoMap.put(KEYS, Long.parseLong(subContentVal));
+                            Long keys = nodeKeyspaceInfoMap.get(KEYS);
+                            keys = keys == null ? nodeCount : keys + nodeCount;
+                            nodeKeyspaceInfoMap.put(KEYS, keys);
                         } else if (Objects.equals(subContentKey, EXPIRES)) {
-                            nodeKeyspaceInfoMap.put(EXPIRES, Long.parseLong(subContentVal));
+                            Long expires = nodeKeyspaceInfoMap.get(EXPIRES);
+                            expires = expires == null ? nodeCount : expires + nodeCount;
+                            nodeKeyspaceInfoMap.put(EXPIRES, expires);
                         }
                     }
                     keyspaceInfoMap.put(key, nodeKeyspaceInfoMap);
@@ -199,17 +214,22 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public AutoCommandResult scan(Cluster cluster, AutoCommandParam autoCommandParam) {
-        AutoCommandResult scanResult = null;
-        try {
-            IDatabaseCommand client = buildDatabaseCommandClient(cluster);
-            if (client != null) {
-                scanResult = client.scan(autoCommandParam);
+    public Set<String> scan(Cluster cluster, AutoCommandParam autoCommandParam) {
+        List<RedisNode> redisMasterNodeList = getRedisMasterNodeList(cluster);
+        int masterSize = redisMasterNodeList.size();
+        int count = masterSize < 10 ? 100 / masterSize : 10;
+        autoCommandParam.setCount(count);
+        Set<String> result = new LinkedHashSet<>();
+        redisMasterNodeList.forEach(masterNode -> {
+            try {
+                RedisClient redisClient = RedisClientFactory.buildRedisClient(masterNode, cluster.getRedisPassword());
+                Set<String> scanResult = redisClient.scan(autoCommandParam);
+                result.addAll(scanResult);
+            } catch (Exception e) {
+                logger.error("Scan redis failed, node = " + masterNode.getHost() + ":" + masterNode.getPort(), e);
             }
-        } catch (Exception e) {
-            logger.error("Scan redis failed, cluster name: " + cluster.getClusterName(), e);
-        }
-        return scanResult;
+        });
+        return result;
     }
 
     @Override
@@ -614,5 +634,6 @@ public class RedisService implements IRedisService {
             redisClient.close();
         }
     }
+
 
 }

@@ -26,18 +26,15 @@
         @click="queryRedis(autoCommandParam)"
         style="margin-left: 20px;"
       >Query</el-button>
-      <el-button size="small" icon="el-icon-search">Scan</el-button>
+      <el-button size="small" icon="el-icon-search" @click="scanRedis(autoCommandParam)">Scan</el-button>
     </div>
-    <div class="tip-wrapper">
-      <span>Limit 100</span>
-    </div>
-
     <codemirror class="result-wrapper" v-model="result" :options="codemirrorOptions"></codemirror>
   </div>
 </template>
 
 <script>
 import API from "@/api/api.js";
+import { isEmpty } from "@/utils/validate.js";
 import { codemirror } from "vue-codemirror-lite";
 require("codemirror/lib/codemirror.js");
 require("codemirror/lib/codemirror.css");
@@ -59,22 +56,18 @@ export default {
     return {
       dbList: [],
       autoCommandParam: {
-        clusterId: this.clusterId
-      },
-      autoCommandResult: {
-        ttl: -2,
-        type: "none",
-        cursor: null,
-        completeIteration: false,
-        value: null
+        clusterId: this.clusterId,
+        count: 100
       },
       result: "",
       codemirrorOptions: {
         mode: "application/json",
-        readOnly: "nocursor",
+        readOnly: true,
         autoRefresh: true,
+        scrollbarStyle: "null",
         // https://codemirror.net/demo/theme.html#xq-light
-        theme: "xq-light"
+        theme: "xq-light",
+        lineNumbers: true
       }
     };
   },
@@ -87,7 +80,8 @@ export default {
         response => {
           let result = response.data;
           if (result.code == 0) {
-            result.data.forEach(db => {
+            let dbList = result.data;
+            dbList.forEach(db => {
               let database = db.database;
               this.dbList.push({
                 label: database,
@@ -105,16 +99,54 @@ export default {
       );
     },
     queryRedis(autoCommandParam) {
+      this.result = "";
       let url = "/data/query";
+      if (isEmpty(autoCommandParam.database)) {
+        console.log("Please select database.");
+        return;
+      }
+      if (isEmpty(autoCommandParam.key)) {
+        console.log("Please enter redis key.");
+        return;
+      }
       API.post(
         url,
         autoCommandParam,
         response => {
           let result = response.data;
           if (result.code == 0) {
-            this.autoCommandResult = result.data;
-            console.log(this.autoCommandResult);
-            this.result = JSON.stringify(this.autoCommandResult, null, 2);
+            let autoCommandResult = result.data;
+            let queryResult = {};
+            queryResult.ttl = autoCommandResult.ttl;
+            queryResult.type = autoCommandResult.type;
+            queryResult.value = autoCommandResult.value;
+            this.result = JSON.stringify(queryResult, null, 2);
+          } else {
+            console.log(result.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    scanRedis(autoCommandParam) {
+      this.result = "";
+      let url = "/data/scan";
+      if (isEmpty(autoCommandParam.database)) {
+        console.log("Please select database.");
+        return;
+      }
+      API.post(
+        url,
+        autoCommandParam,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let scanResult = result.data;
+            scanResult.forEach(key => {
+              this.result += key + "\n";
+            });
           } else {
             console.log(result.message);
           }
@@ -127,15 +159,13 @@ export default {
   },
   mounted() {
     this.getDBList(this.clusterId);
-    console.log("==");
-    this.result = JSON.stringify(this.autoCommandResult, null, 2);
   }
 };
 </script>
 
 <style scoped>
 .query-wrapper {
-  height: 400px;
+  min-height: 500px;
 }
 
 .el-select {
@@ -160,8 +190,13 @@ export default {
 }
 
 .result-wrapper {
+  padding: 0;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
-  height: 85%;
+  line-height: 20px;
+  height: 460px;
+}
+.vue-codemirror-wrap >>> .CodeMirror {
+  height: 460px;
 }
 </style>

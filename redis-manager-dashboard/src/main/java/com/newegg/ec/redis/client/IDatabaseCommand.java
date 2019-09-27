@@ -97,13 +97,6 @@ public interface IDatabaseCommand {
      */
     AutoCommandResult query(AutoCommandParam autoCommandParam);
 
-    /**
-     * Scan redis
-     *
-     * @return
-     */
-    AutoCommandResult scan(AutoCommandParam autoCommandParam);
-
     Object string(DataCommandsParam dataCommandsParam);
 
     Object hash(DataCommandsParam dataCommandsParam);

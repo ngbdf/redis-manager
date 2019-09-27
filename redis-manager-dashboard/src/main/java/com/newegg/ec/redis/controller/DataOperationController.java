@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Jay.H.Zou
@@ -65,7 +66,12 @@ public class DataOperationController {
     @RequestMapping(value = "/scan", method = RequestMethod.POST)
     @ResponseBody
     public Result scanRedis(@RequestBody AutoCommandParam autoCommandParam) {
-        return Result.successResult();
+        Cluster cluster = clusterService.getClusterById(autoCommandParam.getClusterId());
+        if (cluster == null) {
+            return Result.failResult().setMessage("Get cluster failed.");
+        }
+        Set<String> scanResult = redisService.scan(cluster, autoCommandParam);
+        return scanResult != null ? Result.successResult(scanResult) : Result.failResult().setMessage("Scan redis failed.");
     }
 
 }

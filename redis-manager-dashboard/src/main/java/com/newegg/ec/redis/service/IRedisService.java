@@ -7,6 +7,7 @@ import redis.clients.jedis.HostAndPort;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Jay.H.Zou
@@ -54,7 +55,7 @@ public interface IRedisService {
 
     List<RedisSlowLog> getRedisSlowLog(Cluster cluster, SlowLogParam slowLogParam);
 
-    AutoCommandResult scan(Cluster cluster, AutoCommandParam autoCommandParam);
+    Set<String> scan(Cluster cluster, AutoCommandParam autoCommandParam);
 
     AutoCommandResult query(Cluster cluster, AutoCommandParam autoCommandParam);
 

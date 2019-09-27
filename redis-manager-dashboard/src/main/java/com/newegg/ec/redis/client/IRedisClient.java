@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.client;
 
+import com.newegg.ec.redis.entity.AutoCommandParam;
+import com.newegg.ec.redis.entity.AutoCommandResult;
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
 import javafx.util.Pair;
@@ -10,6 +12,7 @@ import redis.clients.jedis.util.Slowlog;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Jay.H.Zou
@@ -40,6 +43,8 @@ public interface IRedisClient extends IDatabaseCommand {
     Map<String, String> getInfo(String section) throws Exception;
 
     Map<String, String> getClusterInfo() throws Exception;
+
+    Set<String> scan(AutoCommandParam autoCommandParam);
 
     /**
      * Get redis memory info

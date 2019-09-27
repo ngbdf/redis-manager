@@ -11,6 +11,8 @@ public class DataCommandsParam {
 
     private int database;
 
+    private String node;
+
     private String command;
 
     public Integer getClusterId() {
@@ -29,6 +31,14 @@ public class DataCommandsParam {
         this.database = database;
     }
 
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
+    }
+
     public String getCommand() {
         return command;
     }
@@ -42,6 +52,7 @@ public class DataCommandsParam {
         return "DataCommandsParam{" +
                 "clusterId=" + clusterId +
                 ", database=" + database +
+                ", node='" + node + '\'' +
                 ", command='" + command + '\'' +
                 '}';
     }

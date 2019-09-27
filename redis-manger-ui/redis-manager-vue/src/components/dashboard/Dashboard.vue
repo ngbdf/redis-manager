@@ -166,7 +166,7 @@
       :visible.sync="queryVisible"
       v-if="queryVisible"
       :close-on-click-modal="false"
-      width="60%"
+      width="50%"
     >
       <query :clusterId="queryClusterId"></query>
     </el-dialog>

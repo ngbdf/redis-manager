@@ -131,13 +131,6 @@ public class RedisClusterClient implements IRedisClusterClient {
     }
 
     @Override
-    public AutoCommandResult scan(AutoCommandParam autoCommandParam) {
-        ScanParams scanParams = autoCommandParam.buildScanParams();
-        ScanResult<String> scanResult = jedisCluster.scan(autoCommandParam.getCursor(), scanParams);
-        return new AutoCommandResult(scanResult);
-    }
-
-    @Override
     public Object string(DataCommandsParam dataCommandsParam) {
         String command = dataCommandsParam.getCommand();
         String[] list = SignUtil.splitBySpace(command);
