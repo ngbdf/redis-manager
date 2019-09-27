@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.plugin.alert.entity;
 
+import java.sql.Timestamp;
+
 /**
  * 告警通道: group 级别
  * Email
@@ -54,6 +56,10 @@ public class AlertChannel {
      *
      */
     private int channelType;
+
+    private String channelInfo;
+
+    private Timestamp updateTime;
 
     public Integer getChannelId() {
         return channelId;
@@ -157,5 +163,21 @@ public class AlertChannel {
 
     public void setChannelType(int channelType) {
         this.channelType = channelType;
+    }
+
+    public String getChannelInfo() {
+        return channelInfo;
+    }
+
+    public void setChannelInfo(String channelInfo) {
+        this.channelInfo = channelInfo;
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 }

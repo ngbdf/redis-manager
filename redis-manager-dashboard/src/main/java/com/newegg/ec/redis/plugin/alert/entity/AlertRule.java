@@ -14,8 +14,6 @@ public class AlertRule {
 
     private Integer groupId;
 
-    private Integer clusterId;
-
     /**
      * 告警配置
      */
@@ -68,14 +66,6 @@ public class AlertRule {
 
     public void setGroupId(Integer groupId) {
         this.groupId = groupId;
-    }
-
-    public Integer getClusterId() {
-        return clusterId;
-    }
-
-    public void setClusterId(Integer clusterId) {
-        this.clusterId = clusterId;
     }
 
     public String getAlertKey() {

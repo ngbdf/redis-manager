@@ -14,8 +14,6 @@ public interface IAlertRuleService {
     
     List<AlertRule> getAlertRuleListByGroupId(int groupId);
 
-    List<AlertRule> getAlertRuleListByClusterId(int groupId, int clusterId);
-
     boolean addAlertRule(AlertRule alertRule);
 
     boolean updateAlertRule(AlertRule alertRule);

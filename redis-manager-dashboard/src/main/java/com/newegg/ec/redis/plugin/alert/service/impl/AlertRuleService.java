@@ -23,7 +23,7 @@ public class AlertRuleService implements IAlertRuleService {
     @Override
     public List<AlertRule> getAlertRuleIds(List<Integer> ruleIdList) {
         try {
-            return alertRuleDao.selectAlertRuleIds(ruleIdList);
+            return alertRuleDao.selectAlertRuleByIds(ruleIdList);
         } catch (Exception e) {
             logger.error("Get alert rule by ids failed, rule ids = " + ruleIdList, e);
             return null;
@@ -33,19 +33,9 @@ public class AlertRuleService implements IAlertRuleService {
     @Override
     public List<AlertRule> getAlertRuleListByGroupId(int groupId) {
         try {
-            return alertRuleDao.selectAlertRuleListByGroupId(groupId);
+            return alertRuleDao.selectAlertRuleByGroupId(groupId);
         } catch (Exception e) {
             logger.error("Get alert rule by group id failed, group id = " + groupId, e);
-            return null;
-        }
-    }
-
-    @Override
-    public List<AlertRule> getAlertRuleListByClusterId(int groupId, int clusterId) {
-        try {
-            return alertRuleDao.selectAlertRuleListByClusterId(groupId, clusterId);
-        } catch (Exception e) {
-            logger.error("Get alert rule by group id and cluster id failed, group id = " + groupId + ", cluster id = " + clusterId, e);
             return null;
         }
     }

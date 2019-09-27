@@ -38,7 +38,7 @@ public interface IMachineDao {
 
     @Insert("<script>" +
             "INSERT INTO machine (machine_group_name, group_id, host, user_name, password, token, type, machine_info, update_time) " +
-            "VALUE <foreach item='machine' collection='machineList' separator=','>" +
+            "VALUES <foreach item='machine' collection='machineList' separator=','>" +
             "(#{machineGroupName}, #{groupId}, #{host}, #{password}, #{token}, #{type}, #{machineInfo}, NOW())" +
             "</foreach>" +
             "</script>")
