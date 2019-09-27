@@ -164,22 +164,37 @@ export default {
       });
     },
     toInstallation() {
-      this.$router.push({ name: "installation" });
+      this.$router.push({
+        name: "installation",
+        params: { groupId: this.selectGroupId }
+      });
     },
     toChannelManage() {
-      this.$router.push({ name: "channel-manage" });
+      this.$router.push({
+        name: "channel-manage",
+        params: { groupId: this.selectGroupId }
+      });
     },
     toRuleManage() {
-      this.$router.push({ name: "rule-manage" });
+      this.$router.push({
+        name: "rule-manage",
+        params: { groupId: this.selectGroupId }
+      });
     },
     toMachineManage() {
-      this.$router.push({ name: "machine-manage" });
+      this.$router.push({
+        name: "machine-manage",
+        params: { groupId: this.selectGroupId }
+      });
     },
     toGroupManage() {
       this.$router.push({ name: "group-manage" });
     },
     toUserManage() {
-      this.$router.push({ name: "user-manage" });
+      this.$router.push({
+        name: "user-manage",
+        params: { groupId: this.selectGroupId }
+      });
     },
     selectGroup() {
       if (!isEmpty(this.selectGroupId)) {

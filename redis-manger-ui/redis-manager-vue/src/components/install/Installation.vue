@@ -18,12 +18,12 @@
               :model="installationParam"
               :rules="rules"
               ref="installationParam"
-              label-width="150px"
+              label-width="120px"
               class="demo-ruleForm"
               size="small"
             >
               <el-form-item label="Group Name" prop="groupName">
-                <el-tag>Bigdata</el-tag>
+                <el-tag size="small">Bigdata</el-tag>
               </el-form-item>
               <el-form-item label="Cluster Name" prop="clusterName">
                 <el-input v-model="installationParam.cluster.clusterName"></el-input>

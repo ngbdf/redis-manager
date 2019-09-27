@@ -327,7 +327,6 @@ export default {
       this.editClusterVisible = editClusterVisible;
     }
   },
-
   computed: {
     currentGroupId() {
       return store.getters.getCurrentGroupId;

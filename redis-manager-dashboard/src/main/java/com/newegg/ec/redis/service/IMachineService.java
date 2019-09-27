@@ -11,13 +11,17 @@ import java.util.Map;
  */
 public interface IMachineService {
 
+    List<String> getMachineGroupNameList(Integer groupId);
+
     /**
-     * 获取多个集群集群
+     * 获取多个集群
      *
      * @param groupId
      * @return
      */
-    Map<String, List<Machine>> getMachineByGroupId(int groupId);
+    Map<String, List<Machine>> getMachineWithGroup(Integer groupId);
+
+    List<Machine> getMachineByGroupId(Integer groupId);
 
     /**
      * 获取一个机器集群

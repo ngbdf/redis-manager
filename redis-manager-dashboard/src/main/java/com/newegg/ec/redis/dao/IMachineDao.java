@@ -17,11 +17,14 @@ public interface IMachineDao {
     @Select("SELECT * FROM machine WHERE group_id = #{groupId}")
     List<Machine> selectMachineByGroupId(Integer groupId);
 
+    @Select("SELECT DISTINCT machine_group_name FROM machine WHERE group_id = #{groupId}")
+    List<String> getMachineGroupNameList(Integer groupId);
+
     @Select("SELECT * FROM machine WHERE machine_group_name = #{machineGroupName}")
     List<Machine> selectMachineByMachineGroup(String machineGroupName);
 
     @Select("<script>" +
-            "SELECT * FROM machine WHERE machine_id IN (" +
+            "SELECT * FROM machine WHERE machine_id IN " +
             "<foreach item='machineId' collection='machineIdList' open='(' separator=',' close=')'>" +
             "#{machineId}" +
             "</foreach>)" +
@@ -29,14 +32,14 @@ public interface IMachineDao {
     List<Machine> selectMachineByIds(List<Integer> machineIdList);
 
     @Update("UPDATE machine SET machine_group_name = #{machineGroupName}, host = #{host}, password = #{password}, " +
-            "token = #{token}, machine_info = #{machineInfo}, update_time = NOW() " +
+            "token = #{token}, type = #{type}, machine_info = #{machineInfo}, update_time = NOW() " +
             "WHERE machine_id = #{machineId}")
     int updateMachine(Machine machine);
 
     @Insert("<script>" +
-            "INSERT INTO machine (machine_group_name, group_id, host, user_name, password, token, machine_info, update_time) " +
+            "INSERT INTO machine (machine_group_name, group_id, host, user_name, password, token, type, machine_info, update_time) " +
             "VALUE <foreach item='machine' collection='machineList' separator=','>" +
-            "(#{machineGroupName}, #{groupId}, #{host}, #{password}, #{token}, #{machineInfo}, NOW())" +
+            "(#{machineGroupName}, #{groupId}, #{host}, #{password}, #{token}, #{type}, #{machineInfo}, NOW())" +
             "</foreach>" +
             "</script>")
     int insertMachine(List<Machine> machineList);

@@ -25,22 +25,42 @@ public class MachineService implements IMachineService {
     private IMachineDao machineDao;
 
     @Override
-    public Map<String, List<Machine>> getMachineByGroupId(int groupId) {
+    public List<String> getMachineGroupNameList(Integer groupId) {
+        try {
+            return machineDao.getMachineGroupNameList(groupId);
+        } catch (Exception e) {
+            logger.error("Get machine group name list failed.", e);
+            return null;
+        }
+    }
+
+    @Override
+    public Map<String, List<Machine>> getMachineWithGroup(Integer groupId) {
         try {
             List<Machine> machines = machineDao.selectMachineByGroupId(groupId);
             if (machines == null || machines.isEmpty()) {
                 return null;
             }
             Multimap<String, Machine> machineMultimap = ArrayListMultimap.create();
-            machines.forEach(machine -> {
-                machineMultimap.put(machine.getMachineGroupName(), machine);
-            });
+            machines.forEach(machine -> machineMultimap.put(machine.getMachineGroupName(), machine));
             Map<String, List<Machine>> machineMap = new LinkedHashMap<>();
             Set<String> machineGroupNameSet = machineMultimap.keySet();
-            machineGroupNameSet.forEach(machineGroupName -> {
-                machineMap.put(machineGroupName, new ArrayList<>(machineMultimap.get(machineGroupName)));
-            });
+            machineGroupNameSet.forEach(machineGroupName -> machineMap.put(machineGroupName, new ArrayList<>(machineMultimap.get(machineGroupName))));
             return machineMap;
+        } catch (Exception e) {
+            logger.error("Get machine by group id failed, group id = " + groupId, e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<Machine> getMachineByGroupId(Integer groupId) {
+        try {
+            List<Machine> machineList = machineDao.selectMachineByGroupId(groupId);
+            if (machineList == null) {
+                return null;
+            }
+            return machineList;
         } catch (Exception e) {
             logger.error("Get machine by group id failed, group id = " + groupId, e);
             return null;

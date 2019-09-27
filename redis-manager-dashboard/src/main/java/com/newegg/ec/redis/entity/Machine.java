@@ -22,6 +22,8 @@ public class Machine {
 
     private String token;
 
+    private int type;
+
     private String machineInfo;
 
     private Timestamp updateTime;
@@ -86,6 +88,14 @@ public class Machine {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String getMachineInfo() {

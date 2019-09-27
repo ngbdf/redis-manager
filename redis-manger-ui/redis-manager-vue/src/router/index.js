@@ -64,7 +64,7 @@ export default new Router({
         },
         {
           name: 'installation',
-          path: '/installation',
+          path: '/installation/:groupId',
           component: Installation,
           meta: {
             title: 'Installation',
@@ -75,7 +75,7 @@ export default new Router({
         },
         {
           name: 'channel-manage',
-          path: '/channel-manage',
+          path: '/channel-manage/:groupId',
           component: ChannelManage,
           meta: {
             title: 'Channel Manage',
@@ -85,7 +85,7 @@ export default new Router({
           }
         }, {
           name: 'rule-manage',
-          path: '/rule-manage',
+          path: '/rule-manage/:groupId',
           component: RuleManage,
           meta: {
             title: 'Rule Manage',
@@ -95,7 +95,7 @@ export default new Router({
           }
         }, {
           name: 'alert-manage',
-          path: '/alert-manage',
+          path: '/alert-manage/:groupId',
           component: AlertManage,
           meta: {
             title: 'Alert Manage',
@@ -105,7 +105,7 @@ export default new Router({
           }
         }, {
           name: 'machine-manage',
-          path: '/machine-manage',
+          path: '/machine-manage/:groupId',
           component: MachineManage,
           meta: {
             title: 'Machine Manage',
@@ -126,7 +126,7 @@ export default new Router({
         },
         {
           name: 'user-manage',
-          path: '/user-manage',
+          path: '/user-manage/:groupId',
           component: UserManage,
           meta: {
             title: 'User Manage',

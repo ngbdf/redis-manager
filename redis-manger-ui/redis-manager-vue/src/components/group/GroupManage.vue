@@ -21,12 +21,12 @@
       :close-on-click-modal="false"
       @close="closeHandler()"
     >
-      <el-form :model="group" ref="group" label-width="120px">
+      <el-form :model="group" ref="group" label-width="120px" size="small">
         <el-form-item label="Group Name" prop="groupName" :rules="rules.groupName">
-          <el-input size="small" v-model="group.groupName" maxlength="50" show-word-limit></el-input>
+          <el-input v-model="group.groupName" maxlength="50" show-word-limit></el-input>
         </el-form-item>
         <el-form-item label="Group Info" prop="groupInfo">
-          <el-input size="small" v-model="group.groupInfo"></el-input>
+          <el-input v-model="group.groupInfo"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">

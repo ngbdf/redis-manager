@@ -19,7 +19,7 @@
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column label="Token"  align="center">
+        <el-table-column label="Token" align="center">
           <template slot-scope="scope">
             <el-popover trigger="hover" placement="top">
               <p>Token: {{ scope.row.password }}</p>
@@ -43,16 +43,15 @@
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog title="Create User" :visible.sync="importMachineVisible">
-      <el-form :model="machines" label-width="120px">
-        <el-form-item label="Machine Group">
+    <el-dialog title="Create User" :visible.sync="importMachineVisible" width="50%">
+      <el-form :model="machines" ref="machines" :rules="rules" size="small" label-width="135px">
+        <el-form-item label="Machine Group" prop="machineGroupName">
           <el-select
-            size="small"
             v-model="machines.machineGroupName"
             filterable
             allow-create
             default-first-option
-            placeholder="Select machine group"
+            placeholder="Select or enter group"
           >
             <el-option
               v-for="item in machineGroupNameList"
@@ -61,41 +60,111 @@
               :value="item.value"
             ></el-option>
           </el-select>
-          <!-- <el-input size="small" v-model="machines.machineGroupName"></el-input> -->
         </el-form-item>
-        <el-form-item label="User Name">
-          <el-input size="small" v-model="machines.userName"></el-input>
+        <el-form-item label="User Name" prop="userName">
+          <el-input v-model="machines.userName"></el-input>
         </el-form-item>
-        <el-form-item label="Password" width="180">
-          <el-input size="small" v-model="machines.password"></el-input>
+        <el-form-item label="Password" prop="password">
+          <el-input v-model="machines.password"></el-input>
         </el-form-item>
-        <el-form-item label="Token" width="180">
-          <el-input size="small" v-model="machines.token"></el-input>
+        <el-form-item label="Token" prop="token">
+          <el-input v-model="machines.token"></el-input>
         </el-form-item>
+
         <el-form-item
           v-for="(host, index) in machines.hostList"
           :label="'Host ' + (index + 1)"
           :key="host.key"
+          :prop="'hostList.' + index + '.value'"
+          :rules="rules.host"
         >
-          <el-input size="small" v-model="host.value">
-            <el-button slot="append" @click.prevent="removeItem(host)" icon="el-icon-delete"></el-button>
+          <el-input v-model="host.value">
+            <el-button slot="append" @click.prevent="removeHost(host)" icon="el-icon-delete"></el-button>
           </el-input>
         </el-form-item>
 
-        <el-form-item label="Cluster Info">
-          <el-input size="small" v-model="machines.machineInfo"></el-input>
+        <el-form-item label="Machine Info" prop="machineInfo">
+          <el-input v-model="machines.machineInfo"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="addItem()">New Host</el-button>
-        <el-button size="small" type="primary">Confirm</el-button>
+        <el-button size="small" @click="addHost()">New Host</el-button>
+        <el-button size="small" type="primary" @click="addMachines('machines')">Confirm</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import API from "@/api/api.js";
+import { formatTime } from "@/utils/time.js";
+import { isEmpty, validateIp } from "@/utils/validate.js";
 export default {
   data() {
+    var validateMahineGroupName = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please select or enter machine group name"));
+      }
+      callback();
+    };
+    var validateUserName = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter machine user name"));
+      }
+      callback();
+    };
+    var validatePassword = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter machine password"));
+      }
+      callback();
+    };
+    var validateToken = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please  enter machine token"));
+      }
+      callback();
+    };
+    var validateHost = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter machine ip"));
+      } else if (!validateIp(value)) {
+        return callback(new Error("Incorrect ip format"));
+      }
+      callback();
+    };
+    var validateHostConnection = (rule, value, callback) => {
+      let userName = this.machines.userName;
+      let password = this.machines.password;
+      if (
+        isEmpty(userName) ||
+        isEmpty(userName.trim()) ||
+        isEmpty(password) ||
+        isEmpty(password.trim())
+      ) {
+        return callback(new Error("Please enter user name and passwor first"));
+      }
+      let url = "/machine/validateConnection";
+      let machine = {
+        userName: userName,
+        password: password,
+        host: value
+      };
+      API.post(
+        url,
+        machine,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            callback();
+          } else {
+            return callback(new Error(result.message));
+          }
+        },
+        err => {
+          return callback(new Error("Network error"));
+        }
+      );
+    };
     return {
       machineList: [
         {
@@ -125,17 +194,117 @@ export default {
       importMachineVisible: false,
       machines: {
         hostList: [{ value: "" }]
+      },
+      rules: {
+        machineGroupName: [
+          {
+            required: true,
+            validator: validateMahineGroupName,
+            trigger: "blur"
+          }
+        ],
+        userName: [
+          {
+            required: true,
+            validator: validateUserName,
+            trigger: "blur"
+          }
+        ],
+        password: [
+          {
+            required: true,
+            validator: validatePassword,
+            trigger: "blur"
+          }
+        ],
+        host: [
+          {
+            required: true,
+            validator: validateHost,
+            trigger: "blur"
+          },
+          {
+            required: true,
+            validator: validateHostConnection,
+            trigger: "blur"
+          }
+        ]
       }
     };
   },
   methods: {
+    getMachineList(groupId) {
+      if (isEmpty(groupId)) {
+        console.log("Please select group.");
+        return;
+      }
+      let url = "/machine/getMachineList/" + groupId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.machineList = result.data;
+          } else {
+            console.log(result.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getMachineGroupNameList(groupId) {
+      let url = "/machine/getMachineGroupNameList/" + groupId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.machineGroupNameList = result.data;
+          } else {
+            console.log(response.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    addMachines(machines) {
+      this.$refs[machines].validate(valid => {
+        if (valid) {
+          let machineList = [];
+          let machineGroupName = this.machines.machineGroupName;
+          let userName = this.machines.userName;
+          let password = this.machines.password;
+          let token = this.machines.token;
+          let hostList = this.machines.hostList;
+          let machineInfo = this.machines.machineInfo;
+          hostList.forEach(host => {
+            machineList.push({
+              machineGroupName: machineGroupName,
+              userName: userName,
+              password: password,
+              token: token,
+              host: host,
+              machineInfo: machineInfo
+            });
+          });
+          let url = "/machine/addMachineList";
+          API.post(url, null, response => {}, err => {});
+        }
+      });
+    },
     handleEdit(index, row) {
       console.log(index, row);
     },
     handleDelete(index, row) {
       console.log(index, row);
     },
-    removeItem(item) {
+    removeHost(item) {
       if (this.machines.hostList.length == 1) {
         return;
       }
@@ -144,7 +313,7 @@ export default {
         this.machines.hostList.splice(index, 1);
       }
     },
-    addItem() {
+    addHost() {
       if (this.machines.hostList.length >= 20) {
         return;
       }
@@ -153,6 +322,10 @@ export default {
         key: Date.now()
       });
     }
+  },
+  mounted() {
+    let groupId = this.$route.params.groupId;
+    this.getMachineList(groupId);
   }
 };
 </script>
