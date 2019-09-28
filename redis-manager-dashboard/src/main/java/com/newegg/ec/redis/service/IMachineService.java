@@ -42,6 +42,8 @@ public interface IMachineService {
 
     boolean addMachineBatch(List<Machine> machineList);
 
+    boolean updateMachine(Machine machine);
+
     boolean deleteMachineById(Integer machineId);
 
     boolean deleteMachineByIdBatch(List<Integer> machineIdList);

@@ -61,7 +61,7 @@ public class InstallationTemplate {
      * @param installationParam
      * @return
      */
-    public boolean install(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
+    public boolean installFlow(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
         boolean verify = verify(installationParam);
         if (verify) {
             return false;
@@ -71,22 +71,23 @@ public class InstallationTemplate {
         if (!prepareSuccess) {
             return false;
         }
+
+        boolean pullImageSuccess = pullImage(installationOperation, installationParam);
         // 拉取安装包
-        boolean pullImageSuccess = installationOperation.pullImage(installationParam);
         if (!pullImageSuccess) {
             return false;
         }
         // 分发配置文件
-        boolean buildConfigSuccess = installationOperation.buildConfig(installationParam);
-        if (!buildConfigSuccess) {
+        boolean pullConfigSuccess = pullConfig(installationOperation, installationParam);
+        if (!pullConfigSuccess) {
             return false;
         }
         // 节点安装
-        boolean installSuccess = installationOperation.install(installationParam);
+        boolean installSuccess = install(installationOperation, installationParam);
         if (!installSuccess) {
             return false;
         }
-        buildCluster(installationParam);
+        boolean initSuccess = init(installationParam);
         return saveToDB(installationParam);
     }
 
@@ -100,7 +101,7 @@ public class InstallationTemplate {
         return true;
     }
 
-    private boolean prepareForInstallation(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
+    public boolean prepareForInstallation(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
         // 获取机器列表
         buildMachineList(installationParam);
         // 构建集群拓扑图
@@ -125,6 +126,18 @@ public class InstallationTemplate {
             return false;
         }
         return true;
+    }
+
+    public boolean pullImage(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
+        return installationOperation.pullImage(installationParam);
+    }
+
+    public boolean pullConfig(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
+        return installationOperation.buildConfig(installationParam);
+    }
+
+    public boolean install(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
+        return installationOperation.install(installationParam);
     }
 
     /**
@@ -315,7 +328,7 @@ public class InstallationTemplate {
      * @param installationParam
      * @return
      */
-    private void buildCluster(InstallationParam installationParam) {
+    public boolean init(InstallationParam installationParam) {
         Cluster cluster = installationParam.getCluster();
         Multimap<RedisNode, RedisNode> topology = installationParam.getTopology();
         RedisNode seed = getSeedNode(cluster, topology);
@@ -336,6 +349,7 @@ public class InstallationTemplate {
                 cluster.setInitialized(true);
             }
         }
+        return true;
     }
 
     /**

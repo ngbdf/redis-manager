@@ -12,7 +12,7 @@ public class Machine {
 
     private String machineGroupName;
 
-    private String groupId;
+    private Integer groupId;
 
     private String host;
 
@@ -22,17 +22,19 @@ public class Machine {
 
     private String token;
 
-    private int type;
+    private int machineType;
 
     private String machineInfo;
 
     private Timestamp updateTime;
 
-    public Machine(){}
+    public Machine() {
+    }
 
     public Machine(String host) {
         this.host = host;
     }
+
 
     public Integer getMachineId() {
         return machineId;
@@ -50,11 +52,11 @@ public class Machine {
         this.machineGroupName = machineGroupName;
     }
 
-    public String getGroupId() {
+    public Integer getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(Integer groupId) {
         this.groupId = groupId;
     }
 
@@ -90,12 +92,12 @@ public class Machine {
         this.token = token;
     }
 
-    public int getType() {
-        return type;
+    public int getMachineType() {
+        return machineType;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setMachineType(int machineType) {
+        this.machineType = machineType;
     }
 
     public String getMachineInfo() {

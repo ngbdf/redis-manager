@@ -18,30 +18,30 @@
               :model="installationParam"
               :rules="rules"
               ref="installationParam"
-              label-width="120px"
+              label-width="150px"
               class="demo-ruleForm"
               size="small"
             >
               <el-form-item label="Group Name" prop="groupName">
-                <el-tag size="small">Bigdata</el-tag>
+                <el-tag size="small">{{ currentGroup.groupName }}</el-tag>
               </el-form-item>
               <el-form-item label="Cluster Name" prop="clusterName">
-                <el-input v-model="installationParam.cluster.clusterName"></el-input>
+                <el-input v-model="installationParam.clusterName" maxlength="50" show-word-limit></el-input>
               </el-form-item>
               <el-form-item label="Redis Password" prop="redisPassword">
-                <el-input v-model="installationParam.cluster.redisPassword"></el-input>
+                <el-input v-model="installationParam.redisPassword" maxlength="50" show-word-limit></el-input>
               </el-form-item>
               <el-form-item label="Redis Mode" prop="redisMode">
-                <el-radio-group v-model="installationParam.cluster.redisMode">
-                  <el-radio label="cluster"></el-radio>
-                  <el-radio label="standalone"></el-radio>
+                <el-radio-group v-model="installationParam.redisMode">
+                  <el-radio label="cluster">Cluster</el-radio>
+                  <el-radio label="standalone">Standalone</el-radio>
                 </el-radio-group>
               </el-form-item>
               <!-- environment start -->
               <el-form-item label="Environment" prop="installationEnvironment">
                 <el-radio-group v-model="installationParam.installationEnvironment">
-                  <el-radio label="Docker"></el-radio>
-                  <el-radio label="Machine"></el-radio>
+                  <el-radio label="0">Docker</el-radio>
+                  <el-radio label="1">Machine</el-radio>
                   <!-- <el-radio-button label="Kubernetes"></el-radio-button> -->
                 </el-radio-group>
               </el-form-item>
@@ -50,7 +50,7 @@
               <el-form-item
                 label="Image"
                 prop="image"
-                v-if="installationParam.installationEnvironment == 'Docker'"
+                v-if="installationParam.installationEnvironment == '0'"
               >
                 <el-select
                   allow-create
@@ -60,20 +60,24 @@
                 >
                   <el-option
                     v-for="image in dockerImages"
-                    :key="image.value"
-                    :label="image.label"
-                    :value="image.value"
+                    :key="image"
+                    :label="image"
+                    :value="image"
                   ></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item
                 label="Image"
                 prop="image"
-                v-if="installationParam.installationEnvironment == 'Machine'"
+                v-if="installationParam.installationEnvironment == '1'"
               >
                 <el-select v-model="installationParam.package" placeholder="Please choose image">
-                  <el-option label="4.0.10" value="4.0.10"></el-option>
-                  <el-option label="4.0.14" value="4.0.14"></el-option>
+                  <el-option
+                    v-for="image in machineImages"
+                    :key="image"
+                    :label="image"
+                    :value="image"
+                  ></el-option>
                 </el-select>
               </el-form-item>
               <!-- image end -->
@@ -83,23 +87,22 @@
               </el-form-item>
               <!-- auto install start -->
 
-              <el-form-item
-                label="Machine List"
-                prop="machineList"
-                v-if="installationParam.autoBuild"
-              >
+              <el-form-item label="Machine List" prop="machines" v-if="installationParam.autoBuild">
                 <div class="block">
                   <el-cascader
                     placeholder="Search"
                     :options="allMachineList"
                     :props="{ multiple: true }"
                     filterable
+                    @change="handleChange"
+                    :leafOnly="true"
+                    v-model="installationParam.machines"
                   ></el-cascader>
                 </div>
               </el-form-item>
 
               <el-form-item label="Start Port" prop="startPort" v-if="installationParam.autoBuild">
-                <el-input v-model="installationParam.startPort"></el-input>
+                <el-input v-model.number="installationParam.startPort"></el-input>
               </el-form-item>
 
               <el-form-item
@@ -107,24 +110,27 @@
                 prop="masterNumber"
                 v-if="installationParam.autoBuild"
               >
-                <el-input v-model="installationParam.masterNumber"></el-input>
+                <el-input v-model.number="installationParam.masterNumber"></el-input>
               </el-form-item>
               <el-form-item
                 label="Replica Number"
                 prop="replicaNumber"
                 v-if="installationParam.autoBuild"
               >
-                <el-input v-model="installationParam.replicaNumber"></el-input>
+                <el-input v-model.number="installationParam.replicaNumber"></el-input>
               </el-form-item>
 
               <!-- auto install end -->
               <!-- custom installation start -->
               <el-form-item
                 label="Machine User"
-                prop="machineUser"
+                prop="machineUserName"
                 v-if="!installationParam.autoBuild"
               >
-                <el-input v-model="installationParam.machineUser" placeholder="Machine user name"></el-input>
+                <el-input
+                  v-model="installationParam.machineUserName"
+                  placeholder="Machine user name"
+                ></el-input>
               </el-form-item>
               <el-form-item
                 label="Machine Password"
@@ -136,16 +142,12 @@
                   placeholder="Machine password"
                 ></el-input>
               </el-form-item>
-              <el-form-item
-                label="Redis Node"
-                prop="redisNodeList"
-                v-if="!installationParam.autoBuild"
-              >
+              <el-form-item label="Topology" prop="topology" v-if="!installationParam.autoBuild">
                 <el-input
                   type="textarea"
                   :autosize="{ minRows: 2, maxRows: 12}"
                   placeholder="Please enter redis node list"
-                  v-model="installationParam.redisNodeList"
+                  v-model="installationParam.topology"
                   class="textarea"
                 ></el-input>
               </el-form-item>
@@ -165,7 +167,7 @@
               <el-form-item
                 label="Auto Init"
                 prop="autoInit"
-                v-if="installationParam.cluster.redisMode == 'cluster'"
+                v-if="installationParam.redisMode == 'cluster'"
               >
                 <el-switch v-model="installationParam.autoInit"></el-switch>
                 <el-tooltip
@@ -178,20 +180,11 @@
                 </el-tooltip>
               </el-form-item>
               <el-form-item label="Cluster Info" prop="clusterInfo">
-                <el-input type="input" v-model="installationParam.cluster.clusterInfo"></el-input>
+                <el-input type="input" v-model="installationParam.clusterInfo"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-button
-                  type="primary"
-                  @click="installationCheck('installationParam')"
-                  v-if="!checkPass"
-                >Check</el-button>
-                <el-button
-                  type="success"
-                  @click="submitForm('installationParam')"
-                  v-if="checkPass"
-                >Create</el-button>
-                <el-button @click="resetForm('installationParam')">Reset</el-button>
+                <el-button type="success" @click="installationCheck('installationParam')">Check</el-button>
+                <!-- <el-button @click="resetForm('installationParam')">Reset</el-button> -->
               </el-form-item>
             </el-form>
           </div>
@@ -204,34 +197,65 @@
         </div>
       </el-col>
     </el-row>
+    <el-dialog title="Installation Info" :visible.sync="installationInfoVisible" width="50%">
+      <span>这是一段信息</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="installationInfoVisible = false">Cancel</el-button>
+        <el-button size="small" type="primary" @click="installationInfoVisible = false">Install</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { store } from "@/vuex/store.js";
+import { isEmpty, validatePort } from "@/utils/validate.js";
+import API from "@/api/api.js";
 export default {
   data() {
+    var validateClusterName = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter cluster name"));
+      } else {
+        let url = "/cluster/validateClusterName/" + value;
+        API.get(
+          url,
+          null,
+          response => {
+            let result = response.data;
+            if (result.code != 0) {
+              let cluster = result.data;
+              return callback(new Error(value + " has exist"));
+            } else {
+              callback();
+            }
+          },
+          err => {
+            return callback(new Error("Network error, " + err));
+          }
+        );
+      }
+    };
+    var validateStartPort = (rule, value, callback) => {
+      if (!validatePort(value)) {
+        return callback(new Error("Incorrect port format"));
+      }
+      callback();
+    };
+    var validateMasterAndReplicaNumber = (rule, value, callback) => {
+      console.log(value);
+      if (value <= 0) {
+        return callback(new Error("Number must be greater than 0"));
+      }
+      callback();
+    };
     return {
-      dockerImages: [
-        {
-          value: "redis:4.0.10",
-          label: "redis:4.0.10"
-        },
-        {
-          value: "redis:4.0.14",
-          label: "redis:4.0.14"
-        },
-        {
-          value: "redis:5.0.5",
-          label: "redis:5.0.5"
-        }
-      ],
-      checkPass: false,
+      dockerImages: [],
+      machineImages: [],
       installationParam: {
-        cluster: {
-          groupId: "",
-          clusterName: "",
-          redisMode: "cluster"
-        },
+        groupId: "",
+        clusterName: "",
+        redisMode: "cluster",
         create: true,
         machineIdList: [],
         machineList: [{ ip: "" }, { ip: "" }],
@@ -241,97 +265,119 @@ export default {
         startPort: "",
         redisNodeList: "127.0.0.1:8001 master\n127.0.0.1:8002",
 
-        installationEnvironment: "Docker"
+        installationEnvironment: "0"
       },
+      installationInfoVisible: false,
       rules: {
-        name: [
-          { required: true, message: "请输入活动名称", trigger: "blur" },
-          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
-        ],
-        region: [
-          { required: true, message: "请选择活动区域", trigger: "change" }
-        ],
-        date1: [
+        clusterName: [
           {
-            type: "date",
             required: true,
-            message: "请选择日期",
+            validator: validateClusterName,
+            trigger: "blur"
+          }
+        ],
+        redisMode: [
+          {
+            required: true,
+            message: "Please select redis mode",
             trigger: "change"
           }
         ],
-        date2: [
+        installationEnvironment: [
           {
-            type: "date",
             required: true,
-            message: "请选择时间",
+            message: "Please select installation environment",
             trigger: "change"
           }
         ],
-        type: [
+        image: [
           {
-            type: "array",
             required: true,
-            message: "请至少选择一个活动性质",
+            message: "Please select image",
             trigger: "change"
           }
         ],
-        resource: [
-          { required: true, message: "请选择活动资源", trigger: "change" }
+        machines: [
+          {
+            required: true,
+            message: "Please select machines",
+            trigger: "change"
+          }
         ],
-        desc: [{ required: true, message: "请填写活动形式", trigger: "blur" }]
+        startPort: [
+          {
+            required: true,
+            message: "Please enter start port",
+            trigger: "blur"
+          },
+          {
+            required: true,
+            validator: validateStartPort,
+            trigger: "blur"
+          }
+        ],
+        masterNumber: [
+          {
+            required: true,
+            message: "Please eneter master number",
+            trigger: "blur"
+          },
+          {
+            type: "number",
+            message: "Please enter integer",
+            trigger: "blur"
+          },
+          {
+            required: true,
+            validator: validateMasterAndReplicaNumber,
+            trigger: "blur"
+          }
+        ],
+        replicaNumber: [
+          {
+            required: true,
+            message: "Please eneter replica number",
+            trigger: "blur"
+          },
+          { type: "number", message: "Please enter integer", trigger: "blur" },
+          {
+            required: true,
+            validator: validateMasterAndReplicaNumber,
+            trigger: "blur"
+          }
+        ],
+        machineUserName: [
+          {
+            required: true,
+            message: "Please enter machine user name",
+            trigger: "blur"
+          }
+        ],
+        machinePassword: [
+          {
+            required: true,
+            message: "Please enter machine password",
+            trigger: "blur"
+          }
+        ],
+        topology: [
+          {
+            required: true,
+            message: "Please enter redis topology",
+            trigger: "blur"
+          }
+        ]
       },
-      allMachineList: [
-        {
-          value: "Shanghai",
-          label: "Shanghai",
-          children: [
-            {
-              value: "192.168.16.2",
-              label: "192.168.16.2"
-            },
-            {
-              value: "192.168.16.3",
-              label: "192.168.16.3"
-            }
-          ]
-        },
-        {
-          value: "Beijing",
-          label: "Beijing",
-          children: [
-            {
-              value: "192.168.16.2",
-              label: "192.168.16.2"
-            },
-            {
-              value: "192.168.16.3",
-              label: "192.168.16.3"
-            }
-          ]
-        },
-        {
-          value: "Hangzhou",
-          label: "Hangzhou",
-          children: [
-            {
-              value: "192.168.16.2",
-              label: "192.168.16.2"
-            },
-            {
-              value: "192.168.16.3",
-              label: "192.168.16.3"
-            }
-          ]
-        }
-      ]
+      allMachineList: []
     };
   },
   methods: {
-    installationCheck(installationParam) {
-      this.checkPass = true;
+    handleChange(value) {
+      console.log(value);
     },
-    submitForm(formName) {
-      this.$refs[formName].validate(valid => {
+    installationCheck(installationParam) {
+      this.installationInfoVisible = true;
+      this.$refs[installationParam].validate(valid => {
         if (valid) {
           alert("submit!");
         } else {
@@ -340,10 +386,108 @@ export default {
         }
       });
     },
-    resetForm(formName) {
-      this.$refs[formName].resetFields();
-      this.checkPass = false;
+    // resetForm(formName) {
+    //   this.$refs[formName].resetFields();
+    //   this.checkPass = false;
+    // },
+    getDockerImageList() {
+      let url = "/installation/getDockerImages";
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.dockerImages = result.data;
+          } else {
+            console.log(result.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getMachineImageList() {
+      let url = "/installation/getMachineImages";
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.machineImages = result.data;
+          } else {
+            console.log(result.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getMachineList(groupId) {
+      if (isEmpty(groupId)) {
+        return;
+      }
+      let url = "/machine/getHierarchyMachineList/" + groupId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let hierarchyMachineList = result.data;
+            hierarchyMachineList.forEach(oneMachineGroup => {
+              let machineGroupName = oneMachineGroup.machineGroupName;
+              oneMachineGroup.label = machineGroupName;
+              oneMachineGroup.value = machineGroupName;
+              let children = oneMachineGroup.children;
+              children.forEach(machine => {
+                machine.label = machine.host;
+                machine.value = machine.machineId;
+              });
+              this.allMachineList = hierarchyMachineList;
+            });
+          } else {
+            console.log(result.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
+  },
+  computed: {
+    currentGroup() {
+      return store.getters.getCurrentGroup;
+    }
+  },
+  watch: {
+    "installationParam.autoBuild": function(newValue, oldValue) {
+      let fields = this.$refs["installationParam"].fields;
+
+      fields.map(field => {
+        if (
+          field.prop === "startPort" ||
+          field.prop === "masterNumber" ||
+          field.prop === "replicaNumber" ||
+          field.prop === "machineUserName" ||
+          field.prop === "machinePassword"
+        ) {
+          console.log(field.prop);
+          field.resetField();
+          return false;
+        }
+      });
+    }
+  },
+  mounted() {
+    this.getDockerImageList();
+    this.getMachineImageList();
+    let groupId = this.$route.params.groupId;
+    this.getMachineList(groupId);
   }
 };
 </script>

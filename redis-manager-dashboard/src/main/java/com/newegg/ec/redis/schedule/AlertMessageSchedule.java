@@ -353,7 +353,6 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         Double actualVal = jsonObject.getDouble(nodeInfoField);
         record.setGroupId(group.getGroupId());
         record.setGroupName(group.getGroupName());
-        record.setClusterId(cluster.getClusterId());
         record.setClusterName(cluster.getClusterName());
         record.setRedisNode(nodeInfo.getNode());
         record.setAlertRule(rule.getAlertKey() + rule.getCompareType() + rule.getAlertValue());

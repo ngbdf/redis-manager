@@ -109,7 +109,6 @@ public class ClusterService implements IClusterService {
         if (row == 0) {
             throw new RuntimeException("Save cluster failed.");
         }
-        System.err.println(cluster.getClusterId());
         nodeInfoService.createNodeInfoTable(cluster.getClusterId());
         return true;
     }

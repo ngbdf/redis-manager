@@ -97,7 +97,7 @@ public interface InitializationDao {
             "user_name varchar(50) NOT NULL, " +
             "password varchar(255) DEFAULT NULL, " +
             "token varchar(255) DEFAULT NULL, " +
-            "type integer(2) DEFAULT NULL, " +
+            "machine_type integer(2) DEFAULT NULL, " +
             "machine_info varchar(255) DEFAULT NULL, " +
             "update_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (machine_id) " +

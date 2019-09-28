@@ -4,19 +4,22 @@ package com.newegg.ec.redis.plugin.install.entity;
  * @author Jay.H.Zou
  * @date 2019/7/28
  */
-public enum InstallationEnvironment {
-    /**
-     * machine
-     */
-    MACHINE,
+public class InstallationEnvironment {
+
+    private InstallationEnvironment() {
+    }
 
     /**
      * docker
      */
-    DOCKER,
+    public static final int DOCKER = 0;
+    /**
+     * machine
+     */
+    public static final int MACHINE = 1;
 
     /**
      * kubernetes
      */
-    KUBERNETES;
+    public static final int KUBERNETES = 2;
 }

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.Future;
@@ -27,6 +28,7 @@ import static com.newegg.ec.redis.util.SignUtil.SPACE;
  * @author Jay.H.Zou
  * @date 2019/8/12
  */
+@Component
 public class DockerNodeOperation extends AbstractNodeOperation implements INodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(DockerNodeOperation.class);

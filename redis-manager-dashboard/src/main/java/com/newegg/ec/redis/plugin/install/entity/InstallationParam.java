@@ -28,7 +28,7 @@ public class InstallationParam {
 
     private boolean sudo;
 
-    private int startPort;
+    private Integer startPort;
 
     /**
      * all nodes
@@ -41,12 +41,12 @@ public class InstallationParam {
     /**
      * master 个数
      */
-    private int masterNumber;
+    private Integer masterNumber;
 
     /**
      * 每个 master 下的副本个数
      */
-    private int replicaNumber;
+    private Integer replicaNumber;
 
     Map<String, String> configMap;
 
@@ -54,7 +54,7 @@ public class InstallationParam {
 
     private String policy;
 
-    private InstallationEnvironment installationEnvironment;
+    private Integer installationEnvironment;
 
     public Cluster getCluster() {
         return cluster;
@@ -112,11 +112,11 @@ public class InstallationParam {
         this.sudo = sudo;
     }
 
-    public int getStartPort() {
+    public Integer getStartPort() {
         return startPort;
     }
 
-    public void setStartPort(int startPort) {
+    public void setStartPort(Integer startPort) {
         this.startPort = startPort;
     }
 
@@ -144,19 +144,19 @@ public class InstallationParam {
         this.topology = topology;
     }
 
-    public int getMasterNumber() {
+    public Integer getMasterNumber() {
         return masterNumber;
     }
 
-    public void setMasterNumber(int masterNumber) {
+    public void setMasterNumber(Integer masterNumber) {
         this.masterNumber = masterNumber;
     }
 
-    public int getReplicaNumber() {
+    public Integer getReplicaNumber() {
         return replicaNumber;
     }
 
-    public void setReplicaNumber(int replicaNumber) {
+    public void setReplicaNumber(Integer replicaNumber) {
         this.replicaNumber = replicaNumber;
     }
 
@@ -184,11 +184,11 @@ public class InstallationParam {
         this.policy = policy;
     }
 
-    public InstallationEnvironment getInstallationEnvironment() {
+    public Integer getInstallationEnvironment() {
         return installationEnvironment;
     }
 
-    public void setInstallationEnvironment(InstallationEnvironment installationEnvironment) {
+    public void setInstallationEnvironment(Integer installationEnvironment) {
         this.installationEnvironment = installationEnvironment;
     }
 }

@@ -1,25 +1,48 @@
 <template>
   <div class="body-wrapper">
     <div class="operation-wrapper">
-      <el-button size="mini" type="success" @click="importMachineVisible = true">Import Machine</el-button>
+      <el-button
+        size="mini"
+        type="success"
+        @click="editMachineVisible = true; isUpdate = false"
+      >Import Machine</el-button>
+    </div>
+
+    <div class="batch-operation-wrapper">
+      <div class="batch-title">Batch Operation</div>
+      <el-row>
+        <el-button size="mini" type="danger" @click="handleDeleteBatch()">Delete</el-button>
+      </el-row>
     </div>
     <div>
-      <el-table :data="machineList" style="width: 100%" center>
+      <!-- :data="machineList.filter(data => !search || data.host.toLowerCase().includes(search.toLowerCase()) || data.machineGroupName.toLowerCase().includes(search.toLowerCase()))" -->
+      <el-table
+        :data="machineList"
+        style="width: 100%"
+        center
+        @selection-change="handleSelectionChange"
+        :default-sort="{prop: 'updateTime', order: 'descending'}"
+      >
         <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column property="machineGroupName" label="Machine Group Name" width="200"></el-table-column>
-        <el-table-column property="host" label="Host"></el-table-column>
+        <el-table-column
+          property="machineGroupName"
+          label="Machine Group Name"
+          width="200"
+          sortable
+        ></el-table-column>
+        <el-table-column property="host" label="Host" sortable></el-table-column>
         <el-table-column property="userName" label="User Name"></el-table-column>
         <el-table-column label="Password" align="center">
           <template slot-scope="scope">
             <el-popover trigger="hover" placement="top">
-              <p>Password: {{ scope.row.password }}</p>
+              <p>{{ scope.row.password }}</p>
               <div slot="reference" class="name-wrapper">
                 <el-tag size="small" type="info">******</el-tag>
               </div>
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column label="Token" align="center">
+        <!-- <el-table-column label="Token" align="center">
           <template slot-scope="scope">
             <el-popover trigger="hover" placement="top">
               <p>Token: {{ scope.row.password }}</p>
@@ -28,12 +51,15 @@
               </div>
             </el-popover>
           </template>
-        </el-table-column>
+        </el-table-column>-->
         <el-table-column property="machineInfo" label="Info"></el-table-column>
-        <el-table-column property="updateTime" label="Time"></el-table-column>
+        <el-table-column property="updateTime" label="Time" sortable></el-table-column>
         <el-table-column label="Operation" width="200px;">
+          <!-- <template slot="header" slot-scope="scope">
+            <el-input v-model="search" size="mini" placeholder="Search" />
+          </template>-->
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+            <el-button size="mini" type="primary" @click="editMachine(scope.$index, scope.row)">Edit</el-button>
             <el-button
               size="mini"
               type="danger"
@@ -43,7 +69,7 @@
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog title="Create User" :visible.sync="importMachineVisible" width="50%">
+    <el-dialog title="Edit machines" :visible.sync="editMachineVisible" width="50%">
       <el-form :model="machines" ref="machines" :rules="rules" size="small" label-width="135px">
         <el-form-item label="Machine Group" prop="machineGroupName">
           <el-select
@@ -54,10 +80,10 @@
             placeholder="Select or enter group"
           >
             <el-option
-              v-for="item in machineGroupNameList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
+              v-for="(machineGroupName, index) in machineGroupNameList"
+              :key="index"
+              :label="machineGroupName"
+              :value="machineGroupName"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -67,34 +93,71 @@
         <el-form-item label="Password" prop="password">
           <el-input v-model="machines.password"></el-input>
         </el-form-item>
-        <el-form-item label="Token" prop="token">
+        <!-- <el-form-item label="Token" prop="token">
           <el-input v-model="machines.token"></el-input>
-        </el-form-item>
+        </el-form-item>-->
 
-        <el-form-item
-          v-for="(host, index) in machines.hostList"
-          :label="'Host ' + (index + 1)"
-          :key="host.key"
-          :prop="'hostList.' + index + '.value'"
-          :rules="rules.host"
-        >
-          <el-input v-model="host.value">
-            <el-button slot="append" @click.prevent="removeHost(host)" icon="el-icon-delete"></el-button>
-          </el-input>
+        <div v-if="!isUpdate">
+          <el-form-item
+            v-for="(host, index) in machines.hostList"
+            :label="'Host ' + (index + 1)"
+            :key="host.key"
+            :prop="'hostList.' + index + '.value'"
+            :rules="rules.host"
+          >
+            <el-input v-model="host.value">
+              <el-button slot="append" @click.prevent="removeHost(host)" icon="el-icon-delete"></el-button>
+            </el-input>
+          </el-form-item>
+        </div>
+        <el-form-item label="Host" prop="host" :rules="rules.host" v-else>
+          <el-input v-model="machines.host"></el-input>
         </el-form-item>
 
         <el-form-item label="Machine Info" prop="machineInfo">
-          <el-input v-model="machines.machineInfo"></el-input>
+          <el-input v-model="machines.machineInfo" maxlength="50" show-word-limit></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="addHost()">New Host</el-button>
-        <el-button size="small" type="primary" @click="addMachines('machines')">Confirm</el-button>
+        <el-button size="small" @click="addHost()" v-if="!isUpdate">New Host</el-button>
+        <el-button
+          size="small"
+          type="primary"
+          @click="saveMachines('machines')"
+          v-if="isUpdate"
+        >Update</el-button>
+        <el-button size="small" type="primary" @click="saveMachines('machines')" v-else>Confirm</el-button>
       </div>
+    </el-dialog>
+
+    <el-dialog title="Delete Machine" :visible.sync="deleteVisible" width="30%">
+      <span>
+        Are you sure to delete
+        <b>{{ machines.machineGroupName }} {{ machines.host }}</b> ?
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="deleteVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteMachine(machines)">Delete</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="Delete Machine Batch" :visible.sync="deleteBatchVisible" width="30%">
+      <span>
+        Are you sure to delete ?
+        <br />
+        <div
+          v-for="(machine, index) in selectedMachineList"
+          :key="index"
+        >{{ machine.machineGroupName }} {{ machine.host }}</div>
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="deleteBatchVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteMachine(selectedMachineList)">Delete</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
 <script>
+import { store } from "@/vuex/store.js";
 import API from "@/api/api.js";
 import { formatTime } from "@/utils/time.js";
 import { isEmpty, validateIp } from "@/utils/validate.js";
@@ -166,32 +229,13 @@ export default {
       );
     };
     return {
-      machineList: [
-        {
-          machineGroupName: "huadong",
-          host: "192.168.53.26",
-          userName: "root",
-          password: "1234",
-          token: "xGea2fg4kj4hjeino;u303asa",
-          machineInfo: "info",
-          updateTime: ""
-        }
-      ],
-      machineGroupNameList: [
-        {
-          value: "E1",
-          label: "E1"
-        },
-        {
-          value: "E2",
-          label: "E2"
-        },
-        {
-          value: "E3",
-          label: "E3"
-        }
-      ],
-      importMachineVisible: false,
+      machineList: [],
+      machineGroupNameList: [],
+      editMachineVisible: false,
+      isUpdate: false,
+      deleteVisible: false,
+      deleteBatchVisible: false,
+      batchDelete: false,
       machines: {
         hostList: [{ value: "" }]
       },
@@ -229,13 +273,14 @@ export default {
             trigger: "blur"
           }
         ]
-      }
+      },
+      search: "",
+      selectedMachineList: []
     };
   },
   methods: {
     getMachineList(groupId) {
       if (isEmpty(groupId)) {
-        console.log("Please select group.");
         return;
       }
       let url = "/machine/getMachineList/" + groupId;
@@ -245,7 +290,11 @@ export default {
         response => {
           let result = response.data;
           if (result.code == 0) {
-            this.machineList = result.data;
+            let machineList = result.data;
+            machineList.forEach(machine => {
+              machine.updateTime = formatTime(machine.updateTime);
+            });
+            this.machineList = machineList;
           } else {
             console.log(result.message);
           }
@@ -273,36 +322,119 @@ export default {
         }
       );
     },
-    addMachines(machines) {
+    buildMachineList(machines) {
+      let machineList = [];
+      if (this.isUpdate) {
+        machineList.push(machines);
+        return machineList;
+      }
+      let machineGroupName = this.machines.machineGroupName;
+      let userName = this.machines.userName;
+      let password = this.machines.password;
+      let token = this.machines.token;
+      let hostList = this.machines.hostList;
+      let machineInfo = this.machines.machineInfo;
+      hostList.forEach(host => {
+        machineList.push({
+          groupId: this.currentGroupId,
+          machineGroupName: machineGroupName,
+          userName: userName,
+          password: password,
+          token: token,
+          host: host.value,
+          machineInfo: machineInfo
+        });
+      });
+      return machineList;
+    },
+    saveMachines(machines) {
       this.$refs[machines].validate(valid => {
         if (valid) {
-          let machineList = [];
-          let machineGroupName = this.machines.machineGroupName;
-          let userName = this.machines.userName;
-          let password = this.machines.password;
-          let token = this.machines.token;
-          let hostList = this.machines.hostList;
-          let machineInfo = this.machines.machineInfo;
-          hostList.forEach(host => {
-            machineList.push({
-              machineGroupName: machineGroupName,
-              userName: userName,
-              password: password,
-              token: token,
-              host: host,
-              machineInfo: machineInfo
-            });
-          });
-          let url = "/machine/addMachineList";
-          API.post(url, null, response => {}, err => {});
+          console.log(this.machines);
+          let machineList = this.buildMachineList(this.machines);
+          console.log(machineList);
+          let url = "";
+          if (this.isUpdate) {
+            url = "/machine/updateMachine";
+          } else {
+            url = "/machine/addMachineList";
+          }
+          API.post(
+            url,
+            machineList,
+            response => {
+              let result = response.data;
+              if (result.code == 0) {
+                this.editMachineVisible = false;
+                this.getMachineGroupNameList(this.currentGroupId);
+                this.getMachineList(this.currentGroupId);
+              } else {
+                console.log(result.message);
+              }
+              this.$refs[machines].resetFields();
+            },
+            err => {
+              console.log(err);
+            }
+          );
         }
       });
     },
-    handleEdit(index, row) {
-      console.log(index, row);
+    editMachine(index, row) {
+      this.machines = row;
+      console.log(this.machines);
+      this.editMachineVisible = true;
+      this.isUpdate = true;
     },
     handleDelete(index, row) {
-      console.log(index, row);
+      this.machines = row;
+      this.deleteVisible = true;
+      this.batchDelete = false;
+    },
+    handleDeleteBatch() {
+      this.batchDelete = true;
+      if (this.selectedMachineList.length == 0) {
+        console.log("Please select machine");
+      } else {
+        this.deleteBatchVisible = true;
+      }
+    },
+    deleteMachine() {
+      let url = "";
+      let data;
+      if (this.batchDelete) {
+        url = "/machine/deleteMachineBatch";
+        data = this.selectedMachineList;
+        data.forEach(machine => {
+          machine.updateTime = new Date();
+        });
+      } else {
+        url = "/machine/deleteMachine";
+        data = this.machines;
+        data.updateTime = new Date();
+      }
+      API.post(
+        url,
+        data,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.deleteVisible = false;
+            this.deleteBatchVisible = false;
+            this.getMachineGroupNameList(this.currentGroupId);
+            this.getMachineList(this.currentGroupId);
+            this.machines = {
+              hostList: [{ value: "" }]
+            };
+            this.selectedMachineList = [];
+          } else {
+            console.log(result.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     },
     removeHost(item) {
       if (this.machines.hostList.length == 1) {
@@ -321,11 +453,21 @@ export default {
         value: "",
         key: Date.now()
       });
+    },
+    handleSelectionChange(val) {
+      this.selectedMachineList = val;
+      console.log(this.selectedMachineList);
+    }
+  },
+  computed: {
+    currentGroupId() {
+      return store.getters.getCurrentGroupId;
     }
   },
   mounted() {
     let groupId = this.$route.params.groupId;
     this.getMachineList(groupId);
+    this.getMachineGroupNameList(groupId);
   }
 };
 </script>
@@ -338,5 +480,15 @@ export default {
   justify-content: flex-end;
   padding-bottom: 20px;
   border-bottom: 1px solid #dcdfe6;
+}
+
+.batch-operation-wrapper {
+  margin: 20px 0;
+}
+
+.batch-title {
+  margin-bottom: 10px;
+  color: #909399;
+  font-size: 14px;
 }
 </style>

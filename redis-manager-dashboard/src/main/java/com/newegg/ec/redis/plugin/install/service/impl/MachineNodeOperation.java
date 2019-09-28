@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.INodeOperation;
@@ -32,6 +33,7 @@ import static com.newegg.ec.redis.util.SignUtil.SLASH;
  * @author Jay.H.Zou
  * @date 2019/8/13
  */
+@Component
 public class MachineNodeOperation extends AbstractNodeOperation implements INodeOperation {
 
     @Value("${redis-manager.install.machine.package-path: /redis/machine/}")
@@ -46,14 +48,15 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
             packagePath += SLASH;
         }
         if (Strings.isNullOrEmpty(packagePath)) {
-            throw new RuntimeException("Machine package config is empty!");
+            throw new ConfigurationException("Machine package config is empty!");
         }
         File file = new File(packagePath);
         if (!file.exists()) {
-            throw new RuntimeException(packagePath + " not exist!");
+            file.mkdirs();
+//            throw new ConfigurationException(packagePath + " not exist!");
         }
         if (!file.isDirectory()) {
-            throw new RuntimeException(packagePath + " is not directory!");
+            throw new ConfigurationException(packagePath + " is not directory!");
         }
     }
 

@@ -42,10 +42,10 @@ redis-manager:
     slow-log-limit: 100
   # installation configuration
   install:
-    # data-dir: /data/redis-manager/
     # physics machine
     machine:
-      package-path: /redis/machine/
+      # absolute path
+      package-path: /redis-manager/machine/
     # docker
     docker:
       # 默认从官方镜像库拉取

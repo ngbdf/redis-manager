@@ -180,7 +180,7 @@
     </el-dialog>
     <el-dialog title="Delete Cluster" :visible.sync="deleteClusterVisible" width="30%">
       <span>
-        Are you sure to delte
+        Are you sure to delete
         <b>{{ cluster.clusterName }}</b> ?
       </span>
       <span slot="footer" class="dialog-footer">
