@@ -104,7 +104,7 @@ public class Cluster {
 
     private String redisPassword;
 
-    private InstallationEnvironment installationEnvironment;
+    private Integer installationEnvironment;
 
     /**
      * 0: install by redis manager
@@ -303,11 +303,11 @@ public class Cluster {
         this.redisPassword = redisPassword;
     }
 
-    public InstallationEnvironment getInstallationEnvironment() {
+    public Integer getInstallationEnvironment() {
         return installationEnvironment;
     }
 
-    public void setInstallationEnvironment(InstallationEnvironment installationEnvironment) {
+    public void setInstallationEnvironment(Integer installationEnvironment) {
         this.installationEnvironment = installationEnvironment;
     }
 

@@ -17,6 +17,7 @@ import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -38,6 +39,7 @@ import static javax.management.timer.Timer.ONE_MINUTE;
  * @author Jay.H.Zou
  * @date 2019/7/26
  */
+@Component
 public class InstallationTemplate {
 
     @Autowired

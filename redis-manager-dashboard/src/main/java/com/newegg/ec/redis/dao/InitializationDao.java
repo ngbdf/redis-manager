@@ -58,7 +58,7 @@ public interface InitializationDao {
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createGroupUserTable();
     
-    @Select("create TABLE IF NOT EXISTS `cluster`( " +
+    @Select("create TABLE IF NOT EXISTS `cluster` ( " +
             "cluster_id integer(4) NOT NULL AUTO_INCREMENT COMMENT '自增ID', " +
             "group_id integer(4) NOT NULL, " +
             "user_id integer(4) NOT NULL, " +
@@ -81,7 +81,7 @@ public interface InitializationDao {
             "cluster_known_nodes integer(4) NOT NULL, " +
             "cluster_size integer(4) NOT NULL, " +
             "redis_password varchar(50) DEFAULT NULL, " +
-            "installation_environment varchar(25) NOT NULL, " +
+            "installation_environment integer(4) NOT NULL, " +
             "installation_type tinyint(1) NOT NULL, " +
             "update_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (cluster_id), " +
