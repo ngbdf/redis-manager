@@ -111,11 +111,6 @@ public class InstallationTemplate {
         }
         // 构建机器和Redis节点结构
         buildMachineRedisNodeMap(installationParam);
-        // 检查机器列表和节点列表
-        boolean checkResult = checkList(installationParam);
-        if (checkResult) {
-            return false;
-        }
         // 检查安装环境
         boolean checkEnvironmentSuccess = installationOperation.checkInstallationEnv(installationParam);
         if (!checkEnvironmentSuccess) {
@@ -147,7 +142,7 @@ public class InstallationTemplate {
      *
      * @param installationParam
      */
-    private void buildMachineList(InstallationParam installationParam) {
+    public void buildMachineList(InstallationParam installationParam) {
         boolean autoBuild = installationParam.isAutoBuild();
         if (autoBuild) {
             List<Integer> machineIdList = installationParam.getMachineIdList();
@@ -164,18 +159,19 @@ public class InstallationTemplate {
      *
      * @return
      */
-    private boolean buildTopology(InstallationParam installationParam) {
+    // Rest 调用
+    public boolean buildTopology(InstallationParam installationParam) {
         boolean autoBuild = installationParam.isAutoBuild();
         Multimap<RedisNode, RedisNode> topology = ArrayListMultimap.create();
         if (autoBuild) {
-            // Rest 调用
-            /*List<Machine> machineList = installationParam.getMachineList();
+
+            List<Machine> machineList = installationParam.getMachineList();
             int masterNumber = installationParam.getMasterNumber();
             int replicaNumber = installationParam.getReplicaNumber();
             int nodeNumber = masterNumber + replicaNumber;
             int port = installationParam.getStartPort();
             List<MachineAndPorts> machineAndPortsList = buildMachinePortsMap(machineList, port, nodeNumber);
-            topology = randomPolicy(machineAndPortsList, masterNumber, replicaNumber);*/
+            topology = randomPolicy(machineAndPortsList, masterNumber, replicaNumber);
         } else {
             List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
             RedisNode masterNode = null;
@@ -313,12 +309,6 @@ public class InstallationTemplate {
             }
         }
         installationParam.setMachineAndRedisNode(machineAndRedisNode);
-    }
-
-    private boolean checkList(InstallationParam installationParam) {
-        List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
-        List<Machine> machineList = installationParam.getMachineList();
-        return !(allRedisNodes.isEmpty() || machineList.isEmpty());
     }
 
     /**

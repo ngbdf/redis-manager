@@ -94,8 +94,8 @@
                     :options="allMachineList"
                     :props="{ multiple: true }"
                     filterable
-                    @change="handleChange"
                     :leafOnly="true"
+                    @change="handleMachine"
                     v-model="installationParam.machines"
                   ></el-cascader>
                 </div>
@@ -142,12 +142,12 @@
                   placeholder="Machine password"
                 ></el-input>
               </el-form-item>
-              <el-form-item label="Topology" prop="topology" v-if="!installationParam.autoBuild">
+              <el-form-item label="Topology" prop="redisNodes" v-if="!installationParam.autoBuild">
                 <el-input
                   type="textarea"
                   :autosize="{ minRows: 2, maxRows: 12}"
                   placeholder="Please enter redis node list"
-                  v-model="installationParam.topology"
+                  v-model="installationParam.redisNodes"
                   class="textarea"
                 ></el-input>
               </el-form-item>
@@ -197,8 +197,45 @@
         </div>
       </el-col>
     </el-row>
-    <el-dialog title="Installation Info" :visible.sync="installationInfoVisible" width="50%">
-      <span>这是一段信息</span>
+    <el-dialog title="Installation Params" :visible.sync="installationInfoVisible" width="50%">
+      <div class="item-param">
+        <span class="param-key">Group:</span>
+        <el-tag size="mini" effect="plain">{{ currentGroup.groupName }}</el-tag>
+      </div>
+      <div class="item-param">
+        <span class="param-key">Cluster Name:</span>
+        <el-tag size="mini" effect="plain">{{ installationParam.clusterName }}</el-tag>
+      </div>
+      <div class="item-param">
+        <span class="param-key">Redis Mode:</span>
+        <el-tag size="mini" effect="plain">{{ installationParam.redisMode }}</el-tag>
+      </div>
+      <div v-if="installationParam.autoBuild">
+        <div class="item-param">
+          <span class="param-key">Master Number:</span>
+          <el-tag size="mini" effect="plain">{{ installationParam.masterNumber }}</el-tag>
+        </div>
+        <div class="item-param">
+          <span class="param-key">Replica Number:</span>
+          <el-tag size="mini" effect="plain">{{ installationParam.replicaNumber }}</el-tag>
+        </div>
+      </div>
+      <div v-if="installationParam.installationEnvironment == 0" class="item-param">
+        <span class="param-key">Environment:</span>
+        <el-tag size="mini" effect="plain">Docker</el-tag>
+      </div>
+      <div v-else-if="installationParam.installationEnvironment == 1" class="item-param">
+        <span class="param-key">Environment:</span>
+        <el-tag size="mini" effect="plain">Machine</el-tag>
+      </div>
+      <div class="item-param">
+        <span class="param-key">Image:</span>
+        {{ installationParam.image }}
+      </div>
+      <div class="item-param">
+        <div class="param-key">Topology:</div>
+        {{ installationParam.redisNodes }}
+      </div>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="installationInfoVisible = false">Cancel</el-button>
         <el-button size="small" type="primary" @click="installationInfoVisible = false">Install</el-button>
@@ -254,7 +291,8 @@ export default {
       machineImages: [],
       installationParam: {
         groupId: "",
-        clusterName: "",
+        clusterName: "Shanghai",
+        redisPassword: "one",
         redisMode: "cluster",
         create: true,
         machineIdList: [],
@@ -262,12 +300,18 @@ export default {
         autoBuild: true,
         autoInit: true,
         sudo: true,
-        startPort: "",
-        redisNodeList: "127.0.0.1:8001 master\n127.0.0.1:8002",
-
+        startPort: 8000,
+        masterNumber: 4,
+        replicaNumber: 2,
+        redisNodes: "127.0.0.1:8001 master\n127.0.0.1:8002",
         installationEnvironment: "0"
       },
       installationInfoVisible: false,
+      buildMachineIdList() {
+        this.installationParam.machines.forEach(item => {
+          this.installationParam.machineIdList.push(item[1]);
+        });
+      },
       rules: {
         clusterName: [
           {
@@ -360,7 +404,7 @@ export default {
             trigger: "blur"
           }
         ],
-        topology: [
+        redisNodes: [
           {
             required: true,
             message: "Please enter redis topology",
@@ -372,8 +416,10 @@ export default {
     };
   },
   methods: {
-    handleChange(value) {
-      console.log(value);
+    handleMachine(val) {
+      val.forEach(item => {
+        console.log(item[1]);
+      });
     },
     installationCheck(installationParam) {
       this.installationInfoVisible = true;
@@ -541,5 +587,13 @@ export default {
   padding: 10px 20px;
   border-bottom: 1px solid #dcdfe6;
   background: #f0f2f5;
+}
+
+.item-param {
+  padding: 5px;
+}
+
+.param-key {
+  color: #909399;
 }
 </style>

@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.plugin.install.InstallationTemplate;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
+import java.util.*;
 
 import static com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment.*;
 
@@ -72,6 +74,23 @@ public class InstallationController {
         AbstractNodeOperation nodeOperation = getNodeOperation(installationEnvironment);
         boolean result = installationTemplate.installFlow(nodeOperation, installationParam);
         return result ? Result.successResult() : Result.failResult();
+    }
+
+    @RequestMapping(value = "prepareForInstallation", method = RequestMethod.POST)
+    @ResponseBody
+    public Result showInstallInfo(@RequestBody InstallationParam installationParam) {
+        Integer installationEnvironment = installationParam.getInstallationEnvironment();
+        AbstractNodeOperation nodeOperation = getNodeOperation(installationEnvironment);
+        boolean prepareSuccess = installationTemplate.prepareForInstallation(nodeOperation, installationParam);
+        List<String> redisNodes = new LinkedList<>();
+        Map<RedisNode, Collection<RedisNode>> topology = installationParam.getTopology().asMap();
+        topology.forEach((masterNode, replicaCol) -> {
+            redisNodes.add(masterNode.getHost() + ":" + masterNode.getPort() + masterNode.getNodeRole().getValue());
+            replicaCol.forEach(replica -> {
+                redisNodes.add(replica.getHost() + ":" + replica.getPort() + replica.getNodeRole().getValue());
+            });
+        });
+        return prepareSuccess ? Result.successResult() : Result.failResult();
     }
 
    /* @RequestMapping(value = "environmentCheck", method = RequestMethod.POST)
