@@ -70,18 +70,21 @@ public class InstallationController {
     @RequestMapping(value = "installFlow", method = RequestMethod.POST)
     @ResponseBody
     public Result install(@RequestBody InstallationParam installationParam) {
-        Integer installationEnvironment = installationParam.getInstallationEnvironment();
+        Integer installationEnvironment = installationParam.getCluster().getInstallationEnvironment();
         AbstractNodeOperation nodeOperation = getNodeOperation(installationEnvironment);
         boolean result = installationTemplate.installFlow(nodeOperation, installationParam);
         return result ? Result.successResult() : Result.failResult();
     }
 
-    @RequestMapping(value = "prepareForInstallation", method = RequestMethod.POST)
+    /*@RequestMapping(value = "prepareForInstallation", method = RequestMethod.POST)
     @ResponseBody
-    public Result showInstallInfo(@RequestBody InstallationParam installationParam) {
+    public Result prepareForInstallation(@RequestBody InstallationParam installationParam) {
         Integer installationEnvironment = installationParam.getInstallationEnvironment();
         AbstractNodeOperation nodeOperation = getNodeOperation(installationEnvironment);
         boolean prepareSuccess = installationTemplate.prepareForInstallation(nodeOperation, installationParam);
+        if (!prepareSuccess) {
+            return Result.failResult();
+        }
         List<String> redisNodes = new LinkedList<>();
         Map<RedisNode, Collection<RedisNode>> topology = installationParam.getTopology().asMap();
         topology.forEach((masterNode, replicaCol) -> {
@@ -90,8 +93,10 @@ public class InstallationController {
                 redisNodes.add(replica.getHost() + ":" + replica.getPort() + replica.getNodeRole().getValue());
             });
         });
-        return prepareSuccess ? Result.successResult() : Result.failResult();
-    }
+        JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(installationParam));
+        jsonObject.put("redisNodes", redisNodes);
+        return Result.successResult(jsonObject);
+    }*/
 
    /* @RequestMapping(value = "environmentCheck", method = RequestMethod.POST)
     @ResponseBody

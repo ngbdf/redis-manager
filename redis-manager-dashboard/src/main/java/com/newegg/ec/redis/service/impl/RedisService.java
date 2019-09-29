@@ -349,6 +349,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         StringBuffer result = new StringBuffer();
         RedisClient redisClient;
         try {
+            // TODO: 测试是否需要密码
             redisClient = RedisClientFactory.buildRedisClient(firstNode);
         } catch (Exception e) {
             String message = "Create redis client failed.";
@@ -596,23 +597,24 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     public String updateRedisPassword(Cluster cluster) {
         String redisPassword = cluster.getRedisPassword();
         StringBuffer result = new StringBuffer();
-        if (!Strings.isNullOrEmpty(redisPassword)) {
-            List<RedisNode> redisNodeList = getRedisNodeList(cluster);
-
-            redisNodeList.forEach(redisNode -> {
-                try {
-                    RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode);
-                    redisClient.setConfig(new Pair<>(MASTER_AUTH, redisPassword));
-                    redisClient.setConfig(new Pair<>(REQUIRE_PASS, redisPassword));
-                    redisClient.rewriteConfig();
-                    redisClient.close();
-                } catch (Exception e) {
-                    String message = "Update redis password failed, host=" + redisNode.getHost() + ", port=" + redisNode.getPort() + ".";
-                    logger.error(message, e);
-                    result.append(message + e.getMessage());
-                }
-            });
+        if (Strings.isNullOrEmpty(redisPassword)) {
+            return result.toString();
         }
+        List<RedisNode> redisNodeList = getRedisNodeList(cluster);
+
+        redisNodeList.forEach(redisNode -> {
+            try {
+                RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode);
+                redisClient.setConfig(new Pair<>(MASTER_AUTH, redisPassword));
+                redisClient.setConfig(new Pair<>(REQUIRE_PASS, redisPassword));
+                redisClient.rewriteConfig();
+                redisClient.close();
+            } catch (Exception e) {
+                String message = "Update redis password failed, host=" + redisNode.getHost() + ", port=" + redisNode.getPort() + ".";
+                logger.error(message, e);
+                result.append(message + e.getMessage());
+            }
+        });
         return result.toString();
     }
 

@@ -37,7 +37,7 @@ public class RedisClientFactory {
     }
 
     public static RedisClient buildRedisClient(RedisNode redisNode) {
-        return buildRedisClient(redisNode);
+        return buildRedisClient(redisNode, null);
     }
 
     public static RedisClient buildRedisClient(RedisNode redisNode, String requirePass) {

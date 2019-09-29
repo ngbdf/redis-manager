@@ -92,6 +92,7 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
                     return true;
                 } catch (InterruptedException e) {
                     // TODO: websocket
+                    e.printStackTrace();
                     return false;
                 }
             }));
@@ -103,6 +104,7 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
                 }
             } catch (Exception e) {
                 // TODO: websocket
+                e.printStackTrace();
                 return false;
             }
         }
@@ -142,6 +144,7 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
             return true;
         } catch (Exception e) {
             // TODO: websocket
+            e.printStackTrace();
             return false;
         }
     }

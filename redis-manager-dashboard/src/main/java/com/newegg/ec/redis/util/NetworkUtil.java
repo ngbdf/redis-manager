@@ -45,7 +45,7 @@ public class NetworkUtil {
             socket.connect(new InetSocketAddress(ip, port), TIMEOUT);
             return socket.isConnected();
         } catch (Exception e) {
-            logger.error(ip + ":" + port + " can't access.", e);
+            logger.error(ip + ":" + port + " can't access.");
         } finally {
             try {
                 socket.close();

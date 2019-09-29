@@ -90,6 +90,8 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
                     commonCheck = false;
                 }
             }
+            // TODO: for test
+            commonCheck = true;
         }
         return commonCheck && checkEnvironment(installationParam);
     }
@@ -116,9 +118,9 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
         boolean sudo = installationParam.isSudo();
         String url;
         // 模式
-        String redisMode = installationParam.getRedisMode();
+        String redisMode = installationParam.getCluster().getRedisMode();
         try {
-            // eg: ip:port/redis/config/cluster/redis.conf
+            // eg: ip:port/redis-manager/config/cluster/redis.conf
             url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + CONFIG_ORIGINAL_PATH + redisMode + SLASH + REDIS_CONF;
         } catch (SocketException e) {
             return false;
@@ -129,9 +131,14 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
         for (Machine machine : machineList) {
             try {
                 // 将 redis.conf 分发到目标机器的临时目录
-                SSH2Util.copyFileToRemote(machine, tempPath, url, sudo);
+                String result = SSH2Util.copyFileToRemote(machine, tempPath, url, sudo);
+                logger.warn(result);
+                if (Strings.isNullOrEmpty(result) || !result.contains("OK")) {
+                    return false;
+                }
             } catch (Exception e) {
                 // TODO: websocket
+                e.printStackTrace();
                 return false;
             }
         }
@@ -143,13 +150,14 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
             RedisNode redisNode = entry.getValue();
             String targetPath = INSTALL_BASE_PATH + redisNode.getPort();
             try {
-                // 本地复制
-                SSH2Util.copy(machine, tempRedisConf, targetPath, sudo);
+                // 清理、复制
+                SSH2Util.copy2(machine, tempRedisConf, targetPath, sudo);
                 // 修改配置文件
                 Map<String, String> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort());
                 RedisConfigUtil.variableAssignment(machine, targetPath, configs, sudo);
             } catch (Exception e) {
                 // TODO: websocket
+                e.printStackTrace();
                 return false;
             }
         }

@@ -50,11 +50,7 @@ public class InstallationParam {
 
     Map<String, String> configMap;
 
-    private String redisMode;
-
     private String policy;
-
-    private Integer installationEnvironment;
 
     public Cluster getCluster() {
         return cluster;
@@ -168,27 +164,4 @@ public class InstallationParam {
         this.configMap = configMap;
     }
 
-    public String getRedisMode() {
-        return redisMode;
-    }
-
-    public void setRedisMode(String redisMode) {
-        this.redisMode = redisMode;
-    }
-
-    public String getPolicy() {
-        return policy;
-    }
-
-    public void setPolicy(String policy) {
-        this.policy = policy;
-    }
-
-    public Integer getInstallationEnvironment() {
-        return installationEnvironment;
-    }
-
-    public void setInstallationEnvironment(Integer installationEnvironment) {
-        this.installationEnvironment = installationEnvironment;
-    }
 }

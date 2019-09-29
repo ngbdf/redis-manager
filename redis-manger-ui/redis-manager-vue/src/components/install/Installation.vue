@@ -40,8 +40,8 @@
               <!-- environment start -->
               <el-form-item label="Environment" prop="installationEnvironment">
                 <el-radio-group v-model="installationParam.installationEnvironment">
-                  <el-radio label="0">Docker</el-radio>
-                  <el-radio label="1">Machine</el-radio>
+                  <el-radio :label="0">Docker</el-radio>
+                  <el-radio :label="1">Machine</el-radio>
                   <!-- <el-radio-button label="Kubernetes"></el-radio-button> -->
                 </el-radio-group>
               </el-form-item>
@@ -50,7 +50,7 @@
               <el-form-item
                 label="Image"
                 prop="image"
-                v-if="installationParam.installationEnvironment == '0'"
+                v-if="installationParam.installationEnvironment == 0"
               >
                 <el-select
                   allow-create
@@ -69,9 +69,9 @@
               <el-form-item
                 label="Image"
                 prop="image"
-                v-if="installationParam.installationEnvironment == '1'"
+                v-else-if="installationParam.installationEnvironment == 1"
               >
-                <el-select v-model="installationParam.package" placeholder="Please choose image">
+                <el-select v-model="installationParam.image" placeholder="Please choose image">
                   <el-option
                     v-for="image in machineImages"
                     :key="image"
@@ -145,7 +145,7 @@
               <el-form-item label="Topology" prop="redisNodes" v-if="!installationParam.autoBuild">
                 <el-input
                   type="textarea"
-                  :autosize="{ minRows: 2, maxRows: 12}"
+                  :autosize="{ minRows: 2, maxRows: 500}"
                   placeholder="Please enter redis node list"
                   v-model="installationParam.redisNodes"
                   class="textarea"
@@ -165,7 +165,7 @@
                 </el-tooltip>
               </el-form-item>
               <el-form-item
-                label="Auto Init"
+                label="Init Slot"
                 prop="autoInit"
                 v-if="installationParam.redisMode == 'cluster'"
               >
@@ -200,33 +200,33 @@
     <el-dialog title="Installation Params" :visible.sync="installationInfoVisible" width="50%">
       <div class="item-param">
         <span class="param-key">Group:</span>
-        <el-tag size="mini" effect="plain">{{ currentGroup.groupName }}</el-tag>
+        <el-tag size="mini">{{ currentGroup.groupName }}</el-tag>
       </div>
       <div class="item-param">
         <span class="param-key">Cluster Name:</span>
-        <el-tag size="mini" effect="plain">{{ installationParam.clusterName }}</el-tag>
+        <el-tag size="mini">{{ installationParam.clusterName }}</el-tag>
       </div>
       <div class="item-param">
         <span class="param-key">Redis Mode:</span>
-        <el-tag size="mini" effect="plain">{{ installationParam.redisMode }}</el-tag>
+        <el-tag size="mini">{{ installationParam.redisMode }}</el-tag>
       </div>
       <div v-if="installationParam.autoBuild">
         <div class="item-param">
           <span class="param-key">Master Number:</span>
-          <el-tag size="mini" effect="plain">{{ installationParam.masterNumber }}</el-tag>
+          <el-tag size="mini">{{ installationParam.masterNumber }}</el-tag>
         </div>
         <div class="item-param">
           <span class="param-key">Replica Number:</span>
-          <el-tag size="mini" effect="plain">{{ installationParam.replicaNumber }}</el-tag>
+          <el-tag size="mini">{{ installationParam.replicaNumber }}</el-tag>
         </div>
       </div>
       <div v-if="installationParam.installationEnvironment == 0" class="item-param">
         <span class="param-key">Environment:</span>
-        <el-tag size="mini" effect="plain">Docker</el-tag>
+        <el-tag size="mini">Docker</el-tag>
       </div>
       <div v-else-if="installationParam.installationEnvironment == 1" class="item-param">
         <span class="param-key">Environment:</span>
-        <el-tag size="mini" effect="plain">Machine</el-tag>
+        <el-tag size="mini">Machine</el-tag>
       </div>
       <div class="item-param">
         <span class="param-key">Image:</span>
@@ -280,7 +280,6 @@ export default {
       callback();
     };
     var validateMasterAndReplicaNumber = (rule, value, callback) => {
-      console.log(value);
       if (value <= 0) {
         return callback(new Error("Number must be greater than 0"));
       }
@@ -304,14 +303,10 @@ export default {
         masterNumber: 4,
         replicaNumber: 2,
         redisNodes: "127.0.0.1:8001 master\n127.0.0.1:8002",
-        installationEnvironment: "0"
+        installationEnvironment: 0
       },
       installationInfoVisible: false,
-      buildMachineIdList() {
-        this.installationParam.machines.forEach(item => {
-          this.installationParam.machineIdList.push(item[1]);
-        });
-      },
+
       rules: {
         clusterName: [
           {
@@ -418,19 +413,52 @@ export default {
   methods: {
     handleMachine(val) {
       val.forEach(item => {
-        console.log(item[1]);
+        // console.log(item[1]);
       });
     },
+    buildMachineIdList() {
+      this.installationParam.machines.forEach(item => {
+        this.installationParam.machineIdList.push(item[1]);
+      });
+    },
+    buildParam() {
+      console.log("============");
+      this.buildMachineIdList();
+      let installationParam = this.installationParam;
+      let cluster = {
+        clusterName: installationParam.clusterName,
+        redisPassword: installationParam.redisPassword,
+        redisMode: installationParam.redisMode,
+        installationEnvironment: installationParam.installationEnvironment,
+        image: installationParam.image,
+        clusterInfo: installationParam.clusterInfo
+      };
+      this.installationParam.cluster = cluster;
+    },
     installationCheck(installationParam) {
-      this.installationInfoVisible = true;
       this.$refs[installationParam].validate(valid => {
         if (valid) {
-          alert("submit!");
+          //this.installationInfoVisible = true;
+          this.buildParam();
+          console.log(this.installationParam);
+          this.install();
         } else {
-          console.log("error submit!!");
           return false;
         }
       });
+    },
+    install() {
+      let url = "/installation/installFlow";
+      API.post(
+        url,
+        this.installationParam,
+        response => {
+          console.log(response);
+        },
+        err => {
+          console.log(err);
+        }
+      );
     },
     // resetForm(formName) {
     //   this.$refs[formName].resetFields();
@@ -520,8 +548,20 @@ export default {
           field.prop === "masterNumber" ||
           field.prop === "replicaNumber" ||
           field.prop === "machineUserName" ||
-          field.prop === "machinePassword"
+          field.prop === "machinePassword" ||
+          field.prop === "topology" ||
+          field.prop === "machines"
         ) {
+          console.log(field.prop);
+          field.resetField();
+          return false;
+        }
+      });
+    },
+    "installationParam.installationEnvironment": function(newValue, oldValue) {
+      let fields = this.$refs["installationParam"].fields;
+      fields.map(field => {
+        if (field.prop === "image") {
           console.log(field.prop);
           field.resetField();
           return false;

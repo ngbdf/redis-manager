@@ -42,6 +42,8 @@ redis-manager:
     slow-log-limit: 100
   # installation configuration
   install:
+    # config path
+    conf-path: /redis-manager/conf/
     # physics machine
     machine:
       # absolute path

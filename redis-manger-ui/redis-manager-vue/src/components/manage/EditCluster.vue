@@ -23,8 +23,8 @@
       </el-form-item>
       <el-form-item label="Environment" prop="installationEnvironment">
         <el-radio-group v-model="cluster.installationEnvironment">
-          <el-radio label="DOCKER">Docker</el-radio>
-          <el-radio label="MACHINE">Machine</el-radio>
+          <el-radio :label="0">Docker</el-radio>
+          <el-radio :label="1">Machine</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="Cluster Info" prop="clusterInfo">
@@ -112,7 +112,7 @@ export default {
       );
     };
     var validateInstallationEnvironment = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
+      if (isEmpty(value)) {
         return callback(new Error("Please select environment"));
       }
       callback();
@@ -143,6 +143,7 @@ export default {
     // 导入外部集群
     saveCluster(cluster) {
       this.$refs[cluster].validate(valid => {
+        console.log(valid)
         if (valid) {
           let currentGroup = this.currentGroup;
           if (isEmpty(currentGroup) || isEmpty(currentGroup.groupId)) {
@@ -155,8 +156,6 @@ export default {
             nodes += node.value + ",";
           });
           this.cluster.nodes = nodes;
-          let installationEnvironment = this.cluster.installationEnvironment.toUpperCase();
-          this.cluster.installationEnvironment = installationEnvironment;
           console.log(this.cluster);
           // axios
           let url = "";
@@ -229,6 +228,7 @@ export default {
             let nodeList = this.nodesToNodeList(cluster.nodes);
             cluster.nodeList = nodeList;
             this.cluster = cluster;
+            console.log(cluster);
           } else {
             console.log("Get clsuter failed.");
           }

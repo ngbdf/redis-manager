@@ -94,7 +94,7 @@ public class DockerClientOperationTest {
 
     @Test
     public void pullImage() throws InterruptedException {
-        dockerClientOperation.pullImage(IP, "harbor.shec.bigdata/shec/itemservice-spring-dev", "1.3.5.0");
+        dockerClientOperation.pullImage(IP, "redis", "4.0.14");
     }
 
 }

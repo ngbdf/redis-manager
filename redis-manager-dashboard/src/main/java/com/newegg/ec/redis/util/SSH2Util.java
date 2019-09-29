@@ -38,7 +38,7 @@ public class SSH2Util {
      * @param targetPath
      * @throws Exception
      */
-    public static void copy(Machine machine, String originalPath, String targetPath, boolean sudo) throws Exception {
+    public static String copy(Machine machine, String originalPath, String targetPath, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
@@ -46,9 +46,38 @@ public class SSH2Util {
         String template = "cp %s %s";
         command.append(String.format(template, originalPath, targetPath));
         String result = execute(machine, command.toString());
-        if (!Strings.isNullOrEmpty(result)) {
-            throw new RuntimeException(result);
+        return result;
+    }
+
+    /**
+     * copy file
+     *
+     * @param machine
+     * @param originalPath
+     * @param targetPath
+     * @throws Exception
+     */
+    public static String copy2(Machine machine, String originalPath, String targetPath, boolean sudo) throws Exception {
+        StringBuffer command = new StringBuffer();
+        if (sudo) {
+            command.append("sudo ");
         }
+        // 删除旧的数据，如果有旧数据的话
+        String rmTemplate = "rm -rf %s;";
+        command.append(String.format(rmTemplate, targetPath));
+        if (sudo) {
+            command.append("sudo ");
+        }
+        // create directory
+        String mkdirTemplate = "mkdir -p %s;";
+        command.append(String.format(mkdirTemplate, targetPath));
+        if (sudo) {
+            command.append("sudo ");
+        }
+        String template = "cp %s %s";
+        command.append(String.format(template, originalPath, targetPath));
+        String result = execute(machine, command.toString());
+        return result;
     }
 
     public static String copyFileToRemote(Machine machine, String tempPath, String url, boolean sudo) throws Exception {
@@ -74,7 +103,7 @@ public class SSH2Util {
         return SSH2Util.execute(machine, command.toString());
     }
 
-    public static void rm(Machine machine, String filePath, boolean sudo) throws Exception {
+    public static String rm(Machine machine, String filePath, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
@@ -82,9 +111,7 @@ public class SSH2Util {
         String template = "rm -rf %s";
         command.append(String.format(template, filePath));
         String result = execute(machine, command.toString());
-        if (!Strings.isNullOrEmpty(result)) {
-            throw new RuntimeException(result);
-        }
+        return result;
     }
 
     public static void unzipToTargetPath(Machine machine, String filePath, String targetPath, boolean sudo) throws Exception {

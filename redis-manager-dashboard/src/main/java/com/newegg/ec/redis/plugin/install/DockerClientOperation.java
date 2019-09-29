@@ -37,8 +37,8 @@ public class DockerClientOperation {
     public static final String REDIS_DEFAULT_WORK_DIR = "/data/";
 
     static DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
-            .withReadTimeout(10000)
-            .withConnectTimeout(10000)
+            .withReadTimeout(300000)
+            .withConnectTimeout(300000)
             .withMaxTotalConnections(1000)
             .withMaxPerRouteConnections(100);
 
@@ -141,7 +141,7 @@ public class DockerClientOperation {
         String bind = String.format(VOLUME, port);
         CreateContainerResponse container = dockerClient.createContainerCmd(image)
                 // container name
-                .withName(CommonUtil.replaceSpace(containerName) + MINUS + port)
+                .withName(CommonUtil.replaceSpace(containerName))
                 // host 模式启动
                 .withHostConfig(new HostConfig().withNetworkMode("host"))
                 // 挂载

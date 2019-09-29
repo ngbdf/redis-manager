@@ -81,7 +81,7 @@ public interface InitializationDao {
             "cluster_known_nodes integer(4) NOT NULL, " +
             "cluster_size integer(4) NOT NULL, " +
             "redis_password varchar(50) DEFAULT NULL, " +
-            "installation_environment integer(4) NOT NULL, " +
+            "installation_environment integer(2) NOT NULL, " +
             "installation_type tinyint(1) NOT NULL, " +
             "update_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (cluster_id), " +

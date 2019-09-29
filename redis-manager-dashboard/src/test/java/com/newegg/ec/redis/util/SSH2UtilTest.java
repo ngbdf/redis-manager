@@ -30,16 +30,18 @@ public class SSH2UtilTest {
 
     @Test
     public void mkdir() throws Exception {
-        SSH2Util.mkdir(machine, DockerNodeOperation.DOCKER_INSTALL_BASE_PATH + port, false);
+        SSH2Util.mkdir(machine, DockerNodeOperation.DOCKER_INSTALL_BASE_PATH + "cluster", true);
     }
 
     @Test
     public void rm() throws Exception {
-        SSH2Util.rm(machine, "/data/test/redis3.0.6.tar.1", true);
+        String rm = SSH2Util.rm(machine, "/data/redis/docker/cluster", true);
+        System.err.println(rm);
     }
 
     @Test
     public void copyRedisConfigToRemote() throws Exception {
-        SSH2Util.copyFileToRemote(machine, "/data/redis/docker/9000/", "127.0.0.1:8000/site/API-Gateway.png", true);
+        String s = SSH2Util.copyFileToRemote(machine, "/data/redis/docker/cluster", "10.16.164.20:8182/redis-manager/config/cluster/redis.conf", true);
+        System.err.println(s);
     }
 }

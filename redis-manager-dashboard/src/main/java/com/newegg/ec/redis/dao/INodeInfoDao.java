@@ -96,7 +96,7 @@ public interface INodeInfoDao {
             "`instantaneous_ops_per_sec` bigint(20) NOT NULL, " +
             "`total_net_input_bytes` bigint(20) NOT NULL, " +
             "`net_input_bytes` bigint(20) NOT NULL, " +
-            "`total_net_output_bytes` bigint(20) NOT NULL, " +
+            "`total_net_output_bytes` bigint(40) NOT NULL, " +
             "`net_output_bytes` bigint(20) NOT NULL, " +
             "`sync_full` integer(4) NOT NULL, " +
             "`sync_partial_ok` integer(4) NOT NULL, " +

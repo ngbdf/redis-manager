@@ -126,7 +126,6 @@ public class Cluster {
         WARN;
     }
 
-
     public Integer getClusterId() {
         return clusterId;
     }

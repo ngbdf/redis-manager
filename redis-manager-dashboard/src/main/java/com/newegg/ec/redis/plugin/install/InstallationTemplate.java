@@ -16,6 +16,8 @@ import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +44,8 @@ import static javax.management.timer.Timer.ONE_MINUTE;
 @Component
 public class InstallationTemplate {
 
+    private static final Logger logger = LoggerFactory.getLogger(InstallationTemplate.class);
+
     @Autowired
     private IMachineService machineService;
 
@@ -65,7 +69,7 @@ public class InstallationTemplate {
      */
     public boolean installFlow(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
         boolean verify = verify(installationParam);
-        if (verify) {
+        if (!verify) {
             return false;
         }
         // 数据准备
@@ -79,6 +83,7 @@ public class InstallationTemplate {
         if (!pullImageSuccess) {
             return false;
         }
+        logger.info("start pull config...");
         // 分发配置文件
         boolean pullConfigSuccess = pullConfig(installationOperation, installationParam);
         if (!pullConfigSuccess) {
@@ -166,11 +171,10 @@ public class InstallationTemplate {
         boolean autoBuild = installationParam.isAutoBuild();
         Multimap<RedisNode, RedisNode> topology = ArrayListMultimap.create();
         if (autoBuild) {
-
             List<Machine> machineList = installationParam.getMachineList();
             int masterNumber = installationParam.getMasterNumber();
             int replicaNumber = installationParam.getReplicaNumber();
-            int nodeNumber = masterNumber + replicaNumber;
+            int nodeNumber = masterNumber * (replicaNumber + 1);
             int port = installationParam.getStartPort();
             List<MachineAndPorts> machineAndPortsList = buildMachinePortsMap(machineList, port, nodeNumber);
             topology = randomPolicy(machineAndPortsList, masterNumber, replicaNumber);
@@ -193,6 +197,14 @@ public class InstallationTemplate {
             }
         }
         installationParam.setTopology(topology);
+        List<RedisNode> allRedisNodes = new LinkedList<>();
+        for (RedisNode masterNode : topology.keySet()) {
+            allRedisNodes.add(masterNode);
+            for (RedisNode redisNode : topology.get(masterNode)) {
+                allRedisNodes.add(redisNode);
+            }
+        }
+        installationParam.setRedisNodeList(allRedisNodes);
         return true;
     }
 
@@ -281,7 +293,7 @@ public class InstallationTemplate {
         List<MachineAndPorts> machineAndPortsList = new ArrayList<>();
         for (Machine machine : machineList) {
             List<Integer> ports = new ArrayList<>();
-            while (nodeNumber < ports.size()) {
+            while (nodeNumber > ports.size()) {
                 if (port >= MAX_PORT) {
                     break;
                 }
@@ -291,6 +303,7 @@ public class InstallationTemplate {
                     }
                 } catch (Exception e) {
                     // TODO: websocket
+                    e.printStackTrace();
                 }
                 port++;
             }
@@ -330,7 +343,7 @@ public class InstallationTemplate {
         List<RedisNode> redisNodeListWithInfo = waitClusterMeet(installationParam, seed, allRedisNodes);
         replicate(cluster, topology, redisNodeListWithInfo);
 
-        // 设置密码
+        // TODO: 此方法有 bug，设置密码
         String updateRedisPasswordResult = redisService.updateRedisPassword(cluster);
         // TODO: websocket
         boolean autoInit = installationParam.isAutoInit();
@@ -358,15 +371,21 @@ public class InstallationTemplate {
         List<RedisNode> redisNodeListWithInfo = new ArrayList<>();
         long timeout = 0;
         // 超过一分钟则认为完成
-        while (timeout < ONE_MINUTE) {
+        // TODO: 等待时间优化：根据集群规模设置等待时长
+        while (timeout < 10000) {
             try {
                 redisNodeListWithInfo = redisClusterClient.clusterNodes();
-                if (redisNodeListWithInfo.size() < redisNodeList.size()) {
+                int realSize = redisNodeListWithInfo.size();
+                int needSize = redisNodeList.size();
+                if (realSize == needSize) {
+                    break;
+                } else {
                     Thread.sleep(TEN_SECONDS);
                     timeout += TEN_SECONDS;
                 }
             } catch (Exception e) {
                 // TODO: websocket
+                e.printStackTrace();
             }
         }
         if (redisNodeListWithInfo.size() < redisNodeList.size()) {

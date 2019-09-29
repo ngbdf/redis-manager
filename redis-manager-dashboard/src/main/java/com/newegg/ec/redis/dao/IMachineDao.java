@@ -27,9 +27,9 @@ public interface IMachineDao {
             "SELECT * FROM machine WHERE machine_id IN " +
             "<foreach item='machineId' collection='machineIdList' open='(' separator=',' close=')'>" +
             "#{machineId}" +
-            "</foreach>)" +
+            "</foreach>" +
             "</script>")
-    List<Machine> selectMachineByIds(List<Integer> machineIdList);
+    List<Machine> selectMachineByIds(@Param("machineIdList") List<Integer> machineIdList);
 
     @Update("UPDATE machine SET machine_group_name = #{machineGroupName}, host = #{host}, password = #{password}, " +
             "token = #{token}, machine_type = #{machineType}, machine_info = #{machineInfo}, update_time = NOW() " +
