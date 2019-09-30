@@ -35,7 +35,7 @@ public interface InstallationOperation {
      *
      * @return
      */
-    boolean buildConfig(InstallationParam installationParam);
+    boolean pullConfig(InstallationParam installationParam);
 
     boolean pullImage(InstallationParam installationParam);
 

@@ -426,6 +426,8 @@ export default {
       this.buildMachineIdList();
       let installationParam = this.installationParam;
       let cluster = {
+        groupId: this.currentGroup.groupId,
+        userId: store.getters.getUserId,
         clusterName: installationParam.clusterName,
         redisPassword: installationParam.redisPassword,
         redisMode: installationParam.redisMode,

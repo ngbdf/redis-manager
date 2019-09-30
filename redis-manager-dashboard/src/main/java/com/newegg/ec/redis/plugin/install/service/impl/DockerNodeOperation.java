@@ -137,7 +137,7 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
         String containerNamePrefix = SignUtil.replaceSpaceToMinus(clusterName);
         int port = redisNode.getPort();
         String host = redisNode.getHost();
-        String containerName = containerNamePrefix + MINUS + port;
+        String containerName = (containerNamePrefix + MINUS + port).toLowerCase();
         try {
             String containerId = dockerClientOperation.createContainer(host, port, image, containerName);
             dockerClientOperation.runContainer(host, containerId);

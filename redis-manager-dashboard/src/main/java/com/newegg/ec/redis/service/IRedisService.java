@@ -155,12 +155,4 @@ public interface IRedisService {
      */
     void autoGenerateConfigFile(Cluster cluster);
 
-    /**
-     * Update redis password
-     *
-     * @param cluster
-     * @return
-     */
-    String updateRedisPassword(Cluster cluster);
-
 }

@@ -114,7 +114,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
     }
 
     @Override
-    public boolean buildConfig(InstallationParam installationParam) {
+    public boolean pullConfig(InstallationParam installationParam) {
         boolean sudo = installationParam.isSudo();
         String url;
         // 模式
@@ -142,7 +142,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
                 return false;
             }
         }
-        // 分发配置文件
+        // copy 配置文件，并修改参数
         String tempRedisConf = tempPath + SLASH + REDIS_CONF;
         Multimap<Machine, RedisNode> machineAndRedisNode = installationParam.getMachineAndRedisNode();
         for (Map.Entry<Machine, RedisNode> entry : machineAndRedisNode.entries()) {
@@ -164,7 +164,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
         return true;
     }
 
-    public abstract Map<String, String> getBaseConfigs(String bind, int port);
+    protected abstract Map<String, String> getBaseConfigs(String bind, int port);
 
     @Override
     public boolean stop(Cluster cluster, Machine machine, RedisNode redisNode) {
@@ -173,6 +173,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
             redisClient.shutdown();
             return true;
         } catch (Exception e) {
+            logger.error("Stop redis node failed, " + redisNode.getHost() + ":" + redisNode.getPort(), e);
             return false;
         }
     }
