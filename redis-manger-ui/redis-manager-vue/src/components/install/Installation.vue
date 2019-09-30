@@ -290,7 +290,7 @@ export default {
       machineImages: [],
       installationParam: {
         groupId: "",
-        clusterName: "Shanghai",
+        clusterName: "Shanghai11",
         redisPassword: "one",
         redisMode: "cluster",
         create: true,
@@ -439,11 +439,13 @@ export default {
     },
     installationCheck(installationParam) {
       this.$refs[installationParam].validate(valid => {
+        console.log(valid);
         if (valid) {
           //this.installationInfoVisible = true;
           this.buildParam();
           console.log(this.installationParam);
-          this.install();
+          //this.install();
+          this.installationLog();
         } else {
           return false;
         }
@@ -533,6 +535,36 @@ export default {
           console.log(err);
         }
       );
+    },
+    installationLog() {
+      let clusterName = this.installationParam.clusterName;
+      if (isEmpty(typeof WebSocket)) {
+        console.log("Can't suport WebSocket!");
+      } else {
+        console.log();
+        let socket = new WebSocket("ws://127.0.0.1:8182/websocket/install");
+        //打开事件
+        socket.onopen = function() {
+          console.log("Socket 已打开");
+          console.log(clusterName)
+          socket.send(clusterName);
+          //socket.send(this.installationParam.clusterName);
+        };
+        //获得消息事件
+        socket.onmessage = function(msg) {
+          console.log(msg.data)
+          //发现消息进入    开始处理前端触发逻辑
+        };
+        //关闭事件
+        socket.onclose = function() {
+          console.log("Socket已关闭");
+        };
+        //发生了错误事件
+        socket.onerror = function() {
+          alert("Socket发生了错误");
+          //此时可以尝试刷新页面
+        };
+      }
     }
   },
   computed: {
