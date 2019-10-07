@@ -211,7 +211,9 @@ export default {
         badNumber: 0,
         alertNumber: 0
       },
-      clusterList: [],
+      clusterList: [{
+
+      }],
       cluster: {},
       queryClusterId: "",
       queryVisible: false,
@@ -248,7 +250,6 @@ export default {
             let result = response.data;
             if (result.code == 0) {
               let overview = result.data;
-              this.overview.userNumber = overview.userNumber;
               this.overview.alertNumber = overview.alertNumber;
             } else {
               console.log("No data");

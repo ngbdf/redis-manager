@@ -11,7 +11,7 @@ const state = {
     groupList: [],
     user: {
         userId: 0,
-        groupId: 10,
+        groupId: 1,
         userName: "Jay",
         headPic: "/user/image/jay.png"
     },

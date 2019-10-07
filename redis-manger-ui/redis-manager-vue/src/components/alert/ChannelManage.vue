@@ -3,15 +3,16 @@
     <div class="header-wrapper">
       <div>Bigdata</div>
       <div>
-        <el-button size="mini" type="success" @click="createVisible = true">Create</el-button>
+        <el-button size="mini" type="success" @click="editVisible = true, isUpdate = false">Create</el-button>
       </div>
     </div>
     <div>
-      <el-table :data="channelList" style="width: 100%">
+      <el-table :data="alertChannelList" style="width: 100%">
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column prop="channelName" label="Channel Name" width="150px;"></el-table-column>
         <el-table-column label="Channel Type" width="200px;">
           <template slot-scope="scope">
+            <el-tag size="small" type="success" v-if="scope.row.channelType == 0">Email</el-tag>
             <el-tag size="small" type="success" v-if="scope.row.channelType == 1">WebChat Webhook</el-tag>
             <!-- <el-popover trigger="hover" placement="top">
               <p>姓名: {{ scope.row.name }}</p>
@@ -24,10 +25,10 @@
         </el-table-column>
         <el-table-column prop="channelInfo" label="Info"></el-table-column>
         <el-table-column prop="updateTime" label="Time"></el-table-column>
-        <el-table-column label="Operation" width="250px;">
+        <el-table-column label="Operation" width="200px;">
           <template slot-scope="scope">
-            <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button>
-            <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+            <!-- <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button> -->
+            <el-button size="mini" type="primary" @click="editChannel(scope.$index, scope.row)">Edit</el-button>
             <el-button
               size="mini"
               type="danger"
@@ -41,7 +42,7 @@
     <!-- dialog: create channel-->
     <el-dialog
       title="Create Channel"
-      :visible.sync="createVisible"
+      :visible.sync="editVisible"
       width="60%"
       :close-on-click-modal="false"
     >
@@ -51,10 +52,10 @@
         </el-form-item>
         <el-form-item label="Channel Type" prop="channelType">
           <el-radio-group v-model="alertChannel.channelType" size="medium">
-            <el-radio label="0">Email</el-radio>
-            <el-radio label="1">Wechat Web Hook</el-radio>
-            <el-radio label="2">DingDing Web Hook</el-radio>
-            <el-radio label="3">Wechat App</el-radio>
+            <el-radio :label="0">Email</el-radio>
+            <el-radio :label="1">Wechat Web Hook</el-radio>
+            <el-radio :label="2">DingDing Web Hook</el-radio>
+            <el-radio :label="3">Wechat App</el-radio>
           </el-radio-group>
         </el-form-item>
         <!-- email start -->
@@ -104,11 +105,30 @@
           <el-input size="small" v-model="alertChannel.corpSecret" autocomplete="off"></el-input>
         </el-form-item>
         <!-- wechat app end -->
+        <el-form-item label="Channel Info" prop="channelInfo">
+          <el-input size="small" v-model="alertChannel.channelInfo"></el-input>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <!-- <el-button size="small" @click="createVisible = false">Cancel</el-button> -->
-        <el-button size="small" type="primary" @click="saveChannel('alertChannel')">Confirm</el-button>
+        <el-button
+          size="small"
+          type="primary"
+          @click="saveChannel('alertChannel')"
+          v-if="isUpdate"
+        >Update</el-button>
+        <el-button size="small" type="primary" @click="saveChannel('alertChannel')" v-else>Confirm</el-button>
       </div>
+    </el-dialog>
+    <el-dialog title="Delete Alert Channel" :visible.sync="deleteVisible" width="30%">
+      <span>
+        Are you sure to delete
+        <b>{{ alertChannel.channelName }}</b> ?
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="deleteVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteChannel()">Delete</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -120,29 +140,6 @@ import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
 export default {
   data() {
-    var validateNotEmpty = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Value can't be empty"));
-      }
-      callback();
-    };
-    var validateChannelName = (rule, value, callback) => {
-      let url = "/channel/validateChannelName/" + value;
-      API.get(
-        url,
-        null,
-        response => {
-          if (response.data.code != 0) {
-            return callback(new Error(value + " has exist"));
-          } else {
-            callback();
-          }
-        },
-        err => {
-          return callback(new Error("Network error, " + err));
-        }
-      );
-    };
     var validateSMTPHost = (rule, value, callback) => {
       if (!validateURL(value)) {
         return callback(new Error("Incorrect host format"));
@@ -155,77 +152,73 @@ export default {
       }
       callback();
     };
-    // var validateEmailTo = (rule, value, callback) => {
-    //   if (isEmpty(value) || isEmpty(value.trim())) {
-    //     return callback(new Error("Please enter email to"));
-    //   }
-    //   callback();
-    // };
     var validateWebHook = (rule, value, callback) => {
       if (!validateURL(value)) {
         return callback(new Error("Incorrect url format"));
       }
       callback();
     };
-    // var validateCorpId = (rule, value, callback) => {
-    //   if (isEmpty(value) || isEmpty(value.trim())) {
-    //     return callback(new Error("Please enter corp id"));
-    //   }
-    //   callback();
-    // };
-    // var validateAgentId = (rule, value, callback) => {
-    //   if (isEmpty(value) || isEmpty(value.trim())) {
-    //     return callback(new Error("Please enter agent id"));
-    //   }
-    //   callback();
-    // };
-    // var validateCorpSecret = (rule, value, callback) => {
-    //   if (isEmpty(value) || isEmpty(value.trim())) {
-    //     return callback(new Error("Please enter corp secret"));
-    //   }
-    //   callback();
-    // };
     return {
-      channelList: [
-        {
-          channelName: "bigdata",
-          channelType: "1",
-          channelInfo: "bigdata alert",
-          updateTime: "2019-08-25"
-        }
-      ],
-      createVisible: false,
-      alertChannel: {
-        channelType: "0"
-      },
+      alertChannelList: [],
+      alertChannel: { channelType: 0 },
+      editVisible: false,
+      isUpdate: false,
+      deleteVisible: false,
       rules: {
         channelName: [
-          { required: true, validator: validateNotEmpty, trigger: "blur" },
-          { required: true, validator: validateChannelName, trigger: "blur" }
+          {
+            required: true,
+            message: "Channel name can't be empty",
+            trigger: "blur"
+          }
         ],
         smtpHost: [
-          { required: true, validator: validateNotEmpty, trigger: "blur" },
+          {
+            required: true,
+            message: "SMTP host can't be empty",
+            trigger: "blur"
+          },
           { required: true, validator: validateSMTPHost, trigger: "blur" }
         ],
         emailFrom: [
-          { required: true, validator: validateNotEmpty, trigger: "blur" },
+          {
+            required: true,
+            message: "Email from can't be empty",
+            trigger: "blur"
+          },
           { required: true, validator: validateEmailFrom, trigger: "blur" }
         ],
         emailTo: [
-          { required: true, validator: validateNotEmpty, trigger: "blur" }
+          {
+            required: true,
+            message: "Email to can't be empty",
+            trigger: "blur"
+          }
         ],
         webhook: [
-          { required: true, validator: validateNotEmpty, trigger: "blur" },
+          {
+            required: true,
+            message: "Web hook can't be empty",
+            trigger: "blur"
+          },
           { required: true, validator: validateWebHook, trigger: "blur" }
         ],
         corpId: [
-          { required: true, validator: validateNotEmpty, trigger: "blur" }
+          { required: true, message: "Corp id can't be empty", trigger: "blur" }
         ],
         agentId: [
-          { required: true, validator: validateNotEmpty, trigger: "blur" }
+          {
+            required: true,
+            message: "Agent id can't be empty",
+            trigger: "blur"
+          }
         ],
         corpSecret: [
-          { required: true, validator: validateNotEmpty, trigger: "blur" }
+          {
+            required: true,
+            message: "Corp Secret can't be empty",
+            trigger: "blur"
+          }
         ]
       }
     };
@@ -234,21 +227,50 @@ export default {
     handleView(index, row) {
       console.log(index, row);
     },
-    handleEdit(index, row) {
-      console.log(index, row);
+    editChannel(index, row) {
+      this.getAlertChannel(row.channelId);
+      this.isUpdate = true;
+      this.editVisible = true;
+      
     },
     handleDelete(index, row) {
       console.log(index, row);
+      this.alertChannel.channelId = row.channelId;
+      this.deleteVisible = true;
     },
-    getChannelList() {
-      let currentGroupId = store.getters.getCurrentGroup;
-      let url = "/channel/getChannelList/" + currentGroupId;
+    deleteChannel() {
+      let url = "/alert/channel/deleteAlertChannel";
+      API.post(
+        url,
+        this.alertChannel,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.getChannelList(this.currentGroupId);
+            this.deleteVisible = false;
+            this.alertChannel = { channelType: 0 };
+          } else {
+            console.log("Delete alert channel failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getChannelList(groupId) {
+      let url = "/alert/channel/getAlertChannelList/" + groupId;
       API.get(
         url,
         null,
         response => {
-          if (response.data.code == 0) {
-            this.channelList = response.data.data;
+          let result = response.data;
+          if (result.code == 0) {
+            let alertChannelList = result.data;
+            alertChannelList.forEach(alertChannel => {
+              alertChannel.updateTime = formatTime(alertChannel.updateTime);
+            });
+            this.alertChannelList = alertChannelList;
           } else {
             console.log("No data");
           }
@@ -258,14 +280,76 @@ export default {
         }
       );
     },
+    getAlertChannel(channelId) {
+      let url = "/alert/channel/getAlertChannel/" + channelId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.alertChannel = result.data;
+          } else {
+            console.log("Get alert channel faild");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
     saveChannel(alertChannel) {
       this.$refs[alertChannel].validate(valid => {
-        console.log(valid);
         if (valid) {
-          console.log(valid);
+          let url;
+          if (this.isUpdate) {
+            url = "/alert/channel/updateAlertChannel";
+          } else {
+            url = "/alert/channel/addAlertChannel";
+          }
+          this.alertChannel.groupId = this.currentGroupId;
+          API.post(
+            url,
+            this.alertChannel,
+            response => {
+              let result = response.data;
+              if (result.code == 0) {
+                this.getChannelList(this.currentGroupId);
+                this.editVisible = false;
+                this.$refs[alertChannel].resetFields();
+              } else {
+                console.log("Save alert channel failed.");
+              }
+            },
+            err => {
+              console.log(err);
+            }
+          );
         }
       });
     }
+  },
+  computed: {
+    currentGroupId() {
+      return store.getters.getCurrentGroupId;
+    }
+  },
+  watch: {
+    "alertChannel.channelType": function(newValue, oldValue) {
+      let fields = this.$refs["alertChannel"].fields;
+
+      fields.map(field => {
+        if (field.prop === "channelName" || field.prop === "channelType") {
+          return true;
+        }
+        field.resetField();
+        return false;
+      });
+    }
+  },
+  mounted() {
+    let groupId = this.$route.params.groupId;
+    this.getChannelList(groupId);
   }
 };
 </script>

@@ -3,16 +3,16 @@
     <div class="header-wrapper">
       <div>Bigdata</div>
       <div>
-        <el-button size="mini" type="success" @click="createVisible = true">Create</el-button>
+        <el-button size="mini" type="success" @click="createAlertRule()">Create</el-button>
       </div>
     </div>
     <div>
-      <el-table :data="ruleList">
+      <el-table :data="alertRuleList">
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column label="Alert Rule">
           <template
             slot-scope="scope"
-          >{{scope.row.alertKey}}{{scope.row.compareType}}{{scope.row.alertValue}}</template>
+          >{{scope.row.ruleKey}} {{scope.row.compareSign}} {{scope.row.ruleValue}}</template>
         </el-table-column>
         <el-table-column label="Rule Status">
           <template slot-scope="scope">
@@ -28,11 +28,15 @@
 
         <el-table-column property="checkCycle" label="Check Cycle"></el-table-column>
         <el-table-column property="ruleInfo" label="Info"></el-table-column>
-        <el-table-column property="updateTime" label="Time"></el-table-column>
+        <el-table-column property="time" label="Time"></el-table-column>
         <el-table-column label="Operation" width="250px;">
           <template slot-scope="scope">
-            <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button>
-            <el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+            <!-- <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button> -->
+            <el-button
+              size="mini"
+              type="primary"
+              @click="editAlertRule(scope.$index, scope.row)"
+            >Edit</el-button>
             <el-button
               size="mini"
               type="danger"
@@ -46,7 +50,7 @@
     <!-- dialog: create rule-->
     <el-dialog
       title="Create Rule"
-      :visible.sync="createVisible"
+      :visible.sync="editVisible"
       width="50%"
       :close-on-click-modal="false"
     >
@@ -101,89 +105,207 @@
       </el-form>
 
       <div slot="footer" class="dialog-footer">
-        <el-button size="small" @click="createVisible = false">Cancel</el-button>
+        <el-button size="small" @click="editVisible = false">Cancel</el-button>
         <el-button size="small" type="primary" @click="saveAlertRule('alertRule')">Confirm</el-button>
       </div>
+    </el-dialog>
+    <el-dialog title="Delete Alert Rule" :visible.sync="deleteVisible" width="30%">
+      <span>
+        Are you sure to delete
+        <b>{{ alertRule.ruleKey }} {{ alertRule.compareSign }} {{ alertRule.ruleValue }}</b> ?
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="deleteVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteAlertRule()">Delete</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
+import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
+import { formatTime } from "@/utils/time.js";
+import API from "@/api/api.js";
 export default {
   data() {
-    var validateRuleKey = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please select rule key"));
-      }
-      callback();
-    };
-    var validateCompareType = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please select compare type"));
-      }
-      callback();
-    };
-    var validateRuleValue = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please select rule value"));
-      }
-      callback();
-    };
-    var validateCheckCycle = (rule, value, callback) => {
-      if (isEmpty(value) || isEmpty(value.trim())) {
-        return callback(new Error("Please select check cycle"));
-      }
-      callback();
-    };
     return {
-      ruleList: [
-        {
-          alertKey: "test",
-          alertValue: "12",
-          compareType: ">",
-          checkCycle: "5",
-          valid: true,
-          global: true,
-          ruleInfo: "test",
-          updateTime: "2019-08-25"
-        }
-      ],
-      createVisible: false,
+      alertRuleList: [],
       alertRule: {
         valid: true,
         global: false
       },
+      editVisible: false,
+      isUpdate: false,
+      deleteVisible: false,
       ruleKeyList: [
         {
-          value: "test",
-          label: "test"
+          value: "used_memory",
+          label: "used_memory"
+        },
+        {
+          value: "used_memory_rss",
+          label: "used_memory_rss"
+        },
+        {
+          value: "used_memory_overhead",
+          label: "used_memory_overhead"
+        },
+        {
+          value: "used_memory_dataset",
+          label: "used_memory_dataset"
+        },
+        {
+          value: "fragmentation_ratio",
+          label: "fragmentation_ratio"
+        },
+        {
+          value: "connections_received",
+          label: "connections_received"
+        },
+        {
+          value: "rejected_connections",
+          label: "rejected_connections"
+        },
+        {
+          value: "connected_clients",
+          label: "connected_clients"
+        },
+        {
+          value: "blocked_clients",
+          label: "blocked_clients"
+        },
+        {
+          value: "commands_processed",
+          label: "commands_processed"
+        },
+        {
+          value: "instantaneous_ops_per_sec",
+          label: "instantaneous_ops_per_sec"
+        },
+        {
+          value: "sync_full",
+          label: "sync_full"
+        },
+        {
+          value: "sync_partial_ok",
+          label: "sync_partial_ok"
+        },
+        {
+          value: "sync_partial_err",
+          label: "sync_partial_err"
+        },
+        {
+          value: "keyspace_hits_ratio",
+          label: "keyspace_hits_ratio"
+        },
+        {
+          value: "keys",
+          label: "keys"
+        },
+        {
+          value: "expires",
+          label: "expires"
+        },
+        {
+          value: "used_cpu_sys",
+          label: "used_cpu_sys"
+        },
+        {
+          value: "used_cpu_user",
+          label: "used_cpu_user"
         }
       ],
+      /**
+       * 0: =
+       * 1: >
+       * -1: <
+       * 2: !=
+       */
       compareTypeList: [
         {
-          value: ">",
+          value: 1,
           label: ">"
+        },
+        {
+          value: -1,
+          label: "<"
+        },
+        {
+          value: 0,
+          label: "="
+        },
+        {
+          value: 2,
+          label: "!="
         }
       ],
       checkCycleList: [
         {
-          value: "5",
-          label: "5min"
+          value: 5,
+          label: "5 Min"
+        },
+        {
+          value: 10,
+          label: "10 Min"
+        },
+        {
+          value: 15,
+          label: "15 Min"
+        },
+        {
+          value: 30,
+          label: "30 Min"
+        },
+        {
+          value: 60,
+          label: "1 Hour"
+        },
+        {
+          value: 180,
+          label: "3 Hour"
+        },
+        {
+          value: 360,
+          label: "6 Hour"
+        },
+        {
+          value: 720,
+          label: "12 Hour"
+        },
+        {
+          value: 1440,
+          label: "1 day"
         }
       ],
       rules: {
         ruleKey: [
-          { required: true, validator: validateRuleKey, trigger: "blur" }
+          {
+            required: true,
+            message: "Rule key can't be empty",
+            trigger: "blur"
+          }
         ],
         compareType: [
-          { required: true, validator: validateCompareType, trigger: "blur" }
+          {
+            required: true,
+            message: "Compare type can't be empty",
+            trigger: "blur"
+          }
         ],
         ruleValue: [
-          { required: true, validator: validateRuleValue, trigger: "blur" }
+          {
+            required: true,
+            message: "Rule value can't be empty",
+            trigger: "blur"
+          }
         ],
         checkCycle: [
-          { required: true, validator: validateCheckCycle, trigger: "blur" }
+          {
+            required: true,
+            message: "Check cycle can't be empty",
+            trigger: "blur"
+          }
         ]
       }
     };
@@ -192,21 +314,131 @@ export default {
     handleView(index, row) {
       console.log(index, row);
     },
-    handleEdit(index, row) {
-      console.log(index, row);
+    editAlertRule(index, row) {
+      this.getAlertRule(row.ruleId);
+      this.isUpdate = true;
+      this.editVisible = true;
     },
     handleDelete(index, row) {
-      console.log(index, row);
+      this.alertRule = row;
+      this.deleteVisible = true;
     },
-    handleClick() {},
+    createAlertRule() {
+      this.editVisible = true;
+      this.isUpdate = false;
+      this.alertRule = {
+        valid: true,
+        global: false
+      };
+    },
+    getAlertRuleList(groupId) {
+      let url = "/alert/rule/getAlertRuleList/" + groupId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let alertRuleList = result.data;
+            alertRuleList.forEach(alertRule => {
+              alertRule.time = formatTime(alertRule.updateTime);
+              let compareType = alertRule.compareType;
+              alertRule.compareSign =
+                compareType == 0
+                  ? "="
+                  : compareType == 1
+                  ? ">"
+                  : compareType == -1
+                  ? "<"
+                  : "!=";
+            });
+            this.alertRuleList = alertRuleList;
+          } else {
+            console.log("Get alert rule list failed");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getAlertRule(ruleId) {
+      let url = "/alert/rule/getAlertRule/" + ruleId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.alertRule = result.data;
+          } else {
+            console.log("Get alert rule faild");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
     saveAlertRule(alertRule) {
       this.$refs[alertRule].validate(valid => {
         console.log(valid);
         if (valid) {
-          console.log(valid);
+          let url;
+          if (this.isUpdate) {
+            url = "/alert/rule/updateAlertRule";
+          } else {
+            url = "/alert/rule/addAlertRule";
+          }
+          this.alertRule.groupId = this.currentGroupId;
+          API.post(
+            url,
+            this.alertRule,
+            response => {
+              let result = response.data;
+              if (result.code == 0) {
+                this.getAlertRuleList(this.currentGroupId);
+                this.editVisible = false;
+                this.$refs[alertRule].resetFields();
+              } else {
+                console.log("Save alert rule failed");
+              }
+            },
+            err => {
+              console.log(err);
+            }
+          );
         }
       });
+    },
+    deleteAlertRule() {
+      let url = "/alert/rule/deleteAlertRule";
+      API.post(
+        url,
+        this.alertRule,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.getAlertRuleList(this.currentGroupId);
+            this.deleteVisible = false;
+          } else {
+            console.log("Delete alert rule failed")
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
+  },
+  computed: {
+    currentGroupId() {
+      return store.getters.getCurrentGroupId;
+    }
+  },
+  mounted() {
+    let groupId = this.$route.params.groupId;
+    this.getAlertRuleList(groupId);
   }
 };
 </script>
