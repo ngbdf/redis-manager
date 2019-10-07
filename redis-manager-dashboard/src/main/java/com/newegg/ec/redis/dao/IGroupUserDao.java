@@ -28,4 +28,14 @@ public interface IGroupUserDao {
 
     @Select("SELECT COUNT(user_id) FROM `group_user` WHERE group_id = #{groupId}")
     Integer getUserNumber(Integer groupId);
+
+    @Select("create TABLE IF NOT EXISTS `group_user`( " +
+            "group_user_id integer(4) NOT NULL AUTO_INCREMENT, " +
+            "group_id integer(4) NOT NULL, " +
+            "user_id integer(4) NOT NULL, " +
+            "user_role varchar(20) NOT NULL, " +
+            "update_time datetime(0) NOT NULL, " +
+            "PRIMARY KEY (group_user_id) " +
+            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
+    void createGroupUserTable();
 }

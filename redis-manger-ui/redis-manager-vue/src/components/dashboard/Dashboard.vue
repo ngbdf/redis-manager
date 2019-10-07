@@ -342,7 +342,7 @@ export default {
   },
   mounted() {
     let groupId = this.$route.params.groupId;
-    this.getClusterList(groupId);
+    // this.getClusterList(groupId);
     this.getOverview(groupId);
   }
 };

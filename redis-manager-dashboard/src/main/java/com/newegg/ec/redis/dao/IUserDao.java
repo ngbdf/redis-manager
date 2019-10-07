@@ -79,4 +79,19 @@ public interface IUserDao {
     @Delete("DELETE FROM user WHERE group_id = #{groupId}")
     int deleteUserByGroupId(Integer groupId);
 
+    @Select("create TABLE IF NOT EXISTS `user` ( " +
+            "user_id integer(4) NOT NULL AUTO_INCREMENT, " +
+            "user_name varchar(255) NOT NULL, " +
+            "password varchar(255) DEFAULT NULL, " +
+            "token varchar(255) DEFAULT NULL, " +
+            "head_pic varchar(255) NOT NULL, " +
+            "email varchar(255) NOT NULL, " +
+            "mobile varchar(20) NOT NULL, " +
+            "user_type TINYINT(4) NOT NULL, " +
+            "update_time datetime(0) NOT NULL, " +
+            "PRIMARY KEY (user_id), " +
+            "UNIQUE KEY `base_info` (user_name, mobile, email) " +
+            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
+    void createUserTable();
+
 }

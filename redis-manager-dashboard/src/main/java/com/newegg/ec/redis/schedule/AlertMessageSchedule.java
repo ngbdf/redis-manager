@@ -294,8 +294,8 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
      */
     private boolean isNotify(NodeInfo nodeInfo, AlertRule alertRule) {
         JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(nodeInfo));
-        String alertKey = alertRule.getAlertKey();
-        double alertValue = alertRule.getAlertValue();
+        String alertKey = alertRule.getRuleKey();
+        double alertValue = alertRule.getRuleValue();
         String nodeInfoField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, alertKey);
         Double actualVal = jsonObject.getDouble(nodeInfoField);
         if (actualVal == null) {
@@ -348,15 +348,15 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     private AlertRecord buildAlertRecord(Group group, Cluster cluster, NodeInfo nodeInfo, AlertRule rule) {
         JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(nodeInfo));
         AlertRecord record = new AlertRecord();
-        String alertKey = rule.getAlertKey();
+        String alertKey = rule.getRuleKey();
         String nodeInfoField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, alertKey);
         Double actualVal = jsonObject.getDouble(nodeInfoField);
         record.setGroupId(group.getGroupId());
         record.setGroupName(group.getGroupName());
         record.setClusterName(cluster.getClusterName());
         record.setRedisNode(nodeInfo.getNode());
-        record.setAlertRule(rule.getAlertKey() + rule.getCompareType() + rule.getAlertValue());
-        record.setActualData(rule.getAlertKey() + EQUAL_SIGN + actualVal);
+        record.setAlertRule(rule.getRuleKey() + rule.getCompareType() + rule.getRuleValue());
+        record.setActualData(rule.getRuleKey() + EQUAL_SIGN + actualVal);
         record.setGlobal(rule.getGlobal());
         record.setRuleInfo(rule.getRuleInfo());
         record.setUpdateTime(TimeUtil.getCurrentTimestamp());

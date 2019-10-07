@@ -34,7 +34,7 @@ public class AlertRecordService implements IAlertRecordService {
     @Override
     public boolean addAlertRecord(List<AlertRecord> alertRecordList) {
         try {
-            int row = alertRecordDao.insertAlertRecord(alertRecordList);
+            int row = alertRecordDao.insertAlertRecordBatch(alertRecordList);
             return row > 0;
         } catch (Exception e) {
             logger.error("Add alert record  failed, " + alertRecordList, e);

@@ -45,4 +45,13 @@ public interface IGroupDao {
     @Delete("DELETE FROM `group` WHERE group_id = #{groupId}")
     int deleteGroupById(Integer groupId);
 
+    @Select("create TABLE IF NOT EXISTS `group` (" +
+            "group_id integer(4) NOT NULL AUTO_INCREMENT, " +
+            "group_name varchar(255) NOT NULL, " +
+            "group_info varchar(255) DEFAULT NULL, " +
+            "update_time datetime(0) NOT NULL, " +
+            "PRIMARY KEY (group_id), " +
+            "UNIQUE KEY (group_name) " +
+            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
+    void createGroupTable();
 }

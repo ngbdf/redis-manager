@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @EnableScheduling
 @EnableTransactionManagement
-@MapperScan({"com.newegg.ec.redis.dao"})
+@MapperScan({"com.newegg.ec.redis.dao", "com.newegg.ec.redis.plugin"})
 @SpringBootApplication
 public class RedisManagerApplication {
 

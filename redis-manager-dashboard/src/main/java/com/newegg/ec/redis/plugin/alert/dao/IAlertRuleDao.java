@@ -1,10 +1,7 @@
 package com.newegg.ec.redis.plugin.alert.dao;
 
 import com.newegg.ec.redis.plugin.alert.entity.AlertRule;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -12,6 +9,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
+@Mapper
 public interface IAlertRuleDao {
 
     @Select("SELECT * FROM alert_rule WHERE group_id = #{groupId}")
@@ -21,28 +19,64 @@ public interface IAlertRuleDao {
             "SELECT * FROM alert_rule WHERE rule_id IN " +
             "<foreach item='ruleId' collection='ruleIdList' open='(' separator=',' close=')'>" +
             "#{ruleId}" +
-            "</foreach>)" +
+            "</foreach>" +
+            " OR global = 1" +
             "</script>")
     List<AlertRule> selectAlertRuleByIds(@Param("ruleIdList") List<Integer> ruleIdList);
 
-    @Insert("INSERT INTO alert_rule (group_id, alert_key, alert_value, compare_type, check_cycle, " +
+    @Select("<script>" +
+            "SELECT * FROM alert_rule WHERE rule_id NOT IN " +
+            "<foreach item='ruleId' collection='ruleIdList' open='(' separator=',' close=')'>" +
+            "#{ruleId}" +
+            "</foreach>" +
+            " AND global = 0" +
+            "</script>")
+    List<AlertRule> selectAlertRuleNotInIds(@Param("ruleIdList") List<Integer> ruleIdList);
+
+    @Select("SELECT * FROM alert_rule WHERE rule_id = #{ruleId}")
+    AlertRule selectAlertRuleById(Integer ruleId);
+
+    @Insert("INSERT INTO alert_rule (group_id, rule_key, rule_value, compare_type, check_cycle, " +
             "valid, global, rule_info, update_time, last_check_time) " +
-            "VALUES (#{groupId}, #{alertKey}, #{alertValue}, #{compareType}, #{checkCycle}, " +
-            "#{valid}, #{global}, #{ruleInfo}, #{updateTime}, #{lastCheckTime})")
+            "VALUES (#{groupId}, #{ruleKey}, #{ruleValue}, #{compareType}, #{checkCycle}, " +
+            "#{valid}, #{global}, #{ruleInfo}, NOW(), NOW())")
     int insertAlertRule(AlertRule alertRule);
 
-    @Update("UPDATE alert_rule SET group_id = #{groupId}, alert_key = #{ruleKey}, alert_value = #{alertRule}, " +
+    @Update("UPDATE alert_rule SET group_id = #{groupId}, rule_key = #{ruleKey}, rule_value = #{ruleValue}, " +
             "compare_type = #{compareType}, valid = #{valid}, global = #{global}, rule_info = #{ruleInfo}, " +
-            "update_time = #{updateTime}, last_check_time #{lastCheckTime} " +
+            "update_time = NOW() " +
             "WHERE rule_id = #{ruleId}")
     int updateAlertRule(AlertRule alertRule);
 
-    int updateAlertRuleLastCheckTime(List<Integer> ruleIdList);
+    @Update("<script>" +
+            "UPDATE alert_rule SET last_check_time = #{lastCheckTime} " +
+            "WHERE rule_id IN " +
+            "<foreach item='ruleId' collection='ruleIdList' open='(' separator=',' close=')'>" +
+            "#{ruleId}" +
+            "</foreach>" +
+            "</script>")
+    int updateAlertRuleLastCheckTime(@Param("ruleIdList") List<Integer> ruleIdList);
 
-    int deleteAlertRuleByIdList(List<Integer> ruleIdList);
+    @Delete("DELETE FROM alert_rule WHERE rule_id = #{ruleId}")
+    int deleteAlertRuleById(Integer ruleId);
 
-    int deleteAlertRuleByClusterId(int clusterId);
+    @Delete("DELETE FROM alert_rule WHERE group_id = #{groupId}")
+    int deleteAlertRuleByGroupId(Integer groupId);
 
-    int deleteAlertRuleByGroupId(int groupId);
+    @Select("create TABLE IF NOT EXISTS `alert_rule` (" +
+            "rule_id integer(4) NOT NULL AUTO_INCREMENT, " +
+            "group_id integer(4) NOT NULL, " +
+            "rule_key varchar(50) NOT NULL, " +
+            "rule_value varchar(50) NOT NULL, " +
+            "compare_type integer(2) NOT NULL, " +
+            "check_cycle integer(4) NOT NULL, " +
+            "valid tinyint(1) NOT NULL, " +
+            "global tinyint(1) NOT NULL, " +
+            "rule_info varchar(255) DEFAULT NULL, " +
+            "update_time datetime(0) NOT NULL, " +
+            "last_check_time datetime(0) NOT NULL, " +
+            "PRIMARY KEY (rule_id) " +
+            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
+    void createAlertChannelTable();
 
 }

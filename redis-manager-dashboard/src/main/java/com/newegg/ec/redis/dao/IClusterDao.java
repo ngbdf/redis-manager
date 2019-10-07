@@ -71,4 +71,35 @@ public interface IClusterDao {
     @Delete("DELETE FROM cluster WHERE cluster_id = #{clusterId}")
     int deleteClusterById(Integer clusterId);
 
+    @Select("create TABLE IF NOT EXISTS `cluster` ( " +
+            "cluster_id integer(4) NOT NULL AUTO_INCREMENT COMMENT '自增ID', " +
+            "group_id integer(4) NOT NULL, " +
+            "user_id integer(4) NOT NULL, " +
+            "cluster_token varchar(255) DEFAULT NULL, " +
+            "cluster_name varchar(255) NOT NULL, " +
+            "nodes varchar(255) NOT NULL, " +
+            "redis_mode varchar(25) NOT NULL, " +
+            "os varchar(255) NOT NULL, " +
+            "redis_version varchar(25) NOT NULL, " +
+            "image varchar(255) DEFAULT NULL, " +
+            "initialized tinyint(1) NOT NULL, " +
+            "total_keys bigint(20) NOT NULL, " +
+            "total_expires bigint(20) NOT NULL, " +
+            "db_size integer(8) NOT NULL, " +
+            "cluster_status varchar(50) NOT NULL, " +
+            "cluster_slots_assigned integer(4) NOT NULL, " +
+            "cluster_slots_ok integer(4) NOT NULL, " +
+            "cluster_slots_pfail integer(4) NOT NULL, " +
+            "cluster_slots_fail integer(4) NOT NULL, " +
+            "cluster_known_nodes integer(4) NOT NULL, " +
+            "cluster_size integer(4) NOT NULL, " +
+            "redis_password varchar(50) DEFAULT NULL, " +
+            "installation_environment integer(2) NOT NULL, " +
+            "installation_type tinyint(1) NOT NULL, " +
+            "update_time datetime(0) NOT NULL, " +
+            "PRIMARY KEY (cluster_id), " +
+            "UNIQUE KEY (cluster_name) " +
+            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
+    void createClusterTable();
+
 }

@@ -17,11 +17,11 @@ public class AlertRule {
     /**
      * 告警配置
      */
-    private String alertKey;
+    private String ruleKey;
     /**
      * 告警阈值
      */
-    private double alertValue;
+    private double ruleValue;
 
     /**
      * 比较类型
@@ -68,20 +68,20 @@ public class AlertRule {
         this.groupId = groupId;
     }
 
-    public String getAlertKey() {
-        return alertKey;
+    public String getRuleKey() {
+        return ruleKey;
     }
 
-    public void setAlertKey(String alertKey) {
-        this.alertKey = alertKey;
+    public void setRuleKey(String ruleKey) {
+        this.ruleKey = ruleKey;
     }
 
-    public double getAlertValue() {
-        return alertValue;
+    public double getRuleValue() {
+        return ruleValue;
     }
 
-    public void setAlertValue(double alertValue) {
-        this.alertValue = alertValue;
+    public void setRuleValue(double ruleValue) {
+        this.ruleValue = ruleValue;
     }
 
     public int getCompareType() {

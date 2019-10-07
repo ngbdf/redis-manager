@@ -48,6 +48,8 @@ public class AlertChannel {
 
     private String corpSecret;
 
+    private String token;
+
     /**
      * 0: email
      * 1: wechat web hook
@@ -155,6 +157,14 @@ public class AlertChannel {
 
     public void setCorpSecret(String corpSecret) {
         this.corpSecret = corpSecret;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public int getChannelType() {

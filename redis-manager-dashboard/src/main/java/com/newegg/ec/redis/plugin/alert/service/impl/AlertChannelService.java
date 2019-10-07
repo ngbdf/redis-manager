@@ -6,6 +6,7 @@ import com.newegg.ec.redis.plugin.alert.service.IAlertChannelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 8/31/2019
  */
+@Service
 public class AlertChannelService implements IAlertChannelService {
 
     private static final Logger logger = LoggerFactory.getLogger(AlertChannelService.class);
@@ -27,6 +29,16 @@ public class AlertChannelService implements IAlertChannelService {
             return alertChannelDao.selectAlertChannelByGroupId(groupId);
         } catch (Exception e) {
             logger.error("Get alert channel list by group id failed, group =" + groupId, e);
+            return null;
+        }
+    }
+
+    @Override
+    public AlertChannel getAlertChannelById(Integer channelId) {
+        try {
+            return alertChannelDao.selectAlertChannelById(channelId);
+        } catch (Exception e) {
+            logger.error("Get alert channel by id failed, channel id = " + channelId, e);
             return null;
         }
     }
@@ -48,7 +60,7 @@ public class AlertChannelService implements IAlertChannelService {
     public boolean addAlertChannel(AlertChannel alertChannel) {
         try {
             int row = alertChannelDao.insertAlertChannel(alertChannel);
-            return row == 1;
+            return row > 0;
         } catch (Exception e) {
             logger.error("Add alert channel failed, " + alertChannel, e);
             return false;
@@ -59,7 +71,7 @@ public class AlertChannelService implements IAlertChannelService {
     public boolean updateAlertChannel(AlertChannel alertChannel) {
         try {
             int row = alertChannelDao.updateAlertChannel(alertChannel);
-            return row == 1;
+            return row > 0;
         } catch (Exception e) {
             logger.error("Update alert channel failed, " + alertChannel, e);
             return false;
@@ -70,7 +82,7 @@ public class AlertChannelService implements IAlertChannelService {
     public boolean deleteAlertChannelById(Integer channelId) {
         try {
             int row = alertChannelDao.deleteAlertChannelById(channelId);
-            return row == 1;
+            return row > 0;
         } catch (Exception e) {
             logger.error("Delete alert channel by id failed, channel id = " + channelId, e);
             return false;

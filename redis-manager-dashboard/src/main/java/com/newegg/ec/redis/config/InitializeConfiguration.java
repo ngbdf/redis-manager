@@ -1,6 +1,8 @@
 package com.newegg.ec.redis.config;
 
-import com.newegg.ec.redis.dao.InitializationDao;
+import com.newegg.ec.redis.dao.*;
+import com.newegg.ec.redis.plugin.alert.dao.IAlertChannelDao;
+import com.newegg.ec.redis.plugin.alert.dao.IAlertRuleDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +16,25 @@ import org.springframework.context.event.ContextRefreshedEvent;
 public class InitializeConfiguration implements ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
-    private InitializationDao initializationDao;
+    private IGroupDao groupDao;
+
+    @Autowired
+    private IUserDao userDao;
+
+    @Autowired
+    private IGroupUserDao groupUserDao;
+
+    @Autowired
+    private IClusterDao clusterDao;
+
+    @Autowired
+    private IMachineDao machineDao;
+
+    @Autowired
+    private IAlertChannelDao alertChannelDao;
+
+    @Autowired
+    private IAlertRuleDao alertRuleDao;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
@@ -22,10 +42,12 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
     }
 
     private void createTables() {
-        initializationDao.createGroupTable();;
-        initializationDao.createUserTable();
-        initializationDao.createGroupUserTable();
-        initializationDao.createClusterTable();
-        initializationDao.createMachineTable();
+        groupDao.createGroupTable();;
+        userDao.createUserTable();
+        groupUserDao.createGroupUserTable();
+        clusterDao.createClusterTable();
+        machineDao.createMachineTable();
+        alertChannelDao.createAlertChannelTable();
+        alertRuleDao.createAlertChannelTable();
     }
 }

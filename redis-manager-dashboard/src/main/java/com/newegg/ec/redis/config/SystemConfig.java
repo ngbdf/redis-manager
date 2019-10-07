@@ -41,14 +41,15 @@ public class SystemConfig implements WebMvcConfigurer {
             throw new ConfigurationException("conf-path is empty.");
         }
         File file = new File(configPath);
-        if (!file.isDirectory()) {
-            throw new ConfigurationException(configPath + " is not a directory.");
-        }
         if (!file.exists()) {
             File clusterConfDir = new File(configPath + CLUSTER);
             clusterConfDir.mkdirs();
             File standaloneConfDir = new File(configPath + STANDALONE);
             standaloneConfDir.mkdirs();
+        }
+
+        if (!file.isDirectory()) {
+            throw new ConfigurationException(configPath + " is not a directory.");
         }
 
         if (Strings.isNullOrEmpty(machinePackagePath)) {

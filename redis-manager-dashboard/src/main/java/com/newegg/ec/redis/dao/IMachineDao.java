@@ -49,11 +49,26 @@ public interface IMachineDao {
     int deleteMachineById(Integer machineId);
 
     @Delete("<script>" +
-            "DELETE FROM machine WHERE machine_id IN (" +
+            "DELETE FROM machine WHERE machine_id IN " +
             "<foreach item='machineId' collection='machineIdList' open='(' separator=',' close=')'>" +
             "#{machineId}" +
             "</foreach>)" +
             "</script>")
     int deleteMachineByIdBatch(@Param("machineIdList") List<Integer>  machineIdList);
+
+    @Select("create TABLE IF NOT EXISTS `machine`( " +
+            "machine_id integer(4) NOT NULL AUTO_INCREMENT, " +
+            "machine_group_name varchar(255) NOT NULL, " +
+            "group_id integer(4) NOT NULL, " +
+            "host varchar(50) NOT NULL, " +
+            "user_name varchar(50) NOT NULL, " +
+            "password varchar(255) DEFAULT NULL, " +
+            "token varchar(255) DEFAULT NULL, " +
+            "machine_type integer(2) DEFAULT NULL, " +
+            "machine_info varchar(255) DEFAULT NULL, " +
+            "update_time datetime(0) NOT NULL, " +
+            "PRIMARY KEY (machine_id) " +
+            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
+    void createMachineTable();
 
 }

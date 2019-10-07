@@ -6,6 +6,7 @@ import com.newegg.ec.redis.plugin.alert.service.IAlertRuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 2019/8/31
  */
+@Service
 public class AlertRuleService implements IAlertRuleService {
 
     private static final Logger logger = LoggerFactory.getLogger(AlertRuleService.class);
@@ -21,7 +23,17 @@ public class AlertRuleService implements IAlertRuleService {
     private IAlertRuleDao alertRuleDao;
 
     @Override
-    public List<AlertRule> getAlertRuleIds(List<Integer> ruleIdList) {
+    public AlertRule getAlertRuleById(Integer ruleId) {
+        try {
+            return alertRuleDao.selectAlertRuleById(ruleId);
+        } catch (Exception e) {
+            logger.error("Get alert rule by ids failed, rule id = " + ruleId, e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<AlertRule> getAlertRuleByIds(List<Integer> ruleIdList) {
         try {
             return alertRuleDao.selectAlertRuleByIds(ruleIdList);
         } catch (Exception e) {
@@ -31,7 +43,7 @@ public class AlertRuleService implements IAlertRuleService {
     }
 
     @Override
-    public List<AlertRule> getAlertRuleListByGroupId(int groupId) {
+    public List<AlertRule> getAlertRuleListByGroupId(Integer groupId) {
         try {
             return alertRuleDao.selectAlertRuleByGroupId(groupId);
         } catch (Exception e) {
@@ -74,18 +86,18 @@ public class AlertRuleService implements IAlertRuleService {
     }
 
     @Override
-    public boolean deleteAlertRuleByIds(List<Integer> ruleIdList) {
+    public boolean deleteAlertRuleById(Integer ruleId) {
         try {
-            alertRuleDao.deleteAlertRuleByIdList(ruleIdList);
+            alertRuleDao.deleteAlertRuleById(ruleId);
             return true;
         } catch (Exception e) {
-            logger.error("Delete alert rule failed, rule ids = " + ruleIdList, e);
+            logger.error("Delete alert rule failed, rule ids = " + ruleId, e);
             return false;
         }
     }
 
     @Override
-    public boolean deleteAlertRuleByGroupId(int groupId) {
+    public boolean deleteAlertRuleByGroupId(Integer groupId) {
         try {
             int row = alertRuleDao.deleteAlertRuleByGroupId(groupId);
             return row > 0;
@@ -94,4 +106,5 @@ public class AlertRuleService implements IAlertRuleService {
             return false;
         }
     }
+
 }
