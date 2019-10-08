@@ -30,6 +30,9 @@ public interface IAlertRecordDao {
             "</script>")
     int insertAlertRecordBatch(@Param("alertRecordList") List<AlertRecord> alertRecordList);
 
+    @Delete("DELETE FROM alert_record WHERE record_id = #{ruleId}")
+    int deleteAlertRecordById(Integer recordId);
+
     @Delete("<script>" +
             "DELETE FROM alert_record WHERE record_id IN " +
             "<foreach item='ruleId' collection='recordIdList' open='(' separator=',' close=')'>" +

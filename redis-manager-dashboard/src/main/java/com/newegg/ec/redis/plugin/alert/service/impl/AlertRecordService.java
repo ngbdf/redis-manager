@@ -6,6 +6,7 @@ import com.newegg.ec.redis.plugin.alert.service.IAlertRecordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 2019/8/31
  */
+@Service
 public class AlertRecordService implements IAlertRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(AlertRecordService.class);
@@ -22,7 +24,7 @@ public class AlertRecordService implements IAlertRecordService {
     private IAlertRecordDao alertRecordDao;
 
     @Override
-    public List<AlertRecord> getAlertRecordByClusterId(int clusterId) {
+    public List<AlertRecord> getAlertRecordByClusterId(Integer clusterId) {
         try {
             return alertRecordDao.selectAlertRecordByClusterId(clusterId);
         } catch (Exception e) {
@@ -38,6 +40,17 @@ public class AlertRecordService implements IAlertRecordService {
             return row > 0;
         } catch (Exception e) {
             logger.error("Add alert record  failed, " + alertRecordList, e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean deleteAlertRecordById(Integer recordId) {
+        try {
+            alertRecordDao.deleteAlertRecordById(recordId);
+            return true;
+        } catch (Exception e) {
+            logger.error("Delete alert record by ids failed, alert record id = " + recordId, e);
             return false;
         }
     }

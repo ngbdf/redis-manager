@@ -1,8 +1,11 @@
 package com.newegg.ec.redis.controller;
 
+import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRule;
 import com.newegg.ec.redis.plugin.alert.service.IAlertRuleService;
+import com.newegg.ec.redis.service.IClusterService;
+import com.newegg.ec.redis.util.SignUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -20,11 +23,24 @@ public class AlertRuleController {
     @Autowired
     private IAlertRuleService alertRuleService;
 
-    @RequestMapping(value = "/getAlertRuleList/{groupId}", method = RequestMethod.GET)
+    @Autowired
+    private IClusterService clusterService;
+
+    @RequestMapping(value = "/getAlertRuleListByGroupId/{groupId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getAlertRuleList(@PathVariable("groupId") Integer groupId) {
+    public Result getAlertRuleListByGroupId(@PathVariable("groupId") Integer groupId) {
         List<AlertRule> alertRuleList = alertRuleService.getAlertRuleListByGroupId(groupId);
         return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();
+    }
+
+    @RequestMapping(value = "/getAlertRuleListByClusterId/{clusterId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getAlertRuleListByClusterId(@PathVariable("clusterId") Integer clusterId) {
+        Cluster cluster = clusterService.getClusterById(clusterId);
+        String ruleIds = cluster.getRuleIds();
+        String[] ruleIdArr = SignUtil.splitByCommas(ruleIds);
+
+        return null;
     }
 
     @RequestMapping(value = "/getAlertRule/{ruleId}", method = RequestMethod.GET)

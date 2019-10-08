@@ -7,7 +7,6 @@
             <div class="card-panel-icon-wrapper card-panel-icon-alert">
               <i class="el-icon-bell"></i>
             </div>
-
             <div class="card-panel-info-wrapper">
               <div class="card-panel-info-key">Alert Record</div>
               <div class="card-panel-info-value">6</div>
@@ -20,7 +19,7 @@
               <i class="el-icon-notebook-2"></i>
             </div>
             <div class="card-panel-info-wrapper">
-              <div class="card-panel-info-key">Health Number</div>
+              <div class="card-panel-info-key">Alert Rule</div>
               <div class="card-panel-info-value">23</div>
             </div>
           </div>
@@ -30,7 +29,6 @@
             <div class="card-panel-icon-wrapper card-panel-icon-channel">
               <i class="el-icon-coin"></i>
             </div>
-
             <div class="card-panel-info-wrapper">
               <div class="card-panel-info-key">Alert Channel</div>
               <div class="card-panel-info-value">1</div>
@@ -50,7 +48,7 @@
             <div class="batch-title">Batch Operation</div>
             <el-button size="mini" type="danger">Delete</el-button>
           </div>
-          <el-table :data="recordList">
+          <el-table :data="alertRecordList">
             <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column property="redisNode" label="Redis Node"></el-table-column>
@@ -63,10 +61,9 @@
             </el-table-column>
             <el-table-column property="checkCycle" label="Check Cycle"></el-table-column>
             <el-table-column property="ruleInfo" label="Info"></el-table-column>
-            <el-table-column property="updateTime" label="Time"></el-table-column>
-            <el-table-column label="Operation" width="200px;">
+            <el-table-column property="time" label="Time"></el-table-column>
+            <el-table-column label="Operation" width="100px;">
               <template slot-scope="scope">
-                <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button>
                 <el-button
                   size="mini"
                   type="danger"
@@ -82,7 +79,7 @@
             <el-button size="mini" type="success" @click="addAlertRuleVisible = true">Add</el-button>
             <el-button size="mini" type="danger">Delete</el-button>
           </div>
-          <el-table :data="ruleList">
+          <el-table :data="alertRuleList">
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column label="Alert Rule" width="200px;">
               <template
@@ -102,7 +99,7 @@
             </el-table-column>
 
             <el-table-column property="ruleInfo" label="Info"></el-table-column>
-            <el-table-column property="updateTime" label="Time"></el-table-column>
+            <el-table-column property="time" label="Time"></el-table-column>
             <el-table-column label="Operation" width="250px;">
               <template slot-scope="scope">
                 <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button>
@@ -121,7 +118,7 @@
             <el-button size="mini" type="success" @click="addAlertChannelVisible = true">Add</el-button>
             <el-button size="mini" type="danger">Delete</el-button>
           </div>
-          <el-table :data="channelList" style="width: 100%">
+          <el-table :data="alertChannelList" style="width: 100%">
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column property="channelName" label="Channel Name" width="150px;"></el-table-column>
             <el-table-column label="Channel Type" width="200px;">
@@ -134,7 +131,7 @@
               </template>
             </el-table-column>
             <el-table-column property="channelInfo" label="Info"></el-table-column>
-            <el-table-column property="updateTime" label="Time"></el-table-column>
+            <el-table-column property="time" label="Time"></el-table-column>
             <el-table-column label="Operation" width="200px;">
               <template slot-scope="scope">
                 <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button>
@@ -150,14 +147,13 @@
       </el-tabs>
     </div>
     <el-dialog title="Add Alert Rule" :visible.sync="addAlertRuleVisible">
-      <el-table :data="ruleList">
+      <el-table :data="alertRuleList">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column label="Alert Rule">
           <template
             slot-scope="scope"
           >{{scope.row.alertKey}}{{scope.row.compareType}}{{scope.row.alertValue}}</template>
         </el-table-column>
-
         <el-table-column property="checkCycle" label="Check Cycle"></el-table-column>
         <el-table-column property="ruleInfo" label="Info"></el-table-column>
         <el-table-column property="updateTime" label="Time"></el-table-column>
@@ -167,7 +163,7 @@
       </span>
     </el-dialog>
     <el-dialog title="Add Alert Channel" :visible.sync="addAlertChannelVisible">
-      <el-table :data="channelList">
+      <el-table :data="alertChannelList">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column property="channelName" label="Channel Name" width="150px;"></el-table-column>
         <el-table-column label="Channel Type" width="200px;">
@@ -196,10 +192,14 @@
 </template>
 
 <script>
+import { store } from "@/vuex/store.js";
+import { isEmpty } from "@/utils/validate.js";
+import API from "@/api/api.js";
+
 export default {
   data() {
     return {
-      recordList: [
+      alertRecordList: [
         {
           redisNode: "192.168.0.5:8000",
           alertRuleL: "test>8",
@@ -207,7 +207,7 @@ export default {
           checkCycle: "5"
         }
       ],
-      ruleList: [
+      alertRuleList: [
         {
           alertKey: "test",
           alertValue: "12",
@@ -219,7 +219,7 @@ export default {
           updateTime: "2019-08-25"
         }
       ],
-      channelList: [
+      alertChannelList: [
         {
           channelName: "bigdata",
           channelType: "1",
@@ -246,6 +246,28 @@ export default {
     },
     handleDelete(index, row) {
       console.log(index, row);
+    },
+    getAlertRecordList(clusterId) {
+      let url = "/alert/record/getAlertRecordList";
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let alertRecordList = result.data;
+            alertRecordList.forEach(alertRecord => {
+              alertRecord.time = formatTime(alertRecord.updateTime);
+            });
+            this.alertRecordList = alertRecordList;
+          } else {
+            console.log("No data");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
   }
 };
@@ -276,6 +298,12 @@ export default {
   border-radius: 4px;
   /* 背景色变化动画 */
   transition: all 0.38s ease-out;
+}
+
+.card-panel-info-wrapper {
+  padding: 0 0.5rem;
+  font-weight: bold;
+  text-align: center;
 }
 
 .card-panel-info-key {

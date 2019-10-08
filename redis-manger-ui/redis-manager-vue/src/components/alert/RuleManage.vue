@@ -331,8 +331,8 @@ export default {
         global: false
       };
     },
-    getAlertRuleList(groupId) {
-      let url = "/alert/rule/getAlertRuleList/" + groupId;
+    getAlertRuleListByGroupId(groupId) {
+      let url = "/alert/rule/getAlertRuleListByGroupId/" + groupId;
       API.get(
         url,
         null,
@@ -397,7 +397,7 @@ export default {
             response => {
               let result = response.data;
               if (result.code == 0) {
-                this.getAlertRuleList(this.currentGroupId);
+                this.getAlertRuleListByGroupId(this.currentGroupId);
                 this.editVisible = false;
                 this.$refs[alertRule].resetFields();
               } else {
@@ -419,7 +419,7 @@ export default {
         response => {
           let result = response.data;
           if (result.code == 0) {
-            this.getAlertRuleList(this.currentGroupId);
+            this.getAlertRuleListByGroupId(this.currentGroupId);
             this.deleteVisible = false;
           } else {
             console.log("Delete alert rule failed")
@@ -438,7 +438,7 @@ export default {
   },
   mounted() {
     let groupId = this.$route.params.groupId;
-    this.getAlertRuleList(groupId);
+    this.getAlertRuleListByGroupId(groupId);
   }
 };
 </script>

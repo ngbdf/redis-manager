@@ -11,9 +11,11 @@ import java.util.List;
  */
 public interface IAlertRecordService {
 
-    List<AlertRecord> getAlertRecordByClusterId(int clusterId);
+    List<AlertRecord> getAlertRecordByClusterId(Integer clusterId);
 
     boolean addAlertRecord(List<AlertRecord> alertRecordList);
+
+    boolean deleteAlertRecordById(Integer recordId);
 
     boolean deleteAlertRecordByIds(List<Integer> recordIdList);
 
