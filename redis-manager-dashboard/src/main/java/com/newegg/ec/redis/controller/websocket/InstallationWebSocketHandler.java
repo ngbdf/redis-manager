@@ -1,6 +1,5 @@
 package com.newegg.ec.redis.controller.websocket;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +28,7 @@ public class InstallationWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) {
         try {
-            Map<String, Object> attributes = webSocketSession.getAttributes();
-            System.err.println(attributes);
-            webSocketSession.sendMessage(new TextMessage("Start installation"));
+            webSocketSession.sendMessage(new TextMessage("Start installation..."));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,14 +49,11 @@ public class InstallationWebSocketHandler implements WebSocketHandler {
                     Thread.sleep(1000);
                 }
                 String message = logQueue.poll();
-                message = "hahaha0";
+                System.err.println("Message: " + message);
                 if (!Strings.isNullOrEmpty(message)) {
                     try {
                         webSocketSession.sendMessage(new TextMessage(message));
-                    } catch (SockJsTransportFailureException e) {
-                        // ignore
-                        e.printStackTrace();
-                    } catch (IOException e) {
+                    } catch (SockJsTransportFailureException | IOException e) {
                         // ignore
                         e.printStackTrace();
                     }
@@ -94,7 +88,7 @@ public class InstallationWebSocketHandler implements WebSocketHandler {
 
     public static void appendLog(String clusterName, String message) {
         BlockingDeque<String> blockingDeque = getLogQueue(clusterName);
-        if (null != blockingDeque) {
+        if (blockingDeque != null) {
             blockingDeque.add(message);
         }
     }
@@ -113,7 +107,8 @@ public class InstallationWebSocketHandler implements WebSocketHandler {
         return CLUSTER_MESSAGE_MAP.get(clusterName);
     }
 
-    private static BlockingDeque<String> getLogQueue(String clusterName) {
+    public static BlockingDeque<String> getLogQueue(String clusterName) {
         return CLUSTER_MESSAGE_MAP.get(clusterName);
     }
+
 }

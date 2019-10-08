@@ -2,6 +2,7 @@ package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
+import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
@@ -11,6 +12,8 @@ import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.INodeOperation;
 import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.SSH2Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -36,6 +39,8 @@ import static com.newegg.ec.redis.util.SignUtil.SLASH;
 @Component
 public class MachineNodeOperation extends AbstractNodeOperation implements INodeOperation {
 
+    private static final Logger logger = LoggerFactory.getLogger(MachineNodeOperation.class);
+
     @Value("${redis-manager.install.machine.package-path: /redis/machine/}")
     private String packagePath;
 
@@ -53,7 +58,6 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
         File file = new File(packagePath);
         if (!file.exists()) {
             file.mkdirs();
-//            throw new ConfigurationException(packagePath + " not exist!");
         }
         if (!file.isDirectory()) {
             throw new ConfigurationException(packagePath + " is not directory!");
@@ -88,6 +92,7 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
     public boolean pullImage(InstallationParam installationParam) {
         boolean sudo = installationParam.isSudo();
         Cluster cluster = installationParam.getCluster();
+        String clusterName = cluster.getClusterName();
         String image = cluster.getImage();
         String url;
         try {
@@ -106,18 +111,22 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
                     SSH2Util.copyFileToRemote(machine, tempPath, url, sudo);
                     return true;
                 } catch (Exception e) {
-                    // TODO: websocket
+                    String message = "Pull machine image failed, host: " + machine.getHost();
+                    InstallationWebSocketHandler.appendLog(clusterName, message);
+                    InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                    logger.error(message, e);
                     return false;
                 }
             }));
         }
         for (Future<Boolean> resultFuture : resultFutureList) {
             try {
-                if (!resultFuture.get(TIMEOUT, TimeUnit.SECONDS)) {
+                if (!resultFuture.get(TIMEOUT, TimeUnit.MINUTES)) {
                     return false;
                 }
             } catch (Exception e) {
-                // TODO: websocket
+                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                logger.error("", e);
                 return false;
             }
         }
@@ -129,9 +138,16 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
             String targetPath = INSTALL_BASE_PATH + redisNode.getPort();
             try {
                 // 解压到目标目录
-                SSH2Util.unzipToTargetPath(machine, tempPackagePath, targetPath, sudo);
+                String result = SSH2Util.unzipToTargetPath(machine, tempPackagePath, targetPath, sudo);
+                if (!Strings.isNullOrEmpty(result)) {
+                    InstallationWebSocketHandler.appendLog(clusterName, "Unzip failed, host: " + machine.getHost());
+                    InstallationWebSocketHandler.appendLog(clusterName, result);
+                    return false;
+                }
             } catch (Exception e) {
-                // TODO: websocket
+                InstallationWebSocketHandler.appendLog(clusterName, "Unzip failed, host: " + machine.getHost());
+                InstallationWebSocketHandler.appendLog(clusterName, "Unzip failed, host: " + machine.getHost());
+                logger.error("", e);
                 return false;
             }
         }
@@ -155,13 +171,18 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
 
     @Override
     public boolean start(Cluster cluster, Machine machine, RedisNode redisNode) {
+        String clusterName = cluster.getClusterName();
         String template = "cd %s; ./redis-server redis.conf";
-        String targetPath = INSTALL_BASE_PATH + redisNode.getPort();
+        int port = redisNode.getPort();
+        String targetPath = INSTALL_BASE_PATH + port;
         try {
             SSH2Util.execute(machine, String.format(template, targetPath));
             return true;
         } catch (Exception e) {
-            // TODO: websocket
+            String message = "Start the installation package failed, host: " + machine.getHost() + ", port: " + port;
+            InstallationWebSocketHandler.appendLog(clusterName, message);
+            InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+            logger.error(message, e);
             return false;
         }
     }

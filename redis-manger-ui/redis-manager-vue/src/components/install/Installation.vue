@@ -1,7 +1,7 @@
 <template>
   <div id="installation" class="body-wrapper">
     <div class="step-wrapper">
-      <el-steps :active="1" finish-status="success">
+      <el-steps :active="step" finish-status="success">
         <el-step title="Environment Check"></el-step>
         <el-step title="Pull Image" description></el-step>
         <el-step title="Pull Config" description></el-step>
@@ -193,7 +193,7 @@
       <el-col :xl="12" :lg="12" :md="24" :sm="24">
         <div class="console-wrapper">
           <div class="console-title">Redis Installation Console</div>
-          <pre class="console">Prepare to install redis...</pre>
+          <pre class="console">{{ installationConsole }}</pre>
         </div>
       </el-col>
     </el-row>
@@ -290,7 +290,7 @@ export default {
       machineImages: [],
       installationParam: {
         groupId: "",
-        clusterName: "Shanghai11",
+        clusterName: "Shanghai",
         redisPassword: "one",
         redisMode: "cluster",
         create: true,
@@ -300,13 +300,13 @@ export default {
         autoInit: true,
         sudo: true,
         startPort: 8000,
-        masterNumber: 4,
+        masterNumber: 1,
         replicaNumber: 2,
         redisNodes: "127.0.0.1:8001 master\n127.0.0.1:8002",
         installationEnvironment: 0
       },
       installationInfoVisible: false,
-
+      installationConsole: "Prepare to install redis...",
       rules: {
         clusterName: [
           {
@@ -407,7 +407,9 @@ export default {
           }
         ]
       },
-      allMachineList: []
+      allMachineList: [],
+      websock: null,
+      step: -1
     };
   },
   methods: {
@@ -444,8 +446,8 @@ export default {
           //this.installationInfoVisible = true;
           this.buildParam();
           console.log(this.installationParam);
-          //this.install();
-          this.installationLog();
+          this.install();
+          this.initWebSocket();
         } else {
           return false;
         }
@@ -458,6 +460,10 @@ export default {
         this.installationParam,
         response => {
           console.log(response);
+          this.$router.push({
+            name: "dashboard",
+            params: { groupId: this.currentGroup.groupId }
+          });
         },
         err => {
           console.log(err);
@@ -536,35 +542,50 @@ export default {
         }
       );
     },
-    installationLog() {
-      let clusterName = this.installationParam.clusterName;
-      if (isEmpty(typeof WebSocket)) {
-        console.log("Can't suport WebSocket!");
-      } else {
-        console.log();
-        let socket = new WebSocket("ws://127.0.0.1:8182/websocket/install");
-        //打开事件
-        socket.onopen = function() {
-          console.log("Socket 已打开");
-          console.log(clusterName)
-          socket.send(clusterName);
-          //socket.send(this.installationParam.clusterName);
-        };
-        //获得消息事件
-        socket.onmessage = function(msg) {
-          console.log(msg.data)
-          //发现消息进入    开始处理前端触发逻辑
-        };
-        //关闭事件
-        socket.onclose = function() {
-          console.log("Socket已关闭");
-        };
-        //发生了错误事件
-        socket.onerror = function() {
-          alert("Socket发生了错误");
-          //此时可以尝试刷新页面
-        };
+    initWebSocket() {
+      const wsuri = "ws://127.0.0.1:8182/websocket/install";
+      this.websock = new WebSocket(wsuri);
+      this.websock.onmessage = this.websocketonmessage;
+      this.websock.onopen = this.websocketonopen;
+      this.websock.onerror = this.websocketonerror;
+      this.websock.onclose = this.websocketclose;
+    },
+    websocketonopen() {
+      //连接建立之后执行send方法发送数据
+      console.log("Socket 已打开");
+      this.websocketsend(this.installationParam.clusterName);
+    },
+    websocketonerror() {
+      console.log("Build websocket error");
+    },
+    websocketonmessage(msg) {
+      //数据接收
+      var message = msg.data;
+      if (!isEmpty(message)) {
+        if (message.indexOf("Start preparing installation") > -1) {
+          this.step = 0;
+        } else if (message.indexOf("Start pulling image") > -1) {
+          this.step = 1;
+        } else if (message.indexOf("Start pulling redis.conf") > -1) {
+          this.step = 2;
+        } else if (message.indexOf("Start installing redis node") > -1) {
+          this.step = 3;
+        } else if (message.indexOf("Start initializing") > -1) {
+          this.step = 4;
+        } else if (message.indexOf("Start saving to database") > -1) {
+          this.step = 5;
+        }
+        this.installationConsole += " \n ";
+        this.installationConsole += message;
       }
+    },
+    websocketsend(data) {
+      //数据发送
+      this.websock.send(data);
+    },
+    websocketclose(e) {
+      //关闭
+      console.log("断开连接", e);
     }
   },
   computed: {
@@ -648,7 +669,7 @@ export default {
 }
 
 .console {
-  min-height: 600px;
+  height: 600px;
   padding: 10px 20px;
   background-color: black;
   color: #ffffff;
@@ -656,6 +677,11 @@ export default {
   word-wrap: break-word;
   font-family: Consolas, Monaco, Menlo, "Courier New", monospace !important;
   margin: 0;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+  line-height: 20px;
+  overflow: auto;
 }
 .console-title {
   padding: 10px 20px;

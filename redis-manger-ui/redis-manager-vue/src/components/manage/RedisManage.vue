@@ -2,26 +2,28 @@
   <div id="cluster-manage" class="body-wrapper">
     <div class="manage-header-wrapper">
       <div class="title-wrapper">
-        <span>Shanghai online</span>
-        <i class="el-icon-sunny health" title="Status"></i>
+        <span>{{ cluster.clusterName }}</span>
+        <i class="el-icon-sunny health" title="Status" v-if="cluster.clusterStatus == 'HEALTH'"></i>
       </div>
 
       <div class="base-info-operation-wrapper">
         <span class="base-info-item">
           Master:
-          <el-tag size="mini">4</el-tag>
+          <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
         </span>
         <span class="base-info-item">
           Node:
-          <el-tag size="mini">12</el-tag>
-        </span>
-        <span class="base-info-item">
-          Type:
-          <el-tag size="mini">Redis Manager</el-tag>
+          <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
         </span>
         <span class="base-info-item">
           Environment:
-          <el-tag size="mini">docker</el-tag>
+          <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Docker</el-tag>
+          <el-tag size="mini" v-else-if="cluster.installationEnvironment == 1">Machine</el-tag>
+        </span>
+        <span class="base-info-item">
+          Type:
+          <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Redis Manager</el-tag>
+          <el-tag size="mini" v-else>Import</el-tag>
         </span>
       </div>
     </div>
@@ -111,9 +113,13 @@
 </template>
 
 <script>
+import { isEmpty } from "@/utils/validate.js";
+import API from "@/api/api.js";
 export default {
   data() {
     return {
+      cluster: {},
+
       search: "",
       redisNodeList: [
         {
@@ -186,7 +192,59 @@ export default {
     },
     handleSlot(slot) {
       return "";
+    },
+    getClusterById(clusterId) {
+      let url = "/cluster/getCluster/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.cluster = result.data;
+          } else {
+            console.log("Get clsuter failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getAllNodeList(clusterId) {
+      let url = "/nodeManage/getAllNodeList/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let masterRedisNode;
+            let children = [];
+            result.data.forEach(node => {
+              if (node == "MASTER") {
+                children = [];
+                masterRedisNode = node;
+                masterRedisNode.children = children;
+              } else {
+                children.push(node);
+              }
+              this.redisNodeList.push(masterRedisNode);
+            });
+          } else {
+            console.log(result.message);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
+  },
+  mounted() {
+    let clusterId = this.$route.params.clusterId;
+    this.getClusterById(clusterId);
+    this.getAllNodeList(clusterId);
   }
 };
 </script>

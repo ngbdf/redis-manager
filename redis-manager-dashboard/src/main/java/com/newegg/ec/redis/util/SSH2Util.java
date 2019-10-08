@@ -114,17 +114,15 @@ public class SSH2Util {
         return result;
     }
 
-    public static void unzipToTargetPath(Machine machine, String filePath, String targetPath, boolean sudo) throws Exception {
+    public static String unzipToTargetPath(Machine machine, String filePath, String targetPath, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
         }
-        String template = "tar -xvf %s -C %s --strip-components 1";
+        String template = "tar -zxf %s -C %s --strip-components 1";
         command.append(String.format(template, filePath, targetPath));
         String result = execute(machine, command.toString());
-        if (!Strings.isNullOrEmpty(result)) {
-            throw new RuntimeException(result);
-        }
+        return result;
     }
 
     /**

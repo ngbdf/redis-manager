@@ -6,6 +6,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;

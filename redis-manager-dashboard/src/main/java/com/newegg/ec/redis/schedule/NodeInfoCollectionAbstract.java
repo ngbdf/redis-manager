@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.client.RedisURI;
+import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;

@@ -59,7 +59,7 @@ public class RedisConfigUtil {
      * @param path
      * @return
      */
-    public static void variableAssignment(Machine machine, String path, Map<String, String> configs, boolean sudo) throws Exception {
+    public static String variableAssignment(Machine machine, String path, Map<String, String> configs, boolean sudo) throws Exception {
         StringBuffer commands = new StringBuffer();
         // 进入配置文件所在目录
         commands.append("cd " + path).append(SEMICOLON);
@@ -76,9 +76,7 @@ public class RedisConfigUtil {
             commands.append("sed -i 's#{" + key + "}#" + value + "#g' " + REDIS_CONF + ";");
         }
         String result = SSH2Util.execute(machine, commands.toString());
-        if (!Strings.isNullOrEmpty(result)) {
-            throw new RuntimeException(result);
-        }
+        return result;
     }
 
     @Deprecated

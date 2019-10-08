@@ -26,6 +26,7 @@ public interface IAlertRecordDao {
             "<foreach item='alertRecord' collection='alertRecordList' separator=','>" +
             "(#{alertRecord.groupId}, #{alertRecord.clusterId}, #{alertRecord.ruleId}, #{alertRecord.redisNode}, " +
             "#{alertRecord.alertRule}, #{alertRecord.actualData}, #{alertRecord.checkCycle}, #{alertRecord.global}, NOW())" +
+            "</foreach>" +
             "</script>")
     int insertAlertRecordBatch(@Param("alertRecordList") List<AlertRecord> alertRecordList);
 
@@ -33,7 +34,7 @@ public interface IAlertRecordDao {
             "DELETE FROM alert_record WHERE record_id IN " +
             "<foreach item='ruleId' collection='recordIdList' open='(' separator=',' close=')'>" +
             "#{ruleId}" +
-            "</foreach>)" +
+            "</foreach>" +
             "</script>")
     int deleteAlertRecordByIds(@Param("recordIdList") List<Integer> recordIdList);
 

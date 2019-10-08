@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.dao.IClusterDao;
@@ -91,7 +92,7 @@ public class ClusterService implements IClusterService {
         String redisMode;
         fillBaseInfo(cluster);
         redisMode = cluster.getRedisMode();
-        if (redisMode == null) {
+        if (Strings.isNullOrEmpty(redisMode)) {
             logger.error("Fill base info failed, " + cluster);
             return false;
         }

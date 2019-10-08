@@ -102,7 +102,7 @@
           <div class="text item">
             Environment:
             <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Docker</el-tag>
-             <el-tag size="mini" v-else-if="cluster.installationEnvironment == 1">Machine</el-tag>
+            <el-tag size="mini" v-else-if="cluster.installationEnvironment == 1">Machine</el-tag>
           </div>
           <div class="text item">
             From:
@@ -211,9 +211,7 @@ export default {
         badNumber: 0,
         alertNumber: 0
       },
-      clusterList: [{
-
-      }],
+      clusterList: [{}],
       cluster: {},
       queryClusterId: "",
       queryVisible: false,
@@ -231,7 +229,12 @@ export default {
       });
     },
     toManage(clusterId) {
-      this.$router.push({ name: "redis-manage" });
+      this.$router.push({
+        name: "redis-manage",
+        params: {
+          clusterId: clusterId
+        }
+      });
     },
     toAlertManage(clusterId) {
       this.$router.push({ name: "alert-manage" });
@@ -342,7 +345,7 @@ export default {
   },
   mounted() {
     let groupId = this.$route.params.groupId;
-    // this.getClusterList(groupId);
+    this.getClusterList(groupId);
     this.getOverview(groupId);
   }
 };

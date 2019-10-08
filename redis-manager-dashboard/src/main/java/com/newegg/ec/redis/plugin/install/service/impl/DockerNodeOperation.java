@@ -1,9 +1,11 @@
 package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.DockerClientOperation;
@@ -45,7 +47,7 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         INSTALL_BASE_PATH = DOCKER_INSTALL_BASE_PATH;
         if (Strings.isNullOrEmpty(images)) {
-            throw new RuntimeException("images not allow empty!");
+            throw new ConfigurationException("images not allow empty!");
         }
     }
 
@@ -66,13 +68,17 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
      */
     @Override
     public boolean checkEnvironment(InstallationParam installationParam) {
+        String clusterName = installationParam.getCluster().getClusterName();
         List<Machine> machineList = installationParam.getMachineList();
         for (Machine machine : machineList) {
             String host = machine.getHost();
             try {
                 dockerClientOperation.getDockerInfo(host);
             } catch (Exception e) {
-                // TODO: websocket
+                String message = "Check docker environment failed, host: " + host;
+                InstallationWebSocketHandler.appendLog(clusterName, message);
+                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                logger.error(message, e);
                 return false;
             }
         }
@@ -83,28 +89,32 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
     public boolean pullImage(InstallationParam installationParam) {
         List<Machine> machineList = installationParam.getMachineList();
         Cluster cluster = installationParam.getCluster();
+        String clusterName = cluster.getClusterName();
         String image = cluster.getImage();
         List<Future<Boolean>> resultFutureList = new ArrayList<>(machineList.size());
         for (Machine machine : machineList) {
             resultFutureList.add(threadPool.submit(() -> {
+                String host = machine.getHost();
                 try {
-                    dockerClientOperation.pullImage(machine.getHost(), image);
+                    dockerClientOperation.pullImage(host, image);
                     return true;
                 } catch (InterruptedException e) {
-                    // TODO: websocket
-                    e.printStackTrace();
+                    String message = "Pull docker image failed, host: " + host;
+                    InstallationWebSocketHandler.appendLog(clusterName, message);
+                    InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                    logger.error(message, e);
                     return false;
                 }
             }));
         }
         for (Future<Boolean> resultFuture : resultFutureList) {
             try {
-                if (!resultFuture.get(TIMEOUT, TimeUnit.SECONDS)) {
+                if (!resultFuture.get(TIMEOUT, TimeUnit.MINUTES)) {
                     return false;
                 }
             } catch (Exception e) {
-                // TODO: websocket
-                e.printStackTrace();
+                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                logger.error("", e);
                 return false;
             }
         }
@@ -143,8 +153,10 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
             dockerClientOperation.runContainer(host, containerId);
             return true;
         } catch (Exception e) {
-            // TODO: websocket
-            e.printStackTrace();
+            String message = "Start container failed, host: " + host + ", port: " + port;
+            InstallationWebSocketHandler.appendLog(clusterName, message);
+            InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+            logger.error(message, e);
             return false;
         }
     }

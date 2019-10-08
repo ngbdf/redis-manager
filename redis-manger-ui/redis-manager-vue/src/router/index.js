@@ -45,7 +45,7 @@ export default new Router({
           path: '/redis-monitor/:clusterId',
           component: RedisMonitor,
           meta: {
-            title: 'Monitor',
+            title: 'Redis Monitor',
             icon: 'el-icon-view',
             noCache: true,
             affix: false
@@ -53,7 +53,7 @@ export default new Router({
         },
         {
           name: 'redis-manage',
-          path: '/redis-manage',
+          path: '/redis-manage/:clusterId',
           component: RedisManage,
           meta: {
             title: 'Redis Manage',

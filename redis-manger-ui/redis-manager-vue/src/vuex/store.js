@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-import { isEmpty } from "@/utils/validate.js";
 
 Vue.use(Vuex)
 
@@ -11,7 +10,7 @@ const state = {
     groupList: [],
     user: {
         userId: 0,
-        groupId: 1,
+        groupId: 10,
         userName: "Jay",
         headPic: "/user/image/jay.png"
     },
