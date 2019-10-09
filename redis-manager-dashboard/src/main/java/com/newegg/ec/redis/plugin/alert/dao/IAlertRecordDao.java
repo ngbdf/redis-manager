@@ -57,5 +57,5 @@ public interface IAlertRecordDao {
             "update_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (record_id) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
-    void createAlertChannelTable();
+    void createAlertRecordTable();
 }

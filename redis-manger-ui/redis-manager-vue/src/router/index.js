@@ -95,7 +95,7 @@ export default new Router({
           }
         }, {
           name: 'alert-manage',
-          path: '/alert-manage/:groupId',
+          path: '/alert-manage/:clusterId',
           component: AlertManage,
           meta: {
             title: 'Alert Manage',

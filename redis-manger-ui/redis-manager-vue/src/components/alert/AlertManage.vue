@@ -195,7 +195,6 @@
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import API from "@/api/api.js";
-
 export default {
   data() {
     return {
@@ -248,12 +247,13 @@ export default {
       console.log(index, row);
     },
     getAlertRecordList(clusterId) {
-      let url = "/alert/record/getAlertRecordList";
+      let url = "/alert/record/getAlertRecordList/" + clusterId;
       API.get(
         url,
         null,
         response => {
           let result = response.data;
+          console.log(result);
           if (result.code == 0) {
             let alertRecordList = result.data;
             alertRecordList.forEach(alertRecord => {
@@ -269,6 +269,10 @@ export default {
         }
       );
     }
+  },
+  mounted() {
+    let clusterId = this.$route.params.clusterId;
+    this.getAlertRecordList(clusterId);
   }
 };
 </script>

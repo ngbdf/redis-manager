@@ -259,7 +259,7 @@ export default {
       );
     },
     getChannelList(groupId) {
-      let url = "/alert/channel/getAlertChannelList/" + groupId;
+      let url = "/alert/channel/getAlertChannelListByGroupId/" + groupId;
       API.get(
         url,
         null,

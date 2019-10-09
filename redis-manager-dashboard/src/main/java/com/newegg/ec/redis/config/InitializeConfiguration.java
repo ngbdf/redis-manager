@@ -2,6 +2,7 @@ package com.newegg.ec.redis.config;
 
 import com.newegg.ec.redis.dao.*;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertChannelDao;
+import com.newegg.ec.redis.plugin.alert.dao.IAlertRecordDao;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRuleDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -37,6 +38,9 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
     private IAlertRuleDao alertRuleDao;
 
     @Autowired
+    private IAlertRecordDao alertRecordDao;
+
+    @Autowired
     private IRedisNodeDao redisNodeDao;
 
     @Override
@@ -52,6 +56,7 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
         machineDao.createMachineTable();
         alertChannelDao.createAlertChannelTable();
         alertRuleDao.createAlertChannelTable();
+        alertRecordDao.createAlertRecordTable();
         redisNodeDao.createRedisNodeTable();
     }
 }
