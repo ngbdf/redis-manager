@@ -183,26 +183,4 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
     }
 
     protected abstract Map<String, String> getBaseConfigs(String bind, int port);
-
-    @Override
-    public boolean stop(Cluster cluster, Machine machine, RedisNode redisNode) {
-        try {
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
-            redisClient.shutdown();
-            return true;
-        } catch (Exception e) {
-            logger.error("Stop redis node failed, " + redisNode.getHost() + ":" + redisNode.getPort(), e);
-            return false;
-        }
-    }
-
-    @Override
-    public boolean restart(Cluster cluster, Machine machine, RedisNode redisNode) {
-        return false;
-    }
-
-    @Override
-    public boolean remove(Cluster cluster, Machine machine, RedisNode redisNode) {
-        return false;
-    }
 }

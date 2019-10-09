@@ -15,12 +15,11 @@ public class RedisNode {
      */
     private Integer redisNodeId;
 
+    private Integer groupId;
+
     private Integer clusterId;
 
     private String nodeId;
-
-
-    private int order;
 
     /***
      * 如果节点是slave，并且已知master节点，则这里列出master节点ID,否则的话这里列出"-"
@@ -53,7 +52,17 @@ public class RedisNode {
 
     private String slotRange;
 
+    private int slotNumber;
+
+    private String containerId;
+
     private String containerName;
+
+    private boolean inCluster;
+
+    private boolean runStatus;
+
+    private Timestamp insertTime;
 
     private Timestamp updateTime;
 
@@ -99,6 +108,14 @@ public class RedisNode {
         this.redisNodeId = redisNodeId;
     }
 
+    public Integer getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Integer groupId) {
+        this.groupId = groupId;
+    }
+
     public Integer getClusterId() {
         return clusterId;
     }
@@ -113,14 +130,6 @@ public class RedisNode {
 
     public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
-    }
-
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
     }
 
     public String getMasterId() {
@@ -179,12 +188,52 @@ public class RedisNode {
         this.slotRange = slotRange;
     }
 
+    public int getSlotNumber() {
+        return slotNumber;
+    }
+
+    public void setSlotNumber(int slotNumber) {
+        this.slotNumber = slotNumber;
+    }
+
+    public String getContainerId() {
+        return containerId;
+    }
+
+    public void setContainerId(String containerId) {
+        this.containerId = containerId;
+    }
+
     public String getContainerName() {
         return containerName;
     }
 
     public void setContainerName(String containerName) {
         this.containerName = containerName;
+    }
+
+    public boolean getInCluster() {
+        return inCluster;
+    }
+
+    public void setInCluster(boolean inCluster) {
+        this.inCluster = inCluster;
+    }
+
+    public boolean getRunStatus() {
+        return runStatus;
+    }
+
+    public void setRunStatus(boolean runStatus) {
+        this.runStatus = runStatus;
+    }
+
+    public Timestamp getInsertTime() {
+        return insertTime;
+    }
+
+    public void setInsertTime(Timestamp insertTime) {
+        this.insertTime = insertTime;
     }
 
     public Timestamp getUpdateTime() {

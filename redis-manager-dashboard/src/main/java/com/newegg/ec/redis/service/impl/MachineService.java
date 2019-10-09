@@ -88,6 +88,20 @@ public class MachineService implements IMachineService {
     }
 
     @Override
+    public Machine getMachineByHost(Integer groupId, String host) {
+        try {
+            List<Machine> machines = machineDao.selectMachineByHost(groupId, host);
+            if (machines == null || machines.isEmpty()) {
+                return null;
+            }
+            return machines.get(0);
+        } catch (Exception e) {
+            logger.error("Get machine by host failed, host: " + host, e);
+            return null;
+        }
+    }
+
+    @Override
     public List<Machine> checkMachineConnection(List<Integer> machineIdList) {
         try {
             return new ArrayList<>();

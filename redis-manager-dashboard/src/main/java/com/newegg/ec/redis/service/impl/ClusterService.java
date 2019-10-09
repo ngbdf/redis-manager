@@ -6,6 +6,9 @@ import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
+import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
+import com.newegg.ec.redis.plugin.install.service.impl.MachineNodeOperation;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
@@ -21,6 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.newegg.ec.redis.client.RedisClient.SERVER;
+import static com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment.DOCKER;
+import static com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment.MACHINE;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
 import static com.newegg.ec.redis.util.RedisUtil.*;
 
@@ -41,6 +46,12 @@ public class ClusterService implements IClusterService {
 
     @Autowired
     private INodeInfoService nodeInfoService;
+
+    @Autowired
+    private DockerNodeOperation dockerNodeOperation;
+
+    @Autowired
+    private MachineNodeOperation machineNodeOperation;
 
     @Override
     public List<Cluster> getAllClusterList() {
@@ -214,6 +225,18 @@ public class ClusterService implements IClusterService {
         }
         cluster.setTotalKeys(totalKeys);
         cluster.setTotalExpires(totalExpires);
+    }
+
+    @Override
+    public AbstractNodeOperation getNodeOperation(Integer installationEnvironment) {
+        switch (installationEnvironment) {
+            case DOCKER:
+                return dockerNodeOperation;
+            case MACHINE:
+                return machineNodeOperation;
+            default:
+                return null;
+        }
     }
 
 }

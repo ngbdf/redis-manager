@@ -293,6 +293,7 @@ export default {
         clusterName: "Shanghai",
         redisPassword: "one",
         redisMode: "cluster",
+        image: "",
         create: true,
         machineIdList: [],
         machineList: [{ ip: "" }, { ip: "" }],

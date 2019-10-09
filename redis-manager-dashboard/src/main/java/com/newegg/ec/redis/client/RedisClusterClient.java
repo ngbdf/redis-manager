@@ -62,6 +62,9 @@ public class RedisClusterClient implements IRedisClusterClient {
             String masterId = item[3];
             String linkState = item[7];
             RedisNode redisNode = new RedisNode(nodeId, hostAndPort.getHost(), hostAndPort.getPort(), null);
+            if(flags.contains("myself")) {
+                flags = flags.substring(7);
+            }
             redisNode.setFlags(flags);
             redisNode.setMasterId(masterId);
             redisNode.setLinkState(linkState);
@@ -69,6 +72,7 @@ public class RedisClusterClient implements IRedisClusterClient {
                 String slotRang = item[8];
                 redisNode.setSlotRange(slotRang);
             }
+
             if (flags.contains(NodeRole.MASTER.getValue())) {
                 redisNode.setNodeRole(NodeRole.MASTER);
             } else if (flags.contains(NodeRole.SLAVE.getValue())) {

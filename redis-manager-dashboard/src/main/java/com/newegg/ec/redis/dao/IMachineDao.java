@@ -31,6 +31,9 @@ public interface IMachineDao {
             "</script>")
     List<Machine> selectMachineByIds(@Param("machineIdList") List<Integer> machineIdList);
 
+    @Select("SELECT * FROM machine WHERE group_id = #{groupId} AND host = #{host}")
+    List<Machine> selectMachineByHost(@Param("groupId") Integer groupId, @Param("host") String host);
+
     @Update("UPDATE machine SET machine_group_name = #{machineGroupName}, host = #{host}, password = #{password}, " +
             "token = #{token}, machine_type = #{machineType}, machine_info = #{machineInfo}, update_time = NOW() " +
             "WHERE machine_id = #{machineId}")

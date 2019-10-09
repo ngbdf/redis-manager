@@ -36,6 +36,9 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
     @Autowired
     private IAlertRuleDao alertRuleDao;
 
+    @Autowired
+    private IRedisNodeDao redisNodeDao;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         createTables();
@@ -49,5 +52,6 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
         machineDao.createMachineTable();
         alertChannelDao.createAlertChannelTable();
         alertRuleDao.createAlertChannelTable();
+        redisNodeDao.createRedisNodeTable();
     }
 }

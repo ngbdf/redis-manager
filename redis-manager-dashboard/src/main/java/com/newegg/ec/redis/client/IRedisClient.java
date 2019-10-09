@@ -192,7 +192,7 @@ public interface IRedisClient extends IDatabaseCommand {
 
     String clusterSetSlotStable(int slot);
 
-    String clusterForget(String nodeId);
+    boolean clusterForget(String nodeId);
 
     String clusterReset(ClusterReset reset);
 
@@ -218,6 +218,8 @@ public interface IRedisClient extends IDatabaseCommand {
      * @return
      */
     String replicaNoOne();
+
+    String memoryPurge();
 
     /**
      * Close client

@@ -70,6 +70,12 @@ public interface INodeInfoDao {
     @Delete("DROP TABLE node_info_${clusterId}")
     int dropTable(@Param("clusterId") Integer clusterId);
 
+    @Select("DROP TABLE node_info_${clusterId}")
+    void deleteNodeInfoTable(@Param("clusterId") Integer clusterId);
+
+    @Select("SELECT COUNT(*) FROM information_schema.TABLES WHERE table_schema = #{database} AND table_name = #{tableName}")
+    int existNodeInfoTable(@Param("database") String database, @Param("tableName") String tableName);
+
     @Select("CREATE TABLE IF NOT EXISTS node_info_${clusterId} ( " +
             "`info_id` integer(4) NOT NULL AUTO_INCREMENT, " +
             "`node` varchar(50) NOT NULL, " +
@@ -113,10 +119,4 @@ public interface INodeInfoDao {
             "INDEX `multiple_query` (`update_time`, `data_type`, `time_type`, `node`) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createNodeInfoTable(@Param("clusterId") Integer clusterId);
-
-    @Select("DROP TABLE node_info_${clusterId}")
-    void deleteNodeInfoTable(@Param("clusterId") Integer clusterId);
-
-    @Select("SELECT COUNT(*) FROM information_schema.TABLES WHERE table_schema = #{database} AND table_name = #{tableName}")
-    int existNodeInfoTable(@Param("database") String database, @Param("tableName") String tableName);
 }

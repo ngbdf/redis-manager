@@ -46,7 +46,7 @@ public class RedisClient implements IRedisClient {
         for (HostAndPort hostAndPort : hostAndPortSet) {
             try {
                 jedis = new Jedis(hostAndPort.getHost(), hostAndPort.getPort(), TIMEOUT, TIMEOUT);
-                if (redisPassword != null) {
+                if (!Strings.isNullOrEmpty(redisPassword)) {
                     jedis.auth(redisPassword);
                 }
                 if (!Strings.isNullOrEmpty(clientName)) {
@@ -491,8 +491,8 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String clusterForget(String nodeId) {
-        return jedis.clusterForget(nodeId);
+    public boolean clusterForget(String nodeId) {
+        return Objects.equals(jedis.clusterForget(nodeId), OK);
     }
 
     @Override
@@ -524,6 +524,11 @@ public class RedisClient implements IRedisClient {
     @Override
     public String replicaNoOne() {
         return jedis.slaveofNoOne();
+    }
+
+    @Override
+    public String memoryPurge() {
+        return null;
     }
 
     @Override

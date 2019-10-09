@@ -132,7 +132,7 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
         List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
         Cluster cluster = installationParam.getCluster();
         for (RedisNode redisNode : allRedisNodes) {
-            boolean start = start(cluster, null, redisNode);
+            boolean start = start(cluster, redisNode);
             if (!start) {
                 return false;
             }
@@ -141,7 +141,7 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
     }
 
     @Override
-    public boolean start(Cluster cluster, Machine machine, RedisNode redisNode) {
+    public boolean start(Cluster cluster, RedisNode redisNode) {
         String image = cluster.getImage();
         String clusterName = cluster.getClusterName();
         String containerNamePrefix = SignUtil.replaceSpaceToMinus(clusterName);
@@ -151,12 +151,47 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
         try {
             String containerId = dockerClientOperation.createContainer(host, port, image, containerName);
             dockerClientOperation.runContainer(host, containerId);
+            redisNode.setContainerId(containerId);
+            redisNode.setContainerName(containerName);
             return true;
         } catch (Exception e) {
             String message = "Start container failed, host: " + host + ", port: " + port;
             InstallationWebSocketHandler.appendLog(clusterName, message);
             InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
             logger.error(message, e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean stop(Cluster cluster, RedisNode redisNode) {
+        try {
+            dockerClientOperation.stopContainer(redisNode.getHost(), redisNode.getContainerId());
+            return true;
+        } catch (Exception e) {
+            logger.error("Stop container failed, host: " + redisNode.getHost() + ", container name: " + redisNode.getContainerName());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean restart(Cluster cluster, RedisNode redisNode) {
+        try {
+            dockerClientOperation.restartContainer(redisNode.getHost(), redisNode.getContainerId());
+            return true;
+        } catch (Exception e) {
+            logger.error("Restart container failed, host: " + redisNode.getHost() + ", container name: " + redisNode.getContainerName());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean remove(Cluster cluster, RedisNode redisNode) {
+        try {
+            dockerClientOperation.removeContainer(redisNode.getHost(), redisNode.getContainerId());
+            return true;
+        } catch (Exception e) {
+            logger.error("Remove container failed, host: " + redisNode.getHost() + ", container name: " + redisNode.getContainerName());
             return false;
         }
     }

@@ -10,12 +10,12 @@ import com.newegg.ec.redis.entity.RedisNode;
  */
 public interface INodeOperation {
 
-    boolean start(Cluster cluster, Machine machine, RedisNode redisNode);
+    boolean start(Cluster cluster, RedisNode redisNode);
 
-    boolean stop(Cluster cluster, Machine machine, RedisNode redisNode);
+    boolean stop(Cluster cluster, RedisNode redisNode);
 
-    boolean restart(Cluster cluster, Machine machine, RedisNode redisNode);
+    boolean restart(Cluster cluster, RedisNode redisNode);
 
-    boolean remove(Cluster cluster, Machine machine, RedisNode redisNode);
+    boolean remove(Cluster cluster, RedisNode redisNode);
 
 }

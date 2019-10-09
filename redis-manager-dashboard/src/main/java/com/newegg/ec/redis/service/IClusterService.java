@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 
 import java.util.List;
 
@@ -33,5 +34,7 @@ public interface IClusterService {
     void fillBaseInfo(Cluster cluster);
 
     void fillKeyspaceInfo(Cluster cluster);
+
+    AbstractNodeOperation getNodeOperation(Integer installationEnvironment);
 
 }

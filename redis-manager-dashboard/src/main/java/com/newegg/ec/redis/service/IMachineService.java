@@ -33,6 +33,8 @@ public interface IMachineService {
 
     List<Machine> getMachineListByIds(List<Integer> machineIdList);
 
+    Machine getMachineByHost(Integer groupId, String host);
+
     /**
      *
      * @param machineIdList

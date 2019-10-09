@@ -2,6 +2,8 @@ package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
+import com.newegg.ec.redis.client.RedisClient;
+import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
@@ -10,10 +12,12 @@ import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.INodeOperation;
+import com.newegg.ec.redis.service.IMachineService;
 import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.SSH2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -41,10 +45,13 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
 
     private static final Logger logger = LoggerFactory.getLogger(MachineNodeOperation.class);
 
+    public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
+
     @Value("${redis-manager.install.machine.package-path: /redis/machine/}")
     private String packagePath;
 
-    public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
+    @Autowired
+    private IMachineService machineService;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
@@ -158,10 +165,10 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
     @Override
     public boolean install(InstallationParam installationParam) {
         Multimap<Machine, RedisNode> machineAndRedisNode = installationParam.getMachineAndRedisNode();
+        Cluster cluster = installationParam.getCluster();
         for (Map.Entry<Machine, RedisNode> entry : machineAndRedisNode.entries()) {
-            Machine machine = entry.getKey();
             RedisNode redisNode = entry.getValue();
-            boolean start = start(null, machine, redisNode);
+            boolean start = start(cluster, redisNode);
             if (!start) {
                 return false;
             }
@@ -170,21 +177,50 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
     }
 
     @Override
-    public boolean start(Cluster cluster, Machine machine, RedisNode redisNode) {
+    public boolean start(Cluster cluster, RedisNode redisNode) {
         String clusterName = cluster.getClusterName();
         String template = "cd %s; ./redis-server redis.conf";
         int port = redisNode.getPort();
         String targetPath = INSTALL_BASE_PATH + port;
+        String host = redisNode.getHost();
         try {
+            Machine machine = machineService.getMachineByHost(cluster.getGroupId(), host);
+            if (machine == null) {
+                return false;
+            }
             SSH2Util.execute(machine, String.format(template, targetPath));
             return true;
         } catch (Exception e) {
-            String message = "Start the installation package failed, host: " + machine.getHost() + ", port: " + port;
+            String message = "Start the installation package failed, host: " + host + ", port: " + port;
             InstallationWebSocketHandler.appendLog(clusterName, message);
             InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
             logger.error(message, e);
             return false;
         }
+    }
+
+    @Override
+    public boolean stop(Cluster cluster, RedisNode redisNode) {
+        try {
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
+            redisClient.shutdown();
+            return true;
+        } catch (Exception e) {
+            logger.error("Stop redis node failed, " + redisNode.getHost() + ":" + redisNode.getPort(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean restart(Cluster cluster, RedisNode redisNode) {
+        boolean stop = stop(cluster, redisNode);
+        boolean start = start(cluster, redisNode);
+        return stop && start;
+    }
+
+    @Override
+    public boolean remove(Cluster cluster, RedisNode redisNode) {
+        return true;
     }
 
     @Override

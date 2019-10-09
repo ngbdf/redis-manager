@@ -139,6 +139,9 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
                 logger.error("Get redis node list failed, " + cluster, e);
             }
         }
+        nodeList.forEach(redisNode -> {
+            redisNode.setClusterId(cluster.getClusterId());
+        });
         return nodeList;
     }
 

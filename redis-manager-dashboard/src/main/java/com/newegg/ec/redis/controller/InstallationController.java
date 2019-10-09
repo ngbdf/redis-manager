@@ -9,6 +9,8 @@ import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.InstallationOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.MachineNodeOperation;
+import com.newegg.ec.redis.service.IClusterService;
+import com.newegg.ec.redis.service.IRedisNodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,9 @@ public class InstallationController {
     @Autowired
     private InstallationTemplate installationTemplate;
 
+    @Autowired
+    private IClusterService clusterService;
+
     @RequestMapping(value = "getDockerImages", method = RequestMethod.GET)
     @ResponseBody
     public Result getDockerImages() {
@@ -71,7 +76,7 @@ public class InstallationController {
     @ResponseBody
     public Result install(@RequestBody InstallationParam installationParam) {
         Integer installationEnvironment = installationParam.getCluster().getInstallationEnvironment();
-        AbstractNodeOperation nodeOperation = getNodeOperation(installationEnvironment);
+        AbstractNodeOperation nodeOperation = clusterService.getNodeOperation(installationEnvironment);
         boolean result = installationTemplate.installFlow(nodeOperation, installationParam);
         return result ? Result.successResult() : Result.failResult();
     }
@@ -128,15 +133,5 @@ public class InstallationController {
         return Result.successResult();
     }*/
 
-    private AbstractNodeOperation getNodeOperation(Integer installationEnvironment) {
-        switch (installationEnvironment) {
-            case DOCKER:
-                return dockerNodeOperation;
-            case MACHINE:
-                return machineNodeOperation;
-            default:
-                return null;
-        }
-    }
     /********************************* Installation step *********************************/
 }

@@ -1,21 +1,27 @@
 package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 
 import java.util.List;
 
 /**
+ *
  * @author Jay.H.Zou
  * @date 2019/7/19
  */
 public interface IRedisNodeService {
 
-    List<RedisNode> getRedisNodeList(Integer clusterId);
+    List<RedisNode> getRedisNodeListByClusterId(Integer clusterId);
 
-    List<RedisNode> getRedisInstance(Integer clusterId);
+    boolean addRedisNodeList(List<RedisNode> redisNodeList);
 
-    int addRedisInstance(List<RedisNode> redisInstanceList);
+    boolean updateRedisNode(RedisNode redisNode);
 
-    int deleteRedisNodeByClusterId(Integer clusterId);
+    boolean deleteRedisNodeListByClusterId(Integer clusterId);
+
+    boolean deleteRedisNodeById(Integer redisNodeId);
+
+    List<RedisNode> sortRedisNodeList(List<RedisNode> redisNodeList);
 
 }
