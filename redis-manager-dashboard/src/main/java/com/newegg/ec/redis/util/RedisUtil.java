@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.util;
 
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.HostAndPort;
 
 import java.io.BufferedReader;
@@ -154,4 +155,8 @@ public class RedisUtil {
         return items;
     }
 
+    public static boolean equals(RedisNode redisNode1, RedisNode redisNode2) {
+        return Objects.equals(redisNode1.getHost(), redisNode2.getHost())
+                && redisNode1.getPort() == redisNode2.getPort();
+    }
 }

@@ -414,32 +414,31 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         for (int slot = shade.getStartSlot(); slot <= shade.getEndSlot(); slot++) {
             RedisClient targetRedisClient = RedisClientFactory.buildRedisClient(targetRedisURI);
 
-            RedisNode masterNodeAssigned = getMasterNodeAssigned(masterNodeAndShadeMap, slot);
+            RedisNode sourceNode = getMasterNodeAssigned(masterNodeAndShadeMap, slot);
             // 槽位没有被分配
-            if (masterNodeAssigned == null) {
+            if (sourceNode == null) {
                 // 直接分配此 slot
                 targetRedisClient.clusterAddSlots(slot);
                 targetRedisClient.close();
                 continue;
             }
             // 如果此 slot 就在它自己本身，则直接跳过
-            if (Objects.equals(masterNodeAssigned.getHost(), targetNode.getHost()) && masterNodeAssigned.getPort() == targetNode.getPort()) {
-
+            if (RedisUtil.equals(sourceNode, targetNode)) {
                 continue;
             }
             // 迁移槽
-            RedisClient sourceRedisClient = RedisClientFactory.buildRedisClient(masterNodeAssigned, redisPassword);
+            RedisClient sourceRedisClient = RedisClientFactory.buildRedisClient(sourceNode, redisPassword);
             try {
-                // 源节点导出槽道
-                sourceRedisClient.clusterSetSlotImporting(slot, targetNodeId);
                 // 目标节点导入槽道
-                targetRedisClient.clusterSetSlotMigrating(slot, masterNodeAssigned.getNodeId());
+                targetRedisClient.clusterSetSlotImporting(slot, sourceNode.getNodeId());
+                // 源节点导出槽道
+                sourceRedisClient.clusterSetSlotMigrating(slot, targetNodeId);
                 // 数据迁移
                 List<String> keyList;
                 do {
                     keyList = sourceRedisClient.clusterGetKeysInSlot(slot, 50);
                     String[] keys = keyList.toArray(new String[0]);
-                    sourceRedisClient.migrate(masterNodeAssigned.getHost(), masterNodeAssigned.getPort(),
+                    sourceRedisClient.migrate(sourceNode.getHost(), sourceNode.getPort(),
                             0, 100000, MigrateParams.migrateParams().replace(), keys);
                 } while (!keyList.isEmpty());
             } catch (Exception e) {
@@ -450,10 +449,11 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
                 sourceRedisClient.clusterSetSlotStable(slot);
             } finally {
                 // set slot to target node
-                targetRedisClient.clusterSetSlotNode(slot, targetNodeId);
+                //targetRedisClient.clusterSetSlotNode(slot, targetNodeId);
                 //？ 这个很奇怪如果没有设置 stable 它的迁移状态会一直在的
                 //sourceRedisClient.clusterSetSlotStable(slot);
-                disseminate(masterNodeAndShadeMap.keySet(), redisPassword, slot);
+                // 所有主节点通知更新数据(槽道迁移)
+                disseminate(masterNodeAndShadeMap.keySet(), redisPassword, slot, targetNodeId);
                 sourceRedisClient.close();
                 targetRedisClient.close();
             }
@@ -468,10 +468,10 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
      * @param requirePass
      * @param slot
      */
-    private void disseminate(Set<RedisNode> masterNodeList, String requirePass, int slot) {
+    private void disseminate(Set<RedisNode> masterNodeList, String requirePass, int slot, String targetNodeId) {
         for (RedisNode redisNode : masterNodeList) {
             RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, requirePass);
-            redisClient.clusterSetSlotNode(slot, redisNode.getNodeId());
+            redisClient.clusterSetSlotNode(slot, targetNodeId);
             redisClient.close();
         }
     }
@@ -533,7 +533,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
                 int slotCount = startEnd.getSlotCount();
                 int start = startEnd.getStartSlot();
                 int end = startEnd.getEndSlot();
-                if (slotCount > 0 && (slot >= start || slot <= end)) {
+                if (slotCount > 0 && (slot >= start && slot <= end)) {
                     return redisNode;
                 }
             }
