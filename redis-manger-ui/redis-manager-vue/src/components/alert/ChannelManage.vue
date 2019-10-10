@@ -24,7 +24,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="channelInfo" label="Info"></el-table-column>
-        <el-table-column prop="updateTime" label="Time"></el-table-column>
+        <el-table-column prop="time" label="Time"></el-table-column>
         <el-table-column label="Operation" width="200px;">
           <template slot-scope="scope">
             <!-- <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button> -->
@@ -268,7 +268,7 @@ export default {
           if (result.code == 0) {
             let alertChannelList = result.data;
             alertChannelList.forEach(alertChannel => {
-              alertChannel.updateTime = formatTime(alertChannel.updateTime);
+              alertChannel.time = formatTime(alertChannel.updateTime);
             });
             this.alertChannelList = alertChannelList;
           } else {

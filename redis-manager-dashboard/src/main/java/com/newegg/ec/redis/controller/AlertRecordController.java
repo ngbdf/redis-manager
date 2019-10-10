@@ -45,4 +45,5 @@ public class AlertRecordController {
         boolean result = alertRecordService.deleteAlertRecordByIds(alertRecordIdList);
         return result ? Result.successResult() : Result.failResult();
     }
+
 }

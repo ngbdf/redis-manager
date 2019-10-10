@@ -268,11 +268,66 @@ export default {
           console.log(err);
         }
       );
+    },
+    getAlertRuleList(clusterId) {
+      let url = "/alert/rule/getAlertRuleListByClusterId/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let alertRuleList = result.data;
+            alertRuleList.forEach(alertRule => {
+              alertRule.time = formatTime(alertRule.updateTime);
+              let compareType = alertRule.compareType;
+              alertRule.compareSign =
+                compareType == 0
+                  ? "="
+                  : compareType == 1
+                  ? ">"
+                  : compareType == -1
+                  ? "<"
+                  : "!=";
+            });
+            this.alertRuleList = alertRuleList;
+          } else {
+            console.log("Get alert rule list failed");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getChannelList(clusterId) {
+      let url = "/alert/channel/getAlertChannelListByClusterId/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let alertChannelList = result.data;
+            alertChannelList.forEach(alertChannel => {
+              alertChannel.time = formatTime(alertChannel.updateTime);
+            });
+            this.alertChannelList = alertChannelList;
+          } else {
+            console.log("No data");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
   },
   mounted() {
     let clusterId = this.$route.params.clusterId;
     this.getAlertRecordList(clusterId);
+    this.getAlertRuleList(clusterId);
+    this.getChannelList(clusterId);
   }
 };
 </script>
