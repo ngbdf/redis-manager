@@ -1,7 +1,5 @@
 package com.newegg.ec.redis.entity;
 
-import com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment;
-
 /**
  * 描述集群基本情况
  * cluster info:
@@ -68,7 +66,7 @@ public class Cluster {
     /**
      *
      */
-    private ClusterState clusterStatus;
+    private ClusterState clusterState;
 
     /**
      * 已分配到集群节点的哈希槽数量（不是没有被绑定的数量）。16384个哈希槽全部被分配到集群节点是集群正常运行的必要条件
@@ -238,12 +236,12 @@ public class Cluster {
         this.dbSize = dbSize;
     }
 
-    public ClusterState getClusterStatus() {
-        return clusterStatus;
+    public ClusterState getClusterState() {
+        return clusterState;
     }
 
-    public void setClusterStatus(ClusterState clusterStatus) {
-        this.clusterStatus = clusterStatus;
+    public void setClusterState(ClusterState clusterState) {
+        this.clusterState = clusterState;
     }
 
     public int getClusterSlotsAssigned() {

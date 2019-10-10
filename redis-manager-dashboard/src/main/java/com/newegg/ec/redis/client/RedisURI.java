@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.client;
 
+import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.HostAndPort;
 
 import java.util.Collections;
@@ -38,6 +39,10 @@ public class RedisURI {
 
     public RedisURI(String host, int port, String requirePass) {
         this(new HostAndPort(host, port), requirePass);
+    }
+
+    public RedisURI(RedisNode redisNode, String requirePass) {
+        this(new HostAndPort(redisNode.getHost(), redisNode.getPort()), requirePass);
     }
 
     public RedisURI(String nodes, String requirePass) {

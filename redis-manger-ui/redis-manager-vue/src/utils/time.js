@@ -16,8 +16,7 @@ export function formatTimeForChart (timestamp) {
     let d = time.getDate()
     let h = time.getHours()
     let m = time.getMinutes()
-    let s = time.getSeconds()
-    return addZero(M) + '/' + addZero(d) + ' ' + addZero(h) + ':' + addZero(m)
+    return addZero(d) + '/' + addZero(M) + ' ' + addZero(h) + ':' + addZero(m)
 }
 
 function addZero (t) {

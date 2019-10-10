@@ -170,7 +170,7 @@ public interface IRedisClient extends IDatabaseCommand {
      * @param nodeId
      * @return
      */
-    String clusterReplicate(String nodeId);
+    boolean clusterReplicate(String nodeId);
 
     /**
      * Be master
@@ -178,7 +178,7 @@ public interface IRedisClient extends IDatabaseCommand {
      *
      * @return
      */
-    String clusterFailOver();
+    boolean clusterFailOver();
 
     String clusterAddSlots(int... slots);
 
@@ -201,7 +201,7 @@ public interface IRedisClient extends IDatabaseCommand {
     String migrate(String host, int port, int destinationDB,
                    int timeout, MigrateParams params, String... keys);
 
-    String clusterSlaves(String nodeId);
+//    String clusterSlaves(String nodeId);
 
     /**
      * old name: slaveOf

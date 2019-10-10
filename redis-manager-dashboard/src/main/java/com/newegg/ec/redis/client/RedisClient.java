@@ -451,13 +451,13 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String clusterReplicate(String nodeId) {
-        return jedis.clusterReplicate(nodeId);
+    public boolean clusterReplicate(String nodeId) {
+        return Objects.equals(jedis.clusterReplicate(nodeId), OK);
     }
 
     @Override
-    public String clusterFailOver() {
-        return jedis.clusterFailover();
+    public boolean clusterFailOver() {
+        return Objects.equals(jedis.clusterFailover(), OK);
     }
 
     @Override
@@ -509,11 +509,6 @@ public class RedisClient implements IRedisClient {
     public String migrate(String host, int port, int destinationDB,
                           int timeout, MigrateParams params, String... keys) {
         return jedis.migrate(host, port, destinationDB, timeout, params, keys);
-    }
-
-    @Override
-    public String clusterSlaves(String nodeId) {
-        return jedis.clusterReplicate(nodeId);
     }
 
     @Override

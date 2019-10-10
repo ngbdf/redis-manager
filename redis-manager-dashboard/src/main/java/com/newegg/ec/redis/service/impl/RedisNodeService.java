@@ -40,10 +40,19 @@ public class RedisNodeService implements IRedisNodeService {
     public List<RedisNode> getRedisNodeListByClusterId(Integer clusterId) {
         try {
             Cluster cluster = clusterService.getClusterById(clusterId);
+            long start = System.currentTimeMillis();
             List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
+            System.err.println("Get Real List: " + (System.currentTimeMillis() - start));
+            start = System.currentTimeMillis();
             List<RedisNode> dbRedisNodeList = redisNodeDao.selectRedisNodeListByClusterId(clusterId);
+            System.err.println("Get DB List: " + (System.currentTimeMillis() - start));
+            start = System.currentTimeMillis();
             List<RedisNode> redisNodeList = mergeRedisNode(realRedisNodeList, dbRedisNodeList);
-            return sortRedisNodeList(redisNodeList);
+            System.err.println("Merge: " + (System.currentTimeMillis() - start));
+            start = System.currentTimeMillis();
+            List<RedisNode> redisNodes = sortRedisNodeList(redisNodeList);
+            System.err.println("Sort: " + (System.currentTimeMillis() - start));
+            return redisNodes;
         } catch (Exception e) {
             logger.error("Get redis node list failed.", e);
             return null;

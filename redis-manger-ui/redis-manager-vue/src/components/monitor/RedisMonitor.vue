@@ -6,7 +6,7 @@
           <div class="monitor-title">
             <span>
               <span class="cluster-name">{{ cluster.clusterName }}</span>
-              <i class="el-icon-sunny health" v-if="cluster.clusterStatus == 'HEALTH'"></i>
+              <i class="el-icon-sunny health" v-if="cluster.clusterState == 'HEALTH'"></i>
             </span>
             <div>
               <el-button
@@ -459,7 +459,7 @@ export default {
       );
     },
     getNodeInfoList(nodeInfoParam) {
-      
+
       let url = "/monitor/getNodeInfoList";
       API.post(
         url,

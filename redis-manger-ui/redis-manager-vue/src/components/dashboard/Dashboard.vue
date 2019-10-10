@@ -71,9 +71,9 @@
             State:
             <el-tag
               size="mini"
-              v-if="cluster.clusterStatus == 'HEALTH'"
+              v-if="cluster.clusterState == 'HEALTH'"
               type="success"
-            >{{ cluster.clusterStatus }}</el-tag>
+            >{{ cluster.clusterState }}</el-tag>
           </div>
           <div class="text item">
             Model:
@@ -277,7 +277,7 @@ export default {
               let healthNumber = 0;
               let badNumber = 0;
               clusterList.forEach(cluster => {
-                if (cluster.clusterStatus == "HEALTH") {
+                if (cluster.clusterState == "HEALTH") {
                   healthNumber++;
                 } else {
                   badNumber++;

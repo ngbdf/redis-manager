@@ -67,11 +67,11 @@ public interface IRedisService {
      * change master
      *
      * @param cluster
-     * @param masterNode
+     * @param masterId
      * @param slaveNode
      * @return
      */
-    String clusterReplicate(Cluster cluster, RedisNode masterNode, RedisNode slaveNode);
+    boolean clusterReplicate(Cluster cluster, String masterId, RedisNode slaveNode);
 
     boolean clusterFailOver(Cluster cluster, RedisNode newMasterNode);
 
@@ -83,11 +83,11 @@ public interface IRedisService {
      * if failed, please try it
      *
      * @param cluster
-     * @param firstNode
+     * @param seed
      * @param redisNodeList
      * @return
      */
-    String clusterMeet(Cluster cluster, RedisNode firstNode, List<RedisNode> redisNodeList);
+    String clusterMeet(Cluster cluster, RedisNode seed, List<RedisNode> redisNodeList);
 
     String clusterAddSlots(Cluster cluster, RedisNode masterNode, SlotBalanceUtil.Shade shade);
 
@@ -100,7 +100,7 @@ public interface IRedisService {
      * @param targetNode
      * @param shade
      */
-    void clusterMoveSlots(Cluster cluster, RedisNode targetNode, SlotBalanceUtil.Shade shade);
+    boolean clusterMoveSlots(Cluster cluster, RedisNode targetNode, SlotBalanceUtil.Shade shade);
 
     /**
      * slave of

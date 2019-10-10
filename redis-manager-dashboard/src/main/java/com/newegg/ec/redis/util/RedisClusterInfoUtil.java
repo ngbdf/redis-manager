@@ -44,7 +44,11 @@ public class RedisClusterInfoUtil {
             if (Strings.isNullOrEmpty(key) || Strings.isNullOrEmpty(value)) {
                 continue;
             }
+            if (Objects.equals(key, CLUSTER_STATE)) {
+                value = Objects.equals(value, OK) ? Cluster.ClusterState.HEALTH.toString() : Cluster.ClusterState.BAD.toString();
+            }
             String field = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, key);
+
             infoJSONObject.put(field, value);
         }
         // 计算集群状态

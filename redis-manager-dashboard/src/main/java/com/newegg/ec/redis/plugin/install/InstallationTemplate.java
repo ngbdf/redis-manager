@@ -363,7 +363,7 @@ public class InstallationTemplate {
         String result = redisService.clusterMeet(cluster, seed, allRedisNodes);
 
         InstallationWebSocketHandler.appendLog(clusterName, "Cluster meet... ");
-        InstallationWebSocketHandler.appendLog(clusterName,  result);
+        InstallationWebSocketHandler.appendLog(clusterName, result);
 
         List<RedisNode> redisNodeListWithInfo = waitClusterMeet(installationParam, seed, allRedisNodes);
         replicate(cluster, topology, redisNodeListWithInfo);
@@ -459,10 +459,10 @@ public class InstallationTemplate {
             }
         }
         realTopology.forEach((masterNodeWithInfo, slaveNode) -> {
-            String replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo, slaveNode);
-            if (!Strings.isNullOrEmpty(replicateResult)) {
-                InstallationWebSocketHandler.appendLog(cluster.getClusterName(), replicateResult);
-                logger.error(replicateResult);
+            boolean replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);
+            if (!replicateResult) {
+                InstallationWebSocketHandler.appendLog(cluster.getClusterName(),
+                        slaveNode.getHost() + ":" + slaveNode.getPort() + " replicate failed.");
             }
         });
         try {

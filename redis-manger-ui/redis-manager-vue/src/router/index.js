@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Index from '@/components/Index'
 import Dashboard from '@/components/dashboard/Dashboard'
 import RedisMonitor from '@/components/monitor/RedisMonitor'
-import RedisManage from '@/components/manage/RedisManage'
+import NodeManage from '@/components/manage/NodeManage'
 import Installation from '@/components/install/Installation'
 import ChannelManage from '@/components/alert/ChannelManage'
 import RuleManage from '@/components/alert/RuleManage'
@@ -54,7 +54,7 @@ export default new Router({
         {
           name: 'redis-manage',
           path: '/redis-manage/:clusterId',
-          component: RedisManage,
+          component: NodeManage,
           meta: {
             title: 'Redis Manage',
             icon: 'el-icon-view',

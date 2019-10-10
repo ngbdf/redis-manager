@@ -100,23 +100,10 @@ public class ClusterService implements IClusterService {
     @Transactional
     @Override
     public boolean addCluster(Cluster cluster) {
-        String redisMode;
-        fillBaseInfo(cluster);
-        redisMode = cluster.getRedisMode();
-        if (Strings.isNullOrEmpty(redisMode)) {
-            logger.error("Fill base info failed, " + cluster);
+        boolean fillResult = fillCluster(cluster);
+        if (!fillResult) {
             return false;
         }
-        fillKeyspaceInfo(cluster);
-        if (Objects.equals(redisMode, CLUSTER)) {
-            if (!fillClusterInfo(cluster)) {
-                logger.error("Fill cluster info failed, " + cluster);
-                return false;
-            }
-        } else if (Objects.equals(redisMode, STANDALONE)) {
-            fillStandaloneInfo(cluster);
-        }
-        cluster.setClusterStatus(Cluster.ClusterState.HEALTH);
         int row = clusterDao.insertCluster(cluster);
         if (row == 0) {
             throw new RuntimeException("Save cluster failed.");
@@ -128,6 +115,7 @@ public class ClusterService implements IClusterService {
     @Override
     public boolean updateCluster(Cluster cluster) {
         try {
+            fillCluster(cluster);
             int row = clusterDao.updateCluster(cluster);
             return row > 0;
         } catch (Exception e) {
@@ -166,11 +154,31 @@ public class ClusterService implements IClusterService {
         return true;
     }
 
+    private boolean fillCluster(Cluster cluster) {
+        String redisMode;
+        fillBaseInfo(cluster);
+        redisMode = cluster.getRedisMode();
+        if (Strings.isNullOrEmpty(redisMode)) {
+            logger.error("Fill base info failed, " + cluster);
+            return false;
+        }
+        fillKeyspaceInfo(cluster);
+        if (Objects.equals(redisMode, CLUSTER)) {
+            if (!fillClusterInfo(cluster)) {
+                logger.error("Fill cluster info failed, " + cluster);
+                return false;
+            }
+        } else if (Objects.equals(redisMode, STANDALONE)) {
+            fillStandaloneInfo(cluster);
+        }
+        return true;
+    }
+
     /**
      * @param cluster
      * @return
      */
-    public boolean fillClusterInfo(Cluster cluster) {
+    private boolean fillClusterInfo(Cluster cluster) {
         try {
             Map<String, String> clusterInfo = redisService.getClusterInfo(cluster);
             if (clusterInfo == null) {
@@ -178,7 +186,7 @@ public class ClusterService implements IClusterService {
                 return true;
             }
             Cluster clusterInfoObj = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfo);
-            cluster.setClusterStatus(clusterInfoObj.getClusterStatus());
+            cluster.setClusterState(clusterInfoObj.getClusterState());
             cluster.setClusterSlotsAssigned(clusterInfoObj.getClusterSlotsAssigned());
             cluster.setClusterSlotsFail(clusterInfoObj.getClusterSlotsPfail());
             cluster.setClusterSlotsPfail(clusterInfoObj.getClusterSlotsPfail());
@@ -192,14 +200,14 @@ public class ClusterService implements IClusterService {
         }
     }
 
-    public boolean fillStandaloneInfo(Cluster cluster) {
+    private boolean fillStandaloneInfo(Cluster cluster) {
         List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
         cluster.setClusterSize(1);
         cluster.setClusterKnownNodes(redisNodeList.size());
         return true;
     }
 
-    public void fillBaseInfo(Cluster cluster) {
+    private void fillBaseInfo(Cluster cluster) {
 
         try {
             String nodes = cluster.getNodes();
@@ -214,7 +222,7 @@ public class ClusterService implements IClusterService {
         }
     }
 
-    public void fillKeyspaceInfo(Cluster cluster) {
+    private void fillKeyspaceInfo(Cluster cluster) {
         Map<String, Map<String, Long>> keyspaceInfoMap = redisService.getKeyspaceInfo(cluster);
         cluster.setDbSize(keyspaceInfoMap.size());
         long totalKeys = 0;

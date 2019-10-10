@@ -27,14 +27,6 @@ public interface IClusterService {
 
     boolean deleteCluster(Integer clusterId);
 
-    boolean fillClusterInfo(Cluster cluster);
-
-    boolean fillStandaloneInfo(Cluster cluster);
-
-    void fillBaseInfo(Cluster cluster);
-
-    void fillKeyspaceInfo(Cluster cluster);
-
     AbstractNodeOperation getNodeOperation(Integer installationEnvironment);
 
 }

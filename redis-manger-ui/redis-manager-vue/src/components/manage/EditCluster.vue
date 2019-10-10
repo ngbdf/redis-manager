@@ -95,10 +95,19 @@ export default {
       }
     };
     var validateConnection = (rule, value, callback) => {
-      let url = "/validate/address/" + value.trim();
-      API.get(
+      let data = {
+        redisPassword: this.cluster.redisPassword
+      };
+      let ipAndPort = value.split(":");
+      let redisNode = {
+        host: ipAndPort[0],
+        port: ipAndPort[1]
+      };
+      data.redisNode = redisNode;
+      let url = "/validate/redisNode";
+      API.post(
         url,
-        null,
+        data,
         response => {
           if (response.data.code != 0) {
             return callback(new Error("Connection refused."));
@@ -143,7 +152,7 @@ export default {
     // 导入外部集群
     saveCluster(cluster) {
       this.$refs[cluster].validate(valid => {
-        console.log(valid)
+        console.log(valid);
         if (valid) {
           let currentGroup = this.currentGroup;
           if (isEmpty(currentGroup) || isEmpty(currentGroup.groupId)) {

@@ -31,7 +31,7 @@ public interface IClusterDao {
             "cluster_name, nodes, redis_mode, " +
             "os, redis_version, image, " +
             "initialized, total_keys, total_expires, " +
-            "db_size, cluster_status, cluster_slots_assigned, " +
+            "db_size, cluster_state, cluster_slots_assigned, " +
             "cluster_slots_ok, cluster_slots_pfail, cluster_slots_fail, " +
             "cluster_known_nodes, cluster_size, redis_password, " +
             "installation_environment, installation_type, update_time) " +
@@ -40,7 +40,7 @@ public interface IClusterDao {
             "#{clusterName}, #{nodes}, #{redisMode}, " +
             "#{os}, #{redisVersion}, #{image}, " +
             "#{initialized}, #{totalKeys}, #{totalExpires}, " +
-            "#{dbSize}, #{clusterStatus}, #{clusterSlotsAssigned}, " +
+            "#{dbSize}, #{clusterState}, #{clusterSlotsAssigned}, " +
             "#{clusterSlotsOk}, #{clusterSlotsPfail}, #{clusterSlotsFail}, " +
             "#{clusterKnownNodes}, #{clusterSize}, #{redisPassword}, " +
             "#{installationEnvironment}, #{installationType},  NOW())")
@@ -52,7 +52,7 @@ public interface IClusterDao {
             "nodes = #{nodes}, redis_mode = #{redisMode}, os = #{os}, " +
             "redis_version = #{redisVersion}, image = #{image}, initialized = #{initialized}, " +
             "total_keys = #{totalKeys}, total_expires = #{totalExpires}, db_size = #{dbSize}, " +
-            "cluster_status = #{clusterStatus}, cluster_slots_assigned = #{clusterSlotsAssigned}, cluster_slots_ok = #{clusterSlotsOk}, " +
+            "cluster_state = #{clusterState}, cluster_slots_assigned = #{clusterSlotsAssigned}, cluster_slots_ok = #{clusterSlotsOk}, " +
             "cluster_slots_pfail = #{clusterSlotsPfail}, cluster_slots_fail = #{clusterSlotsFail}, cluster_known_nodes = #{clusterKnownNodes}, " +
             "cluster_size = #{clusterSize}, redis_password = #{redisPassword}, installation_environment = #{installationEnvironment}, " +
             "installation_type = #{installationType}, update_time = NOW() " +
@@ -86,7 +86,7 @@ public interface IClusterDao {
             "total_keys bigint(20) NOT NULL, " +
             "total_expires bigint(20) NOT NULL, " +
             "db_size integer(8) NOT NULL, " +
-            "cluster_status varchar(50) NOT NULL, " +
+            "cluster_state varchar(50) NOT NULL, " +
             "cluster_slots_assigned integer(4) NOT NULL, " +
             "cluster_slots_ok integer(4) NOT NULL, " +
             "cluster_slots_pfail integer(4) NOT NULL, " +

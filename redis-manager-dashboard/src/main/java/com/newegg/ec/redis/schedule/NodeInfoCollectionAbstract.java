@@ -55,8 +55,8 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        coreSize = Runtime.getRuntime().availableProcessors();
-        threadPool = new ThreadPoolExecutor(coreSize, coreSize * 4, 60L, TimeUnit.SECONDS,
+        coreSize = Runtime.getRuntime().availableProcessors() ;
+        threadPool = new ThreadPoolExecutor(coreSize, coreSize * 8, 60L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("collect-node-info-pool-thread-%d").build(),
                 new ThreadPoolExecutor.AbortPolicy());
@@ -85,8 +85,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
                 // clean last time data and save new data to db
                 NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType);
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
-                // 计算 total keys 和 total expires, 这里不适用 dbsize 命令
-                updateClusterKeyspace(cluster, nodeInfoList);
+                clusterService.updateCluster(cluster);
             } catch (Exception e) {
                 logger.error("Collect " + timeType + " data for " + cluster.getClusterName() + " failed.", e);
             }

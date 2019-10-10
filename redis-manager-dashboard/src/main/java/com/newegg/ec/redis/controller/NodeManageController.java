@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
@@ -13,13 +14,18 @@ import com.newegg.ec.redis.service.IRedisNodeService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisConfigUtil;
+import com.newegg.ec.redis.util.RedisUtil;
+import com.newegg.ec.redis.util.SlotBalanceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import redis.clients.jedis.HostAndPort;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author Jay.H.Zou
@@ -65,10 +71,18 @@ public class NodeManageController {
     @RequestMapping(value = "/getAllNodeListWithStatus/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAllNodeListWithStatus(@PathVariable("clusterId") Integer clusterId) {
+        long start = System.currentTimeMillis();
         List<RedisNode> redisNodeSorted = redisNodeService.getRedisNodeListByClusterId(clusterId);
+        System.err.println("all: " + (System.currentTimeMillis() - start));
         return Result.successResult(redisNodeSorted);
     }
 
+    /**
+     * TODO: jedis 暂无该 API，需自己完成
+     *
+     * @param redisNodeList
+     * @return
+     */
     @RequestMapping(value = "/purgeMemory", method = RequestMethod.POST)
     @ResponseBody
     public Result purgeMemory(@RequestBody List<RedisNode> redisNodeList) {
@@ -81,29 +95,32 @@ public class NodeManageController {
     @RequestMapping(value = "/forget", method = RequestMethod.POST)
     @ResponseBody
     public Result forget(@RequestBody List<RedisNode> redisNodeList) {
-        Result result = clusterOperate(redisNodeList, (redisNode, redisClient) -> redisClient.clusterForget(redisNode.getNodeId()));
+        Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> redisService.clusterForget(cluster, redisNode));
         return result;
     }
 
     @RequestMapping(value = "/moveSlot", method = RequestMethod.POST)
     @ResponseBody
-    public Result moveSlot() {
-
-        return Result.successResult();
+    public Result moveSlot(@RequestBody JSONObject jsonObject) {
+        RedisNode redisNode = jsonObject.getObject("redisNode", RedisNode.class);
+        SlotBalanceUtil.Shade slot = jsonObject.getObject("slotRange", SlotBalanceUtil.Shade.class);
+        Cluster cluster = getCluster(redisNode.getClusterId());
+        boolean result = redisService.clusterMoveSlots(cluster, redisNode, slot);
+        return result ? Result.successResult() : Result.failResult();
     }
 
-    @RequestMapping(value = "/beSlave", method = RequestMethod.POST)
+    @RequestMapping(value = "/replicateOf", method = RequestMethod.POST)
     @ResponseBody
-    public Result beSlave() {
-
-        return Result.successResult();
+    public Result replicateOf(@RequestBody List<RedisNode> redisNodeList) {
+        Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> redisService.clusterReplicate(cluster, redisNode.getMasterId(), redisNode));
+        return result;
     }
 
     @RequestMapping(value = "/failOver", method = RequestMethod.POST)
     @ResponseBody
-    public Result failOver() {
-
-        return Result.successResult();
+    public Result failOver(@RequestBody List<RedisNode> redisNodeList) {
+        Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> redisService.clusterFailOver(cluster, redisNode));
+        return result;
     }
 
     @RequestMapping(value = "/start", method = RequestMethod.POST)
@@ -165,13 +182,29 @@ public class NodeManageController {
         return Result.successResult();
     }
 
+    // TODO add to db
     @RequestMapping(value = "/importNode", method = RequestMethod.POST)
     @ResponseBody
-    public Result importNode(@RequestBody RedisNode redisNode) {
-
-        return Result.successResult();
+    public Result importNode(@RequestBody List<RedisNode> redisNodeList) {
+        try {
+            RedisNode redisNode = redisNodeList.get(0);
+            Cluster cluster = getCluster(redisNode.getClusterId());
+            Set<HostAndPort> hostAndPorts = RedisUtil.nodesToHostAndPortSet(cluster.getNodes());
+            HostAndPort hostAndPort = hostAndPorts.iterator().next();
+            RedisNode seed = new RedisNode();
+            seed.setHost(hostAndPort.getHost());
+            seed.setPort(hostAndPort.getPort());
+            String message = redisService.clusterMeet(cluster, seed, redisNodeList);
+            boolean result = Strings.isNullOrEmpty(message);
+            if (result) {
+                // TODO: save to db
+            }
+            return result ? Result.successResult() : Result.failResult().setMessage(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.failResult().setMessage(e.getMessage());
+        }
     }
-
 
     private Cluster getCluster(Integer clusterId) {
         return clusterService.getClusterById(clusterId);
@@ -197,8 +230,7 @@ public class NodeManageController {
         StringBuffer messageBuffer = new StringBuffer();
         redisNodeList.forEach(redisNode -> {
             try {
-                RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
-                boolean handleResult = clusterHandler.handle(redisNode, redisClient);
+                boolean handleResult = clusterHandler.handle(cluster, redisNode);
                 if (!handleResult) {
                     messageBuffer.append(redisNode.getHost() + ":" + redisNode.getPort() + " operation failed.\n");
                 }
@@ -241,7 +273,7 @@ public class NodeManageController {
 
     interface ClusterHandler {
 
-        boolean handle(RedisNode redisNode, RedisClient redisClient);
+        boolean handle(Cluster cluster, RedisNode redisNode);
 
     }
 
