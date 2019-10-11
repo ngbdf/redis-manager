@@ -25,13 +25,14 @@ public interface IAlertRuleDao {
     List<AlertRule> selectAlertRuleByIds(@Param("ruleIdList") List<Integer> ruleIdList);
 
     @Select("<script>" +
-            "SELECT * FROM alert_rule WHERE rule_id NOT IN " +
+            "SELECT * FROM alert_rule WHERE group_id = #{groupId} " +
+            "AND global = 0 " +
+            "AND rule_id NOT IN " +
             "<foreach item='ruleId' collection='ruleIdList' open='(' separator=',' close=')'>" +
             "#{ruleId}" +
             "</foreach>" +
-            " AND global = 0" +
             "</script>")
-    List<AlertRule> selectAlertRuleNotInIds(@Param("ruleIdList") List<Integer> ruleIdList);
+    List<AlertRule> selectAlertRuleNotUsed(@Param("groupId") Integer groupId, @Param("ruleIdList") List<Integer> ruleIdList);
 
     @Select("SELECT * FROM alert_rule WHERE rule_id = #{ruleId}")
     AlertRule selectAlertRuleById(Integer ruleId);

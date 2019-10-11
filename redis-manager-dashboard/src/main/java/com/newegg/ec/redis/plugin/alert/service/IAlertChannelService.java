@@ -16,6 +16,8 @@ public interface IAlertChannelService {
 
     List<AlertChannel> getAlertChannelByIds(List<Integer> channelIdList);
 
+    List<AlertChannel> getAlertChannelNotUsed(Integer groupId, List<Integer> channelIdList);
+
     boolean addAlertChannel(AlertChannel alertChannel);
 
     boolean updateAlertChannel(AlertChannel alertChannel);

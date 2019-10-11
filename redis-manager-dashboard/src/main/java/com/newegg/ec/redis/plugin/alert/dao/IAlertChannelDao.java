@@ -29,12 +29,13 @@ public interface IAlertChannelDao {
     List<AlertChannel> selectAlertChannelByIds(@Param("channelIdList") List<Integer> channelIdList);
 
     @Select("<script>" +
-            "SELECT * FROM alert_channel WHERE channel_id NOT IN " +
+            "SELECT * FROM alert_channel WHERE group_id = #{groupId} " +
+            "AND channel_id NOT IN " +
             "<foreach item='channelId' collection='channelIdList' open='(' separator=',' close=')'>" +
             "#{channelId}" +
             "</foreach>" +
             "</script>")
-    List<AlertChannel> selectAlertChannelNotInIds(@Param("channelIdList") List<Integer> channelIdList);
+    List<AlertChannel> selectAlertChannelNotUsed(@Param("groupId") Integer groupId, @Param("channelIdList") List<Integer> channelIdList);
 
     @Insert("INSERT INTO alert_channel (group_id, channel_name, smtp_host, smtp_user_name, smtp_password, email_from, email_to, " +
             "webhook, corp_id, agent_id, corp_secret, token, channel_type, channel_info, update_time) " +
@@ -75,4 +76,5 @@ public interface IAlertChannelDao {
             "PRIMARY KEY (channel_id) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createAlertChannelTable();
+
 }

@@ -14,7 +14,9 @@ public interface IAlertRuleService {
 
     List<AlertRule> getAlertRuleByIds(List<Integer> ruleIdList);
     
-    List<AlertRule> getAlertRuleListByGroupId(Integer groupId);
+    List<AlertRule> getAlertRuleByGroupId(Integer groupId);
+
+    List<AlertRule> getAlertRuleNotUsed(Integer groupId, List<Integer> ruleIdList);
 
     boolean addAlertRule(AlertRule alertRule);
 

@@ -37,17 +37,27 @@ public class AlertRuleService implements IAlertRuleService {
         try {
             return alertRuleDao.selectAlertRuleByIds(ruleIdList);
         } catch (Exception e) {
-            logger.error("Get alert rule by ids failed, rule ids = " + ruleIdList, e);
+            logger.error("Get alert rule by ids failed.", e);
             return null;
         }
     }
 
     @Override
-    public List<AlertRule> getAlertRuleListByGroupId(Integer groupId) {
+    public List<AlertRule> getAlertRuleByGroupId(Integer groupId) {
         try {
             return alertRuleDao.selectAlertRuleByGroupId(groupId);
         } catch (Exception e) {
             logger.error("Get alert rule by group id failed, group id = " + groupId, e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<AlertRule> getAlertRuleNotUsed(Integer groupId, List<Integer> ruleIdList) {
+        try {
+            return alertRuleDao.selectAlertRuleNotUsed(groupId, ruleIdList);
+        } catch (Exception e) {
+            logger.error("Get alert rule not used failed.", e);
             return null;
         }
     }
@@ -80,7 +90,7 @@ public class AlertRuleService implements IAlertRuleService {
             int row = alertRuleDao.updateAlertRuleLastCheckTime(ruleIdList);
             return row > 0;
         } catch (Exception e) {
-            logger.error("Update alert rule failed, rule id = " + ruleIdList, e);
+            logger.error("Update alert rule failed.", e);
             return false;
         }
     }
@@ -91,7 +101,7 @@ public class AlertRuleService implements IAlertRuleService {
             alertRuleDao.deleteAlertRuleById(ruleId);
             return true;
         } catch (Exception e) {
-            logger.error("Delete alert rule failed, rule ids = " + ruleId, e);
+            logger.error("Delete alert rule failed.", e);
             return false;
         }
     }

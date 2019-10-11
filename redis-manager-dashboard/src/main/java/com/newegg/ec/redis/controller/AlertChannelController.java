@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.controller;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
@@ -27,24 +28,46 @@ public class AlertChannelController {
     @Autowired
     private IClusterService clusterService;
 
-    @RequestMapping(value = "/getAlertChannelListByGroupId/{groupId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getAlertChannelByGroupId/{groupId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getAlertChannelListByGroupId(@PathVariable("groupId") Integer groupId) {
+    public Result getAlertChannelByGroupId(@PathVariable("groupId") Integer groupId) {
         List<AlertChannel> alertChannelList = alertChannelService.getAlertChannelByGroupId(groupId);
         return alertChannelList != null ? Result.successResult(alertChannelList) : Result.failResult();
     }
 
-    @RequestMapping(value = "/getAlertChannelListByClusterId/{clusterId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getAlertChannelByClusterId/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getAlertChannelListByClusterId(@PathVariable("clusterId") Integer clusterId) {
+    public Result getAlertChannelByClusterId(@PathVariable("clusterId") Integer clusterId) {
         Cluster cluster = clusterService.getClusterById(clusterId);
         String channelIds = cluster.getChannelIds();
+        if (Strings.isNullOrEmpty(channelIds)) {
+            return Result.successResult();
+        }
         String[] channelIdArr = SignUtil.splitByCommas(channelIds);
         List<Integer> channelIdList = new ArrayList<>();
         for (String channelId : channelIdArr) {
             channelIdList.add(Integer.parseInt(channelId));
         }
         List<AlertChannel> alertChannelList = alertChannelService.getAlertChannelByIds(channelIdList);
+        return alertChannelList != null ? Result.successResult(alertChannelList) : Result.failResult();
+    }
+
+    @RequestMapping(value = "/getAlertChannelNotUsed/{clusterId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getAlertChannelNotUsed(@PathVariable("clusterId") Integer clusterId) {
+        Cluster cluster = clusterService.getClusterById(clusterId);
+        String channelIds = cluster.getChannelIds();
+        Integer groupId = cluster.getGroupId();
+        if (Strings.isNullOrEmpty(channelIds)) {
+            List<AlertChannel> alertChannelList = alertChannelService.getAlertChannelByGroupId(groupId);
+            return alertChannelList != null ? Result.successResult(alertChannelList) : Result.failResult();
+        }
+        String[] channelIdArr = SignUtil.splitByCommas(channelIds);
+        List<Integer> channelIdList = new ArrayList<>();
+        for (String channelId : channelIdArr) {
+            channelIdList.add(Integer.parseInt(channelId));
+        }
+        List<AlertChannel> alertChannelList = alertChannelService.getAlertChannelNotUsed(groupId, channelIdList);
         return alertChannelList != null ? Result.successResult(alertChannelList) : Result.failResult();
     }
 

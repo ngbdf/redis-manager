@@ -38,20 +38,27 @@ public class AlertChannelService implements IAlertChannelService {
         try {
             return alertChannelDao.selectAlertChannelById(channelId);
         } catch (Exception e) {
-            logger.error("Get alert channel by id failed, channel id = " + channelId, e);
+            logger.error("Get alert channel by id failed.", e);
             return null;
         }
     }
 
     @Override
     public List<AlertChannel> getAlertChannelByIds(List<Integer> channelIdList) {
-        if (channelIdList == null || channelIdList.isEmpty()) {
-            return null;
-        }
         try {
             return alertChannelDao.selectAlertChannelByIds(channelIdList);
         } catch (Exception e) {
-            logger.error("Get alert channel by ids failed, channel ids = " + channelIdList, e);
+            logger.error("Get alert channel by ids failed.", e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<AlertChannel> getAlertChannelNotUsed(Integer groupId, List<Integer> channelIdList) {
+        try {
+            return alertChannelDao.selectAlertChannelNotUsed(groupId, channelIdList);
+        } catch (Exception e) {
+            logger.error("Get alert channel by ids failed.", e);
             return null;
         }
     }
@@ -59,8 +66,7 @@ public class AlertChannelService implements IAlertChannelService {
     @Override
     public boolean addAlertChannel(AlertChannel alertChannel) {
         try {
-            int row = alertChannelDao.insertAlertChannel(alertChannel);
-            return row > 0;
+            return alertChannelDao.insertAlertChannel(alertChannel) > 0;
         } catch (Exception e) {
             logger.error("Add alert channel failed, " + alertChannel, e);
             return false;
@@ -70,8 +76,7 @@ public class AlertChannelService implements IAlertChannelService {
     @Override
     public boolean updateAlertChannel(AlertChannel alertChannel) {
         try {
-            int row = alertChannelDao.updateAlertChannel(alertChannel);
-            return row > 0;
+            return alertChannelDao.updateAlertChannel(alertChannel) > 0;
         } catch (Exception e) {
             logger.error("Update alert channel failed, " + alertChannel, e);
             return false;
@@ -81,8 +86,7 @@ public class AlertChannelService implements IAlertChannelService {
     @Override
     public boolean deleteAlertChannelById(Integer channelId) {
         try {
-            int row = alertChannelDao.deleteAlertChannelById(channelId);
-            return row > 0;
+            return alertChannelDao.deleteAlertChannelById(channelId) > 0;
         } catch (Exception e) {
             logger.error("Delete alert channel by id failed, channel id = " + channelId, e);
             return false;
@@ -92,8 +96,7 @@ public class AlertChannelService implements IAlertChannelService {
     @Override
     public boolean deleteAlertChannelByGroupId(Integer groupId) {
         try {
-            int row = alertChannelDao.deleteAlertChannelById(groupId);
-            return row > 0;
+            return alertChannelDao.deleteAlertChannelById(groupId) > 0;
         } catch (Exception e) {
             logger.error("Delete alert channel by group id failed, group id = " + groupId, e);
             return false;

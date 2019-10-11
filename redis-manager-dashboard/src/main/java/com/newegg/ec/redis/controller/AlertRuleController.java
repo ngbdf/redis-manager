@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.controller;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRule;
@@ -27,25 +28,46 @@ public class AlertRuleController {
     @Autowired
     private IClusterService clusterService;
 
-    @RequestMapping(value = "/getAlertRuleListByGroupId/{groupId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getAlertRuleByGroupId/{groupId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getAlertRuleListByGroupId(@PathVariable("groupId") Integer groupId) {
-        List<AlertRule> alertRuleList = alertRuleService.getAlertRuleListByGroupId(groupId);
+    public Result getAlertRuleByGroupId(@PathVariable("groupId") Integer groupId) {
+        List<AlertRule> alertRuleList = alertRuleService.getAlertRuleByGroupId(groupId);
         return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();
     }
 
-    @RequestMapping(value = "/getAlertRuleListByClusterId/{clusterId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getAlertRule/clusterId/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getAlertRuleListByClusterId(@PathVariable("clusterId") Integer clusterId) {
+    public Result getAlertRuleByClusterId(@PathVariable("clusterId") Integer clusterId) {
         Cluster cluster = clusterService.getClusterById(clusterId);
         String ruleIds = cluster.getRuleIds();
+        if(Strings.isNullOrEmpty(ruleIds)) {
+            return Result.successResult();
+        }
         String[] ruleIdArr = SignUtil.splitByCommas(ruleIds);
-
         List<Integer> ruleIdList = new ArrayList<>();
         for (String ruleId : ruleIdArr) {
             ruleIdList.add(Integer.parseInt(ruleId));
         }
         List<AlertRule> alertRuleList = alertRuleService.getAlertRuleByIds(ruleIdList);
+        return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();
+    }
+
+    @RequestMapping(value = "/getAlertRuleNotUsed/{clusterId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getAlertRuleNotBeUsed(@PathVariable("clusterId") Integer clusterId) {
+        Cluster cluster = clusterService.getClusterById(clusterId);
+        String ruleIds = cluster.getRuleIds();
+        Integer groupId = cluster.getGroupId();
+        if(Strings.isNullOrEmpty(ruleIds)) {
+            List<AlertRule> alertRuleList = alertRuleService.getAlertRuleByGroupId(cluster.getGroupId());
+            return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();
+        }
+        String[] ruleIdArr = SignUtil.splitByCommas(ruleIds);
+        List<Integer> ruleIdList = new ArrayList<>();
+        for (String ruleId : ruleIdArr) {
+            ruleIdList.add(Integer.parseInt(ruleId));
+        }
+        List<AlertRule> alertRuleList = alertRuleService.getAlertRuleNotUsed(groupId, ruleIdList);
         return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();
     }
 
