@@ -321,9 +321,9 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         }
         try {
             RedisClient redisClient = RedisClientFactory.buildRedisClient(slaveNode, redisPassword);
-            redisClient.clusterReplicate(masterId);
+            boolean result = redisClient.clusterReplicate(masterId);
             redisClient.close();
-            return true;
+            return result;
         } catch (Exception e) {
             logger.error(slaveNode.getHost() + ":" + slaveNode.getPort() + " replicate " + masterId + " failed.", e);
             return false;
@@ -442,7 +442,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
                             0, 100000, MigrateParams.migrateParams().replace(), keys);
                 } while (!keyList.isEmpty());
             } catch (Exception e) {
-                logger.error(clusterName + " move slot error.", e);
+                logger.error(clusterName + " move slot " + slot + "error.", e);
                 result = false;
                 // 出现异常则恢复 slot
                 targetRedisClient.clusterSetSlotStable(slot);

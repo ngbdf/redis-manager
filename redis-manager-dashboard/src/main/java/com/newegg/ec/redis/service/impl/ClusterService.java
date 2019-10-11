@@ -11,6 +11,7 @@ import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.MachineNodeOperation;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
+import com.newegg.ec.redis.service.IRedisNodeService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.RedisClusterInfoUtil;
 import org.slf4j.Logger;
@@ -46,6 +47,9 @@ public class ClusterService implements IClusterService {
 
     @Autowired
     private INodeInfoService nodeInfoService;
+
+    @Autowired
+    private IRedisNodeService redisNodeService;
 
     @Autowired
     private DockerNodeOperation dockerNodeOperation;
@@ -136,6 +140,18 @@ public class ClusterService implements IClusterService {
         }
     }
 
+    @Override
+    public boolean updateNodes(Cluster cluster) {
+        Integer clusterId = cluster.getClusterId();
+        try {
+            clusterDao.updateNodes(clusterId, cluster.getNodes());
+            return true;
+        } catch (Exception e) {
+            logger.error("Update cluster nodes failed, " + cluster, e);
+            return false;
+        }
+    }
+
     /**
      * drop node_info_{clusterId}
      * delete redis_node in this cluster
@@ -151,6 +167,7 @@ public class ClusterService implements IClusterService {
         }
         clusterDao.deleteClusterById(clusterId);
         nodeInfoService.deleteNodeInfoTable(clusterId);
+        redisNodeService.deleteRedisNodeListByClusterId(clusterId);
         return true;
     }
 

@@ -2,6 +2,7 @@ package com.newegg.ec.redis.client;
 
 import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * Build redis client
@@ -32,7 +33,9 @@ public class RedisClientFactory {
 
     public static RedisClient buildRedisClient(RedisURI redisURI) {
         RedisClient redisClient = new RedisClient(redisURI);
-        redisClient.ping();
+        if (redisClient.getJedisClient() == null) {
+            throw new JedisConnectionException("All seed node can't connect.");
+        }
         return redisClient;
     }
 

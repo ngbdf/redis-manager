@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-row :gutter="24" class="card-panel-group">
+    <el-row :gutter="20" class="card-panel-group">
       <el-col :xl="6" :lg="12" :md="12" :sm="12">
         <div class="card-panel">
           <div class="card-panel-icon-wrapper card-panel-icon-user">
@@ -49,17 +49,18 @@
         </div>
       </el-col>
     </el-row>
-    <el-row :gutter="24" id="cluster-list-wrapper">
+    <el-row :gutter="20">
       <el-col
-        :xl="6"
-        :lg="8"
-        :md="12"
+        :xs="24"
         :sm="12"
+        :md="12"
+        :lg="6"
+        :xl="6"
         v-for="cluster in clusterList"
         :key="cluster.clusterId"
       >
-        <el-card class="box-card">
-          <div slot="header" class="clearfix box-card-title">
+        <el-card class="box-card" shadow="hover">
+          <div slot="header" class="box-card-title">
             <span>{{ cluster.clusterName }}</span>
             <i
               class="el-icon-lock health"
@@ -442,7 +443,7 @@ export default {
   margin-bottom: 10px;
 }
 
-.clearfix:before,
+/* .clearfix:before,
 .clearfix:after {
   display: table;
   content: "";
@@ -450,7 +451,7 @@ export default {
 
 .clearfix:after {
   clear: both;
-}
+} */
 
 .box-card {
   margin-bottom: 20px;

@@ -12,10 +12,7 @@ import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IMachineService;
 import com.newegg.ec.redis.service.IRedisNodeService;
 import com.newegg.ec.redis.service.IRedisService;
-import com.newegg.ec.redis.util.NetworkUtil;
-import com.newegg.ec.redis.util.RedisConfigUtil;
-import com.newegg.ec.redis.util.RedisUtil;
-import com.newegg.ec.redis.util.SlotBalanceUtil;
+import com.newegg.ec.redis.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.HostAndPort;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -95,7 +93,15 @@ public class NodeManageController {
     @RequestMapping(value = "/forget", method = RequestMethod.POST)
     @ResponseBody
     public Result forget(@RequestBody List<RedisNode> redisNodeList) {
-        Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> redisService.clusterForget(cluster, redisNode));
+        Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> {
+            String nodes = cluster.getNodes();
+            String node = redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
+            if (nodes.contains(node)) {
+                logger.warn("I can't forget " + node + ", because it in the database");
+                return true;
+            }
+            return redisService.clusterForget(cluster, redisNode);
+        });
         return result;
     }
 
@@ -167,9 +173,11 @@ public class NodeManageController {
     public Result delete(@RequestBody List<RedisNode> redisNodeList) {
         Result result = nodeOperate(redisNodeList, (cluster, redisNode, abstractNodeOperation) -> {
             if (NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort())) {
-                return abstractNodeOperation.remove(cluster, redisNode);
+                return false;
             } else {
-                return abstractNodeOperation.remove(cluster, redisNode);
+                abstractNodeOperation.remove(cluster, redisNode);
+                redisNodeService.deleteRedisNodeById(redisNode.getRedisNodeId());
+                return true;
             }
         });
         return result;
@@ -182,24 +190,31 @@ public class NodeManageController {
         return Result.successResult();
     }
 
-    // TODO add to db
     @RequestMapping(value = "/importNode", method = RequestMethod.POST)
     @ResponseBody
     public Result importNode(@RequestBody List<RedisNode> redisNodeList) {
         try {
-            RedisNode redisNode = redisNodeList.get(0);
-            Cluster cluster = getCluster(redisNode.getClusterId());
+            RedisNode firstRedisNode = redisNodeList.get(0);
+            Cluster cluster = getCluster(firstRedisNode.getClusterId());
             Set<HostAndPort> hostAndPorts = RedisUtil.nodesToHostAndPortSet(cluster.getNodes());
             HostAndPort hostAndPort = hostAndPorts.iterator().next();
             RedisNode seed = new RedisNode();
             seed.setHost(hostAndPort.getHost());
             seed.setPort(hostAndPort.getPort());
-            String message = redisService.clusterMeet(cluster, seed, redisNodeList);
-            boolean result = Strings.isNullOrEmpty(message);
-            if (result) {
-                // TODO: save to db
-            }
-            return result ? Result.successResult() : Result.failResult().setMessage(message);
+            StringBuilder message = new StringBuilder();
+            redisNodeList.forEach(redisNode -> {
+                String oneResult = redisService.clusterMeet(cluster, seed, redisNodeList);
+                if (Strings.isNullOrEmpty(oneResult)) {
+                    message.append(oneResult).append("\n");
+                    // TODO: save to db
+                    Integer redisNodeId = redisNode.getRedisNodeId();
+                    RedisNode exist = redisNodeService.getRedisNodeById(redisNodeId);
+                    if (exist == null) {
+                        redisNodeService.addRedisNode(redisNode);
+                    }
+                }
+            });
+            return Strings.isNullOrEmpty(message.toString())? Result.successResult() : Result.failResult().setMessage(message.toString());
         } catch (Exception e) {
             e.printStackTrace();
             return Result.failResult().setMessage(e.getMessage());

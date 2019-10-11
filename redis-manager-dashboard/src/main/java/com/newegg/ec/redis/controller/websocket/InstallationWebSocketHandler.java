@@ -13,6 +13,8 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import static com.newegg.ec.redis.util.TimeUtil.ONE_HOUR;
+
 /**
  * Created by gl49 on 2018/4/22.
  */
@@ -22,6 +24,8 @@ public class InstallationWebSocketHandler implements WebSocketHandler {
     private static final Logger logger = LoggerFactory.getLogger(InstallationWebSocketHandler.class);
 
     private static Map<String, BlockingDeque<String>> CLUSTER_MESSAGE_MAP = new ConcurrentHashMap<>();
+
+    private static Map<String, Long> CLUSTER_START = new ConcurrentHashMap<>();
 
     private static Map<WebSocketSession, String> WEB_SOCKET_CLUSTER_MAP = new ConcurrentHashMap<>();
 
@@ -46,7 +50,13 @@ public class InstallationWebSocketHandler implements WebSocketHandler {
                     break;
                 }
                 if (logQueue.size() == 0) {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
+                    Long startTime = CLUSTER_START.get(clusterName);
+                    if (System.currentTimeMillis() - startTime > ONE_HOUR) {
+                        CLUSTER_MESSAGE_MAP.remove(clusterName);
+                        CLUSTER_START.remove(clusterName);
+                        break;
+                    }
                 }
                 String message = logQueue.poll();
                 System.err.println("Message: " + message);
@@ -103,6 +113,7 @@ public class InstallationWebSocketHandler implements WebSocketHandler {
 
     private static BlockingDeque<String> createLogQueueIfNotExist(String clusterName, WebSocketSession webSocketSession) {
         CLUSTER_MESSAGE_MAP.putIfAbsent(clusterName, new LinkedBlockingDeque<>());
+        CLUSTER_START.put(clusterName, System.currentTimeMillis());
         WEB_SOCKET_CLUSTER_MAP.putIfAbsent(webSocketSession, clusterName);
         return CLUSTER_MESSAGE_MAP.get(clusterName);
     }

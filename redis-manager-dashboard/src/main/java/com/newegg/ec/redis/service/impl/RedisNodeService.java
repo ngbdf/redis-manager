@@ -8,6 +8,7 @@ import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisNodeService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.NetworkUtil;
+import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,17 @@ public class RedisNodeService implements IRedisNodeService {
         }
     }
 
+    @Override
+    public RedisNode getRedisNodeById(Integer redisNodeId) {
+        try {
+            RedisNode redisNode = redisNodeDao.selectRedisNodeById(redisNodeId);
+            return redisNode;
+        } catch (Exception e) {
+            logger.error("Get redis node by id failed.", e);
+            return null;
+        }
+    }
+
     /**
      * merge redis node info
      * TODO: 未完成
@@ -67,15 +79,14 @@ public class RedisNodeService implements IRedisNodeService {
      * @param dbRedisNodeList
      * @return
      */
-    private List<RedisNode> mergeRedisNode(List<RedisNode> realRedisNodeList, List<RedisNode> dbRedisNodeList) {
+    public List<RedisNode> mergeRedisNode(List<RedisNode> realRedisNodeList, List<RedisNode> dbRedisNodeList) {
         List<RedisNode> redisNodeList = new ArrayList<>();
         realRedisNodeList.forEach(realRedisNode -> {
             realRedisNode.setInCluster(true);
             realRedisNode.setRunStatus(true);
             if (dbRedisNodeList != null && !dbRedisNodeList.isEmpty()) {
                 dbRedisNodeList.forEach(dbRedisNode -> {
-                    if (Objects.equals(dbRedisNode.getHost(), realRedisNode.getHost())
-                            && dbRedisNode.getPort() == realRedisNode.getPort()) {
+                    if (RedisUtil.equals(dbRedisNode, realRedisNode)) {
                         realRedisNode.setContainerId(dbRedisNode.getContainerId());
                         realRedisNode.setContainerName(dbRedisNode.getContainerName());
                     }
@@ -90,8 +101,7 @@ public class RedisNodeService implements IRedisNodeService {
             Iterator<RedisNode> realIterator = realRedisNodeList.iterator();
             while (realIterator.hasNext()) {
                 RedisNode realRedisNode = realIterator.next();
-                if (Objects.equals(dbRedisNode.getHost(), realRedisNode.getHost())
-                        && dbRedisNode.getPort() == realRedisNode.getPort()) {
+                if (RedisUtil.equals(dbRedisNode, realRedisNode)) {
                     realIterator.remove();
                     dbIterator.remove();
                     continue;
@@ -108,6 +118,13 @@ public class RedisNodeService implements IRedisNodeService {
             redisNodeList.add(redisNode);
         });
         return redisNodeList;
+    }
+
+    @Override
+    public boolean addRedisNode(RedisNode redisNode) {
+        List<RedisNode> redisNodeList = new ArrayList<>();
+        redisNodeList.add(redisNode);
+        return addRedisNodeList(redisNodeList);
     }
 
     @Override

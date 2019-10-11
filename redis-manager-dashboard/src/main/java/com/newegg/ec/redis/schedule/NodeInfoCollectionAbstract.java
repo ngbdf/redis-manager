@@ -77,6 +77,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         public void run() {
             try {
                 int clusterId = cluster.getClusterId();
+                RedisClientFactory.buildRedisClient(new RedisURI(cluster.getNodes(), cluster.getRedisPassword()));
                 List<NodeInfo> nodeInfoList = getNodeInfoList(cluster, timeType);
                 // 计算 AVG、MAX、MIN
                 Map<String, List<BigDecimal>> nodeInfoDataMap = nodeInfoDataToMap(nodeInfoList);

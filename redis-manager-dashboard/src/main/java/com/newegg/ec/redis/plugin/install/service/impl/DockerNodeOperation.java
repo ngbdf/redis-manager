@@ -149,10 +149,15 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
         String host = redisNode.getHost();
         String containerName = (containerNamePrefix + MINUS + port).toLowerCase();
         try {
-            String containerId = dockerClientOperation.createContainer(host, port, image, containerName);
-            dockerClientOperation.runContainer(host, containerId);
-            redisNode.setContainerId(containerId);
-            redisNode.setContainerName(containerName);
+            String containerId = redisNode.getContainerId();
+            if (Strings.isNullOrEmpty(containerId)) {
+                containerId = dockerClientOperation.createContainer(host, port, image, containerName);
+                dockerClientOperation.runContainer(host, containerId);
+                redisNode.setContainerId(containerId);
+                redisNode.setContainerName(containerName);
+            } else {
+                dockerClientOperation.runContainer(host, containerId);
+            }
             return true;
         } catch (Exception e) {
             String message = "Start container failed, host: " + host + ", port: " + port;

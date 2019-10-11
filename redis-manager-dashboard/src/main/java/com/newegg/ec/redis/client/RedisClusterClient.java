@@ -68,11 +68,26 @@ public class RedisClusterClient implements IRedisClusterClient {
             redisNode.setFlags(flags);
             redisNode.setMasterId(masterId);
             redisNode.setLinkState(linkState);
-            if (item.length > 8) {
-                String slotRang = item[8];
-                redisNode.setSlotRange(slotRang);
+            int length = item.length;
+            if (length > 8) {
+                int slotNumber = 0;
+                StringBuilder slotRang = new StringBuilder();
+                for(int i = 8; i < length; i++) {
+                    String slotRangeItem = item[i];
+                    String[] startAndEnd = SignUtil.splitByMinus(slotRangeItem);
+                    if (startAndEnd.length == 1) {
+                        slotNumber += 1;
+                    } else {
+                        slotNumber += Integer.parseInt(startAndEnd[1]) - Integer.parseInt(startAndEnd[0]) + 1;
+                    }
+                    slotRang.append(slotRangeItem);
+                    if (i < length - 1) {
+                        slotRang.append(SignUtil.COMMAS);
+                    }
+                }
+                redisNode.setSlotRange(slotRang.toString());
+                redisNode.setSlotNumber(slotNumber);
             }
-
             if (flags.contains(NodeRole.MASTER.getValue())) {
                 redisNode.setNodeRole(NodeRole.MASTER);
             } else if (flags.contains(NodeRole.SLAVE.getValue())) {

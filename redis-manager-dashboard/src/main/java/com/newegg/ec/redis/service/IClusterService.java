@@ -25,6 +25,8 @@ public interface IClusterService {
 
     boolean updateClusterKeys(Cluster cluster);
 
+    boolean updateNodes(Cluster cluster);
+
     boolean deleteCluster(Integer clusterId);
 
     AbstractNodeOperation getNodeOperation(Integer installationEnvironment);

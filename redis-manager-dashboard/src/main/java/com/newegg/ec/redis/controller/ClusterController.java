@@ -100,7 +100,11 @@ public class ClusterController {
             return result;
         }
         boolean result = clusterService.updateCluster(cluster);
-        return result ? Result.successResult() : Result.failResult();
+        if(!result) {
+            return Result.failResult();
+        }
+        cluster = clusterService.getClusterById(cluster.getClusterId());
+        return Result.successResult(cluster);
     }
 
     @RequestMapping(value = "/deleteCluster", method = RequestMethod.POST)
@@ -108,6 +112,7 @@ public class ClusterController {
     public Result deleteCluster(@RequestBody Cluster cluster) {
         try {
             boolean result = clusterService.deleteCluster(cluster.getClusterId());
+
             return result ? Result.successResult() : Result.failResult();
         } catch (Exception e) {
             logger.error("Delete cluster failed.", e);

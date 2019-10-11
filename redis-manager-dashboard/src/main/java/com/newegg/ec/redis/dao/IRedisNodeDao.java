@@ -18,12 +18,16 @@ public interface IRedisNodeDao {
     @Select("SELECT * FROM redis_node WHERE cluster_id = #{clusterId}")
     List<RedisNode> selectRedisNodeListByClusterId(Integer clusterId);
 
+    @Select("SELECT * FROM redis_node WHERE redis_node_id = #{redisNodeId}")
+    RedisNode selectRedisNodeById(Integer redisNodeId);
+
     @Insert("<script>" +
             "INSERT INTO redis_node (group_id, cluster_id, node_id, master_id, host, port, node_role, " +
-            "flags, link_state, slot_range, slot_number, container_name, insert_time update_time) " +
-            "VALUES <foreach item='redisNode' collection='redisNodeList' separator=','>" +
+            "flags, link_state, slot_range, slot_number, container_id, container_name, insert_time, update_time) " +
+            "VALUES " +
+            "<foreach item='redisNode' collection='redisNodeList' separator=','>" +
             "(#{redisNode.groupId}, #{redisNode.clusterId}, #{redisNode.nodeId}, #{redisNode.masterId}, #{redisNode.host}, #{redisNode.port}, #{redisNode.nodeRole}, " +
-            "#{redisNode.flags}, #{redisNode.linkState}, #{redisNode.slotRange}, #{redisNode.containerId}, #{redisNode.containerName}, NOW(), NOW())" +
+            "#{redisNode.flags}, #{redisNode.linkState}, #{redisNode.slotRange}, #{redisNode.slotNumber}, #{redisNode.containerId}, #{redisNode.containerName}, NOW(), NOW())" +
             "</foreach>" +
             "</script>")
     int insertRedisNodeList(@Param("redisNodeList") List<RedisNode> redisNodeList);
@@ -35,22 +39,22 @@ public interface IRedisNodeDao {
     @Delete("DELETE FROM redis_node WHERE cluster_id = #{clusterId}")
     int deleteRedisNodeListByClusterId(Integer clusterId);
 
-    @Select("DELETE FROM redis_node WHERE redis_node_id = #{redisNodeId}")
+    @Delete("DELETE FROM redis_node WHERE redis_node_id = #{redisNodeId}")
     int deleteRedisNodeById(Integer redisNodeId);
 
     @Select("CREATE TABLE IF NOT EXISTS redis_node ( " +
             "`redis_node_id` integer(4) NOT NULL AUTO_INCREMENT, " +
             "`group_id` integer(4) NOT NULL, " +
             "`cluster_id` integer(4) NOT NULL, " +
-            "`node_id` varchar(50) NOT NULL, " +
+            "`node_id` varchar(50) DEFAULT NULL, " +
             "`master_id` varchar(50) DEFAULT NULL, " +
             "`host` varchar(50) NOT NULL, " +
             "`port` integer(4) NOT NULL, " +
-            "`node_role` varchar(50) NOT NULL, " +
-            "`flags` varchar(50) NOT NULL, " +
+            "`node_role` varchar(50) DEFAULT NULL, " +
+            "`flags` varchar(50) DEFAULT NULL, " +
             "`link_state` varchar(50) NOT NULL, " +
             "`slot_range` varchar(50) DEFAULT NULL, " +
-            "`slot_number` integer(4) NOT NULL, " +
+            "`slot_number` integer(4) DEFAULT NULL, " +
             "`container_id` varchar(255) DEFAULT NULL, " +
             "`container_name` varchar(60) DEFAULT NULL, " +
             "`insert_time` datetime(0) NOT NULL, " +

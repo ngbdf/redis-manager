@@ -12,10 +12,7 @@ import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
-import com.newegg.ec.redis.service.IClusterService;
-import com.newegg.ec.redis.service.IMachineService;
-import com.newegg.ec.redis.service.INodeInfoService;
-import com.newegg.ec.redis.service.IRedisService;
+import com.newegg.ec.redis.service.*;
 import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
 import javafx.util.Pair;
@@ -32,9 +29,9 @@ import static com.newegg.ec.redis.util.RedisConfigUtil.MASTER_AUTH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REQUIRE_PASS;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.COMMAS;
-import static com.newegg.ec.redis.util.TimeUtil.FIVE_SECONDS;
-import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
+import static com.newegg.ec.redis.util.TimeUtil.*;
 import static javax.management.timer.Timer.ONE_MINUTE;
+import static javax.management.timer.Timer.ONE_SECOND;
 
 /**
  * 集群安装模板
@@ -62,6 +59,9 @@ public class InstallationTemplate {
 
     @Autowired
     private INodeInfoService nodeInfoService;
+
+    @Autowired
+    private IRedisNodeService redisNodeService;
 
     private static final int MAX_PORT = 65535;
 
@@ -366,7 +366,7 @@ public class InstallationTemplate {
         InstallationWebSocketHandler.appendLog(clusterName, result);
 
         List<RedisNode> redisNodeListWithInfo = waitClusterMeet(installationParam, seed, allRedisNodes);
-        replicate(cluster, topology, redisNodeListWithInfo);
+        replicate(installationParam, topology, redisNodeListWithInfo);
 
         // Set password
         if (!Strings.isNullOrEmpty(redisPassword)) {
@@ -400,12 +400,14 @@ public class InstallationTemplate {
         int size = redisNodeList.size();
         long timeout = 0;
         // TODO: 根据集群规模设置等待时长
-        while (timeout < 5000 * size && timeout < 2 * ONE_MINUTE) {
+        long start = System.currentTimeMillis();
+        while (timeout < FIVE_MINUTES) {
             try {
                 redisNodeListWithInfo = redisClusterClient.clusterNodes();
                 int realSize = redisNodeListWithInfo.size();
                 int needSize = redisNodeList.size();
                 if (realSize == needSize) {
+                    Thread.sleep(TEN_SECONDS);
                     break;
                 } else {
                     Thread.sleep(TEN_SECONDS);
@@ -415,8 +417,10 @@ public class InstallationTemplate {
                 String message = "Wait for cluster meet error.";
                 InstallationWebSocketHandler.appendLog(clusterName, message);
                 logger.error(message, e);
+                installationParam.setAutoInit(false);
             }
         }
+        System.err.println("Wait meet: " + (System.currentTimeMillis() - start));
         if (redisNodeListWithInfo.size() != redisNodeList.size()) {
             installationParam.setAutoInit(false);
             String message = "Topology is incorrect, real nodes = " + redisNodeListWithInfo + ", expectation nodes = " + redisNodeList;
@@ -442,11 +446,12 @@ public class InstallationTemplate {
     }
 
     /**
-     * @param cluster
+     * @param installationParam
      * @param topology
      * @param redisNodeListWithInfo 包含 redis node 基本信息，如 node id
      */
-    private void replicate(Cluster cluster, Multimap<RedisNode, RedisNode> topology, List<RedisNode> redisNodeListWithInfo) {
+    private void replicate(InstallationParam installationParam, Multimap<RedisNode, RedisNode> topology, List<RedisNode> redisNodeListWithInfo) {
+        Cluster cluster = installationParam.getCluster();
         Multimap<RedisNode, RedisNode> realTopology = ArrayListMultimap.create();
         // 将 master 替换掉
         for (Map.Entry<RedisNode, RedisNode> entry : topology.entries()) {
@@ -460,7 +465,17 @@ public class InstallationTemplate {
         }
         realTopology.forEach((masterNodeWithInfo, slaveNode) -> {
             boolean replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);
+            int waitTimeout = 0;
+            while (!replicateResult && waitTimeout < ONE_MINUTE) {
+                try {
+                    Thread.sleep(TEN_SECONDS);
+                    waitTimeout += TEN_SECONDS;
+                } catch (InterruptedException e) {
+                }
+                replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);
+            }
             if (!replicateResult) {
+                installationParam.setAutoInit(false);
                 InstallationWebSocketHandler.appendLog(cluster.getClusterName(),
                         slaveNode.getHost() + ":" + slaveNode.getPort() + " replicate failed.");
             }
@@ -541,11 +556,27 @@ public class InstallationTemplate {
     }
 
     private boolean saveToDB(InstallationParam installationParam) {
+
         // 获取连接节点
         Cluster cluster = installationParam.getCluster();
         String nodes = generateConnectionNodes(cluster);
         cluster.setNodes(nodes);
+        try {
+            Thread.sleep(ONE_SECOND);
+        } catch (InterruptedException e) {
+        }
+
         clusterService.addCluster(cluster);
+        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
+        List<RedisNode> redisNodes = redisNodeService.mergeRedisNode(realRedisNodeList, redisNodeList);
+        Integer groupId = cluster.getGroupId();
+        Integer clusterId = cluster.getClusterId();
+        redisNodes.forEach(redisNode -> {
+            redisNode.setGroupId(groupId);
+            redisNode.setClusterId(clusterId);
+        });
+        redisNodeService.addRedisNodeList(redisNodes);
         return true;
     }
 

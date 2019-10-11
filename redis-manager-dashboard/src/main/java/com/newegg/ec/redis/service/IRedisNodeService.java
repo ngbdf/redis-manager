@@ -14,6 +14,12 @@ public interface IRedisNodeService {
 
     List<RedisNode> getRedisNodeListByClusterId(Integer clusterId);
 
+    RedisNode getRedisNodeById(Integer redisNodeId);
+
+    List<RedisNode> mergeRedisNode(List<RedisNode> realRedisNodeList, List<RedisNode> dbRedisNodeList);
+
+    boolean addRedisNode(RedisNode redisNode);
+
     boolean addRedisNodeList(List<RedisNode> redisNodeList);
 
     boolean updateRedisNode(RedisNode redisNode);

@@ -85,17 +85,17 @@
               <el-tag
                 size="mini"
                 v-if="scope.row.flags == 'master'"
-              >{{ scope.row.flags }} ({{scope.row.replicaNumber }})</el-tag>
+              >{{ scope.row.flags }} [{{scope.row.replicaNumber }}]</el-tag>
               <el-tag size="mini" class="pointer" type="info" v-else>{{ scope.row.flags }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="In Cluster" align="center" sortable>
+          <el-table-column prop="inCluster" label="In Cluster" align="center" sortable>
             <template slot-scope="scope">
               <i class="el-icon-success status-icon normal-status" v-if="scope.row.inCluster"></i>
               <i class="el-icon-error status-icon normal-bad" v-else></i>
             </template>
           </el-table-column>
-          <el-table-column label="Run Status" align="center" sortable>
+          <el-table-column prop="runStatus" label="Run Status" align="center" sortable>
             <template slot-scope="scope">
               <i class="el-icon-success status-icon normal-status" v-if="scope.row.runStatus"></i>
               <i class="el-icon-error status-icon normal-bad" v-else></i>
@@ -103,7 +103,12 @@
           </el-table-column>
           <el-table-column prop="host" label="Host" sortable></el-table-column>
           <el-table-column prop="port" label="Port" sortable></el-table-column>
-          <el-table-column prop="slotRange" label="Slot Range" sortable></el-table-column>
+          <el-table-column prop="slotRange" label="Slot Range" sortable>
+            <template slot-scope="scope">
+              {{ scope.row.slotRange }}
+              <el-tag size="mini" v-if="scope.row.slotRange != null">{{ scope.row.slotNumber }}</el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="Meta" width="130px;">
             <template slot-scope="scope">
               <el-tag
@@ -124,29 +129,53 @@
               <el-input v-model="search" size="mini" placeholder="Search" />
             </template>-->
             <template slot-scope="scope">
-              <el-dropdown size="mini" split-button type="warning">
+              <el-dropdown size="mini" split-button type="warning" trigger="click">
                 Cluster
-                <el-dropdown-menu slot="dropdown" v-if="scope.row.nodeRole == 'MASTER'">
-                  <el-dropdown-item @click.native="handleMoveSlot(scope.row)">Move Slot</el-dropdown-item>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item
+                    @click.native="handleMoveSlot(scope.row)"
+                    v-if="scope.row.nodeRole == 'MASTER' && scope.row.inCluster"
+                  >Move Slot</el-dropdown-item>
+                  <el-dropdown-item
+                    @click.native="handleForget(scope.row)"
+                    v-if="scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA' || (scope.row.nodeRole == 'MASTER' && scope.row.slotRange == null)"
+                  >Forget</el-dropdown-item>
+                  <el-dropdown-item
+                    @click.native="handleReplicateOf(scope.row)"
+                    v-if="scope.row.inCluster && (scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA' || (scope.row.nodeRole == 'MASTER' && scope.row.slotRange == null))"
+                  >Replicate Of</el-dropdown-item>
+                  <el-dropdown-item
+                    @click.native="handleFailOver(scope.row)"
+                    v-if="scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA'"
+                  >Fail Over</el-dropdown-item>
                   <el-dropdown-item>Memory Purge</el-dropdown-item>
                 </el-dropdown-menu>
-                <el-dropdown-menu
-                  slot="dropdown"
-                  v-else-if="scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA'"
-                >
+                <!-- <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item @click.native="handleForget(scope.row)">Forget</el-dropdown-item>
                   <el-dropdown-item @click.native="handleReplicateOf(scope.row)">Replicate Of</el-dropdown-item>
-                  <el-dropdown-item @click.native="handleFailOver(scope.row)">Fail Over</el-dropdown-item>
                   <el-dropdown-item>Memory Purge</el-dropdown-item>
-                </el-dropdown-menu>
+                </el-dropdown-menu>-->
               </el-dropdown>
-              <el-dropdown size="mini" split-button type="danger">
+              <!-- v-if="scope.row.slotRange == null" -->
+              <el-dropdown size="mini" split-button type="danger" trigger="click">
                 Node
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item>Start</el-dropdown-item>
-                  <el-dropdown-item>Stop</el-dropdown-item>
-                  <el-dropdown-item>Restart</el-dropdown-item>
-                  <el-dropdown-item>Delete</el-dropdown-item>
+                  <el-dropdown-item
+                    @click.native="handleStart(scope.row)"
+                    :disabled="scope.row.runStatus"
+                  >Start</el-dropdown-item>
+                  <el-dropdown-item
+                    @click.native="handleStop(scope.row)"
+                    :disabled="scope.row.inCluster || !scope.row.runStatus"
+                  >Stop</el-dropdown-item>
+                  <el-dropdown-item
+                    @click.native="handleRestart(scope.row)"
+                    :disabled="scope.row.inCluster"
+                  >Restart</el-dropdown-item>
+                  <el-dropdown-item
+                    @click.native="handleDelete(scope.row)"
+                    :disabled="scope.row.runStatus"
+                  >Delete</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </template>
@@ -163,7 +192,7 @@
       v-if="replicateOfVisible"
     >
       <el-table
-        :data="redisNodeList"
+        :data="redisNodeList.filter(redisNode => redisNode.inCluster)"
         stripe
         size="medium"
         :default-sort="{prop: 'slotRange', order: 'ascending'}"
@@ -215,6 +244,7 @@
               size="mini"
               type="primary"
               @click="replicateOf(scope.row.nodeId)"
+              :disabled="(operationNode.nodeId == scope.row.nodeId || operationNode.masterId == scope.row.nodeId ) && operationNode.inCluster"
             >Replicate Of</el-button>
           </template>
         </el-table-column>
@@ -275,6 +305,36 @@
         <el-button size="small" type="primary" @click="moveSlot('slotRange')">Confirm</el-button>
       </div>
     </el-dialog>
+    <!-- node operation -->
+    <el-dialog title="Start Node" :visible.sync="startNodeVisible" width="30%">
+      <span>{{ operationNode.host }}:{{ operationNode.port }} will be start</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
+        <el-button size="small" type="primary" @click="startNode()">Start</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="Stop Node" :visible.sync="stopNodeVisible" width="30%">
+      <span>{{ operationNode.host }}:{{ operationNode.port }} will be stop</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="stopNode()">Stop</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="Restart Node" :visible.sync="restartNodeVisible" width="30%">
+      <span>{{ operationNode.host }}:{{ operationNode.port }} will be restart</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
+        <el-button size="small" type="primary" @click="restartNode()">Restart</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="Delete Node" :visible.sync="deleteNodeVisible" width="30%">
+      <span>{{ operationNode.host }}:{{ operationNode.port }} will be delete</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteNode()">Delete</el-button>
+      </span>
+    </el-dialog>
+    <!-- node operation -->
   </div>
 </template>
 
@@ -393,8 +453,13 @@ export default {
       importNodeVisible: false,
       forgetVisible: false,
       moveSlotVisible: false,
+      startNodeVisible: false,
+      stopNodeVisible: false,
+      restartNodeVisible: false,
+      deleteNodeVisible: false,
       slotRange: {},
       operationNode: {},
+      operationNodeList: [],
       newRedisNode: {},
       rules: {
         redisNode: [
@@ -435,7 +500,9 @@ export default {
       }
       return "";
     },
-    handleSelectionChange(val) {},
+    handleSelectionChange(redisNodeList) {
+      console.log(val);
+    },
     handleEdit(index, row) {
       console.log(index, row);
     },
@@ -502,16 +569,57 @@ export default {
         }
       );
     },
+    reload() {
+      let clusterId = this.cluster.clusterId;
+      this.getAllNodeList(clusterId);
+      this.updateCluster(this.clsuter);
+    },
+    updateCluster(cluster) {
+      // axios
+      let url = "/cluster/updateCluster";
+      API.post(
+        url,
+        this.cluster,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.cluster = result.data;
+          } else {
+            console.error(result.message);
+          }
+        },
+        err => {
+          console.error(err);
+        }
+      );
+    },
     getNodeInfo(clusterId, host, port) {
       console.log(clusterId + " " + host + " " + port);
     },
     getConfig(clusterId, host, port) {
       console.log(clusterId + " " + host + " " + port);
     },
+    canOperate() {
+      let node = this.operationNode.host + ":" + this.operationNode.port;
+      if (this.cluster.nodes.indexOf(node) > -1) {
+        console.log("I can't operate " + node + ", because it in the database");
+        return false;
+      }
+      return true;
+    },
+    buildNodeList(data) {
+      let isArray = !isEmpty(data.length);
+      this.operationNodeList = [];
+      if (isArray) {
+      } else {
+        this.operationNode = {};
+        this.operationNode = data;
+        this.operationNodeList.push(this.operationNode);
+      }
+    },
     handleReplicateOf(redisNode) {
       this.replicateOfVisible = true;
-      this.operationNode = {};
-      this.operationNode = redisNode;
+      this.buildNodeList(redisNode);
     },
     replicateOf(nodeId) {
       if (isEmpty(nodeId)) {
@@ -521,19 +629,16 @@ export default {
       console.log(nodeId);
       this.operationNode.masterId = nodeId;
       let url = "/nodeManage/replicateOf";
-      let redisNodeList = [];
-      redisNodeList.push(this.operationNode);
       API.post(
         url,
-        redisNodeList,
+        this.operationNodeList,
         response => {
           let result = response.data;
+          this.reload();
           if (result.code == 0) {
-            this.getAllNodeList(this.cluster.clusterId);
             this.replicateOfVisible = false;
           } else {
             console.log(result.message);
-            this.getAllNodeList(this.cluster.clusterId);
           }
         },
         err => {
@@ -543,16 +648,13 @@ export default {
     },
     handleFailOver(redisNode) {
       this.failOverVisible = true;
-      this.operationNode = {};
-      this.operationNode = redisNode;
+      this.buildNodeList(redisNode);
     },
     failOver() {
       let url = "/nodeManage/failOver";
-      let redisNodeList = [];
-      redisNodeList.push(this.operationNode);
       API.post(
         url,
-        redisNodeList,
+        this.operationNodeList,
         response => {
           let result = response.data;
           this.getAllNodeList(this.cluster.clusterId);
@@ -586,8 +688,8 @@ export default {
             redisNodeList,
             response => {
               let result = response.data;
-              this.getAllNodeList(this.cluster.clusterId);
-              if (result.code != 0) {
+              this.reload();
+              if (result.code == 0) {
                 this.importNodeVisible = false;
               } else {
                 console.log(result.message);
@@ -602,19 +704,19 @@ export default {
     },
     handleForget(redisNode) {
       this.forgetVisible = true;
-      this.operationNode = {};
-      this.operationNode = redisNode;
+      this.buildNodeList(redisNode);
     },
     forget() {
       let url = "/nodeManage/forget";
-      let redisNodeList = [];
-      redisNodeList.push(this.operationNode);
+      if (!this.canOperate()) {
+        return;
+      }
       API.post(
         url,
-        redisNodeList,
+        this.operationNodeList,
         response => {
           let result = response.data;
-          this.getAllNodeList(this.cluster.clusterId);
+          this.reload();
           if (result.code == 0) {
             this.forgetVisible = false;
           } else {
@@ -628,8 +730,7 @@ export default {
     },
     handleMoveSlot(redisNode) {
       this.moveSlotVisible = true;
-      this.operationNode = {};
-      this.operationNode = redisNode;
+      this.buildNodeList(redisNode);
     },
     moveSlot(slotRange) {
       this.$refs[slotRange].validate(valid => {
@@ -646,6 +747,7 @@ export default {
             response => {
               let result = response.data;
               this.getAllNodeList(this.cluster.clusterId);
+              console.log(result);
               if (result.code == 0) {
                 this.moveSlotVisible = false;
                 this.$refs[slotRange].resetFields();
@@ -659,9 +761,147 @@ export default {
           );
         }
       });
+    },
+    handleStart(redisNode) {
+      let runStatus = redisNode.runStatus;
+      if (runStatus) {
+        console.log("This node is already running.");
+        return;
+      }
+      this.buildNodeList(redisNode);
+      this.startNodeVisible = true;
+    },
+    startNode() {
+      let url = "/nodeManage/start";
+      API.post(
+        url,
+        this.operationNodeList,
+        response => {
+          let result = response.data;
+          this.reload();
+          if (result.code == 0) {
+            this.startNodeVisible = false;
+          } else {
+            console.log("start node failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    handleStop(redisNode) {
+      let inCluster = redisNode.inCluster;
+      let runStatus = redisNode.runStatus;
+      if (inCluster) {
+        console.log(
+          redisNode.host +
+            ":" +
+            redisNode.port +
+            " still in the cluster, please forget it first."
+        );
+        return;
+      } else if (!runStatus) {
+        console.log("This node has stopped.");
+        return;
+      }
+      this.buildNodeList(redisNode);
+      this.stopNodeVisible = true;
+    },
+    stopNode() {
+      let url = "/nodeManage/stop";
+      if (!this.canOperate) {
+        return;
+      }
+      API.post(
+        url,
+        this.operationNodeList,
+        response => {
+          let result = response.data;
+          this.reload();
+          if (result.code == 0) {
+            this.stopNodeVisible = false;
+          } else {
+            console.log("stop node failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    handleRestart(redisNode) {
+      this.buildNodeList(redisNode);
+      this.restartNodeVisible = true;
+    },
+    restartNode() {
+      let url = "/nodeManage/restart";
+      if (!this.canOperate) {
+        return;
+      }
+      API.post(
+        url,
+        this.operationNodeList,
+        response => {
+          let result = response.data;
+          this.reload();
+          if (result.code == 0) {
+            this.restartNodeVisible = false;
+          } else {
+            console.log("restart node failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    handleDelete(redisNode) {
+      let inCluster = redisNode.inCluster;
+      let runStatus = redisNode.runStatus;
+      if (inCluster) {
+        console.log(
+          redisNode.host +
+            ":" +
+            redisNode.port +
+            " still in the cluster, please forget it first."
+        );
+        return;
+      } else if (runStatus) {
+        console.log(
+          redisNode.host +
+            ":" +
+            redisNode.port +
+            " is running, please stop it first."
+        );
+        return;
+      }
+      this.buildNodeList(redisNode);
+      this.deleteNodeVisible = true;
+    },
+    deleteNode() {
+      let url = "/nodeManage/delete";
+      if (!this.canOperate) {
+        return;
+      }
+      API.post(
+        url,
+        this.operationNodeList,
+        response => {
+          let result = response.data;
+          this.reload();
+          if (result.code == 0) {
+            this.deleteNodeVisible = false;
+          } else {
+            console.log("delete node failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
   },
-
   mounted() {
     let clusterId = this.$route.params.clusterId;
     this.getClusterById(clusterId);
