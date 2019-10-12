@@ -71,6 +71,17 @@ public class RedisNodeService implements IRedisNodeService {
         }
     }
 
+    @Override
+    public boolean existRedisNode(RedisNode redisNode) {
+        try {
+            RedisNode existRedisNode = redisNodeDao.existRedisNode(redisNode);
+            return existRedisNode != null;
+        } catch (Exception e) {
+            logger.error("Get redis node by id failed.", e);
+            return true;
+        }
+    }
+
     /**
      * merge redis node info
      * TODO: 未完成

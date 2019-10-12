@@ -15,6 +15,8 @@ import java.util.Set;
  */
 public interface IRedisService {
 
+    Map<String, String> getNodeInfo(HostAndPort hostAndPort, String redisPassword);
+
     /**
      * Get keyspace info
      * <p>

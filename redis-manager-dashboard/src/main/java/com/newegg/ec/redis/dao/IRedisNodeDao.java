@@ -21,6 +21,9 @@ public interface IRedisNodeDao {
     @Select("SELECT * FROM redis_node WHERE redis_node_id = #{redisNodeId}")
     RedisNode selectRedisNodeById(Integer redisNodeId);
 
+    @Select("SELECT * FROM redis_node WHERE cluster_id = #{clusterId} AND host = #{host} AND port = #{port}")
+    RedisNode existRedisNode(RedisNode redisNode);
+
     @Insert("<script>" +
             "INSERT INTO redis_node (group_id, cluster_id, node_id, master_id, host, port, node_role, " +
             "flags, link_state, slot_range, slot_number, container_id, container_name, insert_time, update_time) " +

@@ -3,10 +3,8 @@ package com.newegg.ec.redis.schedule;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.client.RedisURI;
-import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
@@ -29,8 +27,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
-import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
-import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 
 /**
  * @author Jay.H.Zou
@@ -136,16 +132,14 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         return hostAndPortSet;
     }
 
-    private NodeInfo getNodeInfo(int clusterId, HostAndPort hostAndPort, String redisPassword, Integer timeType) {
+    private NodeInfo getNodeInfo(Integer clusterId, HostAndPort hostAndPort, String redisPassword, Integer timeType) {
         NodeInfo nodeInfo = null;
         String node = hostAndPort.toString();
         try {
-            RedisURI redisURI = new RedisURI(hostAndPort, redisPassword);
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
-            Map<String, String> infoMap = redisClient.getInfo();
             // 获取上一次的 NodeInfo 来计算某些字段的差值
             NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, DataType.NODE, timeType, node);
             NodeInfo lastTimeNodeInfo = nodeInfoService.getLastTimeNodeInfo(nodeInfoParam);
+            Map<String, String> infoMap = redisService.getNodeInfo(hostAndPort, redisPassword);
             // 指标计算处理
             nodeInfo = RedisNodeInfoUtil.parseInfoToObject(infoMap, lastTimeNodeInfo);
             nodeInfo.setDataType(DataType.NODE);
@@ -248,7 +242,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         dataMap.put(RESPONSE_TIME, responseTime);
 
         dataMap.put(CONNECTED_CLIENTS, connectedClients);
-        dataMap.put(CLIENT_LONGEST_PUTPUT_LIST, clientLongestOutputList);
+        dataMap.put(CLIENT_LONGEST_OUTPUT_LIST, clientLongestOutputList);
         dataMap.put(CLIENT_BIGGEST_INPUT_BUF, clientBiggestInputBuf);
         dataMap.put(BLOCKED_CLIENTS, blockedClients);
 

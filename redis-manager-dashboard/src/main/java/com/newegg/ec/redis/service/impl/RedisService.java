@@ -55,6 +55,19 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
 
     }
 
+    @Override
+    public Map<String, String> getNodeInfo(HostAndPort hostAndPort, String redisPassword) {
+        RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPort, redisPassword);
+        try {
+            Map<String, String> info = redisClient.getInfo();
+            redisClient.close();
+            return info;
+        } catch (Exception e) {
+            logger.error("Get redis node info failed, " + hostAndPort, e);
+            return null;
+        }
+    }
+
     /**
      * db0:keys=31,expires=1,avg_ttl=1
      *

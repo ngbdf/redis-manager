@@ -674,8 +674,6 @@ export default {
   padding: 10px 20px;
   background-color: black;
   color: #ffffff;
-  word-break: break-all;
-  word-wrap: break-word;
   font-family: Consolas, Monaco, Menlo, "Courier New", monospace !important;
   margin: 0;
   word-wrap: break-word;

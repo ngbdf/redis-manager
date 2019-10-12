@@ -2,9 +2,12 @@ package com.newegg.ec.redis.controller;
 
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Group;
+import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IGroupService;
+import com.newegg.ec.redis.service.IRedisNodeService;
+import com.newegg.ec.redis.service.IRedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,12 @@ public class ClusterController {
 
     @Autowired
     private IClusterService clusterService;
+
+    @Autowired
+    private IRedisService redisService;
+
+    @Autowired
+    private IRedisNodeService redisNodeService;
 
     @RequestMapping(value = "/getClusterList/{groupId}", method = RequestMethod.GET)
     @ResponseBody
@@ -73,8 +82,14 @@ public class ClusterController {
             return result;
         }
         try {
-            boolean result = clusterService.addCluster(cluster);
-            return result ? Result.successResult() : Result.failResult();
+            clusterService.addCluster(cluster);
+            List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
+            realRedisNodeList.forEach(redisNode -> {
+                redisNode.setGroupId(cluster.getGroupId());
+                redisNode.setClusterId(cluster.getClusterId());
+            });
+            redisNodeService.addRedisNodeList(realRedisNodeList);
+            return Result.successResult();
         } catch (Exception e) {
             logger.error("Import cluster failed.", e);
             Result result = Result.failResult();

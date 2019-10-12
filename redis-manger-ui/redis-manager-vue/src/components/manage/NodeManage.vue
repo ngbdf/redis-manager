@@ -33,7 +33,7 @@
         <div class="batch-title">Batch Operation</div>
         <div style="display: flex; justify-content: space-between;">
           <div>
-            <el-link :underline="false" icon="el-icon-finished">Memory Purge</el-link>
+            <!-- <el-link :underline="false" icon="el-icon-finished">Memory Purge</el-link>
             <el-divider direction="vertical"></el-divider>
             <el-link :underline="false" icon="el-icon-zoom-out">Forget</el-link>
             <el-divider direction="vertical"></el-divider>
@@ -44,7 +44,7 @@
             <el-link :underline="false" icon="el-icon-refresh-left">Restart</el-link>
             <el-divider direction="vertical"></el-divider>
             <el-link :underline="false" icon="el-icon-circle-close">Delete</el-link>
-            <el-divider direction="vertical"></el-divider>
+            <el-divider direction="vertical"></el-divider>-->
             <el-link :underline="false" icon="el-icon-edit">Edit Config</el-link>
           </div>
           <el-link
@@ -64,10 +64,10 @@
           size="medium"
           :default-sort="{prop: 'slotRange', order: 'ascending'}"
           :row-class-name="tableRowClassName"
-          @selection-change="handleSelectionChange"
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
         >
-          <el-table-column type="selection" width="55px"></el-table-column>
+          <!-- @selection-change="handleSelectionChange"
+          <el-table-column type="selection" width="55px"></el-table-column>-->
           <!-- status 有多种 -->
           <el-table-column label="Link State" sortable width="150px">
             <template slot-scope="scope">
@@ -111,23 +111,12 @@
           </el-table-column>
           <el-table-column label="Meta" width="130px;">
             <template slot-scope="scope">
-              <el-tag
-                size="mini"
-                class="pointer"
-                @click="getNodeInfo(scope.row.clusterId, scope.row.host, scope.row.port)"
-              >Info</el-tag>
-              <el-tag
-                size="mini"
-                class="pointer"
-                @click="getConfig(scope.row.clusterId, scope.row.host, scope.row.port)"
-              >Config</el-tag>
+              <el-tag size="mini" class="pointer" @click="getNodeInfo(scope.row)">Info</el-tag>
+              <el-tag size="mini" class="pointer" @click="getConfig(scope.row)">Config</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="time" label="Time" sortable></el-table-column>
           <el-table-column label="Operation" width="220px">
-            <!-- <template slot="header">
-              <el-input v-model="search" size="mini" placeholder="Search" />
-            </template>-->
             <template slot-scope="scope">
               <el-dropdown size="mini" split-button type="warning" trigger="click">
                 Cluster
@@ -138,7 +127,7 @@
                   >Move Slot</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleForget(scope.row)"
-                    v-if="scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA' || (scope.row.nodeRole == 'MASTER' && scope.row.slotRange == null)"
+                    v-if="scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA' || (scope.row.nodeRole == 'MASTER' && scope.row.children.length == 0)"
                   >Forget</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleReplicateOf(scope.row)"
@@ -150,11 +139,6 @@
                   >Fail Over</el-dropdown-item>
                   <el-dropdown-item>Memory Purge</el-dropdown-item>
                 </el-dropdown-menu>
-                <!-- <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item @click.native="handleForget(scope.row)">Forget</el-dropdown-item>
-                  <el-dropdown-item @click.native="handleReplicateOf(scope.row)">Replicate Of</el-dropdown-item>
-                  <el-dropdown-item>Memory Purge</el-dropdown-item>
-                </el-dropdown-menu>-->
               </el-dropdown>
               <!-- v-if="scope.row.slotRange == null" -->
               <el-dropdown size="mini" split-button type="danger" trigger="click">
@@ -236,9 +220,6 @@
         <el-table-column prop="slotRange" label="Slot Range" sortable></el-table-column>
         <el-table-column prop="time" label="Time" sortable></el-table-column>
         <el-table-column label="Operation" width="120px">
-          <!-- <template slot="header">
-              <el-input v-model="search" size="mini" placeholder="Search" />
-          </template>-->
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -306,28 +287,48 @@
       </div>
     </el-dialog>
     <!-- node operation -->
-    <el-dialog title="Start Node" :visible.sync="startNodeVisible" width="30%">
+    <el-dialog
+      title="Start Node"
+      :visible.sync="startNodeVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
       <span>{{ operationNode.host }}:{{ operationNode.port }} will be start</span>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
         <el-button size="small" type="primary" @click="startNode()">Start</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="Stop Node" :visible.sync="stopNodeVisible" width="30%">
+    <el-dialog
+      title="Stop Node"
+      :visible.sync="stopNodeVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
       <span>{{ operationNode.host }}:{{ operationNode.port }} will be stop</span>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
         <el-button size="small" type="danger" @click="stopNode()">Stop</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="Restart Node" :visible.sync="restartNodeVisible" width="30%">
+    <el-dialog
+      title="Restart Node"
+      :visible.sync="restartNodeVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
       <span>{{ operationNode.host }}:{{ operationNode.port }} will be restart</span>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
         <el-button size="small" type="primary" @click="restartNode()">Restart</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="Delete Node" :visible.sync="deleteNodeVisible" width="30%">
+    <el-dialog
+      title="Delete Node"
+      :visible.sync="deleteNodeVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
       <span>{{ operationNode.host }}:{{ operationNode.port }} will be delete</span>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
@@ -335,14 +336,41 @@
       </span>
     </el-dialog>
     <!-- node operation -->
+
+    <el-dialog
+      :title="'Info - ' + operationNode.host + ':' + operationNode.port"
+      :visible.sync="infoVisible"
+      width="50%"
+      :close-on-click-modal="false"
+      top="5vh"
+    >
+      <info :redisNode="operationNode"></info>
+    </el-dialog>
+
+    <el-dialog
+      :title="'Config - ' + operationNode.host + ':' + operationNode.port"
+      :visible.sync="configVisible"
+      width="50%"
+      :close-on-click-modal="false"
+      top="5vh"
+    >
+      <config :redisNode="operationNode"></config>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import info from "@/components/view/Info";
+import config from "@/components/view/Config";
 import { isEmpty, validateIpAndPort } from "@/utils/validate.js";
 import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
+
 export default {
+  components: {
+    info,
+    config
+  },
   data() {
     var validateRedisNode = (rule, value, callback) => {
       if (!validateIpAndPort(value)) {
@@ -457,6 +485,8 @@ export default {
       stopNodeVisible: false,
       restartNodeVisible: false,
       deleteNodeVisible: false,
+      infoVisible: false,
+      configVisible: false,
       slotRange: {},
       operationNode: {},
       operationNodeList: [],
@@ -493,21 +523,17 @@ export default {
   },
   methods: {
     tableRowClassName({ row, rowIndex }) {
-      if (rowIndex === 1) {
-        return "warning-row";
-      } else if (rowIndex === 3) {
-        return "success-row";
+      if (row.nodeRole == "MASTER") {
+        return "info-row";
       }
       return "";
     },
     handleSelectionChange(redisNodeList) {
-      console.log(val);
-    },
-    handleEdit(index, row) {
-      console.log(index, row);
-    },
-    handleDelete(index, row) {
-      console.log(index, row);
+      console.log(redisNodeList);
+      this.operationNode = [];
+      redisNodeList.forEach(redisNode => {
+        this.operationNode.push(redisNode);
+      });
     },
     getClusterById(clusterId) {
       let url = "/cluster/getCluster/" + clusterId;
@@ -593,19 +619,27 @@ export default {
         }
       );
     },
-    getNodeInfo(clusterId, host, port) {
-      console.log(clusterId + " " + host + " " + port);
+    getNodeInfo(redisNode) {
+      this.operationNode = redisNode;
+      this.infoVisible = true;
     },
-    getConfig(clusterId, host, port) {
-      console.log(clusterId + " " + host + " " + port);
+    getConfig(redisNode) {
+      this.operationNode = redisNode;
+      this.configVisible = true;
     },
     canOperate() {
-      let node = this.operationNode.host + ":" + this.operationNode.port;
-      if (this.cluster.nodes.indexOf(node) > -1) {
-        console.log("I can't operate " + node + ", because it in the database");
-        return false;
-      }
-      return true;
+      let canOperate = true;
+      this.operationNodeList.forEach(redisNode => {
+        let node = redisNode.host + ":" + redisNode.port;
+        console.log(this.cluster.nodes.indexOf(node));
+        if (this.cluster.nodes.indexOf(node) > -1) {
+          console.log(
+            "I can't operate " + node + ", because it in the database"
+          );
+          canOperate = false;
+        }
+      });
+      return canOperate;
     },
     buildNodeList(data) {
       let isArray = !isEmpty(data.length);
@@ -626,8 +660,9 @@ export default {
         console.log("node invalid");
         return;
       }
-      console.log(nodeId);
-      this.operationNode.masterId = nodeId;
+      this.operationNodeList.forEach(redisNode => {
+        redisNode.masterId = nodeId;
+      });
       let url = "/nodeManage/replicateOf";
       API.post(
         url,
@@ -708,6 +743,7 @@ export default {
     },
     forget() {
       let url = "/nodeManage/forget";
+      console.log(this.canOperate());
       if (!this.canOperate()) {
         return;
       }
@@ -945,12 +981,8 @@ export default {
   margin-top: 20px;
 }
 
-.el-table .warning-row {
-  background: oldlace;
-}
-
-.el-table .success-row {
-  background: #f0f9eb;
+.el-table >>> .info-row {
+  background: #fafafa !important;
 }
 
 .master-line {

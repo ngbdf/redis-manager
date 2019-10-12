@@ -20,10 +20,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.HostAndPort;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
+import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
 
 /**
  * @author Jay.H.Zou
@@ -73,6 +72,34 @@ public class NodeManageController {
         List<RedisNode> redisNodeSorted = redisNodeService.getRedisNodeListByClusterId(clusterId);
         System.err.println("all: " + (System.currentTimeMillis() - start));
         return Result.successResult(redisNodeSorted);
+    }
+
+    @RequestMapping(value = "/getNodeInfo", method = RequestMethod.POST)
+    @ResponseBody
+    public Result getNodeInfo(@RequestBody RedisNode redisNode) {
+        Integer clusterId = redisNode.getClusterId();
+        Cluster cluster = clusterService.getClusterById(clusterId);
+        HostAndPort hostAndPort = new HostAndPort(redisNode.getHost(), redisNode.getPort());
+        Map<String, String> infoMap = redisService.getNodeInfo(hostAndPort, cluster.getRedisPassword());
+        List<JSONObject> infoList = new ArrayList<>();
+        if (infoMap == null) {
+            return Result.failResult();
+        }
+        infoMap.forEach((key, value) -> {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("key", key);
+            jsonObject.put("value", value);
+            jsonObject.put("description", RedisNodeInfoUtil.getNodeInfoItemDesc(key));
+            infoList.add(jsonObject);
+        });
+        return Result.successResult(infoList);
+    }
+
+    @RequestMapping(value = "/getConfig", method = RequestMethod.POST)
+    @ResponseBody
+    public Result getConfig(@RequestBody RedisNode redisNode) {
+
+        return Result.successResult();
     }
 
     /**
@@ -195,7 +222,7 @@ public class NodeManageController {
     public Result importNode(@RequestBody List<RedisNode> redisNodeList) {
         try {
             RedisNode firstRedisNode = redisNodeList.get(0);
-            Cluster cluster = getCluster(firstRedisNode.getClusterId());
+            final Cluster cluster = getCluster(firstRedisNode.getClusterId());
             Set<HostAndPort> hostAndPorts = RedisUtil.nodesToHostAndPortSet(cluster.getNodes());
             HostAndPort hostAndPort = hostAndPorts.iterator().next();
             RedisNode seed = new RedisNode();
@@ -205,16 +232,26 @@ public class NodeManageController {
             redisNodeList.forEach(redisNode -> {
                 String oneResult = redisService.clusterMeet(cluster, seed, redisNodeList);
                 if (Strings.isNullOrEmpty(oneResult)) {
-                    message.append(oneResult).append("\n");
+                    message.append(oneResult);
                     // TODO: save to db
-                    Integer redisNodeId = redisNode.getRedisNodeId();
-                    RedisNode exist = redisNodeService.getRedisNodeById(redisNodeId);
-                    if (exist == null) {
-                        redisNodeService.addRedisNode(redisNode);
+                    boolean exist = redisNodeService.existRedisNode(redisNode);
+                    if (!exist) {
+                        try {
+                            Thread.sleep(TEN_SECONDS);
+                        } catch (InterruptedException e) {
+                        }
+                        List<RedisNode> redisNodes = redisService.getRedisNodeList(cluster);
+                        redisNodes.forEach(node -> {
+                            if (RedisUtil.equals(node, redisNode)) {
+                                node.setClusterId(cluster.getClusterId());
+                                node.setGroupId(cluster.getGroupId());
+                                redisNodeService.addRedisNode(node);
+                            }
+                        });
                     }
                 }
             });
-            return Strings.isNullOrEmpty(message.toString())? Result.successResult() : Result.failResult().setMessage(message.toString());
+            return Strings.isNullOrEmpty(message.toString()) ? Result.successResult() : Result.failResult().setMessage(message.toString());
         } catch (Exception e) {
             e.printStackTrace();
             return Result.failResult().setMessage(e.getMessage());

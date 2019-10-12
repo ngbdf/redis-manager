@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.newegg.ec.redis.plugin.install.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
 import static com.newegg.ec.redis.util.SignUtil.*;
@@ -26,6 +27,8 @@ import static com.newegg.ec.redis.util.SignUtil.*;
 public class RedisConfigUtil {
 
     private static final List<RedisConfig> REDIS_CONFIG_LIST = new ArrayList<>();
+
+    private static final Map<String, String> CONFIG_DESC_MAP = new ConcurrentHashMap<>();
 
     private static final String UTF_8 = "UTF-8";
 
@@ -392,6 +395,109 @@ public class RedisConfigUtil {
         REDIS_CONFIG_LIST.add(new RedisConfig(true, "port", "{port}", NORMAL_TYPE, "端口"));
     }
 
+    // https://raw.githubusercontent.com/antirez/redis/5.0/redis.conf
+    // https://www.cnblogs.com/sjfgod/p/7624437.html
+    static {
+        // network
+        CONFIG_DESC_MAP.put("protected-mode", "Protected mode is a layer of security protection, in order to avoid that Redis instances left open on the internet are accessed and exploited");
+        CONFIG_DESC_MAP.put("tcp-backlog", "TCP listen() backlog");
+        CONFIG_DESC_MAP.put("timeout", "Close the connection after a client is idle for N seconds (0 to disable)");
+        CONFIG_DESC_MAP.put("tcp-keepalive", "A reasonable value for this option is N seconds");
+        // general
+        CONFIG_DESC_MAP.put("supervised", null);
+        CONFIG_DESC_MAP.put("pidfile", "Creating a pid file is best effort: if Redis is not able to create it nothing bad happens, the server will start and run normally.");
+        CONFIG_DESC_MAP.put("loglevel", "Specify the server verbosity level (debug, verbose, notice, warning).");
+        CONFIG_DESC_MAP.put("logfile", "Specify the log file name.");
+        CONFIG_DESC_MAP.put("syslog-enabled", "To enable logging to the system logger, just set 'syslog-enabled' to yes, and optionally update the other syslog parameters to suit your needs.");
+        CONFIG_DESC_MAP.put("databases", "Set the number of databases, The default database is DB 0.");
+        // snapshotting
+        CONFIG_DESC_MAP.put("save", "Save the DB on disk.");
+        CONFIG_DESC_MAP.put("stop-writes-on-bgsave-error", "By default Redis will stop accepting writes if RDB snapshots are enabled (at least one save point) and the latest background save failed.");
+        CONFIG_DESC_MAP.put("rdbcompression", "Compress string objects using LZF when dump .rdb databases?");
+        CONFIG_DESC_MAP.put("rdbchecksum", "RDB files created with checksum disabled have a checksum of zero that will tell the loading code to skip the check.");
+        CONFIG_DESC_MAP.put("dbfilename", "The filename where to dump the DB.");
+        // replication
+        CONFIG_DESC_MAP.put("masterauth", "If the master is password protected (using the 'requirepass' configuration directive below) it is possible to tell the replica to authenticate before starting the replication synchronization process, otherwise the master will refuse the replica request.");
+        CONFIG_DESC_MAP.put("slave-serve-stale-data", "When a replica loses its connection with the master, or when the replication is still in progress, the replica can act in two different ways...");
+        CONFIG_DESC_MAP.put("replica-serve-stale-data", "When a replica loses its connection with the master, or when the replication is still in progress, the replica can act in two different ways...");
+        CONFIG_DESC_MAP.put("slave-read-only", "You can configure a replica instance to accept writes or not.");
+        CONFIG_DESC_MAP.put("replica-read-only", "You can configure a replica instance to accept writes or not.");
+        CONFIG_DESC_MAP.put("repl-diskless-sync", "RDB file is transmitted from the master to the replicas. The transmission can happen in two different ways(Disk-backed, Diskless)");
+        CONFIG_DESC_MAP.put("repl-diskless-sync-delay", "The delay is specified in seconds, and by default is 5 seconds.");
+        CONFIG_DESC_MAP.put("repl-ping-slave-period", "Replicas send PINGs to server in a predefined interval. It's possible to change this interval with the repl_ping_replica_period option. The default value is 10 seconds.");
+        CONFIG_DESC_MAP.put("repl-ping-replica-period", "Replicas send PINGs to server in a predefined interval. It's possible to change this interval with the repl_ping_replica_period option. The default value is 10 seconds.");
+        CONFIG_DESC_MAP.put("repl-timeout", "It is important to make sure that this value is greater than the value specified for repl-ping-replica-period otherwise a timeout will be detected every time there is low traffic between the master and the replica.");
+        CONFIG_DESC_MAP.put("repl-disable-tcp-nodelay", "Disable TCP_NODELAY on the replica socket after SYNC?");
+        CONFIG_DESC_MAP.put("repl-backlog-size", "Set the replication backlog size.");
+        CONFIG_DESC_MAP.put("repl-backlog-ttl", "After a master has no longer connected replicas for some time, the backlog will be freed.");
+        CONFIG_DESC_MAP.put("slave-priority", "The replica priority is an integer number published by Redis in the INFO output. By default the priority is 100.");
+        CONFIG_DESC_MAP.put("replica-priority", "The replica priority is an integer number published by Redis in the INFO output. By default the priority is 100.");
+        CONFIG_DESC_MAP.put("min-slaves-to-write", "It is possible for a master to stop accepting writes if there are less than  N replicas connected, having a lag less or equal than M seconds.");
+        CONFIG_DESC_MAP.put("min-replicas-to-write", "It is possible for a master to stop accepting writes if there are less than  N replicas connected, having a lag less or equal than M seconds.");
+        CONFIG_DESC_MAP.put("min-slaves-max-lag", "It is possible for a master to stop accepting writes if there are less than  N replicas connected, having a lag less or equal than M seconds.");
+        CONFIG_DESC_MAP.put("min-replicas-max-lag", "It is possible for a master to stop accepting writes if there are less than  N replicas connected, having a lag less or equal than M seconds.");
+        // security
+        CONFIG_DESC_MAP.put("requirepass", "Require clients to issue AUTH <PASSWORD> before processing any other commands.");
+        CONFIG_DESC_MAP.put("rename-command", "Command renaming.");
+        // clients
+        CONFIG_DESC_MAP.put("maxclients", "Set the max number of connected clients at the same time.");
+        // memory management
+        CONFIG_DESC_MAP.put("maxmemory", "Set a memory usage limit to the specified amount of bytes.");
+        CONFIG_DESC_MAP.put("maxmemory-policy", "how Redis will select what to remove when maxmemory is reached, default is noeviction.");
+        CONFIG_DESC_MAP.put("maxmemory-samples", null);
+        // append only mode
+        CONFIG_DESC_MAP.put("appendonly", "By default Redis asynchronously dumps the dataset on disk.");
+        CONFIG_DESC_MAP.put("appendfilename", "The name of the append only file (default: 'appendonly.aof')");
+        CONFIG_DESC_MAP.put("appendfsync", "The fsync() call tells the Operating System to actually write data on disk instead of waiting for more data in the output buffer.");
+        CONFIG_DESC_MAP.put("no-appendfsync-on-rewrite", "When the AOF fsync policy is set to always or everysec, and a background saving process (a background save or AOF log background rewriting) is performing a lot of I/O against the disk, in some Linux configurations Redis may block too long on the fsync() call.");
+        CONFIG_DESC_MAP.put("auto-aof-rewrite-percentage", "Automatic rewrite of the append only file.");
+        CONFIG_DESC_MAP.put("auto-aof-rewrite-min-size", "Automatic rewrite of the append only file.");
+        CONFIG_DESC_MAP.put("aof-load-truncated", "An AOF file may be found to be truncated at the end during the Redis startup process, when the AOF data gets loaded back into memory.");
+        CONFIG_DESC_MAP.put("aof-use-rdb-preamble", );
+        // redis cluster
+        CONFIG_DESC_MAP.put("cluster-enabled", );
+        CONFIG_DESC_MAP.put("cluster-config-file", );
+        CONFIG_DESC_MAP.put("cluster-node-timeout", );
+        CONFIG_DESC_MAP.put("cluster-slave-validity-factor", );
+        CONFIG_DESC_MAP.put("cluster-migration-barrier", );
+        CONFIG_DESC_MAP.put("cluster-require-full-coverage", );
+        CONFIG_DESC_MAP.put("cluster-slave-no-failover", );
+        // slow log
+        CONFIG_DESC_MAP.put("slowlog-log-slower-than", );
+        CONFIG_DESC_MAP.put("slowlog-max-len", );
+        // advanced config
+        CONFIG_DESC_MAP.put("activerehashing", );
+        CONFIG_DESC_MAP.put("client-output-buffer-limit", );
+        CONFIG_DESC_MAP.put("client-output-buffer-limit", );
+        CONFIG_DESC_MAP.put("client-output-buffer-limit", );
+        CONFIG_DESC_MAP.put("client-query-buffer-limit", );
+        CONFIG_DESC_MAP.put("proto-max-bulk-len", );
+        CONFIG_DESC_MAP.put("hz", );
+        CONFIG_DESC_MAP.put("aof-rewrite-incremental-fsync", );
+        CONFIG_DESC_MAP.put("lfu-log-factor", );
+        CONFIG_DESC_MAP.put("lfu-decay-time", );
+        CONFIG_DESC_MAP.put("unixsocketperm", );
+        // active defragmentation
+        CONFIG_DESC_MAP.put("activedefrag", );
+        CONFIG_DESC_MAP.put("active-defrag-ignore-bytes", );
+        CONFIG_DESC_MAP.put("active-defrag-threshold-lower", );
+        CONFIG_DESC_MAP.put("active-defrag-threshold-upper", );
+        CONFIG_DESC_MAP.put("active-defrag-cycle-min", );
+        CONFIG_DESC_MAP.put("active-defrag-cycle-max", );
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put();
+    }
 
     /**
      * key

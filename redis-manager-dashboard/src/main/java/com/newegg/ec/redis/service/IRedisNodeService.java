@@ -16,6 +16,8 @@ public interface IRedisNodeService {
 
     RedisNode getRedisNodeById(Integer redisNodeId);
 
+    boolean existRedisNode(RedisNode redisNode);
+
     List<RedisNode> mergeRedisNode(List<RedisNode> realRedisNodeList, List<RedisNode> dbRedisNodeList);
 
     boolean addRedisNode(RedisNode redisNode);
