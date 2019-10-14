@@ -485,7 +485,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         for (RedisNode redisNode : masterNodeList) {
             RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, requirePass);
             redisClient.clusterSetSlotNode(slot, targetNodeId);
-            redisClient.close();
+            close(redisClient);
         }
     }
 
@@ -585,15 +585,16 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     }
 
     @Override
-    public Map<String, String> getConfig(Cluster cluster, RedisNode redisNode) {
-        String clusterName = cluster.getClusterName();
-        String redisPassword = cluster.getRedisPassword();
+    public Map<String, String> getConfig(HostAndPort hostAndPort, String redisPassword, String pattern) {
         RedisClient redisClient = null;
         try {
-            redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
-            return redisClient.getConfig();
+            if (Strings.isNullOrEmpty(pattern)) {
+                pattern = "*";
+            }
+            redisClient = RedisClientFactory.buildRedisClient(hostAndPort, redisPassword);
+            return redisClient.getConfig(pattern);
         } catch (Exception e) {
-            logger.error(clusterName + " get config failed.", e);
+            logger.error(hostAndPort + " get config failed.", e);
             return null;
         } finally {
             close(redisClient);

@@ -123,13 +123,8 @@ public interface IRedisService {
      */
     boolean standaloneReplicaNoOne(Cluster cluster, RedisNode redisNode);
 
-    /**
-     * Get config
-     * @param cluster
-     * @param redisNode
-     * @return
-     */
-    Map<String, String> getConfig(Cluster cluster, RedisNode redisNode);
+
+    Map<String, String> getConfig(HostAndPort hostAndPort, String redisPassword, String pattern);
 
     /**
      * 修改Redis配置

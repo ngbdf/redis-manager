@@ -81,10 +81,10 @@ public class NodeManageController {
         Cluster cluster = clusterService.getClusterById(clusterId);
         HostAndPort hostAndPort = new HostAndPort(redisNode.getHost(), redisNode.getPort());
         Map<String, String> infoMap = redisService.getNodeInfo(hostAndPort, cluster.getRedisPassword());
-        List<JSONObject> infoList = new ArrayList<>();
         if (infoMap == null) {
             return Result.failResult();
         }
+        List<JSONObject> infoList = new ArrayList<>();
         infoMap.forEach((key, value) -> {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("key", key);
@@ -98,7 +98,21 @@ public class NodeManageController {
     @RequestMapping(value = "/getConfig", method = RequestMethod.POST)
     @ResponseBody
     public Result getConfig(@RequestBody RedisNode redisNode) {
-
+        Integer clusterId = redisNode.getClusterId();
+        Cluster cluster = clusterService.getClusterById(clusterId);
+        HostAndPort hostAndPort = new HostAndPort(redisNode.getHost(), redisNode.getPort());
+        Map<String, String> configMap = redisService.getConfig(hostAndPort, cluster.getRedisPassword(), null);
+        if (configMap == null) {
+            return Result.failResult();
+        }
+        List<JSONObject> configList = new ArrayList<>();
+        configMap.forEach((key, value) -> {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("key", key);
+            jsonObject.put("value", value);
+            jsonObject.put("description", RedisConfigUtil.getConfigItemDesc(key));
+            configList.add(jsonObject);
+        });
         return Result.successResult();
     }
 

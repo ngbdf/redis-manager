@@ -395,6 +395,10 @@ public class RedisConfigUtil {
         REDIS_CONFIG_LIST.add(new RedisConfig(true, "port", "{port}", NORMAL_TYPE, "端口"));
     }
 
+    public static String getConfigItemDesc(String infoKey) {
+        return CONFIG_DESC_MAP.get(infoKey);
+    }
+
     // https://raw.githubusercontent.com/antirez/redis/5.0/redis.conf
     // https://www.cnblogs.com/sjfgod/p/7624437.html
     static {
@@ -453,50 +457,39 @@ public class RedisConfigUtil {
         CONFIG_DESC_MAP.put("auto-aof-rewrite-percentage", "Automatic rewrite of the append only file.");
         CONFIG_DESC_MAP.put("auto-aof-rewrite-min-size", "Automatic rewrite of the append only file.");
         CONFIG_DESC_MAP.put("aof-load-truncated", "An AOF file may be found to be truncated at the end during the Redis startup process, when the AOF data gets loaded back into memory.");
-        CONFIG_DESC_MAP.put("aof-use-rdb-preamble", );
+        CONFIG_DESC_MAP.put("aof-use-rdb-preamble", "When rewriting the AOF file, Redis is able to use an RDB preamble in the AOF file for faster rewrites and recoveries.");
         // redis cluster
-        CONFIG_DESC_MAP.put("cluster-enabled", );
-        CONFIG_DESC_MAP.put("cluster-config-file", );
-        CONFIG_DESC_MAP.put("cluster-node-timeout", );
-        CONFIG_DESC_MAP.put("cluster-slave-validity-factor", );
-        CONFIG_DESC_MAP.put("cluster-migration-barrier", );
-        CONFIG_DESC_MAP.put("cluster-require-full-coverage", );
-        CONFIG_DESC_MAP.put("cluster-slave-no-failover", );
+        CONFIG_DESC_MAP.put("cluster-enabled", "Cluster enabled.");
+        CONFIG_DESC_MAP.put("cluster-config-file", "Every cluster node has a cluster configuration file.");
+        CONFIG_DESC_MAP.put("cluster-node-timeout", "Cluster node timeout is the amount of milliseconds a node must be unreachable for it to be considered in failure state.");
+        CONFIG_DESC_MAP.put("cluster-slave-validity-factor", "A replica of a failing master will avoid to start a failover if its data looks too old.");
+        CONFIG_DESC_MAP.put("cluster-replica-validity-factor", "A replica of a failing master will avoid to start a failover if its data looks too old.");
+        CONFIG_DESC_MAP.put("cluster-migration-barrier", "Cluster replicas are able to migrate to orphaned masters, that are masters that are left without working replicas.");
+        CONFIG_DESC_MAP.put("cluster-require-full-coverage", "By default Redis Cluster nodes stop accepting queries if they detect there is at least an hash slot uncovered (no available node is serving it).");
+        CONFIG_DESC_MAP.put("cluster-slave-no-failover", "This option, when set to yes, prevents replicas from trying to failover its master during master failures. However the master can still perform a manual failover, if forced to do so.");
+        CONFIG_DESC_MAP.put("cluster-replica-no-failover", "This option, when set to yes, prevents replicas from trying to failover its master during master failures. However the master can still perform a manual failover, if forced to do so.");
         // slow log
-        CONFIG_DESC_MAP.put("slowlog-log-slower-than", );
-        CONFIG_DESC_MAP.put("slowlog-max-len", );
+        CONFIG_DESC_MAP.put("slowlog-log-slower-than", "The Redis Slow Log is a system to log queries that exceeded a specified execution time.");
+        CONFIG_DESC_MAP.put("slowlog-max-len", "There is no limit to this length. Just be aware that it will consume memory. You can reclaim memory used by the slow log with SLOWLOG RESET.");
         // advanced config
-        CONFIG_DESC_MAP.put("activerehashing", );
-        CONFIG_DESC_MAP.put("client-output-buffer-limit", );
-        CONFIG_DESC_MAP.put("client-output-buffer-limit", );
-        CONFIG_DESC_MAP.put("client-output-buffer-limit", );
-        CONFIG_DESC_MAP.put("client-query-buffer-limit", );
-        CONFIG_DESC_MAP.put("proto-max-bulk-len", );
-        CONFIG_DESC_MAP.put("hz", );
-        CONFIG_DESC_MAP.put("aof-rewrite-incremental-fsync", );
-        CONFIG_DESC_MAP.put("lfu-log-factor", );
-        CONFIG_DESC_MAP.put("lfu-decay-time", );
-        CONFIG_DESC_MAP.put("unixsocketperm", );
+        CONFIG_DESC_MAP.put("activerehashing", "Active rehashing uses 1 millisecond every 100 milliseconds of CPU time in order to help rehashing the main Redis hash table .");
+        CONFIG_DESC_MAP.put("client-output-buffer-limit", "The client output buffer limits can be used to force disconnection of clients, that are not reading data from the server fast enough for some reason.");
+        CONFIG_DESC_MAP.put("client-query-buffer-limit", "Client query buffers accumulate new commands. They are limited to a fixed amount by default in order to avoid that a protocol desynchronization will lead to unbound memory usage in the query buffer. ");
+        CONFIG_DESC_MAP.put("proto-max-bulk-len", "In the Redis protocol, bulk requests, that are, elements representing single strings, are normally limited ot 512 mb.");
+        CONFIG_DESC_MAP.put("hz", " Redis calls an internal function to perform many background tasks.");
+        CONFIG_DESC_MAP.put("aof-rewrite-incremental-fsync", "When a child rewrites the AOF file, if the following option is enabled the file will be fsync-ed every 32 MB of data generated.");
+        CONFIG_DESC_MAP.put("unixsocketperm", "Unix socket.");
         // active defragmentation
-        CONFIG_DESC_MAP.put("activedefrag", );
-        CONFIG_DESC_MAP.put("active-defrag-ignore-bytes", );
-        CONFIG_DESC_MAP.put("active-defrag-threshold-lower", );
-        CONFIG_DESC_MAP.put("active-defrag-threshold-upper", );
-        CONFIG_DESC_MAP.put("active-defrag-cycle-min", );
-        CONFIG_DESC_MAP.put("active-defrag-cycle-max", );
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
-        CONFIG_DESC_MAP.put();
+        CONFIG_DESC_MAP.put("activedefrag", "Active defragmentation allows a Redis server to compact the spaces left between small allocations and deallocations of data in memory, thus allowing to reclaim back memory.");
+        CONFIG_DESC_MAP.put("active-defrag-ignore-bytes", "Minimum amount of fragmentation waste to start active defrag.");
+        CONFIG_DESC_MAP.put("active-defrag-threshold-lower", "Minimum percentage of fragmentation to start active defrag.");
+        CONFIG_DESC_MAP.put("active-defrag-threshold-upper", "Maximum percentage of fragmentation at which we use maximum effort.");
+        CONFIG_DESC_MAP.put("active-defrag-cycle-min", "Minimal effort for defrag in CPU percentage.");
+        CONFIG_DESC_MAP.put("active-defrag-cycle-max", "Maximal effort for defrag in CPU percentage.");
+        CONFIG_DESC_MAP.put("daemonize", "By default Redis does not run as a daemon.");
+        CONFIG_DESC_MAP.put("bind", "It is possible to listen to just one or multiple selected interfaces using the 'bind' configuration directive, followed by one or more IP addresses.");
+        CONFIG_DESC_MAP.put("dir", "The working directory.");
+        CONFIG_DESC_MAP.put("port", "Accept connections on the specified port, default is 6379 (IANA #815344).");
     }
 
     /**
