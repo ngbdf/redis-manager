@@ -45,7 +45,11 @@
             <el-divider direction="vertical"></el-divider>
             <el-link :underline="false" icon="el-icon-circle-close">Delete</el-link>
             <el-divider direction="vertical"></el-divider>-->
-            <el-link :underline="false" icon="el-icon-edit">Edit Config</el-link>
+            <el-link
+              :underline="false"
+              icon="el-icon-edit"
+              @click="editConfigVisible = true"
+            >Edit Config</el-link>
           </div>
           <el-link
             :underline="false"
@@ -258,6 +262,42 @@
       </div>
     </el-dialog>
 
+    <el-dialog
+      title="Edit Config"
+      :visible.sync="editConfigVisible"
+      :close-on-click-modal="false"
+      width="30%"
+    >
+      <el-form :model="redisConfig" ref="redisConfig" size="small" label-position="top">
+        <el-form-item label="Config Key" prop="configKey" :rules="rules.configKey">
+          <el-select
+            v-model="redisConfig.configKey"
+            filterable
+            allow-create
+            default-first-option
+            placeholder="Please select config key"
+          >
+            <el-option
+              v-for="configKey in configKeyList"
+              :key="configKey"
+              :label="configKey"
+              :value="configKey"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <!-- <el-form-item label="Current Value" prop="currentValue">
+          <span style="color: #409EFF">5546</span>
+        </el-form-item>-->
+        <el-form-item label="Config Value" prop="configValue">
+          <el-input v-model="redisConfig.configValue"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button size="small" @click="editConfigVisible = false">Cancel</el-button>
+        <el-button size="small" type="primary" @click="editConfig('redisConfig')">Confirm</el-button>
+      </div>
+    </el-dialog>
+
     <el-dialog title="Forget Node" :visible.sync="forgetVisible" width="30%" v-if="forgetVisible">
       <span>{{ operationNode.host }}:{{ operationNode.port }} will be forget</span>
       <span slot="footer" class="dialog-footer">
@@ -343,6 +383,7 @@
       width="50%"
       :close-on-click-modal="false"
       top="5vh"
+      v-if="infoVisible"
     >
       <info :redisNode="operationNode"></info>
     </el-dialog>
@@ -353,6 +394,7 @@
       width="50%"
       :close-on-click-modal="false"
       top="5vh"
+      v-if="configVisible"
     >
       <config :redisNode="operationNode"></config>
     </el-dialog>
@@ -479,6 +521,7 @@ export default {
       replicateOfVisible: false,
       failOverVisible: false,
       importNodeVisible: false,
+      editConfigVisible: false,
       forgetVisible: false,
       moveSlotVisible: false,
       startNodeVisible: false,
@@ -491,6 +534,8 @@ export default {
       operationNode: {},
       operationNodeList: [],
       newRedisNode: {},
+      configKeyList: [],
+      redisConfig: {},
       rules: {
         redisNode: [
           {
@@ -517,6 +562,13 @@ export default {
           },
           { required: true, validator: validateSlot, trigger: "blur" },
           { required: true, validator: validateEndSlotGreater, trigger: "blur" }
+        ],
+        configKey: [
+          {
+            required: true,
+            message: "Please select or enter config key",
+            trigger: "blur"
+          }
         ]
       }
     };
@@ -627,6 +679,48 @@ export default {
       this.operationNode = redisNode;
       this.configVisible = true;
     },
+    getConfigKeyList() {
+      let url = "/nodeManage/getRedisConfigKeyList";
+      API.get(
+        url,
+        null,
+        response => {
+          this.configKeyList = response.data.data;
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    // getConfigCurrentValue(redisConfig) {
+    //   console.log(redisConfig);
+    // },
+    editConfig(redisConfig) {
+      this.$refs[redisConfig].validate(valid => {
+        if (valid) {
+          let url = "/nodeManage/updateRedisConfig";
+          let data = {
+            clusterId: this.cluster.clusterId,
+            redisConfig: this.redisConfig
+          };
+          API.post(
+            url,
+            data,
+            response => {
+              let result = response.data;
+              if (result.code == 0) {
+                this.editConfigVisible = false;
+              } else {
+                console.log("update config failed.");
+              }
+            },
+            err => {
+              console.log(err);
+            }
+          );
+        }
+      });
+    },
     canOperate() {
       let canOperate = true;
       this.operationNodeList.forEach(redisNode => {
@@ -706,7 +800,6 @@ export default {
     },
     importNode(newRedisNode) {
       this.$refs[newRedisNode].validate(valid => {
-        console.log(valid);
         if (valid) {
           let ipAndPort = this.newRedisNode.address.split(":");
           let redisNode = {
@@ -942,6 +1035,7 @@ export default {
     let clusterId = this.$route.params.clusterId;
     this.getClusterById(clusterId);
     this.getAllNodeList(clusterId);
+    this.getConfigKeyList();
   }
 };
 </script>

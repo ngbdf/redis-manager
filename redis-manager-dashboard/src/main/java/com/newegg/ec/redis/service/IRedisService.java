@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.util.RedisConfigUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
 import javafx.util.Pair;
 import redis.clients.jedis.HostAndPort;
@@ -130,20 +131,20 @@ public interface IRedisService {
      * 修改Redis配置
      *
      * @param cluster
-     * @param config
+     * @param redisConfig
      * @return
      */
-    boolean setConfigBatch(Cluster cluster, Pair<String, String> config);
+    boolean setConfigBatch(Cluster cluster, RedisConfigUtil.RedisConfig redisConfig);
 
     /**
      * 修改Redis配置
      *
      * @param cluster
      * @param redisNode
-     * @param config
+     * @param redisConfig
      * @return
      */
-    boolean setConfig(Cluster cluster, RedisNode redisNode, Pair<String, String> config);
+    boolean setConfig(Cluster cluster, RedisNode redisNode, RedisConfigUtil.RedisConfig redisConfig);
 
     /**
      * 自动生成配置文件

@@ -1,7 +1,7 @@
 <template>
   <div class="config-wrapper">
     <div class="config-item" v-for="configItem in configList" :key="configItem.key">
-      <div class="description" v-if="configItem.description != null"># {{ configItem.description }}</div>
+      <div class="description" v-if="configItem.description != null && configItem.description != ''"># {{ configItem.description }}</div>
       <span>
         <span class="key">{{ configItem.key }}:</span>
         <span class="value">{{ configItem.value }}</span>
@@ -55,18 +55,20 @@ export default {
   word-break: break-all;
   white-space: pre-wrap;
   margin-bottom: 5px;
-  line-height: 20px;
 }
 
 .description {
   color: #c0c4cc;
+  font-size: 13px;
 }
 
 .key {
   color: #303133;
+  font-size: 13px;
 }
 .value {
   color: #409eff;
   font: bold;
+  font-size: 13px;
 }
 </style>

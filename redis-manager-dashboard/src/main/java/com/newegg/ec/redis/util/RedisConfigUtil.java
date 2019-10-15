@@ -6,10 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.newegg.ec.redis.plugin.install.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
@@ -399,6 +396,10 @@ public class RedisConfigUtil {
         return CONFIG_DESC_MAP.get(infoKey);
     }
 
+    public static Set<String> getConfigKeyList() {
+        return CONFIG_DESC_MAP.keySet();
+    }
+
     // https://raw.githubusercontent.com/antirez/redis/5.0/redis.conf
     // https://www.cnblogs.com/sjfgod/p/7624437.html
     static {
@@ -406,9 +407,9 @@ public class RedisConfigUtil {
         CONFIG_DESC_MAP.put("protected-mode", "Protected mode is a layer of security protection, in order to avoid that Redis instances left open on the internet are accessed and exploited");
         CONFIG_DESC_MAP.put("tcp-backlog", "TCP listen() backlog");
         CONFIG_DESC_MAP.put("timeout", "Close the connection after a client is idle for N seconds (0 to disable)");
-        CONFIG_DESC_MAP.put("tcp-keepalive", "A reasonable value for this option is N seconds");
+        CONFIG_DESC_MAP.put("tcp-keepalive", "A reasonable value for this option is N seconds.");
         // general
-        CONFIG_DESC_MAP.put("supervised", null);
+        CONFIG_DESC_MAP.put("supervised", "");
         CONFIG_DESC_MAP.put("pidfile", "Creating a pid file is best effort: if Redis is not able to create it nothing bad happens, the server will start and run normally.");
         CONFIG_DESC_MAP.put("loglevel", "Specify the server verbosity level (debug, verbose, notice, warning).");
         CONFIG_DESC_MAP.put("logfile", "Specify the log file name.");
@@ -448,7 +449,7 @@ public class RedisConfigUtil {
         // memory management
         CONFIG_DESC_MAP.put("maxmemory", "Set a memory usage limit to the specified amount of bytes.");
         CONFIG_DESC_MAP.put("maxmemory-policy", "how Redis will select what to remove when maxmemory is reached, default is noeviction.");
-        CONFIG_DESC_MAP.put("maxmemory-samples", null);
+        CONFIG_DESC_MAP.put("maxmemory-samples", "");
         // append only mode
         CONFIG_DESC_MAP.put("appendonly", "By default Redis asynchronously dumps the dataset on disk.");
         CONFIG_DESC_MAP.put("appendfilename", "The name of the append only file (default: 'appendonly.aof')");
@@ -570,6 +571,17 @@ public class RedisConfigUtil {
 
         public void setDesc(String desc) {
             this.desc = desc;
+        }
+
+        @Override
+        public String toString() {
+            return "RedisConfig{" +
+                    "enable=" + enable +
+                    ", configKey='" + configKey + '\'' +
+                    ", configValue='" + configValue + '\'' +
+                    ", mode=" + mode +
+                    ", desc='" + desc + '\'' +
+                    '}';
         }
     }
 

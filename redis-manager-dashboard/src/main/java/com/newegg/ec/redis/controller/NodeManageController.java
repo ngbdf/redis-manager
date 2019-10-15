@@ -113,7 +113,23 @@ public class NodeManageController {
             jsonObject.put("description", RedisConfigUtil.getConfigItemDesc(key));
             configList.add(jsonObject);
         });
-        return Result.successResult();
+        return Result.successResult(configList);
+    }
+
+    @RequestMapping(value = "/getRedisConfigKeyList", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getRedisConfigKeyList() {
+        return Result.successResult(RedisConfigUtil.getConfigKeyList());
+    }
+
+    @RequestMapping(value = "/updateRedisConfig", method = RequestMethod.POST)
+    @ResponseBody
+    public Result updateRedisConfig(@RequestBody JSONObject jsonObject) {
+        Integer clusterId = jsonObject.getInteger("clusterId");
+        RedisConfigUtil.RedisConfig redisConfig = jsonObject.getObject("redisConfig", RedisConfigUtil.RedisConfig.class);
+        Cluster cluster = clusterService.getClusterById(clusterId);
+        boolean result = redisService.setConfigBatch(cluster, redisConfig);
+        return result ? Result.successResult() : Result.failResult();
     }
 
     /**

@@ -6,6 +6,7 @@ import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
+import com.newegg.ec.redis.util.RedisConfigUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
@@ -23,11 +24,10 @@ import redis.clients.jedis.params.MigrateParams;
 import redis.clients.jedis.util.Slowlog;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.newegg.ec.redis.client.IDatabaseCommand.*;
 import static com.newegg.ec.redis.util.RedisClusterInfoUtil.OK;
-import static com.newegg.ec.redis.util.RedisConfigUtil.MASTER_AUTH;
-import static com.newegg.ec.redis.util.RedisConfigUtil.REQUIRE_PASS;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.EXPIRES;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.KEYS;
 import static com.newegg.ec.redis.util.RedisUtil.*;
@@ -602,25 +602,32 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     }
 
     @Override
-    public boolean setConfigBatch(Cluster cluster, Pair<String, String> config) {
+    public boolean setConfigBatch(Cluster cluster, RedisConfigUtil.RedisConfig redisConfig) {
         List<RedisNode> redisNodeList = getRedisNodeList(cluster);
-        redisNodeList.forEach(redisNode -> setConfig(cluster, redisNode, config));
-        return true;
+        AtomicBoolean result = new AtomicBoolean(true);
+        for (RedisNode redisNode : redisNodeList) {
+            result.set(setConfig(cluster, redisNode, redisConfig));
+        }
+        return result.get();
     }
 
     @Override
-
-    public boolean setConfig(Cluster cluster, RedisNode redisNode, Pair<String, String> config) {
-        String clusterName = cluster.getClusterName();
+    public boolean setConfig(Cluster cluster, RedisNode redisNode, RedisConfigUtil.RedisConfig redisConfig) {
         String redisPassword = cluster.getRedisPassword();
         RedisClient redisClient = null;
         try {
-            // TODO: special config, like `save`
             redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
+            String configValue = redisConfig.getConfigValue();
+            // for special config, like `save`
+            if (Strings.isNullOrEmpty(configValue)) {
+                configValue = "";
+            }
+            redisClient.setConfig(new Pair<>(redisConfig.getConfigKey(), configValue));
+            redisClient.clusterSaveConfig();
             redisClient.rewriteConfig();
-            return redisClient.setConfig(config);
+            return true;
         } catch (Exception e) {
-            logger.error(clusterName + " change config failed, config: " + config, e);
+            logger.error(redisNode.getHost() + ":" + redisNode.getPort() + " change config failed, " + redisConfig, e);
             return false;
         } finally {
             close(redisClient);

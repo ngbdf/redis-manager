@@ -1,0 +1,65 @@
+bind 127.0.0.1	ip地址 docker和物理机可能不一样
+protected-mode yes	保护模式是安全保护的一层，以避免可以访问和利用Internet上打开的Redis实例。
+port 6379	端口
+tcp-backlog 511	此参数确定TCP连接中已完成队列（3次握手之后）的长度，应小于Linux系统的/proc/sys/net/core/somaxconn的
+timeout 0	tcp链接空闲时间，超过会被关闭
+tcp-keepalive 300	指定ACKs的时间周期，单位为秒，值非0的情况表示将周期性的检测客户端是否可用，默认值为60秒
+daemonize no	后台模式启动(docker 和 物理机的配置可能会不一样)
+supervised no	可以通过upstart和systemd管理Redis守护进程.supervised默认设置为no
+pidfile /var/run/redis_6379.pid		/var/run/redis.pid，redis启动后的进程ID保存文件
+loglevel notice		verbose，指定服务器信息显示的等级，4个参数分别为debug verbose notice warning
+logfile ""		指定日志的输出路径，默认值stdout，表示输出到屏幕，守护模式时则输出到/dev/null
+databases 16	指定数据库的数量，默认为16个，默认使用的数据库是DB 0
+always-show-logo yes	redis启动时是否显示Logo
+save 900 1		过了900秒并且有1个key发生了改变，触发save动作
+save 300 10		过了300秒并且有10个key发生了改变，触发save动作
+save 60 10000	过了60秒并且至少有10000个key发生了改变，触发save动作
+stop-writes-on-bgsave-error yes		生成快照失败是否停止写
+rdbcompression yes		存储至本地数据库时(持久化rdb文件)是否压缩数据
+rdbchecksum yes		是否对数据进行完整性校验。
+dbfilename dump.rdb		持久化rdb存储文件名
+dir ./	设置数据库文件的存储目录
+slave-serve-stale-data yes		如果与主机失去联系是否还继续对外提供服务
+slave-read-only yes		从机是否只读
+repl-diskless-sync no	默认不使用diskless同步方式
+repl-diskless-sync-delay 5	无磁盘diskless方式在进行数据传递之前会有一个时间的延迟，以便slave端能够进行到待传送的目标队列中，这个时间默认是5秒
+repl-disable-tcp-nodelay no		是否启用TCP_NODELAY
+slave-priority 100		当有多个从机时来指定从机变成主机的优先级,如果设置为0，永不可做主机
+maxclients 10000		限制同时连接的客户数量
+maxmemory <bytes>		 设置最大内存
+maxmemory-policy 内存淘汰策略，默认noeviction 可以选择volatile-lru,volatile-tt,volatile-random,allkeys-lru,allkeys-random
+maxmemory-samples 5	默认值3，LRU和最小TTL策略并非严谨的策略，而是大约估算的方式，因此可以选择取样值以便检查
+lazyfree-lazy-eviction no
+lazyfree-lazy-expire no
+lazyfree-lazy-server-del no
+slave-lazy-flush no
+appendonly no	是否开启aof功能
+appendfilename "appendonly.aof"		AOF文件名称
+appendfsync everysec		aof中文件同步机制
+no-appendfsync-on-rewrite no		当主进程在进行向磁盘的写操作时，将会阻止其它的fsync调用
+auto-aof-rewrite-percentage 100		默认值100
+auto-aof-rewrite-min-size 64mb		aof rewrite触发时机,最小文件大小
+aof-use-rdb-preamble no
+lua-time-limit 5000		lua脚本运行的最大时间
+cluster-enabled yes		集群开关
+cluster-config-file nodes-6379.conf		集群配置文件
+cluster-node-timeout 15000	节点超时时间
+cluster-slave-validity-factor 10		控制从节点FailOver相关的设置.设为0，从节点会一直尝试启动FailOver.
+cluster-migration-barrier 1	最小从节点连接数
+cluster-require-full-coverage yes		若想要设置集群在部份key space没有cover完成时继续去接收查询，就将参数设置为no
+slowlog-log-slower-than 10000		慢操作日志 记录,单位:微秒
+slowlog-max-len 128		慢操作日志 保留的最大条数
+latency-monitor-threshold 0		延迟监控，用于记录等于或超过了指定时间的操作，默认是关闭状态，即值为0
+notify-keyspace-events ""		事件通知，默认不启用，具体参数查看配置文件
+hash-max-ziplist-entries 512		ziplist中允许存储的最大条目个数,建议为128
+hash-max-ziplist-value 64		默认值64   xxxx
+list-max-ziplist-size -2
+list-compress-depth 0
+set-max-intset-entries 512		默认值512，当set类型中的数据都是数值类型，并且set中整型元素的数量不超过指定值时，使用特殊的编码方式
+zset-max-ziplist-entries 128	默认值128，与hash和list类似
+zset-max-ziplist-value 64	默认值64    xxx
+hll-sparse-max-bytes 3000		3000
+activerehashing yes		是否开启顶层数据结构的rehash功能,如果内存允许,请开启，默认yes
+client-output-buffer-limit normal 0 0 0		normal 0 0 0 slave 268435456 67108864 60 pubsub 33554432 8388608 60
+hz 10	执行后台任务的频率(次数/秒)
+aof-rewrite-incremental-fsync yes		是否采取增量文件同步
