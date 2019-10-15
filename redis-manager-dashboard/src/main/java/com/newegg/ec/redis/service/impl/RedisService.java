@@ -371,6 +371,9 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
             return result.toString();
         }
         for (RedisNode redisNode : redisNodeList) {
+            if (RedisUtil.equals(seed, redisNode)) {
+                continue;
+            }
             String host = redisNode.getHost();
             int port = redisNode.getPort();
             try {

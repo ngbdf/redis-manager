@@ -59,8 +59,8 @@ public class InstallationWebSocketHandler implements WebSocketHandler {
                     }
                 }
                 String message = logQueue.poll();
-                System.err.println("Message: " + message);
                 if (!Strings.isNullOrEmpty(message)) {
+                    System.err.println("Message: " + message);
                     try {
                         webSocketSession.sendMessage(new TextMessage(message));
                     } catch (SockJsTransportFailureException | IOException e) {

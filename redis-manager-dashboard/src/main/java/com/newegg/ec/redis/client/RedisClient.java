@@ -130,22 +130,30 @@ public class RedisClient implements IRedisClient {
         List<RedisNode> nodeList = new ArrayList<>();
         Map<String, String> infoMap = getInfo(REPLICATION);
         String role = infoMap.get(ROLE);
-        String host = infoMap.get(MASTER_HOST);
-        int port = Integer.parseInt(infoMap.get(MASTER_PORT));
         // 使用 master node 进行连接
         if (Objects.equals(role, NodeRole.SLAVE.getValue())) {
-            host = infoMap.get(MASTER_HOST);
-            port = Integer.parseInt(infoMap.get(MASTER_PORT));
+            String host = infoMap.get(MASTER_HOST);
+            int port = Integer.parseInt(infoMap.get(MASTER_PORT));
             RedisURI masterURI = new RedisURI(new HostAndPort(host, port), redisURI.getRequirePass());
             RedisClient redisClient = RedisClientFactory.buildRedisClient(masterURI);
             infoMap = redisClient.getInfo(REPLICATION);
+            redisClient.close();
         }
-        nodeList.add(new RedisNode(host, port, NodeRole.MASTER));
+        RedisNode masterNode = new RedisNode();
+        masterNode.setNodeRole(NodeRole.MASTER);
         for (Map.Entry<String, String> node : infoMap.entrySet()) {
-            if (!node.getKey().contains(NodeRole.SLAVE.getValue())) {
+            String infoKey = node.getKey();
+            String infoValue = node.getValue();
+            if (Objects.equals(infoKey, MASTER_HOST)) {
+                masterNode.setHost(infoValue);
+            }
+            if (Objects.equals(infoKey, MASTER_PORT)) {
+                masterNode.setPort(Integer.parseInt(infoValue));
+            }
+            if (!infoKey.contains(NodeRole.SLAVE.getValue())) {
                 continue;
             }
-            String[] keyAndValues = SignUtil.splitByCommas(node.getValue());
+            String[] keyAndValues = SignUtil.splitByCommas(infoValue);
             if (keyAndValues.length < 2) {
                 return nodeList;
             }
@@ -512,8 +520,8 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String replicaOf(String host, int port) {
-        return jedis.slaveof(host, port);
+    public boolean replicaOf(String host, int port) {
+        return Objects.equals(jedis.slaveof(host, port), OK);
     }
 
     @Override

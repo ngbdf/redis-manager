@@ -151,8 +151,8 @@ public class NodeManageController {
     @ResponseBody
     public Result forget(@RequestBody List<RedisNode> redisNodeList) {
         Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> {
-            String nodes = cluster.getNodes();
             String node = redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
+            String nodes = cluster.getNodes();
             if (nodes.contains(node)) {
                 logger.warn("I can't forget " + node + ", because it in the database");
                 return true;
@@ -253,31 +253,43 @@ public class NodeManageController {
         try {
             RedisNode firstRedisNode = redisNodeList.get(0);
             final Cluster cluster = getCluster(firstRedisNode.getClusterId());
-            Set<HostAndPort> hostAndPorts = RedisUtil.nodesToHostAndPortSet(cluster.getNodes());
-            HostAndPort hostAndPort = hostAndPorts.iterator().next();
-            RedisNode seed = new RedisNode();
-            seed.setHost(hostAndPort.getHost());
-            seed.setPort(hostAndPort.getPort());
             StringBuilder message = new StringBuilder();
             redisNodeList.forEach(redisNode -> {
-                String oneResult = redisService.clusterMeet(cluster, seed, redisNodeList);
-                if (Strings.isNullOrEmpty(oneResult)) {
-                    message.append(oneResult);
-                    // TODO: save to db
-                    boolean exist = redisNodeService.existRedisNode(redisNode);
-                    if (!exist) {
-                        try {
-                            Thread.sleep(TEN_SECONDS);
-                        } catch (InterruptedException e) {
-                        }
-                        List<RedisNode> redisNodes = redisService.getRedisNodeList(cluster);
-                        redisNodes.forEach(node -> {
-                            if (RedisUtil.equals(node, redisNode)) {
-                                node.setClusterId(cluster.getClusterId());
-                                node.setGroupId(cluster.getGroupId());
-                                redisNodeService.addRedisNode(node);
+                Set<HostAndPort> hostAndPorts = RedisUtil.nodesToHostAndPortSet(cluster.getNodes());
+                Iterator<HostAndPort> iterator = hostAndPorts.iterator();
+                RedisNode seed = null;
+                while (iterator.hasNext()) {
+                    HostAndPort hostAndPort = iterator.next();
+                    String host = hostAndPort.getHost();
+                    int port = hostAndPort.getPort();
+                    if(Objects.equals(redisNode.getHost(), host) && redisNode.getPort() == port) {
+                        continue;
+                    }
+                    seed = new RedisNode();
+                    seed.setHost(host);
+                    seed.setPort(port);
+                    break;
+                }
+                if (seed != null) {
+                    String oneResult = redisService.clusterMeet(cluster, seed, redisNodeList);
+                    if (Strings.isNullOrEmpty(oneResult)) {
+                        message.append(oneResult);
+                        // TODO: save to db
+                        boolean exist = redisNodeService.existRedisNode(redisNode);
+                        if (!exist) {
+                            try {
+                                Thread.sleep(TEN_SECONDS);
+                            } catch (InterruptedException e) {
                             }
-                        });
+                            List<RedisNode> redisNodes = redisService.getRedisNodeList(cluster);
+                            redisNodes.forEach(node -> {
+                                if (RedisUtil.equals(node, redisNode)) {
+                                    node.setClusterId(cluster.getClusterId());
+                                    node.setGroupId(cluster.getGroupId());
+                                    redisNodeService.addRedisNode(node);
+                                }
+                            });
+                        }
                     }
                 }
             });
@@ -312,6 +324,18 @@ public class NodeManageController {
         StringBuffer messageBuffer = new StringBuffer();
         redisNodeList.forEach(redisNode -> {
             try {
+                String[] nodeArr = SignUtil.splitByCommas(cluster.getNodes());
+                String node = redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
+                if (nodeArr.length > 1) {
+                    StringBuilder newNodes = new StringBuilder();
+                    for (String nodeItem : nodeArr) {
+                        if (!Objects.equals(node, nodeItem) && !Strings.isNullOrEmpty(nodeItem)) {
+                            newNodes.append(nodeItem).append(SignUtil.COMMAS);
+                        }
+                    }
+                    cluster.setNodes(newNodes.toString());
+                    clusterService.updateNodes(cluster);
+                }
                 boolean handleResult = clusterHandler.handle(cluster, redisNode);
                 if (!handleResult) {
                     messageBuffer.append(redisNode.getHost() + ":" + redisNode.getPort() + " operation failed.\n");
@@ -341,6 +365,18 @@ public class NodeManageController {
         StringBuffer messageBuffer = new StringBuffer();
         redisNodeList.forEach(redisNode -> {
             try {
+                String[] nodeArr = SignUtil.splitByCommas(cluster.getNodes());
+                String node = redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
+                if (nodeArr.length > 1) {
+                    StringBuilder newNodes = new StringBuilder();
+                    for (String nodeItem : nodeArr) {
+                        if (!Objects.equals(node, nodeItem) && !Strings.isNullOrEmpty(nodeItem)) {
+                            newNodes.append(nodeItem).append(SignUtil.COMMAS);
+                        }
+                    }
+                    cluster.setNodes(newNodes.toString());
+                    clusterService.updateNodes(cluster);
+                }
                 boolean handleResult = nodeHandler.handle(cluster, redisNode, nodeOperation);
                 if (!handleResult) {
                     messageBuffer.append(redisNode.getHost() + ":" + redisNode.getPort() + " operation failed.\n");

@@ -26,7 +26,7 @@ public class RedisConfigUtilTest {
 
     @Test
     public void createConf() throws IOException {
-        RedisConfigUtil.generateRedisConfig("E:/redis-manager/conf/cluster/", RedisConfigUtil.CLUSTER_TYPE);
+        RedisConfigUtil.generateRedisConfig("E:/redis-manager/conf/standalone/", RedisConfigUtil.STANDALONE_TYPE);
     }
 
     @Test

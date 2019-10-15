@@ -62,6 +62,8 @@ public class RedisNode {
 
     private boolean runStatus;
 
+    private boolean inDatabase;
+
     private Timestamp insertTime;
 
     private Timestamp updateTime;
@@ -226,6 +228,14 @@ public class RedisNode {
 
     public void setRunStatus(boolean runStatus) {
         this.runStatus = runStatus;
+    }
+
+    public boolean getInDatabase() {
+        return inDatabase;
+    }
+
+    public void setInDatabase(boolean inDatabase) {
+        this.inDatabase = inDatabase;
     }
 
     public Timestamp getInsertTime() {

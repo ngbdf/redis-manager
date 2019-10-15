@@ -14,6 +14,7 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.*;
 import com.newegg.ec.redis.util.NetworkUtil;
+import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
 import javafx.util.Pair;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import static com.newegg.ec.redis.entity.NodeRole.MASTER;
 import static com.newegg.ec.redis.entity.NodeRole.SLAVE;
 import static com.newegg.ec.redis.util.RedisConfigUtil.MASTER_AUTH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REQUIRE_PASS;
+import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.COMMAS;
 import static com.newegg.ec.redis.util.TimeUtil.*;
@@ -73,7 +75,9 @@ public class InstallationTemplate {
      * @return
      */
     public boolean installFlow(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
-        String clusterName = installationParam.getCluster().getClusterName();
+        Cluster cluster = installationParam.getCluster();
+        String clusterName = cluster.getClusterName();
+        String redisMode = cluster.getRedisMode();
         boolean verify = verify(installationParam);
         if (!verify) {
             return false;
@@ -84,18 +88,21 @@ public class InstallationTemplate {
         if (!prepareSuccess) {
             return false;
         }
-        InstallationWebSocketHandler.appendLog(clusterName, "Start pulling image...");
-        boolean pullImageSuccess = pullImage(installationOperation, installationParam);
-        // 拉取安装包
-        if (!pullImageSuccess) {
-            return false;
-        }
+
         InstallationWebSocketHandler.appendLog(clusterName, "Start pulling redis.conf...");
         // 分发配置文件
         boolean pullConfigSuccess = pullConfig(installationOperation, installationParam);
         if (!pullConfigSuccess) {
             return false;
         }
+
+        InstallationWebSocketHandler.appendLog(clusterName, "Start pulling image...");
+        boolean pullImageSuccess = pullImage(installationOperation, installationParam);
+        // 拉取安装包
+        if (!pullImageSuccess) {
+            return false;
+        }
+
         InstallationWebSocketHandler.appendLog(clusterName, "Start installing redis node...");
         // 节点安装
         boolean installSuccess = install(installationOperation, installationParam);
@@ -103,7 +110,15 @@ public class InstallationTemplate {
             return false;
         }
         InstallationWebSocketHandler.appendLog(clusterName, "Start initializing...");
-        boolean initSuccess = init(installationParam);
+        boolean initSuccess;
+        if (Objects.equals(redisMode, CLUSTER)) {
+            initSuccess = initCluster(installationParam);
+        } else {
+            initSuccess = initStandalone(installationParam);
+        }
+        if (!initSuccess) {
+            InstallationWebSocketHandler.appendLog(clusterName, "Initialized error.");
+        }
         InstallationWebSocketHandler.appendLog(clusterName, "Start saving to database...");
         return saveToDB(installationParam);
     }
@@ -140,12 +155,12 @@ public class InstallationTemplate {
         return true;
     }
 
-    public boolean pullImage(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
-        return installationOperation.pullImage(installationParam);
-    }
-
     public boolean pullConfig(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
         return installationOperation.pullConfig(installationParam);
+    }
+
+    public boolean pullImage(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
+        return installationOperation.pullImage(installationParam);
     }
 
     public boolean install(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
@@ -351,7 +366,7 @@ public class InstallationTemplate {
      * @param installationParam
      * @return
      */
-    public boolean init(InstallationParam installationParam) {
+    public boolean initCluster(InstallationParam installationParam) {
         Cluster cluster = installationParam.getCluster();
         String clusterName = cluster.getClusterName();
         String redisPassword = cluster.getRedisPassword();
@@ -365,7 +380,7 @@ public class InstallationTemplate {
         InstallationWebSocketHandler.appendLog(clusterName, "Cluster meet... ");
         InstallationWebSocketHandler.appendLog(clusterName, result);
 
-        List<RedisNode> redisNodeListWithInfo = waitClusterMeet(installationParam, seed, allRedisNodes);
+        List<RedisNode> redisNodeListWithInfo = waitNodesMeet(installationParam, seed, allRedisNodes);
         replicate(installationParam, topology, redisNodeListWithInfo);
 
         // Set password
@@ -384,6 +399,29 @@ public class InstallationTemplate {
         return true;
     }
 
+
+    public boolean initStandalone(InstallationParam installationParam) {
+        Cluster cluster = installationParam.getCluster();
+        String clusterName = cluster.getClusterName();
+        String redisPassword = cluster.getRedisPassword();
+        Multimap<RedisNode, RedisNode> topology = installationParam.getTopology();
+        RedisNode seed = getSeedNode(cluster, topology);
+        List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
+        buildStandalone(cluster, seed, allRedisNodes);
+        InstallationWebSocketHandler.appendLog(clusterName, "Standalone meet... ");
+        waitNodesMeet(installationParam, seed, allRedisNodes);
+        // Set password
+        if (!Strings.isNullOrEmpty(redisPassword)) {
+            String updateRedisPasswordResult = updateRedisPassword(redisPassword, cluster);
+            InstallationWebSocketHandler.appendLog(clusterName, updateRedisPasswordResult);
+            logger.error(updateRedisPasswordResult);
+        }
+        installationParam.setAutoInit(false);
+        cluster.setInitialized(true);
+        return true;
+    }
+
+
     /**
      * Wait for cluster meeting
      *
@@ -392,18 +430,25 @@ public class InstallationTemplate {
      * @param redisNodeList
      * @return
      */
-    private List<RedisNode> waitClusterMeet(InstallationParam installationParam, RedisNode seed, List<RedisNode> redisNodeList) {
+    private List<RedisNode> waitNodesMeet(InstallationParam installationParam, RedisNode seed, List<RedisNode> redisNodeList) {
         String clusterName = installationParam.getCluster().getClusterName();
+        String redisMode = installationParam.getCluster().getRedisMode();
         // 获取集群节点
-        RedisClusterClient redisClusterClient = RedisClientFactory.buildRedisClusterClient(seed);
+        RedisClusterClient redisClusterClient = null;
+        RedisClient redisClient = null;
         List<RedisNode> redisNodeListWithInfo = new ArrayList<>();
-        int size = redisNodeList.size();
         long timeout = 0;
         // TODO: 根据集群规模设置等待时长
         long start = System.currentTimeMillis();
         while (timeout < FIVE_MINUTES) {
             try {
-                redisNodeListWithInfo = redisClusterClient.clusterNodes();
+                if (Objects.equals(redisMode, CLUSTER)) {
+                    redisClusterClient = RedisClientFactory.buildRedisClusterClient(seed);
+                    redisNodeListWithInfo = redisClusterClient.clusterNodes();
+                } else {
+                    redisClient = RedisClientFactory.buildRedisClient(seed);
+                    redisNodeListWithInfo = redisClient.nodes();
+                }
                 int realSize = redisNodeListWithInfo.size();
                 int needSize = redisNodeList.size();
                 if (realSize == needSize) {
@@ -414,13 +459,20 @@ public class InstallationTemplate {
                     timeout += TEN_SECONDS;
                 }
             } catch (Exception e) {
-                String message = "Wait for cluster meet error.";
+                String message = "Wait for node meet error.";
                 InstallationWebSocketHandler.appendLog(clusterName, message);
                 logger.error(message, e);
                 installationParam.setAutoInit(false);
+            } finally {
+                if (redisClusterClient != null) {
+                    redisClusterClient.close();
+                }
+                if (redisClient != null) {
+                    redisClient.close();
+                }
             }
         }
-        System.err.println("Wait meet: " + (System.currentTimeMillis() - start));
+        InstallationWebSocketHandler.appendLog(clusterName, "Wait meet: " + (System.currentTimeMillis() - start));
         if (redisNodeListWithInfo.size() != redisNodeList.size()) {
             installationParam.setAutoInit(false);
             String message = "Topology is incorrect, real nodes = " + redisNodeListWithInfo + ", expectation nodes = " + redisNodeList;
@@ -432,16 +484,14 @@ public class InstallationTemplate {
 
     private RedisNode getSeedNode(Cluster cluster, Multimap<RedisNode, RedisNode> topology) {
         Iterator<RedisNode> iterator = topology.keySet().iterator();
-        RedisNode seed = iterator.next();
-        if (!NetworkUtil.telnet(seed.getHost(), seed.getPort())) {
-            while (iterator.hasNext()) {
-                if (NetworkUtil.telnet(seed.getHost(), seed.getPort())) {
-                    seed = iterator.next();
-                    break;
-                }
+        RedisNode seed = null;
+        while (iterator.hasNext()) {
+            seed = iterator.next();
+            if (NetworkUtil.telnet(seed.getHost(), seed.getPort())) {
+                cluster.setNodes(seed.getHost() + COLON + seed.getPort());
+                break;
             }
         }
-        cluster.setNodes(seed.getHost() + COLON + seed.getPort());
         return seed;
     }
 
@@ -546,13 +596,33 @@ public class InstallationTemplate {
     }
 
     /**
-     * Standalone: node slave of
+     * Standalone: node replica of
      *
-     * @param installationParam
+     * @param cluster
+     * @param seed
+     * @param redisNodeList
      * @return
      */
-    private boolean buildStandalone(InstallationParam installationParam) {
-        return false;
+    private boolean buildStandalone(Cluster cluster, RedisNode seed, List<RedisNode> redisNodeList) {
+        String clusterName = cluster.getClusterName();
+        for (RedisNode redisNode: redisNodeList) {
+            if (RedisUtil.equals(seed, redisNode)) {
+                continue;
+            }
+            String host = seed.getHost();
+            int port = seed.getPort();
+            try {
+                RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode);
+                boolean result = redisClient.replicaOf(host, port);
+                if (!result) {
+                    InstallationWebSocketHandler.appendLog(clusterName, redisNode.getHost() + ":" + redisNode.getPort() + " failed to replicate of " + host + ":" + port);
+                }
+            } catch (Exception e) {
+                logger.error("", e);
+                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+            }
+        }
+        return true;
     }
 
     private boolean saveToDB(InstallationParam installationParam) {

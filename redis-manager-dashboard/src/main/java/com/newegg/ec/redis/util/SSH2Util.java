@@ -119,7 +119,7 @@ public class SSH2Util {
         if (sudo) {
             command.append("sudo ");
         }
-        String template = "tar -zxf %s -C %s --strip-components 1";
+        String template = "tar -xzf %s -C %s --strip-components 2";
         command.append(String.format(template, filePath, targetPath));
         String result = execute(machine, command.toString());
         return result;
@@ -132,16 +132,13 @@ public class SSH2Util {
      * @param path
      * @throws Exception
      */
-    public static void mkdir(Machine machine, String path, boolean sudo) throws Exception {
+    public static String mkdir(Machine machine, String path, boolean sudo) throws Exception {
         StringBuffer command = new StringBuffer();
         if (sudo) {
             command.append("sudo ");
         }
         command.append("mkdir -p ").append(path);
-        String result = execute(machine, command.toString());
-        if (!Strings.isNullOrEmpty(result)) {
-            throw new RuntimeException(result);
-        }
+        return execute(machine, command.toString());
     }
 
     /*public static void createFile(Machine machine, String path, boolean sudo) throws Exception {

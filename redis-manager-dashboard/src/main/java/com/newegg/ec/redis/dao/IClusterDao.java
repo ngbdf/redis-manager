@@ -87,10 +87,10 @@ public interface IClusterDao {
             "total_expires bigint(20) NOT NULL, " +
             "db_size integer(8) NOT NULL, " +
             "cluster_state varchar(50) NOT NULL, " +
-            "cluster_slots_assigned integer(4) NOT NULL, " +
-            "cluster_slots_ok integer(4) NOT NULL, " +
-            "cluster_slots_pfail integer(4) NOT NULL, " +
-            "cluster_slots_fail integer(4) NOT NULL, " +
+            "cluster_slots_assigned integer(4) DEFAULT NULL, " +
+            "cluster_slots_ok integer(4) DEFAULT NULL, " +
+            "cluster_slots_pfail integer(4) DEFAULT NULL, " +
+            "cluster_slots_fail integer(4) DEFAULT NULL, " +
             "cluster_known_nodes integer(4) NOT NULL, " +
             "cluster_size integer(4) NOT NULL, " +
             "redis_password varchar(50) DEFAULT NULL, " +

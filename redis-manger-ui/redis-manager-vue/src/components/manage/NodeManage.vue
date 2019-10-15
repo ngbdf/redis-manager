@@ -139,7 +139,7 @@
                   >Replicate Of</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleFailOver(scope.row)"
-                    v-if="scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA'"
+                    v-if="(scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA') && scope.row.inCluster "
                   >Fail Over</el-dropdown-item>
                   <el-dropdown-item>Memory Purge</el-dropdown-item>
                 </el-dropdown-menu>
@@ -154,7 +154,7 @@
                   >Start</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleStop(scope.row)"
-                    :disabled="scope.row.inCluster || !scope.row.runStatus"
+                    :disabled="(scope.row.inCluster || !scope.row.runStatus) && nodeNumber > 1"
                   >Stop</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleRestart(scope.row)"
@@ -607,6 +607,7 @@ export default {
     },
     getAllNodeList(clusterId) {
       let url = "/nodeManage/getAllNodeListWithStatus/" + clusterId;
+      console.log(url);
       API.get(
         url,
         null,
@@ -614,6 +615,7 @@ export default {
           let result = response.data;
           // console.log(result.data);
           if (result.code == 0) {
+            console.log(result.data);
             let redisNodeList = [];
             let nodeList = result.data;
             let masterRedisNode;
@@ -627,7 +629,12 @@ export default {
                 masterRedisNode.children = children;
                 redisNodeList.push(masterRedisNode);
               } else if (flags == "slave" || flags == "replica") {
-                children.push(node);
+                if (node.runStatus) {
+                  children.push(node);
+                } else {
+                  node.children = [];
+                  redisNodeList.push(node);
+                }
               } else {
                 redisNodeList.push(node);
               }
@@ -650,6 +657,7 @@ export default {
     reload() {
       let clusterId = this.cluster.clusterId;
       this.getAllNodeList(clusterId);
+      this.getClusterById(clusterId);
       this.updateCluster(this.clsuter);
     },
     updateCluster(cluster) {
@@ -722,18 +730,21 @@ export default {
       });
     },
     canOperate() {
-      let canOperate = true;
+      if (this.nodeNumber <= 1) {
+        return true;
+      }
+      let nodes = this.cluster.nodes;
+      let nodeArr = nodes.split(",");
       this.operationNodeList.forEach(redisNode => {
         let node = redisNode.host + ":" + redisNode.port;
-        console.log(this.cluster.nodes.indexOf(node));
-        if (this.cluster.nodes.indexOf(node) > -1) {
+        if (nodes.indexOf(node) > -1 && nodeArr.length == 1) {
           console.log(
             "I can't operate " + node + ", because it in the database"
           );
-          canOperate = false;
+          return false;
         }
       });
-      return canOperate;
+      return true;
     },
     buildNodeList(data) {
       let isArray = !isEmpty(data.length);
@@ -836,7 +847,6 @@ export default {
     },
     forget() {
       let url = "/nodeManage/forget";
-      console.log(this.canOperate());
       if (!this.canOperate()) {
         return;
       }
@@ -922,15 +932,7 @@ export default {
     handleStop(redisNode) {
       let inCluster = redisNode.inCluster;
       let runStatus = redisNode.runStatus;
-      if (inCluster) {
-        console.log(
-          redisNode.host +
-            ":" +
-            redisNode.port +
-            " still in the cluster, please forget it first."
-        );
-        return;
-      } else if (!runStatus) {
+      if (!runStatus) {
         console.log("This node has stopped.");
         return;
       }
@@ -1029,6 +1031,16 @@ export default {
           console.log(err);
         }
       );
+    }
+  },
+  computed: {
+    nodeNumber() {
+      let number = 0;
+      this.redisNodeList.forEach(masterNode => {
+        number += 1;
+        number += masterNode.children.length;
+      });
+      return number;
     }
   },
   mounted() {

@@ -3,8 +3,8 @@
     <div class="step-wrapper">
       <el-steps :active="step" finish-status="success">
         <el-step title="Environment Check"></el-step>
-        <el-step title="Pull Image" description></el-step>
         <el-step title="Pull Config" description></el-step>
+        <el-step title="Pull Image" description></el-step>
         <el-step title="Install" description></el-step>
         <el-step title="Init" description></el-step>
         <el-step title="Finish" description></el-step>
@@ -285,6 +285,12 @@ export default {
       }
       callback();
     };
+    var validateMasterNumber = (rule, value, callback) => {
+      if (this.installationParam.redisMode == "standalone" && value > 1) {
+        return callback(new Error("Standalone mode only need 1 master."));
+      }
+      callback();
+    };
     return {
       dockerImages: [],
       machineImages: [],
@@ -370,6 +376,11 @@ export default {
           {
             required: true,
             validator: validateMasterAndReplicaNumber,
+            trigger: "blur"
+          },
+          {
+            required: true,
+            validator: validateMasterNumber,
             trigger: "blur"
           }
         ],
@@ -460,21 +471,21 @@ export default {
         url,
         this.installationParam,
         response => {
-          console.log(response);
-          this.$router.push({
-            name: "dashboard",
-            params: { groupId: this.currentGroup.groupId }
-          });
+          let result = response.data;
+          if (result.code == 0) {
+            this.$router.push({
+              name: "dashboard",
+              params: { groupId: this.currentGroup.groupId }
+            });
+          } else {
+            console.log("Install failed.");
+          }
         },
         err => {
           console.log(err);
         }
       );
     },
-    // resetForm(formName) {
-    //   this.$refs[formName].resetFields();
-    //   this.checkPass = false;
-    // },
     getDockerImageList() {
       let url = "/installation/getDockerImages";
       API.get(
@@ -565,9 +576,9 @@ export default {
       if (!isEmpty(message)) {
         if (message.indexOf("Start preparing installation") > -1) {
           this.step = 0;
-        } else if (message.indexOf("Start pulling image") > -1) {
-          this.step = 1;
         } else if (message.indexOf("Start pulling redis.conf") > -1) {
+          this.step = 1;
+        } else if (message.indexOf("Start pulling image") > -1) {
           this.step = 2;
         } else if (message.indexOf("Start installing redis node") > -1) {
           this.step = 3;

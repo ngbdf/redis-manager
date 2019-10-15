@@ -210,7 +210,7 @@ public interface IRedisClient extends IDatabaseCommand {
      * @param port
      * @return OK
      */
-    String replicaOf(String host, int port);
+    boolean replicaOf(String host, int port);
 
     /**
      * standalone forget this node

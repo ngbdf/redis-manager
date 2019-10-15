@@ -165,7 +165,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
                     return false;
                 }
                 // 修改配置文件
-                Map<String, String> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort());
+                Map<String, String> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort(), targetPath);
                 String changeResult = RedisConfigUtil.variableAssignment(machine, targetPath, configs, sudo);
                 if (!Strings.isNullOrEmpty(changeResult)) {
                     InstallationWebSocketHandler.appendLog(clusterName, changeResult);
@@ -182,5 +182,5 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
         return true;
     }
 
-    protected abstract Map<String, String> getBaseConfigs(String bind, int port);
+    protected abstract Map<String, String> getBaseConfigs(String bind, int port, String dir);
 }

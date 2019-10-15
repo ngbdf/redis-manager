@@ -172,9 +172,8 @@ public class ClusterService implements IClusterService {
     }
 
     private boolean fillCluster(Cluster cluster) {
-        String redisMode;
         fillBaseInfo(cluster);
-        redisMode = cluster.getRedisMode();
+        String redisMode = cluster.getRedisMode();
         if (Strings.isNullOrEmpty(redisMode)) {
             logger.error("Fill base info failed, " + cluster);
             return false;
@@ -221,6 +220,7 @@ public class ClusterService implements IClusterService {
         List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
         cluster.setClusterSize(1);
         cluster.setClusterKnownNodes(redisNodeList.size());
+        cluster.setClusterState(Cluster.ClusterState.HEALTH);
         return true;
     }
 

@@ -89,6 +89,7 @@ export default {
                 database: database.slice(2)
               });
             });
+            console.log(this.dbList);
           } else {
             console.log(result.message);
           }

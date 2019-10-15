@@ -3,10 +3,7 @@ package com.newegg.ec.redis.config;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.exception.ConfigurationException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -22,7 +19,7 @@ import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 @Configuration
 public class SystemConfig implements WebMvcConfigurer {
 
-    public static final String CONFIG_ORIGINAL_PATH = "/redis-manager/config/";
+    public static final String CONFIG_ORIGINAL_PATH = "/redis-manager/conf/";
 
     public static final String MACHINE_PACKAGE_ORIGINAL_PATH = "/redis-manager/machine/";
 

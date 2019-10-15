@@ -202,11 +202,12 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
     }
 
     @Override
-    public Map<String, String> getBaseConfigs(String bind, int port) {
+    public Map<String, String> getBaseConfigs(String bind, int port, String dir) {
         Map<String, String> configs = new HashMap<>(3);
         configs.put(DAEMONIZE, "no");
         configs.put(BIND, bind);
         configs.put(PORT, port + "");
+        configs.put(DIR, "/data/");
         return configs;
     }
 }

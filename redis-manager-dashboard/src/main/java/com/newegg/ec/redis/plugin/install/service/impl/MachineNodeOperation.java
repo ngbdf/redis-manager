@@ -179,7 +179,7 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
     @Override
     public boolean start(Cluster cluster, RedisNode redisNode) {
         String clusterName = cluster.getClusterName();
-        String template = "cd %s; ./redis-server redis.conf";
+        String template = "cd %s; sudo ./redis-server redis.conf";
         int port = redisNode.getPort();
         String targetPath = INSTALL_BASE_PATH + port;
         String host = redisNode.getHost();
@@ -188,8 +188,19 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
             if (machine == null) {
                 return false;
             }
-            SSH2Util.execute(machine, String.format(template, targetPath));
-            return true;
+            String command = String.format(template, targetPath);
+            String execute = SSH2Util.execute(machine, command);
+            InstallationWebSocketHandler.appendLog(clusterName, execute);
+            if (Strings.isNullOrEmpty(execute)) {
+                return true;
+            }
+            command = command.replace("sudo", "");
+            String execute2 = SSH2Util.execute(machine, command);
+            if (Strings.isNullOrEmpty(execute2)) {
+                return true;
+            }
+            InstallationWebSocketHandler.appendLog(clusterName, execute2);
+            return false;
         } catch (Exception e) {
             String message = "Start the installation package failed, host: " + host + ", port: " + port;
             InstallationWebSocketHandler.appendLog(clusterName, message);
@@ -220,15 +231,33 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
 
     @Override
     public boolean remove(Cluster cluster, RedisNode redisNode) {
-        return true;
+        String targetPath = INSTALL_BASE_PATH + redisNode.getPort();
+        Machine machine = machineService.getMachineByHost(cluster.getGroupId(), redisNode.getHost());
+        try {
+            String rm = SSH2Util.rm(machine, targetPath, true);
+            if (Strings.isNullOrEmpty(rm)) {
+                return true;
+            }
+            String rm2 = SSH2Util.rm(machine, targetPath, false);
+            if (Strings.isNullOrEmpty(rm2)) {
+                return true;
+            }
+            logger.error("Remove redis node failed, host: " + redisNode.getHost() + ", port: " + redisNode.getPort());
+            return false;
+        } catch (Exception e) {
+            logger.error("Remove redis node failed, host: " + redisNode.getHost() + ", port: " + redisNode.getPort(), e);
+            return false;
+        }
+
     }
 
     @Override
-    public Map<String, String> getBaseConfigs(String bind, int port) {
-        Map<String, String> configs = new HashMap<>(3);
+    public Map<String, String> getBaseConfigs(String bind, int port, String dir) {
+        Map<String, String> configs = new HashMap<>(4);
         configs.put(DAEMONIZE, "yes");
         configs.put(BIND, bind);
         configs.put(PORT, port + "");
+        configs.put(DIR, dir);
         return configs;
     }
 }

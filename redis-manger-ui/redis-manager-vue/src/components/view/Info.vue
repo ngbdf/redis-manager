@@ -1,6 +1,7 @@
 <template>
   <div class="info-wrapper">
-    <div class="info-item" v-for="infoItem in infoList" :key="infoItem.key">
+    <el-input v-model="search" size="mini" placeholder="search" style="margin-bottom: 20px;" />
+    <div class="info-item" v-for="infoItem in filterInfoList" :key="infoItem.key">
       <div class="description" v-if="infoItem.description != null"># {{ infoItem.description }}</div>
       <span>
         <span class="key">{{ infoItem.key }}:</span>
@@ -19,7 +20,8 @@ export default {
   },
   data() {
     return {
-      infoList: []
+      infoList: [],
+      search: ""
     };
   },
   methods: {
@@ -42,6 +44,15 @@ export default {
       );
     }
   },
+  computed: {
+    filterInfoList() {
+      return this.infoList.filter(
+        item =>
+          !this.search ||
+          item.key.toLowerCase().includes(this.search.toLowerCase())
+      );
+    }
+  },
   mounted() {
     this.getNodeInfo();
   }
@@ -56,17 +67,19 @@ export default {
   word-break: break-all;
   white-space: pre-wrap;
   margin-bottom: 5px;
-  line-height: 20px;
 }
 .description {
   color: #c0c4cc;
+  font-size: 13px;
 }
 
 .key {
   color: #303133;
+  font-size: 13px;
 }
 .value {
   color: #409eff;
   font: bold;
+  font-size: 13px;
 }
 </style>

@@ -745,7 +745,6 @@ export default {
       }
     },
     getSlowLogList(slowLogParam) {
-      console.log("=========================");
       let url = "/monitor/getSlowLogList";
       API.post(
         url,

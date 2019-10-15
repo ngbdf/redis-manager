@@ -387,7 +387,7 @@ public class RedisConfigUtil {
         // ip
         REDIS_CONFIG_LIST.add(new RedisConfig(true, "bind", "{bind}", NORMAL_TYPE));
         // 工作目录
-        REDIS_CONFIG_LIST.add(new RedisConfig(true, "dir", REDIS_DEFAULT_WORK_DIR, NORMAL_TYPE));
+        REDIS_CONFIG_LIST.add(new RedisConfig(true, "dir", "{dir}", NORMAL_TYPE));
         // 端口
         REDIS_CONFIG_LIST.add(new RedisConfig(true, "port", "{port}", NORMAL_TYPE, "端口"));
     }

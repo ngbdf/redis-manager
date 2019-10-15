@@ -1,7 +1,11 @@
 <template>
   <div class="config-wrapper">
-    <div class="config-item" v-for="configItem in configList" :key="configItem.key">
-      <div class="description" v-if="configItem.description != null && configItem.description != ''"># {{ configItem.description }}</div>
+    <el-input v-model="search" size="mini" placeholder="search" style="margin-bottom: 20px;"/>
+    <div class="config-item" v-for="configItem in filterConfigList" :key="configItem.key">
+      <div
+        class="description"
+        v-if="configItem.description != null && configItem.description != ''"
+      ># {{ configItem.description }}</div>
       <span>
         <span class="key">{{ configItem.key }}:</span>
         <span class="value">{{ configItem.value }}</span>
@@ -18,7 +22,8 @@ export default {
   },
   data() {
     return {
-      configList: []
+      configList: [],
+      search: ""
     };
   },
   methods: {
@@ -38,6 +43,15 @@ export default {
         err => {
           console.log(err);
         }
+      );
+    }
+  },
+  computed: {
+    filterConfigList() {
+      return this.configList.filter(
+        item =>
+          !this.search ||
+          item.key.toLowerCase().includes(this.search.toLowerCase())
       );
     }
   },
