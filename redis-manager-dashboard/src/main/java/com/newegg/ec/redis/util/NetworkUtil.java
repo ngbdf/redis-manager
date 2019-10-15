@@ -22,16 +22,6 @@ public class NetworkUtil {
     private NetworkUtil() {
     }
 
-    /*public static final boolean ping(String ip) {
-        try {
-            InetAddress address = InetAddress.getByName(ip);
-            return address.isReachable(TIMEOUT);
-        } catch (Exception e) {
-            logger.error(ip + " unreachable.", e);
-        }
-        return false;
-    }*/
-
     /**
      * 监测端口是否在使用
      *

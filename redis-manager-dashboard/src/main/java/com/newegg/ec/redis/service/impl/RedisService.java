@@ -57,14 +57,16 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
 
     @Override
     public Map<String, String> getNodeInfo(HostAndPort hostAndPort, String redisPassword) {
-        RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPort, redisPassword);
+        RedisClient redisClient = null;
         try {
+            redisClient = RedisClientFactory.buildRedisClient(hostAndPort, redisPassword);
             Map<String, String> info = redisClient.getInfo();
-            redisClient.close();
             return info;
         } catch (Exception e) {
             logger.error("Get redis node info failed, " + hostAndPort, e);
             return null;
+        } finally {
+            close(redisClient);
         }
     }
 
@@ -251,12 +253,23 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     @Override
     public AutoCommandResult query(Cluster cluster, AutoCommandParam autoCommandParam) {
         // standalone or cluster
+        IDatabaseCommand client = null;
         try {
-            IDatabaseCommand client = buildDatabaseCommandClient(cluster);
+            client = buildDatabaseCommandClient(cluster);
             return client.query(autoCommandParam);
         } catch (Exception e) {
             logger.error("Auto query failed, cluster name = " + cluster.getClusterName(), e);
             return null;
+        } finally {
+            String redisMode = cluster.getRedisMode();
+            if (Objects.equals(redisMode, CLUSTER)) {
+                IRedisClusterClient redisClusterClient = (IRedisClusterClient) client;
+                if (redisClusterClient != null) {
+                    redisClusterClient.close();
+                }
+            } else {
+                close((IRedisClient) client);
+            }
         }
     }
 
@@ -304,25 +317,29 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
             if (Objects.equals(nodeId, forgetNodeId)) {
                 continue;
             }
+            RedisClient redisClient = null;
             try {
                 RedisURI redisURI = new RedisURI(redisNode.getHost(), redisNode.getPort(), redisPassword);
-                RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+                redisClient = RedisClientFactory.buildRedisClient(redisURI);
                 redisClient.clusterForget(forgetNodeId);
-                redisClient.close();
             } catch (Exception e) {
                 logger.error("Forget cluster node failed, cluster name: " + clusterName + ", bad node: " + redisNode.getHost() + ":" + redisNode.getPort(), e);
+            } finally {
+                close(redisClient);
             }
         }
+        RedisClient redisClient = null;
         try {
             RedisURI redisURI = new RedisURI(forgetNode.getHost(), forgetNode.getPort(), redisPassword);
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            redisClient = RedisClientFactory.buildRedisClient(redisURI);
             // Forget itself
             redisClient.clusterReset(ClusterReset.HARD);
-            redisClient.close();
             return true;
         } catch (Exception e) {
             logger.error("Forget itself failed, cluster name: " + clusterName + ", " + forgetNode.getHost() + ":" + forgetNode.getPort(), e);
             return false;
+        } finally {
+            close(redisClient);
         }
     }
 
@@ -332,29 +349,33 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         if (Strings.isNullOrEmpty(masterId)) {
             return false;
         }
+        RedisClient redisClient = null;
         try {
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(slaveNode, redisPassword);
+            redisClient = RedisClientFactory.buildRedisClient(slaveNode, redisPassword);
             boolean result = redisClient.clusterReplicate(masterId);
-            redisClient.close();
             return result;
         } catch (Exception e) {
             logger.error(slaveNode.getHost() + ":" + slaveNode.getPort() + " replicate " + masterId + " failed.", e);
             return false;
+        } finally {
+            close(redisClient);
         }
     }
 
     @Override
     public boolean clusterFailOver(Cluster cluster, RedisNode newMasterNode) {
         String redisPassword = cluster.getRedisPassword();
+        RedisClient redisClient = null;
         try {
             RedisURI redisURI = new RedisURI(newMasterNode.getHost(), newMasterNode.getPort(), redisPassword);
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            redisClient = RedisClientFactory.buildRedisClient(redisURI);
             redisClient.clusterFailOver();
-            redisClient.close();
             return true;
         } catch (Exception e) {
             logger.error(newMasterNode.getHost() + ":" + newMasterNode.getPort() + " fail over failed", e);
             return false;
+        } finally {
+            close(redisClient);
         }
     }
 
@@ -378,13 +399,13 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
             int port = redisNode.getPort();
             try {
                 redisClient.clusterMeet(host, port);
-                redisClient.close();
             } catch (Exception e) {
                 String message = "Cluster meet " + host + ":" + port + " failed.";
                 logger.error(message, e);
                 result.append(message).append(e.getMessage());
             }
         }
+        close(redisClient);
         return result.toString();
     }
 
@@ -396,13 +417,16 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         for (int i = start, j = 0; i <= end; i++, j++) {
             slots[j] = i;
         }
+        RedisClient redisClient = null;
         try {
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(masterNode, cluster.getRedisPassword());
+            redisClient = RedisClientFactory.buildRedisClient(masterNode, cluster.getRedisPassword());
             String result = redisClient.clusterAddSlots(slots);
             return Objects.equals(result, OK) ? result : null;
         } catch (Exception e) {
             logger.error(cluster.getClusterName() + " add slots error, " + shade, e);
             return e.getMessage();
+        } finally {
+            close(redisClient);
         }
     }
 
@@ -435,7 +459,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
             if (sourceNode == null) {
                 // 直接分配此 slot
                 targetRedisClient.clusterAddSlots(slot);
-                targetRedisClient.close();
+                close(targetRedisClient);
                 continue;
             }
             // 如果此 slot 就在它自己本身，则直接跳过
@@ -464,14 +488,10 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
                 targetRedisClient.clusterSetSlotStable(slot);
                 sourceRedisClient.clusterSetSlotStable(slot);
             } finally {
-                // set slot to target node
-                //targetRedisClient.clusterSetSlotNode(slot, targetNodeId);
-                //？ 这个很奇怪如果没有设置 stable 它的迁移状态会一直在的
-                //sourceRedisClient.clusterSetSlotStable(slot);
                 // 所有主节点通知更新数据(槽道迁移)
                 disseminate(masterNodeAndShadeMap.keySet(), redisPassword, slot, targetNodeId);
-                sourceRedisClient.close();
-                targetRedisClient.close();
+                close(sourceRedisClient);
+                close(targetRedisClient);
             }
         }
         return result;
@@ -562,28 +582,33 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         String clusterName = cluster.getClusterName();
         String masterHost = masterNode.getHost();
         int masterPort = masterNode.getPort();
+        RedisClient redisClient = null;
         try {
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
+            redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
             redisClient.replicaOf(masterHost, masterPort);
-            redisClient.close();
             redisClient.replicaOf(masterHost, masterPort);
             return true;
         } catch (Exception e) {
             logger.error(redisNode.getHost() + ":" + redisNode.getPort() + " replica of " + masterHost + ":" + masterPort + " failed, cluster name: " + clusterName, e);
             return false;
+        } finally {
+            close(redisClient);
         }
     }
 
     @Override
     public boolean standaloneReplicaNoOne(Cluster cluster, RedisNode redisNode) {
         String clusterName = cluster.getClusterName();
+        RedisClient redisClient = null;
         try {
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
+            redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
             redisClient.replicaNoOne();
             return true;
         } catch (Exception e) {
             logger.error(redisNode.getHost() + ":" + redisNode.getPort() + " replica no one failed, cluster name: " + clusterName, e);
             return false;
+        } finally {
+            close(redisClient);
         }
     }
 

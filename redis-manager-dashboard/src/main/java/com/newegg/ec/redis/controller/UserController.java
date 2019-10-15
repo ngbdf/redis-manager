@@ -30,11 +30,21 @@ public class UserController {
         return Result.successResult(userLogin);
     }
 
+    @RequestMapping(value = "/oauth2", method = RequestMethod.POST)
+    @ResponseBody
+    public Result oauth2(User user) {
+        User userLogin = userService.getUserByNameAndPassword(user);
+        if (userLogin == null) {
+            return Result.failResult();
+        }
+        return Result.successResult(userLogin);
+    }
+
     @RequestMapping(value = "/getUserRole", method = RequestMethod.POST)
     @ResponseBody
-    public Result getUserRole(Integer groupId, Integer userId) {
-        User user = userService.getUserRole(groupId, userId);
-        if (user == null) {
+    public Result getUserRole(User user) {
+        User exist = userService.getUserRole(user.getGroupId(), user.getUserId());
+        if (exist == null) {
             return Result.successResult(User.UserRole.MEMBER);
         }
         return Result.successResult(user.getUserRole());

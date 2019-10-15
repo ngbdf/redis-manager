@@ -274,7 +274,6 @@ public class NodeManageController {
                     String oneResult = redisService.clusterMeet(cluster, seed, redisNodeList);
                     if (Strings.isNullOrEmpty(oneResult)) {
                         message.append(oneResult);
-                        // TODO: save to db
                         boolean exist = redisNodeService.existRedisNode(redisNode);
                         if (!exist) {
                             try {
