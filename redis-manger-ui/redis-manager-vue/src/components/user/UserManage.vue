@@ -41,6 +41,9 @@
 
     <el-dialog title="Create User" :visible.sync="createUserVisible">
       <el-form :model="user">
+        <el-form-item label="Group Name" label-width="100px">
+          <el-tag size="small">{{ currentGroup.groupName }}</el-tag>
+        </el-form-item>
         <el-form-item label="User Role" label-width="100px">
           <el-select size="small" v-model="user.userRole" placeholder="Please select user role">
             <el-option label="Member" value="member"></el-option>
@@ -68,6 +71,8 @@
 </template>
 
 <script>
+import { store } from "@/vuex/store.js";
+import API from "@/api/api.js";
 export default {
   data() {
     return {
@@ -95,6 +100,14 @@ export default {
     handleDelete(index, row) {
       console.log(index, row);
     }
+  },
+  computed: {
+    currentGroup() {
+      return store.getters.getCurrentGroup;
+    }
+  },
+  mounted() {
+    let groupId = this.$route.params.groupId;
   }
 };
 </script>

@@ -17,7 +17,7 @@ public class DockerClientOperationTest {
 
     DockerClientOperation dockerClientOperation = new DockerClientOperation();
 
-    String IP = "101.456.510.456";
+    String IP = "10.16.50.217";
 
     @Test
     public void getDockerClient() {

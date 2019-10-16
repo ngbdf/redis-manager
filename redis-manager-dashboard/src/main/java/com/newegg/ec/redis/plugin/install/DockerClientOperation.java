@@ -30,7 +30,7 @@ import static com.newegg.ec.redis.util.SignUtil.MINUS;
 public class DockerClientOperation {
 
     @Value("${redis-manager.install.docker.docker-host:tcp://%s:2375}")
-    private String dockerHost = "tcp://%s:2375";
+    private String dockerHost = "tcp://%s:2375/";
 
     private static final String VOLUME = DOCKER_INSTALL_BASE_PATH + "%d:/data";
 

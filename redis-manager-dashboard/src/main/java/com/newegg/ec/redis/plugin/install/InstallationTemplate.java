@@ -203,7 +203,7 @@ public class InstallationTemplate {
             int nodeNumber = masterNumber * (replicaNumber + 1);
             int port = installationParam.getStartPort();
             List<MachineAndPorts> machineAndPortsList = buildMachinePortsMap(clusterName, machineList, port, nodeNumber);
-            topology = randomPolicy(machineAndPortsList, masterNumber, replicaNumber);
+            topology = randomPolicy(machineAndPortsList, masterNumber, replicaNumber, nodeNumber);
         } else {
             List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
             RedisNode masterNode = null;
@@ -242,13 +242,16 @@ public class InstallationTemplate {
      * @param replicaNumber
      * @return
      */
-    public Multimap<RedisNode, RedisNode> randomPolicy(List<MachineAndPorts> machineAndPortsList, int masterNumber, int replicaNumber) {
+    public Multimap<RedisNode, RedisNode> randomPolicy(List<MachineAndPorts> machineAndPortsList, int masterNumber, int replicaNumber, int nodeNumber) {
         Map<RedisNode, List<RedisNode>> tempTopology = buildMasterNodes(machineAndPortsList, masterNumber);
         List<RedisNode> allSlaveNodes = new ArrayList<>();
         machineAndPortsList.forEach(machineAndPorts -> {
             Machine machine = machineAndPorts.getMachine();
             List<Integer> ports = machineAndPorts.getPorts();
             for (Integer port : ports) {
+                if ((masterNumber + allSlaveNodes.size()) >= nodeNumber) {
+                    break;
+                }
                 allSlaveNodes.add(new RedisNode(machine.getHost(), port, SLAVE));
             }
         });
@@ -271,10 +274,7 @@ public class InstallationTemplate {
     private Map<RedisNode, List<RedisNode>> buildMasterNodes(List<MachineAndPorts> machineAndPortsList, int masterNumber) {
         // 排序
         Map<RedisNode, List<RedisNode>> topology = new LinkedHashMap<>();
-        while (topology.keySet().size() < masterNumber) {
-            if (getPortNumber(machineAndPortsList) == 0) {
-                break;
-            }
+        while (topology.keySet().size() < masterNumber && getPortNumber(machineAndPortsList) > 0) {
             for (MachineAndPorts machineAndPorts : machineAndPortsList) {
                 List<Integer> ports = machineAndPorts.getPorts();
                 if (topology.keySet().size() >= masterNumber || ports.isEmpty()) {
@@ -318,10 +318,12 @@ public class InstallationTemplate {
      */
     private List<MachineAndPorts> buildMachinePortsMap(String clusterName, List<Machine> machineList, int port, int nodeNumber) {
         List<MachineAndPorts> machineAndPortsList = new ArrayList<>();
+        int avgNodeNumber = nodeNumber / machineList.size();
+        avgNodeNumber = nodeNumber % machineList.size() == 0 ? avgNodeNumber : avgNodeNumber + 1;
         for (Machine machine : machineList) {
             List<Integer> ports = new ArrayList<>();
             String host = machine.getHost();
-            while (nodeNumber > ports.size()) {
+            while (avgNodeNumber > ports.size() && getPortNumber(machineAndPortsList) < nodeNumber) {
                 if (port >= MAX_PORT) {
                     break;
                 }
@@ -516,6 +518,7 @@ public class InstallationTemplate {
         }
         realTopology.forEach((masterNodeWithInfo, slaveNode) -> {
             boolean replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);
+            //waitAfterOperation(FIVE_SECONDS);
             int waitTimeout = 0;
             while (!replicateResult && waitTimeout < ONE_MINUTE) {
                 try {
@@ -531,10 +534,6 @@ public class InstallationTemplate {
                         slaveNode.getHost() + ":" + slaveNode.getPort() + " replicate failed.");
             }
         });
-        try {
-            Thread.sleep(FIVE_SECONDS);
-        } catch (InterruptedException e) {
-        }
     }
 
     private String updateRedisPassword(String redisPassword, Cluster cluster) {
@@ -623,11 +622,7 @@ public class InstallationTemplate {
         Cluster cluster = installationParam.getCluster();
         String nodes = generateConnectionNodes(cluster);
         cluster.setNodes(nodes);
-        try {
-            Thread.sleep(ONE_SECOND);
-        } catch (InterruptedException e) {
-        }
-
+        waitAfterOperation(ONE_SECOND);
         clusterService.addCluster(cluster);
         List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
         List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
@@ -669,4 +664,10 @@ public class InstallationTemplate {
         }
     }
 
+    private static void waitAfterOperation(long duration) {
+        try {
+            Thread.sleep(duration);
+        } catch (InterruptedException e) {
+        }
+    }
 }

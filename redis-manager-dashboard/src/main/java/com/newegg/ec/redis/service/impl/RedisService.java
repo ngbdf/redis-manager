@@ -32,6 +32,7 @@ import static com.newegg.ec.redis.util.RedisClusterInfoUtil.OK;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.EXPIRES;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.KEYS;
 import static com.newegg.ec.redis.util.RedisUtil.*;
+import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
 
 /**
  * @author Jay.H.Zou
@@ -141,16 +142,18 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         String redisMode = cluster.getRedisMode();
         List<RedisNode> nodeList = new ArrayList<>();
         if (STANDALONE.equalsIgnoreCase(redisMode)) {
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
             try {
+                RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
                 nodeList = redisClient.nodes();
+                redisClient.close();
             } catch (Exception e) {
                 logger.error("Get redis node list failed, " + cluster, e);
             }
         } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
-            RedisClusterClient redisClusterClient = RedisClientFactory.buildRedisClusterClient(redisURI);
             try {
+                RedisClusterClient redisClusterClient = RedisClientFactory.buildRedisClusterClient(redisURI);
                 nodeList = redisClusterClient.clusterNodes();
+                redisClusterClient.close();
             } catch (Exception e) {
                 logger.error("Get redis node list failed, " + cluster, e);
             }
@@ -383,30 +386,32 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     @Override
     public String clusterMeet(Cluster cluster, RedisNode seed, List<RedisNode> redisNodeList) {
         StringBuffer result = new StringBuffer();
-        RedisClient redisClient;
+
         try {
-            redisClient = RedisClientFactory.buildRedisClient(seed, cluster.getRedisPassword());
+            for (RedisNode redisNode : redisNodeList) {
+                if (RedisUtil.equals(seed, redisNode)) {
+                    continue;
+                }
+                RedisClient redisClient = null;
+                String host = redisNode.getHost();
+                int port = redisNode.getPort();
+                try {
+                    redisClient = RedisClientFactory.buildRedisClient(seed, cluster.getRedisPassword());
+                    redisClient.clusterMeet(host, port);
+                    Thread.sleep(TEN_SECONDS);
+                } catch (Exception e) {
+                    String message = "Cluster meet " + host + ":" + port + " failed.";
+                    logger.error(message, e);
+                    result.append(message).append(e.getMessage());
+                } finally {
+                    close(redisClient);
+                }
+            }
         } catch (Exception e) {
             String message = "Create redis client failed.";
             logger.error(message, e);
             result.append(message).append(e.getMessage());
-            return result.toString();
         }
-        for (RedisNode redisNode : redisNodeList) {
-            if (RedisUtil.equals(seed, redisNode)) {
-                continue;
-            }
-            String host = redisNode.getHost();
-            int port = redisNode.getPort();
-            try {
-                redisClient.clusterMeet(host, port);
-            } catch (Exception e) {
-                String message = "Cluster meet " + host + ":" + port + " failed.";
-                logger.error(message, e);
-                result.append(message).append(e.getMessage());
-            }
-        }
-        close(redisClient);
         return result.toString();
     }
 
