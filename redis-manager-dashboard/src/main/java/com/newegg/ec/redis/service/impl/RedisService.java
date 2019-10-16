@@ -2,6 +2,7 @@ package com.newegg.ec.redis.service.impl;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.*;
+import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
@@ -410,6 +411,13 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     }
 
     @Override
+    public String clusterMeet(Cluster cluster, RedisNode seed, RedisNode redisNode) {
+        List<RedisNode> redisNodeList = new ArrayList<>();
+        redisNodeList.add(redisNode);
+        return clusterMeet(cluster, seed, redisNodeList);
+    }
+
+    @Override
     public String clusterAddSlots(Cluster cluster, RedisNode masterNode, SlotBalanceUtil.Shade shade) {
         int start = shade.getStartSlot();
         int end = shade.getEndSlot();
@@ -578,19 +586,23 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     }
 
     @Override
-    public boolean standaloneReplicaOf(Cluster cluster, RedisNode masterNode, RedisNode redisNode) {
+    public String standaloneReplicaOf(Cluster cluster, RedisNode masterNode, RedisNode redisNode) {
         String clusterName = cluster.getClusterName();
         String masterHost = masterNode.getHost();
         int masterPort = masterNode.getPort();
+        StringBuilder result = new StringBuilder();
         RedisClient redisClient = null;
         try {
             redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
             redisClient.replicaOf(masterHost, masterPort);
-            redisClient.replicaOf(masterHost, masterPort);
-            return true;
+            return result.toString();
         } catch (Exception e) {
-            logger.error(redisNode.getHost() + ":" + redisNode.getPort() + " replica of " + masterHost + ":" + masterPort + " failed, cluster name: " + clusterName, e);
-            return false;
+            String template = "%s:%d replica of %s:%d failed, cluster name: %s";
+            result.append(String.format(template, redisNode.getHost(), redisNode.getPort(), masterHost, masterPort, clusterName));
+            InstallationWebSocketHandler.appendLog(clusterName, result.toString());
+            InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+            logger.error(result.toString(), e);
+            return result.toString();
         } finally {
             close(redisClient);
         }
@@ -651,7 +663,9 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
                 configValue = "";
             }
             redisClient.setConfig(new Pair<>(redisConfig.getConfigKey(), configValue));
-            redisClient.clusterSaveConfig();
+            if (Objects.equals(cluster.getRedisMode(), CLUSTER)) {
+                redisClient.clusterSaveConfig();
+            }
             redisClient.rewriteConfig();
             return true;
         } catch (Exception e) {

@@ -127,7 +127,7 @@
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
                     @click.native="handleMoveSlot(scope.row)"
-                    v-if="scope.row.nodeRole == 'MASTER' && scope.row.inCluster"
+                    v-if="cluster.redisMode == 'cluster' && (scope.row.nodeRole == 'MASTER' && scope.row.inCluster)"
                   >Move Slot</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleForget(scope.row)"
@@ -135,11 +135,12 @@
                   >Forget</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleReplicateOf(scope.row)"
-                    v-if="scope.row.inCluster && (scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA' || (scope.row.nodeRole == 'MASTER' && scope.row.slotRange == null))"
+                    v-if="(cluster.redisMode == 'cluster' && scope.row.inCluster && (scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA' || (scope.row.nodeRole == 'MASTER' && scope.row.slotRange == null))
+                     || (cluster.redisMode == 'standalone' && !scope.row.inCluster))"
                   >Replicate Of</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleFailOver(scope.row)"
-                    v-if="(scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA') && scope.row.inCluster "
+                    v-if="cluster.redisMode == 'cluster' && (scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA') && scope.row.inCluster "
                   >Fail Over</el-dropdown-item>
                   <el-dropdown-item>Memory Purge</el-dropdown-item>
                 </el-dropdown-menu>
@@ -347,7 +348,7 @@
     >
       <span>{{ operationNode.host }}:{{ operationNode.port }} will be stop</span>
       <span slot="footer" class="dialog-footer">
-        <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
+        <el-button size="small" @click="stopNodeVisible = false">Cancel</el-button>
         <el-button size="small" type="danger" @click="stopNode()">Stop</el-button>
       </span>
     </el-dialog>
@@ -359,7 +360,7 @@
     >
       <span>{{ operationNode.host }}:{{ operationNode.port }} will be restart</span>
       <span slot="footer" class="dialog-footer">
-        <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
+        <el-button size="small" @click="restartNodeVisible = false">Cancel</el-button>
         <el-button size="small" type="primary" @click="restartNode()">Restart</el-button>
       </span>
     </el-dialog>
@@ -371,7 +372,7 @@
     >
       <span>{{ operationNode.host }}:{{ operationNode.port }} will be delete</span>
       <span slot="footer" class="dialog-footer">
-        <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
+        <el-button size="small" @click="deleteNodeVisible = false">Cancel</el-button>
         <el-button size="small" type="danger" @click="deleteNode()">Delete</el-button>
       </span>
     </el-dialog>
@@ -615,12 +616,15 @@ export default {
           let result = response.data;
           // console.log(result.data);
           if (result.code == 0) {
-            console.log(result.data);
-            let redisNodeList = [];
             let nodeList = result.data;
+            let redisNodeList = [];
             let masterRedisNode;
             let children = [];
             nodeList.forEach(node => {
+              let nodeId = node.nodeId;
+              if (isEmpty(nodeId)) {
+                node.nodeId = node.host + ":" + node.port;
+              }
               let flags = node.flags;
               node.time = formatTime(node.insertTime);
               if (flags == "master") {
@@ -768,7 +772,16 @@ export default {
       this.operationNodeList.forEach(redisNode => {
         redisNode.masterId = nodeId;
       });
-      let url = "/nodeManage/replicateOf";
+      let redisMode = this.cluster.redisMode;
+      let url;
+      if (redisMode == "cluster") {
+        url = "/nodeManage/replicateOf";
+      } else if (redisMode == "standalone") {
+        url = "/nodeManage/standaloneReplicateOf";
+      } else {
+        return;
+      }
+      console.log(url);
       API.post(
         url,
         this.operationNodeList,
@@ -846,7 +859,15 @@ export default {
       this.buildNodeList(redisNode);
     },
     forget() {
-      let url = "/nodeManage/forget";
+      let redisMode = this.cluster.redisMode;
+      let url;
+      if (redisMode == "cluster") {
+        url = "/nodeManage/forget";
+      } else if (redisMode == "standalone") {
+        url = "/nodeManage/standaloneForget";
+      } else {
+        return;
+      }
       if (!this.canOperate()) {
         return;
       }

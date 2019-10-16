@@ -23,7 +23,7 @@ public enum NodeRole {
      */
     REPLICA("replica"),
 
-    UNKNOWN();
+    UNKNOWN("unknown");
 
     private String value;
 

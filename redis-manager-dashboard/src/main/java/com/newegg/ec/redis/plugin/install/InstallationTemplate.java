@@ -404,6 +404,7 @@ public class InstallationTemplate {
         Cluster cluster = installationParam.getCluster();
         String clusterName = cluster.getClusterName();
         String redisPassword = cluster.getRedisPassword();
+        cluster.setRedisPassword(null);
         Multimap<RedisNode, RedisNode> topology = installationParam.getTopology();
         RedisNode seed = getSeedNode(cluster, topology);
         List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
@@ -603,26 +604,17 @@ public class InstallationTemplate {
      * @param redisNodeList
      * @return
      */
-    private boolean buildStandalone(Cluster cluster, RedisNode seed, List<RedisNode> redisNodeList) {
+    private void buildStandalone(Cluster cluster, RedisNode seed, List<RedisNode> redisNodeList) {
         String clusterName = cluster.getClusterName();
-        for (RedisNode redisNode: redisNodeList) {
+        for (RedisNode redisNode : redisNodeList) {
             if (RedisUtil.equals(seed, redisNode)) {
                 continue;
             }
-            String host = seed.getHost();
-            int port = seed.getPort();
-            try {
-                RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode);
-                boolean result = redisClient.replicaOf(host, port);
-                if (!result) {
-                    InstallationWebSocketHandler.appendLog(clusterName, redisNode.getHost() + ":" + redisNode.getPort() + " failed to replicate of " + host + ":" + port);
-                }
-            } catch (Exception e) {
-                logger.error("", e);
-                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+            String result = redisService.standaloneReplicaOf(cluster, seed, redisNode);
+            if (!Strings.isNullOrEmpty(result)) {
+                InstallationWebSocketHandler.appendLog(clusterName, result);
             }
         }
-        return true;
     }
 
     private boolean saveToDB(InstallationParam installationParam) {

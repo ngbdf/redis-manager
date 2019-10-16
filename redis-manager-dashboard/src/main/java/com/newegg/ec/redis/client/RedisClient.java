@@ -130,32 +130,32 @@ public class RedisClient implements IRedisClient {
         List<RedisNode> nodeList = new ArrayList<>();
         Map<String, String> infoMap = getInfo(REPLICATION);
         String role = infoMap.get(ROLE);
+        String masterHost = null;
+        Integer masterPort = null;
         // 使用 master node 进行连接
         if (Objects.equals(role, NodeRole.SLAVE.getValue())) {
-            String host = infoMap.get(MASTER_HOST);
-            int port = Integer.parseInt(infoMap.get(MASTER_PORT));
-            RedisURI masterURI = new RedisURI(new HostAndPort(host, port), redisURI.getRequirePass());
+            close();
+            masterHost = infoMap.get(MASTER_HOST);
+            masterPort = Integer.parseInt(infoMap.get(MASTER_PORT));
+            RedisURI masterURI = new RedisURI(new HostAndPort(masterHost, masterPort), redisURI.getRequirePass());
             RedisClient redisClient = RedisClientFactory.buildRedisClient(masterURI);
             infoMap = redisClient.getInfo(REPLICATION);
             redisClient.close();
+        } else {
+            Set<HostAndPort> hostAndPortSet = redisURI.getHostAndPortSet();
+            HostAndPort hostAndPort = hostAndPortSet.iterator().next();
+            masterHost = hostAndPort.getHost();
+            masterPort = hostAndPort.getPort();
         }
-        RedisNode masterNode = new RedisNode();
-        masterNode.setNodeRole(NodeRole.MASTER);
         for (Map.Entry<String, String> node : infoMap.entrySet()) {
             String infoKey = node.getKey();
             String infoValue = node.getValue();
-            if (Objects.equals(infoKey, MASTER_HOST)) {
-                masterNode.setHost(infoValue);
-            }
-            if (Objects.equals(infoKey, MASTER_PORT)) {
-                masterNode.setPort(Integer.parseInt(infoValue));
-            }
             if (!infoKey.contains(NodeRole.SLAVE.getValue())) {
                 continue;
             }
             String[] keyAndValues = SignUtil.splitByCommas(infoValue);
             if (keyAndValues.length < 2) {
-                return nodeList;
+                continue;
             }
             String slaveIp = null;
             String slavePort = null;
@@ -171,8 +171,19 @@ public class RedisClient implements IRedisClient {
             }
             if (!Strings.isNullOrEmpty(slaveIp) && !Strings.isNullOrEmpty(slavePort)) {
                 RedisNode redisNode = new RedisNode(slaveIp, Integer.parseInt(slavePort), NodeRole.SLAVE);
+                redisNode.setLinkState("connected");
+                redisNode.setFlags(NodeRole.SLAVE.getValue());
                 nodeList.add(redisNode);
             }
+        }
+        if (!Strings.isNullOrEmpty(masterHost)) {
+            RedisNode masterNode = new RedisNode();
+            masterNode.setNodeRole(NodeRole.MASTER);
+            masterNode.setHost(masterHost);
+            masterNode.setPort(masterPort);
+            masterNode.setLinkState("connected");
+            masterNode.setFlags(NodeRole.MASTER.getValue());
+            nodeList.add(masterNode);
         }
         return nodeList;
     }

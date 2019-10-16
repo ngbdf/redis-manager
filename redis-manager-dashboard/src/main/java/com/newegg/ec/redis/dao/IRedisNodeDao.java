@@ -55,7 +55,7 @@ public interface IRedisNodeDao {
             "`port` integer(4) NOT NULL, " +
             "`node_role` varchar(50) DEFAULT NULL, " +
             "`flags` varchar(50) DEFAULT NULL, " +
-            "`link_state` varchar(50) NOT NULL, " +
+            "`link_state` varchar(50) DEFAULT NULL, " +
             "`slot_range` varchar(50) DEFAULT NULL, " +
             "`slot_number` integer(4) DEFAULT NULL, " +
             "`container_id` varchar(255) DEFAULT NULL, " +

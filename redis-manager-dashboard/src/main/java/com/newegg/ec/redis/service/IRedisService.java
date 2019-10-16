@@ -92,6 +92,8 @@ public interface IRedisService {
      */
     String clusterMeet(Cluster cluster, RedisNode seed, List<RedisNode> redisNodeList);
 
+    String clusterMeet(Cluster cluster, RedisNode seed, RedisNode redisNode);
+
     String clusterAddSlots(Cluster cluster, RedisNode masterNode, SlotBalanceUtil.Shade shade);
 
     String clusterAddSlotsBatch(Cluster cluster, Map<RedisNode, SlotBalanceUtil.Shade> masterNodeAndShade);
@@ -113,7 +115,7 @@ public interface IRedisService {
      * @param redisNode
      * @return
      */
-    boolean standaloneReplicaOf(Cluster cluster, RedisNode masterNode, RedisNode redisNode);
+    String standaloneReplicaOf(Cluster cluster, RedisNode masterNode, RedisNode redisNode);
 
     /**
      * Forget this node

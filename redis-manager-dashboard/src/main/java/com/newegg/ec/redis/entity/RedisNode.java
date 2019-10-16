@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.entity;
 
+import redis.clients.jedis.HostAndPort;
+
 import java.sql.Timestamp;
 
 /**
@@ -88,6 +90,10 @@ public class RedisNode {
 
     public static RedisNode masterRedisNode(String host, int port) {
         return new RedisNode(host, port, NodeRole.MASTER);
+    }
+
+    public static RedisNode masterRedisNode(HostAndPort hostAndPort) {
+        return new RedisNode(hostAndPort.getHost(), hostAndPort.getPort(), NodeRole.MASTER);
     }
 
     public static RedisNode masterRedisNode(String nodeId, String host, int port) {

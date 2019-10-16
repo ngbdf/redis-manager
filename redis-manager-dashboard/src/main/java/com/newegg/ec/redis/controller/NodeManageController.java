@@ -22,6 +22,7 @@ import redis.clients.jedis.HostAndPort;
 
 import java.util.*;
 
+import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
 import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
 
 /**
@@ -179,6 +180,26 @@ public class NodeManageController {
         return result;
     }
 
+    @RequestMapping(value = "/standaloneForget", method = RequestMethod.POST)
+    @ResponseBody
+    public Result standaloneForget(@RequestBody List<RedisNode> redisNodeList) {
+        Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> redisService.standaloneReplicaNoOne(cluster, redisNode));
+        return result;
+    }
+
+    @RequestMapping(value = "/standaloneReplicateOf", method = RequestMethod.POST)
+    @ResponseBody
+    public Result standaloneReplicateOf(@RequestBody List<RedisNode> redisNodeList) {
+        Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> {
+            String masterNode = redisNode.getMasterId();
+            HostAndPort hostAndPort = RedisUtil.nodesToHostAndPort(masterNode);
+            RedisNode masterRedisNode = RedisNode.masterRedisNode(hostAndPort);
+            String resultMessage = redisService.standaloneReplicaOf(cluster, masterRedisNode, redisNode);
+            return Strings.isNullOrEmpty(resultMessage);
+        });
+        return result;
+    }
+
     @RequestMapping(value = "/failOver", method = RequestMethod.POST)
     @ResponseBody
     public Result failOver(@RequestBody List<RedisNode> redisNodeList) {
@@ -253,27 +274,28 @@ public class NodeManageController {
         try {
             RedisNode firstRedisNode = redisNodeList.get(0);
             final Cluster cluster = getCluster(firstRedisNode.getClusterId());
+            String redisMode = cluster.getRedisMode();
             StringBuilder message = new StringBuilder();
+            List<RedisNode> redisMasterNodeList = redisService.getRedisMasterNodeList(cluster);
             redisNodeList.forEach(redisNode -> {
-                Set<HostAndPort> hostAndPorts = RedisUtil.nodesToHostAndPortSet(cluster.getNodes());
-                Iterator<HostAndPort> iterator = hostAndPorts.iterator();
+                Iterator<RedisNode> iterator = redisMasterNodeList.iterator();
                 RedisNode seed = null;
                 while (iterator.hasNext()) {
-                    HostAndPort hostAndPort = iterator.next();
-                    String host = hostAndPort.getHost();
-                    int port = hostAndPort.getPort();
-                    if(Objects.equals(redisNode.getHost(), host) && redisNode.getPort() == port) {
+                    RedisNode masterNode = iterator.next();
+                    if (Objects.equals(redisNode, masterNode)) {
                         continue;
                     }
-                    seed = new RedisNode();
-                    seed.setHost(host);
-                    seed.setPort(port);
+                    seed = masterNode;
                     break;
                 }
                 if (seed != null) {
-                    String oneResult = redisService.clusterMeet(cluster, seed, redisNodeList);
+                    String oneResult = null;
+                    if (Objects.equals(redisMode, CLUSTER)) {
+                        oneResult = redisService.clusterMeet(cluster, seed, redisNode);
+                    } else {
+                        redisService.standaloneReplicaOf(cluster, seed, redisNode);
+                    }
                     if (Strings.isNullOrEmpty(oneResult)) {
-                        message.append(oneResult);
                         boolean exist = redisNodeService.existRedisNode(redisNode);
                         if (!exist) {
                             try {
@@ -289,6 +311,8 @@ public class NodeManageController {
                                 }
                             });
                         }
+                    } else {
+                        message.append(oneResult);
                     }
                 }
             });

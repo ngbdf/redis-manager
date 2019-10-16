@@ -221,6 +221,12 @@ public class ClusterService implements IClusterService {
         cluster.setClusterSize(1);
         cluster.setClusterKnownNodes(redisNodeList.size());
         cluster.setClusterState(Cluster.ClusterState.HEALTH);
+
+        cluster.setClusterSlotsAssigned(1);
+        cluster.setClusterSlotsFail(1);
+        cluster.setClusterSlotsPfail(1);
+        cluster.setClusterSlotsOk(1);
+
         return true;
     }
 

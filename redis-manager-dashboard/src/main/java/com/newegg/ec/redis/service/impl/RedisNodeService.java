@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.IRedisNodeDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.NodeRole;
@@ -9,6 +10,7 @@ import com.newegg.ec.redis.service.IRedisNodeService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisUtil;
+import com.newegg.ec.redis.util.SignUtil;
 import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import static com.newegg.ec.redis.entity.NodeRole.MASTER;
+import static com.newegg.ec.redis.entity.NodeRole.UNKNOWN;
 
 /**
  * @author Jay.H.Zou
@@ -126,6 +129,7 @@ public class RedisNodeService implements IRedisNodeService {
             redisNode.setInCluster(false);
             boolean run = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
             redisNode.setRunStatus(run);
+            redisNode.setLinkState("unknown");
             redisNodeList.add(redisNode);
         });
         return redisNodeList;
@@ -141,6 +145,11 @@ public class RedisNodeService implements IRedisNodeService {
     @Override
     public boolean addRedisNodeList(List<RedisNode> redisNodeList) {
         try {
+            redisNodeList.forEach(redisNode -> {
+                if (Strings.isNullOrEmpty(redisNode.getNodeId())) {
+                    redisNode.setNodeId(redisNode.getHost() + SignUtil.COLON + redisNode.getPort());
+                }
+            });
             redisNodeDao.insertRedisNodeList(redisNodeList);
             return true;
         } catch (Exception e) {
