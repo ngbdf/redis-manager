@@ -21,7 +21,7 @@ public class AlertRecordController {
     @Autowired
     private IAlertRecordService alertRecordService;
 
-    @RequestMapping(value = "/getAlertRecordList/{clusterId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getAlertRecord/cluster/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAlertRecordList(@PathVariable("clusterId") Integer clusterId) {
         List<AlertRecord> alertRecordList = alertRecordService.getAlertRecordByClusterId(clusterId);

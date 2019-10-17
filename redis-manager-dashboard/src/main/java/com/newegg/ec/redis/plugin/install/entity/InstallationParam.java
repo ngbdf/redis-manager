@@ -37,6 +37,8 @@ public class InstallationParam {
 
     Multimap<Machine, RedisNode> machineAndRedisNode;
 
+    private String topologyList;
+
     Multimap<RedisNode, RedisNode> topology;
     /**
      * master 个数
@@ -130,6 +132,14 @@ public class InstallationParam {
 
     public void setMachineAndRedisNode(Multimap<Machine, RedisNode> machineAndRedisNode) {
         this.machineAndRedisNode = machineAndRedisNode;
+    }
+
+    public String getTopologyList() {
+        return topologyList;
+    }
+
+    public void setTopologyList(String topologyList) {
+        this.topologyList = topologyList;
     }
 
     public Multimap<RedisNode, RedisNode> getTopology() {

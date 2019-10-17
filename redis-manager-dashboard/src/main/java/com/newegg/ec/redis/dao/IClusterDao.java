@@ -68,6 +68,12 @@ public interface IClusterDao {
     @Update("UPDATE cluster SET nodes = #{nodes}, update_time = NOW() WHERE cluster_id = #{clusterId}")
     int updateNodes(@Param("clusterId") Integer clusterId, @Param("nodes") String nodes);
 
+    @Update("UPDATE cluster SET rule_ids = #{ruleIds}, update_time = NOW() WHERE cluster_id = #{clusterId}")
+    int updateClusterRuleIds(@Param("clusterId") Integer clusterId, @Param("ruleIds") String ruleIds);
+
+    @Update("UPDATE cluster SET channel_ids = #{channelIds}, update_time = NOW() WHERE cluster_id = #{clusterId}")
+    int updateClusterChannelIds(@Param("clusterId") Integer clusterId, @Param("channelIds") String channelIds);
+
     @Delete("DELETE FROM cluster WHERE cluster_id = #{clusterId}")
     int deleteClusterById(Integer clusterId);
 
@@ -94,6 +100,8 @@ public interface IClusterDao {
             "cluster_known_nodes integer(4) NOT NULL, " +
             "cluster_size integer(4) NOT NULL, " +
             "redis_password varchar(50) DEFAULT NULL, " +
+            "rule_ids varchar(255) DEFAULT NULL, " +
+            "channel_ids varchar(255) DEFAULT NULL, " +
             "installation_environment integer(2) NOT NULL, " +
             "installation_type tinyint(1) NOT NULL, " +
             "update_time datetime(0) NOT NULL, " +

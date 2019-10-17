@@ -3,7 +3,11 @@
     <div class="header-wrapper">
       <div>Bigdata</div>
       <div>
-        <el-button size="mini" type="success" @click="editVisible = true, isUpdate = false">Create</el-button>
+        <el-button
+          size="mini"
+          type="success"
+          @click="editVisible = true, isUpdate = false, alertChannel = {}"
+        >Create</el-button>
       </div>
     </div>
     <div>
@@ -12,15 +16,42 @@
         <el-table-column prop="channelName" label="Channel Name" width="150px;"></el-table-column>
         <el-table-column label="Channel Type" width="200px;">
           <template slot-scope="scope">
-            <el-tag size="small" type="success" v-if="scope.row.channelType == 0">Email</el-tag>
-            <el-tag size="small" type="success" v-if="scope.row.channelType == 1">WebChat Webhook</el-tag>
-            <!-- <el-popover trigger="hover" placement="top">
-              <p>姓名: {{ scope.row.name }}</p>
-              <p>住址: {{ scope.row.address }}</p>
+            <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '0'">
+              <p>
+                <span class="label-color">Email From:</span>
+                {{ scope.row.emailFrom }}
+              </p>
+              <p>
+                <span class="label-color">Email To:</span>
+                {{ scope.row.emailTo }}
+              </p>
               <div slot="reference" class="name-wrapper">
-                <el-tag size="medium">{{ scope.row.name }}</el-tag>
+                <el-tag size="small" type="success">Email</el-tag>
               </div>
-            </el-popover>-->
+            </el-popover>
+            <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '1'">
+              <p>
+                <span class="label-color">Web Hook:</span>
+                {{ scope.row.webhook }}
+              </p>
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="small" type="success">WebChat Webhook</el-tag>
+              </div>
+            </el-popover>
+            <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '2'">
+              <p>
+                <span class="label-color">Web Hook:</span>
+                {{ scope.row.webhook }}
+              </p>
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="small" type="primary">DingDing Webhook</el-tag>
+              </div>
+            </el-popover>
+            <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '3'">
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="small" type="success">WebChat App</el-tag>
+              </div>
+            </el-popover>
           </template>
         </el-table-column>
         <el-table-column prop="channelInfo" label="Info"></el-table-column>
@@ -48,7 +79,7 @@
     >
       <el-form :model="alertChannel" ref="alertChannel" :rules="rules" label-width="135px">
         <el-form-item label="Channel Name" prop="channelName">
-          <el-input size="small" v-model="alertChannel.channelName" autocomplete="off"></el-input>
+          <el-input size="small" v-model="alertChannel.channelName"></el-input>
         </el-form-item>
         <el-form-item label="Channel Type" prop="channelType">
           <el-radio-group v-model="alertChannel.channelType" size="medium">
@@ -59,29 +90,23 @@
           </el-radio-group>
         </el-form-item>
         <!-- email start -->
-        <el-form-item label="SMTP Host" prop="smtpHost" v-if="alertChannel.channelType == 0">
-          <el-input size="small" v-model="alertChannel.smtpHost" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item
-          label="SMTP User Name"
-          prop="smtpUserName"
-          v-if="alertChannel.channelType == 0"
-        >
-          <el-input size="small" v-model="alertChannel.smtpUserName" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item
-          label="SMTP Password"
-          prop="smtpPassword"
-          v-if="alertChannel.channelType == 0"
-        >
-          <el-input size="small" v-model="alertChannel.smtpPassword" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="Email From" prop="emailFrom" v-if="alertChannel.channelType == 0">
-          <el-input size="small" v-model="alertChannel.emailFrom" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="Email To" prop="emailTo" v-if="alertChannel.channelType == 0">
-          <el-input size="small" v-model="alertChannel.emailTo" autocomplete="off"></el-input>
-        </el-form-item>
+        <div v-if="alertChannel.channelType == 0">
+          <el-form-item label="SMTP Host" prop="smtpHost">
+            <el-input size="small" v-model="alertChannel.smtpHost"></el-input>
+          </el-form-item>
+          <el-form-item label="SMTP User Name" prop="smtpUserName">
+            <el-input size="small" v-model="alertChannel.smtpUserName"></el-input>
+          </el-form-item>
+          <el-form-item label="SMTP Password" prop="smtpPassword">
+            <el-input size="small" v-model="alertChannel.smtpPassword"></el-input>
+          </el-form-item>
+          <el-form-item label="Email From" prop="emailFrom">
+            <el-input size="small" v-model="alertChannel.emailFrom"></el-input>
+          </el-form-item>
+          <el-form-item label="Email To" prop="emailTo">
+            <el-input size="small" v-model="alertChannel.emailTo"></el-input>
+          </el-form-item>
+        </div>
         <!-- email end -->
 
         <!-- wechat web hook start -->
@@ -90,20 +115,22 @@
           prop="webhook"
           v-if="alertChannel.channelType == 1 || alertChannel.channelType == 2"
         >
-          <el-input size="small" v-model="alertChannel.webhook" autocomplete="off"></el-input>
+          <el-input size="small" v-model="alertChannel.webhook"></el-input>
         </el-form-item>
         <!-- wechat web hook end -->
 
         <!-- wechat app start -->
-        <el-form-item label="Corp Id" prop="corpId" v-if="alertChannel.channelType == 3">
-          <el-input size="small" v-model="alertChannel.corpId" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="Agent Id" prop="agentId" v-if="alertChannel.channelType == 3">
-          <el-input size="small" v-model="alertChannel.agentId" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="Corp Secret" prop="corpSecret" v-if="alertChannel.channelType == 3">
-          <el-input size="small" v-model="alertChannel.corpSecret" autocomplete="off"></el-input>
-        </el-form-item>
+        <div v-if="alertChannel.channelType == 3">
+          <el-form-item label="Corp Id" prop="corpId">
+            <el-input size="small" v-model="alertChannel.corpId"></el-input>
+          </el-form-item>
+          <el-form-item label="Agent Id" prop="agentId">
+            <el-input size="small" v-model="alertChannel.agentId"></el-input>
+          </el-form-item>
+          <el-form-item label="Corp Secret" prop="corpSecret">
+            <el-input size="small" v-model="alertChannel.corpSecret"></el-input>
+          </el-form-item>
+        </div>
         <!-- wechat app end -->
         <el-form-item label="Channel Info" prop="channelInfo">
           <el-input size="small" v-model="alertChannel.channelInfo"></el-input>
@@ -160,7 +187,7 @@ export default {
     };
     return {
       alertChannelList: [],
-      alertChannel: { channelType: 0 },
+      alertChannel: {},
       editVisible: false,
       isUpdate: false,
       deleteVisible: false,
@@ -231,7 +258,6 @@ export default {
       this.getAlertChannel(row.channelId);
       this.isUpdate = true;
       this.editVisible = true;
-      
     },
     handleDelete(index, row) {
       console.log(index, row);
@@ -259,7 +285,7 @@ export default {
       );
     },
     getChannelList(groupId) {
-      let url = "/alert/channel/getAlertChannelListByGroupId/" + groupId;
+      let url = "/alert/channel/getAlertChannel/group/" + groupId;
       API.get(
         url,
         null,
@@ -339,7 +365,11 @@ export default {
       let fields = this.$refs["alertChannel"].fields;
 
       fields.map(field => {
-        if (field.prop === "channelName" || field.prop === "channelType") {
+        if (
+          field.prop === "channelName" ||
+          field.prop === "channelType" ||
+          field.prop === "channelInfo"
+        ) {
           return true;
         }
         field.resetField();
@@ -364,5 +394,8 @@ export default {
   align-items: center;
   padding-bottom: 20px;
   border-bottom: 1px solid #dcdfe6;
+}
+.label-color {
+  color: #99a9bf;
 }
 </style>

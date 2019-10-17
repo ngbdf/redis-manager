@@ -9,7 +9,7 @@
             </div>
             <div class="card-panel-info-wrapper">
               <div class="card-panel-info-key">Alert Record</div>
-              <div class="card-panel-info-value">6</div>
+              <div class="card-panel-info-value">{{ alertRecordList.length }}</div>
             </div>
           </div>
         </el-col>
@@ -20,7 +20,7 @@
             </div>
             <div class="card-panel-info-wrapper">
               <div class="card-panel-info-key">Alert Rule</div>
-              <div class="card-panel-info-value">23</div>
+              <div class="card-panel-info-value">{{ alertRuleList.length }}</div>
             </div>
           </div>
         </el-col>
@@ -31,7 +31,7 @@
             </div>
             <div class="card-panel-info-wrapper">
               <div class="card-panel-info-key">Alert Channel</div>
-              <div class="card-panel-info-value">1</div>
+              <div class="card-panel-info-value">{{ alertChannelList.length }}</div>
             </div>
           </div>
         </el-col>
@@ -39,14 +39,18 @@
     </div>
     <div class="body-wrapper">
       <div class="title-wrapper">
-        <span>Shanghai online</span>
-        <i class="el-icon-sunny health" title="Status"></i>
+        <span>{{ cluster.clusterName }}</span>
+        <i class="el-icon-sunny health" title="Status" v-if="cluster.clusterState == 'HEALTH'"></i>
       </div>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="Alert Record" name="record">
           <div class="operation-wrapper">
             <div class="batch-title">Batch Operation</div>
-            <el-button size="mini" type="danger">Delete</el-button>
+            <div style="display: flex; justify-content: space-between;">
+              <div>
+                <el-link type="danger" :underline="false" icon="el-icon-delete">Delete</el-link>
+              </div>
+            </div>
           </div>
           <el-table :data="alertRecordList">
             <el-table-column type="selection" width="55"></el-table-column>
@@ -64,11 +68,7 @@
             <el-table-column property="time" label="Time"></el-table-column>
             <el-table-column label="Operation" width="100px;">
               <template slot-scope="scope">
-                <el-button
-                  size="mini"
-                  type="danger"
-                  @click="handleDelete(scope.$index, scope.row)"
-                >Delete</el-button>
+                <el-button size="mini" type="danger">Delete</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -76,23 +76,32 @@
         <el-tab-pane label="Alert Rule" name="rule">
           <div class="operation-wrapper">
             <div class="batch-title">Batch Operation</div>
-            <el-button size="mini" type="success" @click="addAlertRuleVisible = true">Add</el-button>
-            <el-button size="mini" type="danger">Delete</el-button>
+            <div style="display: flex; justify-content: space-between;">
+              <div>
+                <el-link type="danger" :underline="false" icon="el-icon-delete">Delete</el-link>
+              </div>
+              <el-link
+                :underline="false"
+                icon="el-icon-plus"
+                type="primary"
+                @click="getAlertRuleListNotUsed(cluster.clusterId)"
+              >Add Rule</el-link>
+            </div>
           </div>
           <el-table :data="alertRuleList">
             <el-table-column type="index" width="50"></el-table-column>
-            <el-table-column label="Alert Rule" width="200px;">
+            <el-table-column label="Alert Rule">
               <template
                 slot-scope="scope"
-              >{{scope.row.alertKey}}{{scope.row.compareType}}{{scope.row.alertValue}}</template>
+              >{{ scope.row.ruleKey }}{{ scope.row.compareSign }}{{ scope.row.ruleValue }}</template>
             </el-table-column>
-            <el-table-column label="Rule Status" width="100px;">
+            <el-table-column label="Rule Status">
               <template slot-scope="scope">
                 <el-tag size="mini" type="success" v-if="scope.row.valid">valid</el-tag>
                 <el-tag size="mini" type="danger" v-else>Invalid</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="Is Global" width="100px;">
+            <el-table-column label="Is Global">
               <template slot-scope="scope">
                 <el-tag size="small" v-if="scope.row.global">Global</el-tag>
               </template>
@@ -100,14 +109,9 @@
 
             <el-table-column property="ruleInfo" label="Info"></el-table-column>
             <el-table-column property="time" label="Time"></el-table-column>
-            <el-table-column label="Operation" width="250px;">
+            <el-table-column label="Operation" width="100px;">
               <template slot-scope="scope">
-                <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button>
-                <el-button
-                  size="mini"
-                  type="danger"
-                  @click="handleDelete(scope.$index, scope.row)"
-                >Delete</el-button>
+                <el-button size="mini" type="danger">Delete</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -115,26 +119,88 @@
         <el-tab-pane label="Alert Channel" name="channel">
           <div class="operation-wrapper">
             <div class="batch-title">Batch Operation</div>
-            <el-button size="mini" type="success" @click="addAlertChannelVisible = true">Add</el-button>
-            <el-button size="mini" type="danger">Delete</el-button>
+            <div style="display: flex; justify-content: space-between;">
+              <div>
+                <el-link type="danger" :underline="false" icon="el-icon-delete">Delete</el-link>
+              </div>
+              <el-link
+                :underline="false"
+                icon="el-icon-plus"
+                type="primary"
+                @click="getAlertChannelListNotUsed(cluster.clusterId)"
+              >Add Channel</el-link>
+            </div>
           </div>
           <el-table :data="alertChannelList" style="width: 100%">
             <el-table-column type="index" width="50"></el-table-column>
-            <el-table-column property="channelName" label="Channel Name" width="150px;"></el-table-column>
-            <el-table-column label="Channel Type" width="200px;">
+            <!-- <el-table-column type="expand">
+              <template slot-scope="props">
+                <el-form label-position="left" inline class="table-expand">
+                  <div v-if="props.row.channelType == 0">
+                    <el-form-item label="Email From">
+                      <span>{{ props.row.emailFrom }}</span>
+                    </el-form-item>
+                    <el-form-item label="Email To">
+                      <span>{{ props.row.emailTo }}</span>
+                    </el-form-item>
+                  </div>
+                  <div v-if="props.row.channelType == 1 || props.row.channelType == 2">
+                    <el-form-item label="Web Hook">
+                      <span>{{ props.row.webhook }}</span>
+                    </el-form-item>
+                  </div>
+                  <div v-if="props.row.channelType == 3"></div>
+                  <el-form-item label>
+                    <span>{{ props.row.name }}</span>
+                  </el-form-item>
+                </el-form>
+              </template>
+            </el-table-column>-->
+            <el-table-column property="channelName" label="Channel Name"></el-table-column>
+            <el-table-column label="Channel Type">
               <template slot-scope="scope">
-                <el-tag
-                  size="small"
-                  type="success"
-                  v-if="scope.row.channelType == '1'"
-                >WebChat Webhook</el-tag>
+                <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '0'">
+                  <p>
+                    <span class="label-color">Email From:</span>
+                    {{ scope.row.emailFrom }}
+                  </p>
+                  <p>
+                    <span class="label-color">Email To:</span>
+                    {{ scope.row.emailTo }}
+                  </p>
+                  <div slot="reference" class="name-wrapper">
+                    <el-tag size="small" type="success">Email</el-tag>
+                  </div>
+                </el-popover>
+                <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '1'">
+                  <p>
+                    <span class="label-color">Web Hook:</span>
+                    {{ scope.row.webhook }}
+                  </p>
+                  <div slot="reference" class="name-wrapper">
+                    <el-tag size="small" type="success">WebChat Webhook</el-tag>
+                  </div>
+                </el-popover>
+                <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '2'">
+                  <p>
+                    <span class="label-color">Web Hook:</span>
+                    {{ scope.row.webhook }}
+                  </p>
+                  <div slot="reference" class="name-wrapper">
+                    <el-tag size="small" type="primary">DingDing Webhook</el-tag>
+                  </div>
+                </el-popover>
+                <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '3'">
+                  <div slot="reference" class="name-wrapper">
+                    <el-tag size="small" type="success">WebChat App</el-tag>
+                  </div>
+                </el-popover>
               </template>
             </el-table-column>
             <el-table-column property="channelInfo" label="Info"></el-table-column>
             <el-table-column property="time" label="Time"></el-table-column>
-            <el-table-column label="Operation" width="200px;">
+            <el-table-column label="Operation" width="100px;">
               <template slot-scope="scope">
-                <el-button size="mini" @click="handleView(scope.$index, scope.row)">View</el-button>
                 <el-button
                   size="mini"
                   type="danger"
@@ -147,36 +213,61 @@
       </el-tabs>
     </div>
     <el-dialog title="Add Alert Rule" :visible.sync="addAlertRuleVisible">
-      <el-table :data="alertRuleList">
+      <el-table :data="alertRuleListNotUsed" stripe @selection-change="addRuleSelectionChange">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column label="Alert Rule">
           <template
             slot-scope="scope"
-          >{{scope.row.alertKey}}{{scope.row.compareType}}{{scope.row.alertValue}}</template>
+          >{{ scope.row.ruleKey }}{{ scope.row.compareSign }}{{ scope.row.ruleValue }}</template>
         </el-table-column>
-        <el-table-column property="checkCycle" label="Check Cycle"></el-table-column>
+        <el-table-column property="checkCycle" label="Check Cycle(Min)"></el-table-column>
         <el-table-column property="ruleInfo" label="Info"></el-table-column>
-        <el-table-column property="updateTime" label="Time"></el-table-column>
+        <el-table-column property="time" label="Time"></el-table-column>
       </el-table>
       <span slot="footer" class="dialog-footer">
-        <el-button size="small" type="primary" @click="dialogVisible = false">Confirm</el-button>
+        <el-button size="small" type="primary" @click="addAlertRule()">Confirm</el-button>
       </span>
     </el-dialog>
     <el-dialog title="Add Alert Channel" :visible.sync="addAlertChannelVisible">
-      <el-table :data="alertChannelList">
+      <el-table :data="alertRuleListNotUsed" stripe @selection-change="addChannelSelectionChange">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column property="channelName" label="Channel Name" width="150px;"></el-table-column>
         <el-table-column label="Channel Type" width="200px;">
           <template slot-scope="scope">
-            <el-popover trigger="hover" placement="top">
-              <p>info1: {{ scope.row.channelType }}</p>
-              <p>info2: {{ scope.row.channelType }}</p>
+            <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '0'">
+              <p>
+                <span class="label-color">Email From:</span>
+                {{ scope.row.emailFrom }}
+              </p>
+              <p>
+                <span class="label-color">Email To:</span>
+                {{ scope.row.emailTo }}
+              </p>
               <div slot="reference" class="name-wrapper">
-                <el-tag
-                  size="small"
-                  type="success"
-                  v-if="scope.row.channelType == '1'"
-                >WebChat Webhook</el-tag>
+                <el-tag size="small" type="success">Email</el-tag>
+              </div>
+            </el-popover>
+            <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '1'">
+              <p>
+                <span class="label-color">Web Hook:</span>
+                {{ scope.row.webhook }}
+              </p>
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="small" type="success">WebChat Webhook</el-tag>
+              </div>
+            </el-popover>
+            <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '2'">
+              <p>
+                <span class="label-color">Web Hook:</span>
+                {{ scope.row.webhook }}
+              </p>
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="small" type="primary">DingDing Webhook</el-tag>
+              </div>
+            </el-popover>
+            <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '3'">
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="small" type="success">WebChat App</el-tag>
               </div>
             </el-popover>
           </template>
@@ -185,7 +276,7 @@
         <el-table-column property="updateTime" label="Time"></el-table-column>
       </el-table>
       <span slot="footer" class="dialog-footer">
-        <el-button size="small" type="primary" @click="dialogVisible = false">Confirm</el-button>
+        <el-button size="small" type="primary" @click="addAlertChannel()">Confirm</el-button>
       </span>
     </el-dialog>
   </div>
@@ -195,9 +286,11 @@
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import API from "@/api/api.js";
+import { formatTime } from "@/utils/time.js";
 export default {
   data() {
     return {
+      cluster: {},
       alertRecordList: [
         {
           redisNode: "192.168.0.5:8000",
@@ -218,6 +311,7 @@ export default {
           updateTime: "2019-08-25"
         }
       ],
+      alertRuleListNotUsed: [],
       alertChannelList: [
         {
           channelName: "bigdata",
@@ -235,7 +329,7 @@ export default {
   },
   methods: {
     handleClick(tab, event) {
-      console.log(tab, event);
+      //console.log(tab, event);
     },
     handleView(index, row) {
       console.log(index, row);
@@ -243,19 +337,57 @@ export default {
     handleEdit(index, row) {
       console.log(index, row);
     },
-    handleDelete(index, row) {
-      console.log(index, row);
+    addRuleSelectionChange(val) {
+      let newRuleIds = "";
+      if (val.length > 0) {
+        val.forEach(alertRule => {
+          newRuleIds += alertRule.ruleId;
+          newRuleIds += ",";
+        });
+      }
+      this.cluster.ruleIds = newRuleIds;
     },
-    getAlertRecordList(clusterId) {
-      let url = "/alert/record/getAlertRecordList/" + clusterId;
+    addChannelSelectionChange(val) {
+      let newChannelIds = "";
+      if (val.length > 0) {
+        val.forEach(alertChannel => {
+          newChannelIds += alertChannel.channelId;
+          newChannelIds += ",";
+        });
+      }
+      this.cluster.channelIds = newChannelIds;
+    },
+    getClusterById(clusterId) {
+      let url = "/cluster/getCluster/" + clusterId;
       API.get(
         url,
         null,
         response => {
           let result = response.data;
-          console.log(result);
+          if (result.code == 0) {
+            this.cluster = result.data;
+          } else {
+            console.log("Get clsuter failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getAlertRecordList(clusterId) {
+      let url = "/alert/record/getAlertRecord/cluster/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
           if (result.code == 0) {
             let alertRecordList = result.data;
+            if (alertRecordList == null || alertRecordList.length == 0) {
+              this.alertRecordList = alertRecordList;
+              return;
+            }
             alertRecordList.forEach(alertRecord => {
               alertRecord.time = formatTime(alertRecord.updateTime);
             });
@@ -270,7 +402,7 @@ export default {
       );
     },
     getAlertRuleList(clusterId) {
-      let url = "/alert/rule/getAlertRuleListByClusterId/" + clusterId;
+      let url = "/alert/rule/getAlertRule/cluster/" + clusterId;
       API.get(
         url,
         null,
@@ -278,19 +410,7 @@ export default {
           let result = response.data;
           if (result.code == 0) {
             let alertRuleList = result.data;
-            alertRuleList.forEach(alertRule => {
-              alertRule.time = formatTime(alertRule.updateTime);
-              let compareType = alertRule.compareType;
-              alertRule.compareSign =
-                compareType == 0
-                  ? "="
-                  : compareType == 1
-                  ? ">"
-                  : compareType == -1
-                  ? "<"
-                  : "!=";
-            });
-            this.alertRuleList = alertRuleList;
+            this.alertRuleList = this.buildAlertRuleList(alertRuleList);
           } else {
             console.log("Get alert rule list failed");
           }
@@ -300,21 +420,130 @@ export default {
         }
       );
     },
-    getChannelList(clusterId) {
-      let url = "/alert/channel/getAlertChannelListByClusterId/" + clusterId;
+    getAlertRuleListNotUsed(clusterId) {
+      let url = "/alert/rule/getAlertRuleNotUsed/" + clusterId;
       API.get(
         url,
         null,
         response => {
           let result = response.data;
           if (result.code == 0) {
-            let alertChannelList = result.data;
-            alertChannelList.forEach(alertChannel => {
-              alertChannel.time = formatTime(alertChannel.updateTime);
-            });
-            this.alertChannelList = alertChannelList;
+            this.alertRuleListNotUsed = this.buildAlertRuleList(result.data);
+            this.addAlertRuleVisible = true;
           } else {
             console.log("No data");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    buildAlertRuleList(alertRuleList) {
+      if (alertRuleList == null || alertRuleList.length == 0) {
+        return [];
+      }
+      alertRuleList.forEach(alertRule => {
+        alertRule.time = formatTime(alertRule.updateTime);
+        let compareType = alertRule.compareType;
+        alertRule.compareSign =
+          compareType == 0
+            ? "="
+            : compareType == 1
+            ? ">"
+            : compareType == -1
+            ? "<"
+            : "!=";
+      });
+      return alertRuleList;
+    },
+    addAlertRule() {
+      if (isEmpty(this.cluster.ruleIds)) {
+        console.log("no rules");
+        return;
+      }
+      let url = "/cluster/addAlertRule";
+      API.post(
+        url,
+        this.cluster,
+        response => {
+          let result = response.data;
+          let clusterId = this.cluster.clusterId;
+          this.getAlertRuleList(clusterId);
+          if (result.code == 0) {
+            this.addAlertRuleVisible = false;
+          } else {
+            console.log("add alert rule failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getAlertChannelList(clusterId) {
+      let url = "/alert/channel/getAlertChannel/cluster/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.alertChannelList = this.buildAlertChannelList(result.data);
+          } else {
+            console.log("No data");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getAlertChannelListNotUsed(clusterId) {
+      let url = "/alert/channel/getAlertChannelNotUsed/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.alertRuleListNotUsed = this.buildAlertChannelList(result.data);
+            this.addAlertChannelVisible = true;
+          } else {
+            console.log("No data");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    buildAlertChannelList(alertChannelList) {
+      if (alertChannelList == null || alertChannelList.length == 0) {
+        return [];
+      }
+      alertChannelList.forEach(alertChannel => {
+        alertChannel.time = formatTime(alertChannel.updateTime);
+      });
+      return alertChannelList;
+    },
+    addAlertChannel() {
+      if (isEmpty(this.cluster.channelIds)) {
+        console.log("no channels");
+        return;
+      }
+      let url = "/cluster/addAlertChannel";
+      API.post(
+        url,
+        this.cluster,
+        response => {
+          let result = response.data;
+          let clusterId = this.cluster.clusterId;
+          this.getAlertChannelList(clusterId);
+          if (result.code == 0) {
+            this.addAlertChannelVisible = false;
+          } else {
+            console.log("add alert channel failed.");
           }
         },
         err => {
@@ -325,9 +554,10 @@ export default {
   },
   mounted() {
     let clusterId = this.$route.params.clusterId;
+    this.getClusterById(clusterId);
     this.getAlertRecordList(clusterId);
     this.getAlertRuleList(clusterId);
-    this.getChannelList(clusterId);
+    this.getAlertChannelList(clusterId);
   }
 };
 </script>
@@ -414,5 +644,23 @@ export default {
   margin-bottom: 10px;
   color: #909399;
   font-size: 14px;
+}
+
+.table-expand {
+  font-size: 0;
+}
+
+.table-expand label {
+  width: 90px;
+  color: #99a9bf;
+}
+
+.table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+}
+
+.label-color {
+  color: #99a9bf;
 }
 </style>

@@ -28,14 +28,14 @@ public class AlertChannelController {
     @Autowired
     private IClusterService clusterService;
 
-    @RequestMapping(value = "/getAlertChannelByGroupId/{groupId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getAlertChannel/group/{groupId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAlertChannelByGroupId(@PathVariable("groupId") Integer groupId) {
         List<AlertChannel> alertChannelList = alertChannelService.getAlertChannelByGroupId(groupId);
         return alertChannelList != null ? Result.successResult(alertChannelList) : Result.failResult();
     }
 
-    @RequestMapping(value = "/getAlertChannelByClusterId/{clusterId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getAlertChannel/cluster/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAlertChannelByClusterId(@PathVariable("clusterId") Integer clusterId) {
         Cluster cluster = clusterService.getClusterById(clusterId);
@@ -49,7 +49,17 @@ public class AlertChannelController {
             channelIdList.add(Integer.parseInt(channelId));
         }
         List<AlertChannel> alertChannelList = alertChannelService.getAlertChannelByIds(channelIdList);
-        return alertChannelList != null ? Result.successResult(alertChannelList) : Result.failResult();
+        boolean result = alertChannelList != null;
+        // 每次检查是否有无用的 channel
+        if (result && alertChannelList.size() < channelIdList.size()) {
+            StringBuilder newChannelIds = new StringBuilder();
+            alertChannelList.forEach(alertChannel -> {
+                newChannelIds.append(alertChannel.getChannelId()).append(SignUtil.COMMAS);
+            });
+            cluster.setChannelIds(newChannelIds.toString());
+            clusterService.updateClusterChannelIds(cluster);
+        }
+        return result ? Result.successResult(alertChannelList) : Result.failResult();
     }
 
     @RequestMapping(value = "/getAlertChannelNotUsed/{clusterId}", method = RequestMethod.GET)

@@ -27,6 +27,10 @@ public interface IClusterService {
 
     boolean updateNodes(Cluster cluster);
 
+    boolean updateClusterRuleIds(Cluster cluster);
+
+    boolean updateClusterChannelIds(Cluster cluster);
+
     boolean deleteCluster(Integer clusterId);
 
     AbstractNodeOperation getNodeOperation(Integer installationEnvironment);

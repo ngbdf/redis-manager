@@ -136,6 +136,8 @@ public class InstallationTemplate {
     public boolean prepareForInstallation(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
         // 获取机器列表
         buildMachineList(installationParam);
+
+        boolean checkMachineSuccess = checkMachineList(installationParam);
         // 构建集群拓扑图
         boolean buildTopologySuccess = buildTopology(installationParam);
         if (!buildTopologySuccess) {
@@ -154,6 +156,8 @@ public class InstallationTemplate {
         }
         return true;
     }
+
+
 
     public boolean pullConfig(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
         return installationOperation.pullConfig(installationParam);
@@ -181,7 +185,16 @@ public class InstallationTemplate {
             List<Machine> machineList = machineService.getMachineListByIds(machineIdList);
             installationParam.setMachineList(machineList);
         }
-        // 如果是文本框填入，则机器列表在前端处理后传入后台
+
+    }
+
+    /**
+     * for not auto build
+     * @param installationParam
+     * @return
+     */
+    private boolean checkMachineList(InstallationParam installationParam) {
+        return true;
     }
 
     /**
@@ -226,14 +239,20 @@ public class InstallationTemplate {
         List<RedisNode> allRedisNodes = new LinkedList<>();
         for (RedisNode masterNode : topology.keySet()) {
             allRedisNodes.add(masterNode);
-            for (RedisNode redisNode : topology.get(masterNode)) {
-                allRedisNodes.add(redisNode);
-            }
+            allRedisNodes.addAll(topology.get(masterNode));
         }
         installationParam.setRedisNodeList(allRedisNodes);
         return true;
     }
 
+    /**
+     * for not auto build
+     * @param installationParam
+     * @return
+     */
+    private boolean checkRedisNodeList(InstallationParam installationParam) {
+        return true;
+    }
     /**
      * rest 调用
      *

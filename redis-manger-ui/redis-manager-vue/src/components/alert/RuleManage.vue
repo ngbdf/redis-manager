@@ -26,7 +26,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column property="checkCycle" label="Check Cycle"></el-table-column>
+        <el-table-column property="checkCycle" label="Check Cycle(Min)"></el-table-column>
         <el-table-column property="ruleInfo" label="Info"></el-table-column>
         <el-table-column property="time" label="Time"></el-table-column>
         <el-table-column label="Operation" width="250px;">
@@ -332,7 +332,7 @@ export default {
       };
     },
     getAlertRuleList(groupId) {
-      let url = "/alert/rule/getAlertRuleListByGroupId/" + groupId;
+      let url = "/alert/rule/getAlertRule/group/" + groupId;
       API.get(
         url,
         null,

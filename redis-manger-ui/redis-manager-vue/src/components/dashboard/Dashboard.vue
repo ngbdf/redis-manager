@@ -238,7 +238,12 @@ export default {
       });
     },
     toAlertManage(clusterId) {
-      this.$router.push({ name: "alert-manage" });
+      this.$router.push({
+        name: "alert-manage",
+        params: {
+          clusterId: clusterId
+        }
+      });
     },
     handleQuery(clusterId) {
       this.queryClusterId = clusterId;

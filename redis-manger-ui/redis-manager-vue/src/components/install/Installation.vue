@@ -29,7 +29,11 @@
                 <el-input v-model="installationParam.clusterName" maxlength="50" show-word-limit></el-input>
               </el-form-item>
               <el-form-item label="Redis Password" prop="redisPassword">
-                <el-input v-model="installationParam.redisPassword" maxlength="50" show-word-limit></el-input>
+                <el-input
+                  v-model.trim="installationParam.redisPassword"
+                  maxlength="50"
+                  show-word-limit
+                ></el-input>
               </el-form-item>
               <el-form-item label="Redis Mode" prop="redisMode">
                 <el-radio-group v-model="installationParam.redisMode">
@@ -55,7 +59,7 @@
                 <el-select
                   allow-create
                   filterable
-                  v-model="installationParam.image"
+                  v-model.trim="installationParam.image"
                   placeholder="Please choose image"
                 >
                   <el-option
@@ -71,7 +75,7 @@
                 prop="image"
                 v-else-if="installationParam.installationEnvironment == 1"
               >
-                <el-select v-model="installationParam.image" placeholder="Please choose image">
+                <el-select v-model.trim="installationParam.image" placeholder="Please choose image">
                   <el-option
                     v-for="image in machineImages"
                     :key="image"
@@ -128,7 +132,7 @@
                 v-if="!installationParam.autoBuild"
               >
                 <el-input
-                  v-model="installationParam.machineUserName"
+                  v-model.trim="installationParam.machineUserName"
                   placeholder="Machine user name"
                 ></el-input>
               </el-form-item>
@@ -138,7 +142,7 @@
                 v-if="!installationParam.autoBuild"
               >
                 <el-input
-                  v-model="installationParam.machinePassword"
+                  v-model.trim="installationParam.machinePassword"
                   placeholder="Machine password"
                 ></el-input>
               </el-form-item>
@@ -197,7 +201,7 @@
         </div>
       </el-col>
     </el-row>
-    <el-dialog title="Installation Params" :visible.sync="installationInfoVisible" width="50%">
+    <!-- <el-dialog title="Installation Params" :visible.sync="installationInfoVisible" width="50%">
       <div class="item-param">
         <span class="param-key">Group:</span>
         <el-tag size="mini">{{ currentGroup.groupName }}</el-tag>
@@ -240,14 +244,15 @@
         <el-button size="small" @click="installationInfoVisible = false">Cancel</el-button>
         <el-button size="small" type="primary" @click="installationInfoVisible = false">Install</el-button>
       </span>
-    </el-dialog>
+    </el-dialog>-->
   </div>
 </template>
 
 <script>
 import { store } from "@/vuex/store.js";
-import { isEmpty, validatePort } from "@/utils/validate.js";
+import { isEmpty, validateIpAndPort, validatePort } from "@/utils/validate.js";
 import API from "@/api/api.js";
+import axios from "axios";
 export default {
   data() {
     var validateClusterName = (rule, value, callback) => {
@@ -287,8 +292,80 @@ export default {
     };
     var validateMasterNumber = (rule, value, callback) => {
       if (this.installationParam.redisMode == "standalone" && value > 1) {
-        return callback(new Error("Standalone mode only need 1 master."));
+        return callback(new Error("Standalone mode only need 1 master"));
       }
+      callback();
+    };
+    var validateTopology = (rule, value, callback) => {
+      let topology = value.trim();
+      if (isEmpty(topology)) {
+        return callback(new Error("Please enter topology"));
+      }
+      let machineUserName = this.installationParam.machineUserName;
+      let machinePassword = this.installationParam.machinePassword;
+      if (isEmpty(machineUserName) || isEmpty(machinePassword)) {
+        return callback(
+          new Error("Please enter machine user name and password first")
+        );
+      }
+      let nodeListWithRole = topology.split(/[(\r\n)\r\n]+/);
+      let size = nodeListWithRole.length;
+      let machineList = [];
+      let redisNodeList = [];
+      for (var i = 0; i < size; i++) {
+        let nodeAndRole = nodeListWithRole[i].split(/\s+/);
+        let oneLineSize = nodeAndRole.length;
+
+        if (i == 0) {
+          if (oneLineSize != 2) {
+            return callback(new Error("Line " + i + ": wrong format"));
+          } else if (nodeAndRole[1] != "master") {
+            return callback(new Error("Line " + i + ": node not master"));
+          }
+        }
+        let nodeRole = nodeAndRole[1];
+        if (isEmpty(nodeRole)) {
+          nodeRole = "slave";
+        }
+        let ipAndPort = nodeAndRole[0].split(":");
+        if (validateIpAndPort(ipAndPort)) {
+          return callback(new Error("Line " + i + ": wrong format"));
+        }
+        let host = ipAndPort[0];
+        let port = ipAndPort[1];
+        let machine = {
+          userName: machineUserName,
+          password: machinePassword,
+          host: host
+        };
+        let inMachineList = false;
+        machineList.forEach(machine => {
+          if (machine.host == host) {
+            inMachineList = true;
+            return;
+          }
+        });
+        if (!inMachineList) {
+          machineList.push(machine);
+        }
+        let redisNodeRepeat = false;
+        redisNodeList.forEach(redisNode => {
+          if (redisNode.host == host && redisNode.port == port) {
+            redisNodeRepeat = true;
+          }
+        });
+        if (redisNodeRepeat) {
+          return callback(new Error("Line " + i + ": redis node repeat"));
+        } else {
+          redisNodeList.push({
+            host: host,
+            port: port,
+            nodeRole: nodeRole
+          });
+        }
+      }
+      this.installationParam.machineList = machineList;
+      this.installationParam.redisNodeList = redisNodeList;
       callback();
     };
     return {
@@ -309,6 +386,8 @@ export default {
         startPort: 8000,
         masterNumber: 1,
         replicaNumber: 2,
+        machineUserName: "bigdata",
+        machinePassword: "bigdata",
         redisNodes: "127.0.0.1:8001 master\n127.0.0.1:8002",
         installationEnvironment: 0
       },
@@ -415,6 +494,11 @@ export default {
           {
             required: true,
             message: "Please enter redis topology",
+            trigger: "blur"
+          },
+          {
+            required: true,
+            validator: validateTopology,
             trigger: "blur"
           }
         ]
@@ -554,6 +638,7 @@ export default {
         }
       );
     },
+    validateMachine(machine, handler) {},
     initWebSocket() {
       const wsuri = "ws://127.0.0.1:8182/websocket/install";
       this.websock = new WebSocket(wsuri);
@@ -619,7 +704,6 @@ export default {
           field.prop === "topology" ||
           field.prop === "machines"
         ) {
-          console.log(field.prop);
           field.resetField();
           return false;
         }
@@ -629,7 +713,6 @@ export default {
       let fields = this.$refs["installationParam"].fields;
       fields.map(field => {
         if (field.prop === "image") {
-          console.log(field.prop);
           field.resetField();
           return false;
         }

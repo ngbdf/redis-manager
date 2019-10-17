@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.controller;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Group;
 import com.newegg.ec.redis.entity.RedisNode;
@@ -8,6 +9,7 @@ import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IGroupService;
 import com.newegg.ec.redis.service.IRedisNodeService;
 import com.newegg.ec.redis.service.IRedisService;
+import com.newegg.ec.redis.util.SignUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.PathParam;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Jay.H.Zou
@@ -115,11 +116,44 @@ public class ClusterController {
             return result;
         }
         boolean result = clusterService.updateCluster(cluster);
-        if(!result) {
+        if (!result) {
             return Result.failResult();
         }
         cluster = clusterService.getClusterById(cluster.getClusterId());
         return Result.successResult(cluster);
+    }
+
+    @RequestMapping(value = "/addAlertRule", method = RequestMethod.POST)
+    @ResponseBody
+    public Result addAlertRule(@RequestBody Cluster cluster) {
+        Cluster exist = clusterService.getClusterById(cluster.getClusterId());
+        String ruleIds = mergeAlertIds(exist.getRuleIds(), cluster.getRuleIds());
+        cluster.setRuleIds(ruleIds);
+        boolean result = clusterService.updateClusterRuleIds(cluster);
+        return result ? Result.successResult() : Result.failResult();
+    }
+
+    @RequestMapping(value = "/addAlertChannel", method = RequestMethod.POST)
+    @ResponseBody
+    public Result addAlertChannel(@RequestBody Cluster cluster) {
+        Cluster exist = clusterService.getClusterById(cluster.getClusterId());
+        String channelIds = mergeAlertIds(exist.getChannelIds(), cluster.getChannelIds());
+        cluster.setChannelIds(channelIds);
+        boolean result = clusterService.updateClusterChannelIds(cluster);
+        return result ? Result.successResult() : Result.failResult();
+    }
+
+    private String mergeAlertIds(String oldIds, String newIds) {
+        Set<String> idSet = new LinkedHashSet<>();
+        if (!Strings.isNullOrEmpty(oldIds)) {
+            String[] oldIdArr = SignUtil.splitByCommas(oldIds);
+            idSet.addAll(Arrays.asList(oldIdArr));
+        }
+        String[] newIdArr = SignUtil.splitByCommas(newIds);
+        idSet.addAll(Arrays.asList(newIdArr));
+        StringBuilder ids = new StringBuilder();
+        idSet.forEach((id) -> ids.append(id).append(SignUtil.COMMAS));
+        return ids.toString();
     }
 
     @RequestMapping(value = "/deleteCluster", method = RequestMethod.POST)
@@ -127,7 +161,6 @@ public class ClusterController {
     public Result deleteCluster(@RequestBody Cluster cluster) {
         try {
             boolean result = clusterService.deleteCluster(cluster.getClusterId());
-
             return result ? Result.successResult() : Result.failResult();
         } catch (Exception e) {
             logger.error("Delete cluster failed.", e);

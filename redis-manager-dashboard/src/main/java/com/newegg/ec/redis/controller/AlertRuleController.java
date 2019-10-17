@@ -28,27 +28,44 @@ public class AlertRuleController {
     @Autowired
     private IClusterService clusterService;
 
-    @RequestMapping(value = "/getAlertRuleByGroupId/{groupId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getAlertRule/group/{groupId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAlertRuleByGroupId(@PathVariable("groupId") Integer groupId) {
         List<AlertRule> alertRuleList = alertRuleService.getAlertRuleByGroupId(groupId);
         return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();
     }
 
-    @RequestMapping(value = "/getAlertRule/clusterId/{clusterId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getAlertRule/cluster/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAlertRuleByClusterId(@PathVariable("clusterId") Integer clusterId) {
         Cluster cluster = clusterService.getClusterById(clusterId);
         String ruleIds = cluster.getRuleIds();
-        if(Strings.isNullOrEmpty(ruleIds)) {
-            return Result.successResult();
-        }
-        String[] ruleIdArr = SignUtil.splitByCommas(ruleIds);
         List<Integer> ruleIdList = new ArrayList<>();
-        for (String ruleId : ruleIdArr) {
-            ruleIdList.add(Integer.parseInt(ruleId));
+        if (!Strings.isNullOrEmpty(ruleIds)) {
+            String[] ruleIdArr = SignUtil.splitByCommas(ruleIds);
+            for (String ruleId : ruleIdArr) {
+                ruleIdList.add(Integer.parseInt(ruleId));
+            }
         }
         List<AlertRule> alertRuleList = alertRuleService.getAlertRuleByIds(ruleIdList);
+        boolean result = alertRuleList != null;
+        // 每次检查是否有无用的 rule
+        if (result) {
+            List<AlertRule> rules = new ArrayList<>();
+            alertRuleList.forEach(alertRule -> {
+                if (!alertRule.getGlobal()) {
+                    rules.add(alertRule);
+                }
+            });
+            StringBuilder newRuleIds = new StringBuilder();
+            if (rules.size() < ruleIdList.size()) {
+                rules.forEach(alertRule -> {
+                    newRuleIds.append(alertRule.getRuleId()).append(SignUtil.COMMAS);
+                });
+            }
+            cluster.setRuleIds(newRuleIds.toString());
+            clusterService.updateClusterRuleIds(cluster);
+        }
         return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();
     }
 
@@ -58,14 +75,12 @@ public class AlertRuleController {
         Cluster cluster = clusterService.getClusterById(clusterId);
         String ruleIds = cluster.getRuleIds();
         Integer groupId = cluster.getGroupId();
-        if(Strings.isNullOrEmpty(ruleIds)) {
-            List<AlertRule> alertRuleList = alertRuleService.getAlertRuleByGroupId(cluster.getGroupId());
-            return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();
-        }
-        String[] ruleIdArr = SignUtil.splitByCommas(ruleIds);
         List<Integer> ruleIdList = new ArrayList<>();
-        for (String ruleId : ruleIdArr) {
-            ruleIdList.add(Integer.parseInt(ruleId));
+        if (!Strings.isNullOrEmpty(ruleIds)) {
+            String[] ruleIdArr = SignUtil.splitByCommas(ruleIds);
+            for (String ruleId : ruleIdArr) {
+                ruleIdList.add(Integer.parseInt(ruleId));
+            }
         }
         List<AlertRule> alertRuleList = alertRuleService.getAlertRuleNotUsed(groupId, ruleIdList);
         return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();

@@ -152,6 +152,28 @@ public class ClusterService implements IClusterService {
         }
     }
 
+    @Override
+    public boolean updateClusterRuleIds(Cluster cluster) {
+        try {
+            clusterDao.updateClusterRuleIds(cluster.getClusterId(), cluster.getRuleIds());
+            return true;
+        } catch (Exception e) {
+            logger.error("Update cluster rule ids failed.", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateClusterChannelIds(Cluster cluster) {
+        try {
+            clusterDao.updateClusterChannelIds(cluster.getClusterId(), cluster.getChannelIds());
+            return true;
+        } catch (Exception e) {
+            logger.error("Update cluster channel ids failed.", e);
+            return false;
+        }
+    }
+
     /**
      * drop node_info_{clusterId}
      * delete redis_node in this cluster
