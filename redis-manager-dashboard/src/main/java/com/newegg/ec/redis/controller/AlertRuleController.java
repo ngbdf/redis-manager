@@ -47,24 +47,29 @@ public class AlertRuleController {
                 ruleIdList.add(Integer.parseInt(ruleId));
             }
         }
-        List<AlertRule> alertRuleList = alertRuleService.getAlertRuleByIds(ruleIdList);
+        List<AlertRule> alertRuleList = alertRuleService.getAlertRuleByIds(cluster.getGroupId(), ruleIdList);
         boolean result = alertRuleList != null;
         // 每次检查是否有无用的 rule
         if (result) {
-            List<AlertRule> rules = new ArrayList<>();
+            List<Integer> realRuleIdList = new ArrayList<>();
             alertRuleList.forEach(alertRule -> {
                 if (!alertRule.getGlobal()) {
-                    rules.add(alertRule);
+                    realRuleIdList.add(alertRule.getRuleId());
                 }
             });
-            StringBuilder newRuleIds = new StringBuilder();
-            if (rules.size() < ruleIdList.size()) {
-                rules.forEach(alertRule -> {
-                    newRuleIds.append(alertRule.getRuleId()).append(SignUtil.COMMAS);
-                });
+            boolean needUpdate = false;
+            for (Integer ruleId : ruleIdList) {
+                if (!realRuleIdList.contains(ruleId)) {
+                    needUpdate = true;
+                    break;
+                }
             }
-            cluster.setRuleIds(newRuleIds.toString());
-            clusterService.updateClusterRuleIds(cluster);
+            if (needUpdate) {
+                StringBuilder newRuleIds = new StringBuilder();
+                realRuleIdList.forEach(ruleId -> newRuleIds.append(ruleId).append(SignUtil.COMMAS));
+                cluster.setRuleIds(newRuleIds.toString());
+                clusterService.updateClusterRuleIds(cluster);
+            }
         }
         return alertRuleList != null ? Result.successResult(alertRuleList) : Result.failResult();
     }

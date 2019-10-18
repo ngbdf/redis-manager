@@ -78,7 +78,12 @@ public class AlertRecordService implements IAlertRecordService {
     }
 
     @Override
-    public Integer getAlertNumber() {
-        return 9;
+    public Integer getAlertRecordNumber(Integer groupId) {
+        try {
+            return alertRecordDao.countAlertRecordNumber(groupId);
+        } catch (Exception e) {
+            logger.error("Delete alert record by earliest time failed", e);
+            return 0;
+        }
     }
 }

@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row :gutter="20" class="card-panel-group">
-      <el-col :xl="6" :lg="12" :md="12" :sm="12">
+      <el-col :xl="6" :lg="6" :md="12" :sm="12">
         <div class="card-panel">
           <div class="card-panel-icon-wrapper card-panel-icon-user">
             <i class="el-icon-user"></i>
@@ -13,7 +13,7 @@
           </div>
         </div>
       </el-col>
-      <el-col :xl="6" :lg="12" :md="12" :sm="12">
+      <el-col :xl="6" :lg="6" :md="12" :sm="12">
         <div class="card-panel">
           <div class="card-panel-icon-wrapper card-panel-icon-health">
             <i class="el-icon-sunny"></i>
@@ -24,7 +24,7 @@
           </div>
         </div>
       </el-col>
-      <el-col :xl="6" :lg="12" :md="12" :sm="12">
+      <el-col :xl="6" :lg="6" :md="12" :sm="12">
         <div class="card-panel">
           <div class="card-panel-icon-wrapper card-panel-icon-bad">
             <i class="el-icon-heavy-rain"></i>
@@ -36,7 +36,7 @@
           </div>
         </div>
       </el-col>
-      <el-col :xl="6" :lg="12" :md="12" :sm="12">
+      <el-col :xl="6" :lg="6" :md="12" :sm="12">
         <div class="card-panel">
           <div class="card-panel-icon-wrapper card-panel-icon-alert">
             <i class="el-icon-bell"></i>
@@ -54,7 +54,7 @@
         :xs="24"
         :sm="12"
         :md="12"
-        :lg="6"
+        :lg="8"
         :xl="6"
         v-for="cluster in clusterList"
         :key="cluster.clusterId"
@@ -68,47 +68,54 @@
               v-if="cluster.redisPassword != null && cluster.redisPassword != ''"
             ></i>
           </div>
-          <div class="text item">
-            State:
-            <el-tag
-              size="mini"
-              v-if="cluster.clusterState == 'HEALTH'"
-              type="success"
-            >{{ cluster.clusterState }}</el-tag>
-          </div>
-          <div class="text item">
-            Model:
-            <el-tag size="mini">{{ cluster.redisMode }}</el-tag>
-          </div>
-          <div class="text item">
-            Version:
-            <el-tag size="mini">{{ cluster.redisVersion }}</el-tag>
-          </div>
-          <div class="text item">
-            Master:
-            <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
-          </div>
-          <div class="text item">
-            Nodes:
-            <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
-          </div>
-          <div class="text item">
-            Slots Assigned(ok/assigned):
-            <el-tag size="mini">{{ cluster.clusterSlotsOk }}/{{ cluster.clusterSlotsAssigned }}</el-tag>
-          </div>
-          <div class="text item">
-            Slots Bad(pfail/fail):
-            <el-tag size="mini">{{ cluster.clusterSlotsPfail }}/{{ cluster.clusterSlotsFail }}</el-tag>
-          </div>
-          <div class="text item">
-            Environment:
-            <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Docker</el-tag>
-            <el-tag size="mini" v-else-if="cluster.installationEnvironment == 1">Machine</el-tag>
-          </div>
-          <div class="text item">
-            From:
-            <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Redis Manager</el-tag>
-            <el-tag size="mini" v-else>Import</el-tag>
+          <div>
+            <div class="text item">
+              State:
+              <el-tag
+                size="mini"
+                v-if="cluster.clusterState == 'HEALTH'"
+                type="success"
+              >{{ cluster.clusterState }}</el-tag>
+              <el-tag size="mini" v-else type="danger">{{ cluster.clusterState }}</el-tag>
+            </div>
+            <div class="text item">
+              Model:
+              <el-tag size="mini">{{ cluster.redisMode }}</el-tag>
+            </div>
+            <div class="text item">
+              Version:
+              <el-tag size="mini">{{ cluster.redisVersion }}</el-tag>
+            </div>
+            <div class="text item">
+              Master:
+              <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
+            </div>
+            <div class="text item">
+              Nodes:
+              <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
+            </div>
+            <div class="text item" v-if="cluster.redisMode == 'cluster'">
+              Slots Assigned(ok/assigned):
+              <el-tag size="mini">{{ cluster.clusterSlotsOk }}/{{ cluster.clusterSlotsAssigned }}</el-tag>
+            </div>
+            <!-- <div class="text item" v-if="cluster.redisMode == 'cluster'">
+              Slots Bad(pfail/fail):
+              <el-tag size="mini">{{ cluster.clusterSlotsPfail }}/{{ cluster.clusterSlotsFail }}</el-tag>
+            </div> -->
+            <div class="text item" v-if="cluster.redisMode == 'standalone'">
+              DB Size:
+              <el-tag size="mini">{{ cluster.dbSize }}</el-tag>
+            </div>
+            <div class="text item">
+              Environment:
+              <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Docker</el-tag>
+              <el-tag size="mini" v-else-if="cluster.installationEnvironment == 1">Machine</el-tag>
+            </div>
+            <div class="text item">
+              From:
+              <el-tag size="mini" v-if="cluster.installationType == 0">Redis Manager</el-tag>
+              <el-tag size="mini" v-else>Import</el-tag>
+            </div>
           </div>
           <div class="card-bottom">
             <el-button
@@ -116,7 +123,7 @@
               title="Query"
               icon="el-icon-search"
               circle
-              @click="handleQuery(cluster.clusterId)"
+              @click="handleQuery(cluster)"
             ></el-button>
             <el-button
               size="mini"
@@ -164,7 +171,7 @@
       </el-col>
     </el-row>
     <el-dialog
-      title="Query"
+      :title="'Query ' + cluster.clusterName"
       :visible.sync="queryVisible"
       v-if="queryVisible"
       :close-on-click-modal="false"
@@ -245,8 +252,9 @@ export default {
         }
       });
     },
-    handleQuery(clusterId) {
-      this.queryClusterId = clusterId;
+    handleQuery(cluster) {
+      this.queryClusterId = cluster.clusterId;
+      this.cluster = cluster;
       this.queryVisible = true;
     },
     getOverview(groupId) {

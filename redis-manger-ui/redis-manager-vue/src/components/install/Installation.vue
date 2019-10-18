@@ -318,10 +318,21 @@ export default {
 
         if (i == 0) {
           if (oneLineSize != 2) {
-            return callback(new Error("Line " + i + ": wrong format"));
+            return callback(new Error("Line " + (i + 1) + ": wrong format"));
           } else if (nodeAndRole[1] != "master") {
-            return callback(new Error("Line " + i + ": node not master"));
+            return callback(new Error("Line " + (i + 1) + ": node not master"));
           }
+        }
+        if (
+          i != 0 &&
+          this.installationParam.redisMode == "standalone" &&
+          nodeAndRole[1] == "master"
+        ) {
+          return callback(
+            new Error(
+              "Line " + (i + 1) + ": standalone mode only need one master"
+            )
+          );
         }
         let nodeRole = nodeAndRole[1];
         if (isEmpty(nodeRole)) {
@@ -329,7 +340,7 @@ export default {
         }
         let ipAndPort = nodeAndRole[0].split(":");
         if (validateIpAndPort(ipAndPort)) {
-          return callback(new Error("Line " + i + ": wrong format"));
+          return callback(new Error("Line " + (i + 1) + ": wrong format"));
         }
         let host = ipAndPort[0];
         let port = ipAndPort[1];
@@ -355,12 +366,12 @@ export default {
           }
         });
         if (redisNodeRepeat) {
-          return callback(new Error("Line " + i + ": redis node repeat"));
+          return callback(new Error("Line " + (i + 1) + ": redis node repeat"));
         } else {
           redisNodeList.push({
             host: host,
             port: port,
-            nodeRole: nodeRole
+            nodeRole: nodeRole.toLocaleUpperCase()
           });
         }
       }
@@ -521,8 +532,10 @@ export default {
     },
     buildParam() {
       console.log("============");
-      this.buildMachineIdList();
       let installationParam = this.installationParam;
+      if (installationParam.autoBuild) {
+        this.buildMachineIdList();
+      }
       let cluster = {
         groupId: this.currentGroup.groupId,
         userId: store.getters.getUserId,

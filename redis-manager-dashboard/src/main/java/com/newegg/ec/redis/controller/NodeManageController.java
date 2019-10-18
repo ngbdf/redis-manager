@@ -22,6 +22,7 @@ import redis.clients.jedis.HostAndPort;
 
 import java.util.*;
 
+import static com.newegg.ec.redis.util.RedisConfigUtil.*;
 import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
 import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
 
@@ -101,8 +102,7 @@ public class NodeManageController {
     public Result getConfig(@RequestBody RedisNode redisNode) {
         Integer clusterId = redisNode.getClusterId();
         Cluster cluster = clusterService.getClusterById(clusterId);
-        HostAndPort hostAndPort = new HostAndPort(redisNode.getHost(), redisNode.getPort());
-        Map<String, String> configMap = redisService.getConfig(hostAndPort, cluster.getRedisPassword(), null);
+        Map<String, String> configMap = redisService.getConfig(redisNode, cluster.getRedisPassword(), null);
         if (configMap == null) {
             return Result.failResult();
         }
@@ -117,10 +117,43 @@ public class NodeManageController {
         return Result.successResult(configList);
     }
 
+    @RequestMapping(value = "/getConfigCurrentValue", method = RequestMethod.POST)
+    @ResponseBody
+    public Result getConfigCurrentValue(@RequestBody JSONObject jsonObject) {
+        Cluster cluster = jsonObject.getObject("cluster", Cluster.class);
+        String configKey = jsonObject.getString("configKey");
+        List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
+        List<JSONObject> configList = new ArrayList<>();
+        redisNodeList.forEach(redisNode -> {
+            Map<String, String> configMap = redisService.getConfig(redisNode, cluster.getRedisPassword(), configKey);
+            JSONObject config = new JSONObject();
+            config.put("redisNode", RedisUtil.getNodeString(redisNode));
+            if (configMap != null) {
+                config.put("configValue", configMap.get(configKey));
+            }
+            configList.add(config);
+        });
+        return Result.successResult(configList);
+    }
+
     @RequestMapping(value = "/getRedisConfigKeyList", method = RequestMethod.GET)
     @ResponseBody
     public Result getRedisConfigKeyList() {
-        return Result.successResult(RedisConfigUtil.getConfigKeyList());
+        Set<String> configKeyList = RedisConfigUtil.getConfigKeyList();
+        Iterator<String> iterator = configKeyList.iterator();
+        while (iterator.hasNext()) {
+            String configKey = iterator.next();
+            if (Objects.equals(configKey, REQUIRE_PASS)
+                    || Objects.equals(configKey, MASTER_AUTH)
+                    || Objects.equals(configKey, BIND)
+                    || Objects.equals(configKey, PORT)
+                    || Objects.equals(configKey, DIR)
+                    || Objects.equals(configKey, DAEMONIZE)
+            ) {
+              iterator.remove();
+            }
+        }
+        return Result.successResult(configKeyList);
     }
 
     @RequestMapping(value = "/updateRedisConfig", method = RequestMethod.POST)
@@ -321,6 +354,14 @@ public class NodeManageController {
             e.printStackTrace();
             return Result.failResult().setMessage(e.getMessage());
         }
+    }
+
+    @RequestMapping(value = "/initSlots", method = RequestMethod.POST)
+    @ResponseBody
+    public Result initSlots(@RequestBody Cluster cluster) {
+        cluster = clusterService.getClusterById(cluster.getClusterId());
+        String result = redisService.initSlots(cluster);
+        return Strings.isNullOrEmpty(result) ? Result.successResult():Result.failResult().setMessage(result);
     }
 
     private Cluster getCluster(Integer clusterId) {

@@ -29,6 +29,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.newegg.ec.redis.client.IDatabaseCommand.*;
 import static com.newegg.ec.redis.util.RedisClusterInfoUtil.OK;
+import static com.newegg.ec.redis.util.RedisConfigUtil.*;
+import static com.newegg.ec.redis.util.RedisConfigUtil.DAEMONIZE;
+import static com.newegg.ec.redis.util.RedisConfigUtil.PORT;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.EXPIRES;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.KEYS;
 import static com.newegg.ec.redis.util.RedisUtil.*;
@@ -456,6 +459,19 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     }
 
     @Override
+    public String initSlots(Cluster cluster) {
+        List<RedisNode> masterNodeList = getRedisMasterNodeList(cluster);
+        List<SlotBalanceUtil.Shade> balanceSlots = SlotBalanceUtil.balanceSlot(masterNodeList.size());
+        Map<RedisNode, SlotBalanceUtil.Shade> masterNodeShadeMap = new LinkedHashMap<>();
+        for (int i = 0; i < masterNodeList.size(); i++) {
+            RedisNode redisNode = masterNodeList.get(i);
+            SlotBalanceUtil.Shade shade = balanceSlots.get(i);
+            masterNodeShadeMap.put(redisNode, shade);
+        }
+        return clusterAddSlotsBatch(cluster, masterNodeShadeMap);
+    }
+
+    @Override
     public boolean clusterMoveSlots(Cluster cluster, RedisNode targetNode, SlotBalanceUtil.Shade shade) {
         boolean result = true;
         String clusterName = cluster.getClusterName();
@@ -471,8 +487,13 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
             // 槽位没有被分配
             if (sourceNode == null) {
                 // 直接分配此 slot
-                targetRedisClient.clusterAddSlots(slot);
-                close(targetRedisClient);
+                try {
+                    targetRedisClient.clusterAddSlots(slot);
+                } catch (Exception e) {
+                    logger.error("Assigned slot failed.", e);
+                } finally {
+                    close(targetRedisClient);
+                }
                 continue;
             }
             // 如果此 slot 就在它自己本身，则直接跳过
@@ -630,16 +651,16 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     }
 
     @Override
-    public Map<String, String> getConfig(HostAndPort hostAndPort, String redisPassword, String pattern) {
+    public Map<String, String> getConfig(RedisNode redisNode, String redisPassword, String pattern) {
         RedisClient redisClient = null;
         try {
             if (Strings.isNullOrEmpty(pattern)) {
                 pattern = "*";
             }
-            redisClient = RedisClientFactory.buildRedisClient(hostAndPort, redisPassword);
+            redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
             return redisClient.getConfig(pattern);
         } catch (Exception e) {
-            logger.error(hostAndPort + " get config failed.", e);
+            logger.error(RedisUtil.getNodeString(redisNode) + " get config failed.", e);
             return null;
         } finally {
             close(redisClient);
@@ -661,13 +682,23 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         String redisPassword = cluster.getRedisPassword();
         RedisClient redisClient = null;
         try {
-            redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
+            String configKey = redisConfig.getConfigKey();
+            // 不允许更新以下配置
+            if (Objects.equals(configKey, REQUIRE_PASS)
+                    || Objects.equals(configKey, MASTER_AUTH)
+                    || Objects.equals(configKey, BIND)
+                    || Objects.equals(configKey, PORT)
+                    || Objects.equals(configKey, DIR)
+                    || Objects.equals(configKey, DAEMONIZE)) {
+                return true;
+            }
             String configValue = redisConfig.getConfigValue();
             // for special config, like `save`
             if (Strings.isNullOrEmpty(configValue)) {
                 configValue = "";
             }
-            redisClient.setConfig(new Pair<>(redisConfig.getConfigKey(), configValue));
+            redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
+            redisClient.setConfig(new Pair<>(configKey, configValue));
             if (Objects.equals(cluster.getRedisMode(), CLUSTER)) {
                 redisClient.clusterSaveConfig();
             }

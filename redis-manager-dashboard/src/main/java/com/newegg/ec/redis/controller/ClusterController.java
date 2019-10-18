@@ -83,6 +83,7 @@ public class ClusterController {
             return result;
         }
         try {
+            cluster.setInstallationType(1);
             clusterService.addCluster(cluster);
             List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
             realRedisNodeList.forEach(redisNode -> {
@@ -126,20 +127,40 @@ public class ClusterController {
     @RequestMapping(value = "/addAlertRule", method = RequestMethod.POST)
     @ResponseBody
     public Result addAlertRule(@RequestBody Cluster cluster) {
-        Cluster exist = clusterService.getClusterById(cluster.getClusterId());
-        String ruleIds = mergeAlertIds(exist.getRuleIds(), cluster.getRuleIds());
-        cluster.setRuleIds(ruleIds);
-        boolean result = clusterService.updateClusterRuleIds(cluster);
+        Cluster oldCuster = clusterService.getClusterById(cluster.getClusterId());
+        String ruleIds = mergeAlertIds(oldCuster.getRuleIds(), cluster.getRuleIds());
+        oldCuster.setRuleIds(ruleIds);
+        boolean result = clusterService.updateClusterRuleIds(oldCuster);
+        return result ? Result.successResult() : Result.failResult();
+    }
+
+    @RequestMapping(value = "/deleteAlertRule", method = RequestMethod.POST)
+    @ResponseBody
+    public Result deleteAlertRule(@RequestBody Cluster cluster) {
+        Cluster oldCuster = clusterService.getClusterById(cluster.getClusterId());
+        String ruleIds = removeAlertIds(oldCuster.getRuleIds(), cluster.getRuleIds());
+        oldCuster.setRuleIds(ruleIds);
+        boolean result = clusterService.updateClusterRuleIds(oldCuster);
         return result ? Result.successResult() : Result.failResult();
     }
 
     @RequestMapping(value = "/addAlertChannel", method = RequestMethod.POST)
     @ResponseBody
     public Result addAlertChannel(@RequestBody Cluster cluster) {
-        Cluster exist = clusterService.getClusterById(cluster.getClusterId());
-        String channelIds = mergeAlertIds(exist.getChannelIds(), cluster.getChannelIds());
-        cluster.setChannelIds(channelIds);
-        boolean result = clusterService.updateClusterChannelIds(cluster);
+        Cluster oldCuster = clusterService.getClusterById(cluster.getClusterId());
+        String channelIds = mergeAlertIds(oldCuster.getChannelIds(), cluster.getChannelIds());
+        oldCuster.setChannelIds(channelIds);
+        boolean result = clusterService.updateClusterChannelIds(oldCuster);
+        return result ? Result.successResult() : Result.failResult();
+    }
+
+    @RequestMapping(value = "/deleteAlertChannel", method = RequestMethod.POST)
+    @ResponseBody
+    public Result deleteAlertChannel(@RequestBody Cluster cluster) {
+        Cluster oldCuster = clusterService.getClusterById(cluster.getClusterId());
+        String channelIds = removeAlertIds(oldCuster.getChannelIds(), cluster.getChannelIds());
+        oldCuster.setChannelIds(channelIds);
+        boolean result = clusterService.updateClusterChannelIds(oldCuster);
         return result ? Result.successResult() : Result.failResult();
     }
 
@@ -149,8 +170,27 @@ public class ClusterController {
             String[] oldIdArr = SignUtil.splitByCommas(oldIds);
             idSet.addAll(Arrays.asList(oldIdArr));
         }
-        String[] newIdArr = SignUtil.splitByCommas(newIds);
-        idSet.addAll(Arrays.asList(newIdArr));
+        if (!Strings.isNullOrEmpty(newIds)) {
+            String[] newIdArr = SignUtil.splitByCommas(newIds);
+            idSet.addAll(Arrays.asList(newIdArr));
+        }
+        StringBuilder ids = new StringBuilder();
+        idSet.forEach((id) -> ids.append(id).append(SignUtil.COMMAS));
+        return ids.toString();
+    }
+
+    private String removeAlertIds(String oldIds, String newIds) {
+        Set<String> idSet = new LinkedHashSet<>();
+        if (!Strings.isNullOrEmpty(oldIds)) {
+            String[] oldIdArr = SignUtil.splitByCommas(oldIds);
+            idSet.addAll(Arrays.asList(oldIdArr));
+        }
+        if (!Strings.isNullOrEmpty(newIds)) {
+            String[] newIdArr = SignUtil.splitByCommas(newIds);
+            for (String id : newIdArr) {
+                idSet.remove(id);
+            }
+        }
         StringBuilder ids = new StringBuilder();
         idSet.forEach((id) -> ids.append(id).append(SignUtil.COMMAS));
         return ids.toString();

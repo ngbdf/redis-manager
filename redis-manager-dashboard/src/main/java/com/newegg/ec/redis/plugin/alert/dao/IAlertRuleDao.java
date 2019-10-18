@@ -17,6 +17,7 @@ public interface IAlertRuleDao {
 
     @Select("<script>" +
             "SELECT * FROM alert_rule WHERE global = 1 " +
+            "AND group_id = #{groupId} " +
             "<if test='ruleIdList != null and ruleIdList.size() > 0'>" +
             "OR rule_id IN " +
             "<foreach item='ruleId' collection='ruleIdList' open='(' separator=',' close=')'>" +
@@ -24,7 +25,7 @@ public interface IAlertRuleDao {
             "</foreach>" +
             "</if>" +
             "</script>")
-    List<AlertRule> selectAlertRuleByIds(@Param("ruleIdList") List<Integer> ruleIdList);
+    List<AlertRule> selectAlertRuleByIds(@Param("groupId") Integer groupId, @Param("ruleIdList") List<Integer> ruleIdList);
 
     @Select("<script>" +
             "SELECT * FROM alert_rule WHERE group_id = #{groupId} " +

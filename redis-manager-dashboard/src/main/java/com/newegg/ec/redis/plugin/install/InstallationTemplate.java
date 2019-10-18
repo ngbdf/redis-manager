@@ -13,9 +13,7 @@ import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.*;
-import com.newegg.ec.redis.util.NetworkUtil;
-import com.newegg.ec.redis.util.RedisUtil;
-import com.newegg.ec.redis.util.SlotBalanceUtil;
+import com.newegg.ec.redis.util.*;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,9 +136,17 @@ public class InstallationTemplate {
         buildMachineList(installationParam);
 
         boolean checkMachineSuccess = checkMachineList(installationParam);
+        if (!checkMachineSuccess) {
+            return false;
+        }
         // 构建集群拓扑图
         boolean buildTopologySuccess = buildTopology(installationParam);
         if (!buildTopologySuccess) {
+            return false;
+        }
+
+        boolean checkRedisNodeSuccess = checkRedisNodeList(installationParam);
+        if (!checkRedisNodeSuccess) {
             return false;
         }
         // 构建机器和Redis节点结构
@@ -156,7 +162,6 @@ public class InstallationTemplate {
         }
         return true;
     }
-
 
 
     public boolean pullConfig(AbstractNodeOperation installationOperation, InstallationParam installationParam) {
@@ -190,11 +195,23 @@ public class InstallationTemplate {
 
     /**
      * for not auto build
+     *
      * @param installationParam
      * @return
      */
     private boolean checkMachineList(InstallationParam installationParam) {
-        return true;
+        String clusterName = installationParam.getCluster().getClusterName();
+        boolean result = true;
+        List<Machine> machineList = installationParam.getMachineList();
+        for (Machine machine : machineList) {
+            try {
+                SSH2Util.getConnection(machine);
+            } catch (Exception e) {
+                InstallationWebSocketHandler.appendLog(clusterName, machine.getHost() + " connection refused");
+                result = false;
+            }
+        }
+        return result;
     }
 
     /**
@@ -223,15 +240,8 @@ public class InstallationTemplate {
             for (RedisNode redisNode : allRedisNodes) {
                 if (Objects.equals(redisNode.getNodeRole(), MASTER)) {
                     masterNode = redisNode;
-                }
-                if (Objects.equals(redisNode.getNodeRole(), SLAVE)) {
-                    Collection<RedisNode> slaves = topology.get(masterNode);
-                    if (slaves == null || slaves.isEmpty()) {
-                        redisNode.setNodeRole(MASTER);
-                        topology.put(redisNode, null);
-                    } else {
-                        topology.put(masterNode, redisNode);
-                    }
+                } else if (Objects.equals(redisNode.getNodeRole(), SLAVE)) {
+                    topology.put(masterNode, redisNode);
                 }
             }
         }
@@ -247,12 +257,25 @@ public class InstallationTemplate {
 
     /**
      * for not auto build
+     *
      * @param installationParam
      * @return
      */
     private boolean checkRedisNodeList(InstallationParam installationParam) {
-        return true;
+        String clusterName = installationParam.getCluster().getClusterName();
+        List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
+        boolean result = true;
+        for (RedisNode redisNode : redisNodeList) {
+            String host = redisNode.getHost();
+            int port = redisNode.getPort();
+            if (NetworkUtil.telnet(host, port)) {
+                InstallationWebSocketHandler.appendLog(clusterName, host + COLON + port + " has already been used");
+                result = false;
+            }
+        }
+        return result;
     }
+
     /**
      * rest 调用
      *
@@ -403,7 +426,7 @@ public class InstallationTemplate {
 
         List<RedisNode> redisNodeListWithInfo = waitNodesMeet(installationParam, seed, allRedisNodes);
         replicate(installationParam, topology, redisNodeListWithInfo);
-
+        waitAfterOperation(TEN_SECONDS);
         // Set password
         if (!Strings.isNullOrEmpty(redisPassword)) {
             String updateRedisPasswordResult = updateRedisPassword(redisPassword, cluster);
@@ -412,7 +435,7 @@ public class InstallationTemplate {
         }
         boolean autoInit = installationParam.isAutoInit();
         if (autoInit) {
-            String initResult = initSlot(cluster);
+            String initResult = redisService.initSlots(cluster);
             if (Strings.isNullOrEmpty(initResult)) {
                 cluster.setInitialized(true);
             }
@@ -473,11 +496,10 @@ public class InstallationTemplate {
                 }
                 int realSize = redisNodeListWithInfo.size();
                 int needSize = redisNodeList.size();
+                waitAfterOperation(TEN_SECONDS);
                 if (realSize == needSize) {
-                    Thread.sleep(TEN_SECONDS);
                     break;
                 } else {
-                    Thread.sleep(TEN_SECONDS);
                     timeout += TEN_SECONDS;
                 }
             } catch (Exception e) {
@@ -529,22 +551,17 @@ public class InstallationTemplate {
         for (Map.Entry<RedisNode, RedisNode> entry : topology.entries()) {
             RedisNode masterNode = entry.getKey();
             for (RedisNode redisNodeWithInfo : redisNodeListWithInfo) {
-                if (Objects.equals(masterNode.getHost(), redisNodeWithInfo.getHost())
-                        && masterNode.getPort() == redisNodeWithInfo.getPort()) {
+                if (RedisUtil.equals(masterNode, redisNodeWithInfo)) {
                     realTopology.put(redisNodeWithInfo, entry.getValue());
                 }
             }
         }
         realTopology.forEach((masterNodeWithInfo, slaveNode) -> {
             boolean replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);
-            //waitAfterOperation(FIVE_SECONDS);
             int waitTimeout = 0;
             while (!replicateResult && waitTimeout < ONE_MINUTE) {
-                try {
-                    Thread.sleep(TEN_SECONDS);
-                    waitTimeout += TEN_SECONDS;
-                } catch (InterruptedException e) {
-                }
+                waitAfterOperation(TEN_SECONDS);
+                waitTimeout += TEN_SECONDS;
                 replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);
             }
             if (!replicateResult) {
@@ -581,37 +598,19 @@ public class InstallationTemplate {
     }
 
     private String generateConnectionNodes(Cluster cluster) {
-        List<RedisNode> allRedisNodeList = redisService.getRedisNodeList(cluster);
+        List<RedisNode> masterNodeList = redisService.getRedisMasterNodeList(cluster);
         // 随机选前3个节点
         StringBuffer nodes = new StringBuffer();
-        int size = allRedisNodeList.size();
-        RedisNode redisNode1 = allRedisNodeList.get(0);
+        int size = masterNodeList.size();
+        RedisNode redisNode1 = masterNodeList.get(0);
         nodes.append(redisNode1.getHost()).append(COLON).append(redisNode1.getPort());
         if (size > 3) {
-            RedisNode redisNode2 = allRedisNodeList.get(1);
-            RedisNode redisNode3 = allRedisNodeList.get(2);
+            RedisNode redisNode2 = masterNodeList.get(1);
+            RedisNode redisNode3 = masterNodeList.get(2);
             nodes.append(COMMAS).append(redisNode2.getHost()).append(COLON).append(redisNode2.getPort())
                     .append(COMMAS).append(redisNode3.getHost()).append(COLON).append(redisNode3.getPort());
         }
         return nodes.toString();
-    }
-
-    /**
-     * Slot distribution for redis cluster
-     *
-     * @param cluster
-     * @return
-     */
-    private String initSlot(Cluster cluster) {
-        List<RedisNode> masterNodeList = redisService.getRedisMasterNodeList(cluster);
-        List<SlotBalanceUtil.Shade> balanceSlots = SlotBalanceUtil.balanceSlot(masterNodeList.size());
-        Map<RedisNode, SlotBalanceUtil.Shade> masterNodeShadeMap = new LinkedHashMap<>();
-        for (int i = 0; i < masterNodeList.size(); i++) {
-            RedisNode redisNode = masterNodeList.get(i);
-            SlotBalanceUtil.Shade shade = balanceSlots.get(i);
-            masterNodeShadeMap.put(redisNode, shade);
-        }
-        return redisService.clusterAddSlotsBatch(cluster, masterNodeShadeMap);
     }
 
     /**
@@ -641,6 +640,7 @@ public class InstallationTemplate {
         Cluster cluster = installationParam.getCluster();
         String nodes = generateConnectionNodes(cluster);
         cluster.setNodes(nodes);
+        cluster.setInstallationType(0);
         waitAfterOperation(ONE_SECOND);
         clusterService.addCluster(cluster);
         List<RedisNode> redisNodeList = installationParam.getRedisNodeList();

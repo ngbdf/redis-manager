@@ -98,6 +98,7 @@ public interface IRedisService {
 
     String clusterAddSlotsBatch(Cluster cluster, Map<RedisNode, SlotBalanceUtil.Shade> masterNodeAndShade);
 
+    String initSlots(Cluster cluster);
     /**
      * 迁移槽位
      *
@@ -127,7 +128,7 @@ public interface IRedisService {
     boolean standaloneReplicaNoOne(Cluster cluster, RedisNode redisNode);
 
 
-    Map<String, String> getConfig(HostAndPort hostAndPort, String redisPassword, String pattern);
+    Map<String, String> getConfig(RedisNode redisNode, String redisPassword, String pattern);
 
     /**
      * 修改Redis配置

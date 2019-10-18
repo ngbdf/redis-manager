@@ -21,5 +21,5 @@ public interface IAlertRecordService {
 
     boolean deleteAlertRecordByTime(Timestamp earliestTime);
 
-    Integer getAlertNumber();
+    Integer getAlertRecordNumber(Integer groupId);
 }

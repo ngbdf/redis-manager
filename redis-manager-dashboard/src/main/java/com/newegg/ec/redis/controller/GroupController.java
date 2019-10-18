@@ -3,6 +3,7 @@ package com.newegg.ec.redis.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.Group;
 import com.newegg.ec.redis.entity.Result;
+import com.newegg.ec.redis.plugin.alert.service.impl.AlertRecordService;
 import com.newegg.ec.redis.service.IGroupService;
 import com.newegg.ec.redis.service.IUserService;
 import org.slf4j.Logger;
@@ -29,8 +30,8 @@ public class GroupController {
     @Autowired
     private IUserService userService;
 
-    /*@Autowired
-    private AlertRecordService alertRecordService;*/
+    @Autowired
+    private AlertRecordService alertRecordService;
 
     private static final String USER_NUMBER = "userNumber";
 
@@ -47,7 +48,7 @@ public class GroupController {
     public Result getGroupPartOverview(@PathVariable("groupId") Integer groupId) {
         JSONObject overview = new JSONObject();
         overview.put(USER_NUMBER, userService.getUserNumber(groupId));
-        overview.put(ALERT_NUMBER, 13);
+        overview.put(ALERT_NUMBER, alertRecordService.getAlertRecordNumber(groupId));
         return Result.successResult(overview);
     }
 

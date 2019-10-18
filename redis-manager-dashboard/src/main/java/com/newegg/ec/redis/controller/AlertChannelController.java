@@ -51,13 +51,22 @@ public class AlertChannelController {
         List<AlertChannel> alertChannelList = alertChannelService.getAlertChannelByIds(channelIdList);
         boolean result = alertChannelList != null;
         // 每次检查是否有无用的 channel
-        if (result && alertChannelList.size() < channelIdList.size()) {
-            StringBuilder newChannelIds = new StringBuilder();
-            alertChannelList.forEach(alertChannel -> {
-                newChannelIds.append(alertChannel.getChannelId()).append(SignUtil.COMMAS);
-            });
-            cluster.setChannelIds(newChannelIds.toString());
-            clusterService.updateClusterChannelIds(cluster);
+        if (result) {
+            List<Integer> realChannelIdList = new ArrayList<>();
+            alertChannelList.forEach(alertChannel -> realChannelIdList.add(alertChannel.getChannelId()));
+            boolean needUpdate = false;
+            for (Integer channelId : channelIdList) {
+                if (!realChannelIdList.contains(channelId)) {
+                    needUpdate = true;
+                    break;
+                }
+            }
+            if (needUpdate) {
+                StringBuilder newChannelIds = new StringBuilder();
+                realChannelIdList.forEach(channelId -> newChannelIds.append(channelId).append(SignUtil.COMMAS));
+                cluster.setChannelIds(newChannelIds.toString());
+                clusterService.updateClusterChannelIds(cluster);
+            }
         }
         return result ? Result.successResult(alertChannelList) : Result.failResult();
     }

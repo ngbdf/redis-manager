@@ -50,12 +50,12 @@ public interface IClusterDao {
     @Update("UPDATE cluster SET " +
             "cluster_token = #{clusterToken}, user_id = #{userId}, cluster_name = #{clusterName}, " +
             "nodes = #{nodes}, redis_mode = #{redisMode}, os = #{os}, " +
-            "redis_version = #{redisVersion}, image = #{image}, initialized = #{initialized}, " +
+            "redis_version = #{redisVersion}, initialized = #{initialized}, " +
             "total_keys = #{totalKeys}, total_expires = #{totalExpires}, db_size = #{dbSize}, " +
             "cluster_state = #{clusterState}, cluster_slots_assigned = #{clusterSlotsAssigned}, cluster_slots_ok = #{clusterSlotsOk}, " +
             "cluster_slots_pfail = #{clusterSlotsPfail}, cluster_slots_fail = #{clusterSlotsFail}, cluster_known_nodes = #{clusterKnownNodes}, " +
             "cluster_size = #{clusterSize}, redis_password = #{redisPassword}, installation_environment = #{installationEnvironment}, " +
-            "installation_type = #{installationType}, update_time = NOW() " +
+            "update_time = NOW() " +
             "WHERE cluster_id = #{clusterId}")
     int updateCluster(Cluster cluster);
 

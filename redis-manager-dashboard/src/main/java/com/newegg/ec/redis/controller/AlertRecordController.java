@@ -28,21 +28,10 @@ public class AlertRecordController {
         return alertRecordList != null ? Result.successResult(alertRecordList) : Result.failResult();
     }
 
-    @RequestMapping(value = "/deleteAlertRecord", method = RequestMethod.POST)
-    @ResponseBody
-    public Result deleteAlertRecord(@RequestBody AlertRecord alertRecord) {
-        boolean result = alertRecordService.deleteAlertRecordById(alertRecord.getRecordId());
-        return result ? Result.successResult() : Result.failResult();
-    }
-
     @RequestMapping(value = "/deleteAlertRecordBatch", method = RequestMethod.POST)
     @ResponseBody
-    public Result deleteAlertRecordBatch(@RequestBody List<AlertRecord> alertRecordList) {
-        List<Integer> alertRecordIdList = new ArrayList<>();
-        alertRecordList.forEach(alertRecord -> {
-            alertRecordIdList.add(alertRecord.getRecordId());
-        });
-        boolean result = alertRecordService.deleteAlertRecordByIds(alertRecordIdList);
+    public Result deleteAlertRecordBatch(@RequestBody List<Integer> recordIdList) {
+        boolean result = alertRecordService.deleteAlertRecordByIds(recordIdList);
         return result ? Result.successResult() : Result.failResult();
     }
 

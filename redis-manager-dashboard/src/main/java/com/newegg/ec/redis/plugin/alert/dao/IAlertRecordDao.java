@@ -16,7 +16,7 @@ public interface IAlertRecordDao {
     @Select("SELECT * FROM alert_record WHERE cluster_id = #{clusterId}")
     List<AlertRecord> selectAlertRecordByClusterId(Integer clusterId);
 
-    @Select("SELECT * FROM alert_record WHERE cluster_id = #{clusterId}")
+    @Insert("SELECT * FROM alert_record WHERE cluster_id = #{clusterId}")
     int insertAlertRecord(AlertRecord alertRecord);
 
     @Insert("<script>" +
@@ -29,6 +29,9 @@ public interface IAlertRecordDao {
             "</foreach>" +
             "</script>")
     int insertAlertRecordBatch(@Param("alertRecordList") List<AlertRecord> alertRecordList);
+
+    @Select("SELECT COUNT(record_id) FROM alert_record WHERE group_id = #{groupId}")
+    int countAlertRecordNumber(Integer groupId);
 
     @Delete("DELETE FROM alert_record WHERE record_id = #{ruleId}")
     int deleteAlertRecordById(Integer recordId);

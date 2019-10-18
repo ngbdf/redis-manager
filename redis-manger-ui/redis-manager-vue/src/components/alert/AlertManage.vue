@@ -42,7 +42,11 @@
         <span>{{ cluster.clusterName }}</span>
         <i class="el-icon-sunny health" title="Status" v-if="cluster.clusterState == 'HEALTH'"></i>
       </div>
-      <el-tabs v-model="activeName" @tab-click="handleClick">
+      <el-tabs
+        v-model="activeName"
+        @tab-click="handleClick"
+        
+      >
         <el-tab-pane label="Alert Record" name="record">
           <div class="operation-wrapper">
             <div class="batch-title">Batch Operation</div>
@@ -52,7 +56,7 @@
               </div>
             </div>
           </div>
-          <el-table :data="alertRecordList">
+          <el-table :data="alertRecordList" @selection-change="handleRecordSelectionChange" :default-sort="{prop: 'time', order: 'descending'}">
             <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column property="redisNode" label="Redis Node"></el-table-column>
@@ -68,7 +72,11 @@
             <el-table-column property="time" label="Time"></el-table-column>
             <el-table-column label="Operation" width="100px;">
               <template slot-scope="scope">
-                <el-button size="mini" type="danger">Delete</el-button>
+                <el-button
+                  size="mini"
+                  type="danger"
+                  @click="handleDeleteAlertRecord(scope.row)"
+                >Delete</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -88,7 +96,7 @@
               >Add Rule</el-link>
             </div>
           </div>
-          <el-table :data="alertRuleList">
+          <el-table :data="alertRuleList" :default-sort="{prop: 'time', order: 'descending'}">
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column label="Alert Rule">
               <template
@@ -110,8 +118,12 @@
             <el-table-column property="ruleInfo" label="Info"></el-table-column>
             <el-table-column property="time" label="Time"></el-table-column>
             <el-table-column label="Operation" width="100px;">
-              <template slot-scope="scope">
-                <el-button size="mini" type="danger">Delete</el-button>
+              <template slot-scope="scope" v-if="!scope.row.global">
+                <el-button
+                  size="mini"
+                  type="danger"
+                  @click="handleDeleteAlertRule(scope.row)"
+                >Delete</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -131,7 +143,7 @@
               >Add Channel</el-link>
             </div>
           </div>
-          <el-table :data="alertChannelList" style="width: 100%">
+          <el-table :data="alertChannelList" :default-sort="{prop: 'time', order: 'descending'}">
             <el-table-column type="index" width="50"></el-table-column>
             <!-- <el-table-column type="expand">
               <template slot-scope="props">
@@ -204,7 +216,7 @@
                 <el-button
                   size="mini"
                   type="danger"
-                  @click="handleDelete(scope.$index, scope.row)"
+                  @click="handleDeleteAlertChannel(scope.row)"
                 >Delete</el-button>
               </template>
             </el-table-column>
@@ -228,6 +240,16 @@
         <el-button size="small" type="primary" @click="addAlertRule()">Confirm</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog title="Delete Alert Rule" :visible.sync="deleteAlertRuleVisible">
+      Are you sure to delete
+      <b>{{ deletingAlertRule.ruleKey }} {{ deletingAlertRule.compareSign }} {{ deletingAlertRule.ruleValue }}</b> ?
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="deleteAlertRuleVisible = false">Cancel</el-button>
+        <el-button size="small" type="primary" @click="deleteAlertRule()">Confirm</el-button>
+      </span>
+    </el-dialog>
+
     <el-dialog title="Add Alert Channel" :visible.sync="addAlertChannelVisible">
       <el-table :data="alertRuleListNotUsed" stripe @selection-change="addChannelSelectionChange">
         <el-table-column type="selection" width="55"></el-table-column>
@@ -279,6 +301,27 @@
         <el-button size="small" type="primary" @click="addAlertChannel()">Confirm</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog title="Delete Alert Channel" :visible.sync="deleteAlertChannelVisible" width="30%">
+      <span>
+        Are you sure to delete
+        <b>{{ deletingAlertChannel.channelName }}</b> ?
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="deleteAlertChannelVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteAlertChannel()">Delete</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog title="Delete Alert Record" :visible.sync="deleteAlertRecordVisible" width="30%">
+      <span>
+        Are you sure to delete?
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="deleteAlertChannelVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteAlertRecord()">Delete</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -323,19 +366,17 @@ export default {
       activeName: "record",
       addAlertRuleVisible: false,
       addAlertChannelVisible: false,
-      unaddedRules: [],
-      unaddedChannels: []
+      deleteAlertRuleVisible: false,
+      deleteAlertChannelVisible: false,
+      deleteAlertRecordVisible: false,
+      deletingAlertRule: {},
+      deletingAlertChannel: {},
+      deletingAlertRecordIds: []
     };
   },
   methods: {
     handleClick(tab, event) {
       //console.log(tab, event);
-    },
-    handleView(index, row) {
-      console.log(index, row);
-    },
-    handleEdit(index, row) {
-      console.log(index, row);
     },
     addRuleSelectionChange(val) {
       let newRuleIds = "";
@@ -481,6 +522,31 @@ export default {
         }
       );
     },
+    handleDeleteAlertRule(alertRule) {
+      this.cluster.ruleIds = alertRule.ruleId;
+      this.deletingAlertRule = alertRule;
+      this.deleteAlertRuleVisible = true;
+    },
+    deleteAlertRule() {
+      let url = "/cluster/deleteAlertRule";
+      API.post(
+        url,
+        this.cluster,
+        response => {
+          let result = response.data;
+          let clusterId = this.cluster.clusterId;
+          this.getAlertRuleList(clusterId);
+          if (result.code == 0) {
+            this.deleteAlertRuleVisible = false;
+          } else {
+            console.log("delete alert rule failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
     getAlertChannelList(clusterId) {
       let url = "/alert/channel/getAlertChannel/cluster/" + clusterId;
       API.get(
@@ -544,6 +610,66 @@ export default {
             this.addAlertChannelVisible = false;
           } else {
             console.log("add alert channel failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    handleDeleteAlertChannel(alertChannel) {
+      this.cluster.channelIds = alertChannel.channelId;
+      this.deletingAlertChannel = alertChannel;
+      this.deleteAlertChannelVisible = true;
+    },
+    deleteAlertChannel() {
+      let url = "/cluster/deleteAlertChannel";
+      API.post(
+        url,
+        this.cluster,
+        response => {
+          let result = response.data;
+          let clusterId = this.cluster.clusterId;
+          this.getAlertChannelList(clusterId);
+          if (result.code == 0) {
+            this.deleteAlertChannelVisible = false;
+          } else {
+            console.log("delete alert channel failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    handleDeleteAlertRecord(alertRecord) {
+      this.deletingAlertRecordIds = []
+      this.deletingAlertRecordIds.push(alertRecord.recordId);
+    },
+    handleRecordSelectionChange(val) {
+      if(val.length == 0) {
+        return;
+      }
+      this.deletingAlertRecordIds = []
+      val.forEach(alertRecord => {
+        this.deletingAlertRecordIds.push(alertRecord.recordId);
+      });
+      this.deleteAlertRecordVisible = true;
+      console.log(this.deleteAlertRecordIds);
+    },
+    deleteAlertRecord() {
+      let url = "/cluster/deleteAlertRecordBatch";
+      API.post(
+        url,
+        this.deleteAlertRecordIds,
+        response => {
+          let result = response.data;
+          let clusterId = this.cluster.clusterId;
+          this.getAlertRecordList(clusterId);
+          if (result.code == 0) {
+            this.deleteAlertRecordVisible = false;
+          } else {
+            console.log("delete alert record failed.");
           }
         },
         err => {

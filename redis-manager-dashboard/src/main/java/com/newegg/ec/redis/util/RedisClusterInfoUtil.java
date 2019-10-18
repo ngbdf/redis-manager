@@ -45,7 +45,9 @@ public class RedisClusterInfoUtil {
                 continue;
             }
             if (Objects.equals(key, CLUSTER_STATE)) {
-                value = Objects.equals(value, OK) ? Cluster.ClusterState.HEALTH.toString() : Cluster.ClusterState.BAD.toString();
+                value = Objects.equals(value, OK) ? Cluster.ClusterState.HEALTH.toString() :
+                        Objects.equals(value, FAIL) ?
+                                Cluster.ClusterState.BAD.toString() : Cluster.ClusterState.UNKNOWN.toString();
             }
             String field = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, key);
 

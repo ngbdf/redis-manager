@@ -50,6 +50,16 @@
               icon="el-icon-edit"
               @click="editConfigVisible = true"
             >Edit Config</el-link>
+            <span
+              v-if="cluster.redisMode == 'cluster' && !cluster.initialized && cluster.clusterSlotsAssigned == 0"
+            >
+              <el-divider direction="vertical"></el-divider>
+              <el-link
+                :underline="false"
+                icon="el-icon-coordinate"
+                @click="initSlotsVisible = true"
+              >Init Slot</el-link>
+            </span>
           </div>
           <el-link
             :underline="false"
@@ -107,7 +117,12 @@
           </el-table-column>
           <el-table-column prop="host" label="Host" sortable></el-table-column>
           <el-table-column prop="port" label="Port" sortable></el-table-column>
-          <el-table-column prop="slotRange" label="Slot Range" sortable>
+          <el-table-column
+            prop="slotRange"
+            label="Slot Range"
+            sortable
+            v-if="cluster.redisMode == 'cluster'"
+          >
             <template slot-scope="scope">
               {{ scope.row.slotRange }}
               <el-tag size="mini" v-if="scope.row.slotRange != null">{{ scope.row.slotNumber }}</el-tag>
@@ -277,6 +292,7 @@
             allow-create
             default-first-option
             placeholder="Please select config key"
+            @change="getConfigCurrentValue(redisConfig)"
           >
             <el-option
               v-for="configKey in configKeyList"
@@ -292,6 +308,10 @@
         <el-form-item label="Config Value" prop="configValue">
           <el-input v-model="redisConfig.configValue"></el-input>
         </el-form-item>
+        <p v-for="nodeConfig in nodeConfigList" :key="nodeConfig.redisNode">
+          <span style="color: #606266;">{{ nodeConfig.redisNode }}</span>
+          <span><b>{{ nodeConfig.configValue }}</b></span>
+        </p>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="editConfigVisible = false">Cancel</el-button>
@@ -377,6 +397,37 @@
       </span>
     </el-dialog>
     <!-- node operation -->
+
+    <el-dialog
+      title="Init Slot"
+      :visible.sync="initSlotsVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
+      <p>
+        Cluster Slots All:
+        <b>16384</b>
+      </p>
+      <p>
+        Cluster Slots Assigned:
+        <b>{{ cluster.clusterSlotsAssigned }}</b>
+      </p>
+      <p>
+        Cluster Slots Ok:
+        <b>{{ cluster.clusterSlotsOk }}</b>
+      </p>
+      <p>
+        Cluster Slots Pfail:
+        <b>{{ cluster.clusterSlotsPfail }}</b>
+      </p>
+      <p>
+        Cluster Slots Fail:
+        <b>{{ cluster.clusterSlotsFail }}</b>
+      </p>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" type="primary" @click="initSlots()">Init</el-button>
+      </span>
+    </el-dialog>
 
     <el-dialog
       :title="'Info - ' + operationNode.host + ':' + operationNode.port"
@@ -531,12 +582,14 @@ export default {
       deleteNodeVisible: false,
       infoVisible: false,
       configVisible: false,
+      initSlotsVisible: false,
       slotRange: {},
       operationNode: {},
       operationNodeList: [],
       newRedisNode: {},
       configKeyList: [],
       redisConfig: {},
+      nodeConfigList: [],
       rules: {
         redisNode: [
           {
@@ -608,7 +661,6 @@ export default {
     },
     getAllNodeList(clusterId) {
       let url = "/nodeManage/getAllNodeListWithStatus/" + clusterId;
-      console.log(url);
       API.get(
         url,
         null,
@@ -704,9 +756,24 @@ export default {
         }
       );
     },
-    // getConfigCurrentValue(redisConfig) {
-    //   console.log(redisConfig);
-    // },
+    getConfigCurrentValue(redisConfig) {
+      console.log(redisConfig);
+      let url = "/nodeManage/getConfigCurrentValue";
+      let data = {
+        cluster: this.cluster,
+        configKey: redisConfig.configKey
+      };
+      API.post(
+        url,
+        data,
+        response => {
+          this.nodeConfigList = response.data.data;
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
     editConfig(redisConfig) {
       this.$refs[redisConfig].validate(valid => {
         if (valid) {
@@ -894,7 +961,6 @@ export default {
     },
     moveSlot(slotRange) {
       this.$refs[slotRange].validate(valid => {
-        console.log(valid);
         if (valid) {
           let data = {
             redisNode: this.operationNode,
@@ -1046,6 +1112,25 @@ export default {
             this.deleteNodeVisible = false;
           } else {
             console.log("delete node failed.");
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    initSlots() {
+      let url = "/nodeManage/initSlots";
+      API.post(
+        url,
+        this.cluster,
+        response => {
+          let result = response.data;
+          this.reload();
+          if (result.code == 0) {
+            this.initSlotsVisible = false;
+          } else {
+            console.log(result.message);
           }
         },
         err => {

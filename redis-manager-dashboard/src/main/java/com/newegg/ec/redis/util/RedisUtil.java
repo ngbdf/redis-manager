@@ -159,4 +159,11 @@ public class RedisUtil {
         return Objects.equals(redisNode1.getHost(), redisNode2.getHost())
                 && redisNode1.getPort() == redisNode2.getPort();
     }
+
+    public static String getNodeString(RedisNode redisNode) {
+        StringBuilder result = new StringBuilder();
+        result.append(redisNode.getHost()).append(SignUtil.COLON).append(redisNode.getPort());
+        return result.toString();
+    }
+
 }
