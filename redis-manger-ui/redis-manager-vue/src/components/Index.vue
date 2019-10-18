@@ -56,7 +56,7 @@
                   </el-dropdown-item>
                   <el-dropdown-item command="profile" divided>Profile</el-dropdown-item>
                   <el-dropdown-item>Help</el-dropdown-item>
-                  <el-dropdown-item divided>Sign out</el-dropdown-item>
+                  <el-dropdown-item divided @click.native="toLogin">Sign out</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </div>
@@ -157,7 +157,11 @@ export default {
     };
   },
   methods: {
-    toDashboard() {
+    toLogin() {
+      this.$router.push({
+        name: "login"
+      });
+    },toDashboard() {
       this.$router.push({
         name: "dashboard",
         params: { groupId: this.selectGroupId }

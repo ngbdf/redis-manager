@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import Login from '@/components/Login'
 import Index from '@/components/Index'
 import Dashboard from '@/components/dashboard/Dashboard'
 import RedisMonitor from '@/components/monitor/RedisMonitor'
@@ -23,6 +24,11 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
+    },
     {
       path: '/',
       name: 'index',
