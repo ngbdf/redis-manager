@@ -4,7 +4,8 @@
       <el-row type="flex" class="header-wrapper" justify="space-between">
         <el-col class="grid-content logo-wrapper">
           <i class="el-icon-s-fold aside-operation" @click="collapseHandler"></i>
-          <span class="logo">REDIS MANAGER</span>
+          <!-- <span class="logo">REDIS MANAGER</span> -->
+          <img src="../assets/logo.png" style="width: 150px; height: 20px" />
         </el-col>
         <el-col>
           <div class="grid-content right-content" id="right-content">
@@ -78,6 +79,9 @@
               :collapse="isCollapse"
               :collapse-transition="false"
             >
+              <!-- background-color="#282b37"
+              text-color="#909399"
+              active-text-color="#fff"-->
               <el-menu-item index="1" @click="toDashboard()">
                 <i class="el-icon-discover"></i>
                 <span slot="title">Dashboard</span>
@@ -161,7 +165,8 @@ export default {
       this.$router.push({
         name: "login"
       });
-    },toDashboard() {
+    },
+    toDashboard() {
       this.$router.push({
         name: "dashboard",
         params: { groupId: this.selectGroupId }
@@ -347,6 +352,9 @@ export default {
 }
 
 .logo-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 200px;
   min-width: 200px;
   cursor: pointer;
@@ -354,7 +362,7 @@ export default {
 }
 
 .aside-operation {
-  font-size: 18px;
+  font-size: 22px;
   margin-right: 5px;
 }
 
@@ -400,7 +408,7 @@ export default {
   height: 100%;
   z-index: 100;
   overflow: hidden;
-  background-color: #ffffff;
+  /* background-color: #282b37; */
 }
 
 .main {

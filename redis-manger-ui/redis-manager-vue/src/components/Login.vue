@@ -1,9 +1,9 @@
 <template>
   <!--background-color: #f0f2f5; background-image: linear-gradient(0deg,#04c0c6,#2ba3de 51%,#835be3); -->
-  <el-container style>
+  <el-container style="background-image: linear-gradient(0deg,#04c0c6,#2ba3de 51%,#835be3);">
     <img
-      src="../assets/back.jpg"
-      style="position: absolute; z-index: -1;left: 0;width: 100%; opacity:0.3;"
+      src="../assets/redis-manager.png"
+      style="position: absolute; z-index: 0;left: 0; top:32%; width: 100%; opacity:0.1;"
     />
     <div class="login-wrapper">
       <el-card shadow="hover" class="content-wrapper">
