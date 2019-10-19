@@ -4,10 +4,13 @@ import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * @author Jay.H.Zou
@@ -22,7 +25,7 @@ public class UserController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public Result login(User user) {
+    public Result login(@RequestBody User user) {
         User userLogin = userService.getUserByNameAndPassword(user);
         if (userLogin == null) {
             return Result.failResult();
@@ -32,7 +35,7 @@ public class UserController {
 
     @RequestMapping(value = "/oauth2", method = RequestMethod.POST)
     @ResponseBody
-    public Result oauth2(User user) {
+    public Result oauth2(@RequestBody User user) {
         User userLogin = userService.getUserByNameAndPassword(user);
         if (userLogin == null) {
             return Result.failResult();
@@ -42,12 +45,40 @@ public class UserController {
 
     @RequestMapping(value = "/getUserRole", method = RequestMethod.POST)
     @ResponseBody
-    public Result getUserRole(User user) {
+    public Result getUserRole(@RequestBody User user) {
         User exist = userService.getUserRole(user.getGroupId(), user.getUserId());
         if (exist == null) {
             return Result.successResult(User.UserRole.MEMBER);
         }
         return Result.successResult(user.getUserRole());
+    }
+
+    @RequestMapping(value = "/getUserList/{groupId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getUserRole(@PathVariable Integer groupId) {
+        List<User> userList = userService.getUserByGroupId(groupId);
+        return userList != null ? Result.successResult(userList) : Result.failResult();
+    }
+
+    @RequestMapping(value = "/addUser", method = RequestMethod.POST)
+    @ResponseBody
+    public Result addUser(@RequestBody User user) {
+        boolean result = userService.addUser(user);
+        return result ? Result.successResult() : Result.failResult();
+    }
+
+    @RequestMapping(value = "/updateUser", method = RequestMethod.POST)
+    @ResponseBody
+    public Result updateUser(@RequestBody User user) {
+        boolean result = userService.updateUser(user);
+        return result ? Result.successResult() : Result.failResult();
+    }
+
+    @RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
+    @ResponseBody
+    public Result deleteUser(@RequestBody User user) {
+        boolean result = userService.deleteUserById(user.getUserId());
+        return result ? Result.successResult() : Result.failResult();
     }
 
 }

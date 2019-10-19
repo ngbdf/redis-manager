@@ -44,6 +44,16 @@ export function validateEmail (email) {
   return reg.test(email)
 }
 
+/**
+ * validate mobile
+ * @param email
+ * @returns {boolean}
+ */
+export function validateMobile (mobile) {
+  const reg = /^1[3|4|5|7|8][0-9]{9}$/
+  return reg.test(mobile)
+}
+
 export function validateIpAndPort (ipAndPort) {
   const reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-5]{2}[0-3][0-5])$/
   return reg.test(ipAndPort)

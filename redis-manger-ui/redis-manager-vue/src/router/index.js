@@ -15,6 +15,9 @@ import UserManage from '@/components/user/UserManage'
 import Profile from '@/components/user/Profile'
 import DataOperation from '@/components/tool/DataOperation'
 
+import { store } from '@/vuex/store.js'
+import { isEmpty } from '@/utils/validate.js'
+
 Vue.use(Router)
 
 // const originalPush = Router.prototype.push
@@ -22,12 +25,13 @@ Vue.use(Router)
 //   return originalPush.call(this, location).catch(err => err)
 // }
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/login',
       name: 'login',
-      component: Login
+      component: Login,
+      hidden: true
     },
     {
       path: '/',
@@ -36,134 +40,80 @@ export default new Router({
       children: [
         {
           name: 'dashboard',
-          path: '/dashboard/:groupId',
-          component: Dashboard,
-          props: true,
-          meta: {
-            title: 'Dashboard',
-            icon: 'el-icon-discover',
-            noCache: true,
-            affix: false
-          }
+          path: '/dashboard/group/:groupId',
+          component: Dashboard
         },
         {
           name: 'redis-monitor',
-          path: '/redis-monitor/:clusterId',
-          component: RedisMonitor,
-          meta: {
-            title: 'Redis Monitor',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          path: '/redis-monitor/cluster/:clusterId',
+          component: RedisMonitor
         },
         {
           name: 'redis-manage',
-          path: '/redis-manage/:clusterId',
-          component: NodeManage,
-          meta: {
-            title: 'Redis Manage',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          path: '/redis-manage/cluster/:clusterId',
+          component: NodeManage
         },
         {
           name: 'installation',
-          path: '/installation/:groupId',
-          component: Installation,
-          meta: {
-            title: 'Installation',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          path: '/installation/group/:groupId',
+          component: Installation
         },
         {
           name: 'channel-manage',
-          path: '/channel-manage/:groupId',
-          component: ChannelManage,
-          meta: {
-            title: 'Channel Manage',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          path: '/channel-manage/group/:groupId',
+          component: ChannelManage
         }, {
           name: 'rule-manage',
-          path: '/rule-manage/:groupId',
-          component: RuleManage,
-          meta: {
-            title: 'Rule Manage',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          path: '/rule-manage/group/:groupId',
+          component: RuleManage
         }, {
           name: 'alert-manage',
-          path: '/alert-manage/:clusterId',
-          component: AlertManage,
-          meta: {
-            title: 'Alert Manage',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          path: '/alert-manage/group/:clusterId',
+          component: AlertManage
         }, {
           name: 'machine-manage',
-          path: '/machine-manage/:groupId',
-          component: MachineManage,
-          meta: {
-            title: 'Machine Manage',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          path: '/machine-manage/group/:groupId',
+          component: MachineManage
         }, {
           name: 'group-manage',
           path: '/group-manage',
-          component: GroupManage,
-          meta: {
-            title: 'Group Manage',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          component: GroupManage
         },
         {
           name: 'user-manage',
           path: '/user-manage/:groupId',
-          component: UserManage,
-          meta: {
-            title: 'User Manage',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          component: UserManage
         },
         {
           name: 'profile',
           path: '/profile',
-          component: Profile,
-          meta: {
-            title: 'User Profile',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          component: Profile
         },
         {
           name: 'data-operation',
           path: '/data-operation',
-          component: DataOperation,
-          meta: {
-            title: 'Data Operation',
-            icon: 'el-icon-view',
-            noCache: true,
-            affix: false
-          }
+          component: DataOperation
         }
       ]
     }
+    // {
+    //   path: '*',
+    //   hidden: true,
+    //   redirect: { path: '/login' }
+    // }
   ]
+})
+
+export default router
+
+router.beforeEach((to, from, next) => {
+  if (to.path === '/login') {
+    store.dispatch('setUser', null)
+  }
+  let user = store.getters.getUser
+  if (to.path !== '/login' && (isEmpty(user) || isEmpty(user.userId) || isEmpty(user.userName) || isEmpty(user.userRole))) {
+    next({ path: '/login' })
+  } else {
+    next()
+  }
 })

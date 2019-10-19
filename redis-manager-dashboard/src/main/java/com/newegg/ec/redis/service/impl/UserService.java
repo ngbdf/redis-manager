@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.newegg.ec.redis.dao.IGroupUserDao;
 import com.newegg.ec.redis.dao.IUserDao;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IUserService;
@@ -7,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +23,9 @@ public class UserService implements IUserService {
 
     @Autowired
     private IUserDao userDao;
+
+    @Autowired
+    private IGroupUserDao groupUserDao;
 
     @Override
     public List<User> getAllUser() {
@@ -37,7 +42,7 @@ public class UserService implements IUserService {
         try {
             return userDao.selectUserByGroupId(groupId);
         } catch (Exception e) {
-            logger.error("");
+            logger.error("Get user by group id failed.", e);
             return null;
         }
     }
@@ -45,7 +50,15 @@ public class UserService implements IUserService {
     @Override
     public User getUserByNameAndPassword(User user) {
         try {
-            return userDao.selectUserByNameAndPassword(user);
+            User userLogin = userDao.selectUserByNameAndPassword(user);
+            if(userLogin == null) {
+                return null;
+            }
+            User userRole = getUserRole(userLogin.getGroupId(), userLogin.getUserId());
+            userLogin.setUserRole(userRole.getUserRole());
+            userLogin.setPassword(null);
+            userLogin.setToken(null);
+            return userLogin;
         } catch (Exception e) {
             logger.error("Get user by user name and password failed, " + user, e);
             return null;
@@ -62,15 +75,12 @@ public class UserService implements IUserService {
         }
     }
 
+    @Transactional
     @Override
     public boolean addUser(User user) {
-        try {
-            int row = userDao.insertUser(user);
-            return row > 0;
-        } catch (Exception e) {
-            logger.error("Add user failed, " + user, e);
-            return false;
-        }
+        userDao.insertUser(user);
+        groupUserDao.insertGroupUser(user);
+        return true;
     }
 
     @Override

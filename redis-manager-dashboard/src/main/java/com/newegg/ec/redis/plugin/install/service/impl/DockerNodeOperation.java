@@ -53,8 +53,7 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
 
     @Override
     public List<String> getImageList() {
-        List<String> imageList = new ArrayList<>();
-        imageList.addAll(Arrays.asList(SignUtil.splitByCommas(images.replace(SPACE, ""))));
+        List<String> imageList = new ArrayList<>(Arrays.asList(SignUtil.splitByCommas(images.replace(SPACE, ""))));
         return imageList;
     }
 

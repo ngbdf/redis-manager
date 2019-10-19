@@ -76,17 +76,15 @@ public class GroupService implements IGroupService {
         }
     }
 
-    @Transactional
     @Override
     public boolean addGroup(Group group) {
-        groupDao.insertGroup(group);
-        // User user = userDao.selectUserById(group.getUserId());
-        User user = new User();
-        user.setUserId(0);
-        user.setUserRole(User.UserRole.ADMIN);
-        user.setGroupId(group.getGroupId());
-        groupUserDao.insertGroupUser(user);
-        return true;
+        try {
+            groupDao.insertGroup(group);
+            return true;
+        } catch (Exception e) {
+            logger.error("Add group failed.", e);
+            return false;
+        }
     }
 
     @Override

@@ -18,38 +18,26 @@ public class User {
 
     private String token;
 
-    private UserRole userRole;
+    private Integer userRole;
 
-    private String headPic;
+    private String avatar;
 
     private String email;
 
     private String mobile;
 
-    /**
-     * 0: 系统内部用户
-     * 1: 外部用户
-     */
-    private int userType;
-
     private Timestamp updateTime;
 
-    public enum UserRole {
+    public static class UserRole {
 
-        /**
-         * super admin: manage all groups and members
-         */
-        SUPER_ADMIN,
+        /** super admin: manage all groups and members */
+        public static final int SUPER_ADMIN = 0;
 
-        /**
-         * admin: manage the group and member
-         */
-        ADMIN,
+        /** admin: manage the group and member */
+        public static final int ADMIN = 1;
 
-        /**
-         * only read
-         */
-        MEMBER;
+        /** only read */
+        public static final int MEMBER = 2;
     }
 
     public Integer getUserId() {
@@ -92,20 +80,20 @@ public class User {
         this.token = token;
     }
 
-    public UserRole getUserRole() {
+    public Integer getUserRole() {
         return userRole;
     }
 
-    public void setUserRole(UserRole userRole) {
+    public void setUserRole(Integer userRole) {
         this.userRole = userRole;
     }
 
-    public String getHeadPic() {
-        return headPic;
+    public String getAvatar() {
+        return avatar;
     }
 
-    public void setHeadPic(String headPic) {
-        this.headPic = headPic;
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getEmail() {
@@ -122,14 +110,6 @@ public class User {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
-    }
-
-    public int getUserType() {
-        return userType;
-    }
-
-    public void setUserType(int userType) {
-        this.userType = userType;
     }
 
     public Timestamp getUpdateTime() {

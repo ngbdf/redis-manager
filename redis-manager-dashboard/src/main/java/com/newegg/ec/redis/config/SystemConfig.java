@@ -19,23 +19,28 @@ import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 @Configuration
 public class SystemConfig implements WebMvcConfigurer {
 
-    public static final String CONFIG_ORIGINAL_PATH = "/redis-manager/conf/";
+    public static final String CONFIG_ORIGINAL_DIR = "/redis-manager/conf/";
 
-    public static final String MACHINE_PACKAGE_ORIGINAL_PATH = "/redis-manager/machine/";
+    public static final String MACHINE_PACKAGE_ORIGINAL_DIR = "/redis-manager/machine/";
+
+    public static final String AVATAR_DIR = "/redis-manager/avatar/";
 
     @Value("${server.port}")
     private int serverPort;
 
-    @Value("${redis-manager.install.conf-path}")
+    @Value("${redis-manager.install.conf-dir}")
     private String configPath;
 
-    @Value("${redis-manager.install.machine.package-path}")
+    @Value("${redis-manager.install.machine.package-dir}")
     private String machinePackagePath;
+
+    @Value("${redis-manager.auth.avatar-dir}")
+    private String avatarPath;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         if (Strings.isNullOrEmpty(configPath)) {
-            throw new ConfigurationException("conf-path is empty.");
+            throw new ConfigurationException("conf-dir is empty.");
         }
         File file = new File(configPath);
         if (!file.exists()) {
@@ -50,7 +55,7 @@ public class SystemConfig implements WebMvcConfigurer {
         }
 
         if (Strings.isNullOrEmpty(machinePackagePath)) {
-            throw new ConfigurationException("machine.package-path is empty.");
+            throw new ConfigurationException("machine.package-dir is empty.");
         }
         File file2 = new File(machinePackagePath);
         if (!file2.isDirectory()) {
@@ -59,9 +64,19 @@ public class SystemConfig implements WebMvcConfigurer {
         if (!file2.exists()) {
             file2.mkdirs();
         }
+        if (Strings.isNullOrEmpty(avatarPath)) {
+            throw new ConfigurationException("avatar-dir is empty.");
+        }
+        File file3 = new File(avatarPath);
+        if (!file3.isDirectory()) {
+            throw new ConfigurationException(avatarPath + " is not a directory.");
+        }
+        if (!file2.exists()) {
+            file2.mkdirs();
+        }
 
-        registry.addResourceHandler(CONFIG_ORIGINAL_PATH + "**").addResourceLocations("file:" + configPath);
-        registry.addResourceHandler(MACHINE_PACKAGE_ORIGINAL_PATH + "**").addResourceLocations("file:" + machinePackagePath);
+        registry.addResourceHandler(CONFIG_ORIGINAL_DIR + "**").addResourceLocations("file:" + configPath);
+        registry.addResourceHandler(MACHINE_PACKAGE_ORIGINAL_DIR + "**").addResourceLocations("file:" + machinePackagePath);
     }
 
     public int getServerPort() {

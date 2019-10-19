@@ -102,7 +102,6 @@ public class MachineController {
         try {
             SSH2Util.getConnection(machine);
         } catch (Exception e) {
-            e.printStackTrace();
             return Result.failResult().setMessage("Connection refused");
         }
         return Result.successResult();

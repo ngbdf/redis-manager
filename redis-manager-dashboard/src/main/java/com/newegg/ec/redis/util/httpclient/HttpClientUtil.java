@@ -1,4 +1,4 @@
-package com.newegg.ec.redis.plugin.alert.http;
+package com.newegg.ec.redis.util.httpclient;
 
 
 import com.alibaba.fastjson.JSONObject;

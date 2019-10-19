@@ -25,7 +25,8 @@ public interface IGroupDao {
             "group.update_time AS update_time " +
             "FROM `group`, group_user " +
             "WHERE group_user.group_id = group.group_id " +
-            "AND group_user.user_id = #{userId}")
+            "AND group_user.user_id = #{userId} " +
+            "ORDER BY group_name")
     List<Group> selectGroupByUserId(Integer userId);
 
     @Select("SELECT * FROM `group` WHERE group_name = #{groupName}")

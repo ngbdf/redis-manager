@@ -219,7 +219,7 @@ export default {
         badNumber: 0,
         alertNumber: 0
       },
-      clusterList: [{}],
+      clusterList: [],
       cluster: {},
       queryClusterId: "",
       queryVisible: false,

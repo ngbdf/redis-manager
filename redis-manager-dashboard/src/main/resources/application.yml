@@ -34,6 +34,13 @@ mybatis:
 # http://download.redis.io/releases/
 # redis manager configuration
 redis-manager:
+  auth:
+    user-name: admin
+    password: admin
+    avatar-dir: /redis-manager/avatar/
+    authorization:
+      enabled: true
+      server: xxx
   # monitor configuration
   monitor:
     # 数据保存天数，1-30天, default: 15
@@ -42,12 +49,12 @@ redis-manager:
     slow-log-limit: 100
   # installation configuration
   install:
-    # config path
-    conf-path: /redis-manager/conf/
+    # config dir
+    conf-dir: /redis-manager/conf/
     # physics machine
     machine:
-      # absolute path
-      package-path: /redis-manager/machine/
+      # absolute dir
+      package-dir: /redis-manager/machine/
     # docker
     docker:
       # 默认从官方镜像库拉取

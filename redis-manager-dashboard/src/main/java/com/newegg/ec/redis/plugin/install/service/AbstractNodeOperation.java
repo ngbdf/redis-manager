@@ -3,11 +3,8 @@ package com.newegg.ec.redis.plugin.install.service;
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.newegg.ec.redis.client.RedisClient;
-import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.config.SystemConfig;
 import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
-import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
@@ -26,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
-import static com.newegg.ec.redis.config.SystemConfig.CONFIG_ORIGINAL_PATH;
+import static com.newegg.ec.redis.config.SystemConfig.CONFIG_ORIGINAL_DIR;
 import static com.newegg.ec.redis.util.LinuxInfoUtil.MEMORY_FREE;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
@@ -125,7 +122,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
         String redisMode = installationParam.getCluster().getRedisMode();
         try {
             // eg: ip:port/redis-manager/config/cluster/redis.conf
-            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + CONFIG_ORIGINAL_PATH + redisMode + SLASH + REDIS_CONF;
+            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + CONFIG_ORIGINAL_DIR + redisMode + SLASH + REDIS_CONF;
         } catch (SocketException e) {
             return false;
         }

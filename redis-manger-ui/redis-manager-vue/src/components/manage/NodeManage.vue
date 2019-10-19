@@ -135,7 +135,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="time" label="Time" sortable></el-table-column>
-          <el-table-column label="Operation" width="220px">
+          <el-table-column label="Operation" width="230px">
             <template slot-scope="scope">
               <el-dropdown size="mini" split-button type="warning" trigger="click">
                 Cluster

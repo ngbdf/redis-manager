@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
-import com.newegg.ec.redis.plugin.alert.http.HttpClientUtil;
+import com.newegg.ec.redis.util.httpclient.HttpClientUtil;
 import com.newegg.ec.redis.plugin.alert.service.AbstractAlertNotify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

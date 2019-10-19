@@ -1,6 +1,7 @@
 <template>
   <!--background-color: #f0f2f5; background-image: linear-gradient(0deg,#04c0c6,#2ba3de 51%,#835be3); -->
-  <el-container style="background-image: linear-gradient(0deg,#04c0c6,#2ba3de 51%,#835be3);">
+  <el-container style="background-image: linear-gradient(0deg,#1ac5fa,#2ba3de 51%,#1d71f2);">
+    <!-- #1d71f2 #1ac5fa -->
     <img
       src="../assets/redis-manager.png"
       style="position: absolute; z-index: 0;left: 0; top:32%; width: 100%; opacity:0.1;"
@@ -13,13 +14,17 @@
         <div>
           <el-form :model="user" :rules="rules" ref="user">
             <el-form-item prop="userName">
-              <el-input prefix-icon="el-icon-user" v-model="user.userName" placeholder="User Name"></el-input>
+              <el-input
+                prefix-icon="el-icon-user"
+                v-model.trim="user.userName"
+                placeholder="User Name"
+              ></el-input>
             </el-form-item>
             <el-form-item prop="password">
               <el-input
                 prefix-icon="el-icon-key"
                 type="password"
-                v-model="user.password"
+                v-model.trim="user.password"
                 placeholder="Password"
                 show-password
               ></el-input>
@@ -54,15 +59,46 @@
 </template>
 
 <script>
+import API from "@/api/api.js";
+import { store } from "@/vuex/store.js";
 export default {
   data() {
     return {
       user: {},
-      rules: {}
+      rules: {
+        userName: [
+          { required: true, message: "Please enter user name", trigger: "blur" }
+        ],
+        password: [
+          { required: true, message: "Please enter password", trigger: "blur" }
+        ]
+      }
     };
   },
   methods: {
-    signIn(user) {}
+    signIn(user) {
+      this.$refs[user].validate(valid => {
+        if (valid) {
+          let url = "/user/login";
+          API.post(
+            url,
+            this.user,
+            response => {
+              let result = response.data;
+              if (result.code == 0) {
+                store.dispatch("setUser", result.data);
+                this.$router.push({ name: "index" });
+              } else {
+                console.log("user name or password wrong");
+              }
+            },
+            err => {
+              console.log(err);
+            }
+          );
+        }
+      });
+    }
   }
 };
 </script>

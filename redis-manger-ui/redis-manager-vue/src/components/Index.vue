@@ -5,7 +5,7 @@
         <el-col class="grid-content logo-wrapper">
           <i class="el-icon-s-fold aside-operation" @click="collapseHandler"></i>
           <!-- <span class="logo">REDIS MANAGER</span> -->
-          <img src="../assets/logo.png" style="width: 150px; height: 20px" />
+          <img src="../assets/logo1.png" style="width: 150px; height: 20px" />
         </el-col>
         <el-col>
           <div class="grid-content right-content" id="right-content">
@@ -78,8 +78,11 @@
               @close="handleClose"
               :collapse="isCollapse"
               :collapse-transition="false"
+              background-color="#2a3542"
+              text-color="#909399"
+              active-text-color="#fff"
             >
-              <!-- background-color="#282b37"
+              <!-- background-color="#2a3542"
               text-color="#909399"
               active-text-color="#fff"-->
               <el-menu-item index="1" @click="toDashboard()">
@@ -208,7 +211,6 @@ export default {
     selectGroup() {
       if (!isEmpty(this.selectGroupId)) {
         store.dispatch("setCurrentGroupById", this.selectGroupId);
-        //this.setUserRole();
         console.log(store.getters.getCurrentGroup);
         this.toDashboard();
       } else {
@@ -227,12 +229,8 @@ export default {
     toDataOperation() {
       this.$router.push({ name: "data-operation" });
     },
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath);
-    },
+    handleOpen(key, keyPath) {},
+    handleClose(key, keyPath) {},
     errorHandler() {
       return true;
     },
@@ -252,21 +250,21 @@ export default {
         }
       });
     },
-    setUserRole() {
-      let url =
-        "/user/getUserRole?groupId=" + this.groupId + "&userId=" + this.userId;
-      API.get(
-        url,
-        param,
-        response => {
-          let userRole = response.data.data;
-          store.dispatch("setUserRole", userRole);
-        },
-        err => {
-          store.dispatch("setUserRole", CONSTANT.USER_ROLE.MEMBER);
-        }
-      );
-    },
+    // setUserRole() {
+    //   let url =
+    //     "/user/getUserRole?groupId=" + this.groupId + "&userId=" + this.userId;
+    //   API.get(
+    //     url,
+    //     param,
+    //     response => {
+    //       let userRole = response.data.data;
+    //       store.dispatch("setUserRole", userRole);
+    //     },
+    //     err => {
+    //       store.dispatch("setUserRole", CONSTANT.USER_ROLE.MEMBER);
+    //     }
+    //   );
+    // },
     getGroupList() {
       let userId = store.getters.getUserId;
       let url = "/group/getGroupList/" + userId;
@@ -286,10 +284,15 @@ export default {
               groupList.forEach(group => {
                 if (group.groupId == user.groupId) {
                   this.selectGroupId = user.groupId;
+                  console.log(this.selectGroupId);
                   store.dispatch("setCurrentGroup", group);
                 }
               });
             }
+            this.$router.push({
+              name: "dashboard",
+              params: { groupId: user.groupId }
+            });
           } else {
             console.log("No data");
           }
@@ -322,6 +325,11 @@ export default {
   mounted() {
     this.listenHeaderWidth();
     this.getGroupList();
+    this.selectGroupId = store.getters.getUser.groupId;
+    // this.$router.push({
+    //   name: "dashboard",
+    //   params: { groupId: store.getters.getUser.groupId }
+    // });
   }
 };
 </script>
@@ -408,7 +416,7 @@ export default {
   height: 100%;
   z-index: 100;
   overflow: hidden;
-  /* background-color: #282b37; */
+  background-color: #2a3542;
 }
 
 .main {

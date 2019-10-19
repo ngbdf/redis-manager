@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static com.newegg.ec.redis.config.SystemConfig.MACHINE_PACKAGE_ORIGINAL_PATH;
+import static com.newegg.ec.redis.config.SystemConfig.MACHINE_PACKAGE_ORIGINAL_DIR;
 import static com.newegg.ec.redis.util.RedisConfigUtil.*;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.SLASH;
@@ -47,7 +47,7 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
 
     public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
 
-    @Value("${redis-manager.install.machine.package-path: /redis/machine/}")
+    @Value("${redis-manager.install.machine.package-dir}")
     private String packagePath;
 
     @Autowired
@@ -56,19 +56,6 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         INSTALL_BASE_PATH = MACHINE_INSTALL_BASE_PATH;
-        if (!packagePath.endsWith(SLASH)) {
-            packagePath += SLASH;
-        }
-        if (Strings.isNullOrEmpty(packagePath)) {
-            throw new ConfigurationException("Machine package config is empty!");
-        }
-        File file = new File(packagePath);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        if (!file.isDirectory()) {
-            throw new ConfigurationException(packagePath + " is not directory!");
-        }
     }
 
     @Override
@@ -104,7 +91,7 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
         String url;
         try {
             // eg: ip:port/redis/machine/xxx.tar.gz
-            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + MACHINE_PACKAGE_ORIGINAL_PATH + image;
+            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + MACHINE_PACKAGE_ORIGINAL_DIR + image;
         } catch (SocketException e) {
             return false;
         }
