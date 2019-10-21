@@ -464,6 +464,11 @@ export default {
       return store.getters.getCurrentGroupId;
     }
   },
+  watch: {
+    currentGroupId(groupId) {
+      this.getMachineList(groupId)
+    }
+  },
   mounted() {
     let groupId = this.$route.params.groupId;
     this.getMachineList(groupId);

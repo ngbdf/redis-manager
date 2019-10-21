@@ -4,12 +4,9 @@ import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -41,6 +38,13 @@ public class UserController {
             return Result.failResult();
         }
         return Result.successResult(userLogin);
+    }
+
+    @RequestMapping(value = "/getUser/{userId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getUser(@PathVariable("userId") Integer userId) {
+        User user = userService.getUserById(userId);
+        return user != null ? Result.successResult(user) : Result.failResult();
     }
 
     @RequestMapping(value = "/getUserRole", method = RequestMethod.POST)
@@ -81,4 +85,10 @@ public class UserController {
         return result ? Result.successResult() : Result.failResult();
     }
 
+    @RequestMapping(value = "/validateUserName/{userName}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result validateUserName(@PathVariable String userName) {
+        User user = userService.getUserByName(userName);
+        return user == null ? Result.successResult() : Result.failResult();
+    }
 }

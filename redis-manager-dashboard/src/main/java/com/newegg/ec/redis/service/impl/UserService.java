@@ -51,7 +51,7 @@ public class UserService implements IUserService {
     public User getUserByNameAndPassword(User user) {
         try {
             User userLogin = userDao.selectUserByNameAndPassword(user);
-            if(userLogin == null) {
+            if (userLogin == null) {
                 return null;
             }
             User userRole = getUserRole(userLogin.getGroupId(), userLogin.getUserId());
@@ -61,6 +61,16 @@ public class UserService implements IUserService {
             return userLogin;
         } catch (Exception e) {
             logger.error("Get user by user name and password failed, " + user, e);
+            return null;
+        }
+    }
+
+    @Override
+    public User getUserById(Integer userId) {
+        try {
+            return userDao.selectUserById(userId);
+        } catch (Exception e) {
+            logger.error("Get user by id failed.", e);
             return null;
         }
     }
@@ -84,13 +94,12 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean userNameExist(String userName) {
+    public User getUserByName(String userName) {
         try {
-            User user = userDao.selectUserByName(userName);
-            return user != null;
+            return userDao.selectUserByName(userName);
         } catch (Exception e) {
             logger.error("Get user by user name failed, user name = " + userName, e);
-            return true;
+            return new User();
         }
     }
 
@@ -105,15 +114,12 @@ public class UserService implements IUserService {
         }
     }
 
+    @Transactional
     @Override
     public boolean deleteUserById(Integer userId) {
-        try {
-            int row = userDao.deleteUserById(userId);
-            return row > 0;
-        } catch (Exception e) {
-            logger.error("Delete user by user id failed, user id = " + userId, e);
-            return false;
-        }
+         userDao.deleteUserById(userId);
+         groupUserDao.deleteGroupUserByUserId(userId);
+         return true;
     }
 
     @Override

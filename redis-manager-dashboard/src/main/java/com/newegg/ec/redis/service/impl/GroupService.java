@@ -76,15 +76,16 @@ public class GroupService implements IGroupService {
         }
     }
 
+    @Transactional
     @Override
     public boolean addGroup(Group group) {
-        try {
-            groupDao.insertGroup(group);
-            return true;
-        } catch (Exception e) {
-            logger.error("Add group failed.", e);
-            return false;
-        }
+        groupDao.insertGroup(group);
+        User user = new User();
+        user.setUserRole(User.UserRole.ADMIN);
+        user.setUserId(group.getUserId());
+        user.setGroupId(group.getGroupId());
+        groupUserDao.insertGroupUser(user);
+        return true;
     }
 
     @Override
@@ -101,8 +102,7 @@ public class GroupService implements IGroupService {
     @Override
     public boolean updateGroup(Group group) {
         try {
-            int row = groupDao.updateGroup(group);
-            return row > 0;
+            return groupDao.updateGroup(group) > 0;
         } catch (Exception e) {
             logger.error("Update group failed, " + group, e);
             return false;

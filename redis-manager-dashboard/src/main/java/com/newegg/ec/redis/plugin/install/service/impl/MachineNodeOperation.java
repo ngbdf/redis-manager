@@ -8,7 +8,6 @@ import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
-import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.INodeOperation;
@@ -31,7 +30,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static com.newegg.ec.redis.config.SystemConfig.MACHINE_PACKAGE_ORIGINAL_DIR;
+import static com.newegg.ec.redis.config.SystemConfig.MACHINE_PACKAGE_ORIGINAL_PATH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.*;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.SLASH;
@@ -47,7 +46,7 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
 
     public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
 
-    @Value("${redis-manager.install.machine.package-dir}")
+    @Value("${redis-manager.install.machine.package-path}")
     private String packagePath;
 
     @Autowired
@@ -91,7 +90,7 @@ public class MachineNodeOperation extends AbstractNodeOperation implements INode
         String url;
         try {
             // eg: ip:port/redis/machine/xxx.tar.gz
-            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + MACHINE_PACKAGE_ORIGINAL_DIR + image;
+            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + MACHINE_PACKAGE_ORIGINAL_PATH + image;
         } catch (SocketException e) {
             return false;
         }

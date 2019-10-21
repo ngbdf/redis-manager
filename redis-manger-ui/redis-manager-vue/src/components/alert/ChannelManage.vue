@@ -94,11 +94,11 @@
           <el-form-item label="SMTP Host" prop="smtpHost">
             <el-input size="small" v-model="alertChannel.smtpHost"></el-input>
           </el-form-item>
-          <el-form-item label="SMTP User Name" prop="smtpUserName">
-            <el-input size="small" v-model="alertChannel.smtpUserName"></el-input>
+          <el-form-item label="Email User Name" prop="emailUserName">
+            <el-input size="small" v-model="alertChannel.emailUserName"></el-input>
           </el-form-item>
-          <el-form-item label="SMTP Password" prop="smtpPassword">
-            <el-input size="small" v-model="alertChannel.smtpPassword"></el-input>
+          <el-form-item label="Email Password" prop="emailPassword">
+            <el-input size="small" v-model="alertChannel.emailPassword"></el-input>
           </el-form-item>
           <el-form-item label="Email From" prop="emailFrom">
             <el-input size="small" v-model="alertChannel.emailFrom"></el-input>

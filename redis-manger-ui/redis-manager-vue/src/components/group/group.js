@@ -12,8 +12,9 @@ export function getGroupList() {
           if (response.data.code == 0) {
             let groupList = response.data.data;
             groupList.forEach(group => {
-              group.updateTime = formatTime(group.updateTime);
+              group.time = formatTime(group.updateTime);
             });
+            console.log(groupList)
             store.dispatch("setGroupList", groupList);
           } else {
             console.log("No data");

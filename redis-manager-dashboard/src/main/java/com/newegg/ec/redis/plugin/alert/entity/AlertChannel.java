@@ -27,9 +27,9 @@ public class AlertChannel {
      */
     private String smtpHost;
 
-    private String smtpUserName;
+    private String emailUserName;
 
-    private String smtpPassword;
+    private String emailPassword;
 
     private String emailFrom;
 
@@ -95,20 +95,20 @@ public class AlertChannel {
         this.smtpHost = smtpHost;
     }
 
-    public String getSmtpUserName() {
-        return smtpUserName;
+    public String getEmailUserName() {
+        return emailUserName;
     }
 
-    public void setSmtpUserName(String smtpUserName) {
-        this.smtpUserName = smtpUserName;
+    public void setEmailUserName(String emailUserName) {
+        this.emailUserName = emailUserName;
     }
 
-    public String getSmtpPassword() {
-        return smtpPassword;
+    public String getEmailPassword() {
+        return emailPassword;
     }
 
-    public void setSmtpPassword(String smtpPassword) {
-        this.smtpPassword = smtpPassword;
+    public void setEmailPassword(String emailPassword) {
+        this.emailPassword = emailPassword;
     }
 
     public String getEmailFrom() {

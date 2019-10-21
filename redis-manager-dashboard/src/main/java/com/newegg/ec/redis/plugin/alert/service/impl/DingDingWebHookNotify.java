@@ -50,7 +50,6 @@ public class DingDingWebHookNotify extends AbstractAlertNotify {
                 logger.error("DingDing notify failed, " + alertChannel, e);
             }
         });
-
     }
 
     @Override

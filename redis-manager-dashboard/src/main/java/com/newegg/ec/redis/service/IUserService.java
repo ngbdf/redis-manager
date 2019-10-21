@@ -16,11 +16,13 @@ public interface IUserService {
 
     User getUserByNameAndPassword(User user);
 
+    User getUserById(Integer userId);
+
     User getUserRole(Integer groupId, Integer userId);
 
     boolean addUser(User user);
 
-    boolean userNameExist(String userName);
+    User getUserByName(String userName);
 
     boolean updateUser(User user);
 

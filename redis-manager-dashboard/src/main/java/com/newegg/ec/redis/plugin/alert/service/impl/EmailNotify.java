@@ -1,12 +1,15 @@
 package com.newegg.ec.redis.plugin.alert.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
-import com.newegg.ec.redis.plugin.alert.service.AbstractAlertNotify;
+import com.newegg.ec.redis.plugin.alert.service.INotifyService;
+import com.newegg.ec.redis.util.SignUtil;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
@@ -15,33 +18,69 @@ import java.util.Properties;
  * @author Jay.H.Zou
  * @date 9/3/2019
  */
-public class EmailNotify extends AbstractAlertNotify {
-
-
-
-    @Override
-    protected JSONObject buildRequestBody(List<AlertRecord> alertRecordList) {
-        return null;
-    }
+public class EmailNotify implements INotifyService {
 
     @Override
     public void notify(Collection<AlertChannel> alertChannelList, List<AlertRecord> alertRecordList) {
-
+        AlertRecord alertRecord = alertRecordList.get(0);
+        String subject = buildSubject(alertRecord);
+        String content = buildHtmlContent(alertRecordList);
+        alertChannelList.forEach(alertChannel -> {
+            JavaMailSender javaMailSender = getJavaMailSender(alertChannel);
+            //使用JavaMail的MimeMessage，支持更加复杂的邮件格式和内容  
+            MimeMessage msg = javaMailSender.createMimeMessage();
+            //创建MimeMessageHelper对象，处理MimeMessage的辅助类  
+            // msg:发送的邮件信息，true:是否为HTML格式的文件，utf-8:设置编码格式(因为发送html格式时、内容可能出现乱码)
+            MimeMessageHelper helper;
+            try {
+                helper = new MimeMessageHelper(msg, true, "utf-8");
+                //使用辅助类MimeMessage设定参数  
+                helper.setFrom(alertChannel.getEmailFrom());
+                String emailTos = alertChannel.getEmailTo();
+                helper.setTo(SignUtil.splitBySemicolon(emailTos));
+                helper.setSubject(subject);
+                helper.setText(content, true); //true参数说明该内容格式为HTML
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
-    public JavaMailSender getJavaMailSender() {
+    private String buildSubject(AlertRecord alertRecord) {
+        StringBuilder subject = new StringBuilder("(Redis Manager)");
+
+        return subject.toString();
+    }
+
+    private String buildHtmlContent(List<AlertRecord> alertRecordList) {
+        StringBuilder content = new StringBuilder();
+        content.append("<body>" +
+                "<h2>Redis Manager Alert</h2>");
+        alertRecordList.forEach(alertRecord -> {
+            String item = "<h3>%s</h3>" +
+                    "<ul>" +
+                    "<li>Alert Rule: %s</li>" +
+                    "<li>Actual Value: %s</li>" +
+                    "<li>Rule Info: %s</li>" +
+                    "<li>Time: %s</li>" +
+                    "</ul>";
+            content.append(String.format(item,
+                    alertRecord.getRedisNode(),
+                    alertRecord.getAlertRule(),
+                    alertRecord.getActualData(),
+                    alertRecord.getUpdateTime()));
+        });
+        content.append("<body>");
+        return content.toString();
+    }
+
+    public JavaMailSender getJavaMailSender(AlertChannel alertChannel) {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587);
-
-        mailSender.setUsername("my.gmail@gmail.com");
-        mailSender.setPassword("password");
-
+        mailSender.setHost(alertChannel.getSmtpHost());
+        mailSender.setUsername(alertChannel.getEmailUserName());
+        mailSender.setPassword(alertChannel.getEmailPassword());
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.debug", "true");
         return mailSender;
     }
 

@@ -211,8 +211,7 @@ export default {
     selectGroup() {
       if (!isEmpty(this.selectGroupId)) {
         store.dispatch("setCurrentGroupById", this.selectGroupId);
-        console.log(store.getters.getCurrentGroup);
-        this.toDashboard();
+        //this.toDashboard();
       } else {
         // TODO 报错
         console.log("============ select group failed!");
@@ -289,10 +288,10 @@ export default {
                 }
               });
             }
-            this.$router.push({
-              name: "dashboard",
-              params: { groupId: user.groupId }
-            });
+            // this.$router.push({
+            //   name: "dashboard",
+            //   params: { groupId: user.groupId }
+            // });
           } else {
             console.log("No data");
           }

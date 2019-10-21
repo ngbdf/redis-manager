@@ -37,14 +37,14 @@ public interface IAlertChannelDao {
             "</script>")
     List<AlertChannel> selectAlertChannelNotUsed(@Param("groupId") Integer groupId, @Param("channelIdList") List<Integer> channelIdList);
 
-    @Insert("INSERT INTO alert_channel (group_id, channel_name, smtp_host, smtp_user_name, smtp_password, email_from, email_to, " +
+    @Insert("INSERT INTO alert_channel (group_id, channel_name, smtp_host, email_user_name, email_password, email_from, email_to, " +
             "webhook, corp_id, agent_id, corp_secret, token, channel_type, channel_info, update_time) " +
-            "VALUES (#{groupId}, #{channelName}, #{smtpHost}, #{smtpUserName}, #{smtpPassword}, #{emailFrom}, #{emailTo}, " +
+            "VALUES (#{groupId}, #{channelName}, #{smtpHost}, #{emailUserName}, #{emailPassword}, #{emailFrom}, #{emailTo}, " +
             "#{webhook}, #{corpId}, #{agentId}, #{corpSecret}, #{token}, #{channelType}, #{channelInfo}, NOW())")
     int insertAlertChannel(AlertChannel alertChannel);
 
     @Update("UPDATE alert_channel SET group_id = #{groupId}, channel_name = #{channelName}, smtp_host = #{smtpHost}, " +
-            "smtp_user_name = #{smtpUserName}, smtp_password = #{smtpPassword}, email_from = #{emailFrom}, email_to = #{emailTo}, " +
+            "email_user_name = #{emailUserName}, email_password = #{emailPassword}, email_from = #{emailFrom}, email_to = #{emailTo}, " +
             "webhook = #{webhook}, corp_id = #{corpId}, agent_id = #{agentId}, corp_secret = #{corpSecret}, token = #{token}, " +
             "channel_type = #{channelType}, channel_info = #{channelInfo}, update_time = NOW() " +
             "WHERE channel_id = #{channelId}")
@@ -61,8 +61,8 @@ public interface IAlertChannelDao {
             "group_id integer(4) NOT NULL, " +
             "channel_name varchar(50) NOT NULL, " +
             "smtp_host varchar(255) DEFAULT NULL, " +
-            "smtp_user_name varchar(255) DEFAULT NULL, " +
-            "smtp_password varchar(255) DEFAULT NULL, " +
+            "email_user_name varchar(255) DEFAULT NULL, " +
+            "email_password varchar(255) DEFAULT NULL, " +
             "email_from varchar(255) DEFAULT NULL, " +
             "email_to varchar(255) DEFAULT NULL, " +
             "webhook varchar(255) DEFAULT NULL, " +

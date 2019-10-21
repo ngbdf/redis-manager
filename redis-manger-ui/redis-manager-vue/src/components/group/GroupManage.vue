@@ -7,7 +7,7 @@
       <el-table-column type="index" width="50"></el-table-column>
       <el-table-column property="groupName" label="Group Name"></el-table-column>
       <el-table-column property="groupInfo" label="Info"></el-table-column>
-      <el-table-column property="updateTime" label="Time"></el-table-column>
+      <el-table-column property="time" label="Time"></el-table-column>
       <el-table-column label="Operation" width="150px;">
         <template slot-scope="scope">
           <el-button size="mini" type="primary" @click="editGroup(scope.$index, scope.row)">Edit</el-button>
@@ -128,7 +128,8 @@ export default {
       return store.getters.getGroupList;
     }
   },
-  mounted() {}
+  mounted() {
+  }
 };
 </script>
 
