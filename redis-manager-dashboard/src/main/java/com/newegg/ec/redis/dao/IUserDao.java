@@ -59,17 +59,17 @@ public interface IUserDao {
 
     @Select("SELECT " +
             "user.user_id AS user_id, " +
-            "user.group_id AS group_id, " +
+            "group_user.group_id AS group_id, " +
             "user.user_name AS user_name, " +
             "group_user.user_role AS user_role, " +
             "user.avatar AS avatar, " +
             "user.email AS email, " +
             "user.mobile AS mobile, " +
             "user.update_time AS update_time " +
-            "FROM user, group_user " +
+            "FROM group_user, user " +
             "WHERE group_user.group_id = user.group_id " +
             "AND group_user.user_id = user.user_id " +
-            "AND user.group_id NOT IN (#{groupId})")
+            "AND group_user.group_id = #{groupId}")
     List<User> selectGrantUserByGroupId(Integer groupId);
 
     @Select("SELECT " +

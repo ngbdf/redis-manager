@@ -1,6 +1,5 @@
 package com.newegg.ec.redis.service.impl;
 
-import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.IGroupUserDao;
 import com.newegg.ec.redis.dao.IUserDao;
 import com.newegg.ec.redis.entity.User;
@@ -105,6 +104,18 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public boolean grantUser(User user) {
+        try {
+            User userByName = getUserByName(user.getUserName());
+            user.setUserId(userByName.getUserId());
+            return groupUserDao.insertGroupUser(user) > 0;
+        } catch (Exception e) {
+            logger.error("Grant user failed.", e);
+            return false;
+        }
+    }
+
+    @Override
     public User getUserByName(String userName) {
         try {
             return userDao.selectUserByName(userName);
@@ -131,6 +142,16 @@ public class UserService implements IUserService {
         userDao.deleteUserById(userId);
         groupUserDao.deleteGroupUserByUserId(userId);
         return true;
+    }
+
+    @Override
+    public boolean revokeUser(User user) {
+        try {
+            return groupUserDao.deleteGroupUser(user.getGroupId(), user.getUserId()) > 0;
+        } catch (Exception e) {
+            logger.error("Revoke user failed.", e);
+            return false;
+        }
     }
 
     @Override

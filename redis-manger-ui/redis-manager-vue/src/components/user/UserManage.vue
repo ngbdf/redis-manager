@@ -73,7 +73,7 @@
         <el-table-column prop="time" label="Time"></el-table-column>
         <el-table-column label="Operation" width="200px;">
           <template slot-scope="scope">
-            <el-button size="mini" type="danger" @click="handleDelete(scope.row)">Delete</el-button>
+            <el-button size="mini" type="warning" @click="handleRevoke(scope.row)">Revoke</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -94,7 +94,7 @@
         <el-form-item prop="userName" label="User Name">
           <el-input v-model.trim="user.userName"></el-input>
         </el-form-item>
-        <el-form-item prop="password" label="Password" v-if="passwordChange">
+        <el-form-item prop="password" label="Password">
           <el-input v-model.trim="user.password"></el-input>
         </el-form-item>
         <el-form-item prop="email" label="Email">
@@ -110,7 +110,7 @@
     </el-dialog>
 
     <el-dialog title="Grant User" :visible.sync="editGrantUserVisible">
-      <el-form :model="user" ref="user" :rules="rules" label-width="100px" size="small">
+      <el-form :model="user" ref="user" :rules="grantUserRules" label-width="100px" size="small">
         <el-form-item label="Group Name">
           <el-tag size="small">{{ currentGroup.groupName }}</el-tag>
         </el-form-item>
@@ -126,7 +126,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button size="small" type="primary" @click="saveUser('user')">Confirm</el-button>
+        <el-button size="small" type="primary" @click="saveGroupUser('user')">Confirm</el-button>
       </div>
     </el-dialog>
 
@@ -138,6 +138,17 @@
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="deleteUserVisible = false">Cancel</el-button>
         <el-button size="small" type="danger" @click="deleteUser()">Delete</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog title="Revoke User" :visible.sync="revokeUserVisible" width="30%">
+      <span>
+        Are you sure to revoke 
+        <b>{{ user.userName }}</b> ?
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="revokeUserVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="revokeUser()">Revoke</el-button>
       </span>
     </el-dialog>
   </div>
@@ -172,8 +183,25 @@ export default {
           if (result.code == 0) {
             callback();
           } else {
-            this.passwordChange = false;
             callback(new Error(value + " has been used"));
+          }
+        },
+        err => {
+          return callback(new Error("Network error"));
+        }
+      );
+    };
+    var validateGrantUserName = (rule, value, callback) => {
+      let url = "/user/validateUserName/" + value;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            callback(new Error(value + " not exist"));
+          } else {
+            callback();
           }
         },
         err => {
@@ -189,8 +217,8 @@ export default {
       editUserVisible: false,
       editGrantUserVisible: false,
       deleteUserVisible: false,
+      revokeUserVisible: false,
       isUpdate: false,
-      passwordChange: true,
       rules: {
         userRole: [
           {
@@ -230,6 +258,27 @@ export default {
             trigger: "blur"
           }
         ]
+      },
+      grantUserRules: {
+        userRole: [
+          {
+            required: true,
+            message: "Please select user role",
+            trigger: "blur"
+          }
+        ],
+        userName: [
+          {
+            required: true,
+            message: "Please enter user name",
+            trigger: "blur"
+          },
+          {
+            required: true,
+            validator: validateGrantUserName,
+            trigger: "blur"
+          }
+        ]
       }
     };
   },
@@ -242,6 +291,10 @@ export default {
     handleDelete(row) {
       this.user = row;
       this.deleteUserVisible = true;
+    },
+    handleRevoke(row) {
+      this.user = row;
+      this.revokeUserVisible = true;
     },
     getUserList(groupId) {
       let url = "/user/getUserList/" + groupId;
@@ -264,18 +317,18 @@ export default {
       );
     },
     getGrantedUserList(groupId) {
-      let url = "/user/getGrantUserList/" + groupId;
+      let url = "/user/getGrantedUserList/" + groupId;
       API.get(
         url,
         null,
         response => {
           let result = response.data;
           if (result.code == 0) {
-            let grantUserList = result.data;
-            grantUserList.forEach(user => {
+            let grantedUserList = result.data;
+            grantedUserList.forEach(user => {
               user.time = formatTime(user.updateTime);
             });
-            this.grantUserList = grantUserList;
+            this.grantedUserList = grantedUserList;
           }
         },
         err => {
@@ -333,6 +386,32 @@ export default {
         }
       });
     },
+    saveGroupUser(user) {
+      this.$refs[user].validate(valid => {
+        if (valid) {
+          let groupId = this.currentGroup.groupId;
+          this.user.groupId = groupId;
+          let url = "/user/grantUser";
+          API.post(
+            url,
+            this.user,
+            response => {
+              let result = response.data;
+              this.getGrantedUserList(groupId);
+              if (result.code == 0) {
+                this.editGrantUserVisible = false;
+                this.$refs[user].resetFields();
+              } else {
+                console.log("save user failed");
+              }
+            },
+            err => {
+              console.log(err);
+            }
+          );
+        }
+      });
+    },
     deleteUser() {
       let url = "/user/deleteUser";
       API.post(
@@ -341,6 +420,21 @@ export default {
         response => {
           this.getUserList(this.currentGroup.groupId);
           this.deleteUserVisible = false;
+          this.user = {};
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    revokeUser() {
+      let url = "/user/revokeUser";
+      API.post(
+        url,
+        this.user,
+        response => {
+          this.getGrantedUserList(this.currentGroup.groupId);
+          this.revokeUserVisible = false;
           this.user = {};
         },
         err => {
@@ -360,7 +454,9 @@ export default {
   watch: {
     currentGroup(group) {
       console.log(group);
-      this.getUserList(group.groupId);
+      let groupId = group.groupId
+      this.getUserList(groupId);
+      this.getGrantedUserList(groupId);
     }
   },
   mounted() {

@@ -64,7 +64,7 @@ public class UserController {
         return userList != null ? Result.successResult(userList) : Result.failResult();
     }
 
-    @RequestMapping(value = "/getGrantUserList/{groupId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getGrantedUserList/{groupId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getGrantUserList(@PathVariable Integer groupId) {
         List<User> userList = userService.getGrantUserByGroupId(groupId);
@@ -75,6 +75,13 @@ public class UserController {
     @ResponseBody
     public Result addUser(@RequestBody User user) {
         boolean result = userService.addUser(user);
+        return result ? Result.successResult() : Result.failResult();
+    }
+
+    @RequestMapping(value = "/grantUser", method = RequestMethod.POST)
+    @ResponseBody
+    public Result grantUser(@RequestBody User user) {
+        boolean result = userService.grantUser(user);
         return result ? Result.successResult() : Result.failResult();
     }
 
@@ -89,6 +96,13 @@ public class UserController {
     @ResponseBody
     public Result deleteUser(@RequestBody User user) {
         boolean result = userService.deleteUserById(user.getUserId());
+        return result ? Result.successResult() : Result.failResult();
+    }
+
+    @RequestMapping(value = "/revokeUser", method = RequestMethod.POST)
+    @ResponseBody
+    public Result revokeUser(@RequestBody User user) {
+        boolean result = userService.revokeUser(user);
         return result ? Result.successResult() : Result.failResult();
     }
 

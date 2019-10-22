@@ -24,11 +24,15 @@ public interface IUserService {
 
     boolean addUser(User user);
 
+    boolean grantUser(User user);
+
     User getUserByName(String userName);
 
     boolean updateUser(User user);
 
     boolean deleteUserById(Integer userId);
+
+    boolean revokeUser(User user);
 
     boolean deleteUserByGroupId(Integer groupId);
 
