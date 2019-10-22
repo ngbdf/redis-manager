@@ -16,16 +16,13 @@ public interface IAlertRecordDao {
     @Select("SELECT * FROM alert_record WHERE cluster_id = #{clusterId}")
     List<AlertRecord> selectAlertRecordByClusterId(Integer clusterId);
 
-    @Insert("SELECT * FROM alert_record WHERE cluster_id = #{clusterId}")
-    int insertAlertRecord(AlertRecord alertRecord);
-
     @Insert("<script>" +
-            "INSERT INTO alert_record (group_id, cluster_id, rule_id, redis_node, " +
-            "alert_rule, actual_data, check_cycle, global, update_time) " +
+            "INSERT INTO alert_record (group_id, group_name, cluster_id, cluster_name, rule_id, redis_node, " +
+            "alert_rule, actual_data, check_cycle, rule_info, update_time) " +
             "VALUES " +
             "<foreach item='alertRecord' collection='alertRecordList' separator=','>" +
-            "(#{alertRecord.groupId}, #{alertRecord.clusterId}, #{alertRecord.ruleId}, #{alertRecord.redisNode}, " +
-            "#{alertRecord.alertRule}, #{alertRecord.actualData}, #{alertRecord.checkCycle}, #{alertRecord.global}, NOW())" +
+            "(#{alertRecord.groupId}, #{alertRecord.groupName}, #{alertRecord.clusterId}, #{alertRecord.clusterName}, #{alertRecord.ruleId}, #{alertRecord.redisNode}, " +
+            "#{alertRecord.alertRule}, #{alertRecord.actualData}, #{alertRecord.checkCycle}, #{alertRecord.ruleInfo}, NOW())" +
             "</foreach>" +
             "</script>")
     int insertAlertRecordBatch(@Param("alertRecordList") List<AlertRecord> alertRecordList);
@@ -50,13 +47,15 @@ public interface IAlertRecordDao {
     @Select("create TABLE IF NOT EXISTS `alert_record` (" +
             "record_id integer(4) NOT NULL AUTO_INCREMENT, " +
             "group_id integer(4) NOT NULL, " +
+            "group_name varchar(255) NOT NULL, " +
             "cluster_id integer(4) NOT NULL, " +
+            "cluster_name varchar(255) NOT NULL, " +
             "rule_id integer(4) NOT NULL, " +
             "redis_node varchar(50) NOT NULL, " +
             "alert_rule varchar(50) NOT NULL, " +
             "actual_data varchar(50) NOT NULL, " +
             "check_cycle integer(4) NOT NULL, " +
-            "global tinyint(1) NOT NULL, " +
+            "rule_info varchar(255) DEFAULT NULL, " +
             "update_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (record_id) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")

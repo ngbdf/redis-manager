@@ -54,13 +54,20 @@ public class UserController {
         if (exist == null) {
             return Result.successResult(User.UserRole.MEMBER);
         }
-        return Result.successResult(user.getUserRole());
+        return Result.successResult(exist.getUserRole());
     }
 
     @RequestMapping(value = "/getUserList/{groupId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getUserRole(@PathVariable Integer groupId) {
         List<User> userList = userService.getUserByGroupId(groupId);
+        return userList != null ? Result.successResult(userList) : Result.failResult();
+    }
+
+    @RequestMapping(value = "/getGrantUserList/{groupId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getGrantUserList(@PathVariable Integer groupId) {
+        List<User> userList = userService.getGrantUserByGroupId(groupId);
         return userList != null ? Result.successResult(userList) : Result.failResult();
     }
 

@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.IGroupUserDao;
 import com.newegg.ec.redis.dao.IUserDao;
 import com.newegg.ec.redis.entity.User;
@@ -43,6 +44,16 @@ public class UserService implements IUserService {
             return userDao.selectUserByGroupId(groupId);
         } catch (Exception e) {
             logger.error("Get user by group id failed.", e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<User> getGrantUserByGroupId(Integer groupId) {
+        try {
+            return userDao.selectGrantUserByGroupId(groupId);
+        } catch (Exception e) {
+            logger.error("Get grant user by group id failed.", e);
             return null;
         }
     }
@@ -117,9 +128,9 @@ public class UserService implements IUserService {
     @Transactional
     @Override
     public boolean deleteUserById(Integer userId) {
-         userDao.deleteUserById(userId);
-         groupUserDao.deleteGroupUserByUserId(userId);
-         return true;
+        userDao.deleteUserById(userId);
+        groupUserDao.deleteGroupUserByUserId(userId);
+        return true;
     }
 
     @Override

@@ -5,51 +5,51 @@ import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 import com.newegg.ec.redis.util.httpclient.HttpClientUtil;
-import com.newegg.ec.redis.plugin.alert.service.AbstractAlertNotify;
+import com.newegg.ec.redis.plugin.alert.service.AbstractAlertAlert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 /**
- * {
- * "msgtype": "markdown",
- * "markdown": {
- * "content": "# used_memory \n **Rule**: used_memory > 15gb \n\n **Data**: used_memory = 16gb \n\n **Info**: 内存使用超过 15G",
- * "mentioned_list":["wangqing","@all"],
- * "mentioned_mobile_list":["13800001111","@all"]
- * }
- * }
  *
  * @author Jay.H.Zou
  * @date 7/30/2019
  */
-public class WechatWebHookNotify extends AbstractAlertNotify {
+@Service("wechatWebHookAlert")
+public class WechatWebHookAlert extends AbstractAlertAlert {
 
-    private static final Logger logger = LoggerFactory.getLogger(WechatWebHookNotify.class);
+    private static final Logger logger = LoggerFactory.getLogger(WechatWebHookAlert.class);
 
     private static final String CONTENT = "content";
 
     private static final String MENTIONED_MOBILE_LIST = "mentioned_mobile_list";
 
-    private static final String AT_ALL = "@all";
-
     @Override
-    public void notify(Collection<AlertChannel> alertChannelList, List<AlertRecord> alertRecordList) {
+    public void alert(AlertChannel alertChannel, List<AlertRecord> alertRecordList) {
         JSONObject requestBody = buildRequestBody(alertRecordList);
-        alertChannelList.forEach(alertChannel -> {
             String webhook = alertChannel.getWebhook();
             try {
                 HttpClientUtil.post(webhook, requestBody);
             } catch (IOException e) {
                 logger.error("Wechat webhook notify failed, " + alertChannel, e);
             }
-        });
-        // 真正发送消息
     }
 
+    /**
+     * {
+     * "msgtype": "markdown",
+     * "markdown": {
+     * "content": "# used_memory \n **Rule**: used_memory > 15gb \n\n **Data**: used_memory = 16gb \n\n **Info**: 内存使用超过 15G",
+     * "mentioned_list":["wangqing","@all"],
+     * "mentioned_mobile_list":["13800001111","@all"]
+     * }
+     * }
+     * @param alertRecordList
+     * @return
+     */
     @Override
     protected JSONObject buildRequestBody(List<AlertRecord> alertRecordList) {
         JSONObject requestBody = new JSONObject();
@@ -60,6 +60,7 @@ public class WechatWebHookNotify extends AbstractAlertNotify {
         JSONArray mobileArray = new JSONArray();
         mobileArray.add(AT_ALL);
         markdown.put(MENTIONED_MOBILE_LIST, mobileArray);
+        requestBody.put(MARKDOWN, markdown);
         return requestBody;
     }
 

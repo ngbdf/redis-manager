@@ -66,7 +66,6 @@ public class GroupController {
         if (groupList == null || groupList.isEmpty()) {
             return Result.failResult();
         }
-        Group group = groupList.get(0);
         return Result.successResult(groupList);
     }
 

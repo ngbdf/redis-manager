@@ -48,6 +48,18 @@
               </div>
             </el-popover>
             <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '3'">
+              <p>
+                <span class="label-color">Corp ID:</span>
+                {{ scope.row.corpId }}
+              </p>
+              <p>
+                <span class="label-color">Agent ID:</span>
+                {{ scope.row.agentId }}
+              </p>
+              <p>
+                <span class="label-color">Corp Secret:</span>
+                {{ scope.row.corpSecret }}
+              </p>
               <div slot="reference" class="name-wrapper">
                 <el-tag size="small" type="success">WebChat App</el-tag>
               </div>
@@ -82,7 +94,7 @@
           <el-input size="small" v-model="alertChannel.channelName"></el-input>
         </el-form-item>
         <el-form-item label="Channel Type" prop="channelType">
-          <el-radio-group v-model="alertChannel.channelType" size="medium">
+          <el-radio-group v-model.trim="alertChannel.channelType" size="medium">
             <el-radio :label="0">Email</el-radio>
             <el-radio :label="1">Wechat Web Hook</el-radio>
             <el-radio :label="2">DingDing Web Hook</el-radio>
@@ -92,19 +104,19 @@
         <!-- email start -->
         <div v-if="alertChannel.channelType == 0">
           <el-form-item label="SMTP Host" prop="smtpHost">
-            <el-input size="small" v-model="alertChannel.smtpHost"></el-input>
+            <el-input size="small" v-model.trim="alertChannel.smtpHost"></el-input>
           </el-form-item>
           <el-form-item label="Email User Name" prop="emailUserName">
-            <el-input size="small" v-model="alertChannel.emailUserName"></el-input>
+            <el-input size="small" v-model.trim="alertChannel.emailUserName"></el-input>
           </el-form-item>
           <el-form-item label="Email Password" prop="emailPassword">
-            <el-input size="small" v-model="alertChannel.emailPassword"></el-input>
+            <el-input size="small" v-model.trim="alertChannel.emailPassword"></el-input>
           </el-form-item>
           <el-form-item label="Email From" prop="emailFrom">
-            <el-input size="small" v-model="alertChannel.emailFrom"></el-input>
+            <el-input size="small" v-model.trim="alertChannel.emailFrom"></el-input>
           </el-form-item>
           <el-form-item label="Email To" prop="emailTo">
-            <el-input size="small" v-model="alertChannel.emailTo"></el-input>
+            <el-input size="small" v-model.trim="alertChannel.emailTo"></el-input>
           </el-form-item>
         </div>
         <!-- email end -->
@@ -115,20 +127,20 @@
           prop="webhook"
           v-if="alertChannel.channelType == 1 || alertChannel.channelType == 2"
         >
-          <el-input size="small" v-model="alertChannel.webhook"></el-input>
+          <el-input size="small" v-model.trim="alertChannel.webhook"></el-input>
         </el-form-item>
         <!-- wechat web hook end -->
 
         <!-- wechat app start -->
         <div v-if="alertChannel.channelType == 3">
           <el-form-item label="Corp Id" prop="corpId">
-            <el-input size="small" v-model="alertChannel.corpId"></el-input>
+            <el-input size="small" v-model.trim="alertChannel.corpId"></el-input>
           </el-form-item>
           <el-form-item label="Agent Id" prop="agentId">
-            <el-input size="small" v-model="alertChannel.agentId"></el-input>
+            <el-input size="small" v-model.trim="alertChannel.agentId"></el-input>
           </el-form-item>
           <el-form-item label="Corp Secret" prop="corpSecret">
-            <el-input size="small" v-model="alertChannel.corpSecret"></el-input>
+            <el-input size="small" v-model.trim="alertChannel.corpSecret"></el-input>
           </el-form-item>
         </div>
         <!-- wechat app end -->
@@ -162,13 +174,18 @@
 
 <script>
 import { store } from "@/vuex/store.js";
-import { isEmpty, validateURL, validateEmail } from "@/utils/validate.js";
+import {
+  isEmpty,
+  validateURL,
+  validateEmail,
+  validateIp
+} from "@/utils/validate.js";
 import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
 export default {
   data() {
     var validateSMTPHost = (rule, value, callback) => {
-      if (!validateURL(value)) {
+      if (!validateURL(value) && !validateIp(value)) {
         return callback(new Error("Incorrect host format"));
       }
       callback();
@@ -375,6 +392,9 @@ export default {
         field.resetField();
         return false;
       });
+    },
+    currentGroupId(groupId) {
+      this.getChannelList(groupId);
     }
   },
   mounted() {

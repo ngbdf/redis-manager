@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
+import API from "@/api/api.js";
 
 Vue.use(Vuex)
 
@@ -9,41 +10,33 @@ const state = {
   currentGroup: {},
   groupList: [],
   user: {
-    avatar: '/user/image/jay.png'
-  },
-  userRole: 'ADMIN'
+    avatar: '/user/image/jay.png',
+    userRole: 2
+  }
 }
 
 // 定义所需的 mutations，状态变更操作
 const mutations = {
-  setCurrentGroup (state, currentGroup) {
+  setCurrentGroup(state, currentGroup) {
+    getUserRole(currentGroup.groupId, state.user.userId)
     state.currentGroup = currentGroup
   },
-  setCurrentGroupById (state, groupId) {
-    state.groupList.forEach(group => {
-      if (groupId === group.groupId) {
-        state.currentGroup = group
-      }
-    })
-  },
-  setGroupList (state, groupList) {
+  setGroupList(state, groupList) {
     state.groupList = groupList
   },
-  setUser (state, user) {
+  setUser(state, user) {
     state.user = user
   },
-  setUserRole (state, userRole) {
+  setUserRole(state, userRole) {
     state.user.userRole = userRole
   }
+
 }
 
 // 获取数据操作
 const getters = {
   getCurrentGroup: state => {
     return state.currentGroup
-  },
-  getCurrentGroupId: state => {
-    return state.currentGroup.groupId
   },
   getGroupList: state => {
     return state.groupList
@@ -61,19 +54,16 @@ const getters = {
 
 // 分发 Action
 const actions = {
-  setCurrentGroup (context, currentGroup) {
+  setCurrentGroup(context, currentGroup) {
     context.commit('setCurrentGroup', currentGroup)
   },
-  setCurrentGroupById (context, groupId) {
-    context.commit('setCurrentGroupById', groupId)
-  },
-  setGroupList (context, groupList) {
+  setGroupList(context, groupList) {
     context.commit('setGroupList', groupList)
   },
-  setUser (context, user) {
+  setUser(context, user) {
     context.commit('setUser', user)
   },
-  setUserRole (context, userRole) {
+  setUserRole(context, userRole) {
     context.commit('setUserRole', userRole)
   }
 }
@@ -86,7 +76,7 @@ export const store = new Vuex.Store({
   mutations,
   plugins: [createPersistedState(
     {
-      reducer (val) {
+      reducer(val) {
         return {
           user: val.user
         }
@@ -94,3 +84,19 @@ export const store = new Vuex.Store({
     }
   )]
 })
+
+function getUserRole(groupId, userId) {
+  let url = '/user/getUserRole/'
+  let user = {
+    groupId: groupId,
+    userId: userId
+  }
+  API.post(url, user, response => {
+    let userRole = response.data.data
+    state.user.userRole = userRole
+    console.log(state.user)
+  }, err => {
+    console.log(err)
+    state.user.userRole = 2
+  })
+}

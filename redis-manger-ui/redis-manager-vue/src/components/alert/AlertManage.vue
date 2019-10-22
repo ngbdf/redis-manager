@@ -42,21 +42,26 @@
         <span>{{ cluster.clusterName }}</span>
         <i class="el-icon-sunny health" title="Status" v-if="cluster.clusterState == 'HEALTH'"></i>
       </div>
-      <el-tabs
-        v-model="activeName"
-        @tab-click="handleClick"
-        
-      >
+      <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="Alert Record" name="record">
           <div class="operation-wrapper">
             <div class="batch-title">Batch Operation</div>
             <div style="display: flex; justify-content: space-between;">
               <div>
-                <el-link type="danger" :underline="false" icon="el-icon-delete">Delete</el-link>
+                <el-link
+                  type="danger"
+                  :underline="false"
+                  icon="el-icon-delete"
+                  @click="handleDeleteAlertRecordBatch"
+                >Delete</el-link>
               </div>
             </div>
           </div>
-          <el-table :data="alertRecordList" @selection-change="handleRecordSelectionChange" :default-sort="{prop: 'time', order: 'descending'}">
+          <el-table
+            :data="alertRecordList"
+            @selection-change="handleRecordSelectionChange"
+            :default-sort="{prop: 'time', order: 'descending'}"
+          >
             <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column property="redisNode" label="Redis Node"></el-table-column>
@@ -203,6 +208,18 @@
                   </div>
                 </el-popover>
                 <el-popover trigger="hover" placement="top" v-if="scope.row.channelType == '3'">
+                  <p>
+                    <span class="label-color">Corp ID:</span>
+                    {{ scope.row.corpId }}
+                  </p>
+                  <p>
+                    <span class="label-color">Agent ID:</span>
+                    {{ scope.row.agentId }}
+                  </p>
+                  <p>
+                    <span class="label-color">Corp Secret:</span>
+                    {{ scope.row.corpSecret }}
+                  </p>
                   <div slot="reference" class="name-wrapper">
                     <el-tag size="small" type="success">WebChat App</el-tag>
                   </div>
@@ -314,9 +331,7 @@
     </el-dialog>
 
     <el-dialog title="Delete Alert Record" :visible.sync="deleteAlertRecordVisible" width="30%">
-      <span>
-        Are you sure to delete?
-      </span>
+      <span>Are you sure to delete?</span>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="deleteAlertChannelVisible = false">Cancel</el-button>
         <el-button size="small" type="danger" @click="deleteAlertRecord()">Delete</el-button>
@@ -643,25 +658,30 @@ export default {
       );
     },
     handleDeleteAlertRecord(alertRecord) {
-      this.deletingAlertRecordIds = []
+      this.deletingAlertRecordIds = [];
       this.deletingAlertRecordIds.push(alertRecord.recordId);
+      this.deleteAlertRecordVisible = true;
     },
     handleRecordSelectionChange(val) {
-      if(val.length == 0) {
+      if (val.length == 0) {
         return;
       }
-      this.deletingAlertRecordIds = []
+      this.deletingAlertRecordIds = [];
       val.forEach(alertRecord => {
         this.deletingAlertRecordIds.push(alertRecord.recordId);
       });
+    },
+    handleDeleteAlertRecordBatch() {
+      if (this.deletingAlertRecordIds.length == 0) {
+        return;
+      }
       this.deleteAlertRecordVisible = true;
-      console.log(this.deleteAlertRecordIds);
     },
     deleteAlertRecord() {
-      let url = "/cluster/deleteAlertRecordBatch";
+      let url = "/alert/record/deleteAlertRecordBatch";
       API.post(
         url,
-        this.deleteAlertRecordIds,
+        this.deletingAlertRecordIds,
         response => {
           let result = response.data;
           let clusterId = this.cluster.clusterId;

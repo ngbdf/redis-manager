@@ -49,13 +49,13 @@ public interface IAlertRuleDao {
     int insertAlertRule(AlertRule alertRule);
 
     @Update("UPDATE alert_rule SET group_id = #{groupId}, rule_key = #{ruleKey}, rule_value = #{ruleValue}, " +
-            "compare_type = #{compareType}, valid = #{valid}, global = #{global}, rule_info = #{ruleInfo}, " +
+            "compare_type = #{compareType}, check_cycle = #{checkCycle}, valid = #{valid}, global = #{global}, rule_info = #{ruleInfo}, " +
             "update_time = NOW() " +
             "WHERE rule_id = #{ruleId}")
     int updateAlertRule(AlertRule alertRule);
 
     @Update("<script>" +
-            "UPDATE alert_rule SET last_check_time = #{lastCheckTime} " +
+            "UPDATE alert_rule SET last_check_time = NOW() " +
             "WHERE rule_id IN " +
             "<foreach item='ruleId' collection='ruleIdList' open='(' separator=',' close=')'>" +
             "#{ruleId}" +

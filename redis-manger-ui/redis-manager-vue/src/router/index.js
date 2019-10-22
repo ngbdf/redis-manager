@@ -14,6 +14,7 @@ import GroupManage from '@/components/group/GroupManage'
 import UserManage from '@/components/user/UserManage'
 import Profile from '@/components/user/Profile'
 import DataOperation from '@/components/tool/DataOperation'
+import NotFound from '@/components/error/404'
 
 import { store } from '@/vuex/store.js'
 import { isEmpty } from '@/utils/validate.js'
@@ -95,12 +96,18 @@ const router = new Router({
           component: DataOperation
         }
       ]
+    },
+    {
+      path: '/404',
+      component: NotFound,
+      name: '404',
+      hidden: true
+    },
+    {
+      path: '*',
+      hidden: true,
+      redirect: { path: '/404' }
     }
-    // {
-    //   path: '*',
-    //   hidden: true,
-    //   redirect: { path: '/login' }
-    // }
   ]
 })
 

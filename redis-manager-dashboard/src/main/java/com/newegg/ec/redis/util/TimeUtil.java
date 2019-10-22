@@ -12,7 +12,7 @@ import static javax.management.timer.Timer.ONE_SECOND;
  */
 public class TimeUtil {
 
-    public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
+    public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static final long FIVE_SECONDS = 5 * ONE_SECOND;
 

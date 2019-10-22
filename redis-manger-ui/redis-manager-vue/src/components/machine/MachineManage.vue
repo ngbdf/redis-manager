@@ -21,7 +21,7 @@
         style="width: 100%"
         center
         @selection-change="handleSelectionChange"
-        :default-sort="{prop: 'time', order: 'descending'}"
+        :default-sort="{prop: 'machineGroupName', order: 'ascending'}"
       >
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column

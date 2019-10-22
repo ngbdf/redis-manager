@@ -2,6 +2,7 @@ package com.newegg.ec.redis.plugin.alert.entity;
 
 import java.sql.Timestamp;
 
+
 /**
  * 规则可指定
  *
@@ -29,12 +30,12 @@ public class AlertRule {
      * 1: 大于
      * -1: 小于
      */
-    private int compareType;
+    private Integer compareType;
 
     /**
      * 检测周期, minute
      */
-    private int checkCycle;
+    private Integer checkCycle;
 
     /**
      * 规则是否可用
@@ -84,19 +85,19 @@ public class AlertRule {
         this.ruleValue = ruleValue;
     }
 
-    public int getCompareType() {
+    public Integer getCompareType() {
         return compareType;
     }
 
-    public void setCompareType(int compareType) {
+    public void setCompareType(Integer compareType) {
         this.compareType = compareType;
     }
 
-    public int getCheckCycle() {
+    public Integer getCheckCycle() {
         return checkCycle;
     }
 
-    public void setCheckCycle(int checkCycle) {
+    public void setCheckCycle(Integer checkCycle) {
         this.checkCycle = checkCycle;
     }
 

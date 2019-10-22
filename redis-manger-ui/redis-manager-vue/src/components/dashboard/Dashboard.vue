@@ -101,7 +101,7 @@
             <!-- <div class="text item" v-if="cluster.redisMode == 'cluster'">
               Slots Bad(pfail/fail):
               <el-tag size="mini">{{ cluster.clusterSlotsPfail }}/{{ cluster.clusterSlotsFail }}</el-tag>
-            </div> -->
+            </div>-->
             <div class="text item" v-if="cluster.redisMode == 'standalone'">
               DB Size:
               <el-tag size="mini">{{ cluster.dbSize }}</el-tag>
@@ -140,6 +140,7 @@
               icon="el-icon-bell"
               circle
               @click="toAlertManage(cluster.clusterId)"
+              v-if="userRole < 2"
             ></el-button>
 
             <el-button
@@ -149,9 +150,10 @@
               icon="el-icon-setting"
               circle
               @click="toManage(cluster.clusterId)"
+              v-if="userRole < 2"
             ></el-button>
 
-            <el-dropdown trigger="click" class="more-operation">
+            <el-dropdown trigger="click" class="more-operation" v-if="userRole < 2">
               <el-button size="mini" title="Edit or delete" type="info" icon="el-icon-more" circle></el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
@@ -213,6 +215,7 @@ export default {
   },
   data() {
     return {
+      userRole: 2,
       overview: {
         userNumber: 0,
         healthNumber: 0,
@@ -268,6 +271,7 @@ export default {
             if (result.code == 0) {
               let overview = result.data;
               this.overview.alertNumber = overview.alertNumber;
+              this.overview.userNumber = overview.userNumber;
             } else {
               console.log("No data");
             }
@@ -361,6 +365,7 @@ export default {
     let groupId = this.$route.params.groupId;
     this.getClusterList(groupId);
     this.getOverview(groupId);
+    this.userRole = store.getters.getUserRole;
   }
 };
 </script>

@@ -422,7 +422,7 @@ export default {
             this.getAlertRuleList(this.currentGroupId);
             this.deleteVisible = false;
           } else {
-            console.log("Delete alert rule failed")
+            console.log("Delete alert rule failed");
           }
         },
         err => {
@@ -434,6 +434,11 @@ export default {
   computed: {
     currentGroupId() {
       return store.getters.getCurrentGroupId;
+    }
+  },
+  watch: {
+    currentGroupId(groupId) {
+      this.getAlertRuleList(groupId);
     }
   },
   mounted() {

@@ -14,6 +14,8 @@ public interface IUserService {
 
     List<User> getUserByGroupId(Integer groupId);
 
+    List<User> getGrantUserByGroupId(Integer groupId);
+
     User getUserByNameAndPassword(User user);
 
     User getUserById(Integer userId);
