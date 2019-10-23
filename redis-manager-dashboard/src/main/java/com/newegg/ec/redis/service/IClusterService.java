@@ -17,6 +17,8 @@ public interface IClusterService {
 
     Cluster getClusterById(Integer clusterId);
 
+    Cluster getClusterByIdAndGroup(Integer groupId, Integer clusterId);
+
     Cluster getClusterByName(String clusterName);
 
     boolean addCluster(Cluster cluster);

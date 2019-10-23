@@ -34,13 +34,13 @@
               size="mini"
               type="primary"
               @click="handleEdit(scope.row)"
-              v-if="currentUser.userId != scope.row.userId"
+              v-if="currentUser.userRole <= scope.row.userRole"
             >Edit</el-button>
             <el-button
               size="mini"
               type="danger"
               @click="handleDelete(scope.row)"
-              v-if="currentUser.userId != scope.row.userId"
+              v-if="currentUser.userRole <= scope.row.userRole && currentUser.userId != scope.row.userId"
             >Delete</el-button>
           </template>
         </el-table-column>
@@ -87,8 +87,8 @@
         <el-form-item prop="userRole" label="User Role">
           <el-select v-model="user.userRole" placeholder="Please select user role">
             <el-option label="Member" :value="2"></el-option>
-            <el-option label="Admin" :value="1"></el-option>
-            <el-option label="Super Admin" :value="0"></el-option>
+            <el-option label="Admin" :value="1" v-if="currentUser.userRole < 2"></el-option>
+            <el-option label="Super Admin" :value="0" v-if="currentUser.userRole < 1"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="userName" label="User Name">
@@ -117,8 +117,8 @@
         <el-form-item prop="userRole" label="User Role">
           <el-select v-model="user.userRole" placeholder="Please select user role">
             <el-option label="Member" :value="2"></el-option>
-            <el-option label="Admin" :value="1"></el-option>
-            <el-option label="Super Admin" :value="0"></el-option>
+            <el-option label="Admin" :value="1" v-if="currentUser.userRole < 2"></el-option>
+            <el-option label="Super Admin" :value="0" v-if="currentUser.userRole < 1"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="userName" label="User Name">
@@ -143,7 +143,7 @@
 
     <el-dialog title="Revoke User" :visible.sync="revokeUserVisible" width="30%">
       <span>
-        Are you sure to revoke 
+        Are you sure to revoke
         <b>{{ user.userName }}</b> ?
       </span>
       <span slot="footer" class="dialog-footer">
@@ -182,8 +182,10 @@ export default {
           let result = response.data;
           if (result.code == 0) {
             callback();
-          } else {
+          } else if (this.user.userId !== result.data.userId) {
             callback(new Error(value + " has been used"));
+          } else {
+            callback();
           }
         },
         err => {
@@ -201,7 +203,26 @@ export default {
           if (result.code == 0) {
             callback(new Error(value + " not exist"));
           } else {
-            callback();
+            let user = result.data;
+            API.get(
+              "/user/isGranted/" +
+                this.currentGroup.groupId +
+                "/" +
+                user.userId,
+              null,
+              response => {
+                let result = response.data;
+                console.log(result);
+                if (result.code == 0) {
+                  callback();
+                } else {
+                  return callback(new Error(value + " has been granted"));
+                }
+              },
+              err => {
+                return callback(new Error("Network error"));
+              }
+            );
           }
         },
         err => {
@@ -209,6 +230,7 @@ export default {
         }
       );
     };
+
     return {
       userList: [],
       grantedUserList: [],
@@ -453,10 +475,13 @@ export default {
   },
   watch: {
     currentGroup(group) {
-      console.log(group);
-      let groupId = group.groupId
+      let groupId = group.groupId;
       this.getUserList(groupId);
       this.getGrantedUserList(groupId);
+      this.$router.push({
+        name: "user-manage",
+        params: { groupId: groupId }
+      });
     }
   },
   mounted() {

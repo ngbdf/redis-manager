@@ -2,12 +2,11 @@ import { store } from "@/vuex/store.js";
 import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
 
-export function getGroupList() {
-    let userId = store.getters.getUserId;
-      let url = "/group/getGroupList/" + userId;
-      API.get(
+export function getGroupList(user) {
+      let url = "/group/getGroupList";
+      API.post(
         url,
-        null,
+        user,
         response => {
           if (response.data.code == 0) {
             let groupList = response.data.data;

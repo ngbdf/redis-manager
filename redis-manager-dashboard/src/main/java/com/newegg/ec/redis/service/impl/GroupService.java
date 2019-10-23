@@ -1,10 +1,8 @@
 package com.newegg.ec.redis.service.impl;
 
-import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.IGroupDao;
 import com.newegg.ec.redis.dao.IGroupUserDao;
 import com.newegg.ec.redis.dao.IUserDao;
-import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Group;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IGroupService;
@@ -14,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,7 +50,7 @@ public class GroupService implements IGroupService {
             return groupDao.selectGroupByUserId(userId);
         } catch (Exception e) {
             logger.error("Get group by user id failed, user id = " + userId, e);
-            return null;
+            return new ArrayList<>();
         }
 
     }
@@ -81,10 +80,14 @@ public class GroupService implements IGroupService {
     public boolean addGroup(Group group) {
         groupDao.insertGroup(group);
         User user = new User();
+        String groupName = group.getGroupName();
+        user.setUserName(groupName);
+        user.setPassword(groupName);
+        Integer groupId = group.getGroupId();
         user.setUserRole(User.UserRole.ADMIN);
-        user.setUserId(group.getUserId());
-        user.setGroupId(group.getGroupId());
-        groupUserDao.insertGroupUser(user);
+        user.setGroupId(groupId);
+        userDao.insertUser(user);
+        groupUserDao.insertGroupUser(user, groupId);
         return true;
     }
 

@@ -18,16 +18,20 @@ public interface IGroupDao {
     @Select("SELECT * FROM `group`")
     List<Group> selectAllGroup();
 
-    @Select("SELECT " +
-            "group.group_id AS group_id, " +
+    @Select("<script>" +
+            "SELECT " +
+            "distinct group.group_id AS group_id, " +
             "group.group_name AS group_name, " +
             "group.group_info AS group_info, " +
             "group.update_time AS update_time " +
             "FROM `group`, group_user " +
-            "WHERE group_user.group_id = group.group_id " +
+            "WHERE group_user.grant_group_id = group.group_id " +
+            "<if test='userId != null'>" +
             "AND group_user.user_id = #{userId} " +
-            "ORDER BY group_name")
-    List<Group> selectGroupByUserId(Integer userId);
+            "</if>" +
+            "ORDER BY group_name" +
+            "</script>")
+    List<Group> selectGroupByUserId(@Param("userId") Integer userId);
 
     @Select("SELECT * FROM `group` WHERE group_name = #{groupName}")
     Group selectGroupByGroupName(String groupName);

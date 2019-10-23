@@ -83,11 +83,14 @@ export default {
     saveGroup(group) {
       this.$refs[group].validate(valid => {
         if (valid) {
-          this.group.userId = store.getters.getUserId;
+          let user = store.getters.getUser;
+          this.group.userId = user.userId;
           this.group.updateTime = new Date(this.group.updateTime);
           let url;
           if (isEmpty(this.group.groupId)) {
-            url = "/group/addGroup";
+            // for grant
+            this.group.groupId = user.groupId;
+            url = "/group/addGroup" ;
           } else {
             url = "/group/updateGroup";
           }
@@ -98,7 +101,11 @@ export default {
               if (response.data.code == 0) {
                 this.createGroupVisible = false;
                 this.group = {};
-                getGroupList();
+                let user = store.getters.getUser;
+                if(user.userRole == 0) {
+                  user.userId = null;
+                }
+                getGroupList(user);
               } else {
                 console.log("Add group failed.");
               }

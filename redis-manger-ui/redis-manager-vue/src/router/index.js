@@ -46,7 +46,7 @@ const router = new Router({
         },
         {
           name: 'redis-monitor',
-          path: '/redis-monitor/cluster/:clusterId',
+          path: '/redis-monitor/groupId/:groupId/cluster/:clusterId',
           component: RedisMonitor
         },
         {
@@ -114,12 +114,21 @@ const router = new Router({
 export default router
 
 router.beforeEach((to, from, next) => {
-  if (to.path === '/login') {
-    store.dispatch('setUser', null)
-  }
   let user = store.getters.getUser
-  if (to.path !== '/login' && (isEmpty(user) || isEmpty(user.userId) || isEmpty(user.userName) || isEmpty(user.userRole))) {
+  if (to.path === '/login') {
+    store.dispatch('setUser', {})
+  }
+  let toPath = to.path
+  if (toPath !== '/login' && (isEmpty(user) || isEmpty(user.userId) || isEmpty(user.userName) || isEmpty(user.userRole))) {
     next({ path: '/login' })
+    // admin
+  } else if (user.userRole === 1 && toPath.indexOf('group-manage') > 0) {
+    next({ name: 'dashboard', params: { groupId: store.getters.getCurrentGroup.groupId } })
+  } else if (user.userRole === 2 && (toPath.indexOf('group-manage') > 0 || toPath.indexOf('user-manage') > 0 ||
+    toPath.indexOf('machine-manage') > 0 || toPath.indexOf('installation') > 0 ||
+    toPath.indexOf('channel-manage') > 0 || toPath.indexOf('rule-manage') > 0 ||
+    toPath.indexOf('redis-manage') > 0 || toPath.indexOf('alert-manage') > 0)) {
+    next({ name: 'dashboard', params: { groupId: store.getters.getCurrentGroup.groupId } })
   } else {
     next()
   }

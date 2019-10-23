@@ -22,9 +22,11 @@ public interface IClusterDao {
     @Select("SELECT * FROM cluster WHERE cluster_id = #{clusterId}")
     Cluster selectClusterById(Integer clusterId);
 
+    @Select("SELECT * FROM cluster WHERE group_id = #{groupId} AND cluster_id = #{clusterId}")
+    Cluster getClusterByIdAndGroup(Integer groupId, Integer clusterId);
+
     @Select("SELECT * FROM cluster WHERE cluster_name = #{clusterName}")
     Cluster selectClusterByName(String clusterName);
-
 
     @Insert("INSERT INTO cluster " +
             "(group_id, user_id, cluster_token, " +

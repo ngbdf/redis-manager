@@ -88,6 +88,16 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
+    public Cluster getClusterByIdAndGroup(Integer groupId, Integer clusterId) {
+        try {
+            return clusterDao.getClusterByIdAndGroup(groupId, clusterId);
+        } catch (Exception e) {
+            logger.error("Get cluster failed, cluster id = " + clusterId, e);
+            return null;
+        }
+    }
+
+    @Override
     public Cluster getClusterByName(String clusterName) {
         try {
             return clusterDao.selectClusterByName(clusterName);

@@ -86,6 +86,7 @@ export default {
             response => {
               let result = response.data;
               if (result.code == 0) {
+                console.log(result.data)
                 store.dispatch("setUser", result.data);
                 this.$router.push({ name: "index" });
               } else {

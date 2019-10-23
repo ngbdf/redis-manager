@@ -461,12 +461,18 @@ export default {
   },
   computed: {
     currentGroupId() {
-      return store.getters.getCurrentGroupId;
+      let cuurrentGroupId = store.getters.getCurrentGroup.groupId;
+      console.log(cuurrentGroupId)
+      return cuurrentGroupId;
     }
   },
   watch: {
     currentGroupId(groupId) {
-      this.getMachineList(groupId)
+      this.getMachineList(groupId);
+      this.$router.push({
+        name: "machine-manage",
+        params: { groupId: groupId }
+      });
     }
   },
   mounted() {

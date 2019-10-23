@@ -10,11 +10,9 @@ import java.util.List;
  */
 public interface IUserService {
 
-    List<User> getAllUser();
-
     List<User> getUserByGroupId(Integer groupId);
 
-    List<User> getGrantUserByGroupId(Integer groupId);
+    List<User> getGrantUserByGroupId(Integer grantGroupId);
 
     User getUserByNameAndPassword(User user);
 
@@ -23,6 +21,8 @@ public interface IUserService {
     User getUserRole(Integer groupId, Integer userId);
 
     boolean addUser(User user);
+
+    boolean isGranted(Integer grantGroupId, Integer userId);
 
     boolean grantUser(User user);
 

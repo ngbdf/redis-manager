@@ -51,9 +51,9 @@ public class ClusterController {
         return Result.successResult(clusterList);
     }
 
-    @RequestMapping(value = "/getCluster/{clusterId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getCluster/{groupId}/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getCluster(@PathVariable("clusterId") Integer clusterId) {
+    public Result getCluster(@PathVariable("groupId") Integer groupId, @PathVariable("clusterId") Integer clusterId) {
         Cluster cluster = clusterService.getClusterById(clusterId);
         if (cluster != null) {
             return Result.successResult(cluster);

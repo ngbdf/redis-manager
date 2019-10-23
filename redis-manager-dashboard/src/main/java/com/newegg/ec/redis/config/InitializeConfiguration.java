@@ -91,7 +91,7 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
         }
         User existGroupUser = userDao.selectUserRole(user.getGroupId(), user.getUserId());
         if (existGroupUser == null) {
-            groupUserDao.insertGroupUser(user);
+            groupUserDao.insertGroupUser(user, user.getGroupId());
         }
     }
 

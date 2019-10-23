@@ -78,6 +78,16 @@ public class UserController {
         return result ? Result.successResult() : Result.failResult();
     }
 
+    @RequestMapping(value = "/isGranted/{grantGroupId}/{userId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result isGranted(@PathVariable("grantGroupId") Integer grantGroupId, @PathVariable("userId") Integer userId) {
+        if (grantGroupId == null || userId == null) {
+            return Result.failResult();
+        }
+        boolean result = userService.isGranted(grantGroupId, userId);
+        return result ? Result.failResult() : Result.successResult();
+    }
+
     @RequestMapping(value = "/grantUser", method = RequestMethod.POST)
     @ResponseBody
     public Result grantUser(@RequestBody User user) {
@@ -110,6 +120,6 @@ public class UserController {
     @ResponseBody
     public Result validateUserName(@PathVariable String userName) {
         User user = userService.getUserByName(userName);
-        return user == null ? Result.successResult() : Result.failResult();
+        return user == null ? Result.successResult() : Result.failResult(user);
     }
 }

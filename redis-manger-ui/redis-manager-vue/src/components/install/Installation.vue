@@ -730,6 +730,13 @@ export default {
           return false;
         }
       });
+    },
+    currentGroup(group) {
+      let groupId = group.groupId;
+      this.$router.push({
+        name: "installation",
+        params: { groupId: groupId }
+      });
     }
   },
   mounted() {

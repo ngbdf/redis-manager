@@ -94,7 +94,6 @@ function getUserRole(groupId, userId) {
   API.post(url, user, response => {
     let userRole = response.data.data
     state.user.userRole = userRole
-    console.log(state.user)
   }, err => {
     console.log(err)
     state.user.userRole = 2

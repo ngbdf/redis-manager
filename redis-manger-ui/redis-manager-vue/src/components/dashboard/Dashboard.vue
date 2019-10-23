@@ -140,7 +140,7 @@
               icon="el-icon-bell"
               circle
               @click="toAlertManage(cluster.clusterId)"
-              v-if="userRole < 2"
+              v-if="currentUser.userRole < 2"
             ></el-button>
 
             <el-button
@@ -150,10 +150,10 @@
               icon="el-icon-setting"
               circle
               @click="toManage(cluster.clusterId)"
-              v-if="userRole < 2"
+              v-if="currentUser.userRole < 2"
             ></el-button>
 
-            <el-dropdown trigger="click" class="more-operation" v-if="userRole < 2">
+            <el-dropdown trigger="click" class="more-operation" v-if="currentUser.userRole < 2">
               <el-button size="mini" title="Edit or delete" type="info" icon="el-icon-more" circle></el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
@@ -215,7 +215,6 @@ export default {
   },
   data() {
     return {
-      userRole: 2,
       overview: {
         userNumber: 0,
         healthNumber: 0,
@@ -352,13 +351,20 @@ export default {
   },
   computed: {
     currentGroupId() {
-      return store.getters.getCurrentGroupId;
+      return store.getters.getCurrentGroup.groupId;
+    },
+    currentUser() {
+      return store.getters.getUser;
     }
   },
   watch: {
     currentGroupId(groupId) {
       this.getClusterList(groupId);
       this.getOverview(groupId);
+      this.$router.push({
+        name: "dashboard",
+        params: { groupId: groupId }
+      });
     }
   },
   mounted() {

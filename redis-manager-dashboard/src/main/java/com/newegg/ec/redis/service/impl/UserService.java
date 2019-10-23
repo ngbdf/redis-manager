@@ -28,19 +28,10 @@ public class UserService implements IUserService {
     private IGroupUserDao groupUserDao;
 
     @Override
-    public List<User> getAllUser() {
-        try {
-            return userDao.selectAllUser();
-        } catch (Exception e) {
-            logger.error("Get all user failed.", e);
-            return null;
-        }
-    }
-
-    @Override
     public List<User> getUserByGroupId(Integer groupId) {
         try {
-            return userDao.selectUserByGroupId(groupId);
+            List<User> users = userDao.selectUserByGroupId(groupId);
+            return users;
         } catch (Exception e) {
             logger.error("Get user by group id failed.", e);
             return null;
@@ -48,9 +39,9 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> getGrantUserByGroupId(Integer groupId) {
+    public List<User> getGrantUserByGroupId(Integer grantGroupId) {
         try {
-            return userDao.selectGrantUserByGroupId(groupId);
+            return userDao.selectGrantUserByGroupId(grantGroupId);
         } catch (Exception e) {
             logger.error("Get grant user by group id failed.", e);
             return null;
@@ -86,9 +77,9 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User getUserRole(Integer groupId, Integer userId) {
+    public User getUserRole(Integer grantGroupId, Integer userId) {
         try {
-            return userDao.selectUserRole(groupId, userId);
+            return userDao.selectUserRole(grantGroupId, userId);
         } catch (Exception e) {
             logger.error("Get user by group id and user id failed.", e);
             return null;
@@ -99,16 +90,28 @@ public class UserService implements IUserService {
     @Override
     public boolean addUser(User user) {
         userDao.insertUser(user);
-        groupUserDao.insertGroupUser(user);
+        groupUserDao.insertGroupUser(user, user.getGroupId());
         return true;
+    }
+
+    @Override
+    public boolean isGranted(Integer grantGroupId, Integer userId) {
+        try {
+            User granted = groupUserDao.isGranted(grantGroupId, userId);
+            return granted != null;
+        } catch (Exception e) {
+            logger.error("", e);
+            return true;
+        }
     }
 
     @Override
     public boolean grantUser(User user) {
         try {
+            Integer grantGroupId = user.getGroupId();
             User userByName = getUserByName(user.getUserName());
-            user.setUserId(userByName.getUserId());
-            return groupUserDao.insertGroupUser(user) > 0;
+            userByName.setUserRole(user.getUserRole());
+            return groupUserDao.insertGroupUser(userByName, grantGroupId) > 0;
         } catch (Exception e) {
             logger.error("Grant user failed.", e);
             return false;
@@ -125,15 +128,12 @@ public class UserService implements IUserService {
         }
     }
 
+    @Transactional
     @Override
     public boolean updateUser(User user) {
-        try {
-            int row = userDao.updateUser(user);
-            return row > 0;
-        } catch (Exception e) {
-            logger.error("Update user failed, " + user, e);
-            return false;
-        }
+        userDao.updateUser(user);
+        groupUserDao.updateUserRole(user);
+        return true;
     }
 
     @Transactional
@@ -147,7 +147,7 @@ public class UserService implements IUserService {
     @Override
     public boolean revokeUser(User user) {
         try {
-            return groupUserDao.deleteGroupUser(user.getGroupId(), user.getUserId()) > 0;
+            return groupUserDao.deleteGroupUserByGrantGroupId(user.getGroupId(), user.getUserId()) > 0;
         } catch (Exception e) {
             logger.error("Revoke user failed.", e);
             return false;

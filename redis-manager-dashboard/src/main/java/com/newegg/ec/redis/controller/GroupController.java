@@ -3,6 +3,7 @@ package com.newegg.ec.redis.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.Group;
 import com.newegg.ec.redis.entity.Result;
+import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.plugin.alert.service.impl.AlertRecordService;
 import com.newegg.ec.redis.service.IGroupService;
 import com.newegg.ec.redis.service.IUserService;
@@ -59,10 +60,14 @@ public class GroupController {
         return group != null ? Result.successResult(group) : Result.failResult();
     }
 
-    @RequestMapping(value = "/getGroupList/{userId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getGroupList", method = RequestMethod.POST)
     @ResponseBody
-    public Result getGroupList(@PathVariable("userId") Integer userId) {
-        List<Group> groupList = groupService.getGroupByUserId(userId);
+    public Result getGroupList(@RequestBody User user) {
+        /*Integer userId = user.getUserId();
+        if (user.getUserRole() == 0) {
+            userId = null;
+        }*/
+        List<Group> groupList = groupService.getGroupByUserId(user.getUserId());
         if (groupList == null || groupList.isEmpty()) {
             return Result.failResult();
         }

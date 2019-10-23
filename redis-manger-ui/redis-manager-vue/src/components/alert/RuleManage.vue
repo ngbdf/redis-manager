@@ -433,7 +433,7 @@ export default {
   },
   computed: {
     currentGroupId() {
-      return store.getters.getCurrentGroupId;
+      return store.getters.getCurrentGroup.groupId;
     }
   },
   watch: {

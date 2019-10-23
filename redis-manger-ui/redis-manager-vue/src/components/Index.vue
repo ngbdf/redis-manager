@@ -89,11 +89,11 @@
                 <i class="el-icon-discover"></i>
                 <span slot="title">Dashboard</span>
               </el-menu-item>
-              <el-menu-item index="2" @click="toInstallation()" v-if="userRole < 2">
+              <el-menu-item index="2" @click="toInstallation()" v-if="currentUser.userRole < 2">
                 <i class="el-icon-setting"></i>
                 <span slot="title">Installation</span>
               </el-menu-item>
-              <el-submenu index="3" v-if="userRole < 2">
+              <el-submenu index="3" v-if="currentUser.userRole < 2">
                 <template slot="title">
                   <i class="el-icon-bell"></i>
                   <span>Alert Manage</span>
@@ -103,7 +103,7 @@
                   <el-menu-item index="3-2" @click="toRuleManage()">Rule Manage</el-menu-item>
                 </el-menu-item-group>
               </el-submenu>
-              <el-menu-item index="4" @click="toMachineManage()" v-if="userRole < 2">
+              <el-menu-item index="4" @click="toMachineManage()" v-if="currentUser.userRole < 2">
                 <i class="el-icon-monitor"></i>
                 <span slot="title">Machine Manage</span>
               </el-menu-item>
@@ -116,16 +116,16 @@
                   <el-menu-item
                     index="5-1"
                     @click="toDataOperation()"
-                    v-if="userRole < 2"
+                    v-if="currentUser.userRole < 2"
                   >Data Operation</el-menu-item>
                   <!-- <el-menu-item index="5-2">Other</el-menu-item> -->
                 </el-menu-item-group>
               </el-submenu>
-              <el-menu-item index="6" @click="toGroupManage()" v-if="userRole < 1">
+              <el-menu-item index="6" @click="toGroupManage()" v-if="currentUser.userRole < 1">
                 <i class="el-icon-user-solid"></i>
                 <span slot="title">Group Manage</span>
               </el-menu-item>
-              <el-menu-item index="7" @click="toUserManage()" v-if="userRole < 2">
+              <el-menu-item index="7" @click="toUserManage()" v-if="currentUser.userRole < 2">
                 <i class="el-icon-user"></i>
                 <span slot="title">User Manage</span>
               </el-menu-item>
@@ -164,8 +164,7 @@ export default {
       active: true,
       permission: true,
       importVisible: false,
-      selectGroupId: "",
-      userRole: 2
+      selectGroupId: ""
     };
   },
   methods: {
@@ -217,15 +216,39 @@ export default {
       if (!isEmpty(this.selectGroupId)) {
         this.groupList.forEach(group => {
           if (this.selectGroupId === group.groupId) {
-            store.dispatch("setCurrentGroup", group);
+            this.getUserRole(group);
           }
         });
-
+        let currentPath = this.$route.path;
+        if(currentPath === "/" || currentPath.indexOf("redis-monitor") > 0 || currentPath.indexOf("group-manage") > 0) {
+          this.toDashboard();
+        }
         //this.toDashboard();
       } else {
         // TODO 报错
         console.log("============ select group failed!");
       }
+    },
+    getUserRole(group) {
+      let url = "/user/getUserRole";
+      let user = {
+        userId: this.currentUser.userId,
+        groupId: group.groupId
+      };
+      API.post(
+        url,
+        user,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            store.dispatch("setUserRole", result.data);
+            store.dispatch("setCurrentGroup", group);
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     },
     handleCommand(command) {
       if (command == "profile") {
@@ -260,11 +283,11 @@ export default {
       });
     },
     getGroupList() {
-      let userId = store.getters.getUserId;
-      let url = "/group/getGroupList/" + userId;
-      API.get(
+      let user = store.getters.getUser;
+      let url = "/group/getGroupList";
+      API.post(
         url,
-        null,
+        user,
         response => {
           if (response.data.code == 0) {
             let groupList = response.data.data;
@@ -278,7 +301,7 @@ export default {
               groupList.forEach(group => {
                 if (group.groupId == user.groupId) {
                   this.selectGroupId = user.groupId;
-                  store.dispatch("setCurrentGroup", group);
+                  this.getUserRole(group);
                 }
               });
             }
@@ -312,8 +335,7 @@ export default {
   mounted() {
     this.listenHeaderWidth();
     this.getGroupList();
-    this.selectGroupId = store.getters.getUser.groupId;
-    this.userRole = store.getters.getUserRole;
+    this.selectGroupId = this.currentUser.groupId;
   }
 };
 </script>

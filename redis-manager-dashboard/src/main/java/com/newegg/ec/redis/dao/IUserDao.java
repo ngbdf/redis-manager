@@ -18,18 +18,6 @@ public interface IUserDao {
             "user.user_id AS user_id, " +
             "user.group_id AS group_id, " +
             "user.user_name AS user_name, " +
-            "group_user.user_role AS user_role, " +
-            "user.avatar AS avatar, " +
-            "user.email AS email, " +
-            "user.mobile AS mobile, " +
-            "user.update_time AS update_time " +
-            "FROM user, group_user")
-    List<User> selectAllUser();
-
-    @Select("SELECT " +
-            "user.user_id AS user_id, " +
-            "user.group_id AS group_id, " +
-            "user.user_name AS user_name, " +
             "user.password AS password, " +
             "group_user.user_role AS user_role, " +
             "user.avatar AS avatar, " +
@@ -38,6 +26,7 @@ public interface IUserDao {
             "user.update_time AS update_time " +
             "FROM user, group_user " +
             "WHERE group_user.group_id = user.group_id " +
+            "AND group_user.grant_group_id = user.group_id " +
             "AND group_user.user_id = user.user_id " +
             "AND user.user_id = #{userId}")
     User selectUserById(Integer userId);
@@ -54,12 +43,13 @@ public interface IUserDao {
             "FROM user, group_user " +
             "WHERE group_user.group_id = user.group_id " +
             "AND group_user.user_id = user.user_id " +
-            "AND group_user.group_id = #{groupId}")
+            "AND group_user.group_id = #{groupId} " +
+            "AND group_user.grant_group_id = #{groupId}")
     List<User> selectUserByGroupId(Integer groupId);
 
     @Select("SELECT " +
             "user.user_id AS user_id, " +
-            "group_user.group_id AS group_id, " +
+            "group_user.grant_group_id AS group_id, " +
             "user.user_name AS user_name, " +
             "group_user.user_role AS user_role, " +
             "user.avatar AS avatar, " +
@@ -69,8 +59,9 @@ public interface IUserDao {
             "FROM group_user, user " +
             "WHERE group_user.group_id = user.group_id " +
             "AND group_user.user_id = user.user_id " +
-            "AND group_user.group_id = #{groupId}")
-    List<User> selectGrantUserByGroupId(Integer groupId);
+            "AND grant_group_id = #{grantGroupId} " +
+            "AND group_user.group_id != #{grantGroupId}")
+    List<User> selectGrantUserByGroupId(Integer grantGroupId);
 
     @Select("SELECT " +
             "user.user_id AS user_id, " +
@@ -78,17 +69,17 @@ public interface IUserDao {
             "group_user.user_role AS user_role " +
             "FROM user, group_user " +
             "WHERE group_user.user_id = user.user_id " +
-            "AND group_user.group_id = #{groupId} " +
+            "AND group_user.grant_group_id = #{grantGroupId} " +
             "AND group_user.user_id = #{userId}")
-    User selectUserRole(@Param("groupId") Integer groupId, @Param("userId") Integer userId);
+    User selectUserRole(@Param("grantGroupId") Integer grantGroupId, @Param("userId") Integer userId);
 
-    @Select("SELECT * FROM user WHERE user_name = #{userName} AND password = #{password}")
+    @Select("SELECT * FROM `user`WHERE user_name = #{userName} AND password = #{password}")
     User selectUserByNameAndPassword(User user);
 
     @Select("SELECT * FROM user WHERE user_name = #{userName}")
     User selectUserByName(String userName);
 
-    @Select("SELECT COUNT(user_id) FROM group_user WHERE group_id = #{groupId}")
+    @Select("SELECT COUNT(user_id) FROM user WHERE group_id = #{groupId}")
     int selectUserNumber(Integer groupId);
 
     @Insert("INSERT INTO user (group_id, user_name, password, avatar, email, mobile, update_time) " +
