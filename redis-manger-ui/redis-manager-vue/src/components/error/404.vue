@@ -1,12 +1,31 @@
 <template>
   <div class="page-container">
     <p class="code">404</p>
-    <div>找不到门了</div>
     <div>
-      <el-link href="/">返回首页</el-link>
+      <el-link @click="toDashboard()">Back to home page</el-link>
     </div>
   </div>
 </template>
+
+<script>
+import { store } from "@/vuex/store.js";
+export default {
+  methods: {
+    toDashboard() {
+      this.$router.push({
+        name: "dashboard",
+        params: { groupId: this.currentGroup.groupId }
+      });
+    }
+  },
+  computed: {
+    // 监听group变化
+    currentGroup() {
+      return store.getters.getCurrentGroup;
+    }
+  }
+};
+</script>
 
 <style>
 /** <style lang="scss" scoped> */

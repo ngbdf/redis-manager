@@ -43,7 +43,7 @@ public interface INodeInfoDao {
             "`instantaneous_ops_per_sec`, `total_net_input_bytes`, `net_input_bytes`, `total_net_output_bytes`, `net_output_bytes`, " +
             "`sync_full`, `sync_partial_ok`, `sync_partial_err`, " +
             "`keyspace_hits`, `keyspace_misses`, `keyspace_hits_ratio`, " +
-            "`used_cpu_sys`, `used_cpu_user`, `keys`, `expires`, `update_time`) " +
+            "`used_cpu_sys`, `cpu_sys`, `used_cpu_user`, `cpu_user`, `keys`, `expires`, `update_time`) " +
             "VALUES " +
             "<foreach item='nodeInfo' collection='nodeInfoList' index='index' separator=','>" +
             "(#{nodeInfo.node}, #{nodeInfo.role}, #{nodeInfo.dataType}, #{nodeInfo.timeType}, #{nodeInfo.lastTime}, " +
@@ -53,7 +53,7 @@ public interface INodeInfoDao {
             "#{nodeInfo.instantaneousOpsPerSec}, #{nodeInfo.totalNetInputBytes}, #{nodeInfo.netInputBytes}, #{nodeInfo.totalNetOutputBytes}, #{nodeInfo.netOutputBytes}, " +
             "#{nodeInfo.syncFull}, #{nodeInfo.syncPartialOk}, #{nodeInfo.syncPartialErr}, " +
             "#{nodeInfo.keyspaceHits}, #{nodeInfo.keyspaceMisses}, #{nodeInfo.keyspaceHitsRatio}, " +
-            "#{nodeInfo.usedCpuSys}, #{nodeInfo.usedCpuUser}, #{nodeInfo.keys}, #{nodeInfo.expires}, NOW())" +
+            "#{nodeInfo.usedCpuSys}, #{nodeInfo.cpuSys}, #{nodeInfo.usedCpuUser}, #{nodeInfo.cpuUser}, #{nodeInfo.keys}, #{nodeInfo.expires}, NOW())" +
             "</foreach>" +
             "</script>")
     int insertNodeInfo(@Param("clusterId") Integer clusterId, @Param("nodeInfoList") List<NodeInfo> nodeInfoList);
@@ -111,7 +111,9 @@ public interface INodeInfoDao {
             "`keyspace_hits` bigint(20) NOT NULL, " +
             "`keyspace_hits_ratio` double(6, 2) NOT NULL, " +
             "`used_cpu_sys` double(20, 2) NOT NULL, " +
+            "`cpu_sys` double(20, 2) NOT NULL, " +
             "`used_cpu_user` double(20, 2) NOT NULL, " +
+            "`cpu_user` double(20, 2) NOT NULL, " +
             "`keys` integer(8) NOT NULL, " +
             "`expires` integer(8) NOT NULL, " +
             "`update_time` datetime(0) NOT NULL, " +

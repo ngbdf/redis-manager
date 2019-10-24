@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
+@Component
 public class NodeInfoHourCollection extends NodeInfoCollectionAbstract {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeInfoHourCollection.class);

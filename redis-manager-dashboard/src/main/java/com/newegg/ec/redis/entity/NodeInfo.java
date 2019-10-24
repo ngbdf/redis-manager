@@ -175,7 +175,11 @@ public class NodeInfo {
      */
     private double usedCpuSys;
 
+    private double cpuSys;
+
     private double usedCpuUser;
+
+    private double cpuUser;
 
     /** Keyspace */
     /**
@@ -468,12 +472,28 @@ public class NodeInfo {
         this.usedCpuSys = usedCpuSys;
     }
 
+    public double getCpuSys() {
+        return cpuSys;
+    }
+
+    public void setCpuSys(double cpuSys) {
+        this.cpuSys = cpuSys;
+    }
+
     public double getUsedCpuUser() {
         return usedCpuUser;
     }
 
     public void setUsedCpuUser(double usedCpuUser) {
         this.usedCpuUser = usedCpuUser;
+    }
+
+    public double getCpuUser() {
+        return cpuUser;
+    }
+
+    public void setCpuUser(double cpuUser) {
+        this.cpuUser = cpuUser;
     }
 
     public long getKeys() {

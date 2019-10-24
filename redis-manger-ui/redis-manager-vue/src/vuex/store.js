@@ -78,7 +78,9 @@ export const store = new Vuex.Store({
     {
       reducer(val) {
         return {
-          user: val.user
+          user: val.user,
+          currentGroup: val.currentGroup,
+          groupList: val.groupList
         }
       }
     }

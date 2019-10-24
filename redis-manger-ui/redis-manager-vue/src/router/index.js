@@ -46,7 +46,7 @@ const router = new Router({
         },
         {
           name: 'redis-monitor',
-          path: '/redis-monitor/groupId/:groupId/cluster/:clusterId',
+          path: '/redis-monitor/cluster/:clusterId',
           component: RedisMonitor
         },
         {
@@ -69,7 +69,7 @@ const router = new Router({
           component: RuleManage
         }, {
           name: 'alert-manage',
-          path: '/alert-manage/group/:clusterId',
+          path: '/alert-manage/cluster/:clusterId',
           component: AlertManage
         }, {
           name: 'machine-manage',

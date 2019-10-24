@@ -310,7 +310,9 @@
         </el-form-item>
         <p v-for="nodeConfig in nodeConfigList" :key="nodeConfig.redisNode">
           <span style="color: #606266;">{{ nodeConfig.redisNode }}</span>
-          <span><b>{{ nodeConfig.configValue }}</b></span>
+          <span>
+            <b>{{ nodeConfig.configValue }}</b>
+          </span>
         </p>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -459,7 +461,8 @@ import config from "@/components/view/Config";
 import { isEmpty, validateIpAndPort } from "@/utils/validate.js";
 import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
-
+import { store } from "@/vuex/store.js";
+import { getClusterById } from "@/components/cluster/cluster.js";
 export default {
   components: {
     info,
@@ -519,57 +522,7 @@ export default {
     return {
       cluster: {},
       search: "",
-      redisNodeList: [
-        // {
-        //   nodeId: 1,
-        //   status: "ok",
-        //   role: "master",
-        //   address: "192.16.15.2:8600",
-        //   slot: "0-100",
-        //   slotNumber: 100,
-        //   slotStatus: "",
-        //   updateTime: "2019-08-25"
-        // },
-        // {
-        //   nodeId: 2,
-        //   status: "ok",
-        //   role: "master",
-        //   address: "192.16.15.4:8600",
-        //   slot: "101-200",
-        //   slotNumber: 100,
-        //   slotStatus: "",
-        //   updateTime: "2019-08-25"
-        // },
-        // {
-        //   nodeId: 3,
-        //   status: "ok",
-        //   role: "master",
-        //   address: "192.16.15.5:8600",
-        //   slot: "201-300",
-        //   slotNumber: 100,
-        //   slotStatus: "",
-        //   updateTime: "2019-08-25"
-        // },
-        // {
-        //   nodeId: 4,
-        //   status: "ok",
-        //   role: "master",
-        //   address: "192.16.15.6:8600",
-        //   slot: "301-5461",
-        //   slotNumber: 5462,
-        //   slotStatus: "warning",
-        //   updateTime: "2019-08-25",
-        //   children: [
-        //     {
-        //       nodeId: 5,
-        //       status: "ok",
-        //       role: "slave",
-        //       address: "192.16.15.6:8601",
-        //       updateTime: "2019-08-25"
-        //     }
-        //   ]
-        // }
-      ],
+      redisNodeList: [],
       replicateOfVisible: false,
       failOverVisible: false,
       importNodeVisible: false,
@@ -641,24 +594,6 @@ export default {
         this.operationNode.push(redisNode);
       });
     },
-    getClusterById(clusterId) {
-      let url = "/cluster/getCluster/" + clusterId;
-      API.get(
-        url,
-        null,
-        response => {
-          let result = response.data;
-          if (result.code == 0) {
-            this.cluster = result.data;
-          } else {
-            console.log("Get clsuter failed.");
-          }
-        },
-        err => {
-          console.log(err);
-        }
-      );
-    },
     getAllNodeList(clusterId) {
       let url = "/nodeManage/getAllNodeListWithStatus/" + clusterId;
       API.get(
@@ -713,7 +648,11 @@ export default {
     reload() {
       let clusterId = this.cluster.clusterId;
       this.getAllNodeList(clusterId);
-      this.getClusterById(clusterId);
+      getClusterById(clusterId, cluster => {
+        this.cluster = cluster;
+        this.getAllNodeList(clusterId);
+        this.getConfigKeyList();
+      });
       this.updateCluster(this.clsuter);
     },
     updateCluster(cluster) {
@@ -1147,13 +1086,19 @@ export default {
         number += masterNode.children.length;
       });
       return number;
+    },
+    // 监听group变化
+    currentGroup() {
+      return store.getters.getCurrentGroup;
     }
   },
   mounted() {
     let clusterId = this.$route.params.clusterId;
-    this.getClusterById(clusterId);
-    this.getAllNodeList(clusterId);
-    this.getConfigKeyList();
+    getClusterById(clusterId, cluster => {
+      this.cluster = cluster;
+      this.getAllNodeList(clusterId);
+      this.getConfigKeyList();
+    });
   }
 };
 </script>

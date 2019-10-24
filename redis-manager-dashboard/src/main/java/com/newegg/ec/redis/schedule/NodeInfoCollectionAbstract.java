@@ -56,6 +56,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
                 new SynchronousQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("collect-node-info-pool-thread-%d").build(),
                 new ThreadPoolExecutor.AbortPolicy());
+        System.err.println("********************************* Init collection thread pool *********************************");
     }
 
     protected class CollectNodeInfoTask implements Runnable {
@@ -82,7 +83,9 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
                 // clean last time data and save new data to db
                 NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType);
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
-                clusterService.updateCluster(cluster);
+                if(TimeType.MINUTE.equals(timeType)) {
+                    clusterService.updateCluster(cluster);
+                }
             } catch (Exception e) {
                 logger.error("Collect " + timeType + " data for " + cluster.getClusterName() + " failed.", e);
             }
@@ -194,8 +197,8 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         List<BigDecimal> keyspaceMisses = new ArrayList<>(size);
         List<BigDecimal> keyspaceHitsRatio = new ArrayList<>(size);
 
-        List<BigDecimal> usedCpuSys = new ArrayList<>(size);
-        List<BigDecimal> usedCpuUser = new ArrayList<>(size);
+        List<BigDecimal> cpuSys = new ArrayList<>(size);
+        List<BigDecimal> cpuUser = new ArrayList<>(size);
 
         List<BigDecimal> keys = new ArrayList<>(size);
         List<BigDecimal> expires = new ArrayList<>(size);
@@ -233,8 +236,8 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
             keyspaceMisses.add(new BigDecimal(nodeInfo.getKeyspaceMisses()));
             keyspaceHitsRatio.add(new BigDecimal(nodeInfo.getKeyspaceHitsRatio()));
 
-            usedCpuSys.add(new BigDecimal(nodeInfo.getUsedCpuSys()));
-            usedCpuUser.add(new BigDecimal(nodeInfo.getUsedCpuUser()));
+            cpuSys.add(new BigDecimal(nodeInfo.getCpuSys()));
+            cpuUser.add(new BigDecimal(nodeInfo.getCpuUser()));
 
             keys.add(new BigDecimal(nodeInfo.getKeys()));
             expires.add(new BigDecimal(nodeInfo.getExpires()));
@@ -273,8 +276,8 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         dataMap.put(KEYSPACE_MISSES, keyspaceMisses);
         dataMap.put(KEYSPACE_HITS_RATIO, keyspaceHitsRatio);
 
-        dataMap.put(USED_CPU_SYS, usedCpuSys);
-        dataMap.put(USED_CPU_USER, usedCpuUser);
+        dataMap.put(CPU_SYS, cpuSys);
+        dataMap.put(CPU_USER, cpuUser);
 
         dataMap.put(KEYS, keys);
         dataMap.put(EXPIRES, expires);

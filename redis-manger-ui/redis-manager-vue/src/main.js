@@ -18,6 +18,7 @@ Vue.config.productionTip = false
 Vue.prototype.$axios = axios
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 axios.defaults.baseURL = apiConfig.baseUrl
+axios.defaults.TIMEOUT = 5 * 60 * 1000
 // axios.defaults.withCredentials = true
 // axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*'
 

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-loading="clusterListLoading">
     <el-row :gutter="20" class="card-panel-group">
       <el-col :xl="6" :lg="6" :md="12" :sm="12">
         <div class="card-panel">
@@ -227,7 +227,8 @@ export default {
       queryVisible: false,
       editClusterId: "",
       editClusterVisible: false,
-      deleteClusterVisible: false
+      deleteClusterVisible: false,
+      clusterListLoading: false
     };
   },
 
@@ -283,6 +284,7 @@ export default {
     },
     getClusterList(groupId) {
       let url = "/cluster/getClusterList/" + groupId;
+      this.clusterListLoading = true;
       if (!isEmpty(groupId)) {
         API.get(
           url,
@@ -306,8 +308,10 @@ export default {
             } else {
               console.log("No data");
             }
+            this.clusterListLoading = false;
           },
           err => {
+            this.clusterListLoading = false;
             console.log(err);
           }
         );

@@ -198,7 +198,12 @@
       <query :clusterId="cluster.clusterId"></query>
     </el-dialog>
 
-    <el-dialog title="Slow Log" :visible.sync="slowLogVisible" :close-on-click-modal="false" width="80%">
+    <el-dialog
+      title="Slow Log"
+      :visible.sync="slowLogVisible"
+      :close-on-click-modal="false"
+      width="80%"
+    >
       <el-select
         v-model="slowLogParam.node"
         filterable
@@ -239,6 +244,8 @@ import query from "@/components/tool/Query";
 import API from "@/api/api.js";
 import { formatTime, formatTimeForChart } from "@/utils/time.js";
 import { isEmpty } from "@/utils/validate.js";
+import { store } from "@/vuex/store.js";
+import { getClusterById } from "@/components/cluster/cluster.js";
 export default {
   components: {
     query
@@ -415,24 +422,6 @@ export default {
       nodeInfoParam.endTime = endTime;
       this.nodeInfoParam = nodeInfoParam;
     },
-    getClusterById(clusterId) {
-      let url = "/cluster/getCluster/" + clusterId;
-      API.get(
-        url,
-        null,
-        response => {
-          let result = response.data;
-          if (result.code == 0) {
-            this.cluster = result.data;
-          } else {
-            console.log("Get cluster failed.");
-          }
-        },
-        err => {
-          console.log(err);
-        }
-      );
-    },
     getAllNodeList(clusterId) {
       let url = "/nodeManage/getAllNodeList/" + clusterId;
       API.get(
@@ -441,14 +430,16 @@ export default {
         response => {
           let result = response.data;
           if (result.code == 0) {
+            let nodeList = [{ label: "ALL", value: "" }];
             result.data.forEach(node => {
               var hostAndPort = node.host + ":" + node.port;
               var role = node.nodeRole.toLowerCase();
-              this.nodeList.push({
+              nodeList.push({
                 value: hostAndPort,
                 label: hostAndPort + " " + role
               });
             });
+            this.nodeList = nodeList;
           } else {
             console.log(result.message);
           }
@@ -459,7 +450,6 @@ export default {
       );
     },
     getNodeInfoList(nodeInfoParam) {
-
       let url = "/monitor/getNodeInfoList";
       API.post(
         url,
@@ -567,8 +557,8 @@ export default {
       let keyspaceHitsRatio = [];
       let keys = [];
       let expires = [];
-      let usedCpuSys = [];
-      let usedCpuUser = [];
+      let cpuSys = [];
+      let cpuUser = [];
       this.nodeInfoList.forEach(nodeInfo => {
         // memory
         usedMemory.push(nodeInfo.usedMemory);
@@ -596,8 +586,8 @@ export default {
         keys.push(nodeInfo.keys);
         expires.push(nodeInfo.expires);
         // cpu
-        usedCpuSys.push(nodeInfo.usedCpuSys);
-        usedCpuUser.push(nodeInfo.usedCpuUser);
+        cpuSys.push(nodeInfo.cpuSys);
+        cpuUser.push(nodeInfo.cpuUser);
         this.xAxis.push(nodeInfo.updateTime);
       });
       let memoryData = [];
@@ -644,8 +634,8 @@ export default {
       });
       keysExpiresData.push({ name: "keys", data: keys });
       keysExpiresData.push({ name: "expires", data: expires });
-      cpuData.push({ name: "used_cpu_sys", data: usedCpuSys });
-      cpuData.push({ name: "used_cpu_user", data: usedCpuUser });
+      cpuData.push({ name: "cpu_sys", data: cpuSys });
+      cpuData.push({ name: "cpu_user", data: cpuUser });
 
       let echartsData = [];
       echartsData.push({
@@ -740,7 +730,16 @@ export default {
           nodeInfoParam.startTime = new Date() - range;
           nodeInfoParam.endTime = new Date();
           this.nodeInfoParam = nodeInfoParam;
-          this.getClusterById(this.nodeInfoParam.clusterId);
+          let group = store.getters.getCurrentGroup;
+          getClusterById(this.nodeInfoParam.clusterId, cluster => {
+            this.cluster = cluster;
+            let clusterId = cluster.clusterId;
+            this.getAllNodeList(clusterId);
+            this.nodeInfoParam.clusterId = clusterId;
+            this.slowLogParam.clusterId = clusterId;
+            this.pickerDateTime();
+            this.getNodeInfoList(this.nodeInfoParam);
+          });
         }, 60000);
       }
     },
@@ -754,8 +753,8 @@ export default {
           if (result.code == 0) {
             let slowLogList = result.data;
             slowLogList.forEach(slowLog => {
-             slowLog.dateTime = formatTime(slowLog.dateTime)
-            })
+              slowLog.dateTime = formatTime(slowLog.dateTime);
+            });
             this.slowLogList = slowLogList;
           } else {
             console.log(result.message);
@@ -799,12 +798,14 @@ export default {
   },
   mounted() {
     let clusterId = this.$route.params.clusterId;
-    this.getClusterById(clusterId);
-    this.getAllNodeList(clusterId);
-    this.nodeInfoParam.clusterId = clusterId;
-    this.slowLogParam.clusterId = clusterId;
-    this.pickerDateTime();
-    this.getNodeInfoList(this.nodeInfoParam);
+    getClusterById(clusterId, cluster => {
+      this.cluster = cluster;
+      this.getAllNodeList(this.cluster.clusterId);
+      this.nodeInfoParam.clusterId = clusterId;
+      this.slowLogParam.clusterId = clusterId;
+      this.pickerDateTime();
+      this.getNodeInfoList(this.nodeInfoParam);
+    });
     this.timedRefresh();
   },
   destroyed() {

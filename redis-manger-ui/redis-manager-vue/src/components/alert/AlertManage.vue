@@ -345,18 +345,12 @@ import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import API from "@/api/api.js";
 import { formatTime } from "@/utils/time.js";
+import { getClusterById } from "@/components/cluster/cluster.js";
 export default {
   data() {
     return {
       cluster: {},
-      alertRecordList: [
-        {
-          redisNode: "192.168.0.5:8000",
-          alertRuleL: "test>8",
-          actualData: "test=9",
-          checkCycle: "5"
-        }
-      ],
+      alertRecordList: [],
       alertRuleList: [
         {
           alertKey: "test",
@@ -412,24 +406,6 @@ export default {
         });
       }
       this.cluster.channelIds = newChannelIds;
-    },
-    getClusterById(clusterId) {
-      let url = "/cluster/getCluster/" + clusterId;
-      API.get(
-        url,
-        null,
-        response => {
-          let result = response.data;
-          if (result.code == 0) {
-            this.cluster = result.data;
-          } else {
-            console.log("Get clsuter failed.");
-          }
-        },
-        err => {
-          console.log(err);
-        }
-      );
     },
     getAlertRecordList(clusterId) {
       let url = "/alert/record/getAlertRecord/cluster/" + clusterId;
@@ -698,12 +674,20 @@ export default {
       );
     }
   },
+  computed: {
+    // 监听group变化
+    currentGroup() {
+      return store.getters.getCurrentGroup;
+    }
+  },
   mounted() {
     let clusterId = this.$route.params.clusterId;
-    this.getClusterById(clusterId);
-    this.getAlertRecordList(clusterId);
-    this.getAlertRuleList(clusterId);
-    this.getAlertChannelList(clusterId);
+    getClusterById(clusterId, cluster => {
+      this.cluster = cluster;
+      this.getAlertRecordList(clusterId);
+      this.getAlertRuleList(clusterId);
+      this.getAlertChannelList(clusterId);
+    });
   }
 };
 </script>

@@ -70,9 +70,7 @@ public class NodeManageController {
     @RequestMapping(value = "/getAllNodeListWithStatus/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAllNodeListWithStatus(@PathVariable("clusterId") Integer clusterId) {
-        long start = System.currentTimeMillis();
         List<RedisNode> redisNodeSorted = redisNodeService.getRedisNodeListByClusterId(clusterId);
-        System.err.println("all: " + (System.currentTimeMillis() - start));
         return Result.successResult(redisNodeSorted);
     }
 

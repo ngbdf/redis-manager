@@ -220,7 +220,11 @@ export default {
           }
         });
         let currentPath = this.$route.path;
-        if(currentPath === "/" || currentPath.indexOf("redis-monitor") > 0 || currentPath.indexOf("group-manage") > 0) {
+        if (
+          currentPath === "/" ||
+          currentPath.indexOf("redis-monitor") > 0 ||
+          currentPath.indexOf("group-manage") > 0
+        ) {
           this.toDashboard();
         }
         //this.toDashboard();
@@ -297,10 +301,22 @@ export default {
             store.dispatch("setGroupList", groupList);
             let currentGroup = store.getters.getCurrentGroup;
             let user = store.getters.getUser;
-            if (isEmpty(currentGroup) || isEmpty(currentGroup.groupId)) {
+            let isContainCurrentGroup = false;
+            groupList.forEach(group => {
+              if (currentGroup.groupId == group.groupId) {
+                isContainCurrentGroup = true;
+              }
+            });
+            if (
+              isEmpty(currentGroup) ||
+              isEmpty(currentGroup.groupId) ||
+              user.groupId != currentGroup.groupId ||
+              !isContainCurrentGroup
+            ) {
               groupList.forEach(group => {
                 if (group.groupId == user.groupId) {
                   this.selectGroupId = user.groupId;
+                  store.dispatch("setCurrentGroup", group);
                   this.getUserRole(group);
                 }
               });
@@ -328,6 +344,9 @@ export default {
     currentUser() {
       return store.getters.getUser;
     },
+    currentGroup() {
+      return store.getters.getCurrentGroup;
+    },
     groupList() {
       return store.getters.getGroupList;
     }
@@ -335,7 +354,11 @@ export default {
   mounted() {
     this.listenHeaderWidth();
     this.getGroupList();
-    this.selectGroupId = this.currentUser.groupId;
+    let groupId = this.currentGroup.groupId;
+    if (isEmpty(groupId)) {
+      groupId = this.currentUser.groupId;
+    }
+    this.selectGroupId = groupId;
   }
 };
 </script>

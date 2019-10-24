@@ -99,7 +99,9 @@ public class RedisNodeInfoUtil {
      * CPU
      */
     public static final String USED_CPU_SYS = "used_cpu_sys";
+    public static final String CPU_SYS = "cpu_sys";
     public static final String USED_CPU_USER = "used_cpu_user";
+    public static final String CPU_USER = "cpu_user";
 
     public static final String CLUSTER_ENABLED = "cluster_enabled";
     public static final String DB_PREFIX = "db";
@@ -142,19 +144,24 @@ public class RedisNodeInfoUtil {
                         expires += Long.parseLong(subContentVal);
                     }
                 }
+
             } else if (isByteToMBKeyField(key)) {
+                // 转换单位
                 long newValue = byteToMB(value);
                 infoJSONObject.put(nodeInfoField, newValue);
             } else if (isSubtractionPercentSignField(key)) {
+                // 去掉 %
                 double newValue = truncatedPercentSign(value);
                 infoJSONObject.put(nodeInfoField, newValue);
             } else {
+                // 正常写入
                 infoJSONObject.put(nodeInfoField, value);
             }
         }
         NodeInfo nodeInfo = infoJSONObject.toJavaObject(NodeInfo.class);
         nodeInfo.setKeys(keys);
         nodeInfo.setExpires(expires);
+        // 计算相减
         calculateCumulativeData(nodeInfo, lastTimeNodeInfo);
         return nodeInfo;
     }
@@ -224,16 +231,21 @@ public class RedisNodeInfoUtil {
      * @return
      */
     public static final NodeInfo calculateCumulativeData(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
-        if (lastTimeNodeInfo == null) {
-            nodeInfo.setUsedCpuSys(0);
-            nodeInfo.setTotalCommandsProcessed(0);
-        } else {
-            // TODO: 不止这些
+        if (lastTimeNodeInfo != null) {
             double keyspaceHitRatio = calculateKeyspaceHitRatio(lastTimeNodeInfo, nodeInfo);
             nodeInfo.setKeyspaceHitsRatio(keyspaceHitRatio);
             nodeInfo.setCommandsProcessed(nodeInfo.getTotalCommandsProcessed() - lastTimeNodeInfo.getTotalCommandsProcessed());
-            nodeInfo.setUsedCpuSys(nodeInfo.getUsedCpuSys() - lastTimeNodeInfo.getUsedCpuSys());
-            nodeInfo.setUsedCpuUser(nodeInfo.getUsedCpuUser() - lastTimeNodeInfo.getUsedCpuUser());
+            nodeInfo.setConnectionsReceived(nodeInfo.getTotalConnectionsReceived() - lastTimeNodeInfo.getTotalConnectionsReceived());
+            nodeInfo.setNetInputBytes(nodeInfo.getTotalNetInputBytes() - lastTimeNodeInfo.getTotalNetInputBytes());
+            nodeInfo.setNetOutputBytes(nodeInfo.getTotalNetOutputBytes() - lastTimeNodeInfo.getTotalNetOutputBytes());
+            nodeInfo.setCpuSys(nodeInfo.getUsedCpuSys() - lastTimeNodeInfo.getUsedCpuSys());
+            nodeInfo.setCpuUser(nodeInfo.getUsedCpuUser() - lastTimeNodeInfo.getUsedCpuUser());
+        } else {
+            /*nodeInfo.setUsedCpuSys(0);
+            nodeInfo.setTotalConnectionsReceived(0);
+            nodeInfo.setTotalCommandsProcessed(0);
+            nodeInfo.setTotalNetInputBytes(0);
+            nodeInfo.setTotalNetOutputBytes(0);*/
         }
         return nodeInfo;
     }

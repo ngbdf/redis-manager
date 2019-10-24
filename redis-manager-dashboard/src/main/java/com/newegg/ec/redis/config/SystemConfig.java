@@ -3,7 +3,10 @@ package com.newegg.ec.redis.config;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.exception.ConfigurationException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.request.async.TimeoutCallableProcessingInterceptor;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -11,6 +14,7 @@ import java.io.File;
 
 import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
 import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
+import static com.newegg.ec.redis.util.TimeUtil.FIVE_MINUTES;
 
 /**
  * @author Jay.H.Zou
@@ -69,6 +73,17 @@ public class SystemConfig implements WebMvcConfigurer {
         registry.addResourceHandler(CONFIG_ORIGINAL_PATH + "**").addResourceLocations("file:" + configPath);
         registry.addResourceHandler(MACHINE_PACKAGE_ORIGINAL_PATH + "**").addResourceLocations("file:" + machinePackagePath);
     }
+
+    @Override
+    public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
+        configurer.setDefaultTimeout(FIVE_MINUTES);
+        configurer.registerCallableInterceptors(timeoutInterceptor());
+    }
+    @Bean
+    public TimeoutCallableProcessingInterceptor timeoutInterceptor() {
+        return new TimeoutCallableProcessingInterceptor();
+    }
+
 
     public int getServerPort() {
         return serverPort;
