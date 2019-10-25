@@ -45,19 +45,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
     @Autowired
     private INodeInfoService nodeInfoService;
 
-    private int coreSize;
-
-    static ExecutorService threadPool;
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        coreSize = Runtime.getRuntime().availableProcessors() ;
-        threadPool = new ThreadPoolExecutor(coreSize, coreSize * 8, 60L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
-                new ThreadFactoryBuilder().setNameFormat("collect-node-info-pool-thread-%d").build(),
-                new ThreadPoolExecutor.AbortPolicy());
-        System.err.println("********************************* Init collection thread pool *********************************");
-    }
+    protected int coreSize;
 
     protected class CollectNodeInfoTask implements Runnable {
 

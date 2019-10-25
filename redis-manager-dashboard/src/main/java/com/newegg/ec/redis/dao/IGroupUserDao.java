@@ -3,12 +3,17 @@ package com.newegg.ec.redis.dao;
 import com.newegg.ec.redis.entity.User;
 import org.apache.ibatis.annotations.*;
 
+import java.util.List;
+
 /**
  * @author Jay.H.Zou
  * @date 2019/9/18
  */
 @Mapper
 public interface IGroupUserDao {
+
+    @Select("SELECT * FROM group_user WHERE user_role = 0")
+    List<User> selectAllSuperAdmin();
 
     @Select("SELECT * FROM group_user WHERE grant_group_id = #{grantGroupId} AND user_id = #{userId}")
     User isGranted(@Param("grantGroupId") Integer grantGroupId, @Param("userId") Integer userId);

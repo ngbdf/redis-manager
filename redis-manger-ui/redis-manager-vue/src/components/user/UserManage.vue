@@ -213,7 +213,6 @@ export default {
               null,
               response => {
                 let result = response.data;
-                console.log(result);
                 if (result.code == 0) {
                   callback();
                 } else {

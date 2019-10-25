@@ -53,14 +53,6 @@ export default {
       histrory: "",
       currentCommnad: "",
       clusterList: [
-        {
-          value: "1",
-          label: "Shanghai"
-        },
-        {
-          value: "2",
-          label: "Beijing"
-        }
       ],
       cluster: "",
       dbList: [
@@ -69,7 +61,7 @@ export default {
           label: "db0"
         }
       ],
-      db:""
+      db: ""
     };
   },
   methods: {
@@ -85,6 +77,32 @@ export default {
       console.log(command);
       this.histrory += command + "<br>" + "I'm result...<br>";
       this.currentCommnad = "";
+    },
+    getClusterList(groupId) {
+      let url = "/cluster/getClusterList/" + groupId;
+      this.clusterListLoading = true;
+      if (!isEmpty(groupId)) {
+        API.get(
+          url,
+          null,
+          response => {
+            let result = response.data;
+            if (result.code == 0) {
+              let clusterList = result.data;
+            } else {
+              message.error("Get cluster list failed");
+            }
+          },
+          err => {
+            message.error(err);
+          }
+        );
+      }
+    },
+  },
+  computed: {
+    currentGroup() {
+      return store.getters.getCurrentGroup;
     }
   }
 };

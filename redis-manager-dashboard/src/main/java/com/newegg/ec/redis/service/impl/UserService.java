@@ -1,7 +1,9 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.newegg.ec.redis.dao.IGroupDao;
 import com.newegg.ec.redis.dao.IGroupUserDao;
 import com.newegg.ec.redis.dao.IUserDao;
+import com.newegg.ec.redis.entity.Group;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IUserService;
 import org.slf4j.Logger;
@@ -26,6 +28,9 @@ public class UserService implements IUserService {
 
     @Autowired
     private IGroupUserDao groupUserDao;
+
+    @Autowired
+    private IGroupDao groupDao;
 
     @Override
     public List<User> getUserByGroupId(Integer groupId) {
@@ -90,7 +95,18 @@ public class UserService implements IUserService {
     @Override
     public boolean addUser(User user) {
         userDao.insertUser(user);
-        groupUserDao.insertGroupUser(user, user.getGroupId());
+        if (User.UserRole.SUPER_ADMIN == user.getUserRole()) {
+            List<Group> groupList = groupDao.selectAllGroup();
+            for (Group group : groupList) {
+                User groupUser = new User();
+                groupUser.setUserId(user.getUserId());
+                groupUser.setGroupId(user.getGroupId());
+                groupUser.setUserRole(User.UserRole.SUPER_ADMIN);
+                groupUserDao.insertGroupUser(groupUser, group.getGroupId());
+            }
+        } else {
+            groupUserDao.insertGroupUser(user, user.getGroupId());
+        }
         return true;
     }
 

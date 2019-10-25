@@ -78,15 +78,18 @@ public class GroupService implements IGroupService {
     @Transactional
     @Override
     public boolean addGroup(Group group) {
-        Integer userId = group.getUserId();
-        User currentUser = userDao.selectUserById(userId);
         groupDao.insertGroup(group);
-        User user = new User();
-        Integer grantGroupId = group.getGroupId();
-        user.setUserId(currentUser.getUserId());
-        user.setUserRole(User.UserRole.SUPER_ADMIN);
-        user.setGroupId(currentUser.getGroupId());
-        groupUserDao.insertGroupUser(user, grantGroupId);
+        // 获取所有拥有超级管理员的账户
+        List<User> superAdminList = groupUserDao.selectAllSuperAdmin();
+        for (User superAdmin : superAdminList) {
+            User user = new User();
+            Integer grantGroupId = group.getGroupId();
+            user.setUserId(superAdmin.getUserId());
+            user.setUserRole(User.UserRole.SUPER_ADMIN);
+            user.setGroupId(superAdmin.getGroupId());
+            groupUserDao.insertGroupUser(user, grantGroupId);
+        }
+
         return true;
     }
 
