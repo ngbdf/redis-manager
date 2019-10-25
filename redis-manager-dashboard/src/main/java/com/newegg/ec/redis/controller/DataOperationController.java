@@ -2,10 +2,7 @@ package com.newegg.ec.redis.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.newegg.ec.redis.entity.AutoCommandParam;
-import com.newegg.ec.redis.entity.AutoCommandResult;
-import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.Result;
+import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +69,14 @@ public class DataOperationController {
         }
         Set<String> scanResult = redisService.scan(cluster, autoCommandParam);
         return scanResult != null ? Result.successResult(scanResult) : Result.failResult().setMessage("Scan redis failed.");
+    }
+
+    @RequestMapping(value = "/sendCommand", method = RequestMethod.POST)
+    @ResponseBody
+    public Result sendCommand(@RequestBody DataCommandsParam dataCommandsParam) {
+        Cluster cluster = clusterService.getClusterById(dataCommandsParam.getClusterId());
+        Object console = redisService.console(cluster, dataCommandsParam);
+        return console != null ? Result.successResult(console) : Result.failResult();
     }
 
 }

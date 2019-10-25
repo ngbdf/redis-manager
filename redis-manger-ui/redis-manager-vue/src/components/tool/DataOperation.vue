@@ -2,28 +2,33 @@
   <div id="data-operation" class="body-wrapper">
     <el-row>
       <el-col :xl="24" :lg="24" :md="24" :sm="24" class="select-wrapper">
-        <el-select size="small" v-model="cluster" placeholder="Select cluster">
+        <el-select
+          size="small"
+          v-model="cluster"
+          placeholder="Select cluster"
+          @change="getDBList(cluster.clusterId)"
+        >
           <el-option
-            v-for="item in clusterList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
+            v-for="cluster in clusterList"
+            :key="cluster.clusterId"
+            :label="cluster.clusterName"
+            :value="cluster.clusterId"
           ></el-option>
         </el-select>
-        <el-select size="small" v-model="db" placeholder="Select db">
-          <el-option
-            v-for="item in dbList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          ></el-option>
+        <el-select
+          size="small"
+          v-model="dataCommandsParam.database"
+          placeholder="Select db"
+          :disabled="dbListDisabled"
+        >
+          <el-option v-for="db in dbList" :key="db.database" :label="db.label" :value="db.database"></el-option>
         </el-select>
       </el-col>
       <el-col :xl="24" :lg="24" :md="24" :sm="24">
         <div class="console-wrapper">
-          <div class="console-title">Redis Data Operation</div>
+          <div class="console-title">Redis Command</div>
           <div class="console">
-            <div class="connected">Redis connected</div>
+            <div class="connected" v-if="connected">Redis connected...</div>
             <div class="command-history-wrapper">
               <div class="history" v-html="histrory"></div>
               <div class="command">
@@ -34,8 +39,9 @@
                   size="small"
                   type="text"
                   class="command-input"
-                  v-model="currentCommnad"
-                  @keyup.enter.native="keyUpEnter(currentCommnad)"
+                  v-model="dataCommandsParam.command"
+                  @keyup.enter.native="keyUpEnter(dataCommandsParam)"
+                  :disabled="consoleDisabled"
                 />
               </div>
             </div>
@@ -47,36 +53,33 @@
 </template>
 
 <script>
+import message from "@/utils/message.js";
 export default {
   data() {
     return {
       histrory: "",
-      currentCommnad: "",
-      clusterList: [
-      ],
+      clusterList: [],
       cluster: "",
-      dbList: [
-        {
-          value: "0",
-          label: "db0"
-        }
-      ],
-      db: ""
+      dbList: [],
+      connected: false,
+      dataCommandsParam: {},
+      dbListDisabled: true,
+      consoleDisabled: true
     };
   },
   methods: {
-    keyUpEnter(command) {
+    keyUpEnter(dataCommandsParam) {
+      let command = dataCommandsParam.command;
       if (command == "") {
         return;
       }
       if (command == "clear") {
         this.histrory = "";
-        this.currentCommnad = "";
+        this.dataCommandsParam.command = "";
         return;
       }
-      console.log(command);
       this.histrory += command + "<br>" + "I'm result...<br>";
-      this.currentCommnad = "";
+      this.sendCommand();
     },
     getClusterList(groupId) {
       let url = "/cluster/getClusterList/" + groupId;
@@ -88,7 +91,7 @@ export default {
           response => {
             let result = response.data;
             if (result.code == 0) {
-              let clusterList = result.data;
+              this, (clusterList = result.data);
             } else {
               message.error("Get cluster list failed");
             }
@@ -99,6 +102,36 @@ export default {
         );
       }
     },
+    getDBList(clusterId) {
+      let url = "/data/getDBList/" + clusterId;
+      this.dbList = [];
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let dbList = result.data;
+            dbList.forEach(db => {
+              let database = db.database;
+              this.dbList.push({
+                label: database,
+                keys: db.keys,
+                database: database.slice(2)
+              });
+            });
+          } else {
+            message.error(result.message);
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
+    },
+    sendCommand() {
+      this.dataCommandsParam.clusterId = this.cluster.clusterId;
+    }
   },
   computed: {
     currentGroup() {

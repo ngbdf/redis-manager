@@ -721,11 +721,14 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         String nodes = cluster.getNodes();
         IDatabaseCommand client = null;
         String redisMode = cluster.getRedisMode();
-        RedisURI redisURI = new RedisURI(RedisUtil.nodesToHostAndPortSet(nodes), cluster.getRedisPassword());
+        String redisPassword = cluster.getRedisPassword();
+        RedisURI redisURI = new RedisURI(RedisUtil.nodesToHostAndPortSet(nodes), redisPassword);
         if (STANDALONE.equalsIgnoreCase(redisMode)) {
             client = RedisClientFactory.buildRedisClient(redisURI);
         } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
-            client = RedisClientFactory.buildRedisClusterClient(redisURI);
+            List<RedisNode> masterNodeList = getRedisMasterNodeList(cluster);
+            RedisNode redisNode = masterNodeList.get(0);
+            client = RedisClientFactory.buildRedisClusterClient(redisNode, redisPassword);
         }
         return client;
     }
