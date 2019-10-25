@@ -4,7 +4,7 @@
       <el-button
         size="mini"
         type="success"
-        @click="editMachineVisible = true; isUpdate = false"
+        @click="editMachineVisible = true; isUpdate = false, machines={ hostList: [{ value: '' }]}"
       >Import Machine</el-button>
     </div>
 
@@ -53,7 +53,7 @@
           </template>
         </el-table-column>-->
         <el-table-column property="machineInfo" label="Info"></el-table-column>
-        <el-table-column property="updateTime" label="Time" sortable></el-table-column>
+        <el-table-column property="time" label="Time" sortable></el-table-column>
         <el-table-column label="Operation" width="200px;">
           <!-- <template slot="header" slot-scope="scope">
             <el-input v-model="search" size="mini" placeholder="Search" />
@@ -69,7 +69,13 @@
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog title="Edit machines" :visible.sync="editMachineVisible" width="50%">
+    <el-dialog
+      title="Edit machines"
+      :visible.sync="editMachineVisible"
+      width="50%"
+      :close-on-click-modal="false"
+      v-loading="saveMachineLoading"
+    >
       <el-form :model="machines" ref="machines" :rules="rules" size="small" label-width="135px">
         <el-form-item label="Machine Group" prop="machineGroupName">
           <el-select
@@ -161,6 +167,7 @@ import { store } from "@/vuex/store.js";
 import API from "@/api/api.js";
 import { formatTime } from "@/utils/time.js";
 import { isEmpty, validateIp } from "@/utils/validate.js";
+import message from "@/utils/message.js";
 export default {
   data() {
     var validateMahineGroupName = (rule, value, callback) => {
@@ -275,7 +282,8 @@ export default {
         ]
       },
       search: "",
-      selectedMachineList: []
+      selectedMachineList: [],
+      saveMachineLoading: false
     };
   },
   methods: {
@@ -292,15 +300,15 @@ export default {
           if (result.code == 0) {
             let machineList = result.data;
             machineList.forEach(machine => {
-              machine.updateTime = formatTime(machine.updateTime);
+              machine.time = formatTime(machine.updateTime);
             });
             this.machineList = machineList;
           } else {
-            console.log(result.message);
+           message.error("Get machine list failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -314,11 +322,11 @@ export default {
           if (result.code == 0) {
             this.machineGroupNameList = result.data;
           } else {
-            console.log(response.message);
+            message.error("Get machine group name list failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -350,15 +358,14 @@ export default {
     saveMachines(machines) {
       this.$refs[machines].validate(valid => {
         if (valid) {
-          console.log(this.machines);
           let machineList = this.buildMachineList(this.machines);
-          console.log(machineList);
           let url = "";
           if (this.isUpdate) {
             url = "/machine/updateMachine";
           } else {
             url = "/machine/addMachineList";
           }
+          this.saveMachineLoading = true;
           API.post(
             url,
             machineList,
@@ -369,12 +376,14 @@ export default {
                 this.getMachineGroupNameList(this.currentGroupId);
                 this.getMachineList(this.currentGroupId);
               } else {
-                console.log(result.message);
+                message.error("Save machines failed");
               }
               this.$refs[machines].resetFields();
+              this.saveMachineLoading = false;
             },
             err => {
-              console.log(err);
+              this.saveMachineLoading = true;
+              message.error(err);
             }
           );
         }
@@ -382,7 +391,6 @@ export default {
     },
     editMachine(index, row) {
       this.machines = row;
-      console.log(this.machines);
       this.editMachineVisible = true;
       this.isUpdate = true;
     },
@@ -394,7 +402,7 @@ export default {
     handleDeleteBatch() {
       this.batchDelete = true;
       if (this.selectedMachineList.length == 0) {
-        console.log("Please select machine");
+        message.warning("Please select machine");
       } else {
         this.deleteBatchVisible = true;
       }
@@ -428,11 +436,11 @@ export default {
             };
             this.selectedMachineList = [];
           } else {
-            console.log(result.message);
+            message.error("Delete machine failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -456,14 +464,11 @@ export default {
     },
     handleSelectionChange(val) {
       this.selectedMachineList = val;
-      console.log(this.selectedMachineList);
     }
   },
   computed: {
     currentGroupId() {
-      let cuurrentGroupId = store.getters.getCurrentGroup.groupId;
-      console.log(cuurrentGroupId)
-      return cuurrentGroupId;
+      return store.getters.getCurrentGroup.groupId;
     }
   },
   watch: {

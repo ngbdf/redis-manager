@@ -20,6 +20,7 @@
       :visible.sync="createGroupVisible"
       :close-on-click-modal="false"
       @close="closeHandler()"
+      v-loading="saveGroupLoading"
     >
       <el-form :model="group" ref="group" label-width="120px" size="small">
         <el-form-item label="Group Name" prop="groupName" :rules="rules.groupName">
@@ -41,6 +42,7 @@ import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import { getGroupList } from "@/components/group/group.js";
 import API from "@/api/api.js";
+import message from "@/utils/message.js";
 export default {
   data() {
     var validateGroupName = (rule, value, callback) => {
@@ -76,13 +78,15 @@ export default {
         groupName: [
           { required: true, validator: validateGroupName, trigger: "blur" }
         ]
-      }
+      },
+      saveGroupLoading: false
     };
   },
   methods: {
     saveGroup(group) {
       this.$refs[group].validate(valid => {
         if (valid) {
+          this.saveGroupLoading = true;
           let user = store.getters.getUser;
           this.group.userId = user.userId;
           this.group.updateTime = new Date(this.group.updateTime);
@@ -90,7 +94,7 @@ export default {
           if (isEmpty(this.group.groupId)) {
             // for grant
             this.group.groupId = user.groupId;
-            url = "/group/addGroup" ;
+            url = "/group/addGroup";
           } else {
             url = "/group/updateGroup";
           }
@@ -101,18 +105,15 @@ export default {
               if (response.data.code == 0) {
                 this.createGroupVisible = false;
                 this.group = {};
-                let user = store.getters.getUser;
-                if(user.userRole == 0) {
-                  user.userId = null;
-                }
                 getGroupList(user);
               } else {
-                console.log("Add group failed.");
+                message.error("Save group failed");
               }
+              this.saveGroupLoading = false;
             },
             err => {
-              console.log(err);
-              console.log("Network error.");
+              this.saveGroupLoading = false;
+              message.error(err);
             }
           );
         }
@@ -124,19 +125,15 @@ export default {
     editGroup(index, row) {
       this.group = row;
       this.createGroupVisible = true;
-      console.log(index, row);
     },
-    deleteGroup(index, row) {
-      console.log(index, row);
-    }
+    deleteGroup(index, row) {}
   },
   computed: {
     groupList() {
       return store.getters.getGroupList;
     }
   },
-  mounted() {
-  }
+  mounted() {}
 };
 </script>
 

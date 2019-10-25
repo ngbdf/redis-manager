@@ -14,6 +14,7 @@
 <script>
 import API from "@/api/api.js";
 import { isEmpty } from "@/utils/validate.js";
+import message from "@/utils/message.js";
 export default {
   props: {
     redisNode: {}
@@ -35,11 +36,11 @@ export default {
           if (result.code == 0) {
             this.infoList = result.data;
           } else {
-            console.log("get node info failed.");
+            message.error("Get node info failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     }

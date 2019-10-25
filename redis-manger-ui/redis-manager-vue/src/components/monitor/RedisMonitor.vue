@@ -1,6 +1,6 @@
 <template>
   <div id="monitor">
-    <div class="body-wrapper">
+    <div class="body-wrapper" v-loading="clusterLoading">
       <el-row>
         <el-col :span="24">
           <div class="monitor-title">
@@ -72,7 +72,7 @@
         </el-row>
       </div>
     </div>
-    <div style="margin-top: 20px;">
+    <div style="margin-top: 20px;" v-loading="monitorDataLoading">
       <div class="monitor-condition-wrapper">
         <div class="condition-wrapper">
           <el-select
@@ -204,29 +204,31 @@
       :close-on-click-modal="false"
       width="80%"
     >
-      <el-select
-        v-model="slowLogParam.node"
-        filterable
-        size="small"
-        placeholder="Please select node"
-        class="condition-item"
-        style="margin-bottom: 20px;"
-      >
-        <el-option
-          v-for="node in nodeList"
-          :key="node.label"
-          :label="node.label"
-          :value="node.value"
-        ></el-option>
-      </el-select>
-      <el-table :data="slowLogList" :default-sort="{prop: 'dateTime', order: 'descending'}">
-        <el-table-column type="index" width="50"></el-table-column>
-        <el-table-column prop="node" label="Node" sortable></el-table-column>
-        <el-table-column prop="type" label="Type"></el-table-column>
-        <el-table-column prop="command" label="Command"></el-table-column>
-        <el-table-column prop="executionTime" label="Execution Time(μs)" sortable></el-table-column>
-        <el-table-column prop="dateTime" label="Date Time" sortable></el-table-column>
-      </el-table>
+      <div v-loading="slowLogLoading">
+        <el-select
+          v-model="slowLogParam.node"
+          filterable
+          size="small"
+          placeholder="Please select node"
+          class="condition-item"
+          style="margin-bottom: 20px;"
+        >
+          <el-option
+            v-for="node in nodeList"
+            :key="node.label"
+            :label="node.label"
+            :value="node.value"
+          ></el-option>
+        </el-select>
+        <el-table :data="slowLogList" :default-sort="{prop: 'dateTime', order: 'descending'}">
+          <el-table-column type="index" width="50"></el-table-column>
+          <el-table-column prop="node" label="Node" sortable></el-table-column>
+          <el-table-column prop="type" label="Type"></el-table-column>
+          <el-table-column prop="command" label="Command"></el-table-column>
+          <el-table-column prop="executionTime" label="Execution Time(μs)" sortable></el-table-column>
+          <el-table-column prop="dateTime" label="Date Time" sortable></el-table-column>
+        </el-table>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -246,6 +248,7 @@ import { formatTime, formatTimeForChart } from "@/utils/time.js";
 import { isEmpty } from "@/utils/validate.js";
 import { store } from "@/vuex/store.js";
 import { getClusterById } from "@/components/cluster/cluster.js";
+import message from "@/utils/message.js";
 export default {
   components: {
     query
@@ -406,7 +409,10 @@ export default {
       slowLogList: [],
       timer: 0,
       slowLogParam: {},
-      slowLogList: []
+      slowLogList: [],
+      clusterLoading: false,
+      monitorDataLoading: false,
+      slowLogLoading: false
     };
   },
   methods: {
@@ -441,15 +447,16 @@ export default {
             });
             this.nodeList = nodeList;
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
     getNodeInfoList(nodeInfoParam) {
+      this.monitorDataLoading = true;
       let url = "/monitor/getNodeInfoList";
       API.post(
         url,
@@ -466,11 +473,13 @@ export default {
             this.buildEchartsData();
             this.initCharts();
           } else {
-            console.log("Get node info list failed.");
+            message.error("Get node info list failed");
           }
+          this.monitorDataLoading = false;
         },
         err => {
-          console.log(err);
+          this.monitorDataLoading = false;
+         message.error(err);
         }
       );
     },
@@ -744,6 +753,7 @@ export default {
       }
     },
     getSlowLogList(slowLogParam) {
+      this.slowLogLoading = true;
       let url = "/monitor/getSlowLogList";
       API.post(
         url,
@@ -757,11 +767,13 @@ export default {
             });
             this.slowLogList = slowLogList;
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
+          this.slowLogLoading = false;
         },
         err => {
-          console.log(err);
+          this.slowLogLoading = false;
+          message.error(err);
         }
       );
     }
@@ -784,7 +796,6 @@ export default {
           this.showDataType = true;
           nodeInfoParam.dataType = 1;
         }
-        console.log(this.nodeInfoParam);
         nodeInfoParam.node = this.currentNode;
         this.nodeInfoParam = nodeInfoParam;
       }

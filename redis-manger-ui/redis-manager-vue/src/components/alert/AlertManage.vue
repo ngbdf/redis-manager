@@ -346,6 +346,7 @@ import { isEmpty } from "@/utils/validate.js";
 import API from "@/api/api.js";
 import { formatTime } from "@/utils/time.js";
 import { getClusterById } from "@/components/cluster/cluster.js";
+import message from "@/utils/message.js";
 export default {
   data() {
     return {
@@ -425,11 +426,11 @@ export default {
             });
             this.alertRecordList = alertRecordList;
           } else {
-            console.log("No data");
+            message.error("Get alert record list failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -444,11 +445,11 @@ export default {
             let alertRuleList = result.data;
             this.alertRuleList = this.buildAlertRuleList(alertRuleList);
           } else {
-            console.log("Get alert rule list failed");
+            message.error("Get alert rule list failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -463,11 +464,11 @@ export default {
             this.alertRuleListNotUsed = this.buildAlertRuleList(result.data);
             this.addAlertRuleVisible = true;
           } else {
-            console.log("No data");
+            message.error("Get alert rule list not used failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -491,7 +492,7 @@ export default {
     },
     addAlertRule() {
       if (isEmpty(this.cluster.ruleIds)) {
-        console.log("no rules");
+        message.warning("No rule");
         return;
       }
       let url = "/cluster/addAlertRule";
@@ -505,11 +506,11 @@ export default {
           if (result.code == 0) {
             this.addAlertRuleVisible = false;
           } else {
-            console.log("add alert rule failed.");
+            message.error("Save alert rule failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -530,11 +531,11 @@ export default {
           if (result.code == 0) {
             this.deleteAlertRuleVisible = false;
           } else {
-            console.log("delete alert rule failed.");
+            message.error("Delete alert rule failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -548,11 +549,11 @@ export default {
           if (result.code == 0) {
             this.alertChannelList = this.buildAlertChannelList(result.data);
           } else {
-            console.log("No data");
+            message.error("Get alert channel list failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -567,11 +568,11 @@ export default {
             this.alertRuleListNotUsed = this.buildAlertChannelList(result.data);
             this.addAlertChannelVisible = true;
           } else {
-            console.log("No data");
+            message.error("Get alert channel list not used failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -600,11 +601,11 @@ export default {
           if (result.code == 0) {
             this.addAlertChannelVisible = false;
           } else {
-            console.log("add alert channel failed.");
+            message.error("Save alert channel failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -625,11 +626,11 @@ export default {
           if (result.code == 0) {
             this.deleteAlertChannelVisible = false;
           } else {
-            console.log("delete alert channel failed.");
+            message.error("Delete alert channel failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -665,11 +666,11 @@ export default {
           if (result.code == 0) {
             this.deleteAlertRecordVisible = false;
           } else {
-            console.log("delete alert record failed.");
+            message.error("Delete alert record failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     }

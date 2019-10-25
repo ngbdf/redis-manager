@@ -154,6 +154,7 @@ import CONSTANT from "@/utils/constant.js";
 import API from "@/api/api.js";
 import editCluster from "@/components/manage/EditCluster";
 import { getGroupList } from "@/components/group/group.js";
+import message from "@/utils/message.js";
 export default {
   components: {
     editCluster
@@ -227,10 +228,8 @@ export default {
         ) {
           this.toDashboard();
         }
-        //this.toDashboard();
       } else {
-        // TODO 报错
-        console.log("============ select group failed!");
+        message.error("Select group failed");
       }
     },
     getUserRole(group) {
@@ -250,7 +249,7 @@ export default {
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -321,16 +320,12 @@ export default {
                 }
               });
             }
-            // this.$router.push({
-            //   name: "dashboard",
-            //   params: { groupId: user.groupId }
-            // });
           } else {
-            console.log("No data");
+            message.error("Get group list failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },

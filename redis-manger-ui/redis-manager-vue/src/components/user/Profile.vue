@@ -1,5 +1,5 @@
 <template>
-  <div id="profile" class="body-wrapper">
+  <div id="profile" class="body-wrapper" v-loading="updateUserLoading">
     <div class="profile-wrapper">
       <el-form :model="user" status-icon ref="user" label-width="100px" :rules="rules">
         <el-form-item label="Avatar">
@@ -40,6 +40,7 @@
 import { store } from "@/vuex/store.js";
 import API from "@/api/api.js";
 import { isEmpty, validateEmail, validateMobile } from "@/utils/validate.js";
+import message from "@/utils/message.js";
 export default {
   data() {
     var validateEmailFormat = (rule, value, callback) => {
@@ -76,7 +77,8 @@ export default {
             trigger: "blur"
           }
         ]
-      }
+      },
+      updateUserLoading: false
     };
   },
   methods: {
@@ -90,18 +92,19 @@ export default {
           if (result.code == 0) {
             this.user = result.data;
           } else {
-            console.log("Get user failed.");
+            message.error("Get user failed");
             this.user = this.currentUser;
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
     updateUser(user) {
       this.$refs[user].validate(valid => {
         if (valid) {
+          this.updateUserLoading = true;
           let url = "/user/updateUser";
           API.post(
             url,
@@ -109,13 +112,15 @@ export default {
             response => {
               let result = response.data;
               if (result.code == 0) {
-                console.log("update user successfully!");
+                message.success("update user successfully");
               } else {
-                console.log("update user failed");
+                message.error("update user failed");
               }
+              this.updateUserLoading = false;
             },
             err => {
-              console.log(err);
+              this.updateUserLoading = false;
+              message.error(err);
             }
           );
         }

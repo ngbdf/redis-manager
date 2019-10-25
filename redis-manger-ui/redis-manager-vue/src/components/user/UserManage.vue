@@ -79,7 +79,7 @@
       </el-table>
     </div>
 
-    <el-dialog title="Create User" :visible.sync="editUserVisible">
+    <el-dialog title="Create User" :visible.sync="editUserVisible" v-loading="saveUserLoading">
       <el-form :model="user" ref="user" :rules="rules" label-width="100px" size="small">
         <el-form-item label="Group Name">
           <el-tag size="small">{{ currentGroup.groupName }}</el-tag>
@@ -109,7 +109,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="Grant User" :visible.sync="editGrantUserVisible">
+    <el-dialog title="Grant User" :visible.sync="editGrantUserVisible" v-loading="grantUserLoading">
       <el-form :model="user" ref="user" :rules="grantUserRules" label-width="100px" size="small">
         <el-form-item label="Group Name">
           <el-tag size="small">{{ currentGroup.groupName }}</el-tag>
@@ -159,6 +159,7 @@ import { store } from "@/vuex/store.js";
 import API from "@/api/api.js";
 import { formatTime } from "@/utils/time.js";
 import { isEmpty, validateEmail, validateMobile } from "@/utils/validate.js";
+import message from "@/utils/message.js";
 export default {
   data() {
     var validateEmailFormat = (rule, value, callback) => {
@@ -301,7 +302,9 @@ export default {
             trigger: "blur"
           }
         ]
-      }
+      },
+      saveUserLoading: false,
+      grantUserLoading: false
     };
   },
   methods: {
@@ -334,7 +337,7 @@ export default {
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -354,7 +357,7 @@ export default {
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -368,17 +371,18 @@ export default {
           if (result.code == 0) {
             this.user = result.data;
           } else {
-            console.log("Get user failed.");
+            message.error("Get user failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
     saveUser(user) {
       this.$refs[user].validate(valid => {
         if (valid) {
+          this.saveUserLoading = true;
           let groupId = this.currentGroup.groupId;
           this.user.groupId = groupId;
           let url;
@@ -397,20 +401,22 @@ export default {
                 this.editUserVisible = false;
                 this.$refs[user].resetFields();
               } else {
-                console.log("save user failed");
+                message.error("save user failed");
               }
+              this.saveUserLoading = false;
             },
             err => {
-              console.log(err);
+              this.saveUserLoading = false;
+              cmessage.error(err);
             }
           );
-          console.log(this.user);
         }
       });
     },
     saveGroupUser(user) {
       this.$refs[user].validate(valid => {
         if (valid) {
+          this.grantUserLoading = true;
           let groupId = this.currentGroup.groupId;
           this.user.groupId = groupId;
           let url = "/user/grantUser";
@@ -424,11 +430,13 @@ export default {
                 this.editGrantUserVisible = false;
                 this.$refs[user].resetFields();
               } else {
-                console.log("save user failed");
+                message.error("Save user failed");
               }
+              this.grantUserLoading = false;
             },
             err => {
-              console.log(err);
+              this.grantUserLoading = false;
+              message.error(err);
             }
           );
         }
@@ -445,7 +453,7 @@ export default {
           this.user = {};
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -460,7 +468,7 @@ export default {
           this.user = {};
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     }

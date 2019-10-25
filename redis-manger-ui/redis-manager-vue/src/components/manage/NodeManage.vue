@@ -1,6 +1,6 @@
 <template>
   <div id="cluster-manage" class="body-wrapper">
-    <div class="manage-header-wrapper">
+    <div class="manage-header-wrapper" v-loading="clusterLoading">
       <div class="title-wrapper">
         <span>{{ cluster.clusterName }}</span>
         <i class="el-icon-sunny health" title="Status" v-if="cluster.clusterState == 'HEALTH'"></i>
@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <div class="nodes-wrapper">
+    <div class="nodes-wrapper" v-loading="nodeListLoading">
       <div class="batch-operation-wrapper">
         <div class="batch-title">Batch Operation</div>
         <div style="display: flex; justify-content: space-between;">
@@ -463,6 +463,7 @@ import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
 import { store } from "@/vuex/store.js";
 import { getClusterById } from "@/components/cluster/cluster.js";
+import message from "@/utils/message.js";
 export default {
   components: {
     info,
@@ -577,7 +578,10 @@ export default {
             trigger: "blur"
           }
         ]
-      }
+      },
+      clusterLoading: false,
+      nodeListLoading: false,
+      operationLoading: false
     };
   },
   methods: {
@@ -588,13 +592,13 @@ export default {
       return "";
     },
     handleSelectionChange(redisNodeList) {
-      console.log(redisNodeList);
       this.operationNode = [];
       redisNodeList.forEach(redisNode => {
         this.operationNode.push(redisNode);
       });
     },
     getAllNodeList(clusterId) {
+      this.nodeListLoading = true;
       let url = "/nodeManage/getAllNodeListWithStatus/" + clusterId;
       API.get(
         url,
@@ -637,11 +641,13 @@ export default {
             });
             this.redisNodeList = redisNodeList;
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
+          this.nodeListLoading = false;
         },
         err => {
-          console.log(err);
+          this.nodeListLoading = false;
+          message.error(err);
         }
       );
     },
@@ -666,11 +672,11 @@ export default {
           if (result.code == 0) {
             this.cluster = result.data;
           } else {
-            console.error(result.message);
+            message.error(result.message);
           }
         },
         err => {
-          console.error(err);
+          message.error(err);
         }
       );
     },
@@ -691,12 +697,11 @@ export default {
           this.configKeyList = response.data.data;
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
     getConfigCurrentValue(redisConfig) {
-      console.log(redisConfig);
       let url = "/nodeManage/getConfigCurrentValue";
       let data = {
         cluster: this.cluster,
@@ -709,7 +714,7 @@ export default {
           this.nodeConfigList = response.data.data;
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -729,11 +734,11 @@ export default {
               if (result.code == 0) {
                 this.editConfigVisible = false;
               } else {
-                console.log("update config failed.");
+                message.error("update config failed");
               }
             },
             err => {
-              console.log(err);
+              message.error(err);
             }
           );
         }
@@ -748,7 +753,7 @@ export default {
       this.operationNodeList.forEach(redisNode => {
         let node = redisNode.host + ":" + redisNode.port;
         if (nodes.indexOf(node) > -1 && nodeArr.length == 1) {
-          console.log(
+          message.warning(
             "I can't operate " + node + ", because it in the database"
           );
           return false;
@@ -772,7 +777,7 @@ export default {
     },
     replicateOf(nodeId) {
       if (isEmpty(nodeId)) {
-        console.log("node invalid");
+        message.error("Node invalid");
         return;
       }
       this.operationNodeList.forEach(redisNode => {
@@ -787,7 +792,6 @@ export default {
       } else {
         return;
       }
-      console.log(url);
       API.post(
         url,
         this.operationNodeList,
@@ -797,11 +801,11 @@ export default {
           if (result.code == 0) {
             this.replicateOfVisible = false;
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -820,11 +824,11 @@ export default {
           if (result.code == 0) {
             this.failOverVisible = false;
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -839,7 +843,6 @@ export default {
           };
           let redisNodeList = [];
           redisNodeList.push(redisNode);
-          console.log(redisNodeList);
           let url = "/nodeManage/importNode";
           API.post(
             url,
@@ -850,11 +853,11 @@ export default {
               if (result.code == 0) {
                 this.importNodeVisible = false;
               } else {
-                console.log(result.message);
+                message.error(result.message);
               }
             },
             err => {
-              console.log(err);
+              message.error(err);
             }
           );
         }
@@ -886,11 +889,11 @@ export default {
           if (result.code == 0) {
             this.forgetVisible = false;
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -912,16 +915,15 @@ export default {
             response => {
               let result = response.data;
               this.getAllNodeList(this.cluster.clusterId);
-              console.log(result);
               if (result.code == 0) {
                 this.moveSlotVisible = false;
                 this.$refs[slotRange].resetFields();
               } else {
-                console.log(result.message + " Move slot failed.");
+                message.error(result.message + " Move slot failed");
               }
             },
             err => {
-              console.log(err);
+              message.error(err);
             }
           );
         }
@@ -930,7 +932,7 @@ export default {
     handleStart(redisNode) {
       let runStatus = redisNode.runStatus;
       if (runStatus) {
-        console.log("This node is already running.");
+        message.error("This node is already running");
         return;
       }
       this.buildNodeList(redisNode);
@@ -947,11 +949,11 @@ export default {
           if (result.code == 0) {
             this.startNodeVisible = false;
           } else {
-            console.log("start node failed.");
+            message.error("start node failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -959,7 +961,7 @@ export default {
       let inCluster = redisNode.inCluster;
       let runStatus = redisNode.runStatus;
       if (!runStatus) {
-        console.log("This node has stopped.");
+        message.error("This node has stopped");
         return;
       }
       this.buildNodeList(redisNode);
@@ -979,11 +981,11 @@ export default {
           if (result.code == 0) {
             this.stopNodeVisible = false;
           } else {
-            console.log("stop node failed.");
+            message.error("stop node failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -1005,11 +1007,11 @@ export default {
           if (result.code == 0) {
             this.restartNodeVisible = false;
           } else {
-            console.log("restart node failed.");
+            message.error("restart node failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -1017,19 +1019,19 @@ export default {
       let inCluster = redisNode.inCluster;
       let runStatus = redisNode.runStatus;
       if (inCluster) {
-        console.log(
+        message.error(
           redisNode.host +
             ":" +
             redisNode.port +
-            " still in the cluster, please forget it first."
+            " still in the cluster, please forget it first"
         );
         return;
       } else if (runStatus) {
-        console.log(
+        message.error(
           redisNode.host +
             ":" +
             redisNode.port +
-            " is running, please stop it first."
+            " is running, please stop it first"
         );
         return;
       }
@@ -1050,11 +1052,11 @@ export default {
           if (result.code == 0) {
             this.deleteNodeVisible = false;
           } else {
-            console.log("delete node failed.");
+            message.error("delete node failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -1069,11 +1071,11 @@ export default {
           if (result.code == 0) {
             this.initSlotsVisible = false;
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     }

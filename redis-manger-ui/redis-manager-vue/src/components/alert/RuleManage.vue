@@ -53,6 +53,7 @@
       :visible.sync="editVisible"
       width="50%"
       :close-on-click-modal="false"
+      v-loading="saveAlertRuleLoading"
     >
       <el-form :model="alertRule" ref="alertRule" :rules="rules" label-width="135px">
         <el-form-item label="Rule Key" prop="ruleKey">
@@ -127,6 +128,7 @@ import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
+import message from "@/utils/message.js";
 export default {
   data() {
     return {
@@ -208,12 +210,12 @@ export default {
           label: "expires"
         },
         {
-          value: "used_cpu_sys",
-          label: "used_cpu_sys"
+          value: "cpu_sys",
+          label: "cpu_sys"
         },
         {
-          value: "used_cpu_user",
-          label: "used_cpu_user"
+          value: "cpu_user",
+          label: "cpu_user"
         }
       ],
       /**
@@ -307,12 +309,12 @@ export default {
             trigger: "blur"
           }
         ]
-      }
+      },
+      saveAlertRuleLoading: false
     };
   },
   methods: {
     handleView(index, row) {
-      console.log(index, row);
     },
     editAlertRule(index, row) {
       this.getAlertRule(row.ruleId);
@@ -354,11 +356,11 @@ export default {
             });
             this.alertRuleList = alertRuleList;
           } else {
-            console.log("Get alert rule list failed");
+            message.error("Get alert rule list failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -372,17 +374,16 @@ export default {
           if (result.code == 0) {
             this.alertRule = result.data;
           } else {
-            console.log("Get alert rule faild");
+            message.error("Get alert rule faild");
           }
         },
         err => {
-          console.log(err);
+         message.error(err);
         }
       );
     },
     saveAlertRule(alertRule) {
       this.$refs[alertRule].validate(valid => {
-        console.log(valid);
         if (valid) {
           let url;
           if (this.isUpdate) {
@@ -391,6 +392,7 @@ export default {
             url = "/alert/rule/addAlertRule";
           }
           this.alertRule.groupId = this.currentGroupId;
+          this.saveAlertRuleLoading = true;
           API.post(
             url,
             this.alertRule,
@@ -401,11 +403,13 @@ export default {
                 this.editVisible = false;
                 this.$refs[alertRule].resetFields();
               } else {
-                console.log("Save alert rule failed");
+                message.error("Save alert rule failed");
               }
+              this.saveAlertRuleLoading = false;
             },
             err => {
-              console.log(err);
+              this.saveAlertRuleLoading = false;
+              message.error(err);
             }
           );
         }
@@ -422,11 +426,11 @@ export default {
             this.getAlertRuleList(this.currentGroupId);
             this.deleteVisible = false;
           } else {
-            console.log("Delete alert rule failed");
+            message.error("Delete alert rule failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     }

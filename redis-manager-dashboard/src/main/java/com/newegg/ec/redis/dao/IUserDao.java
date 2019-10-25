@@ -69,6 +69,7 @@ public interface IUserDao {
             "group_user.user_role AS user_role " +
             "FROM user, group_user " +
             "WHERE group_user.user_id = user.user_id " +
+            "AND group_user.group_id = user.group_id " +
             "AND group_user.grant_group_id = #{grantGroupId} " +
             "AND group_user.user_id = #{userId}")
     User selectUserRole(@Param("grantGroupId") Integer grantGroupId, @Param("userId") Integer userId);

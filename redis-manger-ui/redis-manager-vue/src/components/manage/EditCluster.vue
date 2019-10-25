@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-loading="saveClusterLoading">
     <el-form :model="cluster" ref="cluster" :rules="rules" label-width="120px" size="small">
       <el-form-item label="Group Name">
         <el-tag size="small">{{ currentGroup.groupName }}</el-tag>
@@ -48,6 +48,9 @@
 import { store } from "@/vuex/store.js";
 import { isEmpty, validateIpAndPort } from "@/utils/validate.js";
 import API from "@/api/api.js";
+import { getClusterById } from "@/components/cluster/cluster.js";
+import message from "@/utils/message.js";
+
 export default {
   props: {
     clusterId: {
@@ -145,14 +148,14 @@ export default {
             trigger: "change"
           }
         ]
-      }
+      },
+      saveClusterLoading: false
     };
   },
   methods: {
     // 导入外部集群
     saveCluster(cluster) {
       this.$refs[cluster].validate(valid => {
-        console.log(valid);
         if (valid) {
           let currentGroup = this.currentGroup;
           if (isEmpty(currentGroup) || isEmpty(currentGroup.groupId)) {
@@ -165,16 +168,14 @@ export default {
             nodes += node.value + ",";
           });
           this.cluster.nodes = nodes;
-          console.log(this.cluster);
           // axios
           let url = "";
-          console.log(this.clusterId);
           if (isEmpty(this.clusterId)) {
             url = "/cluster/importCluster";
           } else {
             url = "/cluster/updateCluster";
           }
-          console.log(url);
+          this.saveClusterLoading = true;
           API.post(
             url,
             this.cluster,
@@ -190,10 +191,12 @@ export default {
                 });
                 this.$emit("closeDialog", false);
               } else {
-                console.error(result.message);
+                console.error("Save cluster failed");
               }
+              this.saveClusterLoading = false;
             },
             err => {
+              this.saveClusterLoading = false;
               console.error(err);
             }
           );
@@ -224,28 +227,6 @@ export default {
         }
       });
       return nodeList;
-    },
-    getClusterById(clusterId) {
-      let url = "/cluster/getCluster/" + clusterId;
-      API.get(
-        url,
-        null,
-        response => {
-          let result = response.data;
-          if (result.code == 0) {
-            let cluster = result.data;
-            let nodeList = this.nodesToNodeList(cluster.nodes);
-            cluster.nodeList = nodeList;
-            this.cluster = cluster;
-            console.log(cluster);
-          } else {
-            console.log("Get clsuter failed.");
-          }
-        },
-        err => {
-          console.log(err);
-        }
-      );
     }
   },
   computed: {
@@ -260,7 +241,11 @@ export default {
         nodeList: [{ value: "" }]
       };
     } else {
-      this.getClusterById(this.clusterId);
+      getClusterById(this.clusterId, cluster => {
+        let nodeList = this.nodesToNodeList(cluster.nodes);
+        cluster.nodeList = nodeList;
+        this.cluster = cluster;
+      });
     }
   }
 };

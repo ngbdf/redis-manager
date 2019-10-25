@@ -2,6 +2,7 @@ import { store } from "@/vuex/store.js"
 import { isEmpty } from "@/utils/validate.js"
 import API from "@/api/api.js"
 import router from '@/router'
+import message from "@/utils/message.js"
 
 export function getClusterById(clusterId, callback) {
     let groupId = store.getters.getCurrentGroup.groupId
@@ -19,11 +20,11 @@ export function getClusterById(clusterId, callback) {
                 callback(result.data)
             } else {
                 router.push({ name: "404" })
-                console.log("Get clsuter failed.")
+                message.error("Get clsuter failed")
             }
         },
         err => {
-            console.log(err)
+            message.error(err)
         }
     )
 }

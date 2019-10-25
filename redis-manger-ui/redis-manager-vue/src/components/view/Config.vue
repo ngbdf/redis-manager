@@ -16,6 +16,7 @@
 
 <script>
 import API from "@/api/api.js";
+import message from "@/utils/message.js";
 export default {
   props: {
     redisNode: {}
@@ -37,11 +38,11 @@ export default {
           if (result.code == 0) {
             this.configList = result.data;
           } else {
-            console.log("get node config failed.");
+            message.error("get node config failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     }

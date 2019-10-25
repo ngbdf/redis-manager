@@ -78,16 +78,15 @@ public class GroupService implements IGroupService {
     @Transactional
     @Override
     public boolean addGroup(Group group) {
+        Integer userId = group.getUserId();
+        User currentUser = userDao.selectUserById(userId);
         groupDao.insertGroup(group);
         User user = new User();
-        String groupName = group.getGroupName();
-        user.setUserName(groupName);
-        user.setPassword(groupName);
-        Integer groupId = group.getGroupId();
-        user.setUserRole(User.UserRole.ADMIN);
-        user.setGroupId(groupId);
-        userDao.insertUser(user);
-        groupUserDao.insertGroupUser(user, groupId);
+        Integer grantGroupId = group.getGroupId();
+        user.setUserId(currentUser.getUserId());
+        user.setUserRole(User.UserRole.SUPER_ADMIN);
+        user.setGroupId(currentUser.getGroupId());
+        groupUserDao.insertGroupUser(user, grantGroupId);
         return true;
     }
 

@@ -1,5 +1,5 @@
 <template>
-  <div id="query" class="query-wrapper">
+  <div id="query" class="query-wrapper" v-loading="queryLoading">
     <div class="input-wrapper">
       <el-input
         size="small"
@@ -43,6 +43,7 @@ require("codemirror/addon/hint/show-hint.js");
 require("codemirror/addon/hint/show-hint.css");
 require("codemirror/addon/hint/javascript-hint.js");
 require("codemirror/theme/xq-light.css");
+import message from "@/utils/message.js";
 export default {
   components: {
     codemirror
@@ -68,7 +69,8 @@ export default {
         // https://codemirror.net/demo/theme.html#xq-light
         theme: "xq-light",
         lineNumbers: true
-      }
+      },
+      queryLoading: false
     };
   },
   methods: {
@@ -89,13 +91,12 @@ export default {
                 database: database.slice(2)
               });
             });
-            console.log(this.dbList);
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -103,13 +104,14 @@ export default {
       this.result = "";
       let url = "/data/query";
       if (isEmpty(autoCommandParam.database)) {
-        console.log("Please select database.");
+        message.waring("Please select database");
         return;
       }
       if (isEmpty(autoCommandParam.key)) {
-        console.log("Please enter redis key.");
+        message.waring("Please enter redis key");
         return;
       }
+      this.queryLoading = true;
       API.post(
         url,
         autoCommandParam,
@@ -123,11 +125,13 @@ export default {
             queryResult.value = autoCommandResult.value;
             this.result = JSON.stringify(queryResult, null, 2);
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
+          this.queryLoading = false;
         },
         err => {
-          console.log(err);
+          this.queryLoading = false;
+          message.error(err);
         }
       );
     },
@@ -135,9 +139,10 @@ export default {
       this.result = "";
       let url = "/data/scan";
       if (isEmpty(autoCommandParam.database)) {
-        console.log("Please select database.");
+        message.warning("Please select database");
         return;
       }
+      this.queryLoading = true;
       API.post(
         url,
         autoCommandParam,
@@ -149,11 +154,13 @@ export default {
               this.result += key + "\n";
             });
           } else {
-            console.log(result.message);
+            message.error(result.message);
           }
+          this.queryLoading = false;
         },
         err => {
-          console.log(err);
+          this.queryLoading = false;
+          message.error(err);
         }
       );
     }

@@ -84,10 +84,11 @@
 
     <!-- dialog: create channel-->
     <el-dialog
-      title="Create Channel"
+      title="Edit Channel"
       :visible.sync="editVisible"
       width="60%"
       :close-on-click-modal="false"
+      v-loading="saveAlertChannelLoading"
     >
       <el-form :model="alertChannel" ref="alertChannel" :rules="rules" label-width="135px">
         <el-form-item label="Channel Name" prop="channelName">
@@ -182,6 +183,7 @@ import {
 } from "@/utils/validate.js";
 import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
+import message from "@/utils/message.js";
 export default {
   data() {
     var validateSMTPHost = (rule, value, callback) => {
@@ -264,12 +266,12 @@ export default {
             trigger: "blur"
           }
         ]
-      }
+      },
+      saveAlertChannelLoading: false
     };
   },
   methods: {
     handleView(index, row) {
-      console.log(index, row);
     },
     editChannel(index, row) {
       this.getAlertChannel(row.channelId);
@@ -277,7 +279,6 @@ export default {
       this.editVisible = true;
     },
     handleDelete(index, row) {
-      console.log(index, row);
       this.alertChannel.channelId = row.channelId;
       this.deleteVisible = true;
     },
@@ -293,11 +294,11 @@ export default {
             this.deleteVisible = false;
             this.alertChannel = { channelType: 0 };
           } else {
-            console.log("Delete alert channel failed.");
+            message.error("Delete alert channel failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -315,11 +316,11 @@ export default {
             });
             this.alertChannelList = alertChannelList;
           } else {
-            console.log("No data");
+            message.error("Get alert channel list failed");
           }
         },
         err => {
-          console.log(err);
+         message.error(err);
         }
       );
     },
@@ -333,11 +334,11 @@ export default {
           if (result.code == 0) {
             this.alertChannel = result.data;
           } else {
-            console.log("Get alert channel faild");
+            message.error("Get alert channel faild");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -351,6 +352,7 @@ export default {
             url = "/alert/channel/addAlertChannel";
           }
           this.alertChannel.groupId = this.currentGroupId;
+          this.saveAlertChannelLoading = true;
           API.post(
             url,
             this.alertChannel,
@@ -361,11 +363,13 @@ export default {
                 this.editVisible = false;
                 this.$refs[alertChannel].resetFields();
               } else {
-                console.log("Save alert channel failed.");
+               message.error("Save alert channel failed.");
               }
+              this.saveAlertChannelLoading = false;
             },
             err => {
-              console.log(err);
+              this.saveAlertChannelLoading = false;
+              message.error(err);
             }
           );
         }

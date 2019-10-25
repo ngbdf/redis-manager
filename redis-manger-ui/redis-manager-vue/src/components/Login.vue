@@ -61,6 +61,7 @@
 <script>
 import API from "@/api/api.js";
 import { store } from "@/vuex/store.js";
+import message from "@/utils/message.js";
 export default {
   data() {
     return {
@@ -86,15 +87,14 @@ export default {
             response => {
               let result = response.data;
               if (result.code == 0) {
-                console.log(result.data)
                 store.dispatch("setUser", result.data);
                 this.$router.push({ name: "index" });
               } else {
-                console.log("user name or password wrong");
+                message.error("User name or password wrong");
               }
             },
             err => {
-              console.log(err);
+              message.error(err);
             }
           );
         }

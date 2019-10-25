@@ -11,7 +11,7 @@
       </el-steps>
     </div>
     <el-row>
-      <el-col :xl="12" :lg="12" :md="24" :sm="24">
+      <el-col :xl="12" :lg="12" :md="24" :sm="24" v-loading="installationLoading">
         <div class="form-wrapper">
           <div class="form">
             <el-form
@@ -187,7 +187,7 @@
                 <el-input type="input" v-model="installationParam.clusterInfo"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-button type="success" @click="installationCheck('installationParam')">Check</el-button>
+                <el-button type="success" @click="installationCheck('installationParam')">Install</el-button>
                 <!-- <el-button @click="resetForm('installationParam')">Reset</el-button> -->
               </el-form-item>
             </el-form>
@@ -253,6 +253,7 @@ import { store } from "@/vuex/store.js";
 import { isEmpty, validateIpAndPort, validatePort } from "@/utils/validate.js";
 import API from "@/api/api.js";
 import axios from "axios";
+import message from "@/utils/message.js";
 export default {
   data() {
     var validateClusterName = (rule, value, callback) => {
@@ -516,7 +517,8 @@ export default {
       },
       allMachineList: [],
       websock: null,
-      step: -1
+      step: -1,
+      installationLoading: false
     };
   },
   methods: {
@@ -531,7 +533,6 @@ export default {
       });
     },
     buildParam() {
-      console.log("============");
       let installationParam = this.installationParam;
       if (installationParam.autoBuild) {
         this.buildMachineIdList();
@@ -563,6 +564,7 @@ export default {
       });
     },
     install() {
+      this.installationLoading = true;
       let url = "/installation/installFlow";
       API.post(
         url,
@@ -575,11 +577,13 @@ export default {
               params: { groupId: this.currentGroup.groupId }
             });
           } else {
-            console.log("Install failed.");
+             message.error("Install failed");
           }
+          this.installationLoading = false;
         },
         err => {
-          console.log(err);
+          this.installationLoading = false;
+          message.error(err);
         }
       );
     },
@@ -593,11 +597,11 @@ export default {
           if (result.code == 0) {
             this.dockerImages = result.data;
           } else {
-            console.log(result.message);
+             message.error(result.message);
           }
         },
         err => {
-          console.log(err);
+           message.error(err);
         }
       );
     },
@@ -611,11 +615,11 @@ export default {
           if (result.code == 0) {
             this.machineImages = result.data;
           } else {
-            console.log(result.message);
+             message.error(result.message);
           }
         },
         err => {
-          console.log(err);
+           message.error(err);
         }
       );
     },
@@ -643,11 +647,11 @@ export default {
               this.allMachineList = hierarchyMachineList;
             });
           } else {
-            console.log(result.message);
+             message.error(result.message);
           }
         },
         err => {
-          console.log(err);
+           message.error(err);
         }
       );
     },
@@ -662,11 +666,11 @@ export default {
     },
     websocketonopen() {
       //连接建立之后执行send方法发送数据
-      console.log("Socket 已打开");
+      message.error("Open socket");
       this.websocketsend(this.installationParam.clusterName);
     },
     websocketonerror() {
-      console.log("Build websocket error");
+       message.error("Build websocket error");
     },
     websocketonmessage(msg) {
       //数据接收
@@ -695,7 +699,7 @@ export default {
     },
     websocketclose(e) {
       //关闭
-      console.log("断开连接", e);
+       message.error("Close websocket", e);
     }
   },
   computed: {

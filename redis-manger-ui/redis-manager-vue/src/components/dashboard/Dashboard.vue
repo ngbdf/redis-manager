@@ -208,6 +208,7 @@ import editCluster from "@/components/manage/EditCluster";
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import API from "@/api/api.js";
+import message from "@/utils/message.js"
 export default {
   components: {
     query,
@@ -273,11 +274,11 @@ export default {
               this.overview.alertNumber = overview.alertNumber;
               this.overview.userNumber = overview.userNumber;
             } else {
-              console.log("No data");
+              message.error("Get group overview failed");
             }
           },
           err => {
-            console.log(err);
+            message.error(err);
           }
         );
       }
@@ -306,13 +307,13 @@ export default {
               this.overview.badNumber = badNumber;
               this.clusterList = clusterList;
             } else {
-              console.log("No data");
+              message.error("Get cluster list failed");
             }
             this.clusterListLoading = false;
           },
           err => {
             this.clusterListLoading = false;
-            console.log(err);
+            message.error(err);
           }
         );
       }
@@ -341,16 +342,17 @@ export default {
             this.getClusterList(this.currentGroupId);
             this.deleteClusterVisible = false;
           } else {
-            console.log("Delete failed.");
+            message.error("Delete cluster failed");
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
     closeEditClusterDialog(editClusterVisible) {
       this.editClusterVisible = editClusterVisible;
+      this.getClusterList(this.currentGroupId)
     }
   },
   computed: {
