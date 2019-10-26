@@ -5,14 +5,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
+import com.newegg.ec.redis.util.SignUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
 
 /**
  * @author Jay.H.Zou
@@ -38,8 +38,8 @@ public class DataOperationController {
         if (cluster == null) {
             return Result.failResult().setMessage("Get cluster failed.");
         }
-        Map<String, Long> databaseMap = redisService.getDatabase(cluster);
         List<JSONObject> databaseList = new ArrayList<>();
+        Map<String, Long> databaseMap = redisService.getDatabase(cluster);
         databaseMap.forEach((key, val) -> {
             JSONObject item = new JSONObject();
             item.put("database", key);
@@ -76,7 +76,11 @@ public class DataOperationController {
     public Result sendCommand(@RequestBody DataCommandsParam dataCommandsParam) {
         Cluster cluster = clusterService.getClusterById(dataCommandsParam.getClusterId());
         Object console = redisService.console(cluster, dataCommandsParam);
-        return console != null ? Result.successResult(console) : Result.failResult();
+        // 格式处理
+        if (console == null ) {
+            return Result.failResult();
+        }
+        return Result.successResult(console);
     }
 
 }

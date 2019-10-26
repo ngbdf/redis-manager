@@ -81,6 +81,10 @@ public interface IDatabaseCommand {
 
     String ZADD = "ZADD";
 
+    String TYPE = "TYPE";
+
+    String DEL = "DEL";
+
     boolean exists(String key);
 
     String type(String key);
@@ -106,5 +110,9 @@ public interface IDatabaseCommand {
     Object set(DataCommandsParam dataCommandsParam);
 
     Object zset(DataCommandsParam dataCommandsParam);
+
+    Object type(DataCommandsParam dataCommandsParam);
+
+    Object del(DataCommandsParam dataCommandsParam);
 
 }

@@ -4,9 +4,9 @@
       <el-col :xl="24" :lg="24" :md="24" :sm="24" class="select-wrapper">
         <el-select
           size="small"
-          v-model="cluster"
+          v-model="selectedClusterId"
           placeholder="Select cluster"
-          @change="getDBList(cluster.clusterId)"
+          @change="getDBList(selectedClusterId)"
         >
           <el-option
             v-for="cluster in clusterList"
@@ -17,11 +17,13 @@
         </el-select>
         <el-select
           size="small"
-          v-model="dataCommandsParam.database"
+          v-model="database"
           placeholder="Select db"
-          :disabled="dbListDisabled"
+          filterable
+          allow-create
+          @change="handleSelectDB(database)"
         >
-          <el-option v-for="db in dbList" :key="db.database" :label="db.label" :value="db.database"></el-option>
+          <el-option v-for="database in dbList" :key="database" :label="database" :value="database"></el-option>
         </el-select>
       </el-col>
       <el-col :xl="24" :lg="24" :md="24" :sm="24">
@@ -31,19 +33,20 @@
             <div class="connected" v-if="connected">Redis connected...</div>
             <div class="command-history-wrapper">
               <div class="history" v-html="histrory"></div>
-              <div class="command">
-                <span>
-                  <b>></b>
-                </span>
-                <el-input
-                  size="small"
-                  type="text"
-                  class="command-input"
-                  v-model="dataCommandsParam.command"
-                  @keyup.enter.native="keyUpEnter(dataCommandsParam)"
-                  :disabled="consoleDisabled"
-                />
-              </div>
+              <!-- <codemirror class="result-wrapper" v-model="histrory" :options="codemirrorOptions"></codemirror> -->
+            </div>
+            <div class="command">
+              <div style="max-width: 50%; margin-right: 5px;"></div>
+              <el-input
+                size="small"
+                type="text"
+                class="command-input"
+                v-model="command"
+                @keyup.enter.native="keyUpEnter(command)"
+                :disabled="consoleDisabled"
+              >
+                <template slot="prepend">[{{ selectedCluster.clusterName }}]$</template>
+              </el-input>
             </div>
           </div>
         </div>
@@ -53,37 +56,47 @@
 </template>
 
 <script>
+import { store } from "@/vuex/store.js";
+import API from "@/api/api.js";
+import { isEmpty } from "@/utils/validate.js";
+import { codemirror } from "vue-codemirror-lite";
+// require("codemirror/lib/codemirror.js");
+// require("codemirror/lib/codemirror.css");
+// require("codemirror/mode/javascript/javascript");
+// require("codemirror/addon/hint/show-hint.js");
+// require("codemirror/addon/hint/show-hint.css");
+// require("codemirror/addon/hint/javascript-hint.js");
+// require("codemirror/theme/seti.css");
 import message from "@/utils/message.js";
 export default {
+  components: {
+    codemirror
+  },
   data() {
     return {
       histrory: "",
       clusterList: [],
-      cluster: "",
       dbList: [],
+      selectedClusterId: "",
+      selectedCluster: {},
+      database: "",
+      command: "",
       connected: false,
-      dataCommandsParam: {},
-      dbListDisabled: true,
-      consoleDisabled: true
+      consoleDisabled: true,
+      codemirrorOptions: {
+        mode: "application/json",
+        readOnly: "nocursor",
+        autoRefresh: true,
+        scrollbarStyle: "null",
+        // https://codemirror.net/demo/theme.html#xq-light
+        theme: "seti"
+      }
     };
   },
   methods: {
-    keyUpEnter(dataCommandsParam) {
-      let command = dataCommandsParam.command;
-      if (command == "") {
-        return;
-      }
-      if (command == "clear") {
-        this.histrory = "";
-        this.dataCommandsParam.command = "";
-        return;
-      }
-      this.histrory += command + "<br>" + "I'm result...<br>";
-      this.sendCommand();
-    },
     getClusterList(groupId) {
       let url = "/cluster/getClusterList/" + groupId;
-      this.clusterListLoading = true;
+
       if (!isEmpty(groupId)) {
         API.get(
           url,
@@ -91,7 +104,7 @@ export default {
           response => {
             let result = response.data;
             if (result.code == 0) {
-              this, (clusterList = result.data);
+              this.clusterList = result.data;
             } else {
               message.error("Get cluster list failed");
             }
@@ -102,23 +115,40 @@ export default {
         );
       }
     },
-    getDBList(clusterId) {
-      let url = "/data/getDBList/" + clusterId;
+    resetStatus() {
+      this.consoleDisabled = true;
+      this.connected = false;
       this.dbList = [];
+      this.database = "";
+      this.histrory = "";
+    },
+    getDBList(clusterId) {
+      if (isEmpty(clusterId)) {
+        message.warning("Please select cluster");
+        return;
+      }
+      this.clusterList.forEach(cluster => {
+        if (cluster.clusterId == clusterId) {
+          this.selectedCluster = cluster;
+        }
+      });
+      this.resetStatus();
+      if (this.selectedCluster.redisMode == "cluster") {
+        this.dbList.push(0);
+        return;
+      }
+      let url = "/data/getDBList/" + clusterId;
       API.get(
         url,
         null,
         response => {
+          this.dbList = [];
           let result = response.data;
           if (result.code == 0) {
             let dbList = result.data;
             dbList.forEach(db => {
               let database = db.database;
-              this.dbList.push({
-                label: database,
-                keys: db.keys,
-                database: database.slice(2)
-              });
+              this.dbList.push(database.slice(2));
             });
           } else {
             message.error(result.message);
@@ -129,14 +159,79 @@ export default {
         }
       );
     },
-    sendCommand() {
-      this.dataCommandsParam.clusterId = this.cluster.clusterId;
+    handleSelectDB(database) {
+      if (!isEmpty(database)) {
+        this.consoleDisabled = false;
+        this.connected = true;
+      }
+    },
+    sendCommand(dataCommandsParam) {
+      let url = "/data/sendCommand";
+      API.post(
+        url,
+        dataCommandsParam,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            let data = result.data;
+            if (typeof data != "string") {
+              data = JSON.stringify(data);
+            }
+            this.histrory +=
+              "[" +
+              this.selectedCluster.clusterName +
+              "]$ " +
+              this.command +
+              "<br/>" +
+              data +
+              "<br/>";
+          } else {
+            this.histrory +=
+              "[" +
+              this.selectedCluster.clusterName +
+              "]$ " +
+              this.command +
+              "\n operation failed or command not support \n";
+          }
+          this.command = "";
+        },
+        err => {
+          message.error(err);
+        }
+      );
+    },
+    keyUpEnter() {
+      if (isEmpty(this.command)) {
+        return;
+      }
+      if (this.command == "clear") {
+        this.histrory = "";
+        this.command = "";
+        return;
+      }
+      if (isEmpty(this.selectedClusterId)) {
+        message.warning("Please select cluster");
+        return;
+      }
+      if (isEmpty(this.database)) {
+        message.warning("Please select database");
+        return;
+      }
+      let dataCommandsParam = {
+        clusterId: this.selectedClusterId,
+        database: this.database,
+        command: this.command
+      };
+      this.sendCommand(dataCommandsParam);
     }
   },
   computed: {
     currentGroup() {
       return store.getters.getCurrentGroup;
     }
+  },
+  mounted() {
+    this.getClusterList(this.currentGroup.groupId);
   }
 };
 </script>
@@ -157,11 +252,10 @@ export default {
 
 .console {
   min-height: 600px;
-  padding: 10px 20px;
+  padding: 10px 0;
   background-color: black;
   color: #ffffff;
-  word-break: break-all;
-  word-wrap: break-word;
+
   font-family: Consolas, Monaco, Menlo, "Courier New", monospace !important;
   margin: 0;
 }
@@ -170,19 +264,16 @@ export default {
   border-bottom: 1px solid #dcdfe6;
   background: #f0f2f5;
 }
-
+.command-history-wrapper {
+  word-break: break-all;
+  word-wrap: break-word;
+}
 .connected {
   margin-bottom: 10px;
 }
 
-.command {
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
-}
-
-.command-input >>> .el-input__inner {
-  margin-left: 5px;
+.command-input >>> .el-input__inner,
+.command-input >>> .el-input-group__prepend {
   font-family: Consolas, Monaco, Menlo, "Courier New", monospace !important;
   border: none !important;
   font-size: 14px;
@@ -190,6 +281,11 @@ export default {
   color: #ffffff;
   padding: 0;
 }
+
+.command-input >>> .el-input-group__prepend {
+  padding-right: 5px;
+}
+
 .command-input >>> .el-input__inner:focus {
   outline: none;
 }
@@ -198,10 +294,55 @@ export default {
 }
 
 .history {
-  word-break: normal;
   width: auto;
+  line-height: 20px;
+  word-break: normal;
   white-space: pre-wrap;
   word-wrap: break-word;
+  font-family: Consolas, Monaco, Menlo, "Courier New", monospace !important;
   line-height: 24px;
 }
+
+.result-wrapper {
+  height: auto;
+  padding: 0;
+  line-height: 20px;
+  word-break: normal;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.cm-s-seti.CodeMirror {
+  background: #000000 !important;
+}
+.cm-s-seti .CodeMirror-activeline-background {
+  background: #000000;
+}
+.cm-s-seti .CodeMirror-selected {
+  background: #d7d4f0;
+}
+.cm-s-seti .CodeMirror-linenumber {
+  color: #aeaeae;
+} /*行号数字*/
+.cm-s-seti .cm-quote {
+  color: #090;
+} /*引号*/
+.cm-s-seti .cm-keyword {
+  color: #3300cc;
+} /*关键字，例如：SELECT*/
+.cm-s-seti .cm-number {
+  color: #333333;
+} /*数字*/
+.cm-s-seti .cm-variable-2 {
+  color: #333333;
+} /*变量2，例如：a.id中的.id*/
+.cm-s-seti .cm-comment {
+  color: #009933;
+} /*注释*/
+.cm-s-seti .cm-string {
+  color: #009933;
+} /*字符串*/
+.cm-s-seti .cm-string-2 {
+  color: #009933;
+} /*字符串*/
 </style>

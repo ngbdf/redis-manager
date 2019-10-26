@@ -148,11 +148,14 @@ public class RedisUtil {
 
     public static String[] removeCommandAndKey(String[] list) {
         int length = list.length;
-        String[] items = new String[length];
+        String[] items = new String[length - 2];
         for (int i = 2, j = 0; i < length; i++, j++) {
             items[j] = list[i];
         }
         return items;
+    }
+    public static String getKey(String command) {
+        return SignUtil.splitBySpace(command)[1];
     }
 
     public static boolean equals(RedisNode redisNode1, RedisNode redisNode2) {

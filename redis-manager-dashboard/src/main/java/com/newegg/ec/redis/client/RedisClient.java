@@ -84,6 +84,7 @@ public class RedisClient implements IRedisClient {
     @Override
     public Set<String> scan(AutoCommandParam autoCommandParam) {
         ScanParams scanParams = autoCommandParam.buildScanParams();
+        jedis.select(autoCommandParam.getDatabase());
         ScanResult<String> scanResult = jedis.scan(autoCommandParam.getCursor(), scanParams);
         return new LinkedHashSet<>(scanResult.getResult());
     }
@@ -363,6 +364,22 @@ public class RedisClient implements IRedisClient {
             result = jedis.zadd(key, Double.valueOf(param1), param2);
         }
         return result;
+    }
+
+    @Override
+    public Object type(DataCommandsParam dataCommandsParam) {
+        jedis.select(dataCommandsParam.getDatabase());
+        String command = dataCommandsParam.getCommand();
+        String key = RedisUtil.getKey(command);
+        return type(key);
+    }
+
+    @Override
+    public Object del(DataCommandsParam dataCommandsParam) {
+        jedis.select(dataCommandsParam.getDatabase());
+        String command = dataCommandsParam.getCommand();
+        String key = RedisUtil.getKey(command);
+        return del(key);
     }
 
     @Override

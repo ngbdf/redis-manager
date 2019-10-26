@@ -303,6 +303,10 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
                     || command.startsWith(ZCOUNT) || command.startsWith(ZRANGE)
                     || command.startsWith(ZADD)) {
                 result = client.zset(dataCommandsParam);
+            } else if (command.startsWith(TYPE)){
+                result = client.type(dataCommandsParam);
+            } else if (command.startsWith(DEL)) {
+                result = client.del(dataCommandsParam);
             }
         } catch (Exception e) {
             logger.error("Redis operation failed, cluster name: " + cluster.getClusterName() + ", command: " + dataCommandsParam.getCommand(), e);

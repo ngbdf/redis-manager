@@ -4,8 +4,9 @@
       <el-input
         size="small"
         placeholder="Redis Key"
-        v-model="autoCommandParam.key"
+        v-model.trim="autoCommandParam.key"
         class="input-with-select"
+        clearable
       >
         <el-select
           v-model="autoCommandParam.database"

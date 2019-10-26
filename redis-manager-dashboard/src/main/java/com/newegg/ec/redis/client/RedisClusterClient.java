@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.client;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
@@ -171,6 +172,8 @@ public class RedisClusterClient implements IRedisClusterClient {
         String[] list = SignUtil.splitBySpace(command);
         String cmd = command.toUpperCase();
         String key = list[1];
+        String type = type(key);
+        long ttl = ttl(key);
         Object result = null;
         if (cmd.startsWith(HGETALL)) {
             result = jedisCluster.hgetAll(key);
@@ -185,10 +188,15 @@ public class RedisClusterClient implements IRedisClusterClient {
             Map<String, String> hash = new HashMap<>();
             String[] items = removeCommandAndKey(list);
             for (int i = 0; i < items.length; i += 2) {
-                hash.put(items[i], items[i + 1]);
+                String subKey = items[i];
+                if (!Strings.isNullOrEmpty(subKey)) {
+                    hash.put(subKey, items[i + 1]);
+                }
             }
             result = jedisCluster.hset(key, hash);
         }
+        autoCommandResult.setTtl(ttl);
+        autoCommandResult.setType(type);
         autoCommandResult.setValue(result);
         return autoCommandResult;
     }
@@ -206,12 +214,12 @@ public class RedisClusterClient implements IRedisClusterClient {
         } else if (cmd.startsWith(RPUSH)) {
             result = jedisCluster.rpush(key, items);
         } else if (cmd.startsWith(LINDEX)) {
-            result = jedisCluster.lindex(key, Integer.valueOf(list[2]));
+            result = jedisCluster.lindex(key, Integer.parseInt(list[2]));
         } else if (cmd.startsWith(LLEN)) {
             result = jedisCluster.llen(key);
         } else if (cmd.startsWith(LRANGE)) {
-            int start = Integer.valueOf(list[2]);
-            int stop = Integer.valueOf(list[3]);
+            int start = Integer.parseInt(list[2]);
+            int stop = Integer.parseInt(list[3]);
             result = jedisCluster.lrange(key, start, stop);
         }
         return result;
@@ -233,7 +241,7 @@ public class RedisClusterClient implements IRedisClusterClient {
         } else if (cmd.startsWith(SRANDMEMBER)) {
             int count = 1;
             if (list.length > 2) {
-                count = Integer.valueOf(list[2]);
+                count = Integer.parseInt(list[2]);
             }
             result = jedisCluster.srandmember(key, count);
         }
@@ -256,17 +264,31 @@ public class RedisClusterClient implements IRedisClusterClient {
         } else if (cmd.startsWith(ZCOUNT)) {
             result = jedisCluster.zcount(key, param1, param2);
         } else if (cmd.startsWith(ZRANGE)) {
-            int start = Integer.valueOf(param1);
-            int stop = Integer.valueOf(param2);
+            int start = Integer.parseInt(param1);
+            int stop = Integer.parseInt(param2);
             if (list.length > 4) {
                 result = jedisCluster.zrangeWithScores(key, start, stop);
             } else {
                 result = jedisCluster.zrange(key, start, stop);
             }
         } else if (cmd.startsWith(ZADD)) {
-            result = jedisCluster.zadd(key, Double.valueOf(param1), param2);
+            result = jedisCluster.zadd(key, Double.parseDouble(param1), param2);
         }
         return result;
+    }
+
+    @Override
+    public Object type(DataCommandsParam dataCommandsParam) {
+        String command = dataCommandsParam.getCommand();
+        String key = RedisUtil.getKey(command);
+        return type(key);
+    }
+
+    @Override
+    public Object del(DataCommandsParam dataCommandsParam) {
+        String command = dataCommandsParam.getCommand();
+        String key = RedisUtil.getKey(command);
+        return del(key);
     }
 
     @Override
