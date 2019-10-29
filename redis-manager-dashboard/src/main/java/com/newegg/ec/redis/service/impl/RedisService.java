@@ -11,7 +11,6 @@ import com.newegg.ec.redis.util.RedisConfigUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
-import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -702,7 +701,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
                 configValue = "";
             }
             redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
-            redisClient.setConfig(new Pair<>(configKey, configValue));
+            redisClient.setConfig(configKey, configValue);
             if (Objects.equals(cluster.getRedisMode(), CLUSTER)) {
                 redisClient.clusterSaveConfig();
             }

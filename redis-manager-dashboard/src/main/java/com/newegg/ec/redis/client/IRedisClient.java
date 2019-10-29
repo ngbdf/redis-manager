@@ -1,10 +1,8 @@
 package com.newegg.ec.redis.client;
 
 import com.newegg.ec.redis.entity.AutoCommandParam;
-import com.newegg.ec.redis.entity.AutoCommandResult;
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
-import javafx.util.Pair;
 import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.MigrateParams;
@@ -106,10 +104,11 @@ public interface IRedisClient extends IDatabaseCommand {
     /**
      * change config
      *
-     * @param keyAndValue
+     * @param key
+     * @param value
      * @return
      */
-    boolean setConfig(Pair<String, String> keyAndValue);
+    boolean setConfig(String  key,String value);
 
     /** config */
     /**

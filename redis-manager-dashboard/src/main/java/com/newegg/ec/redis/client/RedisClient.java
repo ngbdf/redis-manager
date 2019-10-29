@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
-import javafx.util.Pair;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.MigrateParams;
@@ -430,10 +429,9 @@ public class RedisClient implements IRedisClient {
     public String clientList() {
         return jedis.clientList();
     }
-
     @Override
-    public boolean setConfig(Pair<String, String> keyAndValue) {
-        String result = jedis.configSet(keyAndValue.getKey(), keyAndValue.getValue());
+    public boolean setConfig(String configKey,String configValue) {
+        String result = jedis.configSet(configKey, configValue);
         return Objects.equals(result, OK);
     }
 

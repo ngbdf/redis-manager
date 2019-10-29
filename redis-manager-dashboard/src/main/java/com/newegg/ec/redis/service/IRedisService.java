@@ -3,7 +3,6 @@ package com.newegg.ec.redis.service;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisConfigUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
-import javafx.util.Pair;
 import redis.clients.jedis.HostAndPort;
 
 import java.util.List;

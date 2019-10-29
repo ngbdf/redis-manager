@@ -14,7 +14,6 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.*;
 import com.newegg.ec.redis.util.*;
-import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -578,8 +577,8 @@ public class InstallationTemplate {
         redisNodeList.forEach(redisNode -> {
             try {
                 RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode);
-                redisClient.setConfig(new Pair<>(MASTER_AUTH, redisPassword));
-                redisClient.setConfig(new Pair<>(REQUIRE_PASS, redisPassword));
+                redisClient.setConfig(MASTER_AUTH, redisPassword);
+                redisClient.setConfig(REQUIRE_PASS, redisPassword);
                 redisClient.close();
                 redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
                 redisClient.rewriteConfig();

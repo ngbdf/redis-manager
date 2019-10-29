@@ -24,3 +24,4 @@ selenium-debug.log
 *.ntvs*
 *.njsproj
 *.sln
+redis-manger-ui/redis-manager-vue/package-lock.json
