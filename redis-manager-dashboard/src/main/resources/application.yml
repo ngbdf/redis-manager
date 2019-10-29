@@ -62,6 +62,7 @@ redis-manager:
       docker-host: tcp://%s:2375
     # for newegg
     humpback:
+      enabled: true
       images: redis:4.0.10,redis:4.0.14,redis:5.0.5
       humpback-host: http://%s:8500/dockerapi/v2/
   alert:

@@ -46,7 +46,8 @@
                 <el-radio-group v-model="installationParam.installationEnvironment">
                   <el-radio :label="0">Docker</el-radio>
                   <el-radio :label="1">Machine</el-radio>
-                  <!-- <el-radio-button label="Kubernetes"></el-radio-button> -->
+                  <!-- <el-radio-button :label="2">Kubernetes</el-radio-button> -->
+                  <el-radio :label="3" v-if="humpbackEnabled">Humpback</el-radio>
                 </el-radio-group>
               </el-form-item>
               <!-- environment end -->
@@ -78,6 +79,25 @@
                 <el-select v-model.trim="installationParam.image" placeholder="Please choose image">
                   <el-option
                     v-for="image in machineImages"
+                    :key="image"
+                    :label="image"
+                    :value="image"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item
+                label="Image"
+                prop="image"
+                v-if="installationParam.installationEnvironment == 3"
+              >
+                <el-select
+                  allow-create
+                  filterable
+                  v-model.trim="installationParam.image"
+                  placeholder="Please choose image"
+                >
+                  <el-option
+                    v-for="image in humpbackImages"
                     :key="image"
                     :label="image"
                     :value="image"
@@ -383,6 +403,7 @@ export default {
     return {
       dockerImages: [],
       machineImages: [],
+      humpbackImages: [],
       installationParam: {
         groupId: "",
         clusterName: "Shanghai",
@@ -518,7 +539,8 @@ export default {
       allMachineList: [],
       websock: null,
       step: -1,
-      installationLoading: false
+      installationLoading: false,
+      humpbackEnabled: false
     };
   },
   methods: {
@@ -577,7 +599,7 @@ export default {
               params: { groupId: this.currentGroup.groupId }
             });
           } else {
-             message.error("Install failed");
+            message.error("Install failed");
           }
           this.installationLoading = false;
         },
@@ -597,11 +619,11 @@ export default {
           if (result.code == 0) {
             this.dockerImages = result.data;
           } else {
-             message.error(result.message);
+            message.error(result.message);
           }
         },
         err => {
-           message.error(err);
+          message.error(err);
         }
       );
     },
@@ -615,11 +637,29 @@ export default {
           if (result.code == 0) {
             this.machineImages = result.data;
           } else {
-             message.error(result.message);
+            message.error(result.message);
           }
         },
         err => {
-           message.error(err);
+          message.error(err);
+        }
+      );
+    },
+    getHumpbackImageList() {
+      let url = "/installation/getHumpbackImages";
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.humpbackImages = result.data;
+          } else {
+            message.error(result.message);
+          }
+        },
+        err => {
+          message.error(err);
         }
       );
     },
@@ -647,11 +687,11 @@ export default {
               this.allMachineList = hierarchyMachineList;
             });
           } else {
-             message.error(result.message);
+            message.error(result.message);
           }
         },
         err => {
-           message.error(err);
+          message.error(err);
         }
       );
     },
@@ -670,7 +710,7 @@ export default {
       this.websocketsend(this.installationParam.clusterName);
     },
     websocketonerror() {
-       message.error("Build websocket error");
+      message.error("Build websocket error");
     },
     websocketonmessage(msg) {
       //数据接收
@@ -699,7 +739,24 @@ export default {
     },
     websocketclose(e) {
       //关闭
-       message.error("Close websocket", e);
+      message.error("Close websocket", e);
+    },
+    getHumpbackEnabled() {
+      let url = "/switch/humpbackEnabled";
+      API.get(
+        url,
+        null,
+        response => {
+          let humpbackEnabled = response.data.data;
+          if (humpbackEnabled) {
+            this.humpbackEnabled = humpbackEnabled;
+            this.getHumpbackImageList();
+          }
+        },
+        err => {
+          console.log(err);
+        }
+      );
     }
   },
   computed: {
@@ -748,6 +805,7 @@ export default {
     this.getMachineImageList();
     let groupId = this.$route.params.groupId;
     this.getMachineList(groupId);
+    this.getHumpbackEnabled();
   }
 };
 </script>

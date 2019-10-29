@@ -110,6 +110,7 @@
               Environment:
               <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Docker</el-tag>
               <el-tag size="mini" v-else-if="cluster.installationEnvironment == 1">Machine</el-tag>
+              <el-tag size="mini" v-else-if="cluster.installationEnvironment == 3">Humpback</el-tag>
             </div>
             <div class="text item">
               From:

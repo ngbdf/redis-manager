@@ -176,7 +176,7 @@
         <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
           <el-card shadow="hover" class="box-card">
             <div
-              id="keyspace-hits-ration"
+              id="keyspace-hits-ratio"
               class="chart"
               :class="{ 'chart-no-data' : noNodeInfoData }"
             ></div>
@@ -479,7 +479,8 @@ export default {
         },
         err => {
           this.monitorDataLoading = false;
-         message.error(err);
+          console.log(err)
+          message.error(err);
         }
       );
     },
@@ -679,8 +680,8 @@ export default {
         data: replicaData
       });
       echartsData.push({
-        id: "keyspace-hits-ration",
-        title: "Keyspace Hits Ration",
+        id: "keyspace-hits-ratio",
+        title: "Keyspace Hits Ratio",
         data: keyspaceHitsRationData
       });
       echartsData.push({

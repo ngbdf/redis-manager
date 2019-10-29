@@ -8,6 +8,7 @@ import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
+import com.newegg.ec.redis.plugin.install.service.impl.HumpbackNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.MachineNodeOperation;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
@@ -25,8 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.newegg.ec.redis.client.RedisClient.SERVER;
-import static com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment.DOCKER;
-import static com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment.MACHINE;
+import static com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment.*;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
 import static com.newegg.ec.redis.util.RedisUtil.*;
 
@@ -56,6 +56,9 @@ public class ClusterService implements IClusterService {
 
     @Autowired
     private MachineNodeOperation machineNodeOperation;
+
+    @Autowired
+    private HumpbackNodeOperation humpbackNodeOperation;
 
     @Override
     public List<Cluster> getAllClusterList() {
@@ -296,6 +299,8 @@ public class ClusterService implements IClusterService {
                 return dockerNodeOperation;
             case MACHINE:
                 return machineNodeOperation;
+            case HUMPBACK:
+                return humpbackNodeOperation;
             default:
                 return null;
         }

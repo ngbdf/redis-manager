@@ -1,7 +1,9 @@
 package com.newegg.ec.redis.plugin.install.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.config.SystemConfig;
 import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
@@ -9,27 +11,33 @@ import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
+import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import com.newegg.ec.redis.util.httpclient.HttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static com.newegg.ec.redis.plugin.install.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
+import static com.newegg.ec.redis.util.RedisConfigUtil.*;
+import static com.newegg.ec.redis.util.RedisConfigUtil.DIR;
+import static com.newegg.ec.redis.util.SignUtil.SLASH;
 import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
  * @author Jay.H.Zou
  * @date 10/26/2019
  */
+@Component
 public class HumpbackNodeOperation extends AbstractNodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(HumpbackNodeOperation.class);
@@ -40,27 +48,42 @@ public class HumpbackNodeOperation extends AbstractNodeOperation {
     @Value("${redis-manager.install.humpback.humpback-host：http://%s:8500/dockerapi/v2/}")
     private String humpbackHost;
 
-    /** humpback api */
+    @Autowired
+    private HumpbackAPI humpbackAPI;
+
+    @Autowired
+    private SystemConfig systemConfig;
+
+    /**
+     * humpback api
+     */
 
     private static final String GET_DOCKER_VERSION = "dockerversion";
 
-    private static final String IMAGES = "images";
+    private static String IMAGE_OPERATION;
 
-    private static final String CONTAINER = "containers";
+    private static String CONTAINER_OPERATION;
 
-    /** humpback api */
+    /**
+     * humpback api
+     */
 
     public static final String DOCKER_INSTALL_BASE_PATH = "/data/redis/docker/";
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        if (!systemConfig.getHumpbackEnabled()) {
+            return;
+        }
         INSTALL_BASE_PATH = DOCKER_INSTALL_BASE_PATH;
         if (Strings.isNullOrEmpty(images)) {
             throw new ConfigurationException("images not allow empty!");
         }
-        if (!humpbackHost.endsWith(SignUtil.SLASH)) {
-            humpbackHost += SignUtil.SLASH;
+        if (!humpbackHost.endsWith(SLASH)) {
+            humpbackHost += SLASH;
         }
+        IMAGE_OPERATION = humpbackHost + "images";
+        CONTAINER_OPERATION = humpbackHost + "containers";
     }
 
     @Override
@@ -75,7 +98,7 @@ public class HumpbackNodeOperation extends AbstractNodeOperation {
         for (Machine machine : machineList) {
             String host = machine.getHost();
             try {
-
+                humpbackAPI.getDockerVersion(host);
             } catch (Exception e) {
                 String message = "Check humpback environment failed, host: " + host;
                 InstallationWebSocketHandler.appendLog(clusterName, message);
@@ -94,8 +117,6 @@ public class HumpbackNodeOperation extends AbstractNodeOperation {
         String clusterName = cluster.getClusterName();
         String image = cluster.getImage();
 
-        String urlTemplate = humpbackHost + IMAGES;
-
         JSONObject requestBody = new JSONObject();
         requestBody.put("Image", image);
         List<Future<Boolean>> resultFutureList = new ArrayList<>(machineList.size());
@@ -103,7 +124,7 @@ public class HumpbackNodeOperation extends AbstractNodeOperation {
             resultFutureList.add(threadPool.submit(() -> {
                 String host = machine.getHost();
                 try {
-                    String post = HttpClientUtil.post(String.format(urlTemplate, host), requestBody);
+                    String post = HttpClientUtil.post(String.format(IMAGE_OPERATION, host), requestBody);
                     return true;
                 } catch (Exception e) {
                     String message = "Pull docker image failed, host: " + host;
@@ -128,43 +149,92 @@ public class HumpbackNodeOperation extends AbstractNodeOperation {
         return true;
     }
 
-//    public static void main(String[] args) throws IOException {
-//        JSONObject requestBody = new JSONObject();
-//        requestBody.put("Image", "docker.neg/shec/redis-4.0.8:v1");
-//        String url = String.format("http://%s:8500/dockerapi/v2/images", "1xxx");
-//        String post = HttpClientUtil.post(url, requestBody);
-//        System.err.println(post);
-//    }
-
 
     @Override
     public boolean install(InstallationParam installationParam) {
-        return false;
-    }
-
-    @Override
-    protected Map<String, String> getBaseConfigs(String bind, int port, String dir) {
-        return null;
+        List<RedisNode> allRedisNodes = installationParam.getRedisNodeList();
+        Cluster cluster = installationParam.getCluster();
+        for (RedisNode redisNode : allRedisNodes) {
+            boolean start = start(cluster, redisNode);
+            if (!start) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean start(Cluster cluster, RedisNode redisNode) {
-        return false;
+        String image = cluster.getImage();
+        String clusterName = cluster.getClusterName();
+        int port = redisNode.getPort();
+        String host = redisNode.getHost();
+        String containerName = RedisUtil.generateContainerName(clusterName, port);
+        try {
+            String containerId = redisNode.getContainerId();
+            if (Strings.isNullOrEmpty(containerId)) {
+                JSONObject response = humpbackAPI.createContainer(host, image, containerName);
+                containerId = response.getString("Id");
+                redisNode.setContainerId(containerId);
+                redisNode.setContainerName(containerName);
+            }
+            humpbackAPI.runContainer(host, containerName);
+            return true;
+        } catch (Exception e) {
+            String message = "Start container failed, host: " + host + ", port: " + port;
+            InstallationWebSocketHandler.appendLog(clusterName, message);
+            InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+            logger.error(message, e);
+            return false;
+        }
     }
 
     @Override
     public boolean stop(Cluster cluster, RedisNode redisNode) {
-        return false;
+        try {
+            humpbackAPI.stopContainer(redisNode.getHost(), redisNode.getContainerName());
+            return true;
+        } catch (Exception e) {
+            logger.error("Stop container failed, host: " + redisNode.getHost() + ", container name: " + redisNode.getContainerName());
+            return false;
+        }
     }
 
     @Override
     public boolean restart(Cluster cluster, RedisNode redisNode) {
-        return false;
+        try {
+            humpbackAPI.restartContainer(redisNode.getHost(), redisNode.getContainerName());
+            return true;
+        } catch (Exception e) {
+            logger.error("Restart container failed, host: " + redisNode.getHost() + ", container name: " + redisNode.getContainerName());
+            return false;
+        }
     }
 
     @Override
     public boolean remove(Cluster cluster, RedisNode redisNode) {
-        return false;
+        try {
+            humpbackAPI.removeContainer(redisNode.getHost(), redisNode.getContainerId());
+            return true;
+        } catch (Exception e) {
+            logger.error("Remove container failed, host: " + redisNode.getHost() + ", container name: " + redisNode.getContainerName());
+            return false;
+        }
+    }
+
+    @Override
+    public Map<String, String> getBaseConfigs(String bind, int port, String dir) {
+        Map<String, String> configs = new HashMap<>(3);
+        configs.put(DAEMONIZE, "no");
+        configs.put(BIND, bind);
+        configs.put(PORT, port + "");
+        configs.put(DIR, "/data/");
+        return configs;
+    }
+
+    @Bean
+    public HumpbackAPI generateHumpbackAPI() {
+        return new HumpbackAPI();
     }
 
     private class HumpbackAPI {
@@ -175,6 +245,59 @@ public class HumpbackNodeOperation extends AbstractNodeOperation {
             return JSONObject.parseObject(response);
         }
 
+        public JSONObject pullImage(String host, String image) throws IOException {
+            JSONObject request = new JSONObject();
+            request.put("Image", image);
+            String response = HttpClientUtil.post(String.format(CONTAINER_OPERATION, host), request);
+            return JSONObject.parseObject(response);
+        }
+
+        public JSONObject createContainer(String host, String image, String containerName) throws IOException {
+            JSONObject request = buildCreateContainerRequest(image, containerName);
+            String response = HttpClientUtil.post(String.format(CONTAINER_OPERATION, host), request);
+            return JSONObject.parseObject(response);
+        }
+
+        public JSONObject runContainer(String host, String containerName) throws IOException {
+            return containerOperation(host, containerName, "start");
+        }
+
+        public JSONObject stopContainer(String host, String containerName) throws IOException {
+            return containerOperation(host, containerName, "stop");
+        }
+
+        public JSONObject restartContainer(String host, String containerName) throws IOException {
+            return containerOperation(host, containerName, "restart");
+        }
+
+        public JSONObject removeContainer(String host, String containerId) throws IOException {
+            String urlTemplate = CONTAINER_OPERATION + SLASH + containerId + SLASH + "?force=true";
+            String response = HttpClientUtil.get(String.format(urlTemplate, host));
+            return JSONObject.parseObject(response);
+        }
+
+        JSONObject containerOperation(String host, String containerName, String action) throws IOException {
+            JSONObject request = new JSONObject();
+            request.put("Action", action);
+            request.put("Container", containerName);
+            String response = HttpClientUtil.post(String.format(CONTAINER_OPERATION, host), request);
+            return JSONObject.parseObject(response);
+        }
+
+        private JSONObject buildCreateContainerRequest(String image, String containerName) {
+            JSONObject request = new JSONObject();
+            request.put("Image", image);
+            JSONArray volumeArr = new JSONArray();
+            JSONObject volume = new JSONObject();
+            volume.put("ContainerVolume", REDIS_DEFAULT_WORK_DIR);
+            volume.put("HostVolume", DOCKER_INSTALL_BASE_PATH);
+            volumeArr.add(volume);
+            request.put("Volumes", volumeArr);
+            request.put("NetworkMode", "host");
+            request.put("RestartPolicy", "always");
+            request.put("Name", containerName);
+            return request;
+        }
     }
 
 

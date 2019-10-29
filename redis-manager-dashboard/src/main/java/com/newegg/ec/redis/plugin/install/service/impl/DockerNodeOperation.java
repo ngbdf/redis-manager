@@ -10,6 +10,7 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.DockerClientOperation;
 import com.newegg.ec.redis.plugin.install.service.INodeOperation;
+import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,20 +143,17 @@ public class DockerNodeOperation extends AbstractNodeOperation implements INodeO
     public boolean start(Cluster cluster, RedisNode redisNode) {
         String image = cluster.getImage();
         String clusterName = cluster.getClusterName();
-        String containerNamePrefix = SignUtil.replaceSpaceToMinus(clusterName);
         int port = redisNode.getPort();
         String host = redisNode.getHost();
-        String containerName = (containerNamePrefix + MINUS + port).toLowerCase();
+        String containerName = RedisUtil.generateContainerName(clusterName, port);
         try {
             String containerId = redisNode.getContainerId();
             if (Strings.isNullOrEmpty(containerId)) {
                 containerId = dockerClientOperation.createContainer(host, port, image, containerName);
-                dockerClientOperation.runContainer(host, containerId);
                 redisNode.setContainerId(containerId);
                 redisNode.setContainerName(containerName);
-            } else {
-                dockerClientOperation.runContainer(host, containerId);
             }
+            dockerClientOperation.runContainer(host, containerId);
             return true;
         } catch (Exception e) {
             String message = "Start container failed, host: " + host + ", port: " + port;

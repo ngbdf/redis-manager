@@ -8,6 +8,7 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.InstallationOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
+import com.newegg.ec.redis.plugin.install.service.impl.HumpbackNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.MachineNodeOperation;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisNodeService;
@@ -41,6 +42,9 @@ public class InstallationController {
     private MachineNodeOperation machineNodeOperation;
 
     @Autowired
+    private HumpbackNodeOperation humpbackNodeOperation;
+
+    @Autowired
     private InstallationTemplate installationTemplate;
 
     @Autowired
@@ -67,6 +71,18 @@ public class InstallationController {
         } catch (Exception e) {
             logger.error("Get machine image list failed.", e);
             return Result.failResult().setMessage("Get machine image list failed.");
+        }
+    }
+
+    @RequestMapping(value = "getHumpbackImages", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getHumpbackImages() {
+        try {
+            List<String> imageList = humpbackNodeOperation.getImageList();
+            return Result.successResult(imageList);
+        } catch (Exception e) {
+            logger.error("Get humpback image list failed.", e);
+            return Result.failResult().setMessage("Get humpback image list failed.");
         }
     }
 

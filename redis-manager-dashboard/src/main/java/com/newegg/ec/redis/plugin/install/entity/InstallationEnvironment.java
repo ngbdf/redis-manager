@@ -22,4 +22,6 @@ public class InstallationEnvironment {
      * kubernetes
      */
     public static final int KUBERNETES = 2;
+
+    public static final int HUMPBACK = 3;
 }

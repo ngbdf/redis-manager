@@ -73,7 +73,7 @@ public class RedisConfigUtil {
             if (sudo) {
                 commands.append("sudo ");
             }
-            commands.append("sed -i 's#{" + key + "}#" + value + "#g' " + REDIS_CONF + ";");
+            commands.append("sed -i 's#{").append(key).append("}#").append(value).append("#g' ").append(REDIS_CONF).append(";");
         }
         String result = SSH2Util.execute(machine, commands.toString());
         return result;
@@ -86,10 +86,8 @@ public class RedisConfigUtil {
             throw new RuntimeException(path + " mkdir failed.");
         }
         File file = new File(path + REDIS_CONF);
-        if (file.exists()) {
-            if (!file.delete()) {
-                throw new RuntimeException(file.getName() + " delete failed.");
-            }
+        if (file.exists() && !file.delete()) {
+            throw new RuntimeException(file.getName() + " delete failed.");
         }
         if (!file.createNewFile()) {
             throw new RuntimeException(file.getName() + " create failed.");

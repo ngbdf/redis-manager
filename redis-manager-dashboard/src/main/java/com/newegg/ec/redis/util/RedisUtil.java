@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.*;
 
+import static com.newegg.ec.redis.util.SignUtil.MINUS;
+
 /**
  * @author Jay.H.Zou
  * @date 7/26/2019
@@ -167,6 +169,15 @@ public class RedisUtil {
         StringBuilder result = new StringBuilder();
         result.append(redisNode.getHost()).append(SignUtil.COLON).append(redisNode.getPort());
         return result.toString();
+    }
+
+    public static String generateContainerName(String clusterName, int port){
+        String containerNamePrefix = SignUtil.replaceSpaceToMinus(clusterName);
+        if (containerNamePrefix.endsWith(MINUS)) {
+            return (containerNamePrefix + port).toLowerCase();
+        } else {
+            return (containerNamePrefix + MINUS + port).toLowerCase();
+        }
     }
 
 }

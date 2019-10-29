@@ -41,6 +41,9 @@ public class SystemConfig implements WebMvcConfigurer {
     @Value("${redis-manager.auth.avatar-path}")
     private String avatarPath;
 
+    @Value("${redis-manager.install.humpback.enabled:false}")
+    private boolean humpbackEnabled;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         if (Strings.isNullOrEmpty(configPath)) {
@@ -87,5 +90,9 @@ public class SystemConfig implements WebMvcConfigurer {
 
     public int getServerPort() {
         return serverPort;
+    }
+
+    public boolean getHumpbackEnabled() {
+        return humpbackEnabled;
     }
 }
