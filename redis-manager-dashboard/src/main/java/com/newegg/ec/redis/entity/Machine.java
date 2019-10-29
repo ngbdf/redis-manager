@@ -22,7 +22,7 @@ public class Machine {
 
     private String token;
 
-    private int machineType;
+    private Integer machineType;
 
     private String machineInfo;
 
@@ -92,11 +92,11 @@ public class Machine {
         this.token = token;
     }
 
-    public int getMachineType() {
+    public Integer getMachineType() {
         return machineType;
     }
 
-    public void setMachineType(int machineType) {
+    public void setMachineType(Integer machineType) {
         this.machineType = machineType;
     }
 

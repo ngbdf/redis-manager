@@ -138,19 +138,12 @@ public class NodeManageController {
     @ResponseBody
     public Result getRedisConfigKeyList() {
         Set<String> configKeyList = RedisConfigUtil.getConfigKeyList();
-        Iterator<String> iterator = configKeyList.iterator();
-        while (iterator.hasNext()) {
-            String configKey = iterator.next();
-            if (Objects.equals(configKey, REQUIRE_PASS)
-                    || Objects.equals(configKey, MASTER_AUTH)
-                    || Objects.equals(configKey, BIND)
-                    || Objects.equals(configKey, PORT)
-                    || Objects.equals(configKey, DIR)
-                    || Objects.equals(configKey, DAEMONIZE)
-            ) {
-              iterator.remove();
-            }
-        }
+        configKeyList.removeIf(configKey -> Objects.equals(configKey, REQUIRE_PASS)
+                || Objects.equals(configKey, MASTER_AUTH)
+                || Objects.equals(configKey, BIND)
+                || Objects.equals(configKey, PORT)
+                || Objects.equals(configKey, DIR)
+                || Objects.equals(configKey, DAEMONIZE));
         return Result.successResult(configKeyList);
     }
 
@@ -359,7 +352,7 @@ public class NodeManageController {
     public Result initSlots(@RequestBody Cluster cluster) {
         cluster = clusterService.getClusterById(cluster.getClusterId());
         String result = redisService.initSlots(cluster);
-        return Strings.isNullOrEmpty(result) ? Result.successResult():Result.failResult().setMessage(result);
+        return Strings.isNullOrEmpty(result) ? Result.successResult() : Result.failResult().setMessage(result);
     }
 
     private Cluster getCluster(Integer clusterId) {

@@ -36,7 +36,6 @@ public interface IMachineService {
     Machine getMachineByHost(Integer groupId, String host);
 
     /**
-     *
      * @param machineIdList
      * @return connection refused list
      */

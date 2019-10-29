@@ -48,7 +48,7 @@ public class MachineController {
     public Result getHierarchyMachineList(@PathVariable("groupId") Integer groupId) {
         List<Machine> machineList = machineService.getMachineByGroupId(groupId);
         if (machineList == null) {
-          return Result.failResult().setMessage("Get machine list failed.");
+            return Result.failResult().setMessage("Get machine list failed.");
         }
         Multimap<String, Machine> hierarchyMachineMap = ArrayListMultimap.create();
         machineList.forEach(machine -> hierarchyMachineMap.put(machine.getMachineGroupName(), machine));

@@ -6,7 +6,6 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 
 /**
- *
  * @author Jay.H.Zou
  * @date 2019/7/18
  */
@@ -62,7 +61,7 @@ public interface IClusterDao {
     int updateCluster(Cluster cluster);
 
     @Update("UPDATE cluster SET total_keys = #{totalKeys}, total_expires = #{totalExpires}, update_time = NOW() WHERE cluster_id = #{clusterId}")
-    int updateKeyspace(@Param("clusterId") Integer clusterId, @Param("totalKeys") Long totalKeys,  @Param("totalExpires") Long totalExpires);
+    int updateKeyspace(@Param("clusterId") Integer clusterId, @Param("totalKeys") Long totalKeys, @Param("totalExpires") Long totalExpires);
 
     @Update("UPDATE cluster SET redis_password = #{redisPassword}, update_time = NOW() WHERE cluster_id = #{clusterId}")
     int updateRedisPassword(@Param("clusterId") Integer clusterId, @Param("redisPassword") String redisPassword);

@@ -35,7 +35,7 @@ public class AlertRuleService implements IAlertRuleService {
     @Override
     public List<AlertRule> getAlertRuleByIds(Integer groupId, List<Integer> ruleIdList) {
         try {
-            return alertRuleDao.selectAlertRuleByIds(groupId,ruleIdList);
+            return alertRuleDao.selectAlertRuleByIds(groupId, ruleIdList);
         } catch (Exception e) {
             logger.error("Get alert rule by ids failed.", e);
             return null;

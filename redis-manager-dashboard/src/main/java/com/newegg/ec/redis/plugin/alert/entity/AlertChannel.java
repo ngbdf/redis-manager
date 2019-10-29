@@ -55,7 +55,6 @@ public class AlertChannel {
      * 1: wechat web hook
      * 2: wechat app
      * 3: dingding web hook
-     *
      */
     private int channelType;
 

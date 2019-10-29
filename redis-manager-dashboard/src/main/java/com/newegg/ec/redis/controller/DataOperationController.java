@@ -77,7 +77,7 @@ public class DataOperationController {
         Cluster cluster = clusterService.getClusterById(dataCommandsParam.getClusterId());
         Object console = redisService.console(cluster, dataCommandsParam);
         // 格式处理
-        if (console == null ) {
+        if (console == null) {
             return Result.failResult();
         }
         return Result.successResult(console);

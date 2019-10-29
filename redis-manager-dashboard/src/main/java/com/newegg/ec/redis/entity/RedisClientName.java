@@ -6,7 +6,8 @@ package com.newegg.ec.redis.entity;
  */
 public class RedisClientName {
 
-    private RedisClientName() {}
+    private RedisClientName() {
+    }
 
     public static final String REDIS_MANAGER_ClIENT = "redis-manager";
 

@@ -442,7 +442,7 @@ public class RedisNodeInfoUtil {
         INFO_DESC_MAP.put("min_slaves_good_slaves", "Number of replicas currently considered good.");
         // cpu
         INFO_DESC_MAP.put(USED_CPU_SYS, "System CPU consumed by the Redis server.");
-        INFO_DESC_MAP.put(USED_CPU_USER,"User CPU consumed by the Redis server.");
+        INFO_DESC_MAP.put(USED_CPU_USER, "User CPU consumed by the Redis server.");
         INFO_DESC_MAP.put("used_cpu_sys_children", "System CPU consumed by the background processes.");
         INFO_DESC_MAP.put("used_cpu_user_children", "User CPU consumed by the background processes.");
         // cluster

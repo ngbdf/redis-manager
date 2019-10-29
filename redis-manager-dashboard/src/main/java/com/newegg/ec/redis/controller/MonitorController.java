@@ -33,17 +33,16 @@ public class MonitorController {
     @RequestMapping(value = "/getNodeInfoList", method = RequestMethod.POST)
     @ResponseBody
     public Result getNodeInfoList(@RequestBody NodeInfoParam nodeInfoParam) {
-        // System.err.println(nodeInfoParam);
         List<NodeInfo> nodeInfoList = nodeInfoService.getNodeInfoList(nodeInfoParam);
         return nodeInfoList != null ? Result.successResult(nodeInfoList) : Result.failResult();
     }
 
     @RequestMapping(value = "/getSlowLogList", method = RequestMethod.POST)
     @ResponseBody
-    public Result getSlowLogList(@RequestBody SlowLogParam slowLogParam){
+    public Result getSlowLogList(@RequestBody SlowLogParam slowLogParam) {
         Cluster cluster = clusterService.getClusterById(slowLogParam.getClusterId());
         if (cluster == null) {
-            return Result.failResult().setMessage("Cluster not exist.");
+            return Result.failResult();
         }
         List<RedisSlowLog> redisSlowLog = redisService.getRedisSlowLog(cluster, slowLogParam);
         return Result.successResult(redisSlowLog);

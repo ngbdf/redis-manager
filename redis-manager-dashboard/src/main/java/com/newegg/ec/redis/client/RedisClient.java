@@ -429,8 +429,9 @@ public class RedisClient implements IRedisClient {
     public String clientList() {
         return jedis.clientList();
     }
+
     @Override
-    public boolean setConfig(String configKey,String configValue) {
+    public boolean setConfig(String configKey, String configValue) {
         String result = jedis.configSet(configKey, configValue);
         return Objects.equals(result, OK);
     }

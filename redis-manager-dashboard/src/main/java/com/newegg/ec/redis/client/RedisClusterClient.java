@@ -63,7 +63,7 @@ public class RedisClusterClient implements IRedisClusterClient {
             String masterId = item[3];
             String linkState = item[7];
             RedisNode redisNode = new RedisNode(nodeId, hostAndPort.getHost(), hostAndPort.getPort(), null);
-            if(flags.contains("myself")) {
+            if (flags.contains("myself")) {
                 flags = flags.substring(7);
             }
             redisNode.setFlags(flags);
@@ -73,7 +73,7 @@ public class RedisClusterClient implements IRedisClusterClient {
             if (length > 8) {
                 int slotNumber = 0;
                 StringBuilder slotRang = new StringBuilder();
-                for(int i = 8; i < length; i++) {
+                for (int i = 8; i < length; i++) {
                     String slotRangeItem = item[i];
                     String[] startAndEnd = SignUtil.splitByMinus(slotRangeItem);
                     if (startAndEnd.length == 1) {

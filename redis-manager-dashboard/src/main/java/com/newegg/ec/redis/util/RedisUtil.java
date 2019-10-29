@@ -156,6 +156,7 @@ public class RedisUtil {
         }
         return items;
     }
+
     public static String getKey(String command) {
         return SignUtil.splitBySpace(command)[1];
     }
@@ -171,7 +172,7 @@ public class RedisUtil {
         return result.toString();
     }
 
-    public static String generateContainerName(String clusterName, int port){
+    public static String generateContainerName(String clusterName, int port) {
         String containerNamePrefix = SignUtil.replaceSpaceToMinus(clusterName);
         if (containerNamePrefix.endsWith(MINUS)) {
             return (containerNamePrefix + port).toLowerCase();

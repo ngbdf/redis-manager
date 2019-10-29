@@ -29,12 +29,13 @@ public class NodeInfoMinuteCollection extends NodeInfoCollectionAbstract {
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        coreSize = Runtime.getRuntime().availableProcessors() ;
+        coreSize = Runtime.getRuntime().availableProcessors();
         threadPool = new ThreadPoolExecutor(coreSize, coreSize * 8, 60L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("collect-node-info-pool-thread-%d").build(),
                 new ThreadPoolExecutor.AbortPolicy());
     }
+
     /**
      * 一分钟收集一次 RedisNode 数据，并计算以 MINUTE 为单位的 avg, max, min
      */

@@ -125,7 +125,7 @@ public class MachineService implements IMachineService {
     @Override
     public boolean updateMachine(Machine machine) {
         try {
-             return machineDao.updateMachine(machine) > 0;
+            return machineDao.updateMachine(machine) > 0;
         } catch (Exception e) {
             logger.error("Update machine failed, " + machine, e);
             return false;

@@ -71,7 +71,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
                 // clean last time data and save new data to db
                 NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType);
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
-                if(TimeType.MINUTE.equals(timeType)) {
+                if (TimeType.MINUTE.equals(timeType)) {
                     clusterService.updateCluster(cluster);
                 }
             } catch (Exception e) {

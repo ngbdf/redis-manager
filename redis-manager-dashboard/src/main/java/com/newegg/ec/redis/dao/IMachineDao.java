@@ -57,7 +57,7 @@ public interface IMachineDao {
             "#{machineId}" +
             "</foreach>)" +
             "</script>")
-    int deleteMachineByIdBatch(@Param("machineIdList") List<Integer>  machineIdList);
+    int deleteMachineByIdBatch(@Param("machineIdList") List<Integer> machineIdList);
 
     @Select("create TABLE IF NOT EXISTS `machine`( " +
             "machine_id integer(4) NOT NULL AUTO_INCREMENT, " +

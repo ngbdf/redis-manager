@@ -30,13 +30,19 @@ public class User {
 
     public static class UserRole {
 
-        /** super admin: manage all groups and members */
+        /**
+         * super admin: manage all groups and members
+         */
         public static final int SUPER_ADMIN = 0;
 
-        /** admin: manage the group and member */
+        /**
+         * admin: manage the group and member
+         */
         public static final int ADMIN = 1;
 
-        /** only read */
+        /**
+         * only read
+         */
         public static final int MEMBER = 2;
     }
 

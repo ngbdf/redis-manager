@@ -32,7 +32,7 @@ import static com.newegg.ec.redis.util.SignUtil.SPACE;
  * @date 2019/8/12
  */
 @Component
-public class DockerNodeOperation extends AbstractNodeOperation implements INodeOperation {
+public class DockerNodeOperation extends AbstractNodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(DockerNodeOperation.class);
 

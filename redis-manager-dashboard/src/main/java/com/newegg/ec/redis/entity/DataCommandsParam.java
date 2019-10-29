@@ -1,7 +1,6 @@
 package com.newegg.ec.redis.entity;
 
 
-
 /**
  * @author Jay
  */

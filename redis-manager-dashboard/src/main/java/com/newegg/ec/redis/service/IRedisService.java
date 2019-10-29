@@ -98,6 +98,7 @@ public interface IRedisService {
     String clusterAddSlotsBatch(Cluster cluster, Map<RedisNode, SlotBalanceUtil.Shade> masterNodeAndShade);
 
     String initSlots(Cluster cluster);
+
     /**
      * 迁移槽位
      *

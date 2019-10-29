@@ -18,6 +18,7 @@ package com.newegg.ec.redis.entity;
  * cluster_stats_messages_ping_received:1538939
  * cluster_stats_messages_pong_received:1492419
  * cluster_stats_messages_received:3031358
+ *
  * @author Jay.H.Zou
  * @date 7/19/2019
  */

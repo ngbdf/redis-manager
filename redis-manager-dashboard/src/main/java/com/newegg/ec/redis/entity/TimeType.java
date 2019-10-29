@@ -6,7 +6,8 @@ package com.newegg.ec.redis.entity;
  */
 public class TimeType {
 
-    private TimeType() {}
+    private TimeType() {
+    }
 
     public static final Integer MINUTE = 0;
 

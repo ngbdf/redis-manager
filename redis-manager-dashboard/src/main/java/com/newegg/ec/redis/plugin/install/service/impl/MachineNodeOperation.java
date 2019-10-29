@@ -40,7 +40,7 @@ import static com.newegg.ec.redis.util.SignUtil.SLASH;
  * @date 2019/8/13
  */
 @Component
-public class MachineNodeOperation extends AbstractNodeOperation implements INodeOperation {
+public class MachineNodeOperation extends AbstractNodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(MachineNodeOperation.class);
 

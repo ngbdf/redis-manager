@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- *
  * @author Jay.H.Zou
  * @date 7/30/2019
  */
@@ -30,12 +29,12 @@ public class WechatWebHookAlert extends AbstractAlertAlert {
     @Override
     public void alert(AlertChannel alertChannel, List<AlertRecord> alertRecordList) {
         JSONObject requestBody = buildRequestBody(alertRecordList);
-            String webhook = alertChannel.getWebhook();
-            try {
-                HttpClientUtil.post(webhook, requestBody);
-            } catch (IOException e) {
-                logger.error("Wechat webhook notify failed, " + alertChannel, e);
-            }
+        String webhook = alertChannel.getWebhook();
+        try {
+            HttpClientUtil.post(webhook, requestBody);
+        } catch (IOException e) {
+            logger.error("Wechat webhook notify failed, " + alertChannel, e);
+        }
     }
 
     /**
@@ -47,6 +46,7 @@ public class WechatWebHookAlert extends AbstractAlertAlert {
      * "mentioned_mobile_list":["13800001111","@all"]
      * }
      * }
+     *
      * @param alertRecordList
      * @return
      */

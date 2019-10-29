@@ -13,7 +13,6 @@ public interface InstallationOperation {
     int MIN_MEMORY_FREE = 10;
 
     /**
-     *
      * @return
      */
     List<String> getImageList();

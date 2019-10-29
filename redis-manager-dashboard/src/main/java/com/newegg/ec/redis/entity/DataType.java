@@ -6,16 +6,17 @@ package com.newegg.ec.redis.entity;
  */
 public class DataType {
 
-    private DataType(){}
+    private DataType() {
+    }
 
     public static final Integer NODE = 0;
 
     /**
      * monitor default: calculate node info
      */
-   public static final Integer AVG = 1;
+    public static final Integer AVG = 1;
 
-   public static final Integer MAX = 2;
+    public static final Integer MAX = 2;
 
-   public static final Integer MIN = -1;
+    public static final Integer MIN = -1;
 }

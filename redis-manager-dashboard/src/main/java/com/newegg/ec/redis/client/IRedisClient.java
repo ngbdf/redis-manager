@@ -108,7 +108,7 @@ public interface IRedisClient extends IDatabaseCommand {
      * @param value
      * @return
      */
-    boolean setConfig(String  key,String value);
+    boolean setConfig(String key, String value);
 
     /** config */
     /**
@@ -135,6 +135,7 @@ public interface IRedisClient extends IDatabaseCommand {
 
     /**
      * 该命令主要用于nodes.conf节点状态文件丢失或被删除的情况下重新生成文件。
+     *
      * @return
      */
     String clusterSaveConfig();

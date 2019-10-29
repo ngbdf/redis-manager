@@ -82,6 +82,7 @@ public class SystemConfig implements WebMvcConfigurer {
         configurer.setDefaultTimeout(FIVE_MINUTES);
         configurer.registerCallableInterceptors(timeoutInterceptor());
     }
+
     @Bean
     public TimeoutCallableProcessingInterceptor timeoutInterceptor() {
         return new TimeoutCallableProcessingInterceptor();

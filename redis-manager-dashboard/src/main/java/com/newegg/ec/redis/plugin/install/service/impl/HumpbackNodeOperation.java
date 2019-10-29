@@ -38,7 +38,7 @@ import static com.newegg.ec.redis.util.SignUtil.SPACE;
  * @date 10/26/2019
  */
 @Component
-public class HumpbackNodeOperation extends AbstractNodeOperation {
+public class HumpbackNodeOperation extends DockerNodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(HumpbackNodeOperation.class);
 
@@ -222,7 +222,7 @@ public class HumpbackNodeOperation extends AbstractNodeOperation {
         }
     }
 
-    @Override
+    /*@Override
     public Map<String, String> getBaseConfigs(String bind, int port, String dir) {
         Map<String, String> configs = new HashMap<>(3);
         configs.put(DAEMONIZE, "no");
@@ -230,7 +230,7 @@ public class HumpbackNodeOperation extends AbstractNodeOperation {
         configs.put(PORT, port + "");
         configs.put(DIR, "/data/");
         return configs;
-    }
+    }*/
 
     @Bean
     public HumpbackAPI generateHumpbackAPI() {

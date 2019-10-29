@@ -27,7 +27,8 @@ public enum NodeRole {
 
     private String value;
 
-    NodeRole(){}
+    NodeRole() {
+    }
 
     NodeRole(String value) {
         this.value = value;

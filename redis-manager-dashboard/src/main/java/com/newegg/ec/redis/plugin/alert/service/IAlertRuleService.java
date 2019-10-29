@@ -13,7 +13,7 @@ public interface IAlertRuleService {
     AlertRule getAlertRuleById(Integer ruleId);
 
     List<AlertRule> getAlertRuleByIds(Integer groupId, List<Integer> ruleIdList);
-    
+
     List<AlertRule> getAlertRuleByGroupId(Integer groupId);
 
     List<AlertRule> getAlertRuleNotUsed(Integer groupId, List<Integer> ruleIdList);
