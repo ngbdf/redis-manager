@@ -59,8 +59,8 @@ public class TimeUtil {
         return new Timestamp(System.currentTimeMillis() - duration);
     }
 
-    public static Timestamp getLastHourTimestamp() {
-        return getTime(ONE_HOUR);
+    public static Timestamp getDefaultLastTimestamp() {
+        return getTime(FIVE_MINUTES);
     }
 
     public static boolean moreThanTwoDays(Timestamp startTime, Timestamp endTime) {

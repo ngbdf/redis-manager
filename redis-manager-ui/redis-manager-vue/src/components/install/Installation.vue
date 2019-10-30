@@ -229,6 +229,8 @@
       <div class="item-param">
         <span class="param-key">Cluster Name:</span>
         <el-tag size="mini">{{ installationParam.clusterName }}</el-tag>
+
+        
       </div>
       <div class="item-param">
         <span class="param-key">Redis Mode:</span>

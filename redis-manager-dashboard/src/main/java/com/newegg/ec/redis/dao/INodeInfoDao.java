@@ -16,7 +16,7 @@ import java.util.List;
 @Mapper
 public interface INodeInfoDao {
 
-    @Select("<script>" +
+    /*@Select("<script>" +
             "SELECT * FROM node_info_${clusterId} " +
             "WHERE update_time &gt;= #{startTime} " +
             "AND update_time &lt;= #{endTime} " +
@@ -24,19 +24,31 @@ public interface INodeInfoDao {
             "AND time_type = #{timeType} " +
             "<if test='node != null'> AND node = #{node} </if>" +
             "</script>")
-    List<NodeInfo> selectNodeInfoList(NodeInfoParam nodeInfoParam);
+    List<NodeInfo> selectNodeInfoList(NodeInfoParam nodeInfoParam);*/
+
+    @Select("<script>" +
+            "SELECT * FROM node_info_${nodeInfoParam.clusterId} " +
+            "WHERE update_time &gt;= #{nodeInfoParam.startTime} " +
+            "AND update_time &lt;= #{nodeInfoParam.endTime} " +
+            "AND time_type = #{nodeInfoParam.timeType} " +
+            "<if test='nodeList != null and nodeList.size() > 0'> " +
+            "AND node IN " +
+            "<foreach item='node' collection='nodeList' open='(' separator=',' close=')'>" +
+            "#{node}" +
+            "</foreach>" +
+            "</if>" +
+            "</script>")
+    List<NodeInfo> selectNodeInfoList(@Param("nodeInfoParam") NodeInfoParam nodeInfoParam, @Param("nodeList") List<String> nodeList);
 
     @Select("<script>" +
             "SELECT * FROM node_info_${clusterId} " +
-            "WHERE data_type = #{dataType} " +
-            "AND time_type = #{timeType} " +
-            "<if test='node != null'> AND node = #{node} </if> " +
+            "WHERE time_type = #{timeType} " +
             "AND last_time = 1" +
             "</script>")
     List<NodeInfo> selectLastTimeNodeInfo(NodeInfoParam nodeInfoParam);
 
     @Insert("<script>" +
-            "INSERT INTO node_info_${clusterId} (`node`, `role`, `data_type`, `time_type`, `last_time`, " +
+            "INSERT INTO node_info_${clusterId} (`node`, `role`, `time_type`, `last_time`, " +
             "`response_time`, `connected_clients`, `client_longest_output_list`, `client_biggest_input_buf`, `blocked_clients`, " +
             "`used_memory`, `used_memory_rss`, `used_memory_overhead`, `used_memory_dataset`, `used_memory_dataset_perc`, `mem_fragmentation_ratio`, " +
             "`total_connections_received`, `connections_received`, `rejected_connections`, `total_commands_processed`, `commands_processed`, " +
@@ -46,7 +58,7 @@ public interface INodeInfoDao {
             "`used_cpu_sys`, `cpu_sys`, `used_cpu_user`, `cpu_user`, `keys`, `expires`, `update_time`) " +
             "VALUES " +
             "<foreach item='nodeInfo' collection='nodeInfoList' index='index' separator=','>" +
-            "(#{nodeInfo.node}, #{nodeInfo.role}, #{nodeInfo.dataType}, #{nodeInfo.timeType}, #{nodeInfo.lastTime}, " +
+            "(#{nodeInfo.node}, #{nodeInfo.role}, #{nodeInfo.timeType}, #{nodeInfo.lastTime}, " +
             "#{nodeInfo.responseTime}, #{nodeInfo.connectedClients}, #{nodeInfo.clientLongestOutputList}, #{nodeInfo.clientBiggestInputBuf}, #{nodeInfo.blockedClients}, " +
             "#{nodeInfo.usedMemory}, #{nodeInfo.usedMemoryRss}, #{nodeInfo.usedMemoryOverhead}, #{nodeInfo.usedMemoryDataset}, #{nodeInfo.usedMemoryDatasetPerc}, #{nodeInfo.memFragmentationRatio}, " +
             "#{nodeInfo.totalConnectionsReceived}, #{nodeInfo.connectionsReceived}, #{nodeInfo.rejectedConnections}, #{nodeInfo.totalCommandsProcessed}, #{nodeInfo.commandsProcessed}, " +
@@ -80,7 +92,6 @@ public interface INodeInfoDao {
             "`info_id` integer(4) NOT NULL AUTO_INCREMENT, " +
             "`node` varchar(50) NOT NULL, " +
             "`role` varchar(50) NOT NULL, " +
-            "`data_type` integer(2) NOT NULL, " +
             "`time_type` integer(2) NOT NULL, " +
             "`last_time` tinyint(1) NOT NULL, " +
             "`response_time` integer(4) NOT NULL, " +
@@ -118,7 +129,7 @@ public interface INodeInfoDao {
             "`expires` integer(8) NOT NULL, " +
             "`update_time` datetime(0) NOT NULL, " +
             "PRIMARY KEY (info_id), " +
-            "INDEX `multiple_query` (`update_time`, `data_type`, `time_type`, `node`) " +
+            "INDEX `multiple_query` (`update_time`, `time_type`, `node`) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createNodeInfoTable(@Param("clusterId") Integer clusterId);
 }

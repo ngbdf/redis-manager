@@ -12,8 +12,6 @@ public class NodeInfoParam {
 
     private Integer clusterId;
 
-    private Integer dataType;
-
     private Integer timeType;
 
     private List<String> columnList;
@@ -22,30 +20,28 @@ public class NodeInfoParam {
 
     private Timestamp endTime;
 
-    private String node;
+    private List<String> nodeList;
 
     public NodeInfoParam() {
     }
 
     public NodeInfoParam(Integer clusterId, Integer timeType) {
-        this(clusterId, null, timeType, null);
+        this(clusterId, timeType, null);
     }
 
-    public NodeInfoParam(Integer clusterId, Integer dataType, Integer timeType, String node) {
-        this(clusterId, dataType, timeType, null, null, node);
+    public NodeInfoParam(Integer clusterId, Integer timeType, String node) {
+        this(clusterId, timeType, null, null, node);
     }
 
     public NodeInfoParam(Integer clusterId, Timestamp startTime, Timestamp endTime) {
-        this(clusterId, null, null, startTime, endTime, null);
+        this(clusterId, null, startTime, endTime, null);
     }
 
-    public NodeInfoParam(Integer clusterId, Integer dataType, Integer timeType, Timestamp startTime, Timestamp endTime, String node) {
+    public NodeInfoParam(Integer clusterId, Integer timeType, Timestamp startTime, Timestamp endTime, String node) {
         this.clusterId = clusterId;
-        this.dataType = dataType;
         this.timeType = timeType;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.node = node;
     }
 
     public Integer getClusterId() {
@@ -54,14 +50,6 @@ public class NodeInfoParam {
 
     public void setClusterId(Integer clusterId) {
         this.clusterId = clusterId;
-    }
-
-    public Integer getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(Integer dataType) {
-        this.dataType = dataType;
     }
 
     public Integer getTimeType() {
@@ -96,24 +84,11 @@ public class NodeInfoParam {
         this.endTime = endTime;
     }
 
-    public String getNode() {
-        return node;
+    public List<String> getNodeList() {
+        return nodeList;
     }
 
-    public void setNode(String node) {
-        this.node = node;
-    }
-
-    @Override
-    public String toString() {
-        return "NodeInfoParam{" +
-                "clusterId=" + clusterId +
-                ", dataType=" + dataType +
-                ", timeType=" + timeType +
-                ", columnList=" + columnList +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", node='" + node + '\'' +
-                '}';
+    public void setNodeList(List<String> nodeList) {
+        this.nodeList = nodeList;
     }
 }

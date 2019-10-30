@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Redis info util
- * TODO: move to NodeInfoService
  *
  * @author Jay.H.Zou
  * @date 7/19/2019
@@ -113,7 +112,7 @@ public class RedisNodeInfoUtil {
 
     private static final BigDecimal BIG_DECIMAL_1024 = new BigDecimal(1024);
 
-    public static final NodeInfo parseInfoToObject(Map<String, String> infoMap, NodeInfo lastTimeNodeInfo) throws IOException {
+    public static final NodeInfo parseInfoToObject(Map<String, String> infoMap, NodeInfo lastTimeNodeInfo) {
         JSONObject infoJSONObject = new JSONObject();
         long keys = 0;
         long expires = 0;
@@ -446,7 +445,7 @@ public class RedisNodeInfoUtil {
         INFO_DESC_MAP.put("used_cpu_sys_children", "System CPU consumed by the background processes.");
         INFO_DESC_MAP.put("used_cpu_user_children", "User CPU consumed by the background processes.");
         // cluster
-        INFO_DESC_MAP.put("cluster_enabled", "Indicate Redis cluster is enabled.");
+        INFO_DESC_MAP.put(CLUSTER_ENABLED, "Indicate Redis cluster is enabled.");
     }
 
 }

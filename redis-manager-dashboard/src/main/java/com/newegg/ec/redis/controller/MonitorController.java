@@ -1,5 +1,8 @@
 package com.newegg.ec.redis.controller;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Multimap;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
@@ -11,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,11 +36,24 @@ public class MonitorController {
     @Autowired
     private IClusterService clusterService;
 
-    @RequestMapping(value = "/getNodeInfoList", method = RequestMethod.POST)
+    @RequestMapping(value = "/getNodeInfoDataList", method = RequestMethod.POST)
     @ResponseBody
     public Result getNodeInfoList(@RequestBody NodeInfoParam nodeInfoParam) {
         List<NodeInfo> nodeInfoList = nodeInfoService.getNodeInfoList(nodeInfoParam);
-        return nodeInfoList != null ? Result.successResult(nodeInfoList) : Result.failResult();
+        if (nodeInfoList == null) {
+            return Result.failResult();
+        }
+        if(nodeInfoList.isEmpty()) {
+            return Result.successResult(nodeInfoList);
+        }
+        Multimap<String, NodeInfo> nodeInfoListMap = ArrayListMultimap.create();
+        nodeInfoList.forEach(nodeInfo -> nodeInfoListMap.put(nodeInfo.getNode(), nodeInfo));
+        List<Collection<NodeInfo>> nodeInfoDataList = new ArrayList<>();
+        nodeInfoListMap.keySet().forEach(key -> {
+            Collection<NodeInfo> oneNodeInfoList = nodeInfoListMap.get(key);
+            nodeInfoDataList.add(oneNodeInfoList);
+        });
+        return Result.successResult(nodeInfoDataList);
     }
 
     @RequestMapping(value = "/getSlowLogList", method = RequestMethod.POST)

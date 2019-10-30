@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.INodeInfoDao;
 import com.newegg.ec.redis.entity.NodeInfo;
 import com.newegg.ec.redis.entity.NodeInfoParam;
-import com.newegg.ec.redis.entity.TimeType;
 import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.exception.ParameterException;
 import com.newegg.ec.redis.service.INodeInfoService;
@@ -40,6 +39,8 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
     private static final int MAX_KEEP_DAYS = 365;
 
     public static final String ALL = "ALL";
+
+    public static final String ALL_MASTER = "ALL_MASTER";
 
     @Autowired
     private INodeInfoDao nodeInfoDao;
@@ -96,7 +97,7 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         }
         NodeInfoParam parameterCorrection = parameterCorrection(nodeInfoParam);
         try {
-            return nodeInfoDao.selectNodeInfoList(parameterCorrection);
+            return nodeInfoDao.selectNodeInfoList(parameterCorrection, nodeInfoParam.getNodeList());
         } catch (Exception e) {
             logger.error("Get node info failed, " + parameterCorrection, e);
             return null;
@@ -180,29 +181,19 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
      * @return
      */
     private NodeInfoParam parameterCorrection(NodeInfoParam nodeInfoParam) {
-        if (Strings.isNullOrEmpty(nodeInfoParam.getNode())) {
-            nodeInfoParam.setNode(ALL);
-        }
         Timestamp startTime = nodeInfoParam.getStartTime();
         Timestamp endTime = nodeInfoParam.getEndTime();
         if (endTime == null) {
             endTime = TimeUtil.getCurrentTimestamp();
             nodeInfoParam.setEndTime(endTime);
         }
-        if (startTime == null) {
-
-            nodeInfoParam.setStartTime(startTime);
-        }
         // endTime <= startTime
         if (endTime.getTime() - startTime.getTime() <= 0) {
             endTime = TimeUtil.getCurrentTimestamp();
-            startTime = TimeUtil.getLastHourTimestamp();
+            startTime = TimeUtil.getDefaultLastTimestamp();
             nodeInfoParam.setEndTime(endTime);
             nodeInfoParam.setStartTime(startTime);
         }
-        /*if (TimeUtil.moreThanTwoDays(startTime, endTime)) {
-            nodeInfoParam.setTimeType(TimeType.HOUR);
-        }*/
         return nodeInfoParam;
     }
 

@@ -52,6 +52,31 @@ public class RedisConfigUtil {
     public RedisConfigUtil() {
     }
 
+    @Deprecated
+    public static void generateRedisConfig(String path, int mode) throws IOException {
+        File tempPath = new File(path);
+        if (!tempPath.exists() && !tempPath.mkdirs()) {
+            throw new RuntimeException(path + " mkdir failed.");
+        }
+        File file = new File(path + REDIS_CONF);
+        if (file.exists() && !file.delete()) {
+            throw new RuntimeException(file.getName() + " delete failed.");
+        }
+        if (!file.createNewFile()) {
+            throw new RuntimeException(file.getName() + " create failed.");
+        }
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(file, true), UTF_8));
+        for (RedisConfig redisConfig : getRedisConfig(mode)) {
+            String configKey = redisConfig.getConfigKey();
+            String configValue = redisConfig.getConfigValue();
+            bufferedWriter.write(configKey + SPACE + configValue);
+            bufferedWriter.newLine();
+        }
+        bufferedWriter.flush();
+        bufferedWriter.close();
+    }
+
     /**
      * dir, bind, port 等变量赋值
      *
@@ -79,33 +104,7 @@ public class RedisConfigUtil {
         return result;
     }
 
-    @Deprecated
-    public static void generateRedisConfig(String path, int mode) throws IOException {
-        File tempPath = new File(path);
-        if (!tempPath.exists() && !tempPath.mkdirs()) {
-            throw new RuntimeException(path + " mkdir failed.");
-        }
-        File file = new File(path + REDIS_CONF);
-        if (file.exists() && !file.delete()) {
-            throw new RuntimeException(file.getName() + " delete failed.");
-        }
-        if (!file.createNewFile()) {
-            throw new RuntimeException(file.getName() + " create failed.");
-        }
-        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(file, true), UTF_8));
-        for (RedisConfig redisConfig : getRedisConfig(mode)) {
-            String configKey = redisConfig.getConfigKey();
-            String configValue = redisConfig.getConfigValue();
-            bufferedWriter.write(configKey + SPACE + configValue);
-            bufferedWriter.newLine();
-        }
-        bufferedWriter.flush();
-        bufferedWriter.close();
-    }
-
-    @Deprecated
-    public static List<RedisConfig> getRedisConfig(int mode) {
+    private static List<RedisConfig> getRedisConfig(int mode) {
         List<RedisConfig> configs = new ArrayList<>();
         for (RedisConfig redisConfig : REDIS_CONFIG_LIST) {
             String configKey = redisConfig.getConfigKey();

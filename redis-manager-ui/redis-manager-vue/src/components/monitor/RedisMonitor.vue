@@ -28,10 +28,6 @@
         </el-col>
       </el-row>
       <div class="base-info-wrapper">
-        <!-- <div class="base-info-title-wrapper">
-          <span class="base-info-title">Base Info</span>
-          <i class="el-icon-refresh-left refresh" @click="getClusterById(nodeInfoParam.clusterId)"></i>
-        </div>-->
         <el-row class="base-info">
           <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
@@ -76,32 +72,19 @@
       <div class="monitor-condition-wrapper">
         <div class="condition-wrapper">
           <el-select
-            v-model="currentNode"
+            v-model="nodes"
             filterable
             size="small"
-            placeholder="All"
+            placeholder="Node"
             class="condition-item"
+            multiple
+            collapse-tags
           >
             <el-option
-              v-for="node in nodeList"
+              v-for="node in redisNodeList"
               :key="node.label"
               :label="node.label"
               :value="node.value"
-            ></el-option>
-          </el-select>
-          <el-select
-            v-model="nodeInfoParam.dataType"
-            size="small"
-            placeholder="Data Type"
-            class="condition-item"
-            style="width: 100px"
-            v-if="showDataType"
-          >
-            <el-option
-              v-for="dataType in dataTypeList"
-              :key="dataType.label"
-              :label="dataType.label"
-              :value="dataType.value"
             ></el-option>
           </el-select>
 
@@ -136,18 +119,23 @@
             ></el-date-picker>
           </div>
         </div>
-        <i class="el-icon-refresh-left refresh" @click="getNodeInfoList(nodeInfoParam)"></i>
+        <i class="el-icon-refresh-left refresh" @click="getNodeInfoDataList(nodeInfoParam)"></i>
       </div>
       <el-row class="echart-wrapper" id="monitor-charts">
         <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
           <el-card shadow="hover" class="box-card">
-            <div id="memory" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+            <div id="used_memory" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="used_memory_rss" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
           </el-card>
         </el-col>
         <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
           <el-card shadow="hover" class="box-card">
             <div
-              id="fragmentation-ratio"
+              id="used_memory_overhead"
               class="chart"
               :class="{ 'chart-no-data' : noNodeInfoData }"
             ></div>
@@ -155,28 +143,8 @@
         </el-col>
         <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
           <el-card shadow="hover" class="box-card">
-            <div id="connection" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
-          </el-card>
-        </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
-          <el-card shadow="hover" class="box-card">
-            <div id="client" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
-          </el-card>
-        </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
-          <el-card shadow="hover" class="box-card">
-            <div id="qps" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
-          </el-card>
-        </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
-          <el-card shadow="hover" class="box-card">
-            <div id="replica" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
-          </el-card>
-        </el-col>
-        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
-          <el-card shadow="hover" class="box-card">
             <div
-              id="keyspace-hits-ratio"
+              id="used_memory_dataset"
               class="chart"
               :class="{ 'chart-no-data' : noNodeInfoData }"
             ></div>
@@ -184,15 +152,105 @@
         </el-col>
         <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
           <el-card shadow="hover" class="box-card">
-            <div id="keys-expires" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+            <div
+              id="mem_fragmentation_ratio"
+              class="chart"
+              :class="{ 'chart-no-data' : noNodeInfoData }"
+            ></div>
           </el-card>
         </el-col>
         <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
           <el-card shadow="hover" class="box-card">
-            <div id="cpu" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+            <div
+              id="connections_received"
+              class="chart"
+              :class="{ 'chart-no-data' : noNodeInfoData }"
+            ></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div
+              id="rejected_connections"
+              class="chart"
+              :class="{ 'chart-no-data' : noNodeInfoData }"
+            ></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="connected_clients" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="blocked_clients" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div
+              id="commands_processed"
+              class="chart"
+              :class="{ 'chart-no-data' : noNodeInfoData }"
+            ></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div
+              id="instantaneous_ops_per_sec"
+              class="chart"
+              :class="{ 'chart-no-data' : noNodeInfoData }"
+            ></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="sync_full" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="sync_partial_ok" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="sync_partial_err" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div
+              id="keyspace_hits_ratio"
+              class="chart"
+              :class="{ 'chart-no-data' : noNodeInfoData }"
+            ></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="keys" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="expires" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="cpu_sys" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
+          </el-card>
+        </el-col>
+        <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+          <el-card shadow="hover" class="box-card">
+            <div id="cpu_user" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div>
           </el-card>
         </el-col>
       </el-row>
+      <!-- detail monitor -->
     </div>
     <el-dialog title="Query" :visible.sync="queryVisible" :close-on-click-modal="false" width="60%">
       <query :clusterId="cluster.clusterId"></query>
@@ -214,7 +272,7 @@
           style="margin-bottom: 20px;"
         >
           <el-option
-            v-for="node in nodeList"
+            v-for="node in redisNodeList"
             :key="node.label"
             :label="node.label"
             :value="node.value"
@@ -242,6 +300,7 @@ require("echarts/lib/chart/line");
 require("echarts/lib/component/tooltip"); // tooltip组件
 require("echarts/lib/component/title"); //  title组件
 require("echarts/lib/component/legend"); // legend组件
+import "echarts/lib/component/legendScroll";
 import query from "@/components/tool/Query";
 import API from "@/api/api.js";
 import { formatTime, formatTimeForChart } from "@/utils/time.js";
@@ -257,21 +316,7 @@ export default {
     return {
       queryVisible: false,
       cluster: {},
-      nodeList: [{ label: "ALL", value: "" }],
-      dataTypeList: [
-        {
-          value: 1,
-          label: "Avg"
-        },
-        {
-          value: 2,
-          label: "Max"
-        },
-        {
-          value: -1,
-          label: "Min"
-        }
-      ],
+      redisNodeList: [],
       timeTypeList: [
         {
           value: 0,
@@ -386,25 +431,38 @@ export default {
         ]
       },
       nodeInfoParam: {
-        node: "",
-        dataType: 1,
+        nodeList: [],
         timeType: 0,
-        timeRange: [new Date() - 3600 * 1000, new Date()]
+        timeRange: [new Date() - 15 * 60 * 1000, new Date()]
       },
-      nodeInfoList: [],
-      currentNode: "",
-      showDataType: true,
+      nodeInfoDataList: [],
+      nodes: [],
       noNodeInfoData: true,
       xAxis: [],
-      echartsData: [],
-      lineColor: ["#3888fa", "#FF005A", "#ffb980", "#40c9c6"],
+      lineColor: [
+        "#3888fa",
+        "#FF005A",
+        "#ffb980",
+        "#40c9c6",
+        "#b6a2de",
+        "#d87a80",
+        "#34bfa3",
+        "#5ab1ef",
+        "#3888fa",
+        "#ffba00",
+        "#c9c0cb",
+        "#FF005A",
+        "#3888fa",
+        "#FF005A",
+        "#ffb980",
+        "#40c9c6"
+      ],
       areaStyleColor: [
         "rgba(56, 136, 250, 0.1)",
         "rgba(250, 0, 90, 0.1)",
         "rgba(64, 201, 198, 0.1)",
         "rgba(255, 185, 128, 0.1)"
       ],
-      chartList: [],
       slowLogVisible: false,
       slowLogList: [],
       timer: 0,
@@ -436,16 +494,16 @@ export default {
         response => {
           let result = response.data;
           if (result.code == 0) {
-            let nodeList = [{ label: "ALL", value: "" }];
+            let redisNodeList = [];
             result.data.forEach(node => {
               var hostAndPort = node.host + ":" + node.port;
               var role = node.nodeRole.toLowerCase();
-              nodeList.push({
+              redisNodeList.push({
                 value: hostAndPort,
                 label: hostAndPort + " " + role
               });
             });
-            this.nodeList = nodeList;
+            this.redisNodeList = redisNodeList;
           } else {
             message.error(result.message);
           }
@@ -455,23 +513,20 @@ export default {
         }
       );
     },
-    getNodeInfoList(nodeInfoParam) {
+    getNodeInfoDataList(nodeInfoParam) {
       this.monitorDataLoading = true;
-      let url = "/monitor/getNodeInfoList";
+      let url = "/monitor/getNodeInfoDataList";
       API.post(
         url,
         nodeInfoParam,
         response => {
           let result = response.data;
           if (result.code == 0) {
-            this.nodeInfoList = result.data;
+            this.nodeInfoDataList = result.data;
             this.noNodeInfoData = false;
-            this.nodeInfoList.forEach(nodeInfo => {
-              nodeInfo.updateTime = formatTimeForChart(nodeInfo.updateTime);
-            });
             // init data for echarts
-            this.buildEchartsData();
-            this.initCharts();
+            this.xAxis = [];
+            this.initCharts(this.nodeInfoDataList);
           } else {
             message.error("Get node info list failed");
           }
@@ -479,32 +534,43 @@ export default {
         },
         err => {
           this.monitorDataLoading = false;
-          console.log(err)
+          console.log(err);
           message.error(err);
         }
       );
     },
-    initCharts() {
+    initCharts(nodeInfoDataList) {
       var erd = elementResizeDetectorMaker();
-      let echartsData = this.echartsData;
-      echartsData.forEach(echartsDataGroup => {
-        let series = this.buildSeries(echartsDataGroup.data);
-        var chart = echarts.init(document.getElementById(echartsDataGroup.id));
+      let echartsList = this.buildNodeData(nodeInfoDataList);
+      echartsList.forEach(echartsData => {
+        var chart = echarts.init(document.getElementById(echartsData.id));
         // 绘制图表
+        chart.dispose();
+        chart = echarts.init(document.getElementById(echartsData.id));
+        let series = this.buildSeries(echartsData.series);
+        let id = echartsData.id;
+        if (
+          id == "used_memory" ||
+          id == "used_memory_rss" ||
+          id == "used_memory_overhead" ||
+          id == "used_memory_dataset"
+        ) {
+          id += "(MB)";
+        }
         chart.setOption({
           title: {
-            text: echartsDataGroup.title,
+            text: id,
             left: 35
           },
           legend: {
-            // 工具栏位置
-            bottom: -5
+            type: "scroll",
+            bottom: 0
           },
           // 图表位置
           grid: {
             left: 20,
             right: 20,
-            bottom: 30,
+            bottom: 50,
             top: 50,
             containLabel: true
           },
@@ -546,168 +612,18 @@ export default {
         });
       });
     },
-    buildEchartsData() {
-      this.xAxis = [];
-      let usedMemory = [];
-      let usedMemoryRss = [];
-      let usedMemoryOverhead = [];
-      let usedMemoryDataset = [];
-      let memFragmentationRatio = [];
-      let connectedClients = [];
-      let connectionsReceived = [];
-      let rejectedConnections = [];
-      let clientLongestOutputList = [];
-      let clientBiggestInputBuf = [];
-      let blockedClients = [];
-      let commandsProcessed = [];
-      let instantaneousOpsPerSec = [];
-      let syncFull = [];
-      let syncPartialOk = [];
-      let syncPartialErr = [];
-      let keyspaceHitsRatio = [];
-      let keys = [];
-      let expires = [];
-      let cpuSys = [];
-      let cpuUser = [];
-      this.nodeInfoList.forEach(nodeInfo => {
-        // memory
-        usedMemory.push(nodeInfo.usedMemory);
-        usedMemoryRss.push(nodeInfo.usedMemoryRss);
-        usedMemoryOverhead.push(nodeInfo.usedMemoryOverhead);
-        usedMemoryDataset.push(nodeInfo.usedMemoryDataset);
-        // fragmentation-ratio
-        memFragmentationRatio.push(nodeInfo.memFragmentationRatio);
-        // connection
-        connectionsReceived.push(nodeInfo.connectionsReceived);
-        rejectedConnections.push(nodeInfo.rejectedConnections);
-        // client
-        connectedClients.push(nodeInfo.connectedClients);
-        blockedClients.push(nodeInfo.blockedClients);
-        // qps
-        commandsProcessed.push(nodeInfo.commandsProcessed);
-        instantaneousOpsPerSec.push(nodeInfo.instantaneousOpsPerSec);
-        // replica
-        syncFull.push(nodeInfo.syncFull);
-        syncPartialOk.push(nodeInfo.syncPartialOk);
-        syncPartialErr.push(nodeInfo.syncPartialErr);
-        // keyspace hits ration
-        keyspaceHitsRatio.push(nodeInfo.keyspaceHitsRatio);
-        // keys expires
-        keys.push(nodeInfo.keys);
-        expires.push(nodeInfo.expires);
-        // cpu
-        cpuSys.push(nodeInfo.cpuSys);
-        cpuUser.push(nodeInfo.cpuUser);
-        this.xAxis.push(nodeInfo.updateTime);
-      });
-      let memoryData = [];
-      let fragmentationRatioData = [];
-      let connectionData = [];
-      let clientData = [];
-      let qpsData = [];
-      let replicaData = [];
-      let keyspaceHitsRationData = [];
-      let keysExpiresData = [];
-      let cpuData = [];
-      memoryData.push({ name: "used_memory", data: usedMemory });
-      memoryData.push({ name: "used_memory_rss", data: usedMemoryRss });
-      memoryData.push({
-        name: "used_memory_overhead",
-        data: usedMemoryOverhead
-      });
-      memoryData.push({ name: "used_memory_dataset", data: usedMemoryDataset });
-      fragmentationRatioData.push({
-        name: "fragmentation_ratio",
-        data: memFragmentationRatio
-      });
-      connectionData.push({
-        name: "connections_received",
-        data: connectionsReceived
-      });
-      connectionData.push({
-        name: "rejected_connections",
-        data: rejectedConnections
-      });
-      clientData.push({ name: "connected_clients", data: connectedClients });
-      clientData.push({ name: "blocked_clients", data: blockedClients });
-      qpsData.push({ name: "commands_processed", data: commandsProcessed });
-      qpsData.push({
-        name: "instantaneous_ops_per_sec",
-        data: instantaneousOpsPerSec
-      });
-      replicaData.push({ name: "sync_full", data: syncFull });
-      replicaData.push({ name: "sync_partial_ok", data: syncPartialOk });
-      replicaData.push({ name: "sync_partial_err", data: syncPartialErr });
-      keyspaceHitsRationData.push({
-        name: "keyspace_hits_ratio",
-        data: keyspaceHitsRatio
-      });
-      keysExpiresData.push({ name: "keys", data: keys });
-      keysExpiresData.push({ name: "expires", data: expires });
-      cpuData.push({ name: "cpu_sys", data: cpuSys });
-      cpuData.push({ name: "cpu_user", data: cpuUser });
-
-      let echartsData = [];
-      echartsData.push({
-        id: "memory",
-        title: "Memory(MB)",
-        data: memoryData
-      });
-      echartsData.push({
-        id: "fragmentation-ratio",
-        title: "Fragmentation Ratio",
-        data: fragmentationRatioData
-      });
-      echartsData.push({
-        id: "connection",
-        title: "Connection",
-        data: connectionData
-      });
-      echartsData.push({
-        id: "client",
-        title: "Client",
-        data: clientData
-      });
-      echartsData.push({
-        id: "qps",
-        title: "QPS",
-        data: qpsData
-      });
-
-      echartsData.push({
-        id: "replica",
-        title: "Replica",
-        data: replicaData
-      });
-      echartsData.push({
-        id: "keyspace-hits-ratio",
-        title: "Keyspace Hits Ratio",
-        data: keyspaceHitsRationData
-      });
-      echartsData.push({
-        id: "keys-expires",
-        title: "Keys & Expires",
-        data: keysExpiresData
-      });
-      echartsData.push({
-        id: "cpu",
-        title: "CPU",
-        data: cpuData
-      });
-      this.echartsData = echartsData;
-    },
-    buildSeries(data) {
-      let series = [];
-      let length = data.length;
-      if (length == 0) {
-        return series;
+    buildSeries(series) {
+      let nodeSize = series.length;
+      if (nodeSize == 0) {
+        return;
       }
-      for (var i = 0; i < length; i++) {
-        var dataItem = data[i];
-        var color = this.lineColor[i];
-        var areaStyleColor = this.areaStyleColor[i];
-        series.push({
-          name: dataItem.name,
+      let newSeries = [];
+      for (var i = 0; i < nodeSize; i++) {
+        var color = this.lineColor[i % nodeSize];
+        var areaStyleColor = this.areaStyleColor[i % nodeSize];
+        let oneNode = series[i];
+        newSeries.push({
+          name: oneNode.name,
           itemStyle: {
             normal: {
               color: color,
@@ -719,14 +635,223 @@ export default {
           },
           smooth: true,
           type: "line",
-          data: dataItem.data,
+          data: oneNode.data,
           animationDuration: 2800,
           animationEasing: "cubicInOut"
           // 背景色
           // areaStyle: {}
         });
       }
-      return series;
+      return newSeries;
+    },
+    buildNodeData(nodeInfoDataList) {
+      let nodeInfoList = [];
+      nodeInfoDataList.forEach(oneNodeInfoList => {
+        let oneNodeInfoData = {
+          node: oneNodeInfoList[0].node + " " + oneNodeInfoList[0].role.toLowerCase(),
+          usedMemory: [],
+          usedMemoryRss: [],
+          usedMemoryOverhead: [],
+          usedMemoryDataset: [],
+          memFragmentationRatio: [],
+          connectionsReceived: [],
+          rejectedConnections: [],
+          connectedClients: [],
+          blockedClients: [],
+          commandsProcessed: [],
+          instantaneousOpsPerSec: [],
+          syncFull: [],
+          syncPartialOk: [],
+          syncPartialErr: [],
+          keyspaceHitsRatio: [],
+          keys: [],
+          expires: [],
+          cpuSys: [],
+          cpuUser: []
+        };
+        let isBuildXAxis = this.xAxis.length == 0;
+        oneNodeInfoList.forEach(nodeInfo => {
+          if (isBuildXAxis) {
+            this.xAxis.push(formatTimeForChart(nodeInfo.updateTime));
+          }
+          oneNodeInfoData.usedMemory.push(nodeInfo.usedMemory);
+          oneNodeInfoData.usedMemoryRss.push(nodeInfo.usedMemoryRss);
+          oneNodeInfoData.usedMemoryOverhead.push(nodeInfo.usedMemoryOverhead);
+          oneNodeInfoData.usedMemoryDataset.push(nodeInfo.usedMemoryDataset);
+          oneNodeInfoData.memFragmentationRatio.push(
+            nodeInfo.memFragmentationRatio
+          );
+          oneNodeInfoData.connectionsReceived.push(
+            nodeInfo.connectionsReceived
+          );
+          oneNodeInfoData.rejectedConnections.push(
+            nodeInfo.rejectedConnections
+          );
+          oneNodeInfoData.connectedClients.push(nodeInfo.connectedClients);
+          oneNodeInfoData.blockedClients.push(nodeInfo.blockedClients);
+          oneNodeInfoData.commandsProcessed.push(nodeInfo.commandsProcessed);
+          oneNodeInfoData.instantaneousOpsPerSec.push(
+            nodeInfo.instantaneousOpsPerSec
+          );
+          oneNodeInfoData.syncFull.push(nodeInfo.syncFull);
+          oneNodeInfoData.syncPartialOk.push(nodeInfo.syncPartialOk);
+          oneNodeInfoData.syncPartialErr.push(nodeInfo.syncPartialErr);
+          oneNodeInfoData.keyspaceHitsRatio.push(nodeInfo.keyspaceHitsRatio);
+          oneNodeInfoData.keys.push(nodeInfo.keys);
+          oneNodeInfoData.expires.push(nodeInfo.expires);
+          oneNodeInfoData.cpuSys.push(nodeInfo.cpuSys);
+          oneNodeInfoData.cpuUser.push(nodeInfo.cpuUser);
+        });
+        nodeInfoList.push(oneNodeInfoData);
+      });
+
+      let usedMemorySeries = [];
+      let usedMemoryRssSeries = [];
+      let usedMemoryOverheadSeries = [];
+      let usedMemoryDatasetSeries = [];
+      let memFragmentationRatioSeries = [];
+      let connectionsReceivedSeries = [];
+      let rejectedConnectionsSeries = [];
+      let connectedClientsSeries = [];
+      let blockedClientsSeries = [];
+      let commandsProcessedSeries = [];
+      let instantaneousOpsPerSecSeries = [];
+      let syncFullSeries = [];
+      let syncPartialOkSeries = [];
+      let syncPartialErrSeries = [];
+      let keyspaceHitsRatioSeries = [];
+      let keysSeries = [];
+      let expiresSeries = [];
+      let cpuSysSeries = [];
+      let cpuUserSeries = [];
+      nodeInfoList.forEach(nodeInfoData => {
+        let node = nodeInfoData.node;
+        usedMemorySeries.push({
+          name: node,
+          data: nodeInfoData.usedMemory
+        });
+        usedMemoryRssSeries.push({
+          name: node,
+          data: nodeInfoData.usedMemoryRss
+        });
+        usedMemoryOverheadSeries.push({
+          name: node,
+          data: nodeInfoData.usedMemoryOverhead
+        });
+        usedMemoryDatasetSeries.push({
+          name: node,
+          data: nodeInfoData.usedMemoryDataset
+        });
+        memFragmentationRatioSeries.push({
+          name: node,
+          data: nodeInfoData.memFragmentationRatio
+        });
+        connectionsReceivedSeries.push({
+          name: node,
+          data: nodeInfoData.connectionsReceived
+        });
+        rejectedConnectionsSeries.push({
+          name: node,
+          data: nodeInfoData.rejectedConnections
+        });
+        connectedClientsSeries.push({
+          name: node,
+          data: nodeInfoData.connectedClients
+        });
+        blockedClientsSeries.push({
+          name: node,
+          data: nodeInfoData.blockedClients
+        });
+        commandsProcessedSeries.push({
+          name: node,
+          data: nodeInfoData.commandsProcessed
+        });
+        instantaneousOpsPerSecSeries.push({
+          name: node,
+          data: nodeInfoData.instantaneousOpsPerSec
+        });
+        syncFullSeries.push({
+          name: node,
+          data: nodeInfoData.syncFull
+        });
+        syncPartialOkSeries.push({
+          name: node,
+          data: nodeInfoData.syncPartialOk
+        });
+        syncPartialErrSeries.push({
+          name: node,
+          data: nodeInfoData.syncPartialErr
+        });
+        keyspaceHitsRatioSeries.push({
+          name: node,
+          data: nodeInfoData.keyspaceHitsRatio
+        });
+        keysSeries.push({
+          name: node,
+          data: nodeInfoData.keys
+        });
+        expiresSeries.push({
+          name: node,
+          data: nodeInfoData.expires
+        });
+        cpuSysSeries.push({
+          name: node,
+          data: nodeInfoData.cpuSys
+        });
+        cpuUserSeries.push({
+          name: node,
+          data: nodeInfoData.cpuUser
+        });
+        usedMemorySeries.updateTime = nodeInfoData.updateTime;
+      });
+      let seriesList = [];
+      seriesList.push({ id: "used_memory", series: usedMemorySeries });
+      seriesList.push({ id: "used_memory_rss", series: usedMemoryRssSeries });
+      seriesList.push({
+        id: "used_memory_overhead",
+        series: usedMemoryOverheadSeries
+      });
+      seriesList.push({
+        id: "used_memory_dataset",
+        series: usedMemoryDatasetSeries
+      });
+      seriesList.push({
+        id: "mem_fragmentation_ratio",
+        series: memFragmentationRatioSeries
+      });
+      seriesList.push({
+        id: "connections_received",
+        series: connectionsReceivedSeries
+      });
+      seriesList.push({
+        id: "rejected_connections",
+        series: rejectedConnectionsSeries
+      });
+      seriesList.push({
+        id: "connected_clients",
+        series: connectedClientsSeries
+      });
+      seriesList.push({ id: "blocked_clients", series: blockedClientsSeries });
+      seriesList.push({
+        id: "commands_processed",
+        series: commandsProcessedSeries
+      });
+      seriesList.push({
+        id: "instantaneous_ops_per_sec",
+        series: instantaneousOpsPerSecSeries
+      });
+      seriesList.push({ id: "sync_full", series: syncFullSeries });
+      seriesList.push({ id: "sync_partial_ok", series: syncPartialOkSeries });
+      seriesList.push({ id: "sync_partial_err", series: syncPartialErrSeries });
+      seriesList.push({
+        id: "keyspace_hits_ratio",
+        series: keyspaceHitsRatioSeries
+      });
+      seriesList.push({ id: "keys", series: keysSeries });
+      seriesList.push({ id: "expires", series: expiresSeries });
+      seriesList.push({ id: "cpu_sys", series: cpuSysSeries });
+      seriesList.push({ id: "cpu_user", series: cpuUserSeries });
+      return seriesList;
     },
     timedRefresh() {
       if (this.timer) {
@@ -740,17 +865,17 @@ export default {
           nodeInfoParam.startTime = new Date() - range;
           nodeInfoParam.endTime = new Date();
           this.nodeInfoParam = nodeInfoParam;
-          let group = store.getters.getCurrentGroup;
-          getClusterById(this.nodeInfoParam.clusterId, cluster => {
-            this.cluster = cluster;
-            let clusterId = cluster.clusterId;
-            this.getAllNodeList(clusterId);
-            this.nodeInfoParam.clusterId = clusterId;
-            this.slowLogParam.clusterId = clusterId;
-            this.pickerDateTime();
-            this.getNodeInfoList(this.nodeInfoParam);
-          });
-        }, 60000);
+          // let group = store.getters.getCurrentGroup;
+          // getClusterById(this.nodeInfoParam.clusterId, cluster => {
+          //   this.cluster = cluster;
+          //   let clusterId = cluster.clusterId;
+          //   this.getAllNodeList(clusterId);
+          //   this.nodeInfoParam.clusterId = clusterId;
+          //   this.slowLogParam.clusterId = clusterId;
+          //   this.pickerDateTime();
+          //   this.getNodeInfoDataList(this.nodeInfoParam);
+          // });
+        }, 60000 * 1);
       }
     },
     getSlowLogList(slowLogParam) {
@@ -783,21 +908,20 @@ export default {
     // 深度监听 nodeInfoParam 变化
     nodeInfoParam: {
       handler: function() {
-        this.getNodeInfoList(this.nodeInfoParam);
+        this.getNodeInfoDataList(this.nodeInfoParam);
       },
       deep: true
     },
-    currentNode: {
+    nodes: {
       handler: function() {
         let nodeInfoParam = this.nodeInfoParam;
-        if (!isEmpty(this.currentNode)) {
-          this.showDataType = false;
-          nodeInfoParam.dataType = 0;
-        } else {
-          this.showDataType = true;
-          nodeInfoParam.dataType = 1;
+        let nodeList = [];
+        if (!isEmpty(this.nodes) && this.nodes.length > 0) {
+          this.nodes.forEach(node => {
+            nodeList.push(node);
+          });
         }
-        nodeInfoParam.node = this.currentNode;
+        nodeInfoParam.nodeList = nodeList;
         this.nodeInfoParam = nodeInfoParam;
       }
     },
@@ -816,7 +940,7 @@ export default {
       this.nodeInfoParam.clusterId = clusterId;
       this.slowLogParam.clusterId = clusterId;
       this.pickerDateTime();
-      this.getNodeInfoList(this.nodeInfoParam);
+      this.getNodeInfoDataList(this.nodeInfoParam);
     });
     this.timedRefresh();
   },
@@ -908,7 +1032,7 @@ export default {
 }
 
 .chart {
-  height: 300px;
+  min-height: 350px;
   width: 100%;
 }
 

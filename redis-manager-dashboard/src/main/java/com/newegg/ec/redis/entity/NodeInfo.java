@@ -48,8 +48,6 @@ public class NodeInfo {
 
     private String node;
 
-    private Integer dataType;
-
     private Integer timeType;
 
     private boolean lastTime;
@@ -194,8 +192,7 @@ public class NodeInfo {
     public NodeInfo() {
     }
 
-    public NodeInfo(Integer dataType, Integer timeType, boolean lastTime) {
-        this.dataType = dataType;
+    public NodeInfo(Integer timeType, boolean lastTime) {
         this.timeType = timeType;
         this.lastTime = lastTime;
     }
@@ -222,14 +219,6 @@ public class NodeInfo {
 
     public void setNode(String node) {
         this.node = node;
-    }
-
-    public Integer getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(Integer dataType) {
-        this.dataType = dataType;
     }
 
     public Integer getTimeType() {

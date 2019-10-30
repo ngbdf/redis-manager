@@ -179,7 +179,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     List<AlertRule> alertRuleList = getAlertRuleByIds(validAlertRuleList, ruleIdList);
                     int clusterId = cluster.getClusterId();
                     // 获取 node info 列表
-                    NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, DataType.NODE, TimeType.MINUTE, null);
+                    NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, TimeType.MINUTE, null);
                     List<NodeInfo> lastTimeNodeInfoList = nodeInfoService.getLastTimeNodeInfoList(nodeInfoParam);
                     // 构建告警记录
                     List<AlertRecord> alertRecordList = new ArrayList<>();
