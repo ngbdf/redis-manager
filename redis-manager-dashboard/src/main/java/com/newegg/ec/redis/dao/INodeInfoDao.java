@@ -27,7 +27,17 @@ public interface INodeInfoDao {
     List<NodeInfo> selectNodeInfoList(NodeInfoParam nodeInfoParam);*/
 
     @Select("<script>" +
-            "SELECT * FROM node_info_${nodeInfoParam.clusterId} " +
+            "SELECT " +
+            "<when test='nodeInfoParam.infoItemList !=null and nodeInfoParam.infoItemList.size() > 0'>" +
+            "`node`, `role`, `time_type`, `last_time`, `update_time`, " +
+            "<foreach item='infoItem' collection='nodeInfoParam.infoItemList' separator=',' suffix=' '>" +
+            "${infoItem}" +
+            "</foreach>" +
+            "</when>" +
+            "<otherwise>" +
+            "*" +
+            "</otherwise>" +
+            " FROM node_info_${nodeInfoParam.clusterId} " +
             "WHERE update_time &gt;= #{nodeInfoParam.startTime} " +
             "AND update_time &lt;= #{nodeInfoParam.endTime} " +
             "AND time_type = #{nodeInfoParam.timeType} " +

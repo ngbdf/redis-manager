@@ -14,7 +14,7 @@ public class NodeInfoParam {
 
     private Integer timeType;
 
-    private List<String> columnList;
+    private List<String> infoItemList;
 
     private Timestamp startTime;
 
@@ -60,12 +60,12 @@ public class NodeInfoParam {
         this.timeType = timeType;
     }
 
-    public List<String> getColumnList() {
-        return columnList;
+    public List<String> getInfoItemList() {
+        return infoItemList;
     }
 
-    public void setColumnList(List<String> columnList) {
-        this.columnList = columnList;
+    public void setInfoItemList(List<String> infoItemList) {
+        this.infoItemList = infoItemList;
     }
 
     public Timestamp getStartTime() {

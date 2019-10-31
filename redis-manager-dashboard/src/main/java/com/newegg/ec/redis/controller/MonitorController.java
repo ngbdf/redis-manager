@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
@@ -39,6 +40,29 @@ public class MonitorController {
     @RequestMapping(value = "/getNodeInfoDataList", method = RequestMethod.POST)
     @ResponseBody
     public Result getNodeInfoList(@RequestBody NodeInfoParam nodeInfoParam) {
+        long start = System.currentTimeMillis();
+        List<NodeInfo> nodeInfoList = nodeInfoService.getNodeInfoList(nodeInfoParam);
+        System.err.println("Query: " + ( System.currentTimeMillis() - start));
+        if (nodeInfoList == null) {
+            return Result.failResult();
+        }
+        if(nodeInfoList.isEmpty()) {
+            return Result.successResult(nodeInfoList);
+        }
+        Multimap<String, NodeInfo> nodeInfoListMap = ArrayListMultimap.create();
+        nodeInfoList.forEach(nodeInfo -> nodeInfoListMap.put(nodeInfo.getNode(), nodeInfo));
+        List<Collection<NodeInfo>> nodeInfoDataList = new ArrayList<>();
+        nodeInfoListMap.keySet().forEach(key -> {
+            Collection<NodeInfo> oneNodeInfoList = nodeInfoListMap.get(key);
+            nodeInfoDataList.add(oneNodeInfoList);
+        });
+        System.err.println("All: " + ( System.currentTimeMillis() - start));
+        return Result.successResult(nodeInfoDataList);
+    }
+
+    @RequestMapping(value = "/getInfoItemMonitorDataList", method = RequestMethod.POST)
+    @ResponseBody
+    public Result getFieldMonitorDataList(@RequestBody NodeInfoParam nodeInfoParam) {
         List<NodeInfo> nodeInfoList = nodeInfoService.getNodeInfoList(nodeInfoParam);
         if (nodeInfoList == null) {
             return Result.failResult();
@@ -55,6 +79,7 @@ public class MonitorController {
         });
         return Result.successResult(nodeInfoDataList);
     }
+
 
     @RequestMapping(value = "/getSlowLogList", method = RequestMethod.POST)
     @ResponseBody

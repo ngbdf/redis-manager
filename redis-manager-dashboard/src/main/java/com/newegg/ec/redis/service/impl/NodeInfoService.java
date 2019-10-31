@@ -104,7 +104,6 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         }
     }
 
-
     @Override
     public NodeInfo getLastTimeNodeInfo(NodeInfoParam nodeInfoParam) {
         List<NodeInfo> lastTimeNodeInfoList = getLastTimeNodeInfoList(nodeInfoParam);
@@ -186,6 +185,10 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         if (endTime == null) {
             endTime = TimeUtil.getCurrentTimestamp();
             nodeInfoParam.setEndTime(endTime);
+        }
+        if(startTime == null) {
+            startTime = TimeUtil.getDefaultLastTimestamp();
+            nodeInfoParam.setStartTime(startTime);
         }
         // endTime <= startTime
         if (endTime.getTime() - startTime.getTime() <= 0) {

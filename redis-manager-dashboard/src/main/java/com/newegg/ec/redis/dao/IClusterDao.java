@@ -22,7 +22,7 @@ public interface IClusterDao {
     Cluster selectClusterById(Integer clusterId);
 
     @Select("SELECT * FROM cluster WHERE group_id = #{groupId} AND cluster_id = #{clusterId}")
-    Cluster getClusterByIdAndGroup(Integer groupId, Integer clusterId);
+    Cluster getClusterByIdAndGroup(@Param("groupId") Integer groupId, @Param("clusterId") Integer clusterId);
 
     @Select("SELECT * FROM cluster WHERE cluster_name = #{clusterName}")
     Cluster selectClusterByName(String clusterName);
