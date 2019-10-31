@@ -575,11 +575,9 @@ export default {
     },
     installationCheck(installationParam) {
       this.$refs[installationParam].validate(valid => {
-        console.log(valid);
         if (valid) {
           //this.installationInfoVisible = true;
           this.buildParam();
-          console.log(this.installationParam);
           this.install();
           this.initWebSocket();
         } else {
@@ -708,7 +706,7 @@ export default {
     },
     websocketonopen() {
       //连接建立之后执行send方法发送数据
-      message.error("Open socket");
+      message.info("Open socket");
       this.websocketsend(this.installationParam.clusterName);
     },
     websocketonerror() {

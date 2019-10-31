@@ -481,7 +481,7 @@ export default {
     }
   },
   mounted() {
-    let groupId = this.$route.params.groupId;
+    let groupId = this.currentGroupId;
     this.getMachineList(groupId);
     this.getMachineGroupNameList(groupId);
   }

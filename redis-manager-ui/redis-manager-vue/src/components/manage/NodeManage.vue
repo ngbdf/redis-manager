@@ -1094,6 +1094,14 @@ export default {
       return store.getters.getCurrentGroup;
     }
   },
+  watch: {
+    currentGroup(group) {
+      this.$router.push({
+        name: "dashboard",
+        params: { groupId: group.groupId }
+      });
+    }
+  },
   mounted() {
     let clusterId = this.$route.params.clusterId;
     getClusterById(clusterId, cluster => {
