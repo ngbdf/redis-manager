@@ -3,7 +3,19 @@
     <div class="profile-wrapper">
       <el-form :model="user" status-icon ref="user" label-width="100px" :rules="rules">
         <el-form-item label="Avatar">
-          <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+          <!-- <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png">
+          </el-avatar>-->
+
+          <el-upload
+            class="avatar-uploader"
+            action="/user/saveAvatar"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+          >
+            <img v-if="user.avatar" :src="user.avatar" class="avatar" />
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
         </el-form-item>
         <el-form-item label="User Role" prop="userRole">
           <el-tag size="small" v-if="user.userRole == 0">Super Admin</el-tag>
@@ -128,6 +140,21 @@ export default {
     },
     resetUser(user) {
       this.getUser(this.currentUser.userId);
+    },
+    handleAvatarSuccess(res, file) {
+      this.imageUrl = URL.createObjectURL(file.raw);
+    },
+    beforeAvatarUpload(file) {
+      const isJPGOrPNG = file.type === "image/jpeg" || file.type === "image/png";
+      const isLt5M = file.size / 1024 / 1024 < 5;
+
+      if (!isJPGOrPNG) {
+        this.$message.error("Uploading images can only be in JPG or PNG format!");
+      }
+      if (!isLt5M) {
+        this.$message.error("Upload image size can't exceed 5MB!");
+      }
+      return isJPGOrPNG && isLt5M;
     }
   },
   computed: {
@@ -149,5 +176,32 @@ export default {
 .profile-wrapper {
   margin: 0 auto;
   max-width: 960px;
+}
+
+.avatar-uploader >>> .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar-uploader >>> .el-upload:hover {
+  border-color: #409eff;
+}
+
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 120px;
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  display: block;
 }
 </style>

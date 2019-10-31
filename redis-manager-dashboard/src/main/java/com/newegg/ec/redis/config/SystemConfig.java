@@ -3,13 +3,16 @@ package com.newegg.ec.redis.config;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.exception.ConfigurationException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.context.request.async.TimeoutCallableProcessingInterceptor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.servlet.MultipartConfigElement;
 import java.io.File;
 
 import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
@@ -88,6 +91,15 @@ public class SystemConfig implements WebMvcConfigurer {
         return new TimeoutCallableProcessingInterceptor();
     }
 
+    @Bean
+    public MultipartConfigElement multipartConfigElement() {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        //文件最大KB,MB
+        factory.setMaxFileSize(DataSize.ofBytes(10485760));
+        //设置总上传数据总大小
+        factory.setMaxRequestSize(DataSize.ofBytes(10485760));
+        return factory.createMultipartConfig();
+    }
 
     public int getServerPort() {
         return serverPort;

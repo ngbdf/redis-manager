@@ -6,8 +6,10 @@ import com.newegg.ec.redis.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -19,6 +21,8 @@ public class UserController {
 
     @Autowired
     private IUserService userService;
+
+    private static final String USER_ID = "userId";
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
@@ -121,5 +125,16 @@ public class UserController {
     public Result validateUserName(@PathVariable String userName) {
         User user = userService.getUserByName(userName);
         return user == null ? Result.successResult() : Result.failResult(user);
+    }
+
+    @RequestMapping(value = "/updateAvatar", method = RequestMethod.POST)
+    @ResponseBody
+    public Result updateAvatar(@RequestParam("avatar") MultipartFile avatar, @RequestParam Map<String, Object> user) {
+        if (user == null || user.get(USER_ID) == null) {
+            return Result.failResult().setMessage("user id is empty");
+        }
+        String userId = user.get(USER_ID).toString();
+
+        return null;
     }
 }
