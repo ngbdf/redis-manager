@@ -10,7 +10,6 @@ import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
-import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import com.newegg.ec.redis.util.httpclient.HttpClientUtil;
@@ -28,8 +27,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.plugin.install.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
-import static com.newegg.ec.redis.util.RedisConfigUtil.*;
-import static com.newegg.ec.redis.util.RedisConfigUtil.DIR;
 import static com.newegg.ec.redis.util.SignUtil.SLASH;
 import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
@@ -68,7 +65,7 @@ public class HumpbackNodeOperation extends DockerNodeOperation {
      * humpback api
      */
 
-    public static final String DOCKER_INSTALL_BASE_PATH = "/data/redis/docker/";
+    public static final String DOCKER_INSTALL_BASE_PATH = "/redis-manager/redis/docker/";
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {

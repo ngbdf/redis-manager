@@ -3,17 +3,17 @@
     <div class="profile-wrapper">
       <el-form :model="user" status-icon ref="user" label-width="100px" :rules="rules">
         <el-form-item label="Avatar">
-          <!-- <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png">
-          </el-avatar>-->
-
           <el-upload
             class="avatar-uploader"
-            action="/user/saveAvatar"
+            name="avatarFile"
+            :action="avatarUrl"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
+            :data="user"
             :before-upload="beforeAvatarUpload"
+            title="Change avatar"
           >
-            <img v-if="user.avatar" :src="user.avatar" class="avatar" />
+            <img v-if="user.avatar != null && user.avatar != ''" :src="user.avatar" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
         </el-form-item>
@@ -52,6 +52,7 @@
 import { store } from "@/vuex/store.js";
 import API from "@/api/api.js";
 import { isEmpty, validateEmail, validateMobile } from "@/utils/validate.js";
+import apiConfig from "@/api/apiConfig.js";
 import message from "@/utils/message.js";
 export default {
   data() {
@@ -69,6 +70,7 @@ export default {
     };
     return {
       user: {},
+      avatarUrl: apiConfig.baseUrl + "/user/saveAvatar",
       rules: {
         password: [
           {
@@ -102,7 +104,12 @@ export default {
         response => {
           let result = response.data;
           if (result.code == 0) {
-            this.user = result.data;
+            let user = result.data;
+            let avatar = user.avatar;
+            if (!isEmpty(avatar)) {
+              user.avatar = apiConfig.baseUrl + avatar;
+            }
+            this.user = user;
           } else {
             message.error("Get user failed");
             this.user = this.currentUser;
@@ -142,17 +149,18 @@ export default {
       this.getUser(this.currentUser.userId);
     },
     handleAvatarSuccess(res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw);
+      this.user.avatar = URL.createObjectURL(file.raw);
     },
     beforeAvatarUpload(file) {
-      const isJPGOrPNG = file.type === "image/jpeg" || file.type === "image/png";
+      const isJPGOrPNG =
+        file.type === "image/jpeg" || "image/jpg" || file.type === "image/png";
       const isLt5M = file.size / 1024 / 1024 < 5;
 
       if (!isJPGOrPNG) {
-        this.$message.error("Uploading images can only be in JPG or PNG format!");
+        message.error("Uploading images can only be in JPG or PNG format!");
       }
       if (!isLt5M) {
-        this.$message.error("Upload image size can't exceed 5MB!");
+        message.error("Upload image size can't exceed 5MB!");
       }
       return isJPGOrPNG && isLt5M;
     }

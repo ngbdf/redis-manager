@@ -2,6 +2,7 @@ package com.newegg.ec.redis.config;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.exception.ConfigurationException;
+import com.newegg.ec.redis.util.SignUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
@@ -75,9 +76,10 @@ public class SystemConfig implements WebMvcConfigurer {
         if (!file3.exists()) {
             file3.mkdirs();
         }
-
+        avatarPath += avatarPath.endsWith(SignUtil.SLASH) ? "" : SignUtil.SLASH;
         registry.addResourceHandler(CONFIG_ORIGINAL_PATH + "**").addResourceLocations("file:" + configPath);
         registry.addResourceHandler(MACHINE_PACKAGE_ORIGINAL_PATH + "**").addResourceLocations("file:" + machinePackagePath);
+        registry.addResourceHandler(AVATAR_PATH + "**").addResourceLocations("file:" + avatarPath);
     }
 
     @Override
@@ -107,5 +109,9 @@ public class SystemConfig implements WebMvcConfigurer {
 
     public boolean getHumpbackEnabled() {
         return humpbackEnabled;
+    }
+
+    public String getAvatarPath() {
+        return avatarPath;
     }
 }

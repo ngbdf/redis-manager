@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
 import API from "@/api/api.js";
+import { isEmpty } from '@/utils/validate.js'
+import apiConfig from '@/api/apiConfig.js'
 
 Vue.use(Vuex)
 
@@ -61,6 +63,10 @@ const actions = {
     context.commit('setGroupList', groupList)
   },
   setUser(context, user) {
+    let avatar = user.avatar
+    if (!isEmpty(avatar)) {
+      user.avatar = apiConfig.baseUrl + avatar
+    }
     context.commit('setUser', user)
   },
   setUserRole(context, userRole) {

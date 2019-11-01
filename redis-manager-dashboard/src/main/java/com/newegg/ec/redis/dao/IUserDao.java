@@ -14,6 +14,9 @@ import java.util.List;
 @Mapper
 public interface IUserDao {
 
+    @Select("SELECT * FROM `user`")
+    List<User> selectAllUser();
+
     @Select("SELECT " +
             "user.user_id AS user_id, " +
             "user.group_id AS group_id, " +
@@ -83,15 +86,18 @@ public interface IUserDao {
     @Select("SELECT COUNT(user_id) FROM user WHERE group_id = #{groupId}")
     int selectUserNumber(Integer groupId);
 
-    @Insert("INSERT INTO user (group_id, user_name, password, avatar, email, mobile, update_time) " +
-            "VALUES (#{groupId}, #{userName}, #{password}, #{avatar}, #{email}, #{mobile}, NOW())")
+    @Insert("INSERT INTO user (group_id, user_name, password, email, mobile, update_time) " +
+            "VALUES (#{groupId}, #{userName}, #{password}, #{email}, #{mobile}, NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "userId", keyColumn = "user_id")
     int insertUser(User user);
 
     @Update("UPDATE user SET user_name = #{userName}, password = #{password}, " +
-            "avatar = #{avatar}, email = #{email}, mobile = #{mobile}, update_time = NOW() " +
+            "email = #{email}, mobile = #{mobile}, update_time = NOW() " +
             "WHERE user_id = #{userId}")
     int updateUser(User user);
+
+    @Update("UPDATE user SET avatar = #{avatar} WHERE user_id = #{userId}")
+    int updateUserAvatar(User user);
 
     @Delete("DELETE FROM user WHERE user_id = #{userId}")
     int deleteUserById(Integer userId);

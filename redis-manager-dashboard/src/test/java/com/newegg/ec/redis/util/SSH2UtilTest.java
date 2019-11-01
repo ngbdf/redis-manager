@@ -25,7 +25,7 @@ public class SSH2UtilTest {
 
     @Test
     public void remoteCopy() throws Exception {
-        SSH2Util.wget(machine, "/data/test/", "redis3.0.6.tar", "http://121.1.1.1:8182/package/redis3.0.6.tar", true);
+        SSH2Util.wget(machine, "/redis-manager/test/", "redis3.0.6.tar", "http://121.1.1.1:8182/package/redis3.0.6.tar", true);
     }
 
     @Test
@@ -35,13 +35,13 @@ public class SSH2UtilTest {
 
     @Test
     public void rm() throws Exception {
-        String rm = SSH2Util.rm(machine, "/data/redis/docker/cluster", true);
+        String rm = SSH2Util.rm(machine, "/redis-manager/redis/docker/cluster", true);
         System.err.println(rm);
     }
 
     @Test
     public void copyRedisConfigToRemote() throws Exception {
-        String s = SSH2Util.copyFileToRemote(machine, "/data/redis/docker/cluster", "10.16.164.20:8182/redis-manager/config/cluster/redis.conf", true);
+        String s = SSH2Util.copyFileToRemote(machine, "/redis-manager/redis/docker/cluster", "10.16.164.20:8182/redis-manager/config/cluster/redis.conf", true);
         System.err.println(s);
     }
 }

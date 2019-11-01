@@ -33,6 +33,16 @@ public class UserService implements IUserService {
     private IGroupDao groupDao;
 
     @Override
+    public List<User> getAllUser() {
+        try {
+            return userDao.selectAllUser();
+        } catch (Exception e) {
+            logger.error("Get all user failed.", e);
+            return null;
+        }
+    }
+
+    @Override
     public List<User> getUserByGroupId(Integer groupId) {
         try {
             List<User> users = userDao.selectUserByGroupId(groupId);
@@ -150,6 +160,16 @@ public class UserService implements IUserService {
         userDao.updateUser(user);
         groupUserDao.updateUserRole(user);
         return true;
+    }
+
+    @Override
+    public boolean updateUserAvatar(User user) {
+        try {
+            return userDao.updateUserAvatar(user) > 0;
+        } catch (Exception e) {
+            logger.error("update user avatar failed", e);
+            return false;
+        }
     }
 
     @Transactional

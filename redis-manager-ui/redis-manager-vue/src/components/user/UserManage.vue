@@ -21,7 +21,9 @@
         </el-table-column>
         <el-table-column label="User Role">
           <template slot-scope="scope">
-            <el-avatar :src="scope.row.avatar"></el-avatar>
+            <el-image :src="scope.row.avatar" fit="cover">
+              <div slot="error" class="image-slot">{{ scope.row.userName }}</div>
+            </el-image>
           </template>
         </el-table-column>
 
@@ -64,7 +66,9 @@
         </el-table-column>
         <el-table-column label="User Role">
           <template slot-scope="scope">
-            <el-avatar :src="scope.row.avatar"></el-avatar>
+            <el-image :src="scope.row.avatar" fit="cover">
+              <div slot="error" class="image-slot">{{ scope.row.userName }}</div>
+            </el-image>
           </template>
         </el-table-column>
 
@@ -159,6 +163,7 @@ import { store } from "@/vuex/store.js";
 import API from "@/api/api.js";
 import { formatTime } from "@/utils/time.js";
 import { isEmpty, validateEmail, validateMobile } from "@/utils/validate.js";
+import apiConfig from "@/api/apiConfig.js";
 import message from "@/utils/message.js";
 export default {
   data() {
@@ -330,6 +335,10 @@ export default {
           if (result.code == 0) {
             let userList = result.data;
             userList.forEach(user => {
+              let avatar = user.avatar;
+              if (!isEmpty(avatar)) {
+                user.avatar = apiConfig.baseUrl + avatar;
+              }
               user.time = formatTime(user.updateTime);
             });
             this.userList = userList;
@@ -350,6 +359,10 @@ export default {
           if (result.code == 0) {
             let grantedUserList = result.data;
             grantedUserList.forEach(user => {
+              let avatar = user.avatar;
+              if (!isEmpty(avatar)) {
+                user.avatar = apiConfig.baseUrl + avatar;
+              }
               user.time = formatTime(user.updateTime);
             });
             this.grantedUserList = grantedUserList;

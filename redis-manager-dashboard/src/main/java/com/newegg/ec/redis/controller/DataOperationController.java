@@ -1,24 +1,20 @@
 package com.newegg.ec.redis.controller;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
-import com.newegg.ec.redis.util.SignUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
-
 /**
  * @author Jay.H.Zou
  * @date 9/26/2019
  */
-@RequestMapping("/data/*")
+@RequestMapping("/redis-manager/*")
 @Controller
 public class DataOperationController {
 

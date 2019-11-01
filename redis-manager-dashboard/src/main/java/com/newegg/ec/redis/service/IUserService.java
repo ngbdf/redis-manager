@@ -10,6 +10,8 @@ import java.util.List;
  */
 public interface IUserService {
 
+    List<User> getAllUser();
+
     List<User> getUserByGroupId(Integer groupId);
 
     List<User> getGrantUserByGroupId(Integer grantGroupId);
@@ -29,6 +31,8 @@ public interface IUserService {
     User getUserByName(String userName);
 
     boolean updateUser(User user);
+
+    boolean updateUserAvatar(User user);
 
     boolean deleteUserById(Integer userId);
 

@@ -10,7 +10,6 @@ import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
-import com.newegg.ec.redis.plugin.install.service.INodeOperation;
 import com.newegg.ec.redis.service.IMachineService;
 import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.SSH2Util;
@@ -44,7 +43,7 @@ public class MachineNodeOperation extends AbstractNodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(MachineNodeOperation.class);
 
-    public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
+    public static final String MACHINE_INSTALL_BASE_PATH = "/redis-manager/redis/machine/";
 
     @Value("${redis-manager.install.machine.package-path}")
     private String packagePath;
@@ -95,7 +94,7 @@ public class MachineNodeOperation extends AbstractNodeOperation {
             return false;
         }
         List<Machine> machineList = installationParam.getMachineList();
-        String tempPath = INSTALL_BASE_PATH + "package/";
+        String tempPath = INSTALL_BASE_PATH + "redis-manager/";
         List<Future<Boolean>> resultFutureList = new ArrayList<>(machineList.size());
         for (Machine machine : machineList) {
             resultFutureList.add(threadPool.submit(() -> {

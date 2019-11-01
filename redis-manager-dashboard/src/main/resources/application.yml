@@ -8,7 +8,6 @@ spring:
   http:
     encoding:
       enabled: true
-      force: true
       charset: UTF-8
   datasource:
     # 必填项，
@@ -40,6 +39,7 @@ redis-manager:
     avatar-path: /redis-manager/avatar/
     authorization:
       enabled: true
+      name: xxx
       server: xxx
   # monitor configuration
   monitor:

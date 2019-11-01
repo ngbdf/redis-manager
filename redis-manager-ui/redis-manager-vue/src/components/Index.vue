@@ -4,8 +4,7 @@
       <el-row type="flex" class="header-wrapper" justify="space-between">
         <el-col class="grid-content logo-wrapper">
           <i class="el-icon-s-fold aside-operation" @click="collapseHandler"></i>
-          <!-- <span class="logo">REDIS MANAGER</span> -->
-          <img src="../assets/logo1.png" style="width: 150px; height: 20px" />
+          <img src="../assets/logo.png" style="width: 150px; height: 20px" />
         </el-col>
         <el-col>
           <div class="grid-content right-content" id="right-content">
@@ -45,11 +44,11 @@
             <div class="user-info">
               <!-- <span class="user-name">Redis</span> -->
               <el-dropdown @command="handleCommand">
-                <span>
-                  <el-avatar :size="36" src="../assets/head.jpg" @error="errorHandler">
-                    <img src="../assets/head.jpg" class="image-overflow" />
-                  </el-avatar>
-                </span>
+                <el-image
+                  :src="currentUser.avatar"
+                  @error="errorHandler"
+                  fit="cover"
+                >{{ currentUser.userName }}</el-image>
                 <el-dropdown-menu slot="dropdown" style="min-width: 180px">
                   <el-dropdown-item disabled>
                     Signed in as
@@ -262,7 +261,10 @@ export default {
       this.$router.push({ name: "profile" });
     },
     toDataOperation() {
-      this.$router.push({ name: "data-operation" });
+      this.$router.push({
+        name: "data-operation",
+        params: { groupId: this.selectGroupId }
+      });
     },
     handleOpen(key, keyPath) {},
     handleClose(key, keyPath) {},
@@ -354,6 +356,7 @@ export default {
       groupId = this.currentUser.groupId;
     }
     this.selectGroupId = groupId;
+    this.toDashboard();
   }
 };
 </script>
@@ -422,15 +425,29 @@ export default {
   margin: 0 20px;
 }
 
-.el-avatar {
-  display: flex;
-}
-
 .image-overflow {
   flex: 1;
   overflow: hidden;
 }
 
+.el-image {
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+  display: flex;
+}
+
+.image-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+  color: #909399;
+  font-size: 12px;
+  white-space: nowrap;
+}
 .aside-main-wrapper {
   margin-top: 60px;
 }

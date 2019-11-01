@@ -82,7 +82,7 @@ const router = new Router({
         },
         {
           name: 'user-manage',
-          path: '/user-manage/:groupId',
+          path: '/user-manage/group/:groupId',
           component: UserManage
         },
         {
@@ -92,7 +92,7 @@ const router = new Router({
         },
         {
           name: 'data-operation',
-          path: '/data-operation',
+          path: '/data-operation/group/:groupId',
           component: DataOperation
         }
       ]

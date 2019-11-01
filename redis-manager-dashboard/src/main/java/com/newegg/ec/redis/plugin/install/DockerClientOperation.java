@@ -17,7 +17,6 @@ import java.util.*;
 
 import static com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation.DOCKER_INSTALL_BASE_PATH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
-import static com.newegg.ec.redis.util.SignUtil.MINUS;
 
 
 /**
@@ -34,7 +33,7 @@ public class DockerClientOperation {
 
     private static final String VOLUME = DOCKER_INSTALL_BASE_PATH + "%d:/data";
 
-    public static final String REDIS_DEFAULT_WORK_DIR = "/data/";
+    public static final String REDIS_DEFAULT_WORK_DIR = "/redis-manager/";
 
     static DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
             .withReadTimeout(300000)

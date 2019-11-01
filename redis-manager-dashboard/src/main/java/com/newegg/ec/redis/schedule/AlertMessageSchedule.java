@@ -40,7 +40,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.util.SignUtil.EQUAL_SIGN;
-import static javax.management.timer.Timer.ONE_MINUTE;
 
 /**
  * @author Jay.H.Zou

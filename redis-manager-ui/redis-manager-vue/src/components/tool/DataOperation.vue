@@ -230,6 +230,15 @@ export default {
       return store.getters.getCurrentGroup;
     }
   },
+  watch: {
+    currentGroup(group) {
+      this.getClusterList(group.groupId);
+      this.$router.push({
+        name: "data-operation",
+        params: { groupId: group.groupId }
+      });
+    }
+  },
   mounted() {
     this.getClusterList(this.currentGroup.groupId);
   }

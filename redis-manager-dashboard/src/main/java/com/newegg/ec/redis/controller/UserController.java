@@ -1,8 +1,11 @@
 package com.newegg.ec.redis.controller;
 
+import com.google.common.base.Strings;
+import com.newegg.ec.redis.config.SystemConfig;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IUserService;
+import com.newegg.ec.redis.util.ImageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+
+import static com.newegg.ec.redis.config.SystemConfig.AVATAR_PATH;
 
 /**
  * @author Jay.H.Zou
@@ -21,6 +26,9 @@ public class UserController {
 
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private SystemConfig systemConfig;
 
     private static final String USER_ID = "userId";
 
@@ -127,14 +135,26 @@ public class UserController {
         return user == null ? Result.successResult() : Result.failResult(user);
     }
 
-    @RequestMapping(value = "/updateAvatar", method = RequestMethod.POST)
+    @RequestMapping(value = "/saveAvatar", method = RequestMethod.POST)
     @ResponseBody
-    public Result updateAvatar(@RequestParam("avatar") MultipartFile avatar, @RequestParam Map<String, Object> user) {
+    public Result updateAvatar(@RequestParam("avatarFile") MultipartFile avatarFile, @RequestParam Map<String, Object> user) {
         if (user == null || user.get(USER_ID) == null) {
             return Result.failResult().setMessage("user id is empty");
         }
         String userId = user.get(USER_ID).toString();
-
-        return null;
+        if (Strings.isNullOrEmpty(userId)) {
+            return Result.failResult();
+        }
+        try {
+            ImageUtil.saveImage(avatarFile, systemConfig.getAvatarPath(), userId);
+            String avatar = AVATAR_PATH + ImageUtil.getImageName(userId);
+            User userAvatar = new User();
+            userAvatar.setUserId(Integer.parseInt(userId));
+            userAvatar.setAvatar(avatar);
+            return userService.updateUserAvatar(userAvatar) ? Result.successResult() : Result.failResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.failResult();
+        }
     }
 }

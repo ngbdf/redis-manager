@@ -52,31 +52,6 @@ public class RedisConfigUtil {
     public RedisConfigUtil() {
     }
 
-    @Deprecated
-    public static void generateRedisConfig(String path, int mode) throws IOException {
-        File tempPath = new File(path);
-        if (!tempPath.exists() && !tempPath.mkdirs()) {
-            throw new RuntimeException(path + " mkdir failed.");
-        }
-        File file = new File(path + REDIS_CONF);
-        if (file.exists() && !file.delete()) {
-            throw new RuntimeException(file.getName() + " delete failed.");
-        }
-        if (!file.createNewFile()) {
-            throw new RuntimeException(file.getName() + " create failed.");
-        }
-        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(file, true), UTF_8));
-        for (RedisConfig redisConfig : getRedisConfig(mode)) {
-            String configKey = redisConfig.getConfigKey();
-            String configValue = redisConfig.getConfigValue();
-            bufferedWriter.write(configKey + SPACE + configValue);
-            bufferedWriter.newLine();
-        }
-        bufferedWriter.flush();
-        bufferedWriter.close();
-    }
-
     /**
      * dir, bind, port 等变量赋值
      *
@@ -102,26 +77,6 @@ public class RedisConfigUtil {
         }
         String result = SSH2Util.execute(machine, commands.toString());
         return result;
-    }
-
-    private static List<RedisConfig> getRedisConfig(int mode) {
-        List<RedisConfig> configs = new ArrayList<>();
-        for (RedisConfig redisConfig : REDIS_CONFIG_LIST) {
-            String configKey = redisConfig.getConfigKey();
-            if (Objects.equals(REQUIRE_PASS, configKey) || Objects.equals(MASTER_AUTH, configKey)) {
-                continue;
-            }
-            int item = redisConfig.getMode();
-            boolean type = item == mode || item == NORMAL_TYPE;
-            if (redisConfig.isEnable() && type) {
-                configs.add(redisConfig);
-            }
-        }
-        return configs;
-    }
-
-    public static List<RedisConfig> getAllRedisConfig() {
-        return REDIS_CONFIG_LIST;
     }
 
     /**
@@ -397,8 +352,52 @@ public class RedisConfigUtil {
         return CONFIG_DESC_MAP.keySet();
     }
 
-    // https://raw.githubusercontent.com/antirez/redis/5.0/redis.conf
-    // https://www.cnblogs.com/sjfgod/p/7624437.html
+    /**
+     * little tool
+     * @param path
+     * @param mode
+     * @throws IOException
+     */
+    public static void generateRedisConfig(String path, int mode) throws IOException {
+        File tempPath = new File(path);
+        if (!tempPath.exists() && !tempPath.mkdirs()) {
+            throw new RuntimeException(path + " mkdir failed.");
+        }
+        File file = new File(path + REDIS_CONF);
+        if (file.exists() && !file.delete()) {
+            throw new RuntimeException(file.getName() + " delete failed.");
+        }
+        if (!file.createNewFile()) {
+            throw new RuntimeException(file.getName() + " create failed.");
+        }
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(file, true), UTF_8));
+        for (RedisConfig redisConfig : getRedisConfig(mode)) {
+            String configKey = redisConfig.getConfigKey();
+            String configValue = redisConfig.getConfigValue();
+            bufferedWriter.write(configKey + SPACE + configValue);
+            bufferedWriter.newLine();
+        }
+        bufferedWriter.flush();
+        bufferedWriter.close();
+    }
+
+    private static List<RedisConfig> getRedisConfig(int mode) {
+        List<RedisConfig> configs = new ArrayList<>();
+        for (RedisConfig redisConfig : REDIS_CONFIG_LIST) {
+            String configKey = redisConfig.getConfigKey();
+            if (Objects.equals(REQUIRE_PASS, configKey) || Objects.equals(MASTER_AUTH, configKey)) {
+                continue;
+            }
+            int item = redisConfig.getMode();
+            boolean type = item == mode || item == NORMAL_TYPE;
+            if (redisConfig.isEnable() && type) {
+                configs.add(redisConfig);
+            }
+        }
+        return configs;
+    }
+
     static {
         // network
         CONFIG_DESC_MAP.put("protected-mode", "Protected mode is a layer of security protection, in order to avoid that Redis instances left open on the internet are accessed and exploited");

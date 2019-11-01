@@ -9,7 +9,6 @@ import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.DockerClientOperation;
-import com.newegg.ec.redis.plugin.install.service.INodeOperation;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import org.slf4j.Logger;
@@ -24,7 +23,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.util.RedisConfigUtil.*;
-import static com.newegg.ec.redis.util.SignUtil.MINUS;
 import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
@@ -39,7 +37,7 @@ public class DockerNodeOperation extends AbstractNodeOperation {
     @Value("${redis-manager.install.docker.images}")
     private String images;
 
-    public static final String DOCKER_INSTALL_BASE_PATH = "/data/redis/docker/";
+    public static final String DOCKER_INSTALL_BASE_PATH = "/redis-manager/redis/docker/";
 
     @Autowired
     private DockerClientOperation dockerClientOperation;
@@ -203,7 +201,7 @@ public class DockerNodeOperation extends AbstractNodeOperation {
         configs.put(DAEMONIZE, "no");
         configs.put(BIND, bind);
         configs.put(PORT, port + "");
-        configs.put(DIR, "/data/");
+        configs.put(DIR, "/redis-manager/");
         return configs;
     }
 }

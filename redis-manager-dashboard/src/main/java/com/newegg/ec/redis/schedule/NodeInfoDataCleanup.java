@@ -6,7 +6,9 @@ import com.newegg.ec.redis.service.INodeInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -14,6 +16,7 @@ import java.util.List;
  * @author Jay.H.Zou
  * @date 9/18/2019
  */
+@Component
 public class NodeInfoDataCleanup implements IDataCleanup {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeInfoDataCleanup.class);
@@ -25,9 +28,10 @@ public class NodeInfoDataCleanup implements IDataCleanup {
     protected INodeInfoService nodeInfoService;
 
     /**
-     * 每周星期天凌晨1点实行一次，清理数据
+     * 每天凌晨0点实行一次，清理数据
      */
-    @Scheduled(cron = "0 0 1 ? * L")
+    @Async
+    @Scheduled(cron = "0 0 0 * * ?")
     @Override
     public void cleanup() {
         try {
