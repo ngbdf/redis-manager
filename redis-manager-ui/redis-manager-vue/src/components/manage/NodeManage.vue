@@ -599,7 +599,7 @@ export default {
     },
     getAllNodeList(clusterId) {
       this.nodeListLoading = true;
-      let url = "/nodeManage/getAllNodeListWithStatus/" + clusterId;
+      let url = "/node-manage/getAllNodeListWithStatus/" + clusterId;
       API.get(
         url,
         null,
@@ -689,7 +689,7 @@ export default {
       this.configVisible = true;
     },
     getConfigKeyList() {
-      let url = "/nodeManage/getRedisConfigKeyList";
+      let url = "/node-manage/getRedisConfigKeyList";
       API.get(
         url,
         null,
@@ -702,7 +702,7 @@ export default {
       );
     },
     getConfigCurrentValue(redisConfig) {
-      let url = "/nodeManage/getConfigCurrentValue";
+      let url = "/node-manage/getConfigCurrentValue";
       let data = {
         cluster: this.cluster,
         configKey: redisConfig.configKey
@@ -721,7 +721,7 @@ export default {
     editConfig(redisConfig) {
       this.$refs[redisConfig].validate(valid => {
         if (valid) {
-          let url = "/nodeManage/updateRedisConfig";
+          let url = "/node-manage/updateRedisConfig";
           let data = {
             clusterId: this.cluster.clusterId,
             redisConfig: this.redisConfig
@@ -786,9 +786,9 @@ export default {
       let redisMode = this.cluster.redisMode;
       let url;
       if (redisMode == "cluster") {
-        url = "/nodeManage/replicateOf";
+        url = "/node-manage/replicateOf";
       } else if (redisMode == "standalone") {
-        url = "/nodeManage/standaloneReplicateOf";
+        url = "/node-manage/standaloneReplicateOf";
       } else {
         return;
       }
@@ -814,7 +814,7 @@ export default {
       this.buildNodeList(redisNode);
     },
     failOver() {
-      let url = "/nodeManage/failOver";
+      let url = "/node-manage/failOver";
       API.post(
         url,
         this.operationNodeList,
@@ -843,7 +843,7 @@ export default {
           };
           let redisNodeList = [];
           redisNodeList.push(redisNode);
-          let url = "/nodeManage/importNode";
+          let url = "/node-manage/importNode";
           API.post(
             url,
             redisNodeList,
@@ -871,9 +871,9 @@ export default {
       let redisMode = this.cluster.redisMode;
       let url;
       if (redisMode == "cluster") {
-        url = "/nodeManage/forget";
+        url = "/node-manage/forget";
       } else if (redisMode == "standalone") {
-        url = "/nodeManage/standaloneForget";
+        url = "/node-manage/standaloneForget";
       } else {
         return;
       }
@@ -908,7 +908,7 @@ export default {
             redisNode: this.operationNode,
             slotRange: this.slotRange
           };
-          let url = "/nodeManage/moveSlot";
+          let url = "/node-manage/moveSlot";
           API.post(
             url,
             data,
@@ -939,7 +939,7 @@ export default {
       this.startNodeVisible = true;
     },
     startNode() {
-      let url = "/nodeManage/start";
+      let url = "/node-manage/start";
       API.post(
         url,
         this.operationNodeList,
@@ -968,7 +968,7 @@ export default {
       this.stopNodeVisible = true;
     },
     stopNode() {
-      let url = "/nodeManage/stop";
+      let url = "/node-manage/stop";
       if (!this.canOperate) {
         return;
       }
@@ -994,7 +994,7 @@ export default {
       this.restartNodeVisible = true;
     },
     restartNode() {
-      let url = "/nodeManage/restart";
+      let url = "/node-manage/restart";
       if (!this.canOperate) {
         return;
       }
@@ -1039,7 +1039,7 @@ export default {
       this.deleteNodeVisible = true;
     },
     deleteNode() {
-      let url = "/nodeManage/delete";
+      let url = "/node-manage/delete";
       if (!this.canOperate) {
         return;
       }
@@ -1061,7 +1061,7 @@ export default {
       );
     },
     initSlots() {
-      let url = "/nodeManage/initSlots";
+      let url = "/node-manage/initSlots";
       API.post(
         url,
         this.cluster,

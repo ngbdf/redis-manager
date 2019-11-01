@@ -30,7 +30,7 @@ import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
  * @author Jay.H.Zou
  * @date 9/25/2019
  */
-@RequestMapping("/nodeManage/*")
+@RequestMapping("/node-manage/*")
 @Controller
 public class NodeManageController {
 

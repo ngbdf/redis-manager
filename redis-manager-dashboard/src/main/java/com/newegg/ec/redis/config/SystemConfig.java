@@ -80,6 +80,7 @@ public class SystemConfig implements WebMvcConfigurer {
         registry.addResourceHandler(CONFIG_ORIGINAL_PATH + "**").addResourceLocations("file:" + configPath);
         registry.addResourceHandler(MACHINE_PACKAGE_ORIGINAL_PATH + "**").addResourceLocations("file:" + machinePackagePath);
         registry.addResourceHandler(AVATAR_PATH + "**").addResourceLocations("file:" + avatarPath);
+        registry.addResourceHandler(AVATAR_PATH + "**").addResourceLocations("file:" + avatarPath);
     }
 
     @Override

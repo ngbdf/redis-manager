@@ -27,7 +27,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 /** <style lang="scss" scoped> */
 .page-container {
   font-size: 32px;

@@ -378,7 +378,7 @@ export default {
       this.nodeInfoParam = nodeInfoParam;
     },
     getAllNodeList(clusterId) {
-      let url = "/nodeManage/getAllNodeList/" + clusterId;
+      let url = "/node-manage/getAllNodeList/" + clusterId;
       API.get(
         url,
         null,

@@ -27,7 +27,7 @@ export default {
   },
   methods: {
     getNodeInfo() {
-      let url = "/nodeManage/getNodeInfo";
+      let url = "/node-manage/getNodeInfo";
       API.post(
         url,
         this.redisNode,

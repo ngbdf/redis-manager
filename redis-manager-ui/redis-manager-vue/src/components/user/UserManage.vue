@@ -505,7 +505,7 @@ export default {
     }
   },
   mounted() {
-    let groupId = this.$route.params.groupId;
+    let groupId = this.currentGroup.groupId;
     this.getUserList(groupId);
     this.getGrantedUserList(groupId);
   }

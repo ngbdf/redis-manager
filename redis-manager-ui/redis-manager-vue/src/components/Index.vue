@@ -1,71 +1,74 @@
 <template>
   <el-container id="index">
-    <el-header>
-      <el-row type="flex" class="header-wrapper" justify="space-between">
-        <el-col class="grid-content logo-wrapper">
-          <i class="el-icon-s-fold aside-operation" @click="collapseHandler"></i>
-          <img src="../assets/logo.png" style="width: 150px; height: 20px" />
-        </el-col>
-        <el-col>
-          <div class="grid-content right-content" id="right-content">
-            <el-select
-              v-model="selectGroupId"
-              placeholder="Select Group"
-              size="mini"
-              class="group-select"
-              @change="selectGroup()"
-            >
-              <el-option
-                v-for="group in groupList"
-                :key="group.groupId"
-                :label="group.groupName"
-                :value="group.groupId"
-              ></el-option>
-            </el-select>
-            <div v-if="permission">
-              <el-divider direction="vertical"></el-divider>
-              <el-button size="mini" type="text" @click="importVisible = true">Import Cluster</el-button>
-            </div>
+    <el-header class="header header-wrapper">
+      <div class="grid-content logo-wrapper">
+        <i class="el-icon-s-fold aside-operation" @click="collapseHandler"></i>
+        <img src="../assets/logo.png" style="width: 150px; height: 20px" />
+      </div>
+      <div class="grid-content right-content" id="right-content">
+        <el-select
+          v-model="selectGroupId"
+          placeholder="Select Group"
+          size="mini"
+          class="group-select"
+          @change="selectGroup()"
+        >
+          <el-option
+            v-for="group in groupList"
+            :key="group.groupId"
+            :label="group.groupName"
+            :value="group.groupId"
+          ></el-option>
+        </el-select>
+        <div v-if="permission">
+          <el-button size="mini" type="text" @click="importVisible = true">Import Cluster</el-button>
+        </div>
 
-            <span class="links" id="links">
-              <el-divider direction="vertical"></el-divider>
-              <el-link :underline="false">
-                <i class="el-icon-ali-git link-icon" title="Github"></i>
-              </el-link>
-              <el-divider direction="vertical"></el-divider>
-              <el-link :underline="false">
-                <i class="el-icon-tickets link-icon" title="Document"></i>
-              </el-link>
-              <el-divider direction="vertical"></el-divider>
-              <el-link :underline="false">
-                <i class="el-icon-ali-feedback link-icon" title="Feedback"></i>
-              </el-link>
-            </span>
-            <div class="user-info">
-              <!-- <span class="user-name">Redis</span> -->
-              <el-dropdown @command="handleCommand">
-                <el-image
-                  :src="currentUser.avatar"
-                  @error="errorHandler"
-                  fit="cover"
-                >{{ currentUser.userName }}</el-image>
-                <el-dropdown-menu slot="dropdown" style="min-width: 180px">
-                  <el-dropdown-item disabled>
-                    Signed in as
-                    <b>{{ currentUser.userName }}</b>
-                  </el-dropdown-item>
-                  <el-dropdown-item command="profile" divided>Profile</el-dropdown-item>
-                  <el-dropdown-item>Help</el-dropdown-item>
-                  <el-dropdown-item divided @click.native="toLogin">Sign out</el-dropdown-item>
-                </el-dropdown-menu>
-              </el-dropdown>
-            </div>
-          </div>
-        </el-col>
-        <!-- <el-col :span="3" class="user-info">
-          <div class="grid-content bg-purple"></div>
-        </el-col>-->
-      </el-row>
+        <div class="links" id="links">
+          <el-divider direction="vertical"></el-divider>
+          <el-link
+            :underline="false"
+            href="https://github.com/ngbdf/redis-manager/"
+            target="_blank"
+          >
+            <i class="el-icon-ali-git link-icon" title="Github"></i>
+          </el-link>
+          <el-divider direction="vertical"></el-divider>
+          <el-link
+            :underline="false"
+            href="https://github.com/ngbdf/redis-manager/wiki"
+            target="_blank"
+          >
+            <i class="el-icon-tickets link-icon" title="Document"></i>
+          </el-link>
+          <el-divider direction="vertical"></el-divider>
+          <el-link
+            :underline="false"
+            href="https://github.com/ngbdf/redis-manager/issues/new"
+            target="_blank"
+          >
+            <i class="el-icon-ali-feedback link-icon" title="Feedback"></i>
+          </el-link>
+        </div>
+        <div class="user-info">
+          <!-- <span class="user-name">Redis</span> -->
+          <el-dropdown @command="handleCommand" class="user-dropdown">
+            <el-image
+              :src="currentUser.avatar"
+              @error="errorHandler"
+              fit="cover"
+            >{{ currentUser.userName }}</el-image>
+            <el-dropdown-menu slot="dropdown" style="min-width: 180px">
+              <el-dropdown-item disabled>
+                Signed in as
+                <b>{{ currentUser.userName }}</b>
+              </el-dropdown-item>
+              <el-dropdown-item command="profile" divided>Profile</el-dropdown-item>
+              <el-dropdown-item divided @click.native="toLogin">Sign out</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
+      </div>
     </el-header>
     <el-container class="aside-main-wrapper">
       <el-aside :class="{'is-collapse':isCollapse}" style="width: 200px;">
@@ -276,16 +279,16 @@ export default {
     },
     // 监听顶栏宽度
     listenHeaderWidth() {
-      var erd = elementResizeDetectorMaker();
-      erd.listenTo(document.getElementById("right-content"), function(element) {
-        var width = element.offsetWidth;
-        var links = document.getElementById("links");
-        if (width > 500) {
-          links.style.display = "block";
-        } else {
-          links.style.display = "none";
-        }
-      });
+      // var erd = elementResizeDetectorMaker();
+      // erd.listenTo(document.getElementById("right-content"), function(element) {
+      //   var width = element.offsetWidth;
+      //   var links = document.getElementById("links");
+      //   if (width > 500) {
+      //     links.style.display = "block";
+      //   } else {
+      //     links.style.display = "none";
+      //   }
+      // });
     },
     getGroupList() {
       let user = store.getters.getUser;
@@ -367,12 +370,12 @@ export default {
 }
 
 /*页面下拉，header固定不动*/
-.el-header {
+.header {
   position: fixed;
   width: 100%;
   z-index: 100;
   overflow: hidden;
-  padding: 0;
+  padding: 0 !important;
   line-height: 40px;
   -webkit-box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
   -moz-box-shadow: 0 0 5px rgba(102, 102, 102, 0.05);
@@ -384,14 +387,15 @@ export default {
 .header-wrapper {
   padding: 10px 0;
   overflow: hidden;
+  display: flex;
+  justify-content: space-between;
 }
 
 .logo-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 200px;
-  min-width: 200px;
+  width: 180px;
   cursor: pointer;
   padding-left: 22px;
 }
@@ -407,11 +411,13 @@ export default {
 }
 
 .links {
-  padding-right: 1rem;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
 }
 
 .link-icon {
-  font-size: 16px;
+  font-size: 14px !important;
 }
 
 .group-select {
@@ -419,10 +425,12 @@ export default {
 }
 
 .user-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin: 0 20px;
+}
+
+.user-dropdown {
+  display: flex !important;
+  align-items: center;
 }
 
 .image-overflow {
@@ -474,5 +482,8 @@ export default {
 
 .grid-content {
   min-height: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

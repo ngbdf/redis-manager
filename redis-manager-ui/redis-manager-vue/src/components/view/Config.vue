@@ -29,7 +29,7 @@ export default {
   },
   methods: {
     getConfig() {
-      let url = "/nodeManage/getConfig";
+      let url = "/node-manage/getConfig";
       API.post(
         url,
         this.redisNode,

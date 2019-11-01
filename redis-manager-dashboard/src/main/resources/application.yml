@@ -5,6 +5,8 @@ server:
 spring:
   application:
     name: redis-manager
+  resources:
+    static-locations: classpath:/
   http:
     encoding:
       enabled: true
