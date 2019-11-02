@@ -148,7 +148,7 @@
       <!-- detail monitor -->
     </div>
     <el-dialog title="Query" :visible.sync="queryVisible" :close-on-click-modal="false" width="60%">
-      <query :clusterId="cluster.clusterId"></query>
+      <query :cluster="cluster"></query>
     </el-dialog>
 
     <el-dialog

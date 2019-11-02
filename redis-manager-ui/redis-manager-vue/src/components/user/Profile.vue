@@ -13,7 +13,7 @@
             :before-upload="beforeAvatarUpload"
             title="Change avatar"
           >
-            <img v-if="user.avatar != null && user.avatar != ''" :src="user.avatar" class="avatar" />
+            <img v-if="user.avatar != null && user.avatar != ''" :src="user.avatar" class="avatar" style="object-fit: cover;" />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
         </el-form-item>

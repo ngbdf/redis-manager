@@ -14,7 +14,7 @@ import java.util.*;
  * @author Jay.H.Zou
  * @date 9/26/2019
  */
-@RequestMapping("/redis-manager/*")
+@RequestMapping("/data/*")
 @Controller
 public class DataOperationController {
 

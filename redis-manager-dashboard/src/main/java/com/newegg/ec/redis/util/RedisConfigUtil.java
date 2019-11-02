@@ -2,15 +2,13 @@ package com.newegg.ec.redis.util;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.newegg.ec.redis.plugin.install.DockerClientOperation.REDIS_DEFAULT_WORK_DIR;
-import static com.newegg.ec.redis.util.SignUtil.*;
+import static com.newegg.ec.redis.util.SignUtil.SEMICOLON;
+import static com.newegg.ec.redis.util.SignUtil.SPACE;
 
 /**
  * redis.conf

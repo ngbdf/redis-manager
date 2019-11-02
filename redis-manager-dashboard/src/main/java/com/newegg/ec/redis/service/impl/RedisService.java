@@ -191,7 +191,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
             Map<String, String> clusterInfo = redisClient.getClusterInfo();
             return clusterInfo;
         } catch (Exception e) {
-            logger.error("Get cluster info failed, " + cluster, e);
+            logger.error("Get cluster info failed, cluster name = " + cluster.getClusterName(), e);
             return null;
         }
     }

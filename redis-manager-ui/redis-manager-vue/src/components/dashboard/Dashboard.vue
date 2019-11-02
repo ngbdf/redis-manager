@@ -180,7 +180,7 @@
       :close-on-click-modal="false"
       width="50%"
     >
-      <query :clusterId="queryClusterId"></query>
+      <query :cluster="cluster"></query>
     </el-dialog>
     <el-dialog
       title="Edit Cluster"
@@ -225,7 +225,6 @@ export default {
       },
       clusterList: [],
       cluster: {},
-      queryClusterId: "",
       queryVisible: false,
       editClusterId: "",
       editClusterVisible: false,
@@ -258,7 +257,6 @@ export default {
       });
     },
     handleQuery(cluster) {
-      this.queryClusterId = cluster.clusterId;
       this.cluster = cluster;
       this.queryVisible = true;
     },

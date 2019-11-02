@@ -482,9 +482,8 @@ public class InstallationTemplate {
         RedisClient redisClient = null;
         List<RedisNode> redisNodeListWithInfo = new ArrayList<>();
         long timeout = 0;
-        // TODO: 根据集群规模设置等待时长
         long start = System.currentTimeMillis();
-        while (timeout < FIVE_MINUTES) {
+        while (timeout < ONE_MINUTE) {
             try {
                 if (Objects.equals(redisMode, CLUSTER)) {
                     redisClusterClient = RedisClientFactory.buildRedisClusterClient(seed);
@@ -505,6 +504,7 @@ public class InstallationTemplate {
                 String message = "Wait for node meet error.";
                 InstallationWebSocketHandler.appendLog(clusterName, message);
                 logger.error(message, e);
+                timeout += TEN_SECONDS;
                 installationParam.setAutoInit(false);
             } finally {
                 if (redisClusterClient != null) {
@@ -518,9 +518,12 @@ public class InstallationTemplate {
         InstallationWebSocketHandler.appendLog(clusterName, "Wait meet: " + (System.currentTimeMillis() - start));
         if (redisNodeListWithInfo.size() != redisNodeList.size()) {
             installationParam.setAutoInit(false);
-            String message = "Topology is incorrect, real nodes = " + redisNodeListWithInfo + ", expectation nodes = " + redisNodeList;
-            InstallationWebSocketHandler.appendLog(clusterName, message);
-            logger.warn(message);
+            StringBuilder message = new StringBuilder("Topology is incorrect, real nodes = ");
+            redisNodeListWithInfo.forEach(redisNode -> message.append(RedisUtil.getNodeString(redisNode)).append(COMMAS));
+            message.append("; expectation nodes = ");
+            redisNodeList.forEach(redisNode -> message.append(RedisUtil.getNodeString(redisNode)).append(COMMAS));
+            InstallationWebSocketHandler.appendLog(clusterName, message.toString());
+            logger.warn(message.toString());
         }
         return redisNodeListWithInfo;
     }

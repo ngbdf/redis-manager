@@ -50,15 +50,13 @@ export default {
     codemirror
   },
   props: {
-    clusterId: {
-      type: Number
-    }
+    cluster: {}
   },
   data() {
     return {
       dbList: [],
       autoCommandParam: {
-        clusterId: this.clusterId,
+        clusterId: this.cluster.clusterId,
         count: 100
       },
       result: "",
@@ -167,7 +165,7 @@ export default {
     }
   },
   mounted() {
-    this.getDBList(this.clusterId);
+    this.getDBList(this.cluster.clusterId);
   }
 };
 </script>

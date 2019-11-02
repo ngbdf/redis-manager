@@ -277,19 +277,6 @@ export default {
     collapseHandler() {
       this.isCollapse = !this.isCollapse;
     },
-    // 监听顶栏宽度
-    listenHeaderWidth() {
-      // var erd = elementResizeDetectorMaker();
-      // erd.listenTo(document.getElementById("right-content"), function(element) {
-      //   var width = element.offsetWidth;
-      //   var links = document.getElementById("links");
-      //   if (width > 500) {
-      //     links.style.display = "block";
-      //   } else {
-      //     links.style.display = "none";
-      //   }
-      // });
-    },
     getGroupList() {
       let user = store.getters.getUser;
       let url = "/group/getGroupList";
@@ -302,8 +289,9 @@ export default {
             groupList.forEach(group => {
               group.updateTime = formatTime(group.updateTime);
             });
+            // TODO: 简化逻辑
             store.dispatch("setGroupList", groupList);
-            let currentGroup = store.getters.getCurrentGroup;
+            let currentGroup = this.urrentGroup;
             let user = store.getters.getUser;
             let isContainCurrentGroup = false;
             groupList.forEach(group => {
@@ -322,6 +310,7 @@ export default {
                   this.selectGroupId = user.groupId;
                   store.dispatch("setCurrentGroup", group);
                   this.getUserRole(group);
+                  this.toDashboard();
                 }
               });
             }
@@ -352,14 +341,16 @@ export default {
     }
   },
   mounted() {
-    this.listenHeaderWidth();
     this.getGroupList();
     let groupId = this.currentGroup.groupId;
     if (isEmpty(groupId)) {
       groupId = this.currentUser.groupId;
     }
+
     this.selectGroupId = groupId;
-    this.toDashboard();
+    if (this.$route.path == "/") {
+      this.toDashboard();
+    }
   }
 };
 </script>

@@ -65,7 +65,7 @@ public class HumpbackNodeOperation extends DockerNodeOperation {
      * humpback api
      */
 
-    public static final String DOCKER_INSTALL_BASE_PATH = "/redis-manager/redis/docker/";
+    public static final String DOCKER_INSTALL_BASE_PATH = "/data/redis/docker/";
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {

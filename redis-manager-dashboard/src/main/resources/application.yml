@@ -38,7 +38,7 @@ redis-manager:
   auth:
     user-name: admin
     password: admin
-    avatar-path: /redis-manager/avatar/
+    avatar-path: /data/avatar/
     authorization:
       enabled: true
       name: xxx
@@ -52,11 +52,11 @@ redis-manager:
   # installation configuration
   install:
     # config dir
-    conf-path: /redis-manager/conf/
+    conf-path: /data/conf/
     # physics machine
     machine:
       # absolute dir
-      package-path: /redis-manager/machine/
+      package-path: /data/machine/
     # docker
     docker:
       # 默认从官方镜像库拉取

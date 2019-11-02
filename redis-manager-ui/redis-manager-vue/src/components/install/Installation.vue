@@ -274,6 +274,7 @@
 import { store } from "@/vuex/store.js";
 import { isEmpty, validateIpAndPort, validatePort } from "@/utils/validate.js";
 import API from "@/api/api.js";
+import websocketURI from "@/api/apiConfig.js";
 import axios from "axios";
 import message from "@/utils/message.js";
 export default {
@@ -552,6 +553,7 @@ export default {
       });
     },
     buildMachineIdList() {
+      this.installationParam.machineIdList = [];
       this.installationParam.machines.forEach(item => {
         this.installationParam.machineIdList.push(item[1]);
       });
@@ -697,7 +699,7 @@ export default {
     },
     validateMachine(machine, handler) {},
     initWebSocket() {
-      const wsuri = "ws://127.0.0.1:8182/websocket/install";
+      const wsuri = websocketURI;
       this.websock = new WebSocket(wsuri);
       this.websock.onmessage = this.websocketonmessage;
       this.websock.onopen = this.websocketonopen;
@@ -803,7 +805,7 @@ export default {
   mounted() {
     this.getDockerImageList();
     this.getMachineImageList();
-    let groupId = this.$route.params.groupId;
+    let groupId = this.currentGroup.groupId;
     this.getMachineList(groupId);
     this.getHumpbackEnabled();
   }

@@ -143,23 +143,23 @@ export default {
       ruleKeyList: [
         {
           value: "used_memory",
-          label: "used_memory"
+          label: "used_memory(MB)"
         },
         {
           value: "used_memory_rss",
-          label: "used_memory_rss"
+          label: "used_memory_rss(MB)"
         },
         {
           value: "used_memory_overhead",
-          label: "used_memory_overhead"
+          label: "used_memory_overhead(MB)"
         },
         {
           value: "used_memory_dataset",
-          label: "used_memory_dataset"
+          label: "used_memory_dataset(MB)"
         },
         {
           value: "fragmentation_ratio",
-          label: "fragmentation_ratio"
+          label: "fragmentation_ratio(MB)"
         },
         {
           value: "connections_received",

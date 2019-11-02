@@ -37,7 +37,7 @@ public class DockerNodeOperation extends AbstractNodeOperation {
     @Value("${redis-manager.install.docker.images}")
     private String images;
 
-    public static final String DOCKER_INSTALL_BASE_PATH = "/redis-manager/redis/docker/";
+    public static final String DOCKER_INSTALL_BASE_PATH = "/data/redis/docker/";
 
     @Autowired
     private DockerClientOperation dockerClientOperation;
@@ -201,7 +201,7 @@ public class DockerNodeOperation extends AbstractNodeOperation {
         configs.put(DAEMONIZE, "no");
         configs.put(BIND, bind);
         configs.put(PORT, port + "");
-        configs.put(DIR, "/redis-manager/");
+        configs.put(DIR, "/data/");
         return configs;
     }
 }

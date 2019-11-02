@@ -286,8 +286,8 @@ export default {
   font-family: Consolas, Monaco, Menlo, "Courier New", monospace !important;
   border: none !important;
   font-size: 14px;
-  background-color: #000000;
-  color: #ffffff;
+  background-color: #000000 !important;
+  color: #ffffff !important;
   padding: 0;
 }
 

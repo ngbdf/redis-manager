@@ -27,11 +27,11 @@ import static com.newegg.ec.redis.util.TimeUtil.FIVE_MINUTES;
 @Configuration
 public class SystemConfig implements WebMvcConfigurer {
 
-    public static final String CONFIG_ORIGINAL_PATH = "/redis-manager/conf/";
+    public static final String CONFIG_ORIGINAL_PATH = "/data/conf/";
 
-    public static final String MACHINE_PACKAGE_ORIGINAL_PATH = "/redis-manager/machine/";
+    public static final String MACHINE_PACKAGE_ORIGINAL_PATH = "/data/machine/";
 
-    public static final String AVATAR_PATH = "/redis-manager/avatar/";
+    public static final String AVATAR_PATH = "/data/avatar/";
 
     @Value("${server.port}")
     private int serverPort;

@@ -43,7 +43,7 @@ public class MachineNodeOperation extends AbstractNodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(MachineNodeOperation.class);
 
-    public static final String MACHINE_INSTALL_BASE_PATH = "/redis-manager/redis/machine/";
+    public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
 
     @Value("${redis-manager.install.machine.package-path}")
     private String packagePath;
@@ -64,6 +64,9 @@ public class MachineNodeOperation extends AbstractNodeOperation {
             String name = item.getName();
             return item.isFile() && (name.endsWith("tar") || name.endsWith("tar.gz"));
         });
+        if (packageFiles == null) {
+            return imageList;
+        }
         for (File packageFile : packageFiles) {
             imageList.add(packageFile.getName());
         }
@@ -94,7 +97,7 @@ public class MachineNodeOperation extends AbstractNodeOperation {
             return false;
         }
         List<Machine> machineList = installationParam.getMachineList();
-        String tempPath = INSTALL_BASE_PATH + "redis-manager/";
+        String tempPath = INSTALL_BASE_PATH + "data/";
         List<Future<Boolean>> resultFutureList = new ArrayList<>(machineList.size());
         for (Machine machine : machineList) {
             resultFutureList.add(threadPool.submit(() -> {

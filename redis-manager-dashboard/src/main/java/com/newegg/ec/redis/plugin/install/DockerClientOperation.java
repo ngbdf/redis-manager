@@ -33,7 +33,7 @@ public class DockerClientOperation {
 
     private static final String VOLUME = DOCKER_INSTALL_BASE_PATH + "%d:/data";
 
-    public static final String REDIS_DEFAULT_WORK_DIR = "/redis-manager/";
+    public static final String REDIS_DEFAULT_WORK_DIR = "/data/";
 
     static DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
             .withReadTimeout(300000)

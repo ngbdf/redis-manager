@@ -123,18 +123,18 @@ export default {
         series: series
       });
       // 监听容器宽度变化
-      erd.listenTo(document.getElementById("monitor-charts"), function(
+      erd.listenTo(document.getElementById(this.infoItem), function(
         element
       ) {
         setTimeout(function() {
           chart.resize();
-        }, 100);
+        }, 0);
       });
       // 监听窗口变化
       window.addEventListener("resize", function() {
         setTimeout(function() {
           chart.resize();
-        }, 100);
+        }, 0);
       });
     },
     getNodeInfoDataList(nodeInfoParam) {
@@ -157,7 +157,6 @@ export default {
         },
         err => {
           this.monitorDataLoading = false;
-          console.log(err);
           message.error(err);
         }
       );

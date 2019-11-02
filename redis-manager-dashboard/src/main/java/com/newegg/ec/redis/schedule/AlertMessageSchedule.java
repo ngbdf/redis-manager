@@ -190,6 +190,9 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     }));
                     // 获取告警通道并发送消息
                     List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
+                    if (alertChannelIdList == null || alertChannelIdList.isEmpty()) {
+                        return;
+                    }
                     Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
                     if (!channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
                         distribution(channelMultimap, alertRecordList);
@@ -237,6 +240,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
 
     private Multimap<Integer, AlertChannel> getAlertChannelByIds(List<AlertChannel> validAlertChannelList, List<Integer> channelIdList) {
         List<AlertChannel> alertChannelList = new ArrayList<>();
+
         validAlertChannelList.forEach(alertChannel -> {
             if (channelIdList.contains(alertChannel.getChannelId())) {
                 alertChannelList.add(alertChannel);
