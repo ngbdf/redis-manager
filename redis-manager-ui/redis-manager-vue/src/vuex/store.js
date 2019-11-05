@@ -12,12 +12,10 @@ const state = {
   currentGroup: {},
   groupList: [],
   user: {
-    avatar: '/user/image/jay.png',
     userRole: 2
   }
 }
 
-// 定义所需的 mutations，状态变更操作
 const mutations = {
   setCurrentGroup(state, currentGroup) {
     getUserRole(currentGroup.groupId, state.user.userId)
@@ -35,7 +33,6 @@ const mutations = {
 
 }
 
-// 获取数据操作
 const getters = {
   getCurrentGroup: state => {
     return state.currentGroup
@@ -54,7 +51,6 @@ const getters = {
   }
 }
 
-// 分发 Action
 const actions = {
   setCurrentGroup(context, currentGroup) {
     context.commit('setCurrentGroup', currentGroup)
@@ -64,7 +60,7 @@ const actions = {
   },
   setUser(context, user) {
     let avatar = user.avatar
-    if (!isEmpty(avatar)) {
+    if (!isEmpty(apiConfig.baseUrl) && !isEmpty(avatar) && !avatar.startsWith(apiConfig.baseUrl)) {
       user.avatar = apiConfig.baseUrl + avatar
     }
     context.commit('setUser', user)
@@ -74,7 +70,6 @@ const actions = {
   }
 }
 
-// 创建 store 实例
 export const store = new Vuex.Store({
   state,
   getters,
@@ -94,6 +89,9 @@ export const store = new Vuex.Store({
 })
 
 function getUserRole(groupId, userId) {
+  if (isEmpty(groupId) || isEmpty(userId)) {
+    return
+  }
   let url = '/user/getUserRole/'
   let user = {
     groupId: groupId,

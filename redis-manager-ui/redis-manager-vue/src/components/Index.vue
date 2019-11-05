@@ -152,7 +152,6 @@ var elementResizeDetectorMaker = require("element-resize-detector");
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import { formatTime } from "@/utils/time.js";
-import CONSTANT from "@/utils/constant.js";
 import API from "@/api/api.js";
 import editCluster from "@/components/manage/EditCluster";
 import { getGroupList } from "@/components/group/group.js";
@@ -172,6 +171,9 @@ export default {
   },
   methods: {
     toLogin() {
+      store.dispatch("setUser", {});
+      store.dispatch("setGroupList", []);
+      store.dispatch("setCurrentGroup", {});
       this.$router.push({
         name: "login"
       });
@@ -261,7 +263,10 @@ export default {
       }
     },
     toUserProfile() {
-      this.$router.push({ name: "profile" });
+      this.$router.push({
+        name: "profile",
+        params: { userId: this.currentUser.userId }
+      });
     },
     toDataOperation() {
       this.$router.push({
@@ -291,7 +296,7 @@ export default {
             });
             // TODO: 简化逻辑
             store.dispatch("setGroupList", groupList);
-            let currentGroup = this.urrentGroup;
+            let currentGroup = this.currentGroup;
             let user = store.getters.getUser;
             let isContainCurrentGroup = false;
             groupList.forEach(group => {
@@ -342,9 +347,11 @@ export default {
   },
   mounted() {
     this.getGroupList();
-    let groupId = this.currentGroup.groupId;
-    if (isEmpty(groupId)) {
+    let groupId = "";
+    if (isEmpty(this.currentGroup) || isEmpty(this.currentGroup.groupId)) {
       groupId = this.currentUser.groupId;
+    } else {
+      groupId = this.currentGroup.groupId;
     }
 
     this.selectGroupId = groupId;

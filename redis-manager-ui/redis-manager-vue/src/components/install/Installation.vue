@@ -274,7 +274,7 @@
 import { store } from "@/vuex/store.js";
 import { isEmpty, validateIpAndPort, validatePort } from "@/utils/validate.js";
 import API from "@/api/api.js";
-import websocketURI from "@/api/apiConfig.js";
+import apiConfig from "@/api/apiConfig.js";
 import axios from "axios";
 import message from "@/utils/message.js";
 export default {
@@ -409,26 +409,27 @@ export default {
       humpbackImages: [],
       installationParam: {
         groupId: "",
-        clusterName: "Shanghai",
-        redisPassword: "one",
+        clusterName: "",
+        redisPassword: "",
         redisMode: "cluster",
         image: "",
         create: true,
         machineIdList: [],
         machineList: [{ ip: "" }, { ip: "" }],
         autoBuild: true,
-        autoInit: true,
+        autoInit: false,
         sudo: true,
         startPort: 8000,
         masterNumber: 1,
-        replicaNumber: 2,
-        machineUserName: "bigdata",
-        machinePassword: "bigdata",
+        replicaNumber: 1,
+        machineUserName: "",
+        machinePassword: "",
         redisNodes: "127.0.0.1:8001 master\n127.0.0.1:8002",
         installationEnvironment: 0
       },
       installationInfoVisible: false,
       installationConsole: "Prepare to install redis...",
+      websocketURI: "",
       rules: {
         clusterName: [
           {
@@ -580,8 +581,8 @@ export default {
         if (valid) {
           //this.installationInfoVisible = true;
           this.buildParam();
-          this.install();
           this.initWebSocket();
+          this.install();
         } else {
           return false;
         }
@@ -699,8 +700,7 @@ export default {
     },
     validateMachine(machine, handler) {},
     initWebSocket() {
-      const wsuri = websocketURI;
-      this.websock = new WebSocket(wsuri);
+      this.websock = new WebSocket(this.websocketURI);
       this.websock.onmessage = this.websocketonmessage;
       this.websock.onopen = this.websocketonopen;
       this.websock.onerror = this.websocketonerror;
@@ -744,7 +744,7 @@ export default {
       message.error("Close websocket", e);
     },
     getHumpbackEnabled() {
-      let url = "/switch/humpbackEnabled";
+      let url = "/system/humpbackEnabled";
       API.get(
         url,
         null,
@@ -754,6 +754,21 @@ export default {
             this.humpbackEnabled = humpbackEnabled;
             this.getHumpbackImageList();
           }
+        },
+        err => {
+          console.log(err);
+        }
+      );
+    },
+    getServerAddress() {
+      // ws://127.0.0.1:8183/websocket/install
+      let url = "/system/getServerAddress";
+      API.get(
+        url,
+        null,
+        response => {
+          let serverAddress = response.data.data;
+          this.websocketURI = "ws://" + serverAddress + "/websocket/install";
         },
         err => {
           console.log(err);
@@ -808,6 +823,7 @@ export default {
     let groupId = this.currentGroup.groupId;
     this.getMachineList(groupId);
     this.getHumpbackEnabled();
+    this.getServerAddress();
   }
 };
 </script>

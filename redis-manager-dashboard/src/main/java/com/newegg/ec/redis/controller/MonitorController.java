@@ -60,9 +60,9 @@ public class MonitorController {
         return Result.successResult(nodeInfoDataList);
     }
 
-    @RequestMapping(value = "/getInfoItemMonitorDataList", method = RequestMethod.POST)
+    @RequestMapping(value = "/getInfoItemMonitorData", method = RequestMethod.POST)
     @ResponseBody
-    public Result getFieldMonitorDataList(@RequestBody NodeInfoParam nodeInfoParam) {
+    public Result getInfoItemMonitorData(@RequestBody NodeInfoParam nodeInfoParam) {
         List<NodeInfo> nodeInfoList = nodeInfoService.getNodeInfoList(nodeInfoParam);
         if (nodeInfoList == null) {
             return Result.failResult();

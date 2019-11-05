@@ -117,7 +117,24 @@
               :value="timeType.value"
             ></el-option>
           </el-select>
-          
+          <el-select
+            v-model="selectedInfoItemList"
+            size="small"
+            placeholder="Info Item"
+            class="condition-item"
+            style="width: 260px"
+            multiple
+            collapse-tags
+            @change="monitorItemChange"
+          >
+            <el-option
+              v-for="infoItem in infoItemList"
+              :key="infoItem"
+              :label="infoItem"
+              :value="infoItem"
+            ></el-option>
+          </el-select>
+
           <div class="time-picker-wrapper">
             <el-date-picker
               width="1080px"
@@ -139,7 +156,7 @@
       </div>
       <el-row class="echart-wrapper" id="monitor-charts">
         <echartsItem
-          v-for="infoItem in infoItemList"
+          v-for="infoItem in selectedInfoItemList"
           :key="infoItem"
           :infoItem="infoItem"
           :nodeInfoParam="nodeInfoParam"
@@ -167,7 +184,7 @@
           style="margin-bottom: 20px;"
         >
           <el-option
-            v-for="node in redisNodeList"
+            v-for="node in slowLogRedisNodeList"
             :key="node.label"
             :label="node.label"
             :value="node.value"
@@ -214,6 +231,7 @@ export default {
       queryVisible: false,
       cluster: {},
       redisNodeList: [],
+      slowLogRedisNodeList: [],
       timeTypeList: [
         {
           value: 0,
@@ -348,6 +366,27 @@ export default {
         "cpu_sys",
         "cpu_user"
       ],
+      selectedInfoItemList: [
+        "used_memory",
+        "used_memory_rss",
+        "used_memory_overhead",
+        "used_memory_dataset",
+        "mem_fragmentation_ratio",
+        "connections_received",
+        "rejected_connections",
+        "connected_clients",
+        "blocked_clients",
+        "commands_processed",
+        "instantaneous_ops_per_sec",
+        "sync_full",
+        "sync_partial_ok",
+        "sync_partial_err",
+        "keyspace_hits_ratio",
+        "keys",
+        "expires",
+        "cpu_sys",
+        "cpu_user"
+      ],
       nodeInfoParam: {
         nodeList: [],
         timeType: 0,
@@ -361,7 +400,8 @@ export default {
       slowLogParam: {},
       slowLogList: [],
       clusterLoading: false,
-      slowLogLoading: false
+      slowLogLoading: false,
+      conditionSelectedLoading: false
     };
   },
   methods: {
@@ -379,6 +419,7 @@ export default {
     },
     getAllNodeList(clusterId) {
       let url = "/node-manage/getAllNodeList/" + clusterId;
+      this.slowLogRedisNodeList.push({label: "All"})
       API.get(
         url,
         null,
@@ -389,12 +430,14 @@ export default {
             result.data.forEach(node => {
               var hostAndPort = node.host + ":" + node.port;
               var role = node.nodeRole.toLowerCase();
-              redisNodeList.push({
+              let redisNode = {
                 node: hostAndPort,
                 role: role,
                 value: hostAndPort,
                 label: hostAndPort + " " + role
-              });
+              };
+              redisNodeList.push(redisNode);
+               this.slowLogRedisNodeList.push(redisNode);
             });
             this.redisNodeList = redisNodeList;
             this.nodeType = "ALL_MASTER";
@@ -449,6 +492,11 @@ export default {
           message.error(err);
         }
       );
+    },
+    monitorItemChange(val) {
+      setTimeout(() => {
+        this.refresh();
+      }, 300);
     }
   },
   watch: {
@@ -467,7 +515,7 @@ export default {
     },
     nodeType: {
       handler: function() {
-        if(this.nodeType == "NODE") {
+        if (this.nodeType == "NODE") {
           this.nodes = [];
           return;
         }
@@ -499,12 +547,23 @@ export default {
     let clusterId = this.$route.params.clusterId;
     getClusterById(clusterId, cluster => {
       this.cluster = cluster;
+      if (parseInt(cluster.redisVersion.substring(0)) < 4) {
+        for (var i = 0; i < this.selectedInfoItemList.length; i++) {
+          let infoItem = this.selectedInfoItemList[i];
+          if (
+            infoItem == "used_memory_overhead" ||
+            infoItem == "used_memory_dataset"
+          ) {
+            this.selectedInfoItemList.splice(i, i);
+          }
+        }
+      }
       this.getAllNodeList(this.cluster.clusterId);
       this.nodeInfoParam.clusterId = clusterId;
       this.slowLogParam.clusterId = clusterId;
       this.pickerDateTime();
+      this.timedRefresh();
     });
-    this.timedRefresh();
   },
   destroyed() {
     clearInterval(this.timer);

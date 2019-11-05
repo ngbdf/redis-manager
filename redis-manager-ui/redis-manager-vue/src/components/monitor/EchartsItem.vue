@@ -17,6 +17,7 @@ require("echarts/lib/component/title"); //  title组件
 require("echarts/lib/component/legend"); // legend组件
 import "echarts/lib/component/legendScroll";
 import API from "@/api/api.js";
+import { isEmpty } from "@/utils/validate.js";
 import { formatTimeForChart } from "@/utils/time.js";
 import message from "@/utils/message.js";
 export default {
@@ -61,13 +62,19 @@ export default {
       this.buildEchartsData(nodeInfoDataList);
       let series = this.buildSeries(this.echartsData);
       var erd = elementResizeDetectorMaker();
-
       var start = new Date().getTime();
-      var chart = echarts.init(document.getElementById(this.infoItem));
+      if (isEmpty(this)) {
+        return;
+      }
+      let infoItemObj = document.getElementById(this.infoItem);
+      if (isEmpty(infoItemObj)) {
+        return;
+      }
+      var chart = echarts.init(infoItemObj);
 
       // 绘制图表
       chart.clear();
-      chart = echarts.init(document.getElementById(this.infoItem));
+      chart = echarts.init(infoItemObj);
       let title = this.infoItem;
       if (
         title == "used_memory" ||
@@ -123,9 +130,7 @@ export default {
         series: series
       });
       // 监听容器宽度变化
-      erd.listenTo(document.getElementById(this.infoItem), function(
-        element
-      ) {
+      erd.listenTo(document.getElementById(this.infoItem), function(element) {
         setTimeout(function() {
           chart.resize();
         }, 0);
@@ -139,10 +144,12 @@ export default {
     },
     getNodeInfoDataList(nodeInfoParam) {
       this.monitorDataLoading = true;
-      let url = "/monitor/getInfoItemMonitorDataList";
+      let url = "/monitor/getInfoItemMonitorData";
+      let nodeInfoItemParam = nodeInfoParam;
+      nodeInfoItemParam.infoItem = this.infoItem;
       API.post(
         url,
-        nodeInfoParam,
+        nodeInfoItemParam,
         response => {
           let result = response.data;
           if (result.code == 0) {
@@ -157,6 +164,7 @@ export default {
         },
         err => {
           this.monitorDataLoading = false;
+          console.log(err);
           message.error(err);
         }
       );
@@ -189,7 +197,7 @@ export default {
           animationEasing: "cubicInOut",
           symbol: "none"
           // 背景色
-          // areaStyle: {}
+          //areaStyle: {}
         });
       }
       return series;

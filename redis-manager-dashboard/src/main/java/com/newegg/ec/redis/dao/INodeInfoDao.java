@@ -27,28 +27,35 @@ public interface INodeInfoDao {
     List<NodeInfo> selectNodeInfoList(NodeInfoParam nodeInfoParam);*/
 
     @Select("<script>" +
-            "SELECT " +
-            "<when test='nodeInfoParam.infoItemList !=null and nodeInfoParam.infoItemList.size() > 0'>" +
-            "`node`, `role`, `time_type`, `last_time`, `update_time`, " +
-            "<foreach item='infoItem' collection='nodeInfoParam.infoItemList' separator=',' suffix=' '>" +
-            "${infoItem}" +
-            "</foreach>" +
-            "</when>" +
-            "<otherwise>" +
-            "*" +
-            "</otherwise>" +
-            " FROM node_info_${nodeInfoParam.clusterId} " +
+            "SELECT * " +
+            "FROM node_info_${nodeInfoParam.clusterId} " +
             "WHERE update_time &gt;= #{nodeInfoParam.startTime} " +
             "AND update_time &lt;= #{nodeInfoParam.endTime} " +
             "AND time_type = #{nodeInfoParam.timeType} " +
-            "<if test='nodeList != null and nodeList.size() > 0'> " +
+            "<if test='nodeInfoParam.nodeList != null and nodeInfoParam.nodeList.size() > 0'> " +
             "AND node IN " +
-            "<foreach item='node' collection='nodeList' open='(' separator=',' close=')'>" +
+            "<foreach item='node' collection='nodeInfoParam.nodeList' open='(' separator=',' close=')'>" +
             "#{node}" +
             "</foreach>" +
             "</if>" +
             "</script>")
-    List<NodeInfo> selectNodeInfoList(@Param("nodeInfoParam") NodeInfoParam nodeInfoParam, @Param("nodeList") List<String> nodeList);
+    List<NodeInfo> selectNodeInfoList(@Param("nodeInfoParam") NodeInfoParam nodeInfoParam);
+
+    @Select("<script>" +
+            "SELECT " +
+            "`node`, `role`, `time_type`, `last_time`, `update_time`, `${nodeInfoParam.infoItem}` " +
+            "FROM node_info_${nodeInfoParam.clusterId} " +
+            "WHERE update_time &gt;= #{nodeInfoParam.startTime} " +
+            "AND update_time &lt;= #{nodeInfoParam.endTime} " +
+            "AND time_type = #{nodeInfoParam.timeType} " +
+            "<if test='nodeInfoParam.nodeList != null and nodeInfoParam.nodeList.size() > 0'> " +
+            "AND node IN " +
+            "<foreach item='node' collection='nodeInfoParam.nodeList' open='(' separator=',' close=')'>" +
+            "#{node}" +
+            "</foreach>" +
+            "</if>" +
+            "</script>")
+    List<NodeInfo> selectNodeInfoListWithInfoItem(@Param("nodeInfoParam") NodeInfoParam nodeInfoParam);
 
     @Select("<script>" +
             "SELECT * FROM node_info_${clusterId} " +

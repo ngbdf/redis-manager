@@ -373,7 +373,7 @@ export default {
     }
   },
   mounted() {
-    let groupId = this.$route.params.groupId;
+    let groupId = this.currentGroupId;
     this.getClusterList(groupId);
     this.getOverview(groupId);
     this.userRole = store.getters.getUserRole;

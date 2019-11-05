@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * @author Jay.H.Zou
  * @date 7/23/2019
@@ -74,6 +76,10 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
 
     @Transactional
     public void initDefaultAuth() {
+        List<User> allSuperAdmin = groupUserDao.selectAllSuperAdmin();
+        if (allSuperAdmin != null && allSuperAdmin.size() > 0) {
+            return;
+        }
         Group group = buildDefaultGroup();
         Group existGroup = groupDao.selectGroupByGroupName(group.getGroupName());
         if (existGroup != null) {

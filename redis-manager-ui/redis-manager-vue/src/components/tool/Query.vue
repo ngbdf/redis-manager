@@ -14,8 +14,8 @@
           placeholder="Select DB"
           style="width: 50px;"
         >
-          <el-option v-for="db in dbList" :key="db.database" :label="db.label" :value="db.database">
-            <span style="float: left">{{ db.label }}</span>
+          <el-option v-for="db in dbList" :key="db.database" :label="'db' + db.database" :value="db.database">
+            <span style="float: left">db{{ db.database }}</span>
             <span style="float: right; color: #8492a6; font-size: 13px">{{ db.keys }}</span>
           </el-option>
         </el-select>
@@ -85,7 +85,6 @@ export default {
             dbList.forEach(db => {
               let database = db.database;
               this.dbList.push({
-                label: database,
                 keys: db.keys,
                 database: database.slice(2)
               });
@@ -102,12 +101,15 @@ export default {
     queryRedis(autoCommandParam) {
       this.result = "";
       let url = "/data/query";
+      if (this.cluster.redisMode == "cluster") {
+        autoCommandParam.database = 0;
+      }
       if (isEmpty(autoCommandParam.database)) {
-        message.waring("Please select database");
+        message.warning("Please select database");
         return;
       }
       if (isEmpty(autoCommandParam.key)) {
-        message.waring("Please enter redis key");
+        message.warning("Please enter redis key");
         return;
       }
       this.queryLoading = true;
@@ -137,6 +139,9 @@ export default {
     scanRedis(autoCommandParam) {
       this.result = "";
       let url = "/data/scan";
+      if (this.cluster.redisMode == "cluster") {
+        autoCommandParam.database = 0;
+      }
       if (isEmpty(autoCommandParam.database)) {
         message.warning("Please select database");
         return;
@@ -166,6 +171,9 @@ export default {
   },
   mounted() {
     this.getDBList(this.cluster.clusterId);
+    if (this.cluster.redisMode == "cluster") {
+        this.autoCommandParam.database = "db0";
+      }
   }
 };
 </script>

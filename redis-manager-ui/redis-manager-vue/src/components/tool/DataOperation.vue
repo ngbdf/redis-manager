@@ -33,7 +33,6 @@
             <div class="connected" v-if="connected">Redis connected...</div>
             <div class="command-history-wrapper">
               <div class="history" v-html="histrory"></div>
-              <!-- <codemirror class="result-wrapper" v-model="histrory" :options="codemirrorOptions"></codemirror> -->
             </div>
             <div class="command">
               <div style="max-width: 50%; margin-right: 5px;"></div>
@@ -60,13 +59,6 @@ import { store } from "@/vuex/store.js";
 import API from "@/api/api.js";
 import { isEmpty } from "@/utils/validate.js";
 import { codemirror } from "vue-codemirror-lite";
-// require("codemirror/lib/codemirror.js");
-// require("codemirror/lib/codemirror.css");
-// require("codemirror/mode/javascript/javascript");
-// require("codemirror/addon/hint/show-hint.js");
-// require("codemirror/addon/hint/show-hint.css");
-// require("codemirror/addon/hint/javascript-hint.js");
-// require("codemirror/theme/seti.css");
 import message from "@/utils/message.js";
 export default {
   components: {
@@ -191,7 +183,7 @@ export default {
               this.selectedCluster.clusterName +
               "]$ " +
               this.command +
-              "\n operation failed or command not support \n";
+              "\n no data or operation failed or command not support \n";
           }
           this.command = "";
         },

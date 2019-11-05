@@ -39,6 +39,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static javax.management.timer.Timer.ONE_MINUTE;
 import static com.newegg.ec.redis.util.SignUtil.EQUAL_SIGN;
 
 /**
@@ -306,11 +307,9 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         if (!alertRule.getValid()) {
             return false;
         }
-        return true;
         // 检测时间
-        /*long duration = System.currentTimeMillis() - alertRule.getLastCheckTime().getTime();
-        System.err.println(duration / 1000 / 60);
-        return duration >= alertRule.getCheckCycle() * ONE_MINUTE;*/
+        long duration = System.currentTimeMillis() - alertRule.getLastCheckTime().getTime();
+        return duration >= alertRule.getCheckCycle() * ONE_MINUTE;
     }
 
     /**

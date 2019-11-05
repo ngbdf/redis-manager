@@ -15,9 +15,9 @@ spring:
     # 必填项，
     database: redis_manager_refactor
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.16.50.209:3306/redis_manager_refactor?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://127.0.0.1:3306/redis_manager_refactor?useUnicode=true&characterEncoding=utf-8
     username: root
-    password: Newegg@1234
+    password:
     druid:
       # 初始化时建立物理连接的个数
       initial-size: 0

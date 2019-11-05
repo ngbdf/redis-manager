@@ -13,7 +13,12 @@
             :before-upload="beforeAvatarUpload"
             title="Change avatar"
           >
-            <img v-if="user.avatar != null && user.avatar != ''" :src="user.avatar" class="avatar" style="object-fit: cover;" />
+            <img
+              v-if="user.avatar != null && user.avatar != ''"
+              :src="user.avatar"
+              class="avatar"
+              style="object-fit: cover;"
+            />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
         </el-form-item>
@@ -171,7 +176,10 @@ export default {
     }
   },
   mounted() {
-    let userId = store.getters.getUser.userId;
+    let userId = this.currentUser.userId;
+    if (userId != this.$route.params.userId) {
+      this.$$router.push({ name: "profile", params: { userId: userId } });
+    }
     this.getUser(userId);
   }
 };

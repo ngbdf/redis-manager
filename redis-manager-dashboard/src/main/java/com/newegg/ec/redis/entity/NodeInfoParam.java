@@ -14,7 +14,7 @@ public class NodeInfoParam {
 
     private Integer timeType;
 
-    private List<String> infoItemList;
+    private String infoItem;
 
     private Timestamp startTime;
 
@@ -60,12 +60,12 @@ public class NodeInfoParam {
         this.timeType = timeType;
     }
 
-    public List<String> getInfoItemList() {
-        return infoItemList;
+    public String getInfoItem() {
+        return infoItem;
     }
 
-    public void setInfoItemList(List<String> infoItemList) {
-        this.infoItemList = infoItemList;
+    public void setInfoItem(String infoItem) {
+        this.infoItem = infoItem;
     }
 
     public Timestamp getStartTime() {

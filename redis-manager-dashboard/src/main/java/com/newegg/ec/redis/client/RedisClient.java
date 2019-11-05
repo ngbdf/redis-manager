@@ -214,9 +214,9 @@ public class RedisClient implements IRedisClient {
         // for future
         int count = autoCommandParam.getCount();
         int database = autoCommandParam.getDatabase();
+        jedis.select(database);
         String type = type(key);
         long ttl = ttl(key);
-        jedis.select(database);
         Object value = null;
         switch (type) {
             case TYPE_STRING:
