@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.config.SystemConfig;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.util.LinuxInfoUtil;
@@ -32,6 +33,16 @@ public class SystemSwitchController {
     @ResponseBody
     public Result getServerAddress() throws SocketException {
         return Result.successResult(LinuxInfoUtil.getIpAddress() + ":" + systemConfig.getServerPort());
+    }
+
+    @RequestMapping(value = "/getAuthorization", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getAuthorization() {
+        JSONObject authorization = new JSONObject();
+        authorization.put("enabled", systemConfig.getAuthorizationEnabled());
+        authorization.put("server", systemConfig.getAuthorizationServer());
+        authorization.put("companyName", systemConfig.getCompanyName());
+        return Result.successResult(authorization);
     }
 
 }

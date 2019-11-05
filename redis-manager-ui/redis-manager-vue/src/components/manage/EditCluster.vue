@@ -12,7 +12,7 @@
       </el-form-item>
       <el-form-item
         v-for="(node, index) in cluster.nodeList"
-        :label="'Redis Node ' + index"
+        :label="'Redis Node ' + (index + 1)"
         :key="node.key"
         :prop="'nodeList.' + index + '.value'"
         :rules="rules.redisNode"

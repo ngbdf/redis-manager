@@ -45,6 +45,15 @@ public class SystemConfig implements WebMvcConfigurer {
     @Value("${redis-manager.auth.avatar-path}")
     private String avatarPath;
 
+    @Value("${redis-manager.auth.authorization.enabled:false}")
+    private boolean authorizationEnabled;
+
+    @Value("${redis-manager.auth.authorization.company-name: OAuth2}")
+    private String companyName;
+
+    @Value("${redis-manager.auth.authorization.server}")
+    private String authorizationServer;
+
     @Value("${redis-manager.install.humpback.enabled:false}")
     private boolean humpbackEnabled;
 
@@ -108,11 +117,23 @@ public class SystemConfig implements WebMvcConfigurer {
         return serverPort;
     }
 
-    public boolean getHumpbackEnabled() {
-        return humpbackEnabled;
-    }
-
     public String getAvatarPath() {
         return avatarPath;
+    }
+
+    public boolean getAuthorizationEnabled() {
+        return authorizationEnabled;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public String getAuthorizationServer() {
+        return authorizationServer;
+    }
+
+    public boolean getHumpbackEnabled() {
+        return humpbackEnabled;
     }
 }

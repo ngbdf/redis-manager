@@ -42,22 +42,9 @@
             </el-popover>
           </template>
         </el-table-column>
-        <!-- <el-table-column label="Token" align="center">
-          <template slot-scope="scope">
-            <el-popover trigger="hover" placement="top">
-              <p>Token: {{ scope.row.password }}</p>
-              <div slot="reference" class="name-wrapper">
-                <el-tag size="small" type="info">******</el-tag>
-              </div>
-            </el-popover>
-          </template>
-        </el-table-column>-->
         <el-table-column property="machineInfo" label="Info"></el-table-column>
         <el-table-column property="time" label="Time" sortable></el-table-column>
         <el-table-column label="Operation" width="200px;">
-          <!-- <template slot="header" slot-scope="scope">
-            <el-input v-model="search" size="mini" placeholder="Search" />
-          </template>-->
           <template slot-scope="scope">
             <el-button size="mini" type="primary" @click="editMachine(scope.$index, scope.row)">Edit</el-button>
             <el-button
@@ -99,9 +86,6 @@
         <el-form-item label="Password" prop="password">
           <el-input v-model="machines.password"></el-input>
         </el-form-item>
-        <!-- <el-form-item label="Token" prop="token">
-          <el-input v-model="machines.token"></el-input>
-        </el-form-item>-->
 
         <div v-if="!isUpdate">
           <el-form-item

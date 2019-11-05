@@ -32,12 +32,12 @@
             <el-form-item>
               <el-button type="primary" style="width: 100%;" @click="signIn('user')">Sign In</el-button>
             </el-form-item>
-            <el-form-item>
+            <el-form-item v-if="authorization.enabled">
               <el-button
                 type="success"
                 style="width: 100%;"
                 @click="oAuthSignIn('user')"
-              >OAuth Sign In</el-button>
+              >{{ authorization.companyName }} Sign In</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -66,6 +66,7 @@ export default {
   data() {
     return {
       user: {},
+      authorization: {},
       rules: {
         userName: [
           { required: true, message: "Please enter user name", trigger: "blur" }
@@ -77,6 +78,19 @@ export default {
     };
   },
   methods: {
+    getAuthorization() {
+      let url = "/system/getAuthorization";
+      API.get(
+        url,
+        null,
+        response => {
+          this.authorization = response.data.data;
+        },
+        err => {
+          message.error("Get authorization failed");
+        }
+      );
+    },
     signIn(user) {
       this.$refs[user].validate(valid => {
         if (valid) {

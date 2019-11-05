@@ -151,10 +151,4 @@ public class InstallationController {
 
     /********************************* Installation step *********************************/
 
-    @RequestMapping(value = "validateTopology", method = RequestMethod.POST)
-    @ResponseBody
-    public Result validateTopology(@RequestBody InstallationParam installationParam) {
-
-        return null;
-    }
 }

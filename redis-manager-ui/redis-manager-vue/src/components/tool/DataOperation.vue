@@ -74,15 +74,7 @@ export default {
       database: "",
       command: "",
       connected: false,
-      consoleDisabled: true,
-      codemirrorOptions: {
-        mode: "application/json",
-        readOnly: "nocursor",
-        autoRefresh: true,
-        scrollbarStyle: "null",
-        // https://codemirror.net/demo/theme.html#xq-light
-        theme: "seti"
-      }
+      consoleDisabled: true
     };
   },
   methods: {
@@ -215,6 +207,15 @@ export default {
         command: this.command
       };
       this.sendCommand(dataCommandsParam);
+    },
+    reset() {
+      this.histrory = "";
+      this.clusterList = [];
+      this.dbList = [];
+      this.selectedClusterId = "";
+      this.selectedCluster = {};
+      this.database = "";
+      this.command = "";
     }
   },
   computed: {
@@ -224,6 +225,7 @@ export default {
   },
   watch: {
     currentGroup(group) {
+      this.reset()
       this.getClusterList(group.groupId);
       this.$router.push({
         name: "data-operation",

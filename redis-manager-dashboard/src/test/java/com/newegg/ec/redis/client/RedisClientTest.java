@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class RedisClientTest {
 
-    private static RedisURI redisURI = new RedisURI(new HostAndPort("10.16.50.223", 8018), null);
+    private static RedisURI redisURI = new RedisURI(new HostAndPort("", 8018), null);
 
     private static RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
 

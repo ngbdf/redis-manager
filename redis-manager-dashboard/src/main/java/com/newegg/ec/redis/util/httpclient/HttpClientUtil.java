@@ -2,10 +2,7 @@ package com.newegg.ec.redis.util.httpclient;
 
 
 import com.alibaba.fastjson.JSONObject;
-import org.apache.http.HeaderElement;
-import org.apache.http.HeaderElementIterator;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -146,15 +143,14 @@ public class HttpClientUtil {
      *
      * @return
      */
-    public static RequestConfig getRequestConfig() {
-        RequestConfig requestConfig = RequestConfig.custom()
+    private static RequestConfig getRequestConfig() {
+        return RequestConfig.custom()
+                .setProxy(new HttpHost("10.16.46.161", 3333))
                 .setConnectTimeout(10000)
                 .setSocketTimeout(10000)
                 .setConnectionRequestTimeout(3000)
                 .build();
-        return requestConfig;
     }
-
 
     static class IdleConnectionMonitorThread extends Thread {
 

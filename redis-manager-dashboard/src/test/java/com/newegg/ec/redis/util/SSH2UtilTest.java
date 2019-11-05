@@ -41,7 +41,7 @@ public class SSH2UtilTest {
 
     @Test
     public void copyRedisConfigToRemote() throws Exception {
-        String s = SSH2Util.copyFileToRemote(machine, "/data/redis/docker/cluster", "10.16.164.20:8182/redis-manager/config/cluster/redis.conf", true);
+        String s = SSH2Util.copyFileToRemote(machine, "/data/redis/docker/cluster", "127.0.0.1:8182/redis-manager/config/cluster/redis.conf", true);
         System.err.println(s);
     }
 }

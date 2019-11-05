@@ -26,6 +26,8 @@ public class User {
 
     private String mobile;
 
+    private Integer userType;
+
     private Timestamp updateTime;
 
     public static class UserRole {
@@ -116,6 +118,14 @@ public class User {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public Integer getUserType() {
+        return userType;
+    }
+
+    public void setUserType(Integer userType) {
+        this.userType = userType;
     }
 
     public Timestamp getUpdateTime() {

@@ -17,7 +17,7 @@ public class DockerClientOperationTest {
 
     DockerClientOperation dockerClientOperation = new DockerClientOperation();
 
-    String IP = "10.16.50.217";
+    String IP = "";
 
     @Test
     public void getDockerClient() {
@@ -37,8 +37,7 @@ public class DockerClientOperationTest {
 
     @Test
     public void getImages() {
-        Map<String, String> imageMap = dockerClientOperation.getImages(IP, "harbor.shec.bigdata/shec/centos");
-        System.err.println(imageMap.size());
+        Map<String, String> imageMap = dockerClientOperation.getImages(IP, "");
         imageMap.forEach((key, val) -> {
             System.err.println(key + " = " + val);
         });

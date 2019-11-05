@@ -114,6 +114,7 @@ public interface IUserDao {
             "avatar varchar(255) DEFAULT NULL, " +
             "email varchar(255) DEFAULT NULL, " +
             "mobile varchar(20) DEFAULT NULL, " +
+//            "user_type integer(4) NOT NULL, " +
             "update_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (user_id), " +
             "UNIQUE KEY `user_name` (user_name) " +
