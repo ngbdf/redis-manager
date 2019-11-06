@@ -62,6 +62,7 @@ redis-manager:
       # 默认从官方镜像库拉取
       images: redis:4.0.10,redis:4.0.14,redis:5.0.5
       docker-host: tcp://%s:2375
+    # for newegg
     humpback:
       enabled: false
       images: redis:4.0.10,redis:4.0.14,redis:5.0.5

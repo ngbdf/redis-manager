@@ -425,7 +425,7 @@ public class InstallationTemplate {
 
         List<RedisNode> redisNodeListWithInfo = waitNodesMeet(installationParam, seed, allRedisNodes);
         replicate(installationParam, topology, redisNodeListWithInfo);
-        waitAfterOperation(TEN_SECONDS);
+        waitAfterOperation(FIVE_SECONDS);
         // Set password
         if (!Strings.isNullOrEmpty(redisPassword)) {
             String updateRedisPasswordResult = updateRedisPassword(redisPassword, cluster);
@@ -561,7 +561,7 @@ public class InstallationTemplate {
         realTopology.forEach((masterNodeWithInfo, slaveNode) -> {
             boolean replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);
             int waitTimeout = 0;
-            while (!replicateResult && waitTimeout < ONE_MINUTE) {
+            while (waitTimeout < ONE_MINUTE) {
                 waitAfterOperation(TEN_SECONDS);
                 waitTimeout += TEN_SECONDS;
                 replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);

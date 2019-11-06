@@ -98,7 +98,7 @@ public class InstallationWebSocketHandler implements WebSocketHandler {
 
     public static void appendLog(String clusterName, String message) {
         BlockingDeque<String> blockingDeque = getLogQueue(clusterName);
-        if (blockingDeque != null) {
+        if (blockingDeque != null && !Strings.isNullOrEmpty(message)) {
             blockingDeque.add(message);
         }
     }

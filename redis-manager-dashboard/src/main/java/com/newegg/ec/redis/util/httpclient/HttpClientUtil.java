@@ -2,10 +2,15 @@ package com.newegg.ec.redis.util.httpclient;
 
 
 import com.alibaba.fastjson.JSONObject;
-import org.apache.http.*;
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
@@ -41,6 +46,8 @@ public class HttpClientUtil {
     private static final String UTF8 = "utf-8";
 
     private static CloseableHttpClient httpclient;
+
+    private static int TIMEOUT = 1000 * 60 * 5;
 
     static {
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
@@ -99,16 +106,16 @@ public class HttpClientUtil {
 
     /**
      * @param url
-     * @param param
+     * @param data
      * @return
      */
-    private static HttpPost postForm(String url, JSONObject param) {
+    private static HttpPost postForm(String url, JSONObject data) {
         HttpPost httpPost = new HttpPost(url);
         httpPost.setConfig(getRequestConfig());
         httpPost.setHeader(CONNECTION, KEEP_ALIVE);
         httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
         httpPost.setHeader(ACCEPT, APPLICATION_JSON);
-        StringEntity entity = new StringEntity(param.toString(), UTF8);
+        StringEntity entity = new StringEntity(data.toString(), UTF8);
         httpPost.setEntity(entity);
         return httpPost;
     }
@@ -138,17 +145,69 @@ public class HttpClientUtil {
         return httpGet;
     }
 
+    public static String put(String url, JSONObject data) throws IOException {
+        HttpPut httpPut = putForm(url, data);
+        HttpResponse response;
+        String result = null;
+        try {
+            response = httpclient.execute(httpPut);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                result = EntityUtils.toString(entity);
+            }
+        } finally {
+            httpPut.releaseConnection();
+        }
+        return result;
+    }
+
+    /*
+     * @param url
+     * @return
+     */
+    private static HttpPut putForm(String url, JSONObject data) {
+        HttpPut httpPut = new HttpPut(url);
+        httpPut.setHeader(CONNECTION, KEEP_ALIVE);
+        httpPut.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+        StringEntity entity = new StringEntity(data.toString(), UTF8);//解决中文乱码问题
+        httpPut.setEntity(entity);
+        return httpPut;
+    }
+
+    public static String delete(String url) throws IOException {
+        HttpDelete httpDelete = deleteForm(url);
+        HttpResponse response;
+        String result = null;
+        try {
+            response = httpclient.execute(httpDelete);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                result = EntityUtils.toString(entity);
+            }
+        } finally {
+            httpDelete.releaseConnection();
+        }
+        return result;
+    }
+
+    private static HttpDelete deleteForm(String url) {
+        HttpDelete httpDelete = new HttpDelete(url);
+        httpDelete.setHeader(CONNECTION, KEEP_ALIVE);
+        httpDelete.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+        return httpDelete;
+    }
+
     /**
      * 设置代理及其他配置
      *
      * @return
      */
     private static RequestConfig getRequestConfig() {
+
         return RequestConfig.custom()
-                .setProxy(new HttpHost("10.16.46.161", 3333))
-                .setConnectTimeout(10000)
-                .setSocketTimeout(10000)
-                .setConnectionRequestTimeout(3000)
+                .setConnectTimeout(TIMEOUT)
+                .setSocketTimeout(TIMEOUT)
+                .setConnectionRequestTimeout(TIMEOUT)
                 .build();
     }
 

@@ -102,7 +102,6 @@ public class MachineNodeOperation extends AbstractNodeOperation {
         for (Machine machine : machineList) {
             resultFutureList.add(threadPool.submit(() -> {
                 try {
-                    // 将 redis.conf 分发到目标机器的临时目录
                     SSH2Util.copyFileToRemote(machine, tempPath, url, sudo);
                     return true;
                 } catch (Exception e) {

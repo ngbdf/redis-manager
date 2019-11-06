@@ -134,7 +134,8 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
                 // 将 redis.conf 分发到目标机器的临时目录
                 String result = SSH2Util.copyFileToRemote(machine, tempPath, url, sudo);
                 logger.warn(result);
-                if (Strings.isNullOrEmpty(result) || !result.contains("OK")) {
+                if (!result.contains("OK")) {
+                    InstallationWebSocketHandler.appendLog(clusterName, result);
                     String message = "Copy redis.conf to target machine failed, host: " + machine.getHost();
                     InstallationWebSocketHandler.appendLog(clusterName, message);
                     return false;

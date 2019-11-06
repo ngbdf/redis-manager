@@ -13,7 +13,8 @@ const state = {
   groupList: [],
   user: {
     userRole: 2
-  }
+  },
+  humpbackEnabled: false
 }
 
 const mutations = {
@@ -29,6 +30,9 @@ const mutations = {
   },
   setUserRole(state, userRole) {
     state.user.userRole = userRole
+  },
+  setHumpbackEnabled(state, humpbackEnabled) {
+    state.humpbackEnabled = humpbackEnabled
   }
 
 }
@@ -48,26 +52,33 @@ const getters = {
   },
   getUserRole: state => {
     return state.user.userRole
+  },
+  getHumpbackEnabled: state => {
+    return state.humpbackEnabled
   }
 }
 
 const actions = {
-  setCurrentGroup(context, currentGroup) {
+  setCurrentGroup (context, currentGroup) {
     context.commit('setCurrentGroup', currentGroup)
   },
-  setGroupList(context, groupList) {
+  setGroupList (context, groupList) {
     context.commit('setGroupList', groupList)
   },
-  setUser(context, user) {
+  setUser (context, user) {
     let avatar = user.avatar
     if (!isEmpty(apiConfig.baseUrl) && !isEmpty(avatar) && !avatar.startsWith(apiConfig.baseUrl)) {
       user.avatar = apiConfig.baseUrl + avatar
     }
     context.commit('setUser', user)
   },
-  setUserRole(context, userRole) {
+  setUserRole (context, userRole) {
     context.commit('setUserRole', userRole)
+  },
+  setHumpbackEnabled (context, humpbackEnabled) {
+    context.commit('setHumpbackEnabled', humpbackEnabled)
   }
+
 }
 
 export const store = new Vuex.Store({

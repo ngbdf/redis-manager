@@ -19,6 +19,7 @@
           Environment:
           <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Docker</el-tag>
           <el-tag size="mini" v-else-if="cluster.installationEnvironment == 1">Machine</el-tag>
+          <el-tag size="mini" v-else-if="cluster.installationEnvironment == 3">Humpback</el-tag>
         </span>
         <span class="base-info-item">
           Type:
@@ -635,8 +636,11 @@ export default {
               }
             });
             redisNodeList.forEach(redisNode => {
-              var length = redisNode.children.length;
-              let replicaNumber = isEmpty(length) ? 0 : length;
+              let children = redisNode.children;
+              let replicaNumber = 0;
+              if (!isEmpty(children) && !isEmpty(children.length)) {
+                replicaNumber = children.length;
+              }
               redisNode.replicaNumber = replicaNumber;
             });
             this.redisNodeList = redisNodeList;
@@ -1085,7 +1089,10 @@ export default {
       let number = 0;
       this.redisNodeList.forEach(masterNode => {
         number += 1;
-        number += masterNode.children.length;
+        let children = masterNode.children;
+        if (!isEmpty(children) && !isEmpty(children.length)) {
+          number += children.length;
+        }
       });
       return number;
     },

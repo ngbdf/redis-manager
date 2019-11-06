@@ -25,6 +25,7 @@
         <el-radio-group v-model="cluster.installationEnvironment">
           <el-radio :label="0">Docker</el-radio>
           <el-radio :label="1">Machine</el-radio>
+          <el-radio :label="3" v-if="humpbackEnabled">Humpback</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="Cluster Info" prop="clusterInfo">
@@ -233,6 +234,9 @@ export default {
     // 监听group变化
     currentGroup() {
       return store.getters.getCurrentGroup;
+    },
+    humpbackEnabled() {
+      return store.getters.getHumpbackEnabled;
     }
   },
   mounted() {

@@ -28,13 +28,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.newegg.ec.redis.client.IDatabaseCommand.*;
 import static com.newegg.ec.redis.util.RedisClusterInfoUtil.OK;
-import static com.newegg.ec.redis.util.RedisConfigUtil.*;
-import static com.newegg.ec.redis.util.RedisConfigUtil.DAEMONIZE;
 import static com.newegg.ec.redis.util.RedisConfigUtil.PORT;
+import static com.newegg.ec.redis.util.RedisConfigUtil.*;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.EXPIRES;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.KEYS;
 import static com.newegg.ec.redis.util.RedisUtil.*;
-import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
+import static javax.management.timer.Timer.ONE_SECOND;
 
 /**
  * @author Jay.H.Zou
@@ -362,8 +361,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         RedisClient redisClient = null;
         try {
             redisClient = RedisClientFactory.buildRedisClient(slaveNode, redisPassword);
-            boolean result = redisClient.clusterReplicate(masterId);
-            return result;
+            return redisClient.clusterReplicate(masterId);
         } catch (Exception e) {
             logger.error(slaveNode.getHost() + ":" + slaveNode.getPort() + " replicate " + masterId + " failed.", e);
             return false;
@@ -404,11 +402,11 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
                 try {
                     redisClient = RedisClientFactory.buildRedisClient(seed, cluster.getRedisPassword());
                     redisClient.clusterMeet(host, port);
-                    Thread.sleep(TEN_SECONDS);
+                    Thread.sleep(ONE_SECOND);
                 } catch (Exception e) {
                     String message = "Cluster meet " + host + ":" + port + " failed.";
                     logger.error(message, e);
-                    result.append(message).append(e.getMessage());
+                    result.append(message).append(e.getMessage()).append(SignUtil.COMMAS);
                 } finally {
                     close(redisClient);
                 }

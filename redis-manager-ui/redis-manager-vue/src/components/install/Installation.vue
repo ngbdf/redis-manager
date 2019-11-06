@@ -590,6 +590,7 @@ export default {
     },
     install() {
       this.installationLoading = true;
+      this.step = 0
       let url = "/installation/installFlow";
       API.post(
         url,

@@ -154,7 +154,11 @@ export default {
       this.getUser(this.currentUser.userId);
     },
     handleAvatarSuccess(res, file) {
-      this.user.avatar = URL.createObjectURL(file.raw);
+      let avatar = URL.createObjectURL(file.raw);
+      this.user.avatar = avatar;
+      let user = store.getters.getUser;
+      user.avatar = avatar;
+      store.dispatch("setUser", user);
     },
     beforeAvatarUpload(file) {
       const isJPGOrPNG =

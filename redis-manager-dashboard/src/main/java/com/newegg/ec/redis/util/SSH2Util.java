@@ -1,14 +1,13 @@
 package com.newegg.ec.redis.util;
 
-import ch.ethz.ssh2.*;
-import com.google.common.base.Strings;
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
 import com.newegg.ec.redis.entity.Machine;
 
-import java.io.*;
-
-import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
-import static com.newegg.ec.redis.util.SignUtil.SEMICOLON;
-import static com.newegg.ec.redis.util.SignUtil.SPACE;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * @author Jay.H.Zou
@@ -98,7 +97,7 @@ public class SSH2Util {
             command.append("sudo ");
         }
         // 本机拷贝至安装机器节点
-        String wgetTemplate = "/usr/bin/wget -P %s %s";
+        String wgetTemplate = "/usr/bin/wget -P %s %s;";
         command.append(String.format(wgetTemplate, tempPath, url));
         return SSH2Util.execute(machine, command.toString());
     }
