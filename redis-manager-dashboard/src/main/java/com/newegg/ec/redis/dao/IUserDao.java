@@ -86,8 +86,8 @@ public interface IUserDao {
     @Select("SELECT COUNT(user_id) FROM user WHERE group_id = #{groupId}")
     int selectUserNumber(Integer groupId);
 
-    @Insert("INSERT INTO user (group_id, user_name, password, email, mobile, update_time) " +
-            "VALUES (#{groupId}, #{userName}, #{password}, #{email}, #{mobile}, NOW())")
+    @Insert("INSERT INTO user (group_id, user_name, password, email, mobile, user_type, update_time) " +
+            "VALUES (#{groupId}, #{userName}, #{password}, #{email}, #{mobile}, 0, NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "userId", keyColumn = "user_id")
     int insertUser(User user);
 
@@ -114,7 +114,7 @@ public interface IUserDao {
             "avatar varchar(255) DEFAULT NULL, " +
             "email varchar(255) DEFAULT NULL, " +
             "mobile varchar(20) DEFAULT NULL, " +
-//            "user_type integer(4) NOT NULL, " +
+            "user_type integer(4) NOT NULL, " +
             "update_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (user_id), " +
             "UNIQUE KEY `user_name` (user_name) " +

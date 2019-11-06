@@ -3,7 +3,7 @@
   <el-container style="background-image: linear-gradient(0deg,#1ac5fa,#2ba3de 51%,#1d71f2);">
     <!-- #1d71f2 #1ac5fa -->
     <img
-      src="../assets/redis-manager.png"
+      src="../assets/background.png"
       style="position: absolute; z-index: 0;left: 0; top:32%; width: 100%; opacity:0.1;"
     />
     <div class="login-wrapper">

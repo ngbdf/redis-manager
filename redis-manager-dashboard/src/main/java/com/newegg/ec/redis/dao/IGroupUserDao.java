@@ -41,6 +41,8 @@ public interface IGroupUserDao {
             "user_id integer(4) NOT NULL, " +
             "grant_group_id integer(4) NOT NULL, " +
             "user_role varchar(20) NOT NULL, " +
+            "allowed_urls varchar(255) DEFAULT NULL, " +
+            "grant_clusters varchar(255) DEFAULT NULL, " +
             "update_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (group_user_id), " +
             "UNIQUE KEY `group_user` (user_id, group_id, grant_group_id, user_role) " +

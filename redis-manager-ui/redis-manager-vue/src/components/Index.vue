@@ -3,7 +3,7 @@
     <el-header class="header header-wrapper">
       <div class="grid-content logo-wrapper">
         <i class="el-icon-s-fold aside-operation" @click="collapseHandler"></i>
-        <img src="../assets/logo.png" style="width: 150px; height: 20px" />
+        <img src="../assets/redis-manager.png" style="width: 150px; height: 20px" />
       </div>
       <div class="grid-content right-content" id="right-content">
         <el-select
