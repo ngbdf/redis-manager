@@ -359,7 +359,7 @@
     >
       <span>{{ operationNode.host }}:{{ operationNode.port }} will be start</span>
       <span slot="footer" class="dialog-footer">
-        <el-button size="small" @click="forgetVisible = false">Cancel</el-button>
+        <el-button size="small" @click="startNodeVisible = false">Cancel</el-button>
         <el-button size="small" type="primary" @click="startNode()">Start</el-button>
       </span>
     </el-dialog>
