@@ -762,7 +762,6 @@ export default {
       );
     },
     getServerAddress() {
-      // ws://127.0.0.1:8183/websocket/install
       let url = "/system/getServerAddress";
       API.get(
         url,

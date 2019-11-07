@@ -30,13 +30,16 @@
               ></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" style="width: 100%;">Sign In</el-button>
+              <el-button type="primary" style="width: 100%;" @click="signIn('user')">Sign In</el-button>
             </el-form-item>
             <el-form-item v-if="authorization.enabled">
-              <el-button
-                type="success"
-                style="width: 100%;"
-              ><el-link :href="authorization.server" :underline="false" style="color: #fff">{{ authorization.companyName }} Sign In</el-link></el-button>
+              <el-button type="success" style="width: 100%;">
+                <el-link
+                  :href="authorization.server"
+                  :underline="false"
+                  style="color: #fff"
+                >{{ authorization.companyName }} Sign In</el-link>
+              </el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -48,6 +51,7 @@
               target="_blank"
               class="doc-link"
               :underline="false"
+              @click="oauth2Login()"
             >Redis Manager</el-link>
           </span>
         </div>
@@ -83,7 +87,6 @@ export default {
         null,
         response => {
           this.authorization = response.data.data;
-          console.log(this.authorization)
         },
         err => {
           message.error("Get authorization failed");
@@ -112,9 +115,27 @@ export default {
           );
         }
       });
+    },
+    getUserFromSession() {
+      let url = "/user/getUserFromSession";
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            store.dispatch("setUser", result.data);
+            this.$router.push({ name: "index" });
+          }
+        },
+        err => {
+          console.log("Auto get user failed.");
+        }
+      );
     }
   },
   mounted() {
+    this.getUserFromSession();
     this.getAuthorization();
   }
 };

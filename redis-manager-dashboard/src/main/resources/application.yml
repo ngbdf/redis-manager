@@ -1,6 +1,6 @@
 server:
   tomcat.uri-encoding: UTF-8
-  port: 8182
+  port: 8183
 
 spring:
   application:
@@ -15,9 +15,9 @@ spring:
     # 必填项，
     database: redis_manager_refactor
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/redis_manager_refactor?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://10.16.50.209:3306/redis_manager_refactor?useUnicode=true&characterEncoding=utf-8
     username: root
-    password:
+    password: Newegg@1234
     druid:
       # 初始化时建立物理连接的个数
       initial-size: 0
@@ -40,9 +40,11 @@ redis-manager:
     password: admin
     avatar-path: /data/avatar/
     authorization:
-      enabled: false
-      company-name:
-      server: xxx
+      enabled: true
+      company-name: Newegger
+      server: http://xx:9898/2gb6tcmz3udop1yy5cw1621djf
+      site-key: xxx
+      site-secret: xxx
   # monitor configuration
   monitor:
     # 数据保存天数，1-30天, default: 15

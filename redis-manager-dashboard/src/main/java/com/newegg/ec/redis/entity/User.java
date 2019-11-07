@@ -1,12 +1,13 @@
 package com.newegg.ec.redis.entity;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
  * @author Jay.H.Zou
  * @date 7/19/2019
  */
-public class User {
+public class User implements Serializable {
 
     private Integer userId;
 
@@ -134,5 +135,22 @@ public class User {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId=" + userId +
+                ", groupId=" + groupId +
+                ", userName='" + userName + '\'' +
+                ", password='" + password + '\'' +
+                ", token='" + token + '\'' +
+                ", userRole=" + userRole +
+                ", avatar='" + avatar + '\'' +
+                ", email='" + email + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", userType=" + userType +
+                ", updateTime=" + updateTime +
+                '}';
     }
 }

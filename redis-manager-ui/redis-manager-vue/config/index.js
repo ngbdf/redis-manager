@@ -12,7 +12,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/apis': {
-        target: 'http://127.0.0.1:8182/',  // 后台api
+        target: 'http://127.0.0.1:8183/',  // 后台api
         changeOrigin: true,
         // secure: true,
         pathRewrite: {
@@ -22,8 +22,8 @@ module.exports = {
     },
 
     // Various Dev Server settings
-    host: 'localhost', // can be overwritten by process.env.HOST
-    port: 8181, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    host: '127.0.0.1', // can be overwritten by process.env.HOST
+    port: 8182, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,

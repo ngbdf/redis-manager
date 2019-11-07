@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.config.SystemConfig;
 import com.newegg.ec.redis.entity.Result;
@@ -9,8 +10,12 @@ import com.newegg.ec.redis.util.ImageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -34,18 +39,42 @@ public class UserController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public Result login(@RequestBody User user) {
+    public Result login(@RequestBody User user, HttpServletRequest request) {
         User userLogin = userService.getUserByNameAndPassword(user);
         if (userLogin == null) {
             return Result.failResult();
         }
+        request.getSession().setAttribute("user", userLogin);
         return Result.successResult(userLogin);
     }
 
-    @RequestMapping(value = "/oauth2", method = RequestMethod.POST)
+    @RequestMapping(value = "/signOut", method = RequestMethod.POST)
     @ResponseBody
-    public Result oauth2(@RequestBody User user) {
-        User userLogin = userService.getUserByNameAndPassword(user);
+    public Result signOut(HttpServletRequest request) {
+        request.getSession().setAttribute("user", null);
+        return Result.successResult();
+    }
+
+    @RequestMapping(value = "/oauth2Login", method = RequestMethod.POST)
+    @ResponseBody
+    public Result oauth2Login(@RequestBody JSONObject data, HttpServletRequest request) {
+        System.err.println(data.toJSONString() + " data");
+        User user = new User();
+        user.setUserId(1);
+        user.setGroupId(1);
+        user.setUserName("testOAUTH");
+        user.setUserRole(User.UserRole.SUPER_ADMIN);
+        user.setAvatar("/data/avatar/1.jpg");
+        request.getSession().setAttribute("user", user);
+        return Result.successResult(user);
+    }
+
+    @RequestMapping(value = "/getUserFromSession", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getUserFromSession(HttpSession session) {
+        User userLogin = (User) session.getAttribute("user");
+
+        System.err.println(userLogin + " userLogin");
         if (userLogin == null) {
             return Result.failResult();
         }

@@ -16,6 +16,7 @@ import Profile from '@/components/user/Profile'
 import DataOperation from '@/components/tool/DataOperation'
 import NotFound from '@/components/error/404'
 
+import API from '@/api/api.js'
 import { store } from '@/vuex/store.js'
 import { isEmpty } from '@/utils/validate.js'
 
@@ -27,7 +28,7 @@ Vue.use(Router)
 // }
 
 const router = new Router({
-  // mode: 'history',
+  mode: 'history',
   routes: [
     {
       path: '/login',
@@ -103,12 +104,12 @@ const router = new Router({
       component: NotFound,
       name: '404',
       hidden: true
-    },
-    {
-      path: '*',
-      hidden: true,
-      redirect: { path: '/404' }
     }
+    // {
+    //   path: '*',
+    //   hidden: true,
+    //   redirect: { path: '/404' }
+    // }
   ]
 })
 
@@ -120,8 +121,21 @@ router.beforeEach((to, from, next) => {
     store.dispatch('setUser', {})
   }
   let toPath = to.path
+  console.log(to)
   if (toPath !== '/login' && (isEmpty(user) || isEmpty(user.userId) || isEmpty(user.userName) || isEmpty(user.userRole))) {
-    next({ path: '/login' })
+    let code = to.query.code
+    if (!isEmpty(code)) {
+      let url = '/user/oauth2Login'
+      API.post(url, { data: code }, response => {
+        store.dispatch("setUser", response.data.data)
+        next()
+      }, err => {
+        console.log(err)
+        next({ path: '/login' })
+      })
+    } else {
+      next({ path: '/login' })
+    }
     // admin
   } else if (user.userRole === 1 && toPath.indexOf('group-manage') > 0) {
     next({ name: 'dashboard', params: { groupId: store.getters.getCurrentGroup.groupId } })

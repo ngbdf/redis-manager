@@ -339,6 +339,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         }
         RedisClient redisClient = null;
         try {
+            // time out
             RedisURI redisURI = new RedisURI(forgetNode.getHost(), forgetNode.getPort(), redisPassword);
             redisClient = RedisClientFactory.buildRedisClient(redisURI);
             // Forget itself

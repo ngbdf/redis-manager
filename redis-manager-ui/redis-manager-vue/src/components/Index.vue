@@ -3,7 +3,7 @@
     <el-header class="header header-wrapper">
       <div class="grid-content logo-wrapper">
         <i class="el-icon-s-fold aside-operation" @click="collapseHandler"></i>
-        <img src="../assets/redis-manager.png" style="width: 150px; height: 20px" />
+        <img src="../assets/redis-manager.png" style="width: 150px; height: 15px" />
       </div>
       <div class="grid-content right-content" id="right-content">
         <el-select
@@ -64,7 +64,7 @@
                 <b>{{ currentUser.userName }}</b>
               </el-dropdown-item>
               <el-dropdown-item command="profile" divided>Profile</el-dropdown-item>
-              <el-dropdown-item divided @click.native="toLogin">Sign out</el-dropdown-item>
+              <el-dropdown-item divided @click.native="signOut">Sign out</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -170,13 +170,21 @@ export default {
     };
   },
   methods: {
-    toLogin() {
-      store.dispatch("setUser", {});
-      store.dispatch("setGroupList", []);
-      store.dispatch("setCurrentGroup", {});
-      this.$router.push({
-        name: "login"
-      });
+    signOut() {
+      let url = "/user/signOut";
+      API.post(
+        url,
+        null,
+        response => {
+          store.dispatch("setUser", {});
+          // store.dispatch("setGroupList", []);
+          // store.dispatch("setCurrentGroup", {});
+          location.reload();
+        },
+        err => {
+          console.log("Sign out failed");
+        }
+      );
     },
     toDashboard() {
       this.$router.push({
