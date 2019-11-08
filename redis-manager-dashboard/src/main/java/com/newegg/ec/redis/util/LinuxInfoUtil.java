@@ -3,6 +3,7 @@ package com.newegg.ec.redis.util;
 import ch.ethz.ssh2.Connection;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
+import com.newegg.ec.redis.entity.Result;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -63,22 +64,13 @@ public class LinuxInfoUtil {
 
     public static final Map<String, String> getLinuxInfo(Machine machine) throws Exception {
         String result = SSH2Util.execute(machine, getInfoCommand());
-        Map<String, String> machineResourceInfoMap = formatResult(result);
-        return machineResourceInfoMap;
+        return formatResult(result);
     }
 
     private static String getInfoCommand() {
         String command = "export TERM=linux;res=\"\"\n" +
-                // Version
                 formatCommand(VERSION, "`cat /proc/version`") +
-                // CPU 使用率
-                // formatCommand("processor", "`sar -u 1 1 |grep 'Average'|awk '{print $3}'`") +
-                // loadaverage
-                // formatCommand("load_average", "`uptime |awk '{print $(NF-2) $(NF-1) $NF}'`") +
-                // Memory
-                // formatCommand("memory_total", "`free -g | grep Mem | awk '{print $2}'`") +
                 formatCommand(MEMORY_FREE, "`free -g | grep Mem | awk '{print $4}'`") +
-                // formatCommand("memory_available", "`free -g | grep Mem | awk '{print $7}'`") +
                 "echo -e $res";
         return command;
     }

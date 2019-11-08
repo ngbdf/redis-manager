@@ -45,7 +45,7 @@ public class AvatarCleanup implements IDataCleanup {
             }
             List<File> allFilesName = ImageUtil.getAllFiles(systemConfig.getAvatarPath());
             for (User user : allUser) {
-                String imageName = ImageUtil.getImageName("" + user.getUserId());
+                String imageName = ImageUtil.getImageName(user.getUserId());
                 Iterator<File> iterator = allFilesName.iterator();
                 while (iterator.hasNext()) {
                     File file = iterator.next();

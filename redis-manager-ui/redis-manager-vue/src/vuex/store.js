@@ -14,27 +14,30 @@ const state = {
   user: {
     userRole: 2
   },
-  humpbackEnabled: false
+  installationEnvironmentList: [],
+  authorization: {}
 }
 
 const mutations = {
-  setCurrentGroup(state, currentGroup) {
+  setCurrentGroup (state, currentGroup) {
     getUserRole(currentGroup.groupId, state.user.userId)
     state.currentGroup = currentGroup
   },
-  setGroupList(state, groupList) {
+  setGroupList (state, groupList) {
     state.groupList = groupList
   },
-  setUser(state, user) {
+  setUser (state, user) {
     state.user = user
   },
-  setUserRole(state, userRole) {
+  setUserRole (state, userRole) {
     state.user.userRole = userRole
   },
-  setHumpbackEnabled(state, humpbackEnabled) {
-    state.humpbackEnabled = humpbackEnabled
+  setInstallationEnvironmentList (state, installationEnvironmentList) {
+    state.installationEnvironmentList = installationEnvironmentList
+  },
+  setAuthorization (state, authorization) {
+    state.authorization = authorization
   }
-
 }
 
 const getters = {
@@ -53,8 +56,11 @@ const getters = {
   getUserRole: state => {
     return state.user.userRole
   },
-  getHumpbackEnabled: state => {
-    return state.humpbackEnabled
+  getInstallationEnvironmentList: state => {
+    return state.installationEnvironmentList
+  },
+  getAuthorization: state => {
+    return state.authorization
   }
 }
 
@@ -67,7 +73,7 @@ const actions = {
   },
   setUser (context, user) {
     let avatar = user.avatar
-    if (!isEmpty(apiConfig.baseUrl) && !isEmpty(avatar) && !avatar.startsWith(apiConfig.baseUrl)) {
+    if (!isEmpty(apiConfig.baseUrl) && !isEmpty(avatar) && !avatar.startsWith(apiConfig.baseUrl) && !avatar.startsWith('http')) {
       user.avatar = apiConfig.baseUrl + avatar
     }
     context.commit('setUser', user)
@@ -75,8 +81,11 @@ const actions = {
   setUserRole (context, userRole) {
     context.commit('setUserRole', userRole)
   },
-  setHumpbackEnabled (context, humpbackEnabled) {
-    context.commit('setHumpbackEnabled', humpbackEnabled)
+  setInstallationEnvironmentList (context, installationEnvironmentList) {
+    context.commit('setInstallationEnvironmentList', installationEnvironmentList)
+  },
+  setAuthorization (context, authorization) {
+    context.commit('setAuthorization', authorization)
   }
 
 }
@@ -88,7 +97,7 @@ export const store = new Vuex.Store({
   mutations,
   plugins: [createPersistedState(
     {
-      reducer(val) {
+      reducer (val) {
         return {
           user: val.user,
           currentGroup: val.currentGroup,
@@ -99,7 +108,7 @@ export const store = new Vuex.Store({
   )]
 })
 
-function getUserRole(groupId, userId) {
+function getUserRole (groupId, userId) {
   if (isEmpty(groupId) || isEmpty(userId)) {
     return
   }
@@ -112,7 +121,6 @@ function getUserRole(groupId, userId) {
     let userRole = response.data.data
     state.user.userRole = userRole
   }, err => {
-    console.log(err)
     state.user.userRole = 2
   })
 }

@@ -24,7 +24,7 @@ public class ImageUtil {
      * @return 返回文件名
      * @throws IOException
      */
-    public static void saveImage(MultipartFile multipartFile, String path, String userId) throws Exception {
+    public static void saveImage(MultipartFile multipartFile, String path, Integer userId) throws Exception {
         InputStream inputStream = multipartFile.getInputStream();
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path + File.separator + getImageName(userId)));
         byte[] bs = new byte[1024];
@@ -46,7 +46,7 @@ public class ImageUtil {
         return new ArrayList<>();
     }
 
-    public static String getImageName(String userId) {
+    public static String getImageName(Integer userId) {
         return userId + IMAGE_SUFFIX_JPG;
     }
 

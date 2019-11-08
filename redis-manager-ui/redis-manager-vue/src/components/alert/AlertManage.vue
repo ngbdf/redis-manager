@@ -386,7 +386,6 @@ export default {
   },
   methods: {
     handleClick(tab, event) {
-      //console.log(tab, event);
     },
     addRuleSelectionChange(val) {
       let newRuleIds = "";
@@ -587,7 +586,6 @@ export default {
     },
     addAlertChannel() {
       if (isEmpty(this.cluster.channelIds)) {
-        console.log("no channels");
         return;
       }
       let url = "/cluster/addAlertChannel";

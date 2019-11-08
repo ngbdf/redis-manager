@@ -164,7 +164,6 @@ export default {
         },
         err => {
           this.monitorDataLoading = false;
-          console.log(err);
           message.error(err);
         }
       );

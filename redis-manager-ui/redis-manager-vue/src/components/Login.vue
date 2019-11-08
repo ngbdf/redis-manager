@@ -35,7 +35,7 @@
             <el-form-item v-if="authorization.enabled">
               <el-button type="success" style="width: 100%;">
                 <el-link
-                  :href="authorization.server"
+                  :href="authorization.server + authorization.siteKey"
                   :underline="false"
                   style="color: #fff"
                 >{{ authorization.companyName }} Sign In</el-link>
@@ -51,7 +51,6 @@
               target="_blank"
               class="doc-link"
               :underline="false"
-              @click="oauth2Login()"
             >Redis Manager</el-link>
           </span>
         </div>
@@ -86,7 +85,9 @@ export default {
         url,
         null,
         response => {
-          this.authorization = response.data.data;
+          let authorization = response.data.data;
+          authorization.server += authorization.server.endsWith("/") ? "" : "/";
+          this.authorization = authorization;
         },
         err => {
           message.error("Get authorization failed");
@@ -129,7 +130,7 @@ export default {
           }
         },
         err => {
-          console.log("Auto get user failed.");
+          message.error("Auto get user failed.");
         }
       );
     }

@@ -1,10 +1,10 @@
 package com.newegg.ec.redis.controller.oauth;
 
+import com.newegg.ec.redis.config.SystemConfig;
 import com.newegg.ec.redis.entity.User;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * authorization code
@@ -13,16 +13,18 @@ import javax.servlet.http.HttpServletRequest;
  * @date 10/19/2019
  */
 @Component
-public class AuthService implements IOAuthService {
+public class AuthService implements IOAuthService<String> {
 
-    @Value("${redis-manager.auth.authorization.site-key}")
-    private String siteKey;
-
-    @Value("${redis-manager.auth.authorization.site-secret}")
-    private String siteSecret;
+    @Autowired
+    private SystemConfig systemConfig;
 
     @Override
-    public User oauthLogin(HttpServletRequest request) {
+    public User oauthLogin(String data) {
         return null;
+    }
+
+    @Override
+    public boolean signOut() {
+        return false;
     }
 }

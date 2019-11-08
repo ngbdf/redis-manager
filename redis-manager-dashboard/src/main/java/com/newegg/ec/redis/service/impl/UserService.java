@@ -6,6 +6,7 @@ import com.newegg.ec.redis.dao.IUserDao;
 import com.newegg.ec.redis.entity.Group;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IUserService;
+import com.newegg.ec.redis.util.ImageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.newegg.ec.redis.config.SystemConfig.AVATAR_PATH;
 
 /**
  * @author Jay.H.Zou
@@ -104,7 +107,11 @@ public class UserService implements IUserService {
     @Transactional
     @Override
     public boolean addUser(User user) {
+
         userDao.insertUser(user);
+        String avatar = AVATAR_PATH + ImageUtil.getImageName(user.getUserId());
+        user.setAvatar(avatar);
+        updateUserAvatar(user);
         if (User.UserRole.SUPER_ADMIN == user.getUserRole()) {
             List<Group> groupList = groupDao.selectAllGroup();
             for (Group group : groupList) {

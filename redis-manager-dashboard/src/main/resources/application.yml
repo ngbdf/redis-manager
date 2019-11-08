@@ -1,6 +1,6 @@
 server:
   tomcat.uri-encoding: UTF-8
-  port: 8183
+  port: 8182
 
 spring:
   application:
@@ -12,20 +12,15 @@ spring:
       enabled: true
       charset: UTF-8
   datasource:
-    # 必填项，
     database: redis_manager_refactor
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.16.50.209:3306/redis_manager_refactor?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://127.0.0.1:3306/redis_manager_refactor?useUnicode=true&characterEncoding=utf-8
     username: root
-    password: Newegg@1234
+    password:
     druid:
-      # 初始化时建立物理连接的个数
       initial-size: 0
-      # 最大连接池数量
       max-active: 10
-      # 最小连接池数量
       min-idle: 0
-      # 获取连接时最大等待时间，单位毫秒
       max-wait: 10000
 
 mybatis:
@@ -40,9 +35,9 @@ redis-manager:
     password: admin
     avatar-path: /data/avatar/
     authorization:
-      enabled: true
-      company-name: Newegger
-      server: http://xx:9898/2gb6tcmz3udop1yy5cw1621djf
+      enabled: false
+      company-name: xxx
+      server: xxx
       site-key: xxx
       site-secret: xxx
   # monitor configuration
@@ -64,7 +59,6 @@ redis-manager:
       # 默认从官方镜像库拉取
       images: redis:4.0.10,redis:4.0.14,redis:5.0.5
       docker-host: tcp://%s:2375
-    # for newegg
     humpback:
       enabled: false
       images: redis:4.0.10,redis:4.0.14,redis:5.0.5

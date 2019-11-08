@@ -177,12 +177,14 @@ export default {
         null,
         response => {
           store.dispatch("setUser", {});
-          // store.dispatch("setGroupList", []);
-          // store.dispatch("setCurrentGroup", {});
-          location.reload();
+          store.dispatch("setGroupList", []);
+          store.dispatch("setCurrentGroup", {});
+          this.$router.push({
+            name: "login"
+          });
         },
         err => {
-          console.log("Sign out failed");
+          message.error(err);
         }
       );
     },
@@ -340,20 +342,6 @@ export default {
       this.active = false;
       this.$nextTick(() => (this.active = true));
       this.importVisible = importVisible;
-    },
-    getHumpbackEnabled() {
-      let url = "/system/humpbackEnabled";
-      API.get(
-        url,
-        null,
-        response => {
-          let humpbackEnabled = response.data.data;
-          store.dispatch("setHumpbackEnabled", humpbackEnabled);
-        },
-        err => {
-          console.log(err);
-        }
-      );
     }
   },
   computed: {
@@ -375,7 +363,6 @@ export default {
     } else {
       groupId = this.currentGroup.groupId;
     }
-    this.getHumpbackEnabled();
     this.selectGroupId = groupId;
     if (this.$route.path == "/") {
       this.toDashboard();

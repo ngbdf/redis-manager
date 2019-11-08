@@ -1,17 +1,14 @@
 package com.newegg.ec.redis.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.config.SystemConfig;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.plugin.install.InstallationTemplate;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
-import com.newegg.ec.redis.plugin.install.service.InstallationOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.HumpbackNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.MachineNodeOperation;
 import com.newegg.ec.redis.service.IClusterService;
-import com.newegg.ec.redis.service.IRedisNodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.*;
-
-import static com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment.*;
+import java.util.List;
 
 /**
  * @author Jay.H.Zou
@@ -49,6 +44,9 @@ public class InstallationController {
 
     @Autowired
     private IClusterService clusterService;
+
+    @Autowired
+    private SystemConfig systemConfig;
 
     @RequestMapping(value = "getDockerImages", method = RequestMethod.GET)
     @ResponseBody

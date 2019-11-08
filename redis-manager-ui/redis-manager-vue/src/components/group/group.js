@@ -16,11 +16,11 @@ export function getGroupList (user) {
         })
         store.dispatch('setGroupList', groupList)
       } else {
-        message.err('Get group list failed')
+        message.error('Get group list failed')
       }
     },
     err => {
-      message.err(err)
+      message.error(err)
     }
   )
 }

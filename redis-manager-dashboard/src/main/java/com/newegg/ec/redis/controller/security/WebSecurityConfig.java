@@ -1,8 +1,8 @@
 package com.newegg.ec.redis.controller.security;
 
-import com.alibaba.fastjson.JSONObject;
-import com.newegg.ec.redis.controller.oauth.IOAuthService;
+import com.newegg.ec.redis.controller.oauth.AuthService;
 import com.newegg.ec.redis.entity.User;
+import com.newegg.ec.redis.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -14,35 +14,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.Objects;
 
 /**
  * Created by lzz on 2018/5/2.
  */
+
 @Component
 public class WebSecurityConfig implements WebMvcConfigurer {
 
     @Autowired
-    private IOAuthService authService;
+    private AuthService authService;
+
+    @Autowired
+    private IUserService userService;
 
     @Bean
     public SecurityInterceptor getSecurityInterceptor() {
         return new SecurityInterceptor();
-    }
-
-    private JSONObject getPrdParam(String nasCode) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("Code", nasCode);
-        jsonObject.put("SiteKey", "1t9mf7bctjiik2na80716kmcw0");
-        jsonObject.put("SiteSecret", "0dhnpn9lh15qa2excdepkfj21r2f2jf1i9nq6y124ksxv395ozsu");
-        return jsonObject;
-    }
-
-    private JSONObject getDevParam(String nasCode) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("Code", nasCode);
-        jsonObject.put("SiteKey", "2gb6tcmz3udop1yy5cw1621djf");
-        jsonObject.put("SiteSecret", "1zsj643ywec7o2ww0nsdonoebz201urtrxrmrsl29nr78t49p1vi");
-        return jsonObject;
     }
 
     @Override
@@ -50,10 +39,12 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
         InterceptorRegistration addInterceptor = registry.addInterceptor(getSecurityInterceptor());
         // 排除配置
-        addInterceptor.excludePathPatterns("/user/login")
+        addInterceptor.excludePathPatterns("/login")
+                .excludePathPatterns("/user/login")
                 .excludePathPatterns("/user/signOut")
                 .excludePathPatterns("/user/getUserFromSession")
-                .excludePathPatterns("/system/getAuthorization");
+                .excludePathPatterns("/system/getAuthorization")
+                .excludePathPatterns("/system/getInstallationEnvironment");
         // 拦截配置
         addInterceptor.addPathPatterns("/**");
     }
@@ -63,22 +54,25 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         @Override
         public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
             String requestURI = request.getRequestURI();
-            System.err.println(requestURI);
+            if (!Objects.equals(requestURI, "/user/oauth2Login")) {
+                return true;
+            }
+            String code = request.getParameter("code");
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
-            if (user != null) {
-                return true;
+
+            user = authService.oauthLogin(code);
+            if (user == null) {
+                return false;
             }
-            user = authService.oauthLogin(request);
-            if (user != null) {
-                user = new User();
-                user.setUserId(35);
-                user.setUserName("nihao");
-                user.setUserRole(User.UserRole.SUPER_ADMIN);
-                System.err.println(user + "====================");
-                session.setAttribute("user", user);
-                return true;
+            User realUser = userService.getUserByName(user.getUserName());
+            if (realUser.getUserId() == null) {
+                return false;
             }
+            realUser.setAvatar(user.getAvatar());
+            User userRole = userService.getUserRole(realUser.getGroupId(), realUser.getUserId());
+            realUser.setUserRole(userRole.getUserRole());
+            request.getSession().setAttribute("user", realUser);
             return true;
         }
     }

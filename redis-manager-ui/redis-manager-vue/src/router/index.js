@@ -104,12 +104,12 @@ const router = new Router({
       component: NotFound,
       name: '404',
       hidden: true
+    },
+    {
+      path: '*',
+      hidden: true,
+      redirect: { path: '/404' }
     }
-    // {
-    //   path: '*',
-    //   hidden: true,
-    //   redirect: { path: '/404' }
-    // }
   ]
 })
 
@@ -117,25 +117,31 @@ export default router
 
 router.beforeEach((to, from, next) => {
   let user = store.getters.getUser
-  if (to.path === '/login') {
-    store.dispatch('setUser', {})
-  }
   let toPath = to.path
-  console.log(to)
   if (toPath !== '/login' && (isEmpty(user) || isEmpty(user.userId) || isEmpty(user.userName) || isEmpty(user.userRole))) {
     let code = to.query.code
     if (!isEmpty(code)) {
-      let url = '/user/oauth2Login'
-      API.post(url, { data: code }, response => {
-        store.dispatch("setUser", response.data.data)
-        next()
-      }, err => {
-        console.log(err)
-        next({ path: '/login' })
-      })
+      let url = '/user/oauth2Login?code=' + code
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data
+          if (result.code === 0) {
+            store.dispatch('setUser', result.data)
+            next()
+          } else {
+            next({ path: 'login' })
+          }
+        },
+        () => {
+          next({ path: 'login' })
+        }
+      )
     } else {
-      next({ path: '/login' })
+      next({ path: 'login' })
     }
+    
     // admin
   } else if (user.userRole === 1 && toPath.indexOf('group-manage') > 0) {
     next({ name: 'dashboard', params: { groupId: store.getters.getCurrentGroup.groupId } })

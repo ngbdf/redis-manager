@@ -1,8 +1,8 @@
 package com.newegg.ec.redis.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.config.SystemConfig;
+import com.newegg.ec.redis.controller.oauth.AuthService;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IUserService;
@@ -10,8 +10,6 @@ import com.newegg.ec.redis.util.ImageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +33,9 @@ public class UserController {
     @Autowired
     private SystemConfig systemConfig;
 
+    @Autowired
+    private AuthService authService;
+
     private static final String USER_ID = "userId";
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -52,29 +53,24 @@ public class UserController {
     @ResponseBody
     public Result signOut(HttpServletRequest request) {
         request.getSession().setAttribute("user", null);
+        if (systemConfig.getAuthorizationEnabled()) {
+           authService.signOut();
+        }
         return Result.successResult();
     }
 
-    @RequestMapping(value = "/oauth2Login", method = RequestMethod.POST)
+    @RequestMapping(value = "/oauth2Login", method = RequestMethod.GET)
     @ResponseBody
-    public Result oauth2Login(@RequestBody JSONObject data, HttpServletRequest request) {
-        System.err.println(data.toJSONString() + " data");
-        User user = new User();
-        user.setUserId(1);
-        user.setGroupId(1);
-        user.setUserName("testOAUTH");
-        user.setUserRole(User.UserRole.SUPER_ADMIN);
-        user.setAvatar("/data/avatar/1.jpg");
-        request.getSession().setAttribute("user", user);
-        return Result.successResult(user);
+    public Result oauth2Login(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        return user != null ? Result.successResult(user) : Result.failResult();
     }
 
     @RequestMapping(value = "/getUserFromSession", method = RequestMethod.GET)
     @ResponseBody
     public Result getUserFromSession(HttpSession session) {
         User userLogin = (User) session.getAttribute("user");
-
-        System.err.println(userLogin + " userLogin");
         if (userLogin == null) {
             return Result.failResult();
         }
@@ -170,15 +166,17 @@ public class UserController {
         if (user == null || user.get(USER_ID) == null) {
             return Result.failResult().setMessage("user id is empty");
         }
-        String userId = user.get(USER_ID).toString();
-        if (Strings.isNullOrEmpty(userId)) {
+        String userIdStr = user.get(USER_ID).toString();
+
+        if (Strings.isNullOrEmpty(userIdStr)) {
             return Result.failResult();
         }
+        Integer userId = Integer.parseInt(userIdStr);
         try {
             ImageUtil.saveImage(avatarFile, systemConfig.getAvatarPath(), userId);
             String avatar = AVATAR_PATH + ImageUtil.getImageName(userId);
             User userAvatar = new User();
-            userAvatar.setUserId(Integer.parseInt(userId));
+            userAvatar.setUserId(userId);
             userAvatar.setAvatar(avatar);
             return userService.updateUserAvatar(userAvatar) ? Result.successResult() : Result.failResult();
         } catch (Exception e) {

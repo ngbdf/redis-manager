@@ -44,10 +44,14 @@
               <!-- environment start -->
               <el-form-item label="Environment" prop="installationEnvironment">
                 <el-radio-group v-model="installationParam.installationEnvironment">
-                  <el-radio :label="0">Docker</el-radio>
+                  <el-radio
+                    v-for="environment in installationEnvironmentList"
+                    :key="environment.type"
+                    :label="environment.type"
+                  >{{ environment.name }}</el-radio>
+                  <!-- <el-radio :label="0">Docker</el-radio>
                   <el-radio :label="1">Machine</el-radio>
-                  <!-- <el-radio-button :label="2">Kubernetes</el-radio-button> -->
-                  <el-radio :label="3" v-if="humpbackEnabled">Humpback</el-radio>
+                  <el-radio :label="3" v-if="humpbackEnabled">Humpback</el-radio>-->
                 </el-radio-group>
               </el-form-item>
               <!-- environment end -->
@@ -590,7 +594,7 @@ export default {
     },
     install() {
       this.installationLoading = true;
-      this.step = 0
+      this.step = 0;
       let url = "/installation/installFlow";
       API.post(
         url,
@@ -757,7 +761,7 @@ export default {
           }
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     },
@@ -771,7 +775,7 @@ export default {
           this.websocketURI = "ws://" + serverAddress + "/websocket/install";
         },
         err => {
-          console.log(err);
+          message.error(err);
         }
       );
     }
@@ -779,6 +783,9 @@ export default {
   computed: {
     currentGroup() {
       return store.getters.getCurrentGroup;
+    },
+    installationEnvironmentList() {
+      return store.getters.getInstallationEnvironmentList;
     }
   },
   watch: {
