@@ -54,13 +54,13 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         @Override
         public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
             String requestURI = request.getRequestURI();
-            if (!Objects.equals(requestURI, "/user/oauth2Login")) {
-                return true;
-            }
+
             String code = request.getParameter("code");
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
-
+            if (!Objects.equals(requestURI, "/user/oauth2Login")) {
+                return user != null;
+            }
             user = authService.oauthLogin(code);
             if (user == null) {
                 return false;

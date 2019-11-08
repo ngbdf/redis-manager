@@ -49,9 +49,6 @@
                     :key="environment.type"
                     :label="environment.type"
                   >{{ environment.name }}</el-radio>
-                  <!-- <el-radio :label="0">Docker</el-radio>
-                  <el-radio :label="1">Machine</el-radio>
-                  <el-radio :label="3" v-if="humpbackEnabled">Humpback</el-radio>-->
                 </el-radio-group>
               </el-form-item>
               <!-- environment end -->

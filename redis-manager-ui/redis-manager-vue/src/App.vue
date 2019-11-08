@@ -22,10 +22,7 @@ export default {
         response => {
           let environmentList = response.data.data;
           let installationEnvironmentList = [];
-          environmentList.forEach(env => {
-            let environment = {
-              type: env
-            };
+          environmentList.forEach(environment => {
             let name = "";
             if (environment == 0) {
               name = "Docker";
@@ -34,9 +31,11 @@ export default {
             } else if (environment == 3) {
               name = "Humpback";
             }
-            if (isEmpty(name)) {
-              environment.name = name;
-              installationEnvironmentList.push(environment);
+            if (!isEmpty(name)) {
+              installationEnvironmentList.push({
+                type: environment,
+                name: name
+              });
             }
           });
           store.dispatch(
