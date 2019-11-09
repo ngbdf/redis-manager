@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface IGroupUserDao {
 
-    @Select("SELECT * FROM group_user WHERE user_role = 0")
+    @Select("SELECT distinct group_id, user_id  FROM group_user WHERE user_role = 0")
     List<User> selectAllSuperAdmin();
 
     @Select("SELECT * FROM group_user WHERE grant_group_id = #{grantGroupId} AND user_id = #{userId}")

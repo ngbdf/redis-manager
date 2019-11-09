@@ -3,6 +3,7 @@ const path = require('path')
 const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
+const CompressionPlugin = require('compression-webpack-plugin');
 
 function resolve(dir) {
   return path.join(__dirname, '..', dir)
@@ -20,6 +21,18 @@ const createLintingRule = () => ({
 })
 
 module.exports = {
+  plugins: [
+    new CompressionPlugin({
+      // gzip 压缩
+      asset: '[path].gz[query]',
+      algorithm: 'gzip',
+      test: new RegExp(
+          '\\.(js|css)$' // 压缩 js 与 css
+      ),
+      threshold: 10240,
+      minRatio: 0.8
+    })
+  ],
   context: path.resolve(__dirname, '../'),
   entry: {
     app: './src/main.js'

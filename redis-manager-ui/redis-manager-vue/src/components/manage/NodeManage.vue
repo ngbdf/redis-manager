@@ -4,6 +4,7 @@
       <div class="title-wrapper">
         <span>{{ cluster.clusterName }}</span>
         <i class="el-icon-sunny health" title="Status" v-if="cluster.clusterState == 'HEALTH'"></i>
+        <i class="el-icon-heavy-rain bad" title="Status" v-else></i>
       </div>
 
       <div class="base-info-operation-wrapper">
@@ -20,6 +21,10 @@
           <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Docker</el-tag>
           <el-tag size="mini" v-else-if="cluster.installationEnvironment == 1">Machine</el-tag>
           <el-tag size="mini" v-else-if="cluster.installationEnvironment == 3">Humpback</el-tag>
+        </span>
+        <span class="base-info-item" v-if="cluster.image != null && cluster.image != ''">
+          Image:
+          <el-tag size="mini" >{{ cluster.image }}</el-tag>
         </span>
         <span class="base-info-item">
           Type:
@@ -62,12 +67,16 @@
               >Init Slot</el-link>
             </span>
           </div>
-          <el-link
-            :underline="false"
-            icon="el-icon-plus"
-            type="primary"
-            @click="importNodeVisible = true"
-          >Import Node</el-link>
+          <div style="display: flex;align-items: center;">
+            <el-link
+              :underline="false"
+              icon="el-icon-plus"
+              type="primary"
+              @click="importNodeVisible = true"
+            >Import Node</el-link>
+            <el-divider direction="vertical"></el-divider>
+            <i class="el-icon-refresh-left refresh" @click="refresh()"></i>
+          </div>
         </div>
       </div>
       <div class="table-wrapper">
@@ -80,6 +89,7 @@
           :default-sort="{prop: 'slotRange', order: 'ascending'}"
           :row-class-name="tableRowClassName"
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
+          :default-expand-all="true"
         >
           <!-- @selection-change="handleSelectionChange"
           <el-table-column type="selection" width="55px"></el-table-column>-->
@@ -618,7 +628,7 @@ export default {
                 node.nodeId = node.host + ":" + node.port;
               }
               let flags = node.flags;
-              node.time = formatTime(node.insertTime);
+              node.time = formatTime(node.updateTime);
               if (flags == "master") {
                 children = [];
                 masterRedisNode = node;
@@ -1082,6 +1092,13 @@ export default {
           message.error(err);
         }
       );
+    },
+    refresh() {
+      let clusterId = this.cluster.clusterId;
+      getClusterById(clusterId, cluster => {
+      this.cluster = cluster;
+      this.getAllNodeList(clusterId);
+    });
     }
   },
   computed: {
@@ -1136,8 +1153,8 @@ export default {
   align-items: center;
 }
 
-.health {
-  margin-left: 10px;
+.bad {
+  color: #f4516c;
 }
 
 .base-info-item {
@@ -1173,5 +1190,15 @@ export default {
 
 .bad-status {
   color: #f4516c;
+}
+
+.refresh {
+  font-size: 20px;
+  cursor: pointer;
+  color: #909399;
+}
+
+.refresh:hover {
+  color: #2c3e50;
 }
 </style>

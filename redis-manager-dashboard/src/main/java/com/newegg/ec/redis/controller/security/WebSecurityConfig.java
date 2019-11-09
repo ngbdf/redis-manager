@@ -39,12 +39,12 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
         InterceptorRegistration addInterceptor = registry.addInterceptor(getSecurityInterceptor());
         // 排除配置
-        addInterceptor.excludePathPatterns("/login")
+        /*addInterceptor.excludePathPatterns("/login")
                 .excludePathPatterns("/user/login")
                 .excludePathPatterns("/user/signOut")
                 .excludePathPatterns("/user/getUserFromSession")
                 .excludePathPatterns("/system/getAuthorization")
-                .excludePathPatterns("/system/getInstallationEnvironment");
+                .excludePathPatterns("/system/getInstallationEnvironment");*/
         // 拦截配置
         addInterceptor.addPathPatterns("/**");
     }
@@ -54,14 +54,11 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         @Override
         public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
             String requestURI = request.getRequestURI();
-
-            String code = request.getParameter("code");
-            HttpSession session = request.getSession();
-            User user = (User) session.getAttribute("user");
             if (!Objects.equals(requestURI, "/user/oauth2Login")) {
-                return user != null;
+                return true;
             }
-            user = authService.oauthLogin(code);
+            String code = request.getParameter("code");
+            User user = authService.oauthLogin(code);
             if (user == null) {
                 return false;
             }

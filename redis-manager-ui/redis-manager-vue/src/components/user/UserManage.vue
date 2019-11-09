@@ -19,7 +19,7 @@
             <el-tag size="small" type="info" v-else>Member</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="User Role">
+        <el-table-column label="Avatar">
           <template slot-scope="scope">
             <el-image :src="scope.row.avatar" fit="cover">
               <div slot="error" class="image-slot">{{ scope.row.userName }}</div>
@@ -64,7 +64,7 @@
             <el-tag size="small" type="info" v-else>Member</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="User Role">
+        <el-table-column label="Avatar">
           <template slot-scope="scope">
             <el-image :src="scope.row.avatar" fit="cover">
               <div slot="error" class="image-slot">{{ scope.row.userName }}</div>
@@ -419,7 +419,7 @@ export default {
             },
             err => {
               this.saveUserLoading = false;
-              cmessage.error(err);
+              message.error(err);
             }
           );
         }

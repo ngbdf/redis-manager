@@ -7,6 +7,7 @@
             <span>
               <span class="cluster-name">{{ cluster.clusterName }}</span>
               <i class="el-icon-sunny health" v-if="cluster.clusterState == 'HEALTH'"></i>
+              <i class="el-icon-heavy-rain bad" title="Status" v-else></i>
             </span>
             <div>
               <el-button
@@ -369,23 +370,14 @@ export default {
       selectedInfoItemList: [
         "used_memory",
         "used_memory_rss",
-        "used_memory_overhead",
-        "used_memory_dataset",
         "mem_fragmentation_ratio",
-        "connections_received",
-        "rejected_connections",
         "connected_clients",
-        "blocked_clients",
         "commands_processed",
         "instantaneous_ops_per_sec",
-        "sync_full",
-        "sync_partial_ok",
-        "sync_partial_err",
         "keyspace_hits_ratio",
         "keys",
         "expires",
         "cpu_sys",
-        "cpu_user"
       ],
       nodeInfoParam: {
         nodeList: [],
@@ -581,12 +573,13 @@ export default {
 }
 
 .cluster-name,
-.health {
+.health,
+.bad {
   font-size: 18px;
 }
 
-.health {
-  margin-left: 10px;
+.bad {
+  color: #f4516c;
 }
 
 .base-info-wrapper {

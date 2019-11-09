@@ -141,7 +141,7 @@
         </transition>
       </el-main>
     </el-container>
-    <el-dialog title="Import Cluster" :visible.sync="importVisible" :close-on-click-modal="false">
+    <el-dialog title="Import Cluster" :visible.sync="importVisible" :close-on-click-modal="false" v-if="importVisible">
       <editCluster @closeDialog="closeDialog"></editCluster>
     </el-dialog>
   </el-container>

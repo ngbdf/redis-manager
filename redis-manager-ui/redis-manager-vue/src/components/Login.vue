@@ -32,7 +32,7 @@
             <el-form-item>
               <el-button type="primary" style="width: 100%;" @click="signIn('user')">Sign In</el-button>
             </el-form-item>
-            <el-form-item v-if="authorization.enabled">
+            <el-form-item>
               <el-button type="success" style="width: 100%;">
                 <el-link
                   :href="authorization.server + authorization.siteKey"

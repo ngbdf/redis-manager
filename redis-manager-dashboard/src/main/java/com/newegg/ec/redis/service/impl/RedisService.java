@@ -720,16 +720,15 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
     }
 
     private IDatabaseCommand buildDatabaseCommandClient(Cluster cluster) {
-        String nodes = cluster.getNodes();
         IDatabaseCommand client = null;
         String redisMode = cluster.getRedisMode();
         String redisPassword = cluster.getRedisPassword();
-        RedisURI redisURI = new RedisURI(RedisUtil.nodesToHostAndPortSet(nodes), redisPassword);
+        List<RedisNode> masterNodeList = getRedisMasterNodeList(cluster);
+        RedisNode redisNode = masterNodeList.get(0);
         if (STANDALONE.equalsIgnoreCase(redisMode)) {
+            RedisURI redisURI = new RedisURI(redisNode, redisPassword);
             client = RedisClientFactory.buildRedisClient(redisURI);
         } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
-            List<RedisNode> masterNodeList = getRedisMasterNodeList(cluster);
-            RedisNode redisNode = masterNodeList.get(0);
             client = RedisClientFactory.buildRedisClusterClient(redisNode, redisPassword);
         }
         return client;

@@ -207,6 +207,9 @@ export default {
       });
     },
     removeNode(item) {
+      if (this.cluster.nodeList.length <= 1) {
+        return;
+      }
       var index = this.cluster.nodeList.indexOf(item);
       if (index !== -1) {
         this.cluster.nodeList.splice(index, 1);

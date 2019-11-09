@@ -1,7 +1,7 @@
 <template>
   <div id="user-manage" class="body-wrapper">
     <div class="operation-wrapper">
-      <el-button size="mini" type="success" @click="createGroupVisible = true">Create</el-button>
+      <el-button size="mini" type="success" @click="createGroupVisible = true, group = {}">Create</el-button>
     </div>
     <el-table :data="groupList">
       <el-table-column type="index" width="50"></el-table-column>
@@ -93,7 +93,7 @@ export default {
           let url;
           if (isEmpty(this.group.groupId)) {
             // for grant
-            this.group.groupId = user.groupId;
+            //this.group.groupId = user.groupId;
             url = "/group/addGroup";
           } else {
             url = "/group/updateGroup";

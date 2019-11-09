@@ -95,10 +95,10 @@ public class RedisNodeService implements IRedisNodeService {
                     if (RedisUtil.equals(dbRedisNode, realRedisNode)) {
                         realRedisNode.setContainerId(dbRedisNode.getContainerId());
                         realRedisNode.setContainerName(dbRedisNode.getContainerName());
+                        realRedisNode.setUpdateTime(dbRedisNode.getUpdateTime());
                     }
                 });
             }
-            realRedisNode.setInsertTime(TimeUtil.getCurrentTimestamp());
             redisNodeList.add(realRedisNode);
         });
         Iterator<RedisNode> dbIterator = dbRedisNodeList.iterator();

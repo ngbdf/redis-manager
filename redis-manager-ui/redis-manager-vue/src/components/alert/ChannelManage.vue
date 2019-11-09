@@ -394,7 +394,7 @@ export default {
           return true;
         }
         field.resetField();
-        return false;
+        return true;
       });
     },
     currentGroupId(groupId) {
