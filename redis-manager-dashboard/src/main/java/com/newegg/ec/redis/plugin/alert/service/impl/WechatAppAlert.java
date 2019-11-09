@@ -8,6 +8,7 @@ import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 import com.newegg.ec.redis.plugin.alert.service.IAlertService;
 import com.newegg.ec.redis.util.httpclient.HttpClientUtil;
+import org.apache.http.HttpHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,8 @@ public class WechatAppAlert implements IAlertService {
 
     private static final String NEW_LINE = "\n";
 
+    private HttpHost httpHost = null;
+
     @Override
     public void alert(AlertChannel alertChannel, List<AlertRecord> alertRecordList) {
         Integer channelId = alertChannel.getChannelId();
@@ -62,7 +65,7 @@ public class WechatAppAlert implements IAlertService {
             }
             JSONObject requestBody = buildRequestBody(alertChannel, alertRecordList);
             String url = String.format(URL_TEMPLATE, accessToken);
-            HttpClientUtil.post(url, requestBody);
+            HttpClientUtil.post(url, requestBody, httpHost);
         } catch (Exception e) {
             logger.error("Wechat app notify failed, " + alertChannel, e);
         }
@@ -103,7 +106,7 @@ public class WechatAppAlert implements IAlertService {
         String urlForAccessToken = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + corpId + "&corpsecret=" + secret;
         JSONObject responseObj;
         try {
-            String response = HttpClientUtil.get(urlForAccessToken);
+            String response = HttpClientUtil.get(urlForAccessToken, httpHost);
             responseObj = JSONObject.parseObject(response);
         } catch (Exception e) {
             logger.error("Get access token failed.", e);

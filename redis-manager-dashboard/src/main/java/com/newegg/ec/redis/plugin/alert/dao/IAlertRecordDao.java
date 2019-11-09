@@ -41,7 +41,7 @@ public interface IAlertRecordDao {
             "</script>")
     int deleteAlertRecordByIds(@Param("recordIdList") List<Integer> recordIdList);
 
-    @Delete("DELETE FROM alert_record WHERE update_time &lt; #{oldestTime}")
+    @Delete("DELETE FROM alert_record WHERE update_time <= #{oldestTime}")
     int deleteAlertRecordByTime(Timestamp oldestTime);
 
     @Select("create TABLE IF NOT EXISTS `alert_record` (" +

@@ -2,10 +2,7 @@ package com.newegg.ec.redis.util.httpclient;
 
 
 import com.alibaba.fastjson.JSONObject;
-import org.apache.http.HeaderElement;
-import org.apache.http.HeaderElementIterator;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -47,8 +44,6 @@ public class HttpClientUtil {
 
     private static CloseableHttpClient httpclient;
 
-    private static int TIMEOUT = 1000 * 60 * 5;
-
     static {
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         cm.setDefaultSocketConfig(SocketConfig.custom().setSoKeepAlive(true).setSoTimeout(10 * 60 * 1000).build());
@@ -87,9 +82,12 @@ public class HttpClientUtil {
         idleConnectionMonitorThread.start();
     }
 
-
     public static String post(String url, JSONObject postJson) throws IOException {
-        HttpPost httpPost = postForm(url, postJson);
+        return post(url, postJson, null);
+    }
+
+    public static String post(String url, JSONObject requestBody, HttpHost httpHost) throws IOException {
+        HttpPost httpPost = postForm(url, requestBody, httpHost);
         HttpResponse response;
         String result = null;
         try {
@@ -109,9 +107,9 @@ public class HttpClientUtil {
      * @param data
      * @return
      */
-    private static HttpPost postForm(String url, JSONObject data) {
+    private static HttpPost postForm(String url, JSONObject data, HttpHost httpHost) {
         HttpPost httpPost = new HttpPost(url);
-        httpPost.setConfig(getRequestConfig());
+        httpPost.setConfig(getRequestConfig(httpHost));
         httpPost.setHeader(CONNECTION, KEEP_ALIVE);
         httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
         httpPost.setHeader(ACCEPT, APPLICATION_JSON);
@@ -121,7 +119,11 @@ public class HttpClientUtil {
     }
 
     public static String get(String url) throws IOException {
-        HttpGet httpGet = getForm(url);
+        return get(url, null);
+    }
+
+    public static String get(String url, HttpHost httpHost) throws IOException {
+        HttpGet httpGet = getForm(url, httpHost);
         HttpResponse response;
         try {
             response = httpclient.execute(httpGet);
@@ -136,9 +138,9 @@ public class HttpClientUtil {
      * @param url
      * @return
      */
-    private static HttpGet getForm(String url) {
+    private static HttpGet getForm(String url, HttpHost httpHost) {
         HttpGet httpGet = new HttpGet(url);
-        httpGet.setConfig(getRequestConfig());
+        httpGet.setConfig(getRequestConfig(httpHost));
         httpGet.addHeader(ACCEPT, APPLICATION_JSON);
         httpGet.addHeader(CONNECTION, KEEP_ALIVE);
         httpGet.addHeader(CONTENT_TYPE, APPLICATION_JSON);
@@ -202,10 +204,13 @@ public class HttpClientUtil {
      *
      * @return
      */
-    private static RequestConfig getRequestConfig() {
-
-        return RequestConfig.custom()
-                .setConnectTimeout(TIMEOUT)
+    private static RequestConfig getRequestConfig(HttpHost httpHost) {
+        int TIMEOUT = 1000 * 60 * 5;
+        RequestConfig.Builder custom = RequestConfig.custom();
+        if (httpHost != null) {
+            custom.setProxy(httpHost);
+        }
+        return custom.setConnectTimeout(TIMEOUT)
                 .setSocketTimeout(TIMEOUT)
                 .setConnectionRequestTimeout(TIMEOUT)
                 .build();

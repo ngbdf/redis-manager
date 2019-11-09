@@ -109,7 +109,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     }
 
     /**
-     * 定时获取 node info 进行计算，默认5分钟一次
+     * 定时获取 node info 进行计算
      */
     @Async
     @Scheduled(cron = "0 0/1 * * * ? ")
@@ -127,10 +127,10 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     }
 
     /**
-     * 每周星期天凌晨1点实行一次
+     * 每天凌晨0点实行一次，清理数据
      */
-//    @Async
-//    @Scheduled(cron = "0 0 1 ? * L")
+    @Async
+    @Scheduled(cron = "0 0 0 * * ?")
     @Override
     public void cleanup() {
         try {
@@ -152,8 +152,11 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         @Override
         public void run() {
             try {
-                int groupId = group.getGroupId();
+                Integer groupId = group.getGroupId();
                 // 获取有效的规则
+                if (groupId == 2) {
+                    System.err.println(groupId);
+                }
                 List<AlertRule> validAlertRuleList = getValidAlertRule(groupId);
                 if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
                     return;
@@ -172,14 +175,18 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 }
                 clusterList.forEach(cluster -> {
                     List<Integer> ruleIdList = getRuleIdList(cluster.getRuleIds());
-                    if (ruleIdList == null || ruleIdList.isEmpty()) {
-                        return;
-                    }
                     // 获取集群规则
                     List<AlertRule> alertRuleList = getAlertRuleByIds(validAlertRuleList, ruleIdList);
-                    int clusterId = cluster.getClusterId();
+                    if (alertRuleList.isEmpty()) {
+                        return;
+                    }
+                    // 获取告警通道并发送消息
+                    List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
+                    if (alertChannelIdList.isEmpty()) {
+                        return;
+                    }
                     // 获取 node info 列表
-                    NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, TimeType.MINUTE, null);
+                    NodeInfoParam nodeInfoParam = new NodeInfoParam(cluster.getClusterId(), TimeType.MINUTE, null);
                     List<NodeInfo> lastTimeNodeInfoList = nodeInfoService.getLastTimeNodeInfoList(nodeInfoParam);
                     // 构建告警记录
                     List<AlertRecord> alertRecordList = new ArrayList<>();
@@ -189,11 +196,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                             alertRule.setLastCheckTime(TimeUtil.getCurrentTimestamp());
                         }
                     }));
-                    // 获取告警通道并发送消息
-                    List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
-                    if (alertChannelIdList == null || alertChannelIdList.isEmpty()) {
-                        return;
-                    }
+
                     Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
                     if (!channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
                         distribution(channelMultimap, alertRecordList);
@@ -224,7 +227,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     private List<AlertRule> getAlertRuleByIds(List<AlertRule> validAlertRuleList, List<Integer> ruleIdList) {
         List<AlertRule> alertRuleList = new ArrayList<>();
         validAlertRuleList.forEach(alertRule -> {
-            if (ruleIdList.contains(alertRule.getRuleId())) {
+            if (alertRule.getGlobal() || ruleIdList.contains(alertRule.getRuleId())) {
                 alertRuleList.add(alertRule);
             }
         });
@@ -265,10 +268,10 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
      * @return
      */
     private List<Integer> idsToIntegerList(String ids) {
-        if (Strings.isNullOrEmpty(ids)) {
-            return null;
-        }
         List<Integer> idList = new ArrayList<>();
+        if (Strings.isNullOrEmpty(ids)) {
+            return idList;
+        }
         String[] idArr = SignUtil.splitByCommas(ids);
         for (String id : idArr) {
             idList.add(Integer.parseInt(id));

@@ -88,11 +88,7 @@
         </el-tab-pane>
         <el-tab-pane label="Alert Rule" name="rule">
           <div class="operation-wrapper">
-            <div class="batch-title">Batch Operation</div>
-            <div style="display: flex; justify-content: space-between;">
-              <div>
-                <el-link type="danger" :underline="false" icon="el-icon-delete">Delete</el-link>
-              </div>
+            <div style="display: flex; justify-content: flex-end;">
               <el-link
                 :underline="false"
                 icon="el-icon-plus"
@@ -121,6 +117,7 @@
             </el-table-column>
 
             <el-table-column property="ruleInfo" label="Info"></el-table-column>
+            <el-table-column property="lastCheck" label="Last Check"></el-table-column>
             <el-table-column property="time" label="Time"></el-table-column>
             <el-table-column label="Operation" width="100px;">
               <template slot-scope="scope" v-if="!scope.row.global">
@@ -135,11 +132,7 @@
         </el-tab-pane>
         <el-tab-pane label="Alert Channel" name="channel">
           <div class="operation-wrapper">
-            <div class="batch-title">Batch Operation</div>
-            <div style="display: flex; justify-content: space-between;">
-              <div>
-                <el-link type="danger" :underline="false" icon="el-icon-delete">Delete</el-link>
-              </div>
+            <div style="display: flex; justify-content: flex-end;">
               <el-link
                 :underline="false"
                 icon="el-icon-plus"
@@ -312,7 +305,7 @@
           </template>
         </el-table-column>
         <el-table-column property="channelInfo" label="Info"></el-table-column>
-        <el-table-column property="updateTime" label="Time"></el-table-column>
+        <el-table-column property="time" label="Time"></el-table-column>
       </el-table>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" type="primary" @click="addAlertChannel()">Confirm</el-button>
@@ -352,27 +345,9 @@ export default {
     return {
       cluster: {},
       alertRecordList: [],
-      alertRuleList: [
-        {
-          alertKey: "test",
-          alertValue: "12",
-          compareType: ">",
-          checkCycle: "5",
-          valid: true,
-          global: true,
-          ruleInfo: "test",
-          updateTime: "2019-08-25"
-        }
-      ],
+      alertRuleList: [],
       alertRuleListNotUsed: [],
-      alertChannelList: [
-        {
-          channelName: "bigdata",
-          channelType: "1",
-          channelInfo: "bigdata alert",
-          updateTime: "2019-08-25"
-        }
-      ],
+      alertChannelList: [],
       activeName: "record",
       addAlertRuleVisible: false,
       addAlertChannelVisible: false,
@@ -385,8 +360,7 @@ export default {
     };
   },
   methods: {
-    handleClick(tab, event) {
-    },
+    handleClick(tab, event) {},
     addRuleSelectionChange(val) {
       let newRuleIds = "";
       if (val.length > 0) {
@@ -477,6 +451,7 @@ export default {
       }
       alertRuleList.forEach(alertRule => {
         alertRule.time = formatTime(alertRule.updateTime);
+        alertRule.lastCheck = formatTime(alertRule.lastCheckTime);
         let compareType = alertRule.compareType;
         alertRule.compareSign =
           compareType == 0
@@ -677,6 +652,14 @@ export default {
     // 监听group变化
     currentGroup() {
       return store.getters.getCurrentGroup;
+    }
+  },
+  watch: {
+    currentGroup(group) {
+      this.$router.push({
+        name: "dashboard",
+        params: { groupId: group.groupId }
+      });
     }
   },
   mounted() {

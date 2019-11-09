@@ -87,7 +87,7 @@ public interface INodeInfoDao {
             "</script>")
     int insertNodeInfo(@Param("clusterId") Integer clusterId, @Param("nodeInfoList") List<NodeInfo> nodeInfoList);
 
-    @Delete("DELETE FROM node_info_${clusterId} WHERE update_time &lt; #{oldestTime}")
+    @Delete("DELETE FROM node_info_${clusterId} WHERE update_time <= #{oldestTime}")
     int deleteNodeInfoByTime(@Param("clusterId") Integer clusterId, @Param("oldestTime") Timestamp oldestTime);
 
     @Update("UPDATE node_info_${clusterId} SET last_time = 0 WHERE last_time = 1 AND time_type = #{timeType}")

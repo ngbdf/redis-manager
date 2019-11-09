@@ -308,24 +308,15 @@ export default {
             store.dispatch("setGroupList", groupList);
             let currentGroup = this.currentGroup;
             let user = store.getters.getUser;
-            let isContainCurrentGroup = false;
-            groupList.forEach(group => {
-              if (currentGroup.groupId == group.groupId) {
-                isContainCurrentGroup = true;
-              }
-            });
             if (
               isEmpty(currentGroup) ||
-              isEmpty(currentGroup.groupId) ||
-              user.groupId != currentGroup.groupId ||
-              !isContainCurrentGroup
+              isEmpty(currentGroup.groupId)
             ) {
               groupList.forEach(group => {
                 if (group.groupId == user.groupId) {
                   this.selectGroupId = user.groupId;
                   store.dispatch("setCurrentGroup", group);
                   this.getUserRole(group);
-                  this.toDashboard();
                 }
               });
             }

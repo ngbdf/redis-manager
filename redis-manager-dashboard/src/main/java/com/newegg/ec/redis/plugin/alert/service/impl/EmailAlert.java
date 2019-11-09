@@ -1,9 +1,12 @@
 package com.newegg.ec.redis.plugin.alert.service.impl;
 
+import com.google.common.base.Strings;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 import com.newegg.ec.redis.plugin.alert.service.IAlertService;
 import com.newegg.ec.redis.util.SignUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -24,6 +27,8 @@ import static com.newegg.ec.redis.util.TimeUtil.TIME_FORMATTER;
  */
 @Service("emailAlert")
 public class EmailAlert implements IAlertService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailAlert.class);
 
     @Override
     public void alert(AlertChannel alertChannel, List<AlertRecord> alertRecordList) {
@@ -46,14 +51,12 @@ public class EmailAlert implements IAlertService {
             helper.setText(content, true); //true参数说明该内容格式为HTML
             javaMailSender.send(msg);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            logger.error("Send email failed.", e);
         }
     }
 
     private String buildSubject(AlertRecord alertRecord) {
-        StringBuilder subject = new StringBuilder("(Redis Manager Alert) ");
-        subject.append(alertRecord.getGroupName()).append(SignUtil.MINUS).append(alertRecord.getClusterName());
-        return subject.toString();
+        return "(Redis Manager Alert) " + alertRecord.getGroupName() + SignUtil.MINUS + alertRecord.getClusterName();
     }
 
     private String buildHtmlContent(List<AlertRecord> alertRecordList) {
@@ -68,18 +71,19 @@ public class EmailAlert implements IAlertService {
                     "<li>Rule Info: %s</li>" +
                     "<li>Time: %s</li>" +
                     "</ul>";
+            String ruleInfo = alertRecord.getRuleInfo();
             content.append(String.format(item,
                     alertRecord.getRedisNode(),
                     alertRecord.getAlertRule(),
                     alertRecord.getActualData(),
-                    alertRecord.getRuleInfo(),
+                    Strings.isNullOrEmpty(ruleInfo) ? "" : ruleInfo,
                     ZonedDateTime.now().format(TIME_FORMATTER)));
         });
         content.append("</body>");
         return content.toString();
     }
 
-    public JavaMailSender getJavaMailSender(AlertChannel alertChannel) {
+    private JavaMailSender getJavaMailSender(AlertChannel alertChannel) {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(alertChannel.getSmtpHost());
         mailSender.setUsername(alertChannel.getEmailUserName());
