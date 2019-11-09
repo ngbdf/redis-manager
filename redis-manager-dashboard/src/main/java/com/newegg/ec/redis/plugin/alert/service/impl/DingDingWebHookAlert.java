@@ -5,6 +5,7 @@ import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 import com.newegg.ec.redis.util.httpclient.HttpClientUtil;
 import com.newegg.ec.redis.plugin.alert.service.AbstractAlertAlert;
+import org.apache.http.HttpHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -39,12 +40,14 @@ public class DingDingWebHookAlert extends AbstractAlertAlert {
 
     private static final String IS_AT_ALL = "isAtAll";
 
+    private HttpHost httpHost = null;
+
     @Override
     public void alert(AlertChannel alertChannel, List<AlertRecord> alertRecordList) {
         JSONObject requestBody = buildRequestBody(alertRecordList);
         String webhook = alertChannel.getWebhook();
         try {
-            HttpClientUtil.post(webhook, requestBody);
+            HttpClientUtil.post(webhook, requestBody, httpHost);
         } catch (IOException e) {
             logger.error("DingDing notify failed, " + alertChannel, e);
         }
