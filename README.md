@@ -26,7 +26,7 @@ RedisManager QQ群
 ## Dashboard    
 > 展示当前用户组监控的所有集群  
 
-![](https://user-gold-cdn.xitu.io/2019/11/10/16e532f9cac09036?w=1920&h=975&f=png&s=93486)
+<img src="./documents/images/index.png"/>
 
 ## 集群导入  
 > 导入已存在集群
@@ -34,37 +34,42 @@ RedisManager QQ群
 ## 集群监控  
 > 监控 Memory、Clients 等 Redis 重要指标; 查询 Slow Log  
 
-![](https://user-gold-cdn.xitu.io/2019/11/10/16e534ada3b4946a?w=1920&h=975&f=png&s=78617)
+<img src="./documents/images/monitor.png"/>
 
 ## 集群管理
 > 支持节点Forget、Replicate Of、Failover、Move Slot、Start、Stop、Restart、Delete、修改配置等功能  
 
-![](https://user-gold-cdn.xitu.io/2019/11/10/16e536d1ae64d2b4?w=1920&h=975&f=png&s=85363)
+<img src="./documents/images/manage.png"/>
 
 > 修改配置文件
 
-![](https://user-gold-cdn.xitu.io/2019/11/10/16e536d4ef74a99e?w=1920&h=975&f=png&s=92459)
+<img src="./documents/images/edit-conf.png"/>
 
 ## 集群告警
 > 支持邮件、企业微信APP、企业微信Webhook、钉钉告警  
 
-![](https://user-gold-cdn.xitu.io/2019/11/10/16e53730d0f54474?w=1920&h=975&f=png&s=51123)
+<img src="./documents/images/cluster-rule.png"/>
 
-![](https://user-gold-cdn.xitu.io/2019/11/10/16e537441c8dd9ea?w=1920&h=975&f=png&s=54021)
+<img src="./documents/images/cluster-channel.png"/>
 
 ## 数据操作
 > 支持简单的数据操作
 
-![](https://user-gold-cdn.xitu.io/2019/11/10/16e537e77c6071a8?w=1920&h=975&f=png&s=50307)
+<img src="./documents/images/data-operation.png"/>
 
 ## 创建集群      
-> 目前支持 Redis Cluster、Standalone 模式的创建，包括机器安装、Docker 安装和 Humpback 安装方式。  
+> 目前支持 Redis Cluster、Standalone 模式的创建，包括机器安装、Docker 安装和 Humpback 安装方式  
 
-![](https://user-gold-cdn.xitu.io/2019/11/10/16e5340d813e35c0?w=1920&h=975&f=png&s=64240)
-
-
-
+<img src="./documents/images/installation.png"/>
 	
+## 用户组管理  
+
+<img src="./documents/images/group-manage.png"/>
+
+## 用户管理  
+
+<img src="./documents/images/user-manage.png"/>
+
 ## 用户手册
 > 用户手册主要介绍如何使用 Redis Manager
 
