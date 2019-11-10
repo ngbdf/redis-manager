@@ -50,6 +50,7 @@
               type="primary"
               target="_blank"
               class="doc-link"
+              href="https://github.com/ngbdf/redis-manager/"
               :underline="false"
             >Redis Manager</el-link>
           </span>
