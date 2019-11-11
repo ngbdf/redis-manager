@@ -34,6 +34,7 @@ redis-manager:
   auth:
     user-name: admin
     password: admin
+    # avatar(absolute director)
     avatar-path: /data/avatar/
     authorization:
       enabled: false
@@ -49,11 +50,11 @@ redis-manager:
     slow-log-limit: 100
   # installation configuration
   installation:
-    # config dir
+    # redis.conf(absolute director)
     conf-path: /data/conf/
     # physics machine
     machine:
-      # absolute dir
+      # redis package(absolute director)
       package-path: /data/machine/
     # docker
     docker:

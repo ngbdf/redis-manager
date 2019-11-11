@@ -1,1 +1,1 @@
-create DATABASE `redis_manager` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE DATABASE `redis_manager` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
