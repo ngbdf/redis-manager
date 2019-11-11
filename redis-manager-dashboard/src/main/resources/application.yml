@@ -48,7 +48,7 @@ redis-manager:
     # slow log limit of one node, default: 20
     slow-log-limit: 100
   # installation configuration
-  install:
+  installation:
     # config dir
     conf-path: /data/conf/
     # physics machine
