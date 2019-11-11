@@ -28,7 +28,7 @@ import static com.newegg.ec.redis.util.RedisConfigUtil.REDIS_CONF;
 @Component
 public class DockerClientOperation {
 
-    @Value("${redis-manager.install.docker.docker-host:tcp://%s:2375}")
+    @Value("${redis-manager.installation.docker.docker-host:tcp://%s:2375}")
     private String dockerHost = "tcp://%s:2375/";
 
     private static final String VOLUME = DOCKER_INSTALL_BASE_PATH + "%d:/data";

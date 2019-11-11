@@ -42,10 +42,10 @@ public class HumpbackNodeOperation extends DockerNodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(HumpbackNodeOperation.class);
 
-    @Value("${redis-manager.install.humpback.images}")
+    @Value("${redis-manager.installation.humpback.images}")
     private String images;
 
-    @Value("${redis-manager.install.humpback.humpback-host}")
+    @Value("${redis-manager.installation.humpback.humpback-host}")
     private String humpbackHost;
 
     @Autowired

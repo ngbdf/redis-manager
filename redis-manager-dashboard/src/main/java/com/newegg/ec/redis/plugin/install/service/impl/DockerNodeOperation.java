@@ -34,7 +34,7 @@ public class DockerNodeOperation extends AbstractNodeOperation {
 
     private static final Logger logger = LoggerFactory.getLogger(DockerNodeOperation.class);
 
-    @Value("${redis-manager.install.docker.images}")
+    @Value("${redis-manager.installation.docker.images}")
     private String images;
 
     public static final String DOCKER_INSTALL_BASE_PATH = "/data/redis/docker/";

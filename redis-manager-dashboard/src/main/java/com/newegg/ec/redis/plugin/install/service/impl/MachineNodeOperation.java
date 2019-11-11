@@ -45,7 +45,7 @@ public class MachineNodeOperation extends AbstractNodeOperation {
 
     public static final String MACHINE_INSTALL_BASE_PATH = "/data/redis/machine/";
 
-    @Value("${redis-manager.install.machine.package-path}")
+    @Value("${redis-manager.installation.machine.package-path}")
     private String packagePath;
 
     @Autowired

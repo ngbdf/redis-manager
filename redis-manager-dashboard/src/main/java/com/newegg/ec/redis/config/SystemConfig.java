@@ -40,10 +40,10 @@ public class SystemConfig implements WebMvcConfigurer {
     @Value("${server.port}")
     private int serverPort;
 
-    @Value("${redis-manager.install.conf-path}")
+    @Value("${redis-manager.installation.conf-path}")
     private String configPath;
 
-    @Value("${redis-manager.install.machine.package-path}")
+    @Value("${redis-manager.installation.machine.package-path}")
     private String machinePackagePath;
 
     @Value("${redis-manager.auth.avatar-path}")
@@ -64,7 +64,7 @@ public class SystemConfig implements WebMvcConfigurer {
     @Value("${redis-manager.auth.authorization.site-secret}")
     private String siteSecret;
 
-    @Value("${redis-manager.install.humpback.enabled:false}")
+    @Value("${redis-manager.installation.humpback.enabled:false}")
     private boolean humpbackEnabled;
 
     @Override
