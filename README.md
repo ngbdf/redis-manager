@@ -16,7 +16,13 @@
 # 联系方式
 > 您在使用产品的过程中如果遇到问题或者发现需要改进的地方可以通过以下两种方式直接联系我们或 Pull Request。
  
+RedisManager 微信  
+
+<img src="./documents/contact/wechat.jpg"/>
+
 RedisManager QQ群
+
+<img src="./documents/contact/qq.jpg"/>
 
 知乎专栏  https://zhuanlan.zhihu.com/c_1055846842708930560
 
@@ -39,18 +45,18 @@ RedisManager QQ群
 ## 集群管理
 > 支持节点Forget、Replicate Of、Failover、Move Slot、Start、Stop、Restart、Delete、修改配置等功能  
 
-<img src="./documents/images/manage.png"/>
+<img src="./documents/images/node-manage.png"/>
 
 > 修改配置文件
 
-<img src="./documents/images/edit-conf.png"/>
+<img src="./documents/images/edit-config.png"/>
 
 ## 集群告警
 > 支持邮件、企业微信APP、企业微信Webhook、钉钉告警  
 
-<img src="./documents/images/cluster-rule.png"/>
+<img src="./documents/images/alert-manage/cluster-rule.png"/>
 
-<img src="./documents/images/cluster-channel.png"/>
+<img src="./documents/images/alert-manage/cluster-channel.png"/>
 
 ## 数据操作
 > 支持简单的数据操作
@@ -60,7 +66,7 @@ RedisManager QQ群
 ## 创建集群      
 > 目前支持 Redis Cluster、Standalone 模式的创建，包括机器安装、Docker 安装和 Humpback 安装方式  
 
-<img src="./documents/images/installation.png"/>
+<img src="./documents/images/installation/cluster-docker-auto.png"/>
 	
 ## 用户组管理  
 
@@ -68,26 +74,20 @@ RedisManager QQ群
 
 ## 用户管理  
 
-<img src="./documents/images/user-manage.png"/>
+<img src="./documents/images/user-manage/user-manage.png"/>
 
 ## 用户手册
 > 用户手册主要介绍如何使用 Redis Manager
 
-1. [如何启动项目](https://github.com/ngbdf/redis-manager/wiki/如何启动项目)
-2. [接入已经存在的集群](https://github.com/ngbdf/redis-manager/wiki/接入已经存在的集群)
-3. [如何查看监控](https://github.com/ngbdf/redis-manager/wiki/如何查看监控)
-4. [集群管理与节点管理](https://github.com/ngbdf/redis-manager/wiki/集群管理与节点管理)
-5. [创建集群(Machine安装)](https://github.com/ngbdf/redis-manager/wiki/创建集群(Machine安装))
-6. [创建集群(Docker安装)](https://github.com/ngbdf/redis-manager/wiki/创建集群(Docker安装))
-7. [自定义Redis安装包](https://github.com/ngbdf/redis-manager/wiki/自定义Redis安装包)
-8. [常见问题汇总](https://github.com/ngbdf/redis-manager/wiki/常见问题汇总)
-
-## 产品设计
-> 设计文档主要介绍 redisMangaer 架构设计、框架设计
-
-1. [代码结构介绍](https://github.com/ngbdf/redis-manager/wiki/代码结构介绍) 
-2. [监控数据的采集](https://github.com/ngbdf/redis-manager/wiki/监控数据的采集)
-
+[快速启动](https://github.com/ngbdf/redis-manager/wiki/2.x-%E5%BF%AB%E9%80%9F%E5%90%AF%E5%8A%A8)  
+[导入已存在集群](https://github.com/ngbdf/redis-manager/wiki/2.x-%E5%AF%BC%E5%85%A5%E5%B7%B2%E5%AD%98%E5%9C%A8%E7%9A%84%E9%9B%86%E7%BE%A4)  
+[集群监控](https://github.com/ngbdf/redis-manager/wiki/2.x-%E9%9B%86%E7%BE%A4%E7%9B%91%E6%8E%A7)  
+[节点管理](https://github.com/ngbdf/redis-manager/wiki/2.x-%E8%8A%82%E7%82%B9%E7%AE%A1%E7%90%86)  
+[数据操作](https://github.com/ngbdf/redis-manager/wiki/2.x-%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C)  
+[集群告警](https://github.com/ngbdf/redis-manager/wiki/2.x-%E9%9B%86%E7%BE%A4%E5%91%8A%E8%AD%A6)  
+[机器管理](https://github.com/ngbdf/redis-manager/wiki/2.x-%E6%9C%BA%E5%99%A8%E7%AE%A1%E7%90%86)  
+[集群安装](https://github.com/ngbdf/redis-manager/wiki/2.x-%E9%9B%86%E7%BE%A4%E5%AE%89%E8%A3%85)  
+[组和用户](https://github.com/ngbdf/redis-manager/wiki/2.x-%E7%BB%84%E5%92%8C%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86)
 ## License
 RedisManager is Open Source software released under the  [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
 
