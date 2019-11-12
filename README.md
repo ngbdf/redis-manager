@@ -37,6 +37,8 @@ RedisManager QQ群
 ## 集群导入  
 > 导入已存在集群
 
+<img src="./documents/images/import-cluster.png"/>
+
 ## 集群监控  
 > 监控 Memory、Clients 等 Redis 重要指标; 查询 Slow Log  
 
