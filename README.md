@@ -48,7 +48,7 @@ RedisManager QQ群
 ## 集群告警
 > 支持邮件、企业微信APP、企业微信Webhook、钉钉告警  
 
-<img src="./documents/images/cluster-rule.png"/>
+<img src="./documents/images/alert-manage/cluster-rule.png"/>
 
 <img src="./documents/images/alert-manage/cluster-channel.png"/>
 
