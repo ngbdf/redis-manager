@@ -43,7 +43,7 @@ RedisManager QQ群
 
 > 修改配置文件
 
-<img src="./documents/images/edit-conf.png"/>
+<img src="./documents/images/edit-config.png"/>
 
 ## 集群告警
 > 支持邮件、企业微信APP、企业微信Webhook、钉钉告警  
