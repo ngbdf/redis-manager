@@ -169,6 +169,7 @@
                         <exclude>public/**</exclude>
                         <exclude>templates/**</exclude>
                         <exclude>static/**</exclude>
+                        <exclude>data/**</exclude>
                         <exclude>*.properties</exclude>
                         <exclude>*.yml</exclude>
                         <exclude>*.avro</exclude>

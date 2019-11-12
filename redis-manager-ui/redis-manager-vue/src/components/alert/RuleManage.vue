@@ -49,7 +49,7 @@
 
     <!-- dialog: create rule-->
     <el-dialog
-      title="Create Rule"
+      title="Edit Rule"
       :visible.sync="editVisible"
       width="50%"
       :close-on-click-modal="false"

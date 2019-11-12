@@ -561,7 +561,7 @@ public class InstallationTemplate {
         realTopology.forEach((masterNodeWithInfo, slaveNode) -> {
             boolean replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);
             int waitTimeout = 0;
-            while (waitTimeout < ONE_MINUTE) {
+            while (!replicateResult && waitTimeout < ONE_MINUTE) {
                 waitAfterOperation(TEN_SECONDS);
                 waitTimeout += TEN_SECONDS;
                 replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);

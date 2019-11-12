@@ -103,6 +103,7 @@ public interface IClusterDao {
             "redis_password varchar(50) DEFAULT NULL, " +
             "rule_ids varchar(255) DEFAULT NULL, " +
             "channel_ids varchar(255) DEFAULT NULL, " +
+            "cluster_alert tinyint(1) DEFAULT 1, " +
             "installation_environment integer(2) NOT NULL, " +
             "installation_type tinyint(1) NOT NULL, " +
             "update_time datetime(0) NOT NULL, " +
