@@ -39,7 +39,7 @@ RedisManager QQ群
 ## 集群管理
 > 支持节点Forget、Replicate Of、Failover、Move Slot、Start、Stop、Restart、Delete、修改配置等功能  
 
-<img src="./documents/images/manage.png"/>
+<img src="./documents/images/node-manage.png"/>
 
 > 修改配置文件
 
@@ -50,7 +50,7 @@ RedisManager QQ群
 
 <img src="./documents/images/cluster-rule.png"/>
 
-<img src="./documents/images/cluster-channel.png"/>
+<img src="./documents/images/alert-manage/cluster-channel.png"/>
 
 ## 数据操作
 > 支持简单的数据操作
@@ -60,7 +60,7 @@ RedisManager QQ群
 ## 创建集群      
 > 目前支持 Redis Cluster、Standalone 模式的创建，包括机器安装、Docker 安装和 Humpback 安装方式  
 
-<img src="./documents/images/installation.png"/>
+<img src="./documents/images/installation/cluster-docker-auto.png"/>
 	
 ## 用户组管理  
 
@@ -68,7 +68,7 @@ RedisManager QQ群
 
 ## 用户管理  
 
-<img src="./documents/images/user-manage.png"/>
+<img src="./documents/images/user-manage/user-manage.png"/>
 
 ## 用户手册
 > 用户手册主要介绍如何使用 Redis Manager
@@ -81,12 +81,6 @@ RedisManager QQ群
 6. [创建集群(Docker安装)](https://github.com/ngbdf/redis-manager/wiki/创建集群(Docker安装))
 7. [自定义Redis安装包](https://github.com/ngbdf/redis-manager/wiki/自定义Redis安装包)
 8. [常见问题汇总](https://github.com/ngbdf/redis-manager/wiki/常见问题汇总)
-
-## 产品设计
-> 设计文档主要介绍 redisMangaer 架构设计、框架设计
-
-1. [代码结构介绍](https://github.com/ngbdf/redis-manager/wiki/代码结构介绍) 
-2. [监控数据的采集](https://github.com/ngbdf/redis-manager/wiki/监控数据的采集)
 
 ## License
 RedisManager is Open Source software released under the  [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
