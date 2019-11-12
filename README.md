@@ -12,6 +12,7 @@
 
 [Quick start](https://github.com/ngbdf/redis-manager/wiki/)
 
+# 下载
 [二进制包](https://github.com/ngbdf/redis-manager/releases/download/redismanager-2.0.0-release/redis-manager-2.0.0.tar.gz)
 
 # 联系方式
