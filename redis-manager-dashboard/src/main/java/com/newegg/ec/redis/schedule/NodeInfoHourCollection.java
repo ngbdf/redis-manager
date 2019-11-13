@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +31,7 @@ public class NodeInfoHourCollection extends NodeInfoCollectionAbstract {
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         coreSize = Runtime.getRuntime().availableProcessors();
         threadPool = new ThreadPoolExecutor(coreSize, coreSize * 4, 60L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
+                new LinkedBlockingQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("collect-node-info-pool-thread-%d").build(),
                 new ThreadPoolExecutor.AbortPolicy());
     }

@@ -35,12 +35,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static javax.management.timer.Timer.ONE_MINUTE;
 import static com.newegg.ec.redis.util.SignUtil.EQUAL_SIGN;
+import static javax.management.timer.Timer.ONE_MINUTE;
 
 /**
  * @author Jay.H.Zou
@@ -103,9 +103,8 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         threadPool = new ThreadPoolExecutor(2, 5, 60L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
-                new ThreadFactoryBuilder().setNameFormat("redis-notify-pool-thread-%d").build(),
-                new ThreadPoolExecutor.AbortPolicy());
+                new LinkedBlockingQueue<>(),
+                new ThreadFactoryBuilder().setNameFormat("redis-notify-pool-thread-%d").build());
     }
 
     /**
@@ -122,7 +121,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 });
             }
         } catch (Exception e) {
-            logger.error("Alert scheduled failed.");
+            logger.error("Alert scheduled failed.", e);
         }
     }
 
