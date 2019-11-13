@@ -376,8 +376,7 @@ export default {
         "instantaneous_ops_per_sec",
         "keyspace_hits_ratio",
         "keys",
-        "expires",
-        "cpu_sys",
+        "expires"
       ],
       nodeInfoParam: {
         nodeList: [],
@@ -401,13 +400,11 @@ export default {
       this.queryVisible = true;
     },
     pickerDateTime() {
-      let nodeInfoParam = this.nodeInfoParam;
-      let timeRange = nodeInfoParam.timeRange;
+      let timeRange = this.nodeInfoParam.timeRange;
       let startTime = timeRange[0];
       let endTime = timeRange[1];
-      nodeInfoParam.startTime = startTime;
-      nodeInfoParam.endTime = endTime;
-      this.nodeInfoParam = nodeInfoParam;
+      this.nodeInfoParam.startTime = startTime;
+      this.nodeInfoParam.endTime = endTime;
     },
     getAllNodeList(clusterId) {
       let url = "/node-manage/getAllNodeList/" + clusterId;

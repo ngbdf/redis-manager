@@ -142,11 +142,9 @@ export default {
         }, 0);
       });
     },
-    getNodeInfoDataList(nodeInfoParam) {
+    getNodeInfoDataList(nodeInfoItemParam) {
       this.monitorDataLoading = true;
       let url = "/monitor/getInfoItemMonitorData";
-      let nodeInfoItemParam = nodeInfoParam;
-      nodeInfoItemParam.infoItem = this.infoItem;
       API.post(
         url,
         nodeInfoItemParam,
@@ -236,7 +234,9 @@ export default {
     // 深度监听 nodeInfoParam 变化
     nodeInfoParam: {
       handler: function() {
-        this.getNodeInfoDataList(this.nodeInfoParam);
+        let param = JSON.parse(JSON.stringify(this.nodeInfoParam));
+        param.infoItem = this.infoItem;
+        this.getNodeInfoDataList(param);
       },
       deep: true
     }

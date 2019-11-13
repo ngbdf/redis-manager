@@ -97,7 +97,7 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         }
         NodeInfoParam parameterCorrection = parameterCorrection(nodeInfoParam);
         try {
-            if (Strings.isNullOrEmpty(parameterCorrection.getInfoItem())) {
+            if (!Strings.isNullOrEmpty(parameterCorrection.getInfoItem())) {
                 return nodeInfoDao.selectNodeInfoListWithInfoItem(parameterCorrection);
             }
             return nodeInfoDao.selectNodeInfoList(parameterCorrection);

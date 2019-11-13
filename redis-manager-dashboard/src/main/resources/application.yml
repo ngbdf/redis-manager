@@ -1,4 +1,8 @@
 server:
+  compression:
+    enabled: true
+    mime-types: application/json
+    min-response-size: 1024
   tomcat.uri-encoding: UTF-8
   port: 8182
 
@@ -67,5 +71,3 @@ redis-manager:
       humpback-host: http://%s:8500/dockerapi/v2/
   alert:
     data-keep-days: 15
-  analysis:
-    enabled: false
