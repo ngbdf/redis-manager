@@ -142,26 +142,19 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         RedisURI redisURI = new RedisURI(cluster.getNodes(), cluster.getRedisPassword());
         String redisMode = cluster.getRedisMode();
         List<RedisNode> nodeList = new ArrayList<>();
-        if (STANDALONE.equalsIgnoreCase(redisMode)) {
-            try {
-                RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+        RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+        try {
+            if (STANDALONE.equalsIgnoreCase(redisMode)) {
                 nodeList = redisClient.nodes();
-                redisClient.close();
-            } catch (Exception e) {
-                logger.error("Get redis node list failed, " + cluster, e);
+            } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
+                nodeList = redisClient.clusterNodes();
             }
-        } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
-            try {
-                RedisClusterClient redisClusterClient = RedisClientFactory.buildRedisClusterClient(redisURI);
-                nodeList = redisClusterClient.clusterNodes();
-                redisClusterClient.close();
-            } catch (Exception e) {
-                logger.error("Get redis node list failed, " + cluster, e);
-            }
+        } catch (Exception e) {
+            logger.error("Get redis node list failed, " + cluster, e);
+        } finally {
+            close(redisClient);
         }
-        nodeList.forEach(redisNode -> {
-            redisNode.setClusterId(cluster.getClusterId());
-        });
+        nodeList.forEach(redisNode -> redisNode.setClusterId(cluster.getClusterId()));
         return nodeList;
     }
 
@@ -739,6 +732,4 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
             redisClient.close();
         }
     }
-
-
 }

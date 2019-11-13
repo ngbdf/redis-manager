@@ -89,7 +89,6 @@ public class HumpbackNodeOperation extends DockerNodeOperation {
         }
         IMAGE_OPERATION = humpbackHost + "images";
         CONTAINER_OPERATION = humpbackHost + "containers";
-        System.err.println(CONTAINER_OPERATION);
     }
 
     @Override

@@ -30,7 +30,7 @@ public class NodeInfoHourCollection extends NodeInfoCollectionAbstract {
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         coreSize = Runtime.getRuntime().availableProcessors();
-        threadPool = new ThreadPoolExecutor(coreSize, coreSize * 4, 60L, TimeUnit.SECONDS,
+        threadPool = new ThreadPoolExecutor(coreSize, coreSize, 60L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("collect-node-info-pool-thread-%d").build(),
                 new ThreadPoolExecutor.AbortPolicy());

@@ -30,7 +30,7 @@ public class NodeInfoMinuteCollection extends NodeInfoCollectionAbstract {
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         coreSize = Runtime.getRuntime().availableProcessors();
-        threadPool = new ThreadPoolExecutor(coreSize, coreSize * 8, 60L, TimeUnit.SECONDS,
+        threadPool = new ThreadPoolExecutor(coreSize, coreSize * 4, 60L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("collect-node-info-pool-thread-%d").build(),
                 new ThreadPoolExecutor.AbortPolicy());
@@ -43,12 +43,13 @@ public class NodeInfoMinuteCollection extends NodeInfoCollectionAbstract {
     @Scheduled(cron = "0 0/1 * * * ? ")
     @Override
     public void collect() {
-        logger.info("Start collecting node info (minute)...");
+
         try {
             List<Cluster> allClusterList = clusterService.getAllClusterList();
             if (allClusterList == null || allClusterList.isEmpty()) {
                 return;
             }
+            logger.info("Start collecting node info (minute)... " + "cluster number: " + allClusterList.size());
             for (Cluster cluster : allClusterList) {
                 threadPool.submit(new CollectNodeInfoTask(cluster, TimeType.MINUTE));
             }

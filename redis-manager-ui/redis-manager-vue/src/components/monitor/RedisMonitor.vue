@@ -383,7 +383,7 @@ export default {
         timeType: 0,
         timeRange: [new Date() - 15 * 60 * 1000, new Date()]
       },
-      nodeType: "",
+      nodeType: "ALL_MASTER",
       nodes: [],
       slowLogVisible: false,
       slowLogList: [],
@@ -429,7 +429,6 @@ export default {
                this.slowLogRedisNodeList.push(redisNode);
             });
             this.redisNodeList = redisNodeList;
-            this.nodeType = "ALL_MASTER";
           } else {
             message.error(result.message);
           }

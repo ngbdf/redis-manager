@@ -102,7 +102,8 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        threadPool = new ThreadPoolExecutor(2, 5, 60L, TimeUnit.SECONDS,
+        int coreSize = Runtime.getRuntime().availableProcessors();
+        threadPool = new ThreadPoolExecutor(coreSize, coreSize, 60L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("redis-notify-pool-thread-%d").build());
     }
@@ -153,9 +154,6 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
             try {
                 Integer groupId = group.getGroupId();
                 // 获取有效的规则
-                if (groupId == 2) {
-                    System.err.println(groupId);
-                }
                 List<AlertRule> validAlertRuleList = getValidAlertRule(groupId);
                 if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
                     return;

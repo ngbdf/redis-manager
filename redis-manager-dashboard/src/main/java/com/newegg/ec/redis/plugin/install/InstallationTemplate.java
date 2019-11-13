@@ -478,18 +478,15 @@ public class InstallationTemplate {
         String clusterName = installationParam.getCluster().getClusterName();
         String redisMode = installationParam.getCluster().getRedisMode();
         // 获取集群节点
-        RedisClusterClient redisClusterClient = null;
-        RedisClient redisClient = null;
+        RedisClient redisClient = RedisClientFactory.buildRedisClient(seed);
         List<RedisNode> redisNodeListWithInfo = new ArrayList<>();
         long timeout = 0;
         long start = System.currentTimeMillis();
         while (timeout < ONE_MINUTE) {
             try {
                 if (Objects.equals(redisMode, CLUSTER)) {
-                    redisClusterClient = RedisClientFactory.buildRedisClusterClient(seed);
-                    redisNodeListWithInfo = redisClusterClient.clusterNodes();
+                    redisNodeListWithInfo = redisClient.clusterNodes();
                 } else {
-                    redisClient = RedisClientFactory.buildRedisClient(seed);
                     redisNodeListWithInfo = redisClient.nodes();
                 }
                 int realSize = redisNodeListWithInfo.size();
@@ -507,12 +504,7 @@ public class InstallationTemplate {
                 timeout += TEN_SECONDS;
                 installationParam.setAutoInit(false);
             } finally {
-                if (redisClusterClient != null) {
-                    redisClusterClient.close();
-                }
-                if (redisClient != null) {
-                    redisClient.close();
-                }
+                redisClient.close();
             }
         }
         InstallationWebSocketHandler.appendLog(clusterName, "Wait meet: " + (System.currentTimeMillis() - start));

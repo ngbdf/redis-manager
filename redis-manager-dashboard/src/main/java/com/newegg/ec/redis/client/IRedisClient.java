@@ -70,6 +70,8 @@ public interface IRedisClient extends IDatabaseCommand {
      */
     List<RedisNode> nodes() throws Exception;
 
+    List<RedisNode> clusterNodes() throws Exception;
+
     Long dbSize();
 
     /**

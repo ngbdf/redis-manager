@@ -1,17 +1,12 @@
 package com.newegg.ec.redis.schedule;
 
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.CaseFormat;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
-import com.newegg.ec.redis.service.impl.NodeInfoService;
 import com.newegg.ec.redis.util.RedisNodeInfoUtil;
-import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +14,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import redis.clients.jedis.HostAndPort;
 
-import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
 
 /**
  * @author Jay.H.Zou
@@ -62,6 +50,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         public void run() {
             try {
                 int clusterId = cluster.getClusterId();
+                logger.debug("Start collecting cluster: " + cluster.getClusterName());
                 RedisClientFactory.buildRedisClient(new RedisURI(cluster.getNodes(), cluster.getRedisPassword()));
                 List<NodeInfo> nodeInfoList = getNodeInfoList(cluster, timeType);
                 // clean last time data and save new data to db

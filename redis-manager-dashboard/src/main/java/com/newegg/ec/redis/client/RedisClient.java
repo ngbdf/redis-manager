@@ -9,6 +9,10 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.MigrateParams;
 import redis.clients.jedis.util.Slowlog;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.newegg.ec.redis.client.RedisURI.TIMEOUT;
@@ -186,6 +190,66 @@ public class RedisClient implements IRedisClient {
             nodeList.add(masterNode);
         }
         return nodeList;
+    }
+
+    /**
+     * <id> <ip:port> <flags> <master> <ping-sent> <pong-recv> <config-epoch> <link-state> <slot> ... <slot>
+     *
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<RedisNode> clusterNodes() throws Exception {
+        String nodes = jedis.clusterNodes();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(nodes.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+        String line;
+        List<RedisNode> redisNodeList = new ArrayList<>();
+        while ((line = bufferedReader.readLine()) != null) {
+            String[] item = SignUtil.splitBySpace(line);
+            String nodeId = item[0].trim();
+            String ipPort = item[1];
+            Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(SignUtil.splitByAite(ipPort)[0]);
+            HostAndPort hostAndPort = hostAndPortSet.iterator().next();
+            String flags = item[2];
+            String masterId = item[3];
+            String linkState = item[7];
+            RedisNode redisNode = new RedisNode(nodeId, hostAndPort.getHost(), hostAndPort.getPort(), null);
+            if (flags.contains("myself")) {
+                flags = flags.substring(7);
+            }
+            redisNode.setFlags(flags);
+            redisNode.setMasterId(masterId);
+            redisNode.setLinkState(linkState);
+            int length = item.length;
+            if (length > 8) {
+                int slotNumber = 0;
+                StringBuilder slotRang = new StringBuilder();
+                for (int i = 8; i < length; i++) {
+                    String slotRangeItem = item[i];
+                    String[] startAndEnd = SignUtil.splitByMinus(slotRangeItem);
+                    if (startAndEnd.length == 1) {
+                        slotNumber += 1;
+                    } else {
+                        slotNumber += Integer.parseInt(startAndEnd[1]) - Integer.parseInt(startAndEnd[0]) + 1;
+                    }
+                    slotRang.append(slotRangeItem);
+                    if (i < length - 1) {
+                        slotRang.append(SignUtil.COMMAS);
+                    }
+                }
+                redisNode.setSlotRange(slotRang.toString());
+                redisNode.setSlotNumber(slotNumber);
+            }
+            if (flags.contains(NodeRole.MASTER.getValue())) {
+                redisNode.setNodeRole(NodeRole.MASTER);
+            } else if (flags.contains(NodeRole.SLAVE.getValue())) {
+                redisNode.setNodeRole(NodeRole.SLAVE);
+            } else {
+                redisNode.setNodeRole(NodeRole.UNKNOWN);
+            }
+            redisNodeList.add(redisNode);
+        }
+        return redisNodeList;
     }
 
     @Override
@@ -563,8 +627,12 @@ public class RedisClient implements IRedisClient {
 
     @Override
     public void close() {
-        if (jedis != null) {
-            jedis.close();
+        try {
+            if (jedis != null) {
+                jedis.close();
+            }
+        } catch (Exception ignored) {
+
         }
     }
 }
