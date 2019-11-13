@@ -12,6 +12,8 @@
 
 [Quick start](https://github.com/ngbdf/redis-manager/wiki/)
 
+# 下载
+[二进制包](https://github.com/ngbdf/redis-manager/releases/download/redismanager-2.0.0-release/redis-manager-2.0.0.tar.gz)
 
 # 联系方式
 > 您在使用产品的过程中如果遇到问题或者发现需要改进的地方可以通过以下两种方式直接联系我们或 Pull Request。
@@ -36,6 +38,8 @@ RedisManager QQ群
 
 ## 集群导入  
 > 导入已存在集群
+
+<img src="./documents/images/import-cluster.png"/>
 
 ## 集群监控  
 > 监控 Memory、Clients 等 Redis 重要指标; 查询 Slow Log  
