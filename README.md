@@ -13,7 +13,7 @@
 [Quick start](https://github.com/ngbdf/redis-manager/wiki/)
 
 # 下载
-[redis-manager-2.0.0.tar.gz](https://github.com/ngbdf/redis-manager/releases/download/redismanager-2.0.0-release/redis-manager-2.0.0.tar.gz)
+[redis-manager-2.0.0.tar.gz](https://github.com/ngbdf/redis-manager/releases/download/redis-manager-2.0.0-release/redis-manager-2.0.0.tar.gz)
 
 # 联系方式
 > 您在使用产品的过程中如果遇到问题或者发现需要改进的地方可以通过以下两种方式直接联系我们或 Pull Request。
