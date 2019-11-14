@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.entity;
 
+import java.sql.Timestamp;
+
 /**
  * 描述集群基本情况
  * cluster info:
@@ -114,6 +116,8 @@ public class Cluster {
     private String ruleIds;
 
     private String channelIds;
+
+    private Timestamp updateTime;
 
     public enum ClusterState {
         UNKNOWN,
@@ -331,5 +335,13 @@ public class Cluster {
 
     public void setChannelIds(String channelIds) {
         this.channelIds = channelIds;
+    }
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 }

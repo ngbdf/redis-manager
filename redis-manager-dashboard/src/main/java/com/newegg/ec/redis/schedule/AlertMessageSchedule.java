@@ -169,6 +169,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 if (clusterList == null || clusterList.isEmpty()) {
                     return;
                 }
+                logger.info("Start to send alert message...");
                 // 更新规则
                 updateRuleLastCheckTime(validAlertRuleList);
                 clusterList.forEach(cluster -> {
@@ -213,7 +214,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
      * @param groupId
      * @return
      */
-    private List<AlertRule> getValidAlertRule(int groupId) {
+    private List<AlertRule> getValidAlertRule(Integer groupId) {
         List<AlertRule> validAlertRuleList = alertRuleService.getAlertRuleByGroupId(groupId);
         if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
             return null;
@@ -309,8 +310,10 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
             return false;
         }
         // 检测时间
-        long duration = System.currentTimeMillis() - alertRule.getLastCheckTime().getTime();
-        return duration >= alertRule.getCheckCycle() * ONE_MINUTE;
+        long lastCheckTime = alertRule.getLastCheckTime().getTime();
+        long checkCycle = alertRule.getCheckCycle() * ONE_MINUTE;
+        long duration = System.currentTimeMillis() - lastCheckTime;
+        return duration >= checkCycle;
     }
 
     /**
