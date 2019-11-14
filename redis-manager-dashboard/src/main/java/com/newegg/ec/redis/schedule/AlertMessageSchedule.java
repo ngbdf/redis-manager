@@ -38,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.newegg.ec.redis.util.SignUtil.EQUAL_SIGN;
 import static javax.management.timer.Timer.ONE_MINUTE;
@@ -98,7 +99,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     @Value("${redis-manager.alert.data-keep-days:15}")
     private int dataKeepDays;
 
-    private static ExecutorService threadPool;
+    private ExecutorService threadPool;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
@@ -161,9 +162,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 }
                 // 获取 AlertChannel
                 List<AlertChannel> validAlertChannel = alertChannelService.getAlertChannelByGroupId(groupId);
-                if (validAlertChannel == null || validAlertChannel.isEmpty()) {
-                    return;
-                }
+
                 // 获取 cluster
                 List<Cluster> clusterList = clusterService.getClusterListByGroupId(groupId);
                 if (clusterList == null || clusterList.isEmpty()) {
@@ -175,15 +174,13 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 clusterList.forEach(cluster -> {
                     List<Integer> ruleIdList = getRuleIdList(cluster.getRuleIds());
                     // 获取集群规则
-                    List<AlertRule> alertRuleList = getAlertRuleByIds(validAlertRuleList, ruleIdList);
+                    List<AlertRule> alertRuleList =validAlertRuleList.stream().filter(alertRule -> alertRule.getGlobal()|| ruleIdList.contains(alertRule.getRuleId())).collect(Collectors.toList());
                     if (alertRuleList.isEmpty()) {
                         return;
                     }
                     // 获取告警通道并发送消息
                     List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
-                    if (alertChannelIdList.isEmpty()) {
-                        return;
-                    }
+
                     // 获取 node info 列表
                     NodeInfoParam nodeInfoParam = new NodeInfoParam(cluster.getClusterId(), TimeType.MINUTE, null);
                     List<NodeInfo> lastTimeNodeInfoList = nodeInfoService.getLastTimeNodeInfoList(nodeInfoParam);
@@ -192,15 +189,19 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     alertRuleList.forEach(alertRule -> lastTimeNodeInfoList.forEach(nodeInfo -> {
                         if (isNotify(nodeInfo, alertRule)) {
                             alertRecordList.add(buildAlertRecord(group, cluster, nodeInfo, alertRule));
-                            alertRule.setLastCheckTime(TimeUtil.getCurrentTimestamp());
+                            //alertRule.setLastCheckTime(TimeUtil.getCurrentTimestamp());
                         }
                     }));
 
-                    Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
-                    if (!channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
-                        distribution(channelMultimap, alertRecordList);
-                    }
                     saveRecordToDB(cluster.getClusterName(), alertRecordList);
+
+                    if (validAlertChannel != null && !validAlertChannel.isEmpty() && alertChannelIdList.isEmpty()) {
+                        Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
+                        if (!channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
+                            distribution(channelMultimap, alertRecordList);
+                        }
+                    }
+
                 });
             } catch (Exception e) {
                 logger.error("Alert task failed, " + group, e);
@@ -223,6 +224,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         return validAlertRuleList;
     }
 
+    @Deprecated
     private List<AlertRule> getAlertRuleByIds(List<AlertRule> validAlertRuleList, List<Integer> ruleIdList) {
         List<AlertRule> alertRuleList = new ArrayList<>();
         validAlertRuleList.forEach(alertRule -> {
@@ -410,8 +412,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
 
     private void updateRuleLastCheckTime(List<AlertRule> validAlertRuleList) {
         try {
-            List<Integer> ruleIdList = new ArrayList<>();
-            validAlertRuleList.forEach(alertRule -> ruleIdList.add(alertRule.getRuleId()));
+            List<Integer> ruleIdList = validAlertRuleList.stream().map(AlertRule::getRuleId).collect(Collectors.toList());
             alertRuleService.updateAlertRuleLastCheckTime(ruleIdList);
         } catch (Exception e) {
             logger.error("Update alert rule last check time, " + validAlertRuleList, e);
