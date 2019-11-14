@@ -84,7 +84,10 @@ public class ClusterController {
         }
         try {
             cluster.setInstallationType(1);
-            clusterService.addCluster(cluster);
+            boolean addClusterResult = clusterService.addCluster(cluster);
+            if (!addClusterResult) {
+                return Result.failResult();
+            }
             List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
             realRedisNodeList.forEach(redisNode -> {
                 redisNode.setGroupId(cluster.getGroupId());

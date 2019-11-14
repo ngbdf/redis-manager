@@ -117,6 +117,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         try {
             List<Group> allGroup = groupService.getAllGroup();
             if (allGroup != null && !allGroup.isEmpty()) {
+                logger.info("Start to check alert rules...");
                 allGroup.forEach(group -> {
                     threadPool.submit(new AlertTask(group));
                 });
@@ -158,8 +159,6 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
                     return;
                 }
-                // 更新规则
-                updateRuleLastCheckTime(validAlertRuleList);
                 // 获取 AlertChannel
                 List<AlertChannel> validAlertChannel = alertChannelService.getAlertChannelByGroupId(groupId);
                 if (validAlertChannel == null || validAlertChannel.isEmpty()) {
@@ -170,6 +169,8 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 if (clusterList == null || clusterList.isEmpty()) {
                     return;
                 }
+                // 更新规则
+                updateRuleLastCheckTime(validAlertRuleList);
                 clusterList.forEach(cluster -> {
                     List<Integer> ruleIdList = getRuleIdList(cluster.getRuleIds());
                     // 获取集群规则
