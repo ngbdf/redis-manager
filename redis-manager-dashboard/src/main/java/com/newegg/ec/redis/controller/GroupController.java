@@ -63,11 +63,8 @@ public class GroupController {
     @RequestMapping(value = "/getGroupList", method = RequestMethod.POST)
     @ResponseBody
     public Result getGroupList(@RequestBody User user) {
-        /*Integer userId = user.getUserId();
-        if (user.getUserRole() == 0) {
-            userId = null;
-        }*/
         List<Group> groupList = groupService.getGroupByUserId(user.getUserId());
+
         if (groupList == null || groupList.isEmpty()) {
             return Result.failResult();
         }

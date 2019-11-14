@@ -34,7 +34,11 @@ public class WechatWebHookAlert extends AbstractAlertAlert {
         JSONObject requestBody = buildRequestBody(alertRecordList);
         String webhook = alertChannel.getWebhook();
         try {
-            HttpClientUtil.post(webhook, requestBody, httpHost);
+            String post = HttpClientUtil.post(webhook, requestBody, httpHost);
+            JSONObject response = JSONObject.parseObject(post);
+            if (0 != response.getInteger("errcode")) {
+                logger.error("Wechat webhook notify failed, response: " + post + " , request body: " + requestBody.toJSONString());
+            }
         } catch (IOException e) {
             logger.error("Wechat webhook notify failed, " + alertChannel, e);
         }

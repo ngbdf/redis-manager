@@ -89,7 +89,6 @@ export default {
           this.saveGroupLoading = true;
           let user = store.getters.getUser;
           this.group.userId = user.userId;
-          this.group.updateTime = new Date(this.group.updateTime);
           let url;
           if (isEmpty(this.group.groupId)) {
             // for grant

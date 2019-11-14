@@ -302,7 +302,7 @@ export default {
           if (response.data.code == 0) {
             let groupList = response.data.data;
             groupList.forEach(group => {
-              group.updateTime = formatTime(group.updateTime);
+              group.time = formatTime(group.updateTime);
             });
             // TODO: 简化逻辑
             store.dispatch("setGroupList", groupList);

@@ -34,6 +34,8 @@ public class DingDingWebHookAlert extends AbstractAlertAlert {
 
     private static final Logger logger = LoggerFactory.getLogger(DingDingWebHookAlert.class);
 
+    private static final String TITLE = "title";
+
     private static final String TEXT = "text";
 
     private static final String AT = "at";
@@ -47,7 +49,11 @@ public class DingDingWebHookAlert extends AbstractAlertAlert {
         JSONObject requestBody = buildRequestBody(alertRecordList);
         String webhook = alertChannel.getWebhook();
         try {
-            HttpClientUtil.post(webhook, requestBody, httpHost);
+            String post = HttpClientUtil.post(webhook, requestBody, httpHost);
+            JSONObject response = JSONObject.parseObject(post);
+            if (0 != response.getInteger("errcode")) {
+                logger.error("DingDing notify failed, response: " + post + " , request body: " + requestBody.toJSONString());
+            }
         } catch (IOException e) {
             logger.error("DingDing notify failed, " + alertChannel, e);
         }
@@ -58,6 +64,8 @@ public class DingDingWebHookAlert extends AbstractAlertAlert {
         JSONObject requestBody = new JSONObject();
         requestBody.put(MSG_TYPE, MARKDOWN);
         JSONObject markdown = new JSONObject();
+        AlertRecord firstRecord = alertRecordList.get(0);
+        markdown.put(TITLE, firstRecord.getClusterName());
         String text = buildMessage(alertRecordList);
         markdown.put(TEXT, text);
         JSONObject at = new JSONObject();

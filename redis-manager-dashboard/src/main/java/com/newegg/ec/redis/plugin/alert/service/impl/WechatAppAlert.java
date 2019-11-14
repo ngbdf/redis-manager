@@ -65,7 +65,11 @@ public class WechatAppAlert implements IAlertService {
             }
             JSONObject requestBody = buildRequestBody(alertChannel, alertRecordList);
             String url = String.format(URL_TEMPLATE, accessToken);
-            HttpClientUtil.post(url, requestBody, httpHost);
+            String post = HttpClientUtil.post(url, requestBody, httpHost);
+            JSONObject response = JSONObject.parseObject(post);
+            if (0 != response.getInteger("errcode")) {
+                logger.error("Wechat app notify failed, response: " + post + " , request body: " + requestBody.toJSONString());
+            }
         } catch (Exception e) {
             logger.error("Wechat app notify failed, " + alertChannel, e);
         }
