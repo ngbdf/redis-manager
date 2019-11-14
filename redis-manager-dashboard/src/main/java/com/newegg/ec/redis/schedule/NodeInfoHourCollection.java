@@ -43,12 +43,12 @@ public class NodeInfoHourCollection extends NodeInfoCollectionAbstract {
     @Scheduled(cron = "0 0 0/1 * * ? ")
     @Override
     public void collect() {
-        logger.info("Start collecting node info (hour)...");
         try {
             List<Cluster> allClusterList = clusterService.getAllClusterList();
             if (allClusterList == null || allClusterList.isEmpty()) {
                 return;
             }
+            logger.info("Start collecting node info (hour)... " + "cluster number: " + allClusterList.size());
             for (Cluster cluster : allClusterList) {
                 threadPool.submit(new CollectNodeInfoTask(cluster, TimeType.HOUR));
             }
