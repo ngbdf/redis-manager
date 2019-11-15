@@ -1,0 +1,73 @@
+server:
+  compression:
+    enabled: true
+    mime-types: application/json
+    min-response-size: 1024
+  tomcat.uri-encoding: UTF-8
+  port: 8182
+
+spring:
+  application:
+    name: redis-manager
+  resources:
+    static-locations: classpath:/
+  http:
+    encoding:
+      enabled: true
+      charset: UTF-8
+  datasource:
+    # 必填，与数据库同名
+    database: redis_manager
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8
+    username: root
+    password: xxx
+    druid:
+      initial-size: 0
+      max-active: 10
+      min-idle: 0
+      max-wait: 10000
+
+mybatis:
+  configuration:
+    mapUnderscoreToCamelCase: true
+
+# http://download.redis.io/releases/
+# redis manager configuration
+redis-manager:
+  auth:
+    user-name: admin
+    password: admin
+    # avatar(absolute director)
+    avatar-path: /data/avatar/
+    authorization:
+      enabled: false
+      company-name: xxx
+      server: xxx
+      site-key: xxx
+      site-secret: xxx
+  # monitor configuration
+  monitor:
+    # 数据保存天数，1-30天, default: 15
+    data-keep-days: 15
+    # slow log limit of one node, default: 20
+    slow-log-limit: 100
+  # installation configuration
+  installation:
+    # redis.conf(absolute director)
+    conf-path: /data/conf/
+    # physics machine
+    machine:
+      # redis package(absolute director)
+      package-path: /data/machine/
+    # docker
+    docker:
+      # 默认从官方镜像库拉取
+      images: redis:4.0.10,redis:4.0.14,redis:5.0.5
+      docker-host: tcp://%s:2375
+    humpback:
+      enabled: false
+      images: redis:4.0.10,redis:4.0.14,redis:5.0.5
+      humpback-host: http://%s:8500/dockerapi/v2/
+  alert:
+    data-keep-days: 15
