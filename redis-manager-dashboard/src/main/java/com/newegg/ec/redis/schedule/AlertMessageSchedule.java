@@ -156,21 +156,21 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         public void run() {
             try {
                 Integer groupId = group.getGroupId();
-                // 获取有效的规则
-                List<AlertRule> validAlertRuleList = getValidAlertRule(groupId);
-                if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
-                    return;
-                }
-                // 获取 AlertChannel
-                List<AlertChannel> validAlertChannel = alertChannelService.getAlertChannelByGroupId(groupId);
                 // 获取 cluster
                 List<Cluster> clusterList = clusterService.getClusterListByGroupId(groupId);
                 if (clusterList == null || clusterList.isEmpty()) {
                     return;
                 }
-                logger.info("Start to send alert message...");
+
+                // 获取有效的规则
+                List<AlertRule> validAlertRuleList = getValidAlertRule(groupId);
+                if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
+                    return;
+                }
                 // 更新规则
                 updateRuleLastCheckTime(validAlertRuleList);
+                // 获取 AlertChannel
+                List<AlertChannel> validAlertChannel = alertChannelService.getAlertChannelByGroupId(groupId);
                 clusterList.forEach(cluster -> {
                     List<Integer> ruleIdList = getRuleIdList(cluster.getRuleIds());
                     // 获取集群规则
@@ -182,9 +182,6 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     }
                     // 获取告警通道并发送消息
                     List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
-                    if (alertChannelIdList.isEmpty()) {
-                        return;
-                    }
                     // 获取 node info 列表
                     NodeInfoParam nodeInfoParam = new NodeInfoParam(cluster.getClusterId(), TimeType.MINUTE, null);
                     List<NodeInfo> lastTimeNodeInfoList = nodeInfoService.getLastTimeNodeInfoList(nodeInfoParam);
@@ -195,12 +192,11 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                             alertRecordList.add(buildAlertRecord(group, cluster, nodeInfo, alertRule));
                         }
                     }));
+                    logger.info("Start to send alert message...");
                     // save to database
-                    if (!alertChannelIdList.isEmpty()) {
-                        saveRecordToDB(cluster.getClusterName(), alertRecordList);
-                    }
+                    saveRecordToDB(cluster.getClusterName(), alertRecordList);
                     Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
-                    if (!channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
+                    if (channelMultimap != null && !channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
                         distribution(channelMultimap, alertRecordList);
                     }
                 });
@@ -246,7 +242,9 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
 
     private Multimap<Integer, AlertChannel> getAlertChannelByIds(List<AlertChannel> validAlertChannelList, List<Integer> channelIdList) {
         List<AlertChannel> alertChannelList = new ArrayList<>();
-
+        if (validAlertChannelList != null && !validAlertChannelList.isEmpty()) {
+            return null;
+        }
         validAlertChannelList.forEach(alertChannel -> {
             if (channelIdList.contains(alertChannel.getChannelId())) {
                 alertChannelList.add(alertChannel);

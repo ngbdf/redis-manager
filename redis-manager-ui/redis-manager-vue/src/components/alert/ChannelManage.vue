@@ -223,8 +223,7 @@ export default {
             required: true,
             message: "SMTP host can't be empty",
             trigger: "blur"
-          },
-          { required: true, validator: validateSMTPHost, trigger: "blur" }
+          }
         ],
         emailFrom: [
           {
