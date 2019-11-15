@@ -32,16 +32,16 @@ public class EmailAlert implements IAlertService {
 
     @Override
     public void alert(AlertChannel alertChannel, List<AlertRecord> alertRecordList) {
-        AlertRecord alertRecord = alertRecordList.get(0);
-        String subject = buildSubject(alertRecord);
-        String content = buildHtmlContent(alertRecordList);
-        JavaMailSender javaMailSender = getJavaMailSender(alertChannel);
-        //使用JavaMail的MimeMessage，支持更加复杂的邮件格式和内容  
-        MimeMessage msg = javaMailSender.createMimeMessage();
-        //创建MimeMessageHelper对象，处理MimeMessage的辅助类  
-        // msg:发送的邮件信息，true:是否为HTML格式的文件，utf-8:设置编码格式(因为发送html格式时、内容可能出现乱码)
-        MimeMessageHelper helper;
         try {
+            AlertRecord alertRecord = alertRecordList.get(0);
+            String subject = buildSubject(alertRecord);
+            String content = buildHtmlContent(alertRecordList);
+            JavaMailSender javaMailSender = getJavaMailSender(alertChannel);
+            //使用JavaMail的MimeMessage，支持更加复杂的邮件格式和内容  
+            MimeMessage msg = javaMailSender.createMimeMessage();
+            //创建MimeMessageHelper对象，处理MimeMessage的辅助类  
+            // msg:发送的邮件信息，true:是否为HTML格式的文件，utf-8:设置编码格式(因为发送html格式时、内容可能出现乱码)
+            MimeMessageHelper helper;
             helper = new MimeMessageHelper(msg, true, "utf-8");
             //使用辅助类MimeMessage设定参数  
             helper.setFrom(alertChannel.getEmailFrom());
