@@ -140,4 +140,21 @@ public class AlertRule {
     public void setLastCheckTime(Timestamp lastCheckTime) {
         this.lastCheckTime = lastCheckTime;
     }
+
+    @Override
+    public String toString() {
+        return "AlertRule{" +
+                "ruleId=" + ruleId +
+                ", groupId=" + groupId +
+                ", ruleKey='" + ruleKey + '\'' +
+                ", ruleValue=" + ruleValue +
+                ", compareType=" + compareType +
+                ", checkCycle=" + checkCycle +
+                ", valid=" + valid +
+                ", global=" + global +
+                ", ruleInfo='" + ruleInfo + '\'' +
+                ", updateTime=" + updateTime +
+                ", lastCheckTime=" + lastCheckTime +
+                '}';
+    }
 }

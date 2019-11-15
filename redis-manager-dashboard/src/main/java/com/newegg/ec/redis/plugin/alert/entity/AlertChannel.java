@@ -189,4 +189,26 @@ public class AlertChannel {
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
     }
+
+    @Override
+    public String toString() {
+        return "AlertChannel{" +
+                "channelId=" + channelId +
+                ", groupId=" + groupId +
+                ", channelName='" + channelName + '\'' +
+                ", smtpHost='" + smtpHost + '\'' +
+                ", emailUserName='" + emailUserName + '\'' +
+                ", emailPassword='" + emailPassword + '\'' +
+                ", emailFrom='" + emailFrom + '\'' +
+                ", emailTo='" + emailTo + '\'' +
+                ", webhook='" + webhook + '\'' +
+                ", corpId='" + corpId + '\'' +
+                ", agentId='" + agentId + '\'' +
+                ", corpSecret='" + corpSecret + '\'' +
+                ", token='" + token + '\'' +
+                ", channelType=" + channelType +
+                ", channelInfo='" + channelInfo + '\'' +
+                ", updateTime=" + updateTime +
+                '}';
+    }
 }

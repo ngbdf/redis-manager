@@ -127,4 +127,22 @@ public class AlertRecord {
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
     }
+
+    @Override
+    public String toString() {
+        return "AlertRecord{" +
+                "recordId=" + recordId +
+                ", groupId=" + groupId +
+                ", groupName='" + groupName + '\'' +
+                ", clusterId=" + clusterId +
+                ", clusterName='" + clusterName + '\'' +
+                ", ruleId=" + ruleId +
+                ", redisNode='" + redisNode + '\'' +
+                ", alertRule='" + alertRule + '\'' +
+                ", actualData='" + actualData + '\'' +
+                ", checkCycle=" + checkCycle +
+                ", ruleInfo='" + ruleInfo + '\'' +
+                ", updateTime=" + updateTime +
+                '}';
+    }
 }

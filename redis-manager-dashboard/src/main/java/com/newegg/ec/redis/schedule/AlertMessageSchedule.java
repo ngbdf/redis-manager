@@ -163,9 +163,6 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 }
                 // 获取 AlertChannel
                 List<AlertChannel> validAlertChannel = alertChannelService.getAlertChannelByGroupId(groupId);
-                if (validAlertChannel == null || validAlertChannel.isEmpty()) {
-                    return;
-                }
                 // 获取 cluster
                 List<Cluster> clusterList = clusterService.getClusterListByGroupId(groupId);
                 if (clusterList == null || clusterList.isEmpty()) {
@@ -196,14 +193,14 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     alertRuleList.forEach(alertRule -> lastTimeNodeInfoList.forEach(nodeInfo -> {
                         if (isNotify(nodeInfo, alertRule)) {
                             alertRecordList.add(buildAlertRecord(group, cluster, nodeInfo, alertRule));
-                            //alertRule.setLastCheckTime(TimeUtil.getCurrentTimestamp());
                         }
                     }));
-
+                    // save to database
+                    if (!alertChannelIdList.isEmpty()) {
+                        saveRecordToDB(cluster.getClusterName(), alertRecordList);
+                    }
                     Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
                     if (!channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
-                        // save to database
-                        saveRecordToDB(cluster.getClusterName(), alertRecordList);
                         distribution(channelMultimap, alertRecordList);
                     }
                 });
