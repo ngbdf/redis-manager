@@ -242,7 +242,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
 
     private Multimap<Integer, AlertChannel> getAlertChannelByIds(List<AlertChannel> validAlertChannelList, List<Integer> channelIdList) {
         List<AlertChannel> alertChannelList = new ArrayList<>();
-        if (validAlertChannelList != null && !validAlertChannelList.isEmpty()) {
+        if (validAlertChannelList == null || validAlertChannelList.isEmpty()) {
             return null;
         }
         validAlertChannelList.forEach(alertChannel -> {
