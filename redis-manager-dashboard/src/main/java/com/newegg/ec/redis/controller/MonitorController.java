@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.newegg.ec.redis.entity.*;
@@ -49,17 +51,29 @@ public class MonitorController {
         if (nodeInfoList == null) {
             return Result.failResult();
         }
-        if(nodeInfoList.isEmpty()) {
+        if (nodeInfoList.isEmpty()) {
             return Result.successResult(nodeInfoList);
         }
-        Multimap<String, NodeInfo> nodeInfoListMap = ArrayListMultimap.create();
-        nodeInfoList.forEach(nodeInfo -> nodeInfoListMap.put(nodeInfo.getNode(), nodeInfo));
-        List<Collection<NodeInfo>> nodeInfoDataList = new ArrayList<>();
+        Multimap<String, JSONObject> nodeInfoListMap = ArrayListMultimap.create();
+
+        nodeInfoList.forEach(nodeInfo -> nodeInfoListMap.put(nodeInfo.getNode(), compressionNodeInfo(nodeInfoParam.getInfoItem(), nodeInfo)));
+        List<Collection<JSONObject>> nodeInfoDataList = new ArrayList<>();
         nodeInfoListMap.keySet().forEach(key -> {
-            Collection<NodeInfo> oneNodeInfoList = nodeInfoListMap.get(key);
+            Collection<JSONObject> oneNodeInfoList = nodeInfoListMap.get(key);
             nodeInfoDataList.add(oneNodeInfoList);
         });
         return Result.successResult(nodeInfoDataList);
+    }
+
+    private JSONObject compressionNodeInfo(String infoItem, NodeInfo nodeInfo) {
+        String nodeInfoField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, infoItem);
+        JSONObject original = JSONObject.parseObject(JSONObject.toJSONString(nodeInfo));
+        JSONObject info = new JSONObject();
+        info.put("role", nodeInfo.getRole());
+        info.put("node", nodeInfo.getNode());
+        info.put(nodeInfoField, original.getDoubleValue(nodeInfoField));
+        info.put("updateTime", nodeInfo.getUpdateTime());
+        return info;
     }
 
 
