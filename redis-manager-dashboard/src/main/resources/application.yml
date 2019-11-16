@@ -4,7 +4,7 @@ server:
     mime-types: application/json
     min-response-size: 1024
   tomcat.uri-encoding: UTF-8
-  port: 8182
+  port: ${SERVER_PORT:8182}
 
 spring:
   application:
@@ -17,11 +17,11 @@ spring:
       charset: UTF-8
   datasource:
     # 必填，与数据库同名
-    database: redis_manager
+    database: ${DATASOURCE_DATABASE:redis_manager}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8
-    username: root
-    password: xxx
+    url: ${DATASOURCE_URL:jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:xxx}
     druid:
       initial-size: 0
       max-active: 10
@@ -36,10 +36,10 @@ mybatis:
 # redis manager configuration
 redis-manager:
   auth:
-    user-name: admin
-    password: admin
+    user-name: ${RM_AUTH_USERNAME:admin}
+    password: ${RM_AUTH_PASSWORD:admin}
     # avatar(absolute director)
-    avatar-path: /data/avatar/
+    avatar-path: ${RM_AUTH_AVATAR_PATH:/data/avatar/}
     authorization:
       enabled: false
       company-name: xxx
@@ -55,11 +55,11 @@ redis-manager:
   # installation configuration
   installation:
     # redis.conf(absolute director)
-    conf-path: /data/conf/
+    conf-path: ${RM_INSTALLATION_CONF_PATH:/data/conf/}
     # physics machine
     machine:
       # redis package(absolute director)
-      package-path: /data/machine/
+      package-path: ${RM_INSTALLATION_PACKAGE_PATH:/data/machine/}
     # docker
     docker:
       # 默认从官方镜像库拉取
