@@ -28,7 +28,7 @@
         </span>
         <span class="base-info-item">
           Type:
-          <el-tag size="mini" v-if="cluster.installationEnvironment == 0">Redis Manager</el-tag>
+          <el-tag size="mini" v-if="cluster.installationType == 0">Redis Manager</el-tag>
           <el-tag size="mini" v-else>Import</el-tag>
         </span>
       </div>
