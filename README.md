@@ -13,6 +13,17 @@
 [Quick start](https://github.com/ngbdf/redis-manager/wiki/)
 
 # 下载
+## Docker容器启动
+[Dockerhub](https://hub.docker.com/repository/docker/reasonduan/redis-manager)
+```sh
+$sudo docker run -d --net=host --name redis-manager  \
+-e DATASOURCE_DATABASE='redis_manager' \
+-e DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8' \
+-e DATASOURCE_USERNAME='root' \
+-e DATASOURCE_PASSWORD='******' \
+reasonduan/redis-manager
+```
+## 二进制包
 [redis-manager-2.0.0.tar.gz](https://github.com/ngbdf/redis-manager/releases/download/redis-manager-2.0.0-release/redis-manager-2.0.0.tar.gz)
 
 # 联系方式
