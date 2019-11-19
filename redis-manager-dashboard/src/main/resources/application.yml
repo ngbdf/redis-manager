@@ -1,7 +1,16 @@
 server:
+  # 开启压缩
   compression:
     enabled: true
-    mime-types: application/json
+    mime-types:
+      - image/png
+      - image/jpeg
+      - image/jpg
+      - text/html
+      - application/javascript
+      - text/css
+      - application/octet-stream
+      - application/json
     min-response-size: 1024
   tomcat.uri-encoding: UTF-8
   port: ${SERVER_PORT:8182}
