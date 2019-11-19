@@ -4,6 +4,7 @@ const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
 const CompressionPlugin = require('compression-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 function resolve(dir) {
   return path.join(__dirname, '..', dir)
@@ -29,8 +30,17 @@ module.exports = {
       test: new RegExp(
           '\\.(js|css)$' // 压缩 js 与 css
       ),
-      threshold: 10240,
+      threshold: 1024,
       minRatio: 0.8
+    }),
+    new UglifyJsPlugin({
+      uglifyOptions: {
+        compress: {
+          warnings: false
+        }
+      },
+      sourceMap: config.build.productionSourceMap,
+      parallel: true
     })
   ],
   context: path.resolve(__dirname, '../'),
