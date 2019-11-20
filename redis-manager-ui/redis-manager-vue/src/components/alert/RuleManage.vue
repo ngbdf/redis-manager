@@ -1,7 +1,7 @@
 <template>
   <div id="rule-manage" class="body-wrapper">
     <div class="header-wrapper">
-      <div>Bigdata</div>
+      <div>{{ currentGroup.groupName }}</div>
       <div>
         <el-button size="mini" type="success" @click="createAlertRule()">Create</el-button>
       </div>
@@ -391,7 +391,7 @@ export default {
           } else {
             url = "/alert/rule/addAlertRule";
           }
-          this.alertRule.groupId = this.currentGroupId;
+          this.alertRule.groupId = this.currentGroup.groupId;
           this.saveAlertRuleLoading = true;
           API.post(
             url,
@@ -399,7 +399,7 @@ export default {
             response => {
               let result = response.data;
               if (result.code == 0) {
-                this.getAlertRuleList(this.currentGroupId);
+                this.getAlertRuleList(this.currentGroup.groupId);
                 this.editVisible = false;
                 this.$refs[alertRule].resetFields();
               } else {
@@ -423,7 +423,7 @@ export default {
         response => {
           let result = response.data;
           if (result.code == 0) {
-            this.getAlertRuleList(this.currentGroupId);
+            this.getAlertRuleList(this.currentGroup.groupId);
             this.deleteVisible = false;
           } else {
             message.error("Delete alert rule failed");
@@ -436,17 +436,17 @@ export default {
     }
   },
   computed: {
-    currentGroupId() {
-      return store.getters.getCurrentGroup.groupId;
+    currentGroup() {
+      return store.getters.getCurrentGroup;
     }
   },
   watch: {
-    currentGroupId(groupId) {
-      this.getAlertRuleList(groupId);
+    currentGroup(group) {
+      this.getAlertRuleList(group.groupId);
     }
   },
   mounted() {
-    let groupId = this.$route.params.groupId;
+    let groupId = this.currentGroup.groupId;
     this.getAlertRuleList(groupId);
   }
 };
