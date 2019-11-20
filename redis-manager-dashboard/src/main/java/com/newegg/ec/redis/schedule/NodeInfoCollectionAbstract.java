@@ -98,6 +98,9 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
             NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType, node);
             NodeInfo lastTimeNodeInfo = nodeInfoService.getLastTimeNodeInfo(nodeInfoParam);
             Map<String, String> infoMap = redisService.getNodeInfo(hostAndPort, redisPassword);
+            if (infoMap == null) {
+                return null;
+            }
             // 指标计算处理
             nodeInfo = RedisNodeInfoUtil.parseInfoToObject(infoMap, lastTimeNodeInfo);
             nodeInfo.setLastTime(true);

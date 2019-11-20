@@ -10,9 +10,22 @@
 **集群告警**：支持 Memory、Clients 等指标(同监控指标)，支持邮件、企业微信APP、企业微信Webhook、钉钉告警  
 **工具箱**：支持 Query、Scan 以及基本的数据操作
 
-[Quick start](https://github.com/ngbdf/redis-manager/wiki/)
+[使用手册](https://github.com/ngbdf/redis-manager/wiki/)
 
-# 下载
+# 安装
+[快速启动](https://github.com/ngbdf/redis-manager/wiki/2.x-%E5%BF%AB%E9%80%9F%E5%90%AF%E5%8A%A8)
+
+## Docker容器启动
+[Dockerhub](https://hub.docker.com/repository/docker/reasonduan/redis-manager)
+```sh
+$sudo docker run -d --net=host --name redis-manager  \
+-e DATASOURCE_DATABASE='redis_manager' \
+-e DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8' \
+-e DATASOURCE_USERNAME='root' \
+-e DATASOURCE_PASSWORD='******' \
+reasonduan/redis-manager
+```
+## 二进制包
 [redis-manager-2.0.0.tar.gz](https://github.com/ngbdf/redis-manager/releases/download/redis-manager-2.0.0-release/redis-manager-2.0.0.tar.gz)
 
 # 联系方式

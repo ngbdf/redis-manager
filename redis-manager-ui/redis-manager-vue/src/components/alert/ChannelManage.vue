@@ -1,7 +1,7 @@
 <template>
   <div id="channel-manage" class="body-wrapper">
     <div class="header-wrapper">
-      <div>Bigdata</div>
+      <div>{{ currentGroup.groupName }}</div>
       <div>
         <el-button
           size="mini"
@@ -270,8 +270,7 @@ export default {
     };
   },
   methods: {
-    handleView(index, row) {
-    },
+    handleView(index, row) {},
     editChannel(index, row) {
       this.getAlertChannel(row.channelId);
       this.isUpdate = true;
@@ -289,7 +288,7 @@ export default {
         response => {
           let result = response.data;
           if (result.code == 0) {
-            this.getChannelList(this.currentGroupId);
+            this.getChannelList(this.currentGroup.groupId);
             this.deleteVisible = false;
             this.alertChannel = { channelType: 0 };
           } else {
@@ -319,7 +318,7 @@ export default {
           }
         },
         err => {
-         message.error(err);
+          message.error(err);
         }
       );
     },
@@ -350,7 +349,7 @@ export default {
           } else {
             url = "/alert/channel/addAlertChannel";
           }
-          this.alertChannel.groupId = this.currentGroupId;
+          this.alertChannel.groupId = this.currentGroup.groupId;
           this.saveAlertChannelLoading = true;
           API.post(
             url,
@@ -358,11 +357,11 @@ export default {
             response => {
               let result = response.data;
               if (result.code == 0) {
-                this.getChannelList(this.currentGroupId);
+                this.getChannelList(this.currentGroup.groupId);
                 this.editVisible = false;
                 this.$refs[alertChannel].resetFields();
               } else {
-               message.error("Save alert channel failed.");
+                message.error("Save alert channel failed.");
               }
               this.saveAlertChannelLoading = false;
             },
@@ -376,8 +375,8 @@ export default {
     }
   },
   computed: {
-    currentGroupId() {
-      return store.getters.getCurrentGroup.groupId;
+    currentGroup() {
+      return store.getters.getCurrentGroup;
     }
   },
   watch: {
@@ -396,12 +395,12 @@ export default {
         return true;
       });
     },
-    currentGroupId(groupId) {
-      this.getChannelList(groupId);
+    currentGroup(group) {
+      this.getChannelList(group.groupId);
     }
   },
   mounted() {
-    let groupId = this.currentGroupId;
+    let groupId = this.currentGroup.groupId;
     this.getChannelList(groupId);
   }
 };
