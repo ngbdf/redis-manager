@@ -362,23 +362,24 @@ public class InstallationTemplate {
         int avgNodeNumber = nodeNumber / machineList.size();
         avgNodeNumber = nodeNumber % machineList.size() == 0 ? avgNodeNumber : avgNodeNumber + 1;
         for (Machine machine : machineList) {
+            int currentPort = port;
             List<Integer> ports = new ArrayList<>();
             String host = machine.getHost();
             while (avgNodeNumber > ports.size() && getPortNumber(machineAndPortsList) < nodeNumber) {
-                if (port >= MAX_PORT) {
+                if (currentPort >= MAX_PORT) {
                     break;
                 }
                 try {
-                    if (!NetworkUtil.telnet(host, port)) {
-                        ports.add(port);
+                    if (!NetworkUtil.telnet(host, currentPort)) {
+                        ports.add(currentPort);
                     }
                 } catch (Exception e) {
-                    String message = "Check port failed, host: " + host + ", port: " + port;
+                    String message = "Check port failed, host: " + host + ", port: " + currentPort;
                     InstallationWebSocketHandler.appendLog(clusterName, message);
                     InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
                     logger.error(message, e);
                 }
-                port++;
+                currentPort++;
             }
             machineAndPortsList.add(new MachineAndPorts(machine, ports));
         }
@@ -578,11 +579,10 @@ public class InstallationTemplate {
                 redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
                 redisClient.rewriteConfig();
                 redisClient.close();
-
             } catch (Exception e) {
                 String message = "Update redis password failed, host=" + redisNode.getHost() + ", port=" + redisNode.getPort() + ".";
                 logger.error(message, e);
-                result.append(message + e.getMessage());
+                result.append(message).append(e.getMessage());
             }
         });
         if (Strings.isNullOrEmpty(result.toString())) {
