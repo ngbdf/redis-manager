@@ -51,7 +51,6 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
             try {
                 int clusterId = cluster.getClusterId();
                 logger.debug("Start collecting cluster: " + cluster.getClusterName());
-                RedisClientFactory.buildRedisClient(new RedisURI(cluster.getNodes(), cluster.getRedisPassword()));
                 List<NodeInfo> nodeInfoList = getNodeInfoList(cluster, timeType);
                 // clean last time data and save new data to db
                 NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType);

@@ -47,8 +47,7 @@ public class RedisNodeService implements IRedisNodeService {
             List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
             List<RedisNode> dbRedisNodeList = redisNodeDao.selectRedisNodeListByClusterId(clusterId);
             List<RedisNode> redisNodeList = mergeRedisNode(realRedisNodeList, dbRedisNodeList);
-            List<RedisNode> redisNodes = sortRedisNodeList(redisNodeList);
-            return redisNodes;
+            return sortRedisNodeList(redisNodeList);
         } catch (Exception e) {
             logger.error("Get redis node list failed.", e);
             return null;
@@ -58,8 +57,7 @@ public class RedisNodeService implements IRedisNodeService {
     @Override
     public RedisNode getRedisNodeById(Integer redisNodeId) {
         try {
-            RedisNode redisNode = redisNodeDao.selectRedisNodeById(redisNodeId);
-            return redisNode;
+            return redisNodeDao.selectRedisNodeById(redisNodeId);
         } catch (Exception e) {
             logger.error("Get redis node by id failed.", e);
             return null;
@@ -210,7 +208,7 @@ public class RedisNodeService implements IRedisNodeService {
         });
         List<RedisNode> redisNodeSorted = new ArrayList<>();
         masterAndReplicaMap.values().forEach(redisNodeSet -> {
-            redisNodeSet.forEach(redisNode -> redisNodeSorted.add(redisNode));
+            redisNodeSorted.addAll(redisNodeSet);
         });
         return redisNodeSorted;
     }
