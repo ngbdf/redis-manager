@@ -1,6 +1,9 @@
 #!/bin/bash
 set encoding=utf-8
-CLASSPATH=conf/
+project_path=$(cd `dirname $0`; pwd)
+cd $project_path
+
+CLASSPATH=conf/:web/
 for i in lib/*.jar; do
         CLASSPATH=${CLASSPATH}:$i
 done
