@@ -26,7 +26,7 @@ public class RedisClient implements IRedisClient {
 
     private static final String OK = "OK";
 
-    private static final String PONG = "pong";
+    private static final String PONG = "PONG";
 
     /**
      * info subkey
@@ -60,6 +60,7 @@ public class RedisClient implements IRedisClient {
                 }
             } catch (JedisConnectionException e) {
                 // try next nodes
+                close();
             }
         }
     }
@@ -531,7 +532,8 @@ public class RedisClient implements IRedisClient {
 
     @Override
     public boolean ping() {
-        return Objects.equals(jedis.ping(), PONG);
+        String ping = jedis.ping();
+        return !Strings.isNullOrEmpty(ping) && Objects.equals(ping.toUpperCase(), PONG);
     }
 
     @Override

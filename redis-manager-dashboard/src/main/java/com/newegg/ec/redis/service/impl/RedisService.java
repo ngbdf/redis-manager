@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.ClusterReset;
 import redis.clients.jedis.HostAndPort;
@@ -40,7 +38,7 @@ import static javax.management.timer.Timer.ONE_SECOND;
  * @date 7/26/2019
  */
 @Service
-public class RedisService implements IRedisService, ApplicationListener<ContextRefreshedEvent> {
+public class RedisService implements IRedisService {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisService.class);
 
@@ -52,11 +50,6 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
 
     @Value("${redis-manager.monitor.slow-log-limit:100}")
     private int slowLogLimit;
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-
-    }
 
     @Override
     public Map<String, String> getNodeInfo(HostAndPort hostAndPort, String redisPassword) {
@@ -83,8 +76,9 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         List<RedisNode> redisMasterNodeList = getRedisMasterNodeList(cluster);
         Map<String, Map<String, Long>> keyspaceInfoMap = new LinkedHashMap<>();
         redisMasterNodeList.forEach(redisNode -> {
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
+            RedisClient redisClient = null;
             try {
+                redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
                 Map<String, String> keyspaceInfo = redisClient.getInfo(RedisClient.KEYSPACE);
                 if (keyspaceInfo.isEmpty()) {
                     return;
@@ -143,15 +137,16 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         RedisURI redisURI = new RedisURI(cluster.getNodes(), cluster.getRedisPassword());
         String redisMode = cluster.getRedisMode();
         List<RedisNode> nodeList = new ArrayList<>();
-        RedisClient redisClient = RedisClientFactory.buildRedisClient(redisURI);
+        RedisClient redisClient = null;
         try {
+            redisClient = RedisClientFactory.buildRedisClient(redisURI);
             if (STANDALONE.equalsIgnoreCase(redisMode)) {
                 nodeList = redisClient.nodes();
             } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
                 nodeList = redisClient.clusterNodes();
             }
         } catch (Exception e) {
-            logger.error("Get redis node list failed, " + cluster, e);
+            logger.error("Get redis node list failed, " + cluster.getClusterName(), e);
         } finally {
             close(redisClient);
         }
@@ -193,7 +188,6 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
 
     @Override
     public List<RedisSlowLog> getRedisSlowLog(Cluster cluster, SlowLogParam slowLogParam) {
-
         List<RedisNode> nodeList;
         String node = slowLogParam.getNode();
         if (Strings.isNullOrEmpty(node)) {
@@ -206,12 +200,10 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         }
         List<RedisSlowLog> redisSlowLogList = new ArrayList<>();
         for (RedisNode redisNode : nodeList) {
-            HostAndPort hostAndPort = null;
+            HostAndPort hostAndPort = new HostAndPort(redisNode.getHost(), redisNode.getPort());
             RedisClient redisClient = null;
             try {
-                hostAndPort = new HostAndPort(redisNode.getHost(), redisNode.getPort());
-                RedisURI redisURI = new RedisURI(hostAndPort, cluster.getRedisPassword());
-                redisClient = RedisClientFactory.buildRedisClient(redisURI);
+                redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
                 List<Slowlog> slowLogs = redisClient.getSlowLog(slowLogLimit);
                 for (Slowlog slowLog : slowLogs) {
                     RedisSlowLog redisSlowLog = new RedisSlowLog(hostAndPort, slowLog);
@@ -341,8 +333,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
             }
             RedisClient redisClient = null;
             try {
-                RedisURI redisURI = new RedisURI(redisNode.getHost(), redisNode.getPort(), redisPassword);
-                redisClient = RedisClientFactory.buildRedisClient(redisURI);
+                redisClient = RedisClientFactory.buildRedisClient(redisNode, redisPassword);
                 redisClient.clusterForget(forgetNodeId);
             } catch (Exception e) {
                 logger.error("Forget cluster node failed, cluster name: " + clusterName + ", bad node: " + redisNode.getHost() + ":" + redisNode.getPort(), e);
@@ -352,9 +343,7 @@ public class RedisService implements IRedisService, ApplicationListener<ContextR
         }
         RedisClient redisClient = null;
         try {
-            // time out
-            RedisURI redisURI = new RedisURI(forgetNode.getHost(), forgetNode.getPort(), redisPassword);
-            redisClient = RedisClientFactory.buildRedisClient(redisURI);
+            redisClient = RedisClientFactory.buildRedisClient(forgetNode, redisPassword);
             // Forget itself
             redisClient.clusterReset(ClusterReset.HARD);
             return true;

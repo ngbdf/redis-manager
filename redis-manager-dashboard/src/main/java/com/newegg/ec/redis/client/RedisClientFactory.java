@@ -13,21 +13,11 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 public class RedisClientFactory {
 
     public static RedisClusterClient buildRedisClusterClient(RedisURI redisURI) {
-        RedisClusterClient redisClusterClient = new RedisClusterClient(redisURI);
-        return redisClusterClient;
+        return new RedisClusterClient(redisURI);
     }
 
     public static RedisClusterClient buildRedisClusterClient(RedisNode redisNode, String requirePass) {
         RedisURI redisURI = new RedisURI(redisNode.getHost(), redisNode.getPort(), requirePass);
-        return buildRedisClusterClient(redisURI);
-    }
-
-    public static RedisClusterClient buildRedisClusterClient(RedisNode redisNode) {
-        return buildRedisClusterClient(redisNode, null);
-    }
-
-    public static RedisClusterClient buildRedisClusterClient(HostAndPort hostAndPort, String requirePass) {
-        RedisURI redisURI = new RedisURI(hostAndPort, requirePass);
         return buildRedisClusterClient(redisURI);
     }
 
@@ -45,14 +35,12 @@ public class RedisClientFactory {
 
     public static RedisClient buildRedisClient(RedisNode redisNode, String requirePass) {
         RedisURI redisURI = new RedisURI(redisNode.getHost(), redisNode.getPort(), requirePass);
-        RedisClient redisClient = buildRedisClient(redisURI);
-        return redisClient;
+        return buildRedisClient(redisURI);
     }
 
     public static RedisClient buildRedisClient(HostAndPort hostAndPort, String requirePass) {
         RedisURI redisURI = new RedisURI(hostAndPort, requirePass);
-        RedisClient redisClient = buildRedisClient(redisURI);
-        return redisClient;
+        return buildRedisClient(redisURI);
     }
 
 }
