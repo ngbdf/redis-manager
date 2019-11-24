@@ -73,7 +73,7 @@ public class RedisUtil {
      * @return
      * @throws IOException
      */
-    public static final Map<String, String> parseInfoToMap(String info) throws IOException {
+    public static Map<String, String> parseInfoToMap(String info) throws IOException {
         Map<String, String> infoMap = new LinkedHashMap<>();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(info.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
         String line;
@@ -92,7 +92,7 @@ public class RedisUtil {
         return infoMap;
     }
 
-    public static final Set<HostAndPort> nodesToHostAndPortSet(String nodes) {
+    public static Set<HostAndPort> nodesToHostAndPortSet(String nodes) {
         String[] nodeList = SignUtil.splitByCommas(nodes);
         int length = nodeList.length;
         Set<HostAndPort> hostAndPortSet = new HashSet<>(length);
@@ -106,7 +106,7 @@ public class RedisUtil {
         return hostAndPortSet;
     }
 
-    public static final HostAndPort nodesToHostAndPort(String node) {
+    public static HostAndPort nodesToHostAndPort(String node) {
         Set<HostAndPort> hostAndPortSet = nodesToHostAndPortSet(node);
         return hostAndPortSet.iterator().next();
     }

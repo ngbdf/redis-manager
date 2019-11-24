@@ -5,10 +5,7 @@ import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.Result;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +28,7 @@ public class LinuxInfoUtil {
     }
 
     public static String getIpAddress() throws SocketException {
-        Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+        /*Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
         InetAddress ip;
         while (allNetInterfaces.hasMoreElements()) {
             NetworkInterface netInterface = allNetInterfaces.nextElement();
@@ -46,8 +43,15 @@ public class LinuxInfoUtil {
                     }
                 }
             }
+        }*/
+        String ip = "";
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            ip = "127.0.0.1";
         }
-        return "127.0.0.1";
+        return ip;
     }
 
     public static final boolean login(Machine machine) throws Exception {

@@ -112,7 +112,7 @@ public class RedisNodeInfoUtil {
 
     private static final BigDecimal BIG_DECIMAL_1024 = new BigDecimal(1024);
 
-    public static final NodeInfo parseInfoToObject(Map<String, String> infoMap, NodeInfo lastTimeNodeInfo) {
+    public static NodeInfo parseInfoToObject(Map<String, String> infoMap, NodeInfo lastTimeNodeInfo) {
         JSONObject infoJSONObject = new JSONObject();
         long keys = 0;
         long expires = 0;
