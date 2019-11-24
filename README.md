@@ -35,9 +35,6 @@ RedisManager 微信
 
 <img src="./documents/contact/wechat.jpg" width="200px"/>
 
-RedisManager QQ群
-
-<img src="./documents/contact/qq.jpg" width="200px"/>
 
 知乎专栏  https://zhuanlan.zhihu.com/c_1055846842708930560
 
