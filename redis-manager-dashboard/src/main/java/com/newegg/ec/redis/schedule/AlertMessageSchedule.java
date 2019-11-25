@@ -207,7 +207,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     }
 
     /**
-     * 获取 group 下没有冻结(valid==true)且满足时间周期(lastCheckTime - nowTime >= cycleTime)的规则
+     * 获取 group 下没有冻结(valid==true)且满足时间周期(nowTime - lastCheckTime >= cycleTime)的规则
      *
      * @param groupId
      * @return

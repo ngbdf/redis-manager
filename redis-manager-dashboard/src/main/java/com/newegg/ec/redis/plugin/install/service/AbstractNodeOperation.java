@@ -124,6 +124,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
             // eg: ip:port/redis-manager/config/cluster/redis.conf
             url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + CONFIG_ORIGINAL_PATH + redisMode + SLASH + REDIS_CONF;
         } catch (SocketException e) {
+            logger.error("Get conf from original machine.", e);
             return false;
         }
         List<Machine> machineList = installationParam.getMachineList();
