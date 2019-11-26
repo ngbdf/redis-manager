@@ -294,7 +294,7 @@ public class RedisClient implements IRedisClient {
                 value = jedis.lrange(key, 0, -1);
                 break;
             case TYPE_SET:
-                value = jedis.srandmember(key, -1);
+                value = jedis.smembers(key);
                 break;
             case TYPE_ZSET:
                 value = jedis.zrangeWithScores(key, 0, -1);

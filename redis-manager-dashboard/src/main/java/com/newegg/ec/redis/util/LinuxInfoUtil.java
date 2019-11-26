@@ -3,10 +3,10 @@ package com.newegg.ec.redis.util;
 import ch.ethz.ssh2.Connection;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
-import com.newegg.ec.redis.entity.Result;
 
-import java.net.*;
-import java.util.Enumeration;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
