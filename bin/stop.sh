@@ -5,3 +5,4 @@ cd $project_path
 cd ../
 
 kill -5 `cat pid`
+rm -f pid
