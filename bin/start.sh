@@ -2,6 +2,7 @@
 set encoding=utf-8
 project_path=$(cd `dirname $0`; pwd)
 cd $project_path
+cd ../
 
 CLASSPATH=conf/:web/
 for i in lib/*.jar; do

@@ -14,3 +14,4 @@ rm -rf target/classes/com/
 mv -f target/classes/* $project_path/web/
 mv -f target/lib/ $project_path/
 cp target/*.jar $project_path/
+cp -rf ../bin/ $project_path/
