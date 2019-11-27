@@ -5,7 +5,6 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.NodeInfo;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -231,7 +230,7 @@ public class RedisNodeInfoUtil {
      */
     private static NodeInfo calculateCumulativeData(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
         if (lastTimeNodeInfo != null) {
-            double keyspaceHitRatio = calculateKeyspaceHitRatio(lastTimeNodeInfo, nodeInfo);
+            double keyspaceHitRatio = calculateKeyspaceHitRatio(nodeInfo, lastTimeNodeInfo);
             nodeInfo.setKeyspaceHitsRatio(keyspaceHitRatio);
             nodeInfo.setCommandsProcessed(nodeInfo.getTotalCommandsProcessed() - lastTimeNodeInfo.getTotalCommandsProcessed());
             nodeInfo.setConnectionsReceived(nodeInfo.getTotalConnectionsReceived() - lastTimeNodeInfo.getTotalConnectionsReceived());
@@ -244,13 +243,13 @@ public class RedisNodeInfoUtil {
     }
 
     private static double calculateKeyspaceHitRatio(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
-        long keyspaceHit = nodeInfo.getKeyspaceHits() - lastTimeNodeInfo.getKeyspaceHits();
+        long keyspaceHits = nodeInfo.getKeyspaceHits() - lastTimeNodeInfo.getKeyspaceHits();
         long keyspaceMisses = nodeInfo.getKeyspaceMisses() - lastTimeNodeInfo.getKeyspaceMisses();
-        BigDecimal hitAndMiss = BigDecimal.valueOf(keyspaceHit + keyspaceMisses);
+        BigDecimal hitAndMiss = BigDecimal.valueOf(keyspaceHits + keyspaceMisses);
         if (hitAndMiss.longValue() == 0) {
             return 0;
         }
-        BigDecimal divide = BigDecimal.valueOf(keyspaceHit).divide(hitAndMiss, 2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal divide = BigDecimal.valueOf(keyspaceHits).divide(hitAndMiss, 4, BigDecimal.ROUND_HALF_UP);
         return divide.doubleValue();
     }
 
