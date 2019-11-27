@@ -24,7 +24,7 @@ import java.util.List;
  */
 @RequestMapping("/system/*")
 @Controller
-public class SystemSwitchController implements ApplicationListener<ContextRefreshedEvent> {
+public class SystemConfigController implements ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
     private SystemConfig systemConfig;

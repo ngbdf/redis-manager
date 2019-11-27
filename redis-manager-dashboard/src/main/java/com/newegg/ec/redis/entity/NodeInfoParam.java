@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.entity;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 
 /**
@@ -20,6 +21,8 @@ public class NodeInfoParam {
     private Timestamp endTime;
 
     private String node;
+
+    private List<String> nodeList;
 
     public NodeInfoParam() {
     }
@@ -90,5 +93,13 @@ public class NodeInfoParam {
 
     public void setNode(String node) {
         this.node = node;
+    }
+
+    public List<String> getNodeList() {
+        return nodeList;
+    }
+
+    public void setNodeList(List<String> nodeList) {
+        this.nodeList = nodeList;
     }
 }
