@@ -110,7 +110,7 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
     @Override
     public NodeInfo getLastTimeNodeInfo(NodeInfoParam nodeInfoParam) {
         List<NodeInfo> lastTimeNodeInfoList = getLastTimeNodeInfoList(nodeInfoParam);
-        if (lastTimeNodeInfoList == null || lastTimeNodeInfoList.size() != 1) {
+        if (lastTimeNodeInfoList == null || lastTimeNodeInfoList.isEmpty()) {
             return null;
         }
         return lastTimeNodeInfoList.get(0);
@@ -123,6 +123,8 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         }
         List<NodeInfo> nodeInfoList = null;
         try {
+            String node = nodeInfoParam.getNode();
+            nodeInfoParam.setNode(Strings.isNullOrEmpty(node) ? null : node);
             nodeInfoList = nodeInfoDao.selectLastTimeNodeInfo(nodeInfoParam);
         } catch (Exception e) {
             logger.error("Get last time node info failed, " + nodeInfoParam, e);
@@ -139,11 +141,6 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         try {
             // 移除掉上一次集群记录
             nodeInfoDao.updateLastTimeStatus(clusterId, nodeInfoParam.getTimeType());
-            Integer timeType = nodeInfoParam.getTimeType();
-            for (NodeInfo nodeInfo : nodeInfoList) {
-                nodeInfo.setTimeType(timeType);
-            }
-
             int row = nodeInfoDao.insertNodeInfo(clusterId, nodeInfoList);
             if (row == nodeInfoList.size()) {
                 return true;
@@ -189,7 +186,7 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
             endTime = TimeUtil.getCurrentTimestamp();
             nodeInfoParam.setEndTime(endTime);
         }
-        if(startTime == null) {
+        if (startTime == null) {
             startTime = TimeUtil.getDefaultLastTimestamp();
             nodeInfoParam.setStartTime(startTime);
         }

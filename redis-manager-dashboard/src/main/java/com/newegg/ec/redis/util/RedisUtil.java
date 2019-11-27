@@ -9,7 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.newegg.ec.redis.util.SignUtil.MINUS;
@@ -75,7 +75,7 @@ public class RedisUtil {
      */
     public static Map<String, String> parseInfoToMap(String info) throws IOException {
         Map<String, String> infoMap = new LinkedHashMap<>();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(info.getBytes(Charset.forName("utf8"))), Charset.forName("utf8")));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(info.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             String[] keyValue = SignUtil.splitByColon(line);

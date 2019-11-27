@@ -60,7 +60,10 @@ public interface INodeInfoDao {
     @Select("<script>" +
             "SELECT * FROM node_info_${clusterId} " +
             "WHERE time_type = #{timeType} " +
-            "AND last_time = 1" +
+            "AND last_time = 1 " +
+            "<if test='node != null'>" +
+            "AND node = #{node}" +
+            "</if>" +
             "</script>")
     List<NodeInfo> selectLastTimeNodeInfo(NodeInfoParam nodeInfoParam);
 

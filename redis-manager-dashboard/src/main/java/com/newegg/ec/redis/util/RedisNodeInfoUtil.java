@@ -171,7 +171,7 @@ public class RedisNodeInfoUtil {
      * @param key
      * @return
      */
-    private static final boolean isByteToMBKeyField(String key) {
+    private static boolean isByteToMBKeyField(String key) {
         return Objects.equals(USED_MEMORY, key)
                 || Objects.equals(USED_MEMORY_RSS, key)
                 || Objects.equals(USED_MEMORY_OVERHEAD, key)
@@ -184,7 +184,7 @@ public class RedisNodeInfoUtil {
      * @param key
      * @return
      */
-    private static final boolean isSubtractionPercentSignField(String key) {
+    private static boolean isSubtractionPercentSignField(String key) {
         return Objects.equals(USED_MEMORY_PEAK_PERC, key)
                 || Objects.equals(USED_MEMORY_DATASET_PERC, key);
     }
@@ -204,7 +204,7 @@ public class RedisNodeInfoUtil {
         return divide.longValue();
     }
 
-    public static double truncatedPercentSign(String originalData) {
+    private static double truncatedPercentSign(String originalData) {
         double percent = 0;
         if (!Strings.isNullOrEmpty(originalData) && originalData.contains("%")) {
             String replace = originalData.replace("%", "");
@@ -229,7 +229,7 @@ public class RedisNodeInfoUtil {
      * @param nodeInfo
      * @return
      */
-    public static final NodeInfo calculateCumulativeData(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
+    private static NodeInfo calculateCumulativeData(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
         if (lastTimeNodeInfo != null) {
             double keyspaceHitRatio = calculateKeyspaceHitRatio(lastTimeNodeInfo, nodeInfo);
             nodeInfo.setKeyspaceHitsRatio(keyspaceHitRatio);
@@ -239,17 +239,11 @@ public class RedisNodeInfoUtil {
             nodeInfo.setNetOutputBytes(nodeInfo.getTotalNetOutputBytes() - lastTimeNodeInfo.getTotalNetOutputBytes());
             nodeInfo.setCpuSys(nodeInfo.getUsedCpuSys() - lastTimeNodeInfo.getUsedCpuSys());
             nodeInfo.setCpuUser(nodeInfo.getUsedCpuUser() - lastTimeNodeInfo.getUsedCpuUser());
-        } else {
-            /*nodeInfo.setUsedCpuSys(0);
-            nodeInfo.setTotalConnectionsReceived(0);
-            nodeInfo.setTotalCommandsProcessed(0);
-            nodeInfo.setTotalNetInputBytes(0);
-            nodeInfo.setTotalNetOutputBytes(0);*/
         }
         return nodeInfo;
     }
 
-    public static final double calculateKeyspaceHitRatio(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
+    private static double calculateKeyspaceHitRatio(NodeInfo nodeInfo, NodeInfo lastTimeNodeInfo) {
         long keyspaceHit = nodeInfo.getKeyspaceHits() - lastTimeNodeInfo.getKeyspaceHits();
         long keyspaceMisses = nodeInfo.getKeyspaceMisses() - lastTimeNodeInfo.getKeyspaceMisses();
         BigDecimal hitAndMiss = BigDecimal.valueOf(keyspaceHit + keyspaceMisses);

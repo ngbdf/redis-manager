@@ -275,7 +275,7 @@ public class ClusterService implements IClusterService {
             cluster.setRedisMode(serverInfo.get(REDIS_MODE));
             cluster.setRedisVersion(serverInfo.get(REDIS_VERSION));
         } catch (Exception e) {
-            logger.error("Fill redis base info failed, " + cluster, e);
+            logger.error("Fill redis base info failed, " + cluster.getClusterName(), e);
         }
     }
 
