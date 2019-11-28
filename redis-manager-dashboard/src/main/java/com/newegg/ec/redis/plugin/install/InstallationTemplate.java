@@ -81,12 +81,13 @@ public class InstallationTemplate {
         }
         // 数据准备
         InstallationWebSocketHandler.appendLog(clusterName, "Start preparing installation...");
+        logger.info(clusterName + " start preparing installation...");
         boolean prepareSuccess = prepareForInstallation(installationOperation, installationParam);
         if (!prepareSuccess) {
             return false;
         }
-
         InstallationWebSocketHandler.appendLog(clusterName, "Start pulling redis.conf...");
+        logger.info(clusterName + " start pulling redis.conf...");
         // 分发配置文件
         boolean pullConfigSuccess = pullConfig(installationOperation, installationParam);
         if (!pullConfigSuccess) {
@@ -94,6 +95,7 @@ public class InstallationTemplate {
         }
 
         InstallationWebSocketHandler.appendLog(clusterName, "Start pulling image...");
+        logger.info(clusterName + " start pulling image...");
         boolean pullImageSuccess = pullImage(installationOperation, installationParam);
         // 拉取安装包
         if (!pullImageSuccess) {
@@ -101,12 +103,14 @@ public class InstallationTemplate {
         }
 
         InstallationWebSocketHandler.appendLog(clusterName, "Start installing redis node...");
+        logger.info(clusterName + " start installing redis node...");
         // 节点安装
         boolean installSuccess = install(installationOperation, installationParam);
         if (!installSuccess) {
             return false;
         }
         InstallationWebSocketHandler.appendLog(clusterName, "Start initializing...");
+        logger.info(clusterName + " start initializing...");
         boolean initSuccess;
         if (Objects.equals(redisMode, CLUSTER)) {
             initSuccess = initCluster(installationParam);
@@ -117,6 +121,7 @@ public class InstallationTemplate {
             InstallationWebSocketHandler.appendLog(clusterName, "Initialized error.");
         }
         InstallationWebSocketHandler.appendLog(clusterName, "Start saving to database...");
+        logger.info(clusterName + " start saving to database...");
         return saveToDB(installationParam);
     }
 
@@ -207,6 +212,7 @@ public class InstallationTemplate {
                 SSH2Util.getConnection(machine);
             } catch (Exception e) {
                 InstallationWebSocketHandler.appendLog(clusterName, machine.getHost() + " connection refused");
+                logger.info(clusterName + " " + machine.getHost() + " connection refused");
                 result = false;
             }
         }

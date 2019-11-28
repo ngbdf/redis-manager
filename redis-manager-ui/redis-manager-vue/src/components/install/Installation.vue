@@ -579,7 +579,11 @@ export default {
         if (valid) {
           //this.installationInfoVisible = true;
           this.buildParam();
-          this.initWebSocket();
+          try {
+            this.initWebSocket();
+          } catch (err) {
+            message.error("Open websocket failed.")
+          }
           this.install();
         } else {
           return false;
@@ -711,7 +715,7 @@ export default {
       this.websocketsend(this.installationParam.clusterName);
     },
     websocketonerror() {
-      message.error("Build websocket error");
+      message.error("Build websocket failed, but you can still install.");
     },
     websocketonmessage(msg) {
       //数据接收
