@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.newegg.ec.redis.entity.*;
@@ -41,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.newegg.ec.redis.util.SignUtil.EQUAL_SIGN;
+import static com.newegg.ec.redis.util.TimeUtil.FIVE_SECONDS;
 import static javax.management.timer.Timer.ONE_MINUTE;
 
 /**
@@ -65,6 +67,8 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     private static final int DINGDING_WEB_HOOK = 2;
 
     private static final int WECHAT_APP = 3;
+
+    private static final int ALERT_RECORD_LIMIT = 16;
 
     @Autowired
     private IGroupService groupService;
@@ -385,17 +389,31 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         }
     }
 
+    /**
+     * 给各通道发送消息
+     * 由于部分通道对于消息长度、频率等有限制，此处做了分批、微延迟处理
+     * @param channelMultimap
+     * @param alertRecordList
+     */
     private void distribution(Multimap<Integer, AlertChannel> channelMultimap, List<AlertRecord> alertRecordList) {
         alert(emailAlert, channelMultimap.get(EMAIL), alertRecordList);
-        alert(wechatWebHookAlert, channelMultimap.get(WECHAT_WEB_HOOK), alertRecordList);
-        alert(dingDingWebHookAlert, channelMultimap.get(DINGDING_WEB_HOOK), alertRecordList);
-        alert(wechatAppAlert, channelMultimap.get(WECHAT_APP), alertRecordList);
+        if (alertRecordList.size() > ALERT_RECORD_LIMIT) {
+            List<List<AlertRecord>> partition = Lists.partition(alertRecordList, ALERT_RECORD_LIMIT);
+            partition.forEach(partAlertRecordList -> {
+                alert(wechatWebHookAlert, channelMultimap.get(WECHAT_WEB_HOOK), partAlertRecordList);
+                alert(dingDingWebHookAlert, channelMultimap.get(DINGDING_WEB_HOOK), partAlertRecordList);
+                alert(wechatAppAlert, channelMultimap.get(WECHAT_APP), partAlertRecordList);
+                try {
+                    Thread.sleep(FIVE_SECONDS);
+                } catch (InterruptedException ignored) {
+                }
+            });
+
+        }
     }
 
     private void alert(IAlertService alertService, Collection<AlertChannel> alertChannelCollection, List<AlertRecord> alertRecordList) {
-        alertChannelCollection.forEach(alertChannel -> {
-            alertService.alert(alertChannel, alertRecordList);
-        });
+        alertChannelCollection.forEach(alertChannel -> alertService.alert(alertChannel, alertRecordList));
     }
 
     private void saveRecordToDB(String clusterName, List<AlertRecord> alertRecordList) {

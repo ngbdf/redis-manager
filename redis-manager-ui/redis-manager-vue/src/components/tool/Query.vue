@@ -195,6 +195,11 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
+  justify-content: space-between;
+}
+
+.input-wrapper >>> .el-input-group {
+  width: 80% !important;
 }
 
 .tip-wrapper {
