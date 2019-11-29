@@ -142,18 +142,6 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
-    public boolean updateClusterKeys(Cluster cluster) {
-        int clusterId = cluster.getClusterId();
-        try {
-            clusterDao.updateKeyspace(clusterId, cluster.getTotalKeys(), cluster.getTotalExpires());
-            return true;
-        } catch (Exception e) {
-            logger.error("Update cluster keys failed, " + cluster, e);
-            return false;
-        }
-    }
-
-    @Override
     public boolean updateNodes(Cluster cluster) {
         Integer clusterId = cluster.getClusterId();
         try {
@@ -213,7 +201,7 @@ public class ClusterService implements IClusterService {
             logger.error("Fill base info failed, " + cluster);
             return false;
         }
-        fillKeyspaceInfo(cluster);
+        fillTotalData(cluster);
         if (Objects.equals(redisMode, CLUSTER)) {
             if (!fillClusterInfo(cluster)) {
                 logger.error("Fill cluster info failed, " + cluster);
@@ -251,21 +239,18 @@ public class ClusterService implements IClusterService {
         }
     }
 
-    private boolean fillStandaloneInfo(Cluster cluster) {
+    private void fillStandaloneInfo(Cluster cluster) {
         List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
         cluster.setClusterSize(1);
         cluster.setClusterKnownNodes(redisNodeList.size());
         cluster.setClusterState(Cluster.ClusterState.HEALTH);
-        cluster.setClusterSlotsAssigned(1);
-        cluster.setClusterSlotsFail(1);
-        cluster.setClusterSlotsPfail(1);
-        cluster.setClusterSlotsOk(1);
-
-        return true;
+        cluster.setClusterSlotsAssigned(0);
+        cluster.setClusterSlotsFail(0);
+        cluster.setClusterSlotsPfail(0);
+        cluster.setClusterSlotsOk(0);
     }
 
     private void fillBaseInfo(Cluster cluster) {
-
         try {
             String nodes = cluster.getNodes();
             RedisClient redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes), cluster.getRedisPassword());
@@ -279,7 +264,7 @@ public class ClusterService implements IClusterService {
         }
     }
 
-    private void fillKeyspaceInfo(Cluster cluster) {
+    private void fillTotalData(Cluster cluster) {
         Map<String, Map<String, Long>> keyspaceInfoMap = redisService.getKeyspaceInfo(cluster);
         cluster.setDbSize(keyspaceInfoMap.size());
         long totalKeys = 0;
@@ -290,6 +275,8 @@ public class ClusterService implements IClusterService {
         }
         cluster.setTotalKeys(totalKeys);
         cluster.setTotalExpires(totalExpires);
+        Map<String, Long> totalMemoryInfo = redisService.getTotalMemoryInfo(cluster);
+        cluster.setTotalUsedMemory(totalMemoryInfo.get(USED_MEMORY));
     }
 
     @Override

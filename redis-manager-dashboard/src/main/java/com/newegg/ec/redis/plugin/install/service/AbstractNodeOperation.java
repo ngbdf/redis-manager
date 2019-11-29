@@ -89,7 +89,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
                     commonCheck = false;
                 }
             }
-            // TODO: for test
+            // no check
             commonCheck = true;
         }
         return commonCheck && checkEnvironment(installationParam);

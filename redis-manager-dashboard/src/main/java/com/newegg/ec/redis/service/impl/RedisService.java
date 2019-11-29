@@ -7,10 +7,7 @@ import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
-import com.newegg.ec.redis.util.RedisConfigUtil;
-import com.newegg.ec.redis.util.RedisUtil;
-import com.newegg.ec.redis.util.SignUtil;
-import com.newegg.ec.redis.util.SlotBalanceUtil;
+import com.newegg.ec.redis.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +20,13 @@ import redis.clients.jedis.util.Slowlog;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.newegg.ec.redis.client.IDatabaseCommand.*;
 import static com.newegg.ec.redis.util.RedisClusterInfoUtil.OK;
 import static com.newegg.ec.redis.util.RedisConfigUtil.PORT;
 import static com.newegg.ec.redis.util.RedisConfigUtil.*;
-import static com.newegg.ec.redis.util.RedisNodeInfoUtil.EXPIRES;
-import static com.newegg.ec.redis.util.RedisNodeInfoUtil.KEYS;
+import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
 import static com.newegg.ec.redis.util.RedisUtil.*;
 import static javax.management.timer.Timer.ONE_SECOND;
 
@@ -120,6 +117,34 @@ public class RedisService implements IRedisService {
             }
         });
         return keyspaceInfoMap;
+    }
+
+    @Override
+    public Map<String, Long> getTotalMemoryInfo(Cluster cluster) {
+        List<RedisNode> redisMasterNodeList = getRedisMasterNodeList(cluster);
+        Map<String, Long> totalMemoryInfo = new HashMap<>();
+        AtomicLong totalUsedMemory = new AtomicLong(0);
+        redisMasterNodeList.forEach(redisNode -> {
+            RedisClient redisClient = null;
+            try {
+                redisClient = RedisClientFactory.buildRedisClient(redisNode, cluster.getRedisPassword());
+                Map<String, String> memoryInfo = redisClient.getInfo(RedisClient.MEMORY);
+                if (memoryInfo.isEmpty()) {
+                    return;
+                }
+                memoryInfo.forEach((key, val) -> {
+                    if (Objects.equals(USED_MEMORY, key)) {
+                        totalUsedMemory.addAndGet(byteToMB(val));
+                    }
+                });
+            } catch (Exception e) {
+                logger.error("Get keyspace info failed, redis node = " + redisNode.getHost() + ":" + redisNode.getPort(), e);
+            } finally {
+                close(redisClient);
+            }
+        });
+        totalMemoryInfo.put(USED_MEMORY, totalUsedMemory.get());
+        return totalMemoryInfo;
     }
 
     @Override

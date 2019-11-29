@@ -35,6 +35,8 @@ public class RedisClient implements IRedisClient {
 
     public static final String KEYSPACE = "keyspace";
 
+    public static final String MEMORY = "memory";
+
     public static final String REPLICATION = "replication";
 
     private Jedis jedis;

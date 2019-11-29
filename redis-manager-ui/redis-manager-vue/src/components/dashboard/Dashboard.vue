@@ -94,6 +94,10 @@
               Nodes:
               <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
             </div>
+            <div class="text item">
+              Total Momery:
+              <el-tag size="mini">{{ cluster.totalUsedMemory }}MB</el-tag>
+            </div>
             <div class="text item" v-if="cluster.redisMode == 'cluster'">
               Slots Assigned(ok/assigned):
               <el-tag size="mini">{{ cluster.clusterSlotsOk }}/{{ cluster.clusterSlotsAssigned }}</el-tag>
@@ -469,7 +473,7 @@ export default {
 }
 
 .item {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 /* .clearfix:before,

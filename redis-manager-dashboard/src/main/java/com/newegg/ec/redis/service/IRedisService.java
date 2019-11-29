@@ -27,6 +27,8 @@ public interface IRedisService {
      */
     Map<String, Map<String, Long>> getKeyspaceInfo(Cluster cluster);
 
+    Map<String, Long> getTotalMemoryInfo(Cluster cluster);
+
     /**
      * Get database
      * <p>

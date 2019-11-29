@@ -194,7 +194,7 @@ public class RedisNodeInfoUtil {
      * @param originalData
      * @return
      */
-    private static long byteToMB(String originalData) {
+    public static long byteToMB(String originalData) {
         if (Strings.isNullOrEmpty(originalData)) {
             return 0;
         }

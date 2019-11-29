@@ -31,7 +31,7 @@ public interface IClusterDao {
             "(group_id, user_id, cluster_token, " +
             "cluster_name, nodes, redis_mode, " +
             "os, redis_version, image, " +
-            "initialized, total_keys, total_expires, " +
+            "initialized, total_used_memory, total_keys, total_expires, " +
             "db_size, cluster_state, cluster_slots_assigned, " +
             "cluster_slots_ok, cluster_slots_pfail, cluster_slots_fail, " +
             "cluster_known_nodes, cluster_size, redis_password, " +
@@ -40,7 +40,7 @@ public interface IClusterDao {
             "(#{groupId}, #{userId}, #{clusterToken}, " +
             "#{clusterName}, #{nodes}, #{redisMode}, " +
             "#{os}, #{redisVersion}, #{image}, " +
-            "#{initialized}, #{totalKeys}, #{totalExpires}, " +
+            "#{initialized}, #{totalUsedMemory}, #{totalKeys}, #{totalExpires}, " +
             "#{dbSize}, #{clusterState}, #{clusterSlotsAssigned}, " +
             "#{clusterSlotsOk}, #{clusterSlotsPfail}, #{clusterSlotsFail}, " +
             "#{clusterKnownNodes}, #{clusterSize}, #{redisPassword}, " +
@@ -52,16 +52,13 @@ public interface IClusterDao {
             "cluster_token = #{clusterToken}, user_id = #{userId}, cluster_name = #{clusterName}, " +
             "nodes = #{nodes}, redis_mode = #{redisMode}, os = #{os}, " +
             "redis_version = #{redisVersion}, initialized = #{initialized}, " +
-            "total_keys = #{totalKeys}, total_expires = #{totalExpires}, db_size = #{dbSize}, " +
+            "total_used_memory = #{totalUsedMemory}, total_keys = #{totalKeys}, total_expires = #{totalExpires}, db_size = #{dbSize}, " +
             "cluster_state = #{clusterState}, cluster_slots_assigned = #{clusterSlotsAssigned}, cluster_slots_ok = #{clusterSlotsOk}, " +
             "cluster_slots_pfail = #{clusterSlotsPfail}, cluster_slots_fail = #{clusterSlotsFail}, cluster_known_nodes = #{clusterKnownNodes}, " +
             "cluster_size = #{clusterSize}, redis_password = #{redisPassword}, installation_environment = #{installationEnvironment}, " +
             "update_time = NOW() " +
             "WHERE cluster_id = #{clusterId}")
     int updateCluster(Cluster cluster);
-
-    @Update("UPDATE cluster SET total_keys = #{totalKeys}, total_expires = #{totalExpires}, update_time = NOW() WHERE cluster_id = #{clusterId}")
-    int updateKeyspace(@Param("clusterId") Integer clusterId, @Param("totalKeys") Long totalKeys, @Param("totalExpires") Long totalExpires);
 
     @Update("UPDATE cluster SET redis_password = #{redisPassword}, update_time = NOW() WHERE cluster_id = #{clusterId}")
     int updateRedisPassword(@Param("clusterId") Integer clusterId, @Param("redisPassword") String redisPassword);
@@ -90,6 +87,7 @@ public interface IClusterDao {
             "redis_version varchar(25) NOT NULL, " +
             "image varchar(255) DEFAULT NULL, " +
             "initialized tinyint(1) NOT NULL, " +
+            "total_used_memory bigint(20) NOT NULL, " +
             "total_keys bigint(20) NOT NULL, " +
             "total_expires bigint(20) NOT NULL, " +
             "db_size integer(8) NOT NULL, " +

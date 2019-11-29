@@ -56,6 +56,12 @@
           </el-col>
           <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
+              Total Memory:
+              <el-tag size="mini">{{ cluster.totalUsedMemory }}MB</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="3" :lg="4" :md="6" :sm="8">
+            <div class="base-info-item">
               Total Keys:
               <el-tag size="mini">{{ cluster.totalKeys }}</el-tag>
             </div>

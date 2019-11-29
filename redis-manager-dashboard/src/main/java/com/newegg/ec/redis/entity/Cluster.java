@@ -64,6 +64,8 @@ public class Cluster {
      */
     private long totalExpires;
 
+    private long totalUsedMemory;
+
     private int dbSize;
 
     /**
@@ -231,6 +233,14 @@ public class Cluster {
 
     public void setTotalExpires(long totalExpires) {
         this.totalExpires = totalExpires;
+    }
+
+    public long getTotalUsedMemory() {
+        return totalUsedMemory;
+    }
+
+    public void setTotalUsedMemory(long totalUsedMemory) {
+        this.totalUsedMemory = totalUsedMemory;
     }
 
     public int getDbSize() {
