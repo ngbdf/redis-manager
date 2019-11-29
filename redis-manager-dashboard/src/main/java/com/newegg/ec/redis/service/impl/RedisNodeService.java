@@ -108,7 +108,6 @@ public class RedisNodeService implements IRedisNodeService {
                 if (RedisUtil.equals(dbRedisNode, realRedisNode)) {
                     realIterator.remove();
                     dbIterator.remove();
-                    continue;
                 }
             }
         }
@@ -207,9 +206,7 @@ public class RedisNodeService implements IRedisNodeService {
             masterAndReplicaMap.put(masterId, replicaSet);
         });
         List<RedisNode> redisNodeSorted = new ArrayList<>();
-        masterAndReplicaMap.values().forEach(redisNodeSet -> {
-            redisNodeSorted.addAll(redisNodeSet);
-        });
+        masterAndReplicaMap.values().forEach(redisNodeSorted::addAll);
         return redisNodeSorted;
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface IAlertRuleDao {
 
-    @Select("SELECT * FROM alert_rule WHERE group_id = #{groupId}")
+    @Select("SELECT * FROM alert_rule WHERE group_id = #{groupId} ORDER BY cluster_alert DESC")
     List<AlertRule> selectAlertRuleByGroupId(Integer groupId);
 
     @Select("<script>" +
@@ -42,13 +42,13 @@ public interface IAlertRuleDao {
     @Select("SELECT * FROM alert_rule WHERE rule_id = #{ruleId}")
     AlertRule selectAlertRuleById(Integer ruleId);
 
-    @Insert("INSERT INTO alert_rule (group_id, rule_key, rule_value, compare_type, check_cycle, " +
+    @Insert("INSERT INTO alert_rule (group_id, cluster_alert, rule_key, rule_value, compare_type, check_cycle, " +
             "valid, global, rule_info, update_time, last_check_time) " +
-            "VALUES (#{groupId}, #{ruleKey}, #{ruleValue}, #{compareType}, #{checkCycle}, " +
+            "VALUES (#{groupId}, #{clusterAlert}, #{ruleKey}, #{ruleValue}, #{compareType}, #{checkCycle}, " +
             "#{valid}, #{global}, #{ruleInfo}, NOW(), NOW())")
     int insertAlertRule(AlertRule alertRule);
 
-    @Update("UPDATE alert_rule SET group_id = #{groupId}, rule_key = #{ruleKey}, rule_value = #{ruleValue}, " +
+    @Update("UPDATE alert_rule SET group_id = #{groupId}, cluster_alert = #{clusterAlert}, rule_key = #{ruleKey}, rule_value = #{ruleValue}, " +
             "compare_type = #{compareType}, check_cycle = #{checkCycle}, valid = #{valid}, global = #{global}, rule_info = #{ruleInfo}, " +
             "update_time = NOW() " +
             "WHERE rule_id = #{ruleId}")
@@ -72,6 +72,7 @@ public interface IAlertRuleDao {
     @Select("create TABLE IF NOT EXISTS `alert_rule` (" +
             "rule_id integer(4) NOT NULL AUTO_INCREMENT, " +
             "group_id integer(4) NOT NULL, " +
+            "cluster_alert tinyint(1) NOT NULL DEFAULT '0', " +
             "rule_key varchar(50) NOT NULL, " +
             "rule_value varchar(50) NOT NULL, " +
             "compare_type integer(2) NOT NULL, " +

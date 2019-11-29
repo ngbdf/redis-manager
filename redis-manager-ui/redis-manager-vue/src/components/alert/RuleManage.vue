@@ -10,9 +10,12 @@
       <el-table :data="alertRuleList">
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column label="Alert Rule">
-          <template
-            slot-scope="scope"
-          >{{scope.row.ruleKey}} {{scope.row.compareSign}} {{scope.row.ruleValue}}</template>
+          <template slot-scope="scope">
+            <span v-if="scope.row.clusterAlert">
+              <el-tag size="small" type="primary">Cluster Alert</el-tag>
+            </span>
+            <span v-else>{{scope.row.ruleKey}} {{scope.row.compareSign}} {{scope.row.ruleValue}}</span>
+          </template>
         </el-table-column>
         <el-table-column label="Rule Status">
           <template slot-scope="scope">
@@ -56,34 +59,43 @@
       v-loading="saveAlertRuleLoading"
     >
       <el-form :model="alertRule" ref="alertRule" :rules="rules" label-width="135px">
-        <el-form-item label="Rule Key" prop="ruleKey">
-          <el-select size="small" v-model="alertRule.ruleKey" placeholder="Select rule key">
-            <el-option
-              v-for="item in ruleKeyList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select>
+        <el-form-item label="Cluster Alert" prop="clusterAlert">
+          <el-switch v-model="alertRule.clusterAlert"></el-switch>
         </el-form-item>
-        <el-form-item label="Compare Type" prop="compareType">
-          <el-select size="small" v-model="alertRule.compareType" placeholder="Select compare type">
-            <el-option
-              v-for="item in compareTypeList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Rule Value" prop="ruleValue">
-          <el-input
-            size="small"
-            v-model="alertRule.ruleValue"
-            placeholder="Please enter rule value"
-            style="width: 215px;"
-          ></el-input>
-        </el-form-item>
+        <div v-if="!alertRule.clusterAlert">
+          <el-form-item label="Rule Key" prop="ruleKey">
+            <el-select size="small" v-model="alertRule.ruleKey" placeholder="Select rule key">
+              <el-option
+                v-for="item in ruleKeyList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Compare Type" prop="compareType">
+            <el-select
+              size="small"
+              v-model="alertRule.compareType"
+              placeholder="Select compare type"
+            >
+              <el-option
+                v-for="item in compareTypeList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Rule Value" prop="ruleValue">
+            <el-input
+              size="small"
+              v-model="alertRule.ruleValue"
+              placeholder="Please enter rule value"
+              style="width: 215px;"
+            ></el-input>
+          </el-form-item>
+        </div>
         <el-form-item label="Check Cycle" prop="checkCycle">
           <el-select size="small" v-model="alertRule.checkCycle" placeholder="Select check circle">
             <el-option
@@ -113,7 +125,9 @@
     <el-dialog title="Delete Alert Rule" :visible.sync="deleteVisible" width="30%">
       <span>
         Are you sure to delete
-        <b>{{ alertRule.ruleKey }} {{ alertRule.compareSign }} {{ alertRule.ruleValue }}</b> ?
+        <b
+          v-if="!alertRule.clusterAlert"
+        >{{ alertRule.ruleKey }} {{ alertRule.compareSign }} {{ alertRule.ruleValue }}</b> ?
       </span>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="deleteVisible = false">Cancel</el-button>
@@ -135,7 +149,8 @@ export default {
       alertRuleList: [],
       alertRule: {
         valid: true,
-        global: false
+        global: false,
+        clusterAlert: false
       },
       editVisible: false,
       isUpdate: false,
@@ -314,8 +329,7 @@ export default {
     };
   },
   methods: {
-    handleView(index, row) {
-    },
+    handleView(index, row) {},
     editAlertRule(index, row) {
       this.getAlertRule(row.ruleId);
       this.isUpdate = true;
@@ -330,7 +344,8 @@ export default {
       this.isUpdate = false;
       this.alertRule = {
         valid: true,
-        global: false
+        global: false,
+        clusterAlert: false
       };
     },
     getAlertRuleList(groupId) {
@@ -378,7 +393,7 @@ export default {
           }
         },
         err => {
-         message.error(err);
+          message.error(err);
         }
       );
     },

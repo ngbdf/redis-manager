@@ -26,6 +26,7 @@ import static com.newegg.ec.redis.entity.NodeRole.SLAVE;
 import static com.newegg.ec.redis.util.RedisConfigUtil.MASTER_AUTH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REQUIRE_PASS;
 import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
+import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.COMMAS;
 import static com.newegg.ec.redis.util.TimeUtil.*;

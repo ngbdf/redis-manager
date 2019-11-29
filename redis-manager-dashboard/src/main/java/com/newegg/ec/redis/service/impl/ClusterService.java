@@ -110,6 +110,7 @@ public class ClusterService implements IClusterService {
         }
     }
 
+
     /**
      * @param cluster
      * @return
@@ -120,6 +121,9 @@ public class ClusterService implements IClusterService {
         boolean fillResult = fillCluster(cluster);
         if (!fillResult) {
             return false;
+        }
+        if (Objects.equals(STANDALONE, cluster.getRedisMode())) {
+            cluster.setClusterState(Cluster.ClusterState.HEALTH);
         }
         int row = clusterDao.insertCluster(cluster);
         if (row == 0) {
@@ -243,7 +247,6 @@ public class ClusterService implements IClusterService {
         List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
         cluster.setClusterSize(1);
         cluster.setClusterKnownNodes(redisNodeList.size());
-        cluster.setClusterState(Cluster.ClusterState.HEALTH);
         cluster.setClusterSlotsAssigned(0);
         cluster.setClusterSlotsFail(0);
         cluster.setClusterSlotsPfail(0);

@@ -17,11 +17,11 @@ public interface IAlertRecordDao {
     List<AlertRecord> selectAlertRecordByClusterId(Integer clusterId);
 
     @Insert("<script>" +
-            "INSERT INTO alert_record (group_id, group_name, cluster_id, cluster_name, rule_id, redis_node, " +
+            "INSERT INTO alert_record (group_id, cluster_alert, group_name, cluster_id, cluster_name, rule_id, redis_node, " +
             "alert_rule, actual_data, check_cycle, rule_info, update_time) " +
             "VALUES " +
             "<foreach item='alertRecord' collection='alertRecordList' separator=','>" +
-            "(#{alertRecord.groupId}, #{alertRecord.groupName}, #{alertRecord.clusterId}, #{alertRecord.clusterName}, #{alertRecord.ruleId}, #{alertRecord.redisNode}, " +
+            "(#{alertRecord.groupId}, #{alertRecord.clusterAlert}, #{alertRecord.groupName}, #{alertRecord.clusterId}, #{alertRecord.clusterName}, #{alertRecord.ruleId}, #{alertRecord.redisNode}, " +
             "#{alertRecord.alertRule}, #{alertRecord.actualData}, #{alertRecord.checkCycle}, #{alertRecord.ruleInfo}, NOW())" +
             "</foreach>" +
             "</script>")
@@ -47,6 +47,7 @@ public interface IAlertRecordDao {
     @Select("create TABLE IF NOT EXISTS `alert_record` (" +
             "record_id integer(4) NOT NULL AUTO_INCREMENT, " +
             "group_id integer(4) NOT NULL, " +
+            "cluster_alert tinyint(1) NOT NULL DEFAULT '0', " +
             "group_name varchar(255) NOT NULL, " +
             "cluster_id integer(4) NOT NULL, " +
             "cluster_name varchar(255) NOT NULL, " +

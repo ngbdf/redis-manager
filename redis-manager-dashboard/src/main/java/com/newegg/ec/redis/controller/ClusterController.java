@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.ws.rs.PathParam;
 import java.util.*;
 
+import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
+
 /**
  * @author Jay.H.Zou
  * @date 7/20/2019

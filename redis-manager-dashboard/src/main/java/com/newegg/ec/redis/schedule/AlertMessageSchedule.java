@@ -7,6 +7,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.newegg.ec.redis.client.RedisClient;
+import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
@@ -15,9 +17,8 @@ import com.newegg.ec.redis.plugin.alert.service.IAlertChannelService;
 import com.newegg.ec.redis.plugin.alert.service.IAlertRecordService;
 import com.newegg.ec.redis.plugin.alert.service.IAlertRuleService;
 import com.newegg.ec.redis.plugin.alert.service.IAlertService;
-import com.newegg.ec.redis.service.IClusterService;
-import com.newegg.ec.redis.service.IGroupService;
-import com.newegg.ec.redis.service.INodeInfoService;
+import com.newegg.ec.redis.service.*;
+import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
@@ -32,9 +33,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -44,6 +43,7 @@ import java.util.stream.Collectors;
 import static com.newegg.ec.redis.util.SignUtil.EQUAL_SIGN;
 import static com.newegg.ec.redis.util.TimeUtil.FIVE_SECONDS;
 import static javax.management.timer.Timer.ONE_MINUTE;
+import static javax.management.timer.Timer.ONE_SECOND;
 
 /**
  * @author Jay.H.Zou
@@ -75,6 +75,12 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
 
     @Autowired
     private IClusterService clusterService;
+
+    @Autowired
+    private IRedisNodeService redisNodeService;
+
+    @Autowired
+    private IRedisService redisService;
 
     @Autowired
     private IAlertRuleService alertRuleService;
@@ -152,7 +158,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
 
         private Group group;
 
-        public AlertTask(Group group) {
+        AlertTask(Group group) {
             this.group = group;
         }
 
@@ -184,21 +190,17 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     if (alertRuleList.isEmpty()) {
                         return;
                     }
-                    // 获取告警通道并发送消息
-                    List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
-                    // 获取 node info 列表
-                    NodeInfoParam nodeInfoParam = new NodeInfoParam(cluster.getClusterId(), TimeType.MINUTE, null);
-                    List<NodeInfo> lastTimeNodeInfoList = nodeInfoService.getLastTimeNodeInfoList(nodeInfoParam);
-                    // 构建告警记录
-                    List<AlertRecord> alertRecordList = new ArrayList<>();
-                    alertRuleList.forEach(alertRule -> lastTimeNodeInfoList.forEach(nodeInfo -> {
-                        if (isNotify(nodeInfo, alertRule)) {
-                            alertRecordList.add(buildAlertRecord(group, cluster, nodeInfo, alertRule));
-                        }
-                    }));
+                    List<AlertRecord> alertRecordList = getNodeInfoAlertRecord(group, cluster, alertRuleList);
+                    // 获取集群级别的告警
+                    List<AlertRecord> clusterAlertRecordList = getClusterAlertRecord(group, cluster, alertRuleList);
+                    if (!clusterAlertRecordList.isEmpty()) {
+                        alertRecordList.addAll(clusterAlertRecordList);
+                    }
                     logger.info("Start to send alert message...");
                     // save to database
                     saveRecordToDB(cluster.getClusterName(), alertRecordList);
+                    // 获取告警通道并发送消息
+                    List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
                     Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
                     if (channelMultimap != null && !channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
                         distribution(channelMultimap, alertRecordList);
@@ -208,6 +210,78 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 logger.error("Alert task failed, " + group, e);
             }
         }
+    }
+
+    private List<AlertRecord> getNodeInfoAlertRecord(Group group, Cluster cluster, List<AlertRule> alertRuleList) {
+        List<AlertRecord> alertRecordList = new ArrayList<>();
+        // 获取 node info 列表
+        NodeInfoParam nodeInfoParam = new NodeInfoParam(cluster.getClusterId(), TimeType.MINUTE, null);
+        List<NodeInfo> lastTimeNodeInfoList = nodeInfoService.getLastTimeNodeInfoList(nodeInfoParam);
+        // 构建告警记录
+        for (AlertRule alertRule : alertRuleList) {
+            if (alertRule.getClusterAlert()) {
+                continue;
+            }
+            for (NodeInfo nodeInfo : lastTimeNodeInfoList) {
+                if (isNotify(nodeInfo, alertRule)) {
+                    alertRecordList.add(buildNodeInfoAlertRecord(group, cluster, nodeInfo, alertRule));
+                }
+            }
+        }
+        return alertRecordList;
+    }
+
+    /**
+     * cluster/standalone check
+     * <p>
+     * 1.connect cluster/standalone failed
+     * 2.cluster(mode) cluster_state isn't ok
+     * 3.node not in cluster/standalone
+     * 4.node shutdown
+     *
+     * @param group
+     * @param cluster
+     * @param alertRuleList
+     * @return
+     */
+    private List<AlertRecord> getClusterAlertRecord(Group group, Cluster cluster, List<AlertRule> alertRuleList) {
+        List<AlertRecord> alertRecordList = new ArrayList<>();
+        String seedNodes = cluster.getNodes();
+        for (AlertRule alertRule : alertRuleList) {
+            if (!alertRule.getClusterAlert()) {
+                continue;
+            }
+            RedisClient redisClient = null;
+            try {
+                redisClient = RedisClientFactory.buildRedisClient(RedisUtil.nodesToHostAndPort(seedNodes), cluster.getRedisPassword());
+            } catch (Exception e) {
+                logger.error("Connected " + cluster.getClusterName() + " failed.", e);
+                alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, e.getMessage()));
+                cluster.setClusterState(Cluster.ClusterState.BAD);
+                return alertRecordList;
+            } finally {
+                if (redisClient != null) {
+                    redisClient.close();
+                }
+            }
+
+            List<RedisNode> redisNodeList = redisNodeService.getRedisNodeListByClusterId(cluster.getClusterId());
+            if (redisClient == null || redisNodeList.isEmpty()) {
+                alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Get nodes failed"));
+                cluster.setClusterState(Cluster.ClusterState.BAD);
+                continue;
+            }
+            redisNodeList.forEach(redisNode -> {
+                String node = RedisUtil.getNodeString(redisNode);
+                String reason = !redisNode.getRunStatus() ? node + " is shutdown" : !redisNode.getInCluster() ? node + " not in cluster/standalone" : null;
+                if (Strings.isNullOrEmpty(reason)) {
+                    alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, node, reason));
+                    cluster.setClusterState(Cluster.ClusterState.WARN);
+                }
+            });
+        }
+        clusterService.updateCluster(cluster);
+        return alertRecordList;
     }
 
     /**
@@ -346,7 +420,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
 
     }
 
-    private AlertRecord buildAlertRecord(Group group, Cluster cluster, NodeInfo nodeInfo, AlertRule rule) {
+    private AlertRecord buildNodeInfoAlertRecord(Group group, Cluster cluster, NodeInfo nodeInfo, AlertRule rule) {
         JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(nodeInfo));
         AlertRecord record = new AlertRecord();
         String alertKey = rule.getRuleKey();
@@ -360,6 +434,21 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         record.setRedisNode(nodeInfo.getNode());
         record.setAlertRule(rule.getRuleKey() + getCompareSign(rule.getCompareType()) + rule.getRuleValue());
         record.setActualData(rule.getRuleKey() + EQUAL_SIGN + actualVal);
+        record.setCheckCycle(rule.getCheckCycle());
+        record.setRuleInfo(rule.getRuleInfo());
+        return record;
+    }
+
+    private AlertRecord buildClusterAlertRecord(Group group, Cluster cluster, AlertRule rule, String nodes, String reason) {
+        AlertRecord record = new AlertRecord();
+        record.setGroupId(group.getGroupId());
+        record.setGroupName(group.getGroupName());
+        record.setClusterId(cluster.getClusterId());
+        record.setClusterName(cluster.getClusterName());
+        record.setRuleId(rule.getRuleId());
+        record.setRedisNode(nodes);
+        record.setAlertRule("Check cluster/standalone");
+        record.setActualData(reason);
         record.setCheckCycle(rule.getCheckCycle());
         record.setRuleInfo(rule.getRuleInfo());
         return record;
@@ -392,6 +481,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     /**
      * 给各通道发送消息
      * 由于部分通道对于消息长度、频率等有限制，此处做了分批、微延迟处理
+     *
      * @param channelMultimap
      * @param alertRecordList
      */
@@ -399,12 +489,14 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         alert(emailAlert, channelMultimap.get(EMAIL), alertRecordList);
         if (alertRecordList.size() > ALERT_RECORD_LIMIT) {
             List<List<AlertRecord>> partition = Lists.partition(alertRecordList, ALERT_RECORD_LIMIT);
+            int size = partition.size();
+            long waitSecond = size > 10 ? FIVE_SECONDS : ONE_SECOND;
             partition.forEach(partAlertRecordList -> {
                 alert(wechatWebHookAlert, channelMultimap.get(WECHAT_WEB_HOOK), partAlertRecordList);
                 alert(dingDingWebHookAlert, channelMultimap.get(DINGDING_WEB_HOOK), partAlertRecordList);
                 alert(wechatAppAlert, channelMultimap.get(WECHAT_APP), partAlertRecordList);
                 try {
-                    Thread.sleep(FIVE_SECONDS);
+                    Thread.sleep(waitSecond);
                 } catch (InterruptedException ignored) {
                 }
             });
@@ -436,28 +528,4 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         }
     }
 
-    /**
-     * 基于集群级别的告警
-     */
-    public class AlertMessageNotify implements Runnable {
-
-        private Cluster cluster;
-
-        private List<AlertRule> alertRuleList;
-
-        public AlertMessageNotify(Cluster cluster, List<AlertRule> alertRuleList) {
-            this.cluster = cluster;
-            this.alertRuleList = alertRuleList;
-        }
-
-        /**
-         * 1.获取NodeInfoList
-         * 2.匹配规则(检查间间隔)
-         * 3.写入 DB
-         * 4.发送消息
-         */
-        @Override
-        public void run() {
-        }
-    }
 }

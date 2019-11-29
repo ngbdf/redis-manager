@@ -12,6 +12,8 @@ public class AlertRecord {
 
     private Integer groupId;
 
+    private Boolean clusterAlert;
+
     private String groupName;
 
     private Integer clusterId;
@@ -46,6 +48,14 @@ public class AlertRecord {
 
     public void setGroupId(Integer groupId) {
         this.groupId = groupId;
+    }
+
+    public Boolean getClusterAlert() {
+        return clusterAlert;
+    }
+
+    public void setClusterAlert(Boolean clusterAlert) {
+        this.clusterAlert = clusterAlert;
     }
 
     public String getGroupName() {

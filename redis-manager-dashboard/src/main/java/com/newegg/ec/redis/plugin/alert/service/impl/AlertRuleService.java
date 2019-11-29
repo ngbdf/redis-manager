@@ -3,6 +3,7 @@ package com.newegg.ec.redis.plugin.alert.service.impl;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRuleDao;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRule;
 import com.newegg.ec.redis.plugin.alert.service.IAlertRuleService;
+import com.newegg.ec.redis.util.SignUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,11 @@ public class AlertRuleService implements IAlertRuleService {
     @Override
     public boolean addAlertRule(AlertRule alertRule) {
         try {
+            if (alertRule.getClusterAlert()) {
+                alertRule.setRuleKey(SignUtil.MINUS);
+                alertRule.setCompareType(0);
+                alertRule.setRuleValue(0);
+            }
             int row = alertRuleDao.insertAlertRule(alertRule);
             return row > 0;
         } catch (Exception e) {

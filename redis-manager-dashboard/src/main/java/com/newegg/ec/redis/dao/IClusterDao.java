@@ -15,7 +15,7 @@ public interface IClusterDao {
     @Select("SELECT * FROM cluster")
     List<Cluster> selectAllCluster();
 
-    @Select("SELECT * FROM cluster WHERE group_id = #{groupId}")
+    @Select("SELECT * FROM cluster WHERE group_id = #{groupId} ORDER BY cluster_name ASC")
     List<Cluster> selectClusterByGroupId(Integer groupId);
 
     @Select("SELECT * FROM cluster WHERE cluster_id = #{clusterId}")
