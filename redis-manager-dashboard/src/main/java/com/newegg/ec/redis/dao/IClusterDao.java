@@ -60,6 +60,9 @@ public interface IClusterDao {
             "WHERE cluster_id = #{clusterId}")
     int updateCluster(Cluster cluster);
 
+    @Update("UPDATE cluster SET update_time = NOW() WHERE cluster_id = #{clusterId}")
+    int updateClusterState(Cluster cluster);
+
     @Update("UPDATE cluster SET redis_password = #{redisPassword}, update_time = NOW() WHERE cluster_id = #{clusterId}")
     int updateRedisPassword(@Param("clusterId") Integer clusterId, @Param("redisPassword") String redisPassword);
 

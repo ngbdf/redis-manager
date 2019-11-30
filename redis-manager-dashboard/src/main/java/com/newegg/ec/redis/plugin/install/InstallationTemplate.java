@@ -440,13 +440,13 @@ public class InstallationTemplate {
             InstallationWebSocketHandler.appendLog(clusterName, updateRedisPasswordResult);
             logger.error(updateRedisPasswordResult);
         }
-        boolean autoInit = installationParam.isAutoInit();
+        /*boolean autoInit = installationParam.isAutoInit();
         if (autoInit) {
             String initResult = redisService.initSlots(cluster);
             if (Strings.isNullOrEmpty(initResult)) {
                 cluster.setInitialized(true);
             }
-        }
+        }*/
         return true;
     }
 
@@ -468,7 +468,7 @@ public class InstallationTemplate {
             InstallationWebSocketHandler.appendLog(clusterName, updateRedisPasswordResult);
             logger.error(updateRedisPasswordResult);
         }
-        installationParam.setAutoInit(false);
+        // installationParam.setAutoInit(false);
         cluster.setInitialized(true);
         return true;
     }
@@ -510,14 +510,14 @@ public class InstallationTemplate {
                 InstallationWebSocketHandler.appendLog(clusterName, message);
                 logger.error(message, e);
                 timeout += TEN_SECONDS;
-                installationParam.setAutoInit(false);
+                // installationParam.setAutoInit(false);
             } finally {
                 redisClient.close();
             }
         }
         InstallationWebSocketHandler.appendLog(clusterName, "Wait meet: " + (System.currentTimeMillis() - start));
         if (redisNodeListWithInfo.size() != redisNodeList.size()) {
-            installationParam.setAutoInit(false);
+            // installationParam.setAutoInit(false);
             StringBuilder message = new StringBuilder("Topology is incorrect, real nodes = ");
             redisNodeListWithInfo.forEach(redisNode -> message.append(RedisUtil.getNodeString(redisNode)).append(COMMAS));
             message.append("; expectation nodes = ");
@@ -567,7 +567,7 @@ public class InstallationTemplate {
                 replicateResult = redisService.clusterReplicate(cluster, masterNodeWithInfo.getNodeId(), slaveNode);
             }
             if (!replicateResult) {
-                installationParam.setAutoInit(false);
+                // installationParam.setAutoInit(false);
                 InstallationWebSocketHandler.appendLog(cluster.getClusterName(),
                         slaveNode.getHost() + ":" + slaveNode.getPort() + " replicate failed.");
             }

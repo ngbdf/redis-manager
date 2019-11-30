@@ -45,7 +45,9 @@ public class UserController {
         if (userLogin == null) {
             return Result.failResult();
         }
-        request.getSession().setAttribute("user", userLogin);
+        HttpSession session = request.getSession();
+        session.setAttribute("user", user);
+        session.setMaxInactiveInterval(60 * 60);
         return Result.successResult(userLogin);
     }
 

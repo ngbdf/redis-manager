@@ -189,7 +189,7 @@
                   <i class="el-icon-info info"></i>
                 </el-tooltip>
               </el-form-item>
-              <el-form-item
+              <!-- <el-form-item
                 label="Init Slot"
                 prop="autoInit"
                 v-if="installationParam.redisMode == 'cluster'"
@@ -203,7 +203,7 @@
                 >
                   <i class="el-icon-info info"></i>
                 </el-tooltip>
-              </el-form-item>
+              </el-form-item> -->
               <el-form-item label="Cluster Info" prop="clusterInfo">
                 <el-input type="input" v-model="installationParam.clusterInfo"></el-input>
               </el-form-item>

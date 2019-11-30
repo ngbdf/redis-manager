@@ -15,6 +15,7 @@
     "echarts": "^4.2.1",
     "element-resize-detector": "^1.1.15",
     "element-ui": "^2.12.0",
+    "js-cookie": "^2.2.1",
     "vue": "^2.5.2",
     "vue-codemirror-lite": "^1.0.4",
     "vue-router": "^3.0.7",

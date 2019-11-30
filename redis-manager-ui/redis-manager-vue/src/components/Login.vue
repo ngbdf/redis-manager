@@ -118,27 +118,32 @@ export default {
         }
       });
     },
-    getUserFromSession() {
-      let url = "/user/getUserFromSession";
-      API.get(
-        url,
-        null,
-        response => {
-          let result = response.data;
-          if (result.code == 0) {
-            store.dispatch("setUser", result.data);
-            this.$router.push({ name: "index" });
-          } 
-        },
-        err => {
-          message.error("Auto get user failed.");
-        }
-      );
-    }
+    // getUserFromSession() {
+    //   let url = "/user/getUserFromSession";
+    //   API.get(
+    //     url,
+    //     null,
+    //     response => {
+    //       let result = response.data;
+    //       if (result.code == 0) {
+    //         store.dispatch("setUser", result.data);
+    //         this.$router.push({ name: "index" });
+    //       }
+    //     },
+    //     err => {
+    //       message.error("Auto get user failed.");
+    //     }
+    //   );
+    // }
   },
   mounted() {
-    this.getUserFromSession();
+    //this.getUserFromSession();
     this.getAuthorization();
+    store.dispatch("setUser", {
+      userRole: 2
+    });
+    store.dispatch("setCurrentGroup", {});
+    store.dispatch("setGroupList", []);
   }
 };
 </script>

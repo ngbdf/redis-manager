@@ -141,7 +141,7 @@ router.beforeEach((to, from, next) => {
     } else {
       next({ path: 'login' })
     }
-    
+
     // admin
   } else if (user.userRole === 1 && toPath.indexOf('group-manage') > 0) {
     next({ name: 'dashboard', params: { groupId: store.getters.getCurrentGroup.groupId } })

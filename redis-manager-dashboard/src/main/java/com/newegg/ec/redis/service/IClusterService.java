@@ -25,6 +25,8 @@ public interface IClusterService {
 
     boolean updateCluster(Cluster cluster);
 
+    boolean updateClusterState(Cluster cluster);
+
     boolean updateNodes(Cluster cluster);
 
     boolean updateClusterRuleIds(Cluster cluster);

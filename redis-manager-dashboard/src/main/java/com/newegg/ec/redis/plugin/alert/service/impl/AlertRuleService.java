@@ -66,11 +66,6 @@ public class AlertRuleService implements IAlertRuleService {
     @Override
     public boolean addAlertRule(AlertRule alertRule) {
         try {
-            if (alertRule.getClusterAlert()) {
-                alertRule.setRuleKey(SignUtil.MINUS);
-                alertRule.setCompareType(0);
-                alertRule.setRuleValue(0);
-            }
             int row = alertRuleDao.insertAlertRule(alertRule);
             return row > 0;
         } catch (Exception e) {

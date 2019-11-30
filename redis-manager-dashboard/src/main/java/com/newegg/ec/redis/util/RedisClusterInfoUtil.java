@@ -36,7 +36,7 @@ public class RedisClusterInfoUtil {
     public static final String CLUSTER_SIZE = "cluster_size";
 
 
-    public static final Cluster parseClusterInfoToObject(Map<String, String> clusterInfoMap) throws IOException {
+    public static Cluster parseClusterInfoToObject(Map<String, String> clusterInfoMap) throws IOException {
         JSONObject infoJSONObject = new JSONObject();
         for (Map.Entry<String, String> entry : clusterInfoMap.entrySet()) {
             String key = entry.getKey();

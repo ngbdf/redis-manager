@@ -146,6 +146,17 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
+    public boolean updateClusterState(Cluster cluster) {
+        try {
+            int row = clusterDao.updateClusterState(cluster);
+            return row > 0;
+        } catch (Exception e) {
+            logger.error("Update cluster state failed.", e);
+            return false;
+        }
+    }
+
+    @Override
     public boolean updateNodes(Cluster cluster) {
         Integer clusterId = cluster.getClusterId();
         try {
@@ -226,6 +237,7 @@ public class ClusterService implements IClusterService {
             Map<String, String> clusterInfo = redisService.getClusterInfo(cluster);
             if (clusterInfo == null) {
                 logger.warn("Cluster info is empty.");
+                cluster.setClusterState(Cluster.ClusterState.BAD);
                 return true;
             }
             Cluster clusterInfoObj = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfo);

@@ -66,7 +66,7 @@
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column property="redisNode" label="Redis Node"></el-table-column>
             <el-table-column property="alertRule" label="Alert Rule"></el-table-column>
-            <el-table-column property="actualData" label="Actual Data"></el-table-column>
+            <el-table-column property="actualData" label="Reason"></el-table-column>
             <el-table-column label="Is Global">
               <template slot-scope="scope">
                 <el-tag size="small" v-if="scope.row.global">Global</el-tag>
@@ -100,9 +100,12 @@
           <el-table :data="alertRuleList" :default-sort="{prop: 'time', order: 'descending'}">
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column label="Alert Rule">
-              <template
-                slot-scope="scope"
-              >{{ scope.row.ruleKey }}{{ scope.row.compareSign }}{{ scope.row.ruleValue }}</template>
+              <template slot-scope="scope">
+                <span v-if="scope.row.clusterAlert">
+                  <el-tag size="small" type="primary">Cluster Alert</el-tag>
+                </span>
+                <span v-else>{{scope.row.ruleKey}} {{scope.row.compareSign}} {{scope.row.ruleValue}}</span>
+              </template>
             </el-table-column>
             <el-table-column label="Rule Status">
               <template slot-scope="scope">
@@ -238,9 +241,12 @@
       <el-table :data="alertRuleListNotUsed" stripe @selection-change="addRuleSelectionChange">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column label="Alert Rule">
-          <template
-            slot-scope="scope"
-          >{{ scope.row.ruleKey }}{{ scope.row.compareSign }}{{ scope.row.ruleValue }}</template>
+          <template slot-scope="scope">
+            <span v-if="scope.row.clusterAlert">
+              <el-tag size="small" type="primary">Cluster Alert</el-tag>
+            </span>
+            <span v-else>{{scope.row.ruleKey}} {{scope.row.compareSign}} {{scope.row.ruleValue}}</span>
+          </template>
         </el-table-column>
         <el-table-column property="checkCycle" label="Check Cycle(Min)"></el-table-column>
         <el-table-column property="ruleInfo" label="Info"></el-table-column>

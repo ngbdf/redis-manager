@@ -141,7 +141,12 @@
         </transition>
       </el-main>
     </el-container>
-    <el-dialog title="Import Cluster" :visible.sync="importVisible" :close-on-click-modal="false" v-if="importVisible">
+    <el-dialog
+      title="Import Cluster"
+      :visible.sync="importVisible"
+      :close-on-click-modal="false"
+      v-if="importVisible"
+    >
       <editCluster @closeDialog="closeDialog"></editCluster>
     </el-dialog>
   </el-container>
@@ -176,9 +181,6 @@ export default {
         url,
         null,
         response => {
-          store.dispatch("setUser", {});
-          store.dispatch("setGroupList", []);
-          store.dispatch("setCurrentGroup", {});
           this.$router.push({
             name: "login"
           });
@@ -308,10 +310,7 @@ export default {
             store.dispatch("setGroupList", groupList);
             let currentGroup = this.currentGroup;
             let user = store.getters.getUser;
-            if (
-              isEmpty(currentGroup) ||
-              isEmpty(currentGroup.groupId)
-            ) {
+            if (isEmpty(currentGroup) || isEmpty(currentGroup.groupId)) {
               groupList.forEach(group => {
                 if (group.groupId == user.groupId) {
                   this.selectGroupId = user.groupId;
@@ -333,6 +332,24 @@ export default {
       this.active = false;
       this.$nextTick(() => (this.active = true));
       this.importVisible = importVisible;
+    },
+    getUserFromSession() {
+      let url = "/user/getUserFromSession";
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            store.dispatch("setUser", result.data);
+          } else {
+            this.signOut();
+          }
+        },
+        err => {
+          message.error("Auto get user failed.");
+        }
+      );
     }
   },
   computed: {
@@ -347,6 +364,7 @@ export default {
     }
   },
   mounted() {
+   // this.getUserFromSession();
     this.getGroupList();
     let groupId = "";
     if (isEmpty(this.currentGroup) || isEmpty(this.currentGroup.groupId)) {

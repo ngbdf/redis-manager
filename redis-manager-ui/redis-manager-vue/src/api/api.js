@@ -1,5 +1,7 @@
 /* eslint-disable indent */
 import axios from 'axios'
+import message from '@/utils/message.js'
+import router from '@/router'
 
 // 封装axios
 // eslint-disable-next-line space-before-function-paren
@@ -14,7 +16,12 @@ function apiAxios(method, url, params, successHandler, failureHandler) {
     }).then(function (res) {
         successHandler(res)
     }).catch(function (err) {
-        failureHandler(err)
+        if (err.response.status === 401) {
+            message.warning('Session timeout')
+            router.push({ name: 'login' })
+        } else {
+            failureHandler(err)
+        }
     })
 }
 

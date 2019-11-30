@@ -4,6 +4,7 @@ import createPersistedState from 'vuex-persistedstate'
 import API from "@/api/api.js";
 import { isEmpty } from '@/utils/validate.js'
 import apiConfig from '@/api/apiConfig.js'
+import * as Cookies from 'js-cookie'
 
 Vue.use(Vuex)
 
@@ -97,6 +98,11 @@ export const store = new Vuex.Store({
   mutations,
   plugins: [createPersistedState(
     {
+      storage: {
+        getItem: key => Cookies.get(key),
+        setItem: (key, value) => Cookies.set(key, value, { expires: 1 }),
+        removeItem: key => Cookies.remove(key)
+      },
       reducer (val) {
         return {
           user: val.user,

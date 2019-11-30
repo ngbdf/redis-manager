@@ -40,6 +40,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.newegg.ec.redis.util.RedisClusterInfoUtil.parseClusterInfoToObject;
+import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
 import static com.newegg.ec.redis.util.SignUtil.EQUAL_SIGN;
 import static com.newegg.ec.redis.util.TimeUtil.FIVE_SECONDS;
 import static javax.management.timer.Timer.ONE_MINUTE;
@@ -193,17 +195,20 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     List<AlertRecord> alertRecordList = getNodeInfoAlertRecord(group, cluster, alertRuleList);
                     // 获取集群级别的告警
                     List<AlertRecord> clusterAlertRecordList = getClusterAlertRecord(group, cluster, alertRuleList);
-                    if (!clusterAlertRecordList.isEmpty()) {
-                        alertRecordList.addAll(clusterAlertRecordList);
-                    }
                     logger.info("Start to send alert message...");
                     // save to database
                     saveRecordToDB(cluster.getClusterName(), alertRecordList);
+                    saveRecordToDB(cluster.getClusterName(), clusterAlertRecordList);
                     // 获取告警通道并发送消息
                     List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
                     Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
-                    if (channelMultimap != null && !channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
-                        distribution(channelMultimap, alertRecordList);
+                    if (channelMultimap != null && !channelMultimap.isEmpty()) {
+                        if (!alertRecordList.isEmpty()) {
+                            distribution(channelMultimap, alertRecordList);
+                        }
+                        if (!clusterAlertRecordList.isEmpty()) {
+                            distribution(channelMultimap, clusterAlertRecordList);
+                        }
                     }
                 });
             } catch (Exception e) {
@@ -254,6 +259,15 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
             RedisClient redisClient = null;
             try {
                 redisClient = RedisClientFactory.buildRedisClient(RedisUtil.nodesToHostAndPort(seedNodes), cluster.getRedisPassword());
+                if (Objects.equals(CLUSTER, cluster.getRedisMode())) {
+                    Map<String, String> clusterInfo = redisClient.getClusterInfo();
+                    Cluster currentCluster = parseClusterInfoToObject(clusterInfo);
+                    Cluster.ClusterState clusterState = currentCluster.getClusterState();
+                    if (!Objects.equals(Cluster.ClusterState.HEALTH, currentCluster.getClusterState())) {
+                        alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Cluster state not ok"));
+                        cluster.setClusterState(clusterState);
+                    }
+                }
             } catch (Exception e) {
                 logger.error("Connected " + cluster.getClusterName() + " failed.", e);
                 alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, e.getMessage()));
@@ -273,14 +287,14 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
             }
             redisNodeList.forEach(redisNode -> {
                 String node = RedisUtil.getNodeString(redisNode);
-                String reason = !redisNode.getRunStatus() ? node + " is shutdown" : !redisNode.getInCluster() ? node + " not in cluster/standalone" : null;
-                if (Strings.isNullOrEmpty(reason)) {
+                String reason = !redisNode.getRunStatus() ? node + " is shutdown" : !redisNode.getInCluster() ? node + " not in cluster" : null;
+                if (!Strings.isNullOrEmpty(reason)) {
                     alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, node, reason));
                     cluster.setClusterState(Cluster.ClusterState.WARN);
                 }
             });
         }
-        clusterService.updateCluster(cluster);
+        clusterService.updateClusterState(cluster);
         return alertRecordList;
     }
 
@@ -295,19 +309,8 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
             return null;
         }
-        validAlertRuleList.removeIf(alertRule -> !isValid(alertRule));
+        validAlertRuleList.removeIf(alertRule -> !isRuleValid(alertRule));
         return validAlertRuleList;
-    }
-
-    @Deprecated
-    private List<AlertRule> getAlertRuleByIds(List<AlertRule> validAlertRuleList, List<Integer> ruleIdList) {
-        List<AlertRule> alertRuleList = new ArrayList<>();
-        validAlertRuleList.forEach(alertRule -> {
-            if (alertRule.getGlobal() || ruleIdList.contains(alertRule.getRuleId())) {
-                alertRuleList.add(alertRule);
-            }
-        });
-        return alertRuleList;
     }
 
     private List<Integer> getRuleIdList(String ruleIds) {
@@ -383,7 +386,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
      * @param alertRule
      * @return
      */
-    private boolean isValid(AlertRule alertRule) {
+    private boolean isRuleValid(AlertRule alertRule) {
         // 规则状态是否有效
         if (!alertRule.getValid()) {
             return false;
@@ -436,6 +439,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         record.setActualData(rule.getRuleKey() + EQUAL_SIGN + actualVal);
         record.setCheckCycle(rule.getCheckCycle());
         record.setRuleInfo(rule.getRuleInfo());
+        record.setClusterAlert(rule.getClusterAlert());
         return record;
     }
 
@@ -447,10 +451,11 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         record.setClusterName(cluster.getClusterName());
         record.setRuleId(rule.getRuleId());
         record.setRedisNode(nodes);
-        record.setAlertRule("Check cluster/standalone");
+        record.setAlertRule("Cluster Alert");
         record.setActualData(reason);
         record.setCheckCycle(rule.getCheckCycle());
         record.setRuleInfo(rule.getRuleInfo());
+        record.setClusterAlert(rule.getClusterAlert());
         return record;
     }
 
@@ -487,21 +492,18 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
      */
     private void distribution(Multimap<Integer, AlertChannel> channelMultimap, List<AlertRecord> alertRecordList) {
         alert(emailAlert, channelMultimap.get(EMAIL), alertRecordList);
-        if (alertRecordList.size() > ALERT_RECORD_LIMIT) {
-            List<List<AlertRecord>> partition = Lists.partition(alertRecordList, ALERT_RECORD_LIMIT);
-            int size = partition.size();
-            long waitSecond = size > 10 ? FIVE_SECONDS : ONE_SECOND;
-            partition.forEach(partAlertRecordList -> {
-                alert(wechatWebHookAlert, channelMultimap.get(WECHAT_WEB_HOOK), partAlertRecordList);
-                alert(dingDingWebHookAlert, channelMultimap.get(DINGDING_WEB_HOOK), partAlertRecordList);
-                alert(wechatAppAlert, channelMultimap.get(WECHAT_APP), partAlertRecordList);
-                try {
-                    Thread.sleep(waitSecond);
-                } catch (InterruptedException ignored) {
-                }
-            });
-
-        }
+        List<List<AlertRecord>> partition = Lists.partition(alertRecordList, ALERT_RECORD_LIMIT);
+        int size = partition.size();
+        long waitSecond = size > 10 ? FIVE_SECONDS : ONE_SECOND;
+        partition.forEach(partAlertRecordList -> {
+            alert(wechatWebHookAlert, channelMultimap.get(WECHAT_WEB_HOOK), partAlertRecordList);
+            alert(dingDingWebHookAlert, channelMultimap.get(DINGDING_WEB_HOOK), partAlertRecordList);
+            alert(wechatAppAlert, channelMultimap.get(WECHAT_APP), partAlertRecordList);
+            try {
+                Thread.sleep(waitSecond);
+            } catch (InterruptedException ignored) {
+            }
+        });
     }
 
     private void alert(IAlertService alertService, Collection<AlertChannel> alertChannelCollection, List<AlertRecord> alertRecordList) {

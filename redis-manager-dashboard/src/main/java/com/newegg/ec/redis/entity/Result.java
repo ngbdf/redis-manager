@@ -48,6 +48,10 @@ public class Result {
         return new Result(ResultCode.FAIL);
     }
 
+    public static Result notLoginResult() {
+        return new Result(ResultCode.NOT_LOGIN);
+    }
+
     public int getCode() {
         return code;
     }
@@ -102,7 +106,9 @@ public class Result {
          */
         EXIST(1, "exist"),
 
-        BAD_PARAM(-2, "bad param");
+        BAD_PARAM(-2, "bad param"),
+
+        NOT_LOGIN(-3, "not login");
 
         private int code;
 

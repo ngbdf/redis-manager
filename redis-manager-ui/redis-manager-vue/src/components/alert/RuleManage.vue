@@ -408,6 +408,11 @@ export default {
           }
           this.alertRule.groupId = this.currentGroup.groupId;
           this.saveAlertRuleLoading = true;
+          if (this.alertRule.clusterAlert) {
+            this.alertRule.ruleKey = "-";
+            this.alertRule.compareType = 0;
+            this.alertRule.ruleValue = 0;
+          }
           API.post(
             url,
             this.alertRule,
