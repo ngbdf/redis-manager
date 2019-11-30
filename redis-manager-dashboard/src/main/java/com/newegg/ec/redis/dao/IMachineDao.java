@@ -34,15 +34,15 @@ public interface IMachineDao {
     @Select("SELECT * FROM machine WHERE group_id = #{groupId} AND host = #{host}")
     List<Machine> selectMachineByHost(@Param("groupId") Integer groupId, @Param("host") String host);
 
-    @Update("UPDATE machine SET machine_group_name = #{machineGroupName}, host = #{host}, password = #{password}, " +
+    @Update("UPDATE machine SET machine_group_name = #{machineGroupName}, host = #{host}, ssh_port = #{sshPort}, password = #{password}, " +
             "token = #{token}, machine_type = #{machineType}, machine_info = #{machineInfo}, update_time = NOW() " +
             "WHERE machine_id = #{machineId}")
     int updateMachine(Machine machine);
 
     @Insert("<script>" +
-            "INSERT INTO machine (machine_group_name, group_id, host, user_name, password, token, machine_type, machine_info, update_time) " +
+            "INSERT INTO machine (machine_group_name, group_id, host, ssh_port, user_name, password, token, machine_type, machine_info, update_time) " +
             "VALUES <foreach item='machine' collection='machineList' separator=','>" +
-            "(#{machine.machineGroupName}, #{machine.groupId}, #{machine.host}, #{machine.userName}, #{machine.password}, " +
+            "(#{machine.machineGroupName}, #{machine.groupId}, #{machine.host}, #{machine.sshPort}, #{machine.userName}, #{machine.password}, " +
             "#{machine.token}, #{machine.machineType}, #{machine.machineInfo}, NOW())" +
             "</foreach>" +
             "</script>")
@@ -64,6 +64,7 @@ public interface IMachineDao {
             "machine_group_name varchar(255) NOT NULL, " +
             "group_id integer(4) NOT NULL, " +
             "host varchar(50) NOT NULL, " +
+            "ssh_port integer(4) NOT NULL, " +
             "user_name varchar(50) NOT NULL, " +
             "password varchar(255) DEFAULT NULL, " +
             "token varchar(255) DEFAULT NULL, " +

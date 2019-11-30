@@ -20,7 +20,7 @@ public class SSH2Util {
 
     public static void wget(Machine machine, String targetPath, String fileName, String remoteUrl, boolean sudo) throws Exception {
         rm(machine, targetPath + fileName, sudo);
-        StringBuffer command = new StringBuffer();
+        StringBuilder command = new StringBuilder();
         if (sudo) {
             command.append("sudo ");
         }
@@ -38,14 +38,13 @@ public class SSH2Util {
      * @throws Exception
      */
     public static String copy(Machine machine, String originalPath, String targetPath, boolean sudo) throws Exception {
-        StringBuffer command = new StringBuffer();
+        StringBuilder command = new StringBuilder();
         if (sudo) {
             command.append("sudo ");
         }
         String template = "cp %s %s";
         command.append(String.format(template, originalPath, targetPath));
-        String result = execute(machine, command.toString());
-        return result;
+        return execute(machine, command.toString());
     }
 
     /**
@@ -57,7 +56,7 @@ public class SSH2Util {
      * @throws Exception
      */
     public static String copy2(Machine machine, String originalPath, String targetPath, boolean sudo) throws Exception {
-        StringBuffer command = new StringBuffer();
+        StringBuilder command = new StringBuilder();
         if (sudo) {
             command.append("sudo ");
         }
@@ -75,12 +74,11 @@ public class SSH2Util {
         }
         String template = "cp %s %s";
         command.append(String.format(template, originalPath, targetPath));
-        String result = execute(machine, command.toString());
-        return result;
+        return execute(machine, command.toString());
     }
 
     public static String copyFileToRemote(Machine machine, String tempPath, String url, boolean sudo) throws Exception {
-        StringBuffer command = new StringBuffer();
+        StringBuilder command = new StringBuilder();
         if (sudo) {
             command.append("sudo ");
         }
@@ -103,25 +101,23 @@ public class SSH2Util {
     }
 
     public static String rm(Machine machine, String filePath, boolean sudo) throws Exception {
-        StringBuffer command = new StringBuffer();
+        StringBuilder command = new StringBuilder();
         if (sudo) {
             command.append("sudo ");
         }
         String template = "rm -rf %s";
         command.append(String.format(template, filePath));
-        String result = execute(machine, command.toString());
-        return result;
+        return execute(machine, command.toString());
     }
 
     public static String unzipToTargetPath(Machine machine, String filePath, String targetPath, boolean sudo) throws Exception {
-        StringBuffer command = new StringBuffer();
+        StringBuilder command = new StringBuilder();
         if (sudo) {
             command.append("sudo ");
         }
         String template = "tar -xzf %s -C %s --strip-components 2";
         command.append(String.format(template, filePath, targetPath));
-        String result = execute(machine, command.toString());
-        return result;
+        return execute(machine, command.toString());
     }
 
     /**
@@ -205,7 +201,7 @@ public class SSH2Util {
         String line;
         try {
             while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             }
         } finally {
             try {
@@ -221,7 +217,13 @@ public class SSH2Util {
         String userName = machine.getUserName();
         String password = machine.getPassword();
         String host = machine.getHost();
-        Connection connection = new Connection(host);
+        Connection connection;
+        Integer sshPort = machine.getSshPort();
+        if (sshPort == null) {
+            connection = new Connection(host);
+        } else {
+            connection = new Connection(host, machine.getSshPort());
+        }
         connection.connect();
         boolean success = connection.authenticateWithPassword(userName, password);
         if (!success) {
@@ -230,7 +232,7 @@ public class SSH2Util {
         return connection;
     }
 
-    private static final void close(Connection connection) {
+    private static void close(Connection connection) {
         if (connection != null) {
             connection.close();
         }

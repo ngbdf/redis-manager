@@ -16,6 +16,8 @@ public class Machine {
 
     private String host;
 
+    private Integer sshPort;
+
     private String userName;
 
     private String password;
@@ -66,6 +68,14 @@ public class Machine {
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public Integer getSshPort() {
+        return sshPort;
+    }
+
+    public void setSshPort(Integer sshPort) {
+        this.sshPort = sshPort;
     }
 
     public String getUserName() {

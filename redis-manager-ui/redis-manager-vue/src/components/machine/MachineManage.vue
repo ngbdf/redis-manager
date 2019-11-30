@@ -86,7 +86,9 @@
         <el-form-item label="Password" prop="password">
           <el-input v-model="machines.password"></el-input>
         </el-form-item>
-
+        <el-form-item label="SSH Port" prop="sshPort">
+          <el-input v-model.number="machines.sshPort"></el-input>
+        </el-form-item>
         <div v-if="!isUpdate">
           <el-form-item
             v-for="(host, index) in machines.hostList"
@@ -189,6 +191,7 @@ export default {
     var validateHostConnection = (rule, value, callback) => {
       let userName = this.machines.userName;
       let password = this.machines.password;
+      let sshPort = this.machines.sshPort;
       if (
         isEmpty(userName) ||
         isEmpty(userName.trim()) ||
@@ -201,7 +204,8 @@ export default {
       let machine = {
         userName: userName,
         password: password,
-        host: value
+        host: value,
+        sshPort: sshPort
       };
       API.post(
         url,
@@ -228,7 +232,8 @@ export default {
       deleteBatchVisible: false,
       batchDelete: false,
       machines: {
-        hostList: [{ value: "" }]
+        hostList: [{ value: "" }],
+        sshPort: 22
       },
       rules: {
         machineGroupName: [
@@ -326,6 +331,8 @@ export default {
       let token = this.machines.token;
       let hostList = this.machines.hostList;
       let machineInfo = this.machines.machineInfo;
+      let sshPort = this.machines.sshPort;
+      sshPort = isEmpty(sshPort) ? 22 : sshPort;
       hostList.forEach(host => {
         machineList.push({
           groupId: this.currentGroupId,
@@ -334,6 +341,7 @@ export default {
           password: password,
           token: token,
           host: host.value,
+          sshPort: sshPort,
           machineInfo: machineInfo
         });
       });
