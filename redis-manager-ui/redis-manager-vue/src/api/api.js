@@ -2,6 +2,7 @@
 import axios from 'axios'
 import message from '@/utils/message.js'
 import router from '@/router'
+import { store } from '@/vuex/store.js'
 
 // 封装axios
 // eslint-disable-next-line space-before-function-paren
@@ -9,6 +10,7 @@ function apiAxios(method, url, params, successHandler, failureHandler) {
     axios({
         method: method,
         url: url,
+        headers: {'UserIp': store.getters.getUserIp},
         data: method === 'POST' || method === 'PUT' ? params : null,
         params: method === 'GET' || method === 'DELETE' ? params : null
         // baseURL: root,

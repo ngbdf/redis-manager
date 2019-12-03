@@ -2,11 +2,10 @@ package com.newegg.ec.redis.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.aop.annotation.OperationLog;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
-import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.RedisNode;
-import com.newegg.ec.redis.entity.Result;
+import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IMachineService;
@@ -149,6 +148,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/updateRedisConfig", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.REDIS_CONFIG)
     public Result updateRedisConfig(@RequestBody JSONObject jsonObject) {
         Integer clusterId = jsonObject.getInteger("clusterId");
         RedisConfigUtil.RedisConfig redisConfig = jsonObject.getObject("redisConfig", RedisConfigUtil.RedisConfig.class);
@@ -165,6 +165,7 @@ public class NodeManageController {
      */
     @RequestMapping(value = "/purgeMemory", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.PURGE_MEMORY, objType = OperationObjectType.NODE)
     public Result purgeMemory(@RequestBody List<RedisNode> redisNodeList) {
         if (!verifyRedisNodeList(redisNodeList)) {
             return Result.failResult();
@@ -174,6 +175,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/forget", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.FORGET, objType = OperationObjectType.NODE)
     public Result forget(@RequestBody List<RedisNode> redisNodeList) {
         Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> {
             String node = redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
@@ -189,6 +191,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/moveSlot", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.MOVE_SLOT, objType = OperationObjectType.NODE)
     public Result moveSlot(@RequestBody JSONObject jsonObject) {
         RedisNode redisNode = jsonObject.getObject("redisNode", RedisNode.class);
         SlotBalanceUtil.Shade slot = jsonObject.getObject("slotRange", SlotBalanceUtil.Shade.class);
@@ -199,6 +202,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/replicateOf", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.REPLICATE_OF, objType = OperationObjectType.NODE)
     public Result replicateOf(@RequestBody List<RedisNode> redisNodeList) {
         Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> redisService.clusterReplicate(cluster, redisNode.getMasterId(), redisNode));
         return result;
@@ -206,6 +210,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/standaloneForget", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.FORGET, objType = OperationObjectType.NODE)
     public Result standaloneForget(@RequestBody List<RedisNode> redisNodeList) {
         Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> redisService.standaloneReplicaNoOne(cluster, redisNode));
         return result;
@@ -213,6 +218,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/standaloneReplicateOf", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.REPLICATE_OF, objType = OperationObjectType.NODE)
     public Result standaloneReplicateOf(@RequestBody List<RedisNode> redisNodeList) {
         Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> {
             String masterNode = redisNode.getMasterId();
@@ -226,6 +232,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/failOver", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.FAIL_OVER, objType = OperationObjectType.NODE)
     public Result failOver(@RequestBody List<RedisNode> redisNodeList) {
         Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> redisService.clusterFailOver(cluster, redisNode));
         return result;
@@ -233,6 +240,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/start", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.START, objType = OperationObjectType.NODE)
     public Result start(@RequestBody List<RedisNode> redisNodeList) {
         Result result = nodeOperate(redisNodeList, (cluster, redisNode, abstractNodeOperation) -> {
             if (NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort())) {
@@ -246,6 +254,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/stop", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.STOP, objType = OperationObjectType.NODE)
     public Result stop(@RequestBody List<RedisNode> redisNodeList) {
         Result result = nodeOperate(redisNodeList, (cluster, redisNode, abstractNodeOperation) -> {
             if (NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort())) {
@@ -259,6 +268,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/restart", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.RESTART, objType = OperationObjectType.NODE)
     public Result restart(@RequestBody List<RedisNode> redisNodeList) {
         Result result = nodeOperate(redisNodeList, (cluster, redisNode, abstractNodeOperation) -> {
             if (NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort())) {
@@ -272,6 +282,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DELETE, objType = OperationObjectType.NODE)
     public Result delete(@RequestBody List<RedisNode> redisNodeList) {
         Result result = nodeOperate(redisNodeList, (cluster, redisNode, abstractNodeOperation) -> {
             if (NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort())) {
@@ -294,6 +305,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/importNode", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.IMPORT, objType = OperationObjectType.NODE)
     public Result importNode(@RequestBody List<RedisNode> redisNodeList) {
         try {
             RedisNode firstRedisNode = redisNodeList.get(0);
@@ -349,6 +361,7 @@ public class NodeManageController {
 
     @RequestMapping(value = "/initSlots", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.INIT_SLOTS, objType = OperationObjectType.CLUSTER)
     public Result initSlots(@RequestBody Cluster cluster) {
         cluster = clusterService.getClusterById(cluster.getClusterId());
         String result = redisService.initSlots(cluster);

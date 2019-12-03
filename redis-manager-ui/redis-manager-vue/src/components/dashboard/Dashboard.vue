@@ -335,9 +335,13 @@ export default {
     },
     deleteCluster(clusterId) {
       let url = "/cluster/deleteCluster";
+      let data = { 
+        clusterId: clusterId,
+        groupId: this.currentGroupId,
+      };
       API.post(
         url,
-        { clusterId: clusterId },
+        data,
         response => {
           let result = response.data;
           if (result.code == 0) {

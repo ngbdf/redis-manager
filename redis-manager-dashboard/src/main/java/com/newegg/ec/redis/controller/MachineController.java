@@ -4,7 +4,10 @@ import ch.ethz.ssh2.Connection;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.newegg.ec.redis.aop.annotation.OperationLog;
 import com.newegg.ec.redis.entity.Machine;
+import com.newegg.ec.redis.entity.OperationObjectType;
+import com.newegg.ec.redis.entity.OperationType;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.service.IMachineService;
 import com.newegg.ec.redis.util.SSH2Util;
@@ -64,6 +67,7 @@ public class MachineController {
 
     @RequestMapping(value = "/addMachineList", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.ADD, objType = OperationObjectType.MACHINE)
     public Result addMachineList(@RequestBody List<Machine> machineList) {
         boolean result = machineService.addMachineBatch(machineList);
         return result ? Result.successResult() : Result.failResult().setMessage("Save machine list failed.");
@@ -71,6 +75,7 @@ public class MachineController {
 
     @RequestMapping(value = "/updateMachine", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.MACHINE)
     public Result updateMachine(@RequestBody List<Machine> machineList) {
         if (machineList == null || machineList.isEmpty()) {
             return Result.failResult().setMessage("Update machine failed, cause machine list is empty.");
@@ -82,6 +87,7 @@ public class MachineController {
 
     @RequestMapping(value = "/deleteMachine", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DELETE, objType = OperationObjectType.MACHINE)
     public Result deleteMachine(@RequestBody Machine machine) {
         boolean result = machineService.deleteMachineById(machine.getMachineId());
         return result ? Result.successResult() : Result.failResult().setMessage("Delete machine failed.");
@@ -89,6 +95,7 @@ public class MachineController {
 
     @RequestMapping(value = "/deleteMachineBatch", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DELETE, objType = OperationObjectType.MACHINE)
     public Result deleteMachineBatch(@RequestBody List<Machine> machineList) {
         List<Integer> machineIdList = new ArrayList<>();
         machineList.forEach(machine -> machineIdList.add(machine.getMachineId()));

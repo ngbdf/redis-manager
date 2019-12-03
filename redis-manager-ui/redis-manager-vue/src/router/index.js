@@ -15,6 +15,7 @@ import UserManage from '@/components/user/UserManage'
 import Profile from '@/components/user/Profile'
 import DataOperation from '@/components/tool/DataOperation'
 import NotFound from '@/components/error/404'
+import EditHistory from '@/components/history/EditHistory'
 
 import API from '@/api/api.js'
 import { store } from '@/vuex/store.js'
@@ -22,10 +23,10 @@ import { isEmpty } from '@/utils/validate.js'
 
 Vue.use(Router)
 
-// const originalPush = Router.prototype.push
-// Router.prototype.push = function push(location) {
-//   return originalPush.call(this, location).catch(err => err)
-// }
+const originalPush = Router.prototype.push
+Router.prototype.push = function push (location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 
 const router = new Router({
   mode: 'history',
@@ -88,6 +89,11 @@ const router = new Router({
           component: UserManage
         },
         {
+          name: 'edit-history',
+          path: '/history/group/:groupId',
+          component: EditHistory
+        },
+        {
           name: 'profile',
           path: '/profile/:userId',
           component: Profile
@@ -148,7 +154,8 @@ router.beforeEach((to, from, next) => {
   } else if (user.userRole === 2 && (toPath.indexOf('group-manage') > 0 || toPath.indexOf('user-manage') > 0 ||
     toPath.indexOf('machine-manage') > 0 || toPath.indexOf('installation') > 0 ||
     toPath.indexOf('channel-manage') > 0 || toPath.indexOf('rule-manage') > 0 ||
-    toPath.indexOf('redis-manage') > 0 || toPath.indexOf('alert-manage') > 0)) {
+    toPath.indexOf('redis-manage') > 0 || toPath.indexOf('alert-manage') > 0 ||
+    toPath.indexOf('edit-history') > 0)) {
     next({ name: 'dashboard', params: { groupId: store.getters.getCurrentGroup.groupId } })
   } else {
     next()

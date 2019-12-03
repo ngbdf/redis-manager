@@ -282,6 +282,7 @@ export default {
     },
     deleteChannel() {
       let url = "/alert/channel/deleteAlertChannel";
+      this.alertChannel.groupId = this.currentGroup.groupId;
       API.post(
         url,
         this.alertChannel,

@@ -4,6 +4,7 @@ import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -11,7 +12,7 @@ import java.util.List;
  */
 public interface IAlertRecordService {
 
-    List<AlertRecord> getAlertRecordByClusterId(Integer clusterId);
+    Map<String, Object> getAlertRecordByClusterId(Integer clusterId, Integer pageNo, Integer pageSize);
 
     boolean addAlertRecord(List<AlertRecord> alertRecordList);
 

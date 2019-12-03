@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-import API from "@/api/api.js";
+import API from '@/api/api.js'
 import { isEmpty } from '@/utils/validate.js'
 import apiConfig from '@/api/apiConfig.js'
 import * as Cookies from 'js-cookie'
@@ -16,7 +16,8 @@ const state = {
     userRole: 2
   },
   installationEnvironmentList: [],
-  authorization: {}
+  authorization: {},
+  userIp: ''
 }
 
 const mutations = {
@@ -38,6 +39,9 @@ const mutations = {
   },
   setAuthorization (state, authorization) {
     state.authorization = authorization
+  },
+  setUserIp (context, userIp) {
+    context.userIp = userIp
   }
 }
 
@@ -62,6 +66,9 @@ const getters = {
   },
   getAuthorization: state => {
     return state.authorization
+  },
+  getUserIp: state => {
+    return state.userIp
   }
 }
 
@@ -87,6 +94,9 @@ const actions = {
   },
   setAuthorization (context, authorization) {
     context.commit('setAuthorization', authorization)
+  },
+  setUserIp (context, userIp) {
+    context.commit('setUserIp', userIp)
   }
 
 }
@@ -126,7 +136,7 @@ function getUserRole (groupId, userId) {
   API.post(url, user, response => {
     let userRole = response.data.data
     state.user.userRole = userRole
-  }, err => {
+  }, () => {
     state.user.userRole = 2
   })
 }

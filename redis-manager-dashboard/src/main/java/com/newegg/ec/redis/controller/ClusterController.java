@@ -1,10 +1,8 @@
 package com.newegg.ec.redis.controller;
 
 import com.google.common.base.Strings;
-import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.Group;
-import com.newegg.ec.redis.entity.RedisNode;
-import com.newegg.ec.redis.entity.Result;
+import com.newegg.ec.redis.aop.annotation.OperationLog;
+import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IGroupService;
 import com.newegg.ec.redis.service.IRedisNodeService;
@@ -18,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.PathParam;
 import java.util.*;
-
-import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
 
 /**
  * @author Jay.H.Zou
@@ -71,6 +67,7 @@ public class ClusterController {
      */
     @RequestMapping(value = "/importCluster", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.IMPORT, objType = OperationObjectType.CLUSTER)
     public Result importCluster(@RequestBody Cluster cluster) {
         Group group = groupService.getGroupById(cluster.getGroupId());
         if (group == null) {
@@ -131,6 +128,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/addAlertRule", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.ATTACH, objType = OperationObjectType.ALERT_RULE)
     public Result addAlertRule(@RequestBody Cluster cluster) {
         Cluster oldCuster = clusterService.getClusterById(cluster.getClusterId());
         String ruleIds = mergeAlertIds(oldCuster.getRuleIds(), cluster.getRuleIds());
@@ -141,6 +139,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/deleteAlertRule", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DETACH, objType = OperationObjectType.ALERT_RULE)
     public Result deleteAlertRule(@RequestBody Cluster cluster) {
         Cluster oldCuster = clusterService.getClusterById(cluster.getClusterId());
         String ruleIds = removeAlertIds(oldCuster.getRuleIds(), cluster.getRuleIds());
@@ -151,6 +150,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/addAlertChannel", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.ATTACH, objType = OperationObjectType.ALERT_CHANNEL)
     public Result addAlertChannel(@RequestBody Cluster cluster) {
         Cluster oldCuster = clusterService.getClusterById(cluster.getClusterId());
         String channelIds = mergeAlertIds(oldCuster.getChannelIds(), cluster.getChannelIds());
@@ -161,6 +161,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/deleteAlertChannel", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DETACH, objType = OperationObjectType.ALERT_CHANNEL)
     public Result deleteAlertChannel(@RequestBody Cluster cluster) {
         Cluster oldCuster = clusterService.getClusterById(cluster.getClusterId());
         String channelIds = removeAlertIds(oldCuster.getChannelIds(), cluster.getChannelIds());
@@ -203,6 +204,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/deleteCluster", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DELETE, objType = OperationObjectType.CLUSTER)
     public Result deleteCluster(@RequestBody Cluster cluster) {
         try {
             boolean result = clusterService.deleteCluster(cluster.getClusterId());

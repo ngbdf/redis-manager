@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.plugin.alert.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRecordDao;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 import com.newegg.ec.redis.plugin.alert.service.IAlertRecordService;
@@ -9,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jay.H.Zou
@@ -24,9 +28,17 @@ public class AlertRecordService implements IAlertRecordService {
     private IAlertRecordDao alertRecordDao;
 
     @Override
-    public List<AlertRecord> getAlertRecordByClusterId(Integer clusterId) {
+    public Map<String, Object> getAlertRecordByClusterId(Integer clusterId, Integer pageNo, Integer pageSize) {
         try {
-            return alertRecordDao.selectAlertRecordByClusterId(clusterId);
+            Map<String, Object> returnMap = new HashMap<>();
+
+            Page<AlertRecord> alertRecords = PageHelper.startPage(pageNo, pageSize);
+            alertRecordDao.selectAlertRecordByClusterId(clusterId);
+
+            returnMap.put("alertRecords", alertRecords);
+            returnMap.put("totalCount", alertRecords.getTotal());
+            returnMap.put("totalPage",alertRecords.getPages());
+            return returnMap;
         } catch (Exception e) {
             logger.error("Get alert record by cluster id failed, cluster id = " + clusterId, e);
             return null;

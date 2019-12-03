@@ -6,7 +6,6 @@ import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertChannelDao;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRecordDao;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRuleDao;
-import com.newegg.ec.redis.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -50,6 +49,9 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
     @Autowired
     private IRedisNodeDao redisNodeDao;
 
+    @Autowired
+    private IOperationLogDao operationLogDao;
+
     @Value("${redis-manager.auth.user-name:admin}")
     private String userName;
 
@@ -72,6 +74,7 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
         alertRuleDao.createAlertChannelTable();
         alertRecordDao.createAlertRecordTable();
         redisNodeDao.createRedisNodeTable();
+        operationLogDao.createLogTable();
     }
 
     @Transactional

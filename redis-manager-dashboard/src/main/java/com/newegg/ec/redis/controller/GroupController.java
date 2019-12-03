@@ -1,9 +1,8 @@
 package com.newegg.ec.redis.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.newegg.ec.redis.entity.Group;
-import com.newegg.ec.redis.entity.Result;
-import com.newegg.ec.redis.entity.User;
+import com.newegg.ec.redis.aop.annotation.OperationLog;
+import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.plugin.alert.service.impl.AlertRecordService;
 import com.newegg.ec.redis.service.IGroupService;
 import com.newegg.ec.redis.service.IUserService;
@@ -73,6 +72,7 @@ public class GroupController {
 
     @RequestMapping(value = "/addGroup", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.CREATE, objType = OperationObjectType.GROUP)
     public Result addGroup(@RequestBody Group group) {
         try {
             groupService.addGroup(group);
@@ -85,6 +85,7 @@ public class GroupController {
 
     @RequestMapping(value = "/updateGroup", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.GROUP)
     public Result updateGroup(@RequestBody Group group) {
         boolean result = groupService.updateGroup(group);
         return result ? Result.successResult() : Result.failResult();

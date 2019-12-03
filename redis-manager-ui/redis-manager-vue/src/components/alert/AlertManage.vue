@@ -9,7 +9,7 @@
             </div>
             <div class="card-panel-info-wrapper">
               <div class="card-panel-info-key">Alert Record</div>
-              <div class="card-panel-info-value">{{ alertRecordList.length }}</div>
+              <div class="card-panel-info-value">{{ alertRecordTotalCount }}</div>
             </div>
           </div>
         </el-col>
@@ -63,7 +63,7 @@
             :default-sort="{prop: 'time', order: 'descending'}"
           >
             <el-table-column type="selection" width="55"></el-table-column>
-            <el-table-column type="index" width="50"></el-table-column>
+            <el-table-column type="index" width="60" :index="getIndex"></el-table-column>
             <el-table-column property="redisNode" label="Redis Node"></el-table-column>
             <el-table-column property="alertRule" label="Alert Rule"></el-table-column>
             <el-table-column property="actualData" label="Reason"></el-table-column>
@@ -85,6 +85,15 @@
               </template>
             </el-table-column>
           </el-table>
+          <el-pagination
+            v-if="alertRecordPaginationShow"
+            @current-change="handleCurrentChange"
+            :current-page.sync="alertRecordCurrentPageNo"
+            :page-size="alertRecordPageSize"
+            layout="prev, pager, next, jumper"
+            :total="alertRecordTotalCount"
+            style="text-align: center">
+          </el-pagination>
         </el-tab-pane>
         <el-tab-pane label="Alert Rule" name="rule">
           <div class="operation-wrapper">
@@ -362,7 +371,12 @@ export default {
       deleteAlertRecordVisible: false,
       deletingAlertRule: {},
       deletingAlertChannel: {},
-      deletingAlertRecordIds: []
+      deletingAlertRecordIds: [],
+      alertRecordCurrentPageNo: 1,
+      alertRecordPageSize: 20,
+      alertRecordTotalPage: 0,
+      alertRecordPaginationShow: false,
+      alertRecordTotalCount: 0
     };
   },
   methods: {
@@ -388,14 +402,14 @@ export default {
       this.cluster.channelIds = newChannelIds;
     },
     getAlertRecordList(clusterId) {
-      let url = "/alert/record/getAlertRecord/cluster/" + clusterId;
+      let url = "/alert/record/getAlertRecord/cluster/" + clusterId + "?pageNo=" + this.alertRecordCurrentPageNo;
       API.get(
         url,
         null,
         response => {
           let result = response.data;
           if (result.code == 0) {
-            let alertRecordList = result.data;
+            let alertRecordList = result.data.alertRecords;
             if (alertRecordList == null || alertRecordList.length == 0) {
               this.alertRecordList = alertRecordList;
               return;
@@ -404,6 +418,11 @@ export default {
               alertRecord.time = formatTime(alertRecord.updateTime);
             });
             this.alertRecordList = alertRecordList;
+            this.alertRecordTotalCount = result.data.totalCount;
+            this.alertRecordTotalPage = result.data.totalPage;
+            if (this.alertRecordTotalPage > 1) {
+              this.alertRecordPaginationShow = true;
+            }
           } else {
             message.error("Get alert record list failed");
           }
@@ -412,6 +431,14 @@ export default {
           message.error(err);
         }
       );
+    },
+    handleCurrentChange(pageNo) {
+      this.alertRecordCurrentPageNo = pageNo;
+      let clusterId = this.cluster.clusterId;
+      this.getAlertRecordList(clusterId);
+    },
+    getIndex(val) {
+      return this.indexBasic + val + 1;
     },
     getAlertRuleList(clusterId) {
       let url = "/alert/rule/getAlertRule/cluster/" + clusterId;
@@ -635,9 +662,13 @@ export default {
     },
     deleteAlertRecord() {
       let url = "/alert/record/deleteAlertRecordBatch";
+      let data = {
+        groupId: this.currentGroup.groupId,
+        recordsIds: this.deletingAlertRecordIds
+      };
       API.post(
         url,
-        this.deletingAlertRecordIds,
+        data,
         response => {
           let result = response.data;
           let clusterId = this.cluster.clusterId;
@@ -658,6 +689,9 @@ export default {
     // 监听group变化
     currentGroup() {
       return store.getters.getCurrentGroup;
+    },
+    indexBasic() {
+      return (this.currentPageNo - 1) * this.pageSize;
     }
   },
   watch: {

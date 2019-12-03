@@ -43,13 +43,16 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         InterceptorRegistration addInterceptor = registry.addInterceptor(getSecurityInterceptor());
         // 排除配置
         addInterceptor.excludePathPatterns("/")
+                .excludePathPatterns("/index")
                 .excludePathPatterns("/login")
                 .excludePathPatterns("/user/login")
                 .excludePathPatterns("/user/signOut")
                 .excludePathPatterns("/user/getUserFromSession")
                 .excludePathPatterns("/system/getAuthorization")
                 .excludePathPatterns("/system/getInstallationEnvironment")
-                .excludePathPatterns("/static/**").excludePathPatterns("/data/**");
+                .excludePathPatterns("/static/**")
+                .excludePathPatterns("/data/**")
+                .excludePathPatterns("/logo.ico");
         // 拦截配置
         addInterceptor.addPathPatterns("/**");
     }
@@ -62,7 +65,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             if (!Objects.equals(requestURI, "/user/oauth2Login")) {
                 HttpSession session = request.getSession();
                 User user = (User) session.getAttribute("user");
-                if (user == null) {
+                if (user == null || user.getGroupId() == null) {
                     response.setCharacterEncoding("UTF-8");
                     response.setContentType("application/json; charset=utf-8");
                     try {

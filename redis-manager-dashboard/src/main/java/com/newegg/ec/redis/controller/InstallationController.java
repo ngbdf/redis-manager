@@ -1,6 +1,9 @@
 package com.newegg.ec.redis.controller;
 
+import com.newegg.ec.redis.aop.annotation.OperationLog;
 import com.newegg.ec.redis.config.SystemConfig;
+import com.newegg.ec.redis.entity.OperationObjectType;
+import com.newegg.ec.redis.entity.OperationType;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.plugin.install.InstallationTemplate;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
@@ -88,6 +91,7 @@ public class InstallationController {
 
     @RequestMapping(value = "installFlow", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.INSTALL, objType = OperationObjectType.CLUSTER)
     public Result install(@RequestBody InstallationParam installationParam) {
         Integer installationEnvironment = installationParam.getCluster().getInstallationEnvironment();
         AbstractNodeOperation nodeOperation = clusterService.getNodeOperation(installationEnvironment);

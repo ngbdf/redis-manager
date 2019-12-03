@@ -738,7 +738,8 @@ export default {
           let url = "/node-manage/updateRedisConfig";
           let data = {
             clusterId: this.cluster.clusterId,
-            redisConfig: this.redisConfig
+            redisConfig: this.redisConfig,
+            groupId: this.currentGroup.groupId
           };
           API.post(
             url,
@@ -782,6 +783,7 @@ export default {
       } else {
         this.operationNode = {};
         this.operationNode = data;
+        this.operationNode.groupId = this.currentGroup.groupId;
         this.operationNodeList.push(this.operationNode);
       }
     },
@@ -853,7 +855,8 @@ export default {
           let redisNode = {
             clusterId: this.cluster.clusterId,
             host: ipAndPort[0],
-            port: ipAndPort[1]
+            port: ipAndPort[1],
+            groupId: this.currentGroup.groupId
           };
           let redisNodeList = [];
           redisNodeList.push(redisNode);
@@ -920,7 +923,8 @@ export default {
         if (valid) {
           let data = {
             redisNode: this.operationNode,
-            slotRange: this.slotRange
+            slotRange: this.slotRange,
+            groupId: this.currentGroup.groupId
           };
           let url = "/node-manage/moveSlot";
           API.post(

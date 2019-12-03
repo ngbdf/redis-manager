@@ -1,8 +1,11 @@
 package com.newegg.ec.redis.controller;
 
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.aop.annotation.OperationLog;
 import com.newegg.ec.redis.config.SystemConfig;
 import com.newegg.ec.redis.controller.oauth.AuthService;
+import com.newegg.ec.redis.entity.OperationObjectType;
+import com.newegg.ec.redis.entity.OperationType;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.service.IUserService;
@@ -46,7 +49,7 @@ public class UserController {
             return Result.failResult();
         }
         HttpSession session = request.getSession();
-        session.setAttribute("user", user);
+        session.setAttribute("user", userLogin);
         session.setMaxInactiveInterval(60 * 60);
         return Result.successResult(userLogin);
     }
@@ -112,6 +115,7 @@ public class UserController {
 
     @RequestMapping(value = "/addUser", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.ADD,objType = OperationObjectType.USER)
     public Result addUser(@RequestBody User user) {
         boolean result = userService.addUser(user);
         return result ? Result.successResult() : Result.failResult();
@@ -129,6 +133,7 @@ public class UserController {
 
     @RequestMapping(value = "/grantUser", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.GRANT,objType = OperationObjectType.USER)
     public Result grantUser(@RequestBody User user) {
         boolean result = userService.grantUser(user);
         return result ? Result.successResult() : Result.failResult();
@@ -136,6 +141,7 @@ public class UserController {
 
     @RequestMapping(value = "/updateUser", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.UPDATE,objType = OperationObjectType.USER)
     public Result updateUser(@RequestBody User user) {
         boolean result = userService.updateUser(user);
         return result ? Result.successResult() : Result.failResult();
@@ -143,6 +149,7 @@ public class UserController {
 
     @RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DELETE,objType = OperationObjectType.USER)
     public Result deleteUser(@RequestBody User user) {
         boolean result = userService.deleteUserById(user.getUserId());
         return result ? Result.successResult() : Result.failResult();
@@ -150,6 +157,7 @@ public class UserController {
 
     @RequestMapping(value = "/revokeUser", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.REVOKE,objType = OperationObjectType.USER)
     public Result revokeUser(@RequestBody User user) {
         boolean result = userService.revokeUser(user);
         return result ? Result.successResult() : Result.failResult();

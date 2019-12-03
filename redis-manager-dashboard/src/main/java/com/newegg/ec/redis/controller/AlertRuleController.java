@@ -1,7 +1,10 @@
 package com.newegg.ec.redis.controller;
 
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.aop.annotation.OperationLog;
 import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.OperationObjectType;
+import com.newegg.ec.redis.entity.OperationType;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRule;
 import com.newegg.ec.redis.plugin.alert.service.IAlertRuleService;
@@ -100,6 +103,7 @@ public class AlertRuleController {
 
     @RequestMapping(value = "/addAlertRule", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.CREATE, objType = OperationObjectType.ALERT_RULE)
     public Result addAlertRule(@RequestBody AlertRule alertRule) {
         boolean result = alertRuleService.addAlertRule(alertRule);
         return result ? Result.successResult() : Result.failResult();
@@ -107,6 +111,7 @@ public class AlertRuleController {
 
     @RequestMapping(value = "/updateAlertRule", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.ALERT_RULE)
     public Result updateAlertRule(@RequestBody AlertRule alertRule) {
         boolean result = alertRuleService.updateAlertRule(alertRule);
         return result ? Result.successResult() : Result.failResult();
@@ -114,6 +119,7 @@ public class AlertRuleController {
 
     @RequestMapping(value = "/deleteAlertRule", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DELETE, objType = OperationObjectType.ALERT_RULE)
     public Result deleteAlertRule(@RequestBody AlertRule alertRule) {
         boolean result = alertRuleService.deleteAlertRuleById(alertRule.getRuleId());
         return result ? Result.successResult() : Result.failResult();

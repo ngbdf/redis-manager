@@ -131,6 +131,11 @@
                 <i class="el-icon-user"></i>
                 <span slot="title">User Manage</span>
               </el-menu-item>
+              <el-menu-item index="8" @click="toEditHistory()" v-if="currentUser.userRole < 2">
+                <!-- <i class="el-icon-odometer"></i> -->
+                <i class="el-icon-edit"></i>
+                <span slot="title">Edit History</span>
+              </el-menu-item>
             </el-menu>
           </el-col>
         </el-row>
@@ -161,6 +166,7 @@ import API from "@/api/api.js";
 import editCluster from "@/components/manage/EditCluster";
 import { getGroupList } from "@/components/group/group.js";
 import message from "@/utils/message.js";
+import { getUserIP } from "@/utils/ip.js";
 export default {
   components: {
     editCluster
@@ -222,6 +228,12 @@ export default {
     },
     toGroupManage() {
       this.$router.push({ name: "group-manage" });
+    },
+    toEditHistory() {
+      this.$router.push({
+        name: "edit-history",
+        params: { groupId: this.selectGroupId }
+      });
     },
     toUserManage() {
       this.$router.push({
@@ -376,6 +388,11 @@ export default {
     if (this.$route.path == "/") {
       this.toDashboard();
     }
+  },
+  created() {
+    getUserIP((ip) => {
+      store.dispatch("setUserIp", ip);
+    })
   }
 };
 </script>

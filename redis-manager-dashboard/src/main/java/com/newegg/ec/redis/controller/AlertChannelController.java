@@ -1,7 +1,10 @@
 package com.newegg.ec.redis.controller;
 
 import com.google.common.base.Strings;
+import com.newegg.ec.redis.aop.annotation.OperationLog;
 import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.OperationObjectType;
+import com.newegg.ec.redis.entity.OperationType;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
 import com.newegg.ec.redis.plugin.alert.service.IAlertChannelService;
@@ -99,6 +102,7 @@ public class AlertChannelController {
 
     @RequestMapping(value = "/addAlertChannel", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.CREATE, objType = OperationObjectType.ALERT_CHANNEL)
     public Result addAlertChannel(@RequestBody AlertChannel alertChannel) {
         boolean result = alertChannelService.addAlertChannel(alertChannel);
         return result ? Result.successResult() : Result.failResult();
@@ -106,6 +110,7 @@ public class AlertChannelController {
 
     @RequestMapping(value = "/updateAlertChannel", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.ALERT_CHANNEL)
     public Result updateAlertChannel(@RequestBody AlertChannel alertChannel) {
         boolean result = alertChannelService.updateAlertChannel(alertChannel);
         return result ? Result.successResult() : Result.failResult();
@@ -113,6 +118,7 @@ public class AlertChannelController {
 
     @RequestMapping(value = "/deleteAlertChannel", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DELETE, objType = OperationObjectType.ALERT_CHANNEL)
     public Result deleteAlertChannel(@RequestBody AlertChannel alertChannel) {
         boolean result = alertChannelService.deleteAlertChannelById(alertChannel.getChannelId());
         return result ? Result.successResult() : Result.failResult();

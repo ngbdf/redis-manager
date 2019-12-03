@@ -55,7 +55,7 @@ public interface IMachineDao {
             "DELETE FROM machine WHERE machine_id IN " +
             "<foreach item='machineId' collection='machineIdList' open='(' separator=',' close=')'>" +
             "#{machineId}" +
-            "</foreach>)" +
+            "</foreach>" +
             "</script>")
     int deleteMachineByIdBatch(@Param("machineIdList") List<Integer> machineIdList);
 
