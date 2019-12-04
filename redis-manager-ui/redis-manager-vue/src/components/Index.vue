@@ -376,7 +376,7 @@ export default {
     }
   },
   mounted() {
-   // this.getUserFromSession();
+    this.getUserFromSession();
     this.getGroupList();
     let groupId = "";
     if (isEmpty(this.currentGroup) || isEmpty(this.currentGroup.groupId)) {

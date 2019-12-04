@@ -70,7 +70,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                     response.setContentType("application/json; charset=utf-8");
                     try {
                         PrintWriter out = response.getWriter();
-                        response.sendError(401, "not login");
+                        response.sendError(404, "Page not found");
                         out.append(JSONObject.toJSON(Result.notLoginResult()).toString());
                     } catch (Exception ignore) {
                     }
