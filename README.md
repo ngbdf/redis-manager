@@ -26,7 +26,7 @@ $sudo docker run -d --net=host --name redis-manager  \
 reasonduan/redis-manager
 ```
 ## 二进制包
-[redis-manager-2.0](https://github.com/ngbdf/redis-manager/releases/download/redis-manager-2.0.4/redis-manager-2.0.4.tar.gz)
+[redis-manager-2.0](https://github.com/ngbdf/redis-manager/releases/download/redis-manager-2.1.0/redis-manager-2.1.0.tar.gz)
 
 # 联系方式
 > 您在使用产品的过程中如果遇到问题或者发现需要改进的地方可以通过以下两种方式直接联系我们或 Pull Request。
