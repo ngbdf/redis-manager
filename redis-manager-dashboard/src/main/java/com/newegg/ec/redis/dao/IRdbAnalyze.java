@@ -2,7 +2,12 @@ package com.newegg.ec.redis.dao;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.newegg.ec.redis.entity.RDBAnalyze;
+import com.newegg.ec.redis.entity.RDBAnalyzeProvider;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.UpdateProvider;
+
+import java.util.List;
 
 /**
  * @author Kyle.K.Zhao
@@ -10,7 +15,11 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface IRdbAnalyze extends BaseMapper<RDBAnalyze> {
 
-    Integer updateRdbAnalyze();
+    @UpdateProvider(type = RDBAnalyzeProvider.class, method = "updateRdbAnalyze")
+    Integer updateRdbAnalyze(@Param("rdbAnalyze") RDBAnalyze rdbAnalyze);
+
+    @Select("select * from rdb_analyze")
+    List<RDBAnalyze> queryList();
 
     @Select("create TABLE IF NOT EXISTS `rdb_analyze`( " +
             "id integer AUTO_INCREMENT, " +
@@ -21,14 +30,20 @@ public interface IRdbAnalyze extends BaseMapper<RDBAnalyze> {
             "is_report integer, " +
             "mailTo varchar(255), " +
             "analyzer varchar(255), " +
-            "pid integer, " + // redis id
+            "cluster_id integer, " + // redis id
             "PRIMARY KEY (id) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createRdbAnalyzeTable();
 
-    @Select("select id from rdb_analyze where pid = #{pid}")
-    Long getRDBAnalyzeIdByPid(Long pid);
+    @Select("select id from rdb_analyze where cluster_id = #{cluster_id}")
+    Long getRDBAnalyzeIdByCluster_id(Long cluster_id);
 
-    @Select("select pid from rdb_analyze where id=#{id}")
-    Long selectPidById(Long id);
+    @Select("select cluster_id from rdb_analyze where id=#{id}")
+    Long selectClusterIdById(Long id);
+
+    @Select("select * from rdb_analyze where cluster_id = #{cluster_id}")
+    RDBAnalyze getRDBAnalyzeByCluster_id(Long cluster_id);
+
+    @Select("select * from rdb_analyze where id = #{id}")
+    RDBAnalyze getRDBAnalyzeById(Long id);
 }

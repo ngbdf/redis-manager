@@ -23,8 +23,8 @@ public class RDBAnalyze {
 	private boolean report;
 	private String mailTo;
 	private String analyzer;
-	
-	private Long pid;
+	@TableField(value="cluster_id")
+	private Long clusterId;
 	
 
 	public Long getId() {
@@ -75,11 +75,12 @@ public class RDBAnalyze {
 	public void setReport(Boolean report) {
 		this.report = report;
 	}
-	
-	public Long getPid() {
-		return pid;
+
+	public Long getClusterId() {
+		return clusterId;
 	}
-	public void setPid(Long pid) {
-		this.pid = pid;
+
+	public void setClusterId(Long clusterId) {
+		this.clusterId = clusterId;
 	}
 }

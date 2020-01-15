@@ -26,17 +26,17 @@ public interface IRdbAnalyzeResult extends BaseMapper<RDBAnalyzeResult> {
     @Select("select * from rdb_analyze_result where schedule_id=(select max(schedule_id) from rdb_analyze_result where redis_info_id = #{redisInfoId})")
     @Results({ @Result(id = true, column = "id", property = "id"),
             @Result(column = "schedule_id", property = "scheduleId"),
-            @Result(column = "redis_info_id", property = "redisInfoId"),
+            @Result(column = "cluster_id", property = "cluster_id"),
             @Result(column = "result", property = "result")})
-    RDBAnalyzeResult selectLatestResultByRedisInfoId(Long redisInfoId);
+    RDBAnalyzeResult selectLatestResultByRedisInfoId(Long cluster_id);
 
     /**
      * query all result by redis_info_id
      * @param redisInfoId queryId
      * @return List<RDBAnalyzeResult>
      */
-    @Select("select * from rdb_analyze_result where redis_info_id= #{redisInfoId}")
-    List<RDBAnalyzeResult> selectAllResultById(Long redisInfoId);
+    @Select("select * from rdb_analyze_result where cluster_id= #{cluster_id}")
+    List<RDBAnalyzeResult> selectAllResultById(Long cluster_id);
 
     /**
      * query all result by redis_info_id
@@ -46,21 +46,21 @@ public interface IRdbAnalyzeResult extends BaseMapper<RDBAnalyzeResult> {
     @Select("select * from rdb_analyze_result where schedule_id != (select max(schedule_id) from rdb_analyze_result where redis_info_id = #{redisInfoId}) and redis_info_id = #{redisInfoId}")
     @Results({ @Result(id = true, column = "id", property = "id"),
             @Result(column = "schedule_id", property = "scheduleId"),
-            @Result(column = "redis_info_id", property = "redisInfoId"),
+            @Result(column = "cluster_id", property = "clusterId"),
             @Result(column = "result", property = "result")})
-    List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long redisInfoId);
+    List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long cluster_id);
 
 
     @Select("create TABLE IF NOT EXISTS `rdb_analyze_result`( " +
             "id integer AUTO_INCREMENT, " +
             "schedule_id integer NOT NULL, " +
-            "redis_info_id integer, " +
+            "cluster_id integer, " +
             "result varchar(1024), " +
             "PRIMARY KEY (id) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createRdbAnalyzeResult();
 
 
-    @Select("select * from rdb_analyze_result where schedule_id= #{scheduleId} and redis_info_id = #{redisInfoId}")
-    RDBAnalyzeResult selectByRedisIdAndSId(Long redisInfoId, Long scheduleId);
+    @Select("select * from rdb_analyze_result where schedule_id= #{scheduleId} and cluster_id = #{cluster_id}")
+    RDBAnalyzeResult selectByRedisIdAndSId(Long cluster_id, Long scheduleId);
 }

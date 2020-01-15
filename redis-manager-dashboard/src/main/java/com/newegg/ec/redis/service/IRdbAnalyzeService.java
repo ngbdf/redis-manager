@@ -2,43 +2,42 @@ package com.newegg.ec.redis.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.RDBAnalyze;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
 
-/**
- * @author Kyle.K.Zhao
- * @date 1/8/2020 17:10
- */
 public interface IRdbAnalyzeService {
+    public JSONObject allocationRDBAnalyzeJob(Long id, int[] analyzer);
 
-    JSONObject allocationRDBAnalyzeJob(Long id, int[] analyzer);
+    public JSONObject canceRDBAnalyze(String instance);
 
-    JSONObject canceRDBAnalyze(String instance);
+    public boolean update(RDBAnalyze rdbAnalyze);
 
-    boolean ifRDBAnalyzeIsRunning(Long id);
+    public RDBAnalyze selectById(Long id);
 
-    void rdbBgsave(Jedis jedis, String host, String port);
+    public boolean add(RDBAnalyze rdbAnalyze);
 
-    boolean update(RDBAnalyze rdbAnalyze);
+    public List<RDBAnalyze> list();
 
-    RDBAnalyze selectById(Long id);
+    public boolean checkResult(Integer result);
 
-    boolean add(RDBAnalyze rdbAnalyze);
+    public RDBAnalyze getRDBAnalyzeByPid(Long pid);
 
-    List<RDBAnalyze> list();
+    public RDBAnalyze getRDBAnalyzeById(Long pid);
 
-    RDBAnalyze getRDBAnalyzeByPid(Long pid);
+    public boolean ifRDBAnalyzeIsRunning(Long id);
 
-    RDBAnalyze getRDBAnalyzeById(Long pid);
+    public Long getRedisIDBasePID(Long pid);
 
-    Long getRedisIDBasePID(Long pid);
+    public boolean updateRdbAnalyze(RDBAnalyze rdbAnalyze);
 
-    boolean updateRdbAnalyze(RDBAnalyze rdbAnalyze);
+    public void updateJob(RDBAnalyze rdbAnalyze);
 
-    Long selectPidById(Long id);
+    public void rdbBgsave(Jedis jedis, String host, String port);
+
+    public Long selectClusterIdById(Long id);
 
     void createRdbAnalyzeTable();
-
-
 }

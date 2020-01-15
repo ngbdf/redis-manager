@@ -10,59 +10,56 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Kyle.K.Zhao
- * @date 1/8/2020 17:10
- */
 public interface IRdbAnalyzeResultService {
-    int totalCount = 7;
+    public void delete(Long id);
 
-    void delete(Long id);
+    public void add(RDBAnalyzeResult rdbAnalyzeResult);
 
-    void add(RDBAnalyzeResult rdbAnalyzeResult);
+    public List<RDBAnalyzeResult> selectList();
 
-    List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long redisInfoId);
+    public List<RDBAnalyzeResult> selectAllResultById(Long redisInfoId);
 
-    RDBAnalyzeResult selectLatestResultByRID(Long redisInfoId);
+    public List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long redisInfoId);
 
-    RDBAnalyzeResult selectResultByRIDandSID(Long redisInfoId, Long scheduleId);
+    public RDBAnalyzeResult selectLatestResultByRID(Long redisInfoId);
 
-    List<RDBAnalyzeResult> selectByMap(Map<String, Object> map);
+    public RDBAnalyzeResult selectResultByRIDandSID(Long redisInfoId, Long scheduleId);
 
-    RDBAnalyzeResult reportDataWriteToDb(RDBAnalyze rdbAnalyze, Map<String, Set<String>> data);
+    public List<RDBAnalyzeResult> selectByMap(Map<String, Object> map);
 
-    List<JSONObject> getAllKeyPrefixByResult(String result);
+    public boolean checkResult(int result);
 
-    Object getLineStringFromResult(Long id, Long scheduleId, String key);
+    public RDBAnalyzeResult reportDataWriteToDb(RDBAnalyze rdbAnalyze, Map<String, Set<String>> data);
 
-    JSONArray getJsonArrayFromResult(Long id, Long scheduleId, String key);
+    public List<JSONObject> getAllKeyPrefixByResult(String result);
 
-    Object getListStringFromResult(Long id, Long scheduleId, String key) throws Exception;
+    public Object getLineStringFromResult(Long id, Long scheduleId, String key) throws Exception;
 
-    JSONArray getJSONArrayFromResultByKey(String result, String key);
+    public JSONArray getJsonArrayFromResult(Long id, Long scheduleId, String key) throws Exception;
 
-    Object getTopKeyFromResultByKey(Long id, Long scheduleId, Long key) throws Exception;
+    public Object getListStringFromResult(Long id, Long scheduleId, String key) throws Exception;
 
-    JSONArray getTopKeyFromResultByKey(String result, Long startNum);
+    public JSONArray getJSONArrayFromResultByKey(String result, String key);
 
-    JSONArray getPrefixLineByCountOrMem(Long pid, String type, int top, String prefixKey);
+    public Object getTopKeyFromResultByKey(Long id, Long scheduleId, Long key) throws Exception;
 
-    Map<String, JSONObject> getMapJSONByResult(RDBAnalyzeResult rdbAnalyzeResult, JSONArray arrayResult);
+    public JSONArray getTopKeyFromResultByKey(String result, Long startNum);
 
-    List<String> getcolumnKeyList(String prefixKey, List<JSONObject> resultObjecList, String columnName, int top);
+    public JSONArray getPrefixLineByCountOrMem(Long pid, String type, int top, String prefixKey);
 
-    List<JSONObject> getJSONObjList(JSONArray jsonArray);
+    public List<String> getcolumnKeyList(String prefixKey, List<JSONObject> resultObjecList, String columnName, int top);
 
-    String getSortColumn(String type);
+    public List<JSONObject> getJSONObjList(JSONArray jsonArray);
 
-    JSONArray getPrefixType(Long id, Long scheduleId) throws Exception;
+    public String getSortColumn(String type);
 
-    JSONArray getPrefixArrayAddMem(JSONArray count, Map<String, JSONObject> memMap, String column);
+    public JSONArray getPrefixType(Long id, Long scheduleId) throws Exception;
 
-    Map<String, JSONObject> getJsonObject(JSONArray jsonArray);
+    public JSONArray getPrefixArrayAddMem(JSONArray count, Map<String, JSONObject> memMap, String column);
 
-    Map<String, ReportData> getReportDataLatest(Long pid);
+    public Map<String, JSONObject> getJsonObject(JSONArray jsonArray);
+
+    public Map<String, ReportData> getReportDataLatest(Long pid);
 
     void createRdbAnalyzeResultTable();
-
 }

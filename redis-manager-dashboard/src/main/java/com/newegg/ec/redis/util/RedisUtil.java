@@ -3,6 +3,8 @@ package com.newegg.ec.redis.util;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

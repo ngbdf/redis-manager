@@ -16,8 +16,17 @@ public class RDBAnalyzeResult {
 	private Long id;
 	@TableField(value="schedule_id")
 	private Long scheduleId;
-	@TableField(value="redis_info_id")
-	private Long redisInfoId;
+	@TableField(value="cluster_id")
+	private Long clusterId;
+
+	public Long getClusterId() {
+		return clusterId;
+	}
+
+	public void setClusterId(Long clusterId) {
+		this.clusterId = clusterId;
+	}
+
 	private String result;
 	public Long getId() {
 		return id;
@@ -31,12 +40,7 @@ public class RDBAnalyzeResult {
 	public void setScheduleId(Long scheduleId) {
 		this.scheduleId = scheduleId;
 	}
-	public Long getRedisInfoId() {
-		return redisInfoId;
-	}
-	public void setRedisInfoId(Long redisInfoId) {
-		this.redisInfoId = redisInfoId;
-	}
+
 	public String getResult() {
 		return result;
 	}

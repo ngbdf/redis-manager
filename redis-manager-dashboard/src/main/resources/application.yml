@@ -1,19 +1,10 @@
 server:
-  # 开启压缩
   compression:
     enabled: true
-    mime-types:
-      - image/png
-      - image/jpeg
-      - image/jpg
-      - text/html
-      - application/javascript
-      - text/css
-      - application/octet-stream
-      - application/json
+    mime-types: application/json
     min-response-size: 1024
   tomcat.uri-encoding: UTF-8
-  port: ${SERVER_PORT:8182}
+  port: 8182
 
 spring:
   application:
@@ -26,27 +17,16 @@ spring:
       charset: UTF-8
   datasource:
     # 必填，与数据库同名
-    database: ${DATASOURCE_DATABASE:redis_manager}
+    database: redis_manager2
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DATASOURCE_URL:jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8}
-    username: ${DATASOURCE_USERNAME:root}
-    password: ${DATASOURCE_PASSWORD:xxx}
-    #hikari数据库连接池
-    hikari:
-      pool-name: redis-manager-hikaricp
-      # 最小空闲连接数量
-      minimum-idle: 10
-      # 空闲连接存活最大时间，默认600000（10分钟）
-      idle-timeout: 180000
-      # 连接池最大连接数，默认是10
-      maximum-pool-size: 50
-      # 此属性控制从池返回的连接的默认自动提交行为,默认值：true
-      auto-commit: true
-      # 此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
-      max-lifetime: 600000
-      # 数据库连接超时时间,默认30秒，即30000
-      connection-timeout: 30000
-      connection-test-query: 'SELECT 1'
+    url: jdbc:mysql://10.16.236.126:3306/redis_manager2?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 123456
+    druid:
+      initial-size: 0
+      max-active: 10
+      min-idle: 0
+      max-wait: 10000
 
 mybatis:
   configuration:
@@ -56,8 +36,8 @@ mybatis:
 # redis manager configuration
 redis-manager:
   auth:
-    user-name: ${RM_AUTH_USERNAME:admin}
-    password: ${RM_AUTH_PASSWORD:admin}
+    user-name: admin
+    password: admin
     # avatar(absolute director)
     avatar-path: /data/avatar/
     authorization:
