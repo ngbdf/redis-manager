@@ -20,10 +20,10 @@ public interface IRdbAnalyzeResult extends BaseMapper<RDBAnalyzeResult> {
 
     /**
      * query info from db by id and max schedule_id
-     * @param redisInfoId queryId
+     * @param cluster_id queryId
      * @return RDBAnalyzeResult
      */
-    @Select("select * from rdb_analyze_result where schedule_id=(select max(schedule_id) from rdb_analyze_result where redis_info_id = #{redisInfoId})")
+    @Select("select * from rdb_analyze_result where schedule_id=(select max(schedule_id) from rdb_analyze_result where cluster_id = #{cluster_id})")
     @Results({ @Result(id = true, column = "id", property = "id"),
             @Result(column = "schedule_id", property = "scheduleId"),
             @Result(column = "cluster_id", property = "cluster_id"),
@@ -32,7 +32,7 @@ public interface IRdbAnalyzeResult extends BaseMapper<RDBAnalyzeResult> {
 
     /**
      * query all result by redis_info_id
-     * @param redisInfoId queryId
+     * @param cluster_id queryId
      * @return List<RDBAnalyzeResult>
      */
     @Select("select * from rdb_analyze_result where cluster_id= #{cluster_id}")
@@ -40,10 +40,10 @@ public interface IRdbAnalyzeResult extends BaseMapper<RDBAnalyzeResult> {
 
     /**
      * query all result by redis_info_id
-     * @param redisInfoId queryId
+     * @param cluster_id queryId
      * @return List<RDBAnalyzeResult>
      */
-    @Select("select * from rdb_analyze_result where schedule_id != (select max(schedule_id) from rdb_analyze_result where redis_info_id = #{redisInfoId}) and redis_info_id = #{redisInfoId}")
+    @Select("select * from rdb_analyze_result where schedule_id != (select max(schedule_id) from rdb_analyze_result where cluster_id = #{cluster_id}) and cluster_id = #{cluster_id}")
     @Results({ @Result(id = true, column = "id", property = "id"),
             @Result(column = "schedule_id", property = "scheduleId"),
             @Result(column = "cluster_id", property = "clusterId"),

@@ -17,13 +17,13 @@ public interface IRdbAnalyzeResultService {
 
     public List<RDBAnalyzeResult> selectList();
 
-    public List<RDBAnalyzeResult> selectAllResultById(Long redisInfoId);
+    public List<RDBAnalyzeResult> selectAllResultById(Long cluster_id);
 
-    public List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long redisInfoId);
+    public List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long cluster_id);
 
-    public RDBAnalyzeResult selectLatestResultByRID(Long redisInfoId);
+    public RDBAnalyzeResult selectLatestResultByRID(Long cluster_id);
 
-    public RDBAnalyzeResult selectResultByRIDandSID(Long redisInfoId, Long scheduleId);
+    public RDBAnalyzeResult selectResultByRIDandSID(Long cluster_id, Long scheduleId);
 
     public List<RDBAnalyzeResult> selectByMap(Map<String, Object> map);
 
@@ -45,7 +45,7 @@ public interface IRdbAnalyzeResultService {
 
     public JSONArray getTopKeyFromResultByKey(String result, Long startNum);
 
-    public JSONArray getPrefixLineByCountOrMem(Long pid, String type, int top, String prefixKey);
+    public JSONArray getPrefixLineByCountOrMem(Long cluster_id, String type, int top, String prefixKey);
 
     public List<String> getcolumnKeyList(String prefixKey, List<JSONObject> resultObjecList, String columnName, int top);
 
@@ -59,7 +59,7 @@ public interface IRdbAnalyzeResultService {
 
     public Map<String, JSONObject> getJsonObject(JSONArray jsonArray);
 
-    public Map<String, ReportData> getReportDataLatest(Long pid);
+    public Map<String, ReportData> getReportDataLatest(Long cluster_id);
 
     void createRdbAnalyzeResultTable();
 }

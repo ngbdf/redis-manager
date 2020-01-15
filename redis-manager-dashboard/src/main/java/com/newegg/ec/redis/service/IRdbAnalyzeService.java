@@ -2,8 +2,6 @@ package com.newegg.ec.redis.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.RDBAnalyze;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
@@ -23,13 +21,13 @@ public interface IRdbAnalyzeService {
 
     public boolean checkResult(Integer result);
 
-    public RDBAnalyze getRDBAnalyzeByPid(Long pid);
+    public RDBAnalyze getRDBAnalyzeByPid(Long cluster_id);
 
-    public RDBAnalyze getRDBAnalyzeById(Long pid);
+    public RDBAnalyze getRDBAnalyzeById(Long cluster_id);
 
     public boolean ifRDBAnalyzeIsRunning(Long id);
 
-    public Long getRedisIDBasePID(Long pid);
+    public Long getRedisIDBasePID(Long cluster_id);
 
     public boolean updateRdbAnalyze(RDBAnalyze rdbAnalyze);
 

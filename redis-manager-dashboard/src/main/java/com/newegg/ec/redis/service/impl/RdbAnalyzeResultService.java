@@ -48,18 +48,18 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 	}
 
 	/**
-	 * get result list by redisInfoId
-	 * @param redisInfoId redisInfoId
+	 * get result list by cluster_id
+	 * @param cluster_id cluster_id
 	 * @return List<RDBAnalyzeResult>
 	 */
 	@Override
-	public List<RDBAnalyzeResult> selectAllResultById(Long redisInfoId) {
-		if(null == redisInfoId) {
+	public List<RDBAnalyzeResult> selectAllResultById(Long cluster_id) {
+		if(null == cluster_id) {
 			return null;
 		}
 		List<RDBAnalyzeResult> results = null;
 		try {
-			results = rdbAnalyzeResultMapper.selectAllResultById(redisInfoId);
+			results = rdbAnalyzeResultMapper.selectAllResultById(cluster_id);
 		} catch (Exception e) {
 			LOG.error("selectAllResultById failed!", e);
 		}
@@ -68,17 +68,17 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 
 	/**
 	 * get result list by schedule_id
-	 * @param redisInfoId schedule_id
+	 * @param clusterId clusterId
 	 * @return List<RDBAnalyzeResult>
 	 */
 	@Override
-	public List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long redisInfoId) {
-		if(null == redisInfoId) {
+	public List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long clusterId) {
+		if(null == clusterId) {
 			return null;
 		}
 		List<RDBAnalyzeResult> results = null;
 		try {
-			results = rdbAnalyzeResultMapper.selectAllResultByIdExceptLatest(redisInfoId);
+			results = rdbAnalyzeResultMapper.selectAllResultByIdExceptLatest(clusterId);
 		} catch (Exception e) {
 			LOG.error("selectAllResultById failed!", e);
 		}
@@ -86,18 +86,18 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 	}
 
 	/**
-	 * get result by redisInfoId
-	 * @param redisInfoId redisInfoId
-	 * @return RDBAnalyzeResult 不包含 redisInfoId 和 scheduleId
+	 * get result by cluster_id
+	 * @param clusterId cluster_id
+	 * @return RDBAnalyzeResult 不包含 cluster_id 和 scheduleId
 	 */
 	@Override
-	public RDBAnalyzeResult selectLatestResultByRID(Long redisInfoId) {
-		if(null == redisInfoId) {
+	public RDBAnalyzeResult selectLatestResultByRID(Long clusterId) {
+		if(null == clusterId) {
 			return null;
 		}
 		RDBAnalyzeResult result = null;
 		try {
-			result = rdbAnalyzeResultMapper.selectLatestResultByRedisInfoId(redisInfoId);
+			result = rdbAnalyzeResultMapper.selectLatestResultByRedisInfoId(clusterId);
 		} catch (Exception e) {
 			LOG.error("selectLatestResultByRedisInfoId failed!", e);
 		}
@@ -106,20 +106,20 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 
 	/**
 	 * get result by RID AND SID
-	 * @param redisInfoId redisInfoId
+	 * @param clusterId clusterId
 	 * @param scheduleId scheduleId
 	 * @return RDBAnalyzeResult
 	 */
 	@Override
-	public RDBAnalyzeResult selectResultByRIDandSID(Long redisInfoId, Long scheduleId) {
-		if(null == redisInfoId || null == scheduleId) {
+	public RDBAnalyzeResult selectResultByRIDandSID(Long clusterId, Long scheduleId) {
+		if(null == clusterId || null == scheduleId) {
 			return null;
 		}
 		RDBAnalyzeResult result = null;
 		try {
-			result = rdbAnalyzeResultMapper.selectByRedisIdAndSId(redisInfoId, scheduleId);
+			result = rdbAnalyzeResultMapper.selectByRedisIdAndSId(clusterId, scheduleId);
 		} catch (Exception e) {
-			LOG.error("selectLatestResultByRedisInfoId failed!", e);
+			LOG.error("selectLatestResultByclusterId failed!", e);
 		}
 		return result;
 	}
@@ -207,7 +207,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 	 * @return
 	 */
 	@Override
-	public Object getLineStringFromResult(Long id, Long scheduleId, String key) throws Exception{
+	public Object getLineStringFromResult(Long clusterId, Long scheduleId, String key) throws Exception{
 		if(null == key || "".equals(key.trim())) {
 			throw new Exception("key should not null!");
 		}
@@ -217,14 +217,14 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 		List<Long> y = new ArrayList<>();
 		JSONObject jsonObject;
 		if(IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT.equalsIgnoreCase(key)){
-			jsonArray = getJsonArrayFromResult(id, scheduleId, IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT);
+			jsonArray = getJsonArrayFromResult(clusterId, scheduleId, IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT);
 			for(Object obj : jsonArray) {
 				jsonObject = (JSONObject) obj;
 				x.add(jsonObject.getString("prefixKey"));
 				y.add(jsonObject.getLong("keyCount"));
 			}
 		} else if (IAnalyzeDataConverse.PREFIX_KEY_BY_MEMORY.equalsIgnoreCase(key)) {
-			jsonArray = getJsonArrayFromResult(id, scheduleId, IAnalyzeDataConverse.PREFIX_KEY_BY_MEMORY);
+			jsonArray = getJsonArrayFromResult(clusterId, scheduleId, IAnalyzeDataConverse.PREFIX_KEY_BY_MEMORY);
 			for(Object obj : jsonArray) {
 				jsonObject = (JSONObject) obj;
 				x.add(jsonObject.getString("prefixKey"));
@@ -239,23 +239,23 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 	}
 
 	@Override
-	public JSONArray getJsonArrayFromResult(Long id, Long scheduleId, String key) throws Exception{
-		if(null == id) {
-			throw new Exception("pid should not null!");
+	public JSONArray getJsonArrayFromResult(Long clusterId, Long scheduleId, String key) throws Exception{
+		if(null == clusterId) {
+			throw new Exception("clusterId should not null!");
 		}
 		RDBAnalyzeResult rdbAnalyzeResult;
 		if(null == scheduleId) {
-			rdbAnalyzeResult = selectLatestResultByRID(id);
+			rdbAnalyzeResult = selectLatestResultByRID(clusterId);
 		} else {
-			rdbAnalyzeResult = selectResultByRIDandSID(id, scheduleId);
+			rdbAnalyzeResult = selectResultByRIDandSID(clusterId, scheduleId);
 		}
 		JSONArray result = getJSONArrayFromResultByKey(rdbAnalyzeResult.getResult(), key);
 		return result;
 	}
 
 	@Override
-	public Object getListStringFromResult(Long id, Long scheduleId, String key) throws Exception{
-		return getJsonArrayFromResult(id, scheduleId, key);
+	public Object getListStringFromResult(Long clusterId, Long scheduleId, String key) throws Exception{
+		return getJsonArrayFromResult(clusterId, scheduleId, key);
 	}
 
 
@@ -272,15 +272,15 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 	}
 
 	@Override
-	public Object getTopKeyFromResultByKey(Long id, Long scheduleId, Long key) throws Exception{
-		if(null == id || null == key) {
+	public Object getTopKeyFromResultByKey(Long clusterId, Long scheduleId, Long key) throws Exception{
+		if(null == clusterId || null == key) {
 			throw new Exception("id or key should not null!");
 		}
 		RDBAnalyzeResult rdbAnalyzeResult;
 		if (null == scheduleId) {
-			rdbAnalyzeResult = selectLatestResultByRID(id);
+			rdbAnalyzeResult = selectLatestResultByRID(clusterId);
 		} else {
-			rdbAnalyzeResult = selectResultByRIDandSID(id, scheduleId);
+			rdbAnalyzeResult = selectResultByRIDandSID(clusterId, scheduleId);
 		}
 		JSONArray result = getTopKeyFromResultByKey(rdbAnalyzeResult.getResult(), key);
 		return result;
@@ -299,14 +299,14 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 
 	/**
 	 *
-	 * @param pid redisInfoID
+	 * @param clusterId clusterId
 	 * @param type  PrefixKeyByCount,PrefixKeyByMemory
 	 * @return JSONArray
 	 */
 	@Override
-	public JSONArray getPrefixLineByCountOrMem(Long pid, String type, int top, String prefixKey) {
+	public JSONArray getPrefixLineByCountOrMem(Long clusterId, String type, int top, String prefixKey) {
 		String sortColumn = getSortColumn(type);
-		RDBAnalyzeResult rdbAnalyzeLatestResult = selectLatestResultByRID(pid);
+		RDBAnalyzeResult rdbAnalyzeLatestResult = selectLatestResultByRID(clusterId);
 		if( null == rdbAnalyzeLatestResult) {
 			return null;
 		}
@@ -320,7 +320,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 		// 需要返回的前缀
 		List<String> prefixKeyList = getcolumnKeyList(prefixKey, resultObjecList, "prefixKey", top);
 		// except Latest RDBAnalyzeResult
-		List<RDBAnalyzeResult> rdbAnalyzeResultList = selectAllResultByIdExceptLatest(pid);
+		List<RDBAnalyzeResult> rdbAnalyzeResultList = selectAllResultByIdExceptLatest(clusterId);
 		// key ：prefixKey
 		Map<String, Map<String, JSONObject>> resultMap = new HashMap<>(7);
 		Map<String, JSONObject> latest = getMapJSONByResult(rdbAnalyzeLatestResult,arrayResult);
@@ -444,12 +444,12 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 
 
 	@Override
-	public JSONArray getPrefixType(Long id, Long scheduleId) throws Exception {
-		if (null == id) {
-			throw new Exception("pid should not null!");
+	public JSONArray getPrefixType(Long clusterId, Long scheduleId) throws Exception {
+		if (null == clusterId) {
+			throw new Exception("clusterId should not null!");
 		}
-		JSONArray count = getJsonArrayFromResult(id, scheduleId, IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT);
-		JSONArray memory = getJsonArrayFromResult(id, scheduleId, IAnalyzeDataConverse.PREFIX_KEY_BY_MEMORY);
+		JSONArray count = getJsonArrayFromResult(clusterId, scheduleId, IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT);
+		JSONArray memory = getJsonArrayFromResult(clusterId, scheduleId, IAnalyzeDataConverse.PREFIX_KEY_BY_MEMORY);
 		if(null == memory || memory.isEmpty()) {
 			return count;
 		}
@@ -490,15 +490,15 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 
 	/**
 	 * 获取上一次的数据转换为ReportData
-	 * @param pid pid
+	 * @param clusterId clusterId
 	 * @return Map
 	 */
 	@Override
-	public Map<String, ReportData> getReportDataLatest(Long pid) {
-		if(null == pid) {
+	public Map<String, ReportData> getReportDataLatest(Long clusterId) {
+		if(null == clusterId) {
 			return null;
 		}
-		RDBAnalyzeResult rdbAnalyzeResult = selectLatestResultByRID(pid);
+		RDBAnalyzeResult rdbAnalyzeResult = selectLatestResultByRID(clusterId);
 		if( null == rdbAnalyzeResult) {
 			return null;
 		}

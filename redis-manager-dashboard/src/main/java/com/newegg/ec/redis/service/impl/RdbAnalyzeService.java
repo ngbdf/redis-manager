@@ -333,7 +333,6 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 	 */
 	@Override
 	public boolean ifRDBAnalyzeIsRunning(Long id) {
-		// Long id = getRedisIDBasePID(pid);
 		List<ScheduleDetail> scheduleDetail = AppCache.scheduleDetailMap.get(id);
 		// default no task running
 		boolean result = false;

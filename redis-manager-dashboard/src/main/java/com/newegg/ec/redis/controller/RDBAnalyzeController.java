@@ -24,11 +24,6 @@ public class RDBAnalyzeController {
 	@Autowired
     RdbAnalyzeResultService rdbAnalyzeResultService;
 
-/*	@Autowired
-	RedisInfoService redisInfoService;*/
-
-	@Autowired
-	ClusterService clusterService;
 	@Autowired
 	ScheduleTaskService taskService;
 
@@ -89,31 +84,29 @@ public class RDBAnalyzeController {
 		return Result.successResult();
 	}
 
-	@RequestMapping(value = { "/pid/{pid}" }, method = RequestMethod.GET)
-	public Result getRDBAnalyzeByParentID(@PathVariable Long pid) {
+	@RequestMapping(value = { "/clusterId/{clusterId}" }, method = RequestMethod.GET)
+	public Result getRDBAnalyzeByParentID(@PathVariable Long clusterId) {
 		JSONObject data = new JSONObject();
-		RDBAnalyze rdbAnalyze = rdbAnalyzeService.getRDBAnalyzeByPid(pid);
+		RDBAnalyze rdbAnalyze = rdbAnalyzeService.getRDBAnalyzeByPid(clusterId);
 		Cluster clusterInfo;
 		if (null == rdbAnalyze) {
-			//clusterInfo = clusterService.selectByid(Math.toIntExact(pid));
 			rdbAnalyze = new RDBAnalyze();
-			rdbAnalyze.setClusterId(pid);
+			rdbAnalyze.setClusterId(clusterId);
 		}
 		if (null != rdbAnalyze) {
-			//clusterInfo = rdbAnalyze.getRedisInfo();
-			rdbAnalyze.setClusterId(pid);
+			rdbAnalyze.setClusterId(clusterId);
 		}
 		data.put("info", rdbAnalyze);
-		Long id = rdbAnalyzeService.getRedisIDBasePID(pid);
+		Long id = rdbAnalyzeService.getRedisIDBasePID(clusterId);
 		if(id!=null) {
 			data.put("status", rdbAnalyzeService.ifRDBAnalyzeIsRunning(id));
 		}		
 		return Result.successResult(data);
 	}
 
-	@GetMapping("/analyze/status/{pid}")
-	public Result ifRDBAnalyzeIsRunning(@PathVariable Long pid) {
-		Long id = rdbAnalyzeService.getRedisIDBasePID(pid);
+	@GetMapping("/analyze/status/{clusterId}")
+	public Result ifRDBAnalyzeIsRunning(@PathVariable Long clusterId) {
+		Long id = rdbAnalyzeService.getRedisIDBasePID(clusterId);
 		return Result.successResult(rdbAnalyzeService.ifRDBAnalyzeIsRunning(id));
 
 	}
@@ -187,7 +180,7 @@ public class RDBAnalyzeController {
 	/**
 	 * 取消分析任务
 	 * 
-	 * @param instance (pid)
+	 * @param instance (clusterId)
 	 * @return JSON string: </br>
 	 *         <code>
 	 *         cancel succeed:
@@ -213,18 +206,17 @@ public class RDBAnalyzeController {
 	/**
 	 * get schedule_id list
 	 * 
-	 * @param pid pid
+	 * @param clusterId clusterId
 	 * @return schedule_id List
 	 */
 	@GetMapping("/all/schedule_id")
-	public Result getAllScheduleId(@RequestParam Long pid) {
+	public Result getAllScheduleId(@RequestParam Long clusterId) {
 		try {
-			// Long id = rdbAnalyzeService.getRedisIDBasePID(pid);
-			if (null == pid) {
-				return Result.failResult("pid  not null!");
+			if (null == clusterId) {
+				return Result.failResult("clusterId not null!");
 			}
 			Map<String, Object> queryMap = new HashMap<>(2);
-			queryMap.put("redis_info_id", pid);
+			queryMap.put("cluster_id", clusterId);
 			List<RDBAnalyzeResult> rdbAnalyzeResultList = rdbAnalyzeResultService.selectByMap(queryMap);
 			List<JSONObject> result = new ArrayList<>(500);
 			JSONObject obj;
@@ -244,21 +236,21 @@ public class RDBAnalyzeController {
 	/**
 	 * get all key_prefix
 	 * 
-	 * @param pid
+	 * @param clusterId
 	 * @param scheduleId
 	 * @return
 	 */
 	@GetMapping("/all/key_prefix")
-	public Result getAllKeyPrefix(@RequestParam Long pid, @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
+	public Result getAllKeyPrefix(@RequestParam Long clusterId, @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
 		try {
-			if (null == pid) {
-				return Result.failResult("pid should not null!");
+			if (null == clusterId) {
+				return Result.failResult("clusterId should not null!");
 			}
 			RDBAnalyzeResult rdbAnalyzeResult;
 			if(null != scheduleId){
-				rdbAnalyzeResult = rdbAnalyzeResultService.selectResultByRIDandSID(pid, scheduleId);
+				rdbAnalyzeResult = rdbAnalyzeResultService.selectResultByRIDandSID(clusterId, scheduleId);
 			} else {
-				rdbAnalyzeResult = rdbAnalyzeResultService.selectLatestResultByRID(pid);
+				rdbAnalyzeResult = rdbAnalyzeResultService.selectLatestResultByRID(clusterId);
 			}
 			if(null == rdbAnalyzeResult) {
 				return Result.successResult(null);
@@ -275,15 +267,15 @@ public class RDBAnalyzeController {
 	 * 
 	 * @param type       value:
 	 *                   PrefixKeyByCount,PrefixKeyByMemory,DataTypeAnalyze,TTLAnalyze
-	 * @param pid
+	 * @param clusterId
 	 * @param scheduleId
 	 * @return
 	 */
 	@GetMapping("/chart/{type}")
-	public Result getChartDataByType(@PathVariable("type") String type, @RequestParam Long pid,
+	public Result getChartDataByType(@PathVariable("type") String type, @RequestParam Long clusterId,
                                            @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
 		try {
-			return Result.successResult(rdbAnalyzeResultService.getListStringFromResult(pid, scheduleId, type));
+			return Result.successResult(rdbAnalyzeResultService.getListStringFromResult(clusterId, scheduleId, type));
 		} catch (Exception e) {
 			LOG.error("getChartDataByType failed!", e);
 			return Result.failResult("getChartDataByType failed!");
@@ -292,14 +284,14 @@ public class RDBAnalyzeController {
 	/**
 	 * get table data
 	 *
-	 * @param pid
+	 * @param clusterId
 	 * @param scheduleId
 	 * @return
 	 */
 	@GetMapping("/table/prefix")
-	public Result getPrefixType(@RequestParam Long pid, @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
+	public Result getPrefixType(@RequestParam Long clusterId, @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
 		try {
-			return Result.successResult(rdbAnalyzeResultService.getPrefixType(pid, scheduleId));
+			return Result.successResult(rdbAnalyzeResultService.getPrefixType(clusterId, scheduleId));
 		}
 		catch (Exception e) {
 			LOG.error("getPrefixType failed!", e);
@@ -311,16 +303,16 @@ public class RDBAnalyzeController {
 	/**
 	 * getTopKey data
 	 * 
-	 * @param pid
+	 * @param clusterId
 	 * @param scheduleId
 	 * @param type       0:string 5:hash 10:list 15:set
 	 * @return
 	 */
 	@GetMapping("/top_key")
-	public Result getPrefixKeyByMem(@RequestParam Long pid, @RequestParam(value = "scheduleId", required = false) Long scheduleId,
+	public Result getPrefixKeyByMem(@RequestParam Long clusterId, @RequestParam(value = "scheduleId", required = false) Long scheduleId,
                                           @RequestParam Long type) {
 		try {
-			return Result.successResult(rdbAnalyzeResultService.getTopKeyFromResultByKey(pid, scheduleId, type));
+			return Result.successResult(rdbAnalyzeResultService.getTopKeyFromResultByKey(clusterId, scheduleId, type));
 		} catch (Exception e) {
 			LOG.error("getPrefixKeyByMem failed!", e);
 			return Result.failResult("getPrefixKeyByMem failed!");
@@ -332,16 +324,15 @@ public class RDBAnalyzeController {
 	 * 折线图
 	 * 
 	 * @param type       PrefixKeyByCount,PrefixKeyByMemory
-	 * @param pid
+	 * @param clusterId
 	 * @param scheduleId
 	 * @return
 	 */
 	@GetMapping("/line/{type}")
-	public Result getPerfixLine(@PathVariable("type") String type, @RequestParam Long pid,
+	public Result getPerfixLine(@PathVariable("type") String type, @RequestParam Long clusterId,
                                       @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
 		try {
-			// Long id = rdbAnalyzeService.getRedisIDBasePID(pid);
-			return Result.successResult(rdbAnalyzeResultService.getLineStringFromResult(pid, scheduleId, type));
+			return Result.successResult(rdbAnalyzeResultService.getLineStringFromResult(clusterId, scheduleId, type));
 		} catch (Exception e) {
 			LOG.error("getPerfixLine failed!", e);
 			return Result.failResult("getPerfixLine failed!");
@@ -351,13 +342,13 @@ public class RDBAnalyzeController {
 	/**
 	 *
 	 * @param type PrefixKeyByCount,PrefixKeyByMemory
-	 * @param pid redisInfoID
+	 * @param clusterId clusterId
 	 * @return JSONArray
 	 */
 	@GetMapping("/line/prefix/{type}")
-	public Result getPrefixLineByCountOrMem(@PathVariable String type, @RequestParam Long pid, @RequestParam(value = "prefixKey", required = false) String prefixKey) {
+	public Result getPrefixLineByCountOrMem(@PathVariable String type, @RequestParam Long clusterId, @RequestParam(value = "prefixKey", required = false) String prefixKey) {
 		try {
-			JSONArray result = rdbAnalyzeResultService.getPrefixLineByCountOrMem(pid, type, 20, prefixKey);
+			JSONArray result = rdbAnalyzeResultService.getPrefixLineByCountOrMem(clusterId, type, 20, prefixKey);
 			return Result.successResult(result);
 		}
 		catch (Exception e) {
