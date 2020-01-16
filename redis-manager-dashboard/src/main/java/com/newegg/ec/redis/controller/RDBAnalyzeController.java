@@ -23,9 +23,15 @@ public class RDBAnalyzeController {
 	RdbAnalyzeService rdbAnalyzeService;
 	@Autowired
     RdbAnalyzeResultService rdbAnalyzeResultService;
-
+//
 	@Autowired
 	ScheduleTaskService taskService;
+
+	@RequestMapping(value = { "", "/" }, method = RequestMethod.GET)
+	@ResponseBody
+	public Result rdbAnalyzeList(){
+		return Result.successResult(rdbAnalyzeService.list());
+	}
 
 	// update
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.PUT)
@@ -39,7 +45,7 @@ public class RDBAnalyzeController {
 				LOG.error("schedule job delete faild!message:{}", e.getMessage());
 			}
 
-			if (rdbAnalyze.getAutoAnalyze()) {
+			if (rdbAnalyze.isAutoAnalyze()) {
 				try {
 					taskService.addTask(rdbAnalyze, RdbScheduleJob.class);
 				} catch (SchedulerException e) {
@@ -56,7 +62,7 @@ public class RDBAnalyzeController {
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.POST)
 	public Result addRdbAnalyze(@RequestBody RDBAnalyze rdbAnalyze) {
 		if (rdbAnalyzeService.add(rdbAnalyze)) {
-			if (rdbAnalyze.getAutoAnalyze()) {
+			if (rdbAnalyze.isAutoAnalyze()) {
 				try {
 					taskService.addTask(rdbAnalyze, RdbScheduleJob.class);
 				} catch (SchedulerException e) {

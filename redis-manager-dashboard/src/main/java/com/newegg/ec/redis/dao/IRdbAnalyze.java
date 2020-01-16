@@ -1,11 +1,10 @@
 package com.newegg.ec.redis.dao;
 
+
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.newegg.ec.redis.entity.RDBAnalyze;
 import com.newegg.ec.redis.entity.RDBAnalyzeProvider;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -13,6 +12,7 @@ import java.util.List;
  * @author Kyle.K.Zhao
  * @date 1/8/2020 16:26
  */
+@Mapper
 public interface IRdbAnalyze extends BaseMapper<RDBAnalyze> {
 
     @UpdateProvider(type = RDBAnalyzeProvider.class, method = "updateRdbAnalyze")
@@ -46,4 +46,10 @@ public interface IRdbAnalyze extends BaseMapper<RDBAnalyze> {
 
     @Select("select * from rdb_analyze where id = #{id}")
     RDBAnalyze getRDBAnalyzeById(Long id);
+
+    @Insert("insert into rdb_analyze (auto_analyze,schedule,dataPath,prefixes,is_report,mailTo,analyzer,cluster_id,group_id) " +
+            "values (#{autoAnalyze},#{schedule},#{dataPath},#{prefixes},#{report},#{mailTo},#{analyzer},#{clusterId},#{groupId})")
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    Integer insert(RDBAnalyze rdbAnalyze);
+
 }

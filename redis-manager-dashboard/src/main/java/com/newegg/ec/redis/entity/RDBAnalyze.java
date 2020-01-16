@@ -10,70 +10,83 @@ import com.baomidou.mybatisplus.enums.IdType;
  * @author Kyle.K.Zhao
  * @date 1/8/2020 16:26
  */
-@TableName("rdb_analyze")
 public class RDBAnalyze {
-	@TableId(value = "id", type = IdType.AUTO)
 	private Long id;
-	@TableField(value="auto_analyze")
 	private boolean autoAnalyze;
 	private String schedule;
 	private String dataPath;
 	private String prefixes;
-	@TableField(value="is_report")
 	private boolean report;
 	private String mailTo;
 	private String analyzer;
-	@TableField(value="cluster_id")
 	private Long clusterId;
-	
+
+
+	private Long groupId;
+
 
 	public Long getId() {
 		return id;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Boolean getAutoAnalyze() {
+
+	public boolean isAutoAnalyze() {
 		return autoAnalyze;
 	}
-	public void setAutoAnalyze(Boolean autoAnalyze) {
+
+	public void setAutoAnalyze(boolean autoAnalyze) {
 		this.autoAnalyze = autoAnalyze;
 	}
+
 	public String getSchedule() {
 		return schedule;
 	}
+
 	public void setSchedule(String schedule) {
 		this.schedule = schedule;
 	}
+
 	public String getDataPath() {
 		return dataPath;
 	}
+
 	public void setDataPath(String dataPath) {
 		this.dataPath = dataPath;
 	}
+
 	public String getPrefixes() {
 		return prefixes;
 	}
+
 	public void setPrefixes(String prefixes) {
 		this.prefixes = prefixes;
 	}
+
+	public boolean isReport() {
+		return report;
+	}
+
+	public void setReport(boolean report) {
+		this.report = report;
+	}
+
 	public String getMailTo() {
 		return mailTo;
 	}
+
 	public void setMailTo(String mailTo) {
 		this.mailTo = mailTo;
 	}
+
 	public String getAnalyzer() {
 		return analyzer;
 	}
+
 	public void setAnalyzer(String analyzer) {
 		this.analyzer = analyzer;
-	}
-	public Boolean getReport() {
-		return report;
-	}
-	public void setReport(Boolean report) {
-		this.report = report;
 	}
 
 	public Long getClusterId() {
@@ -82,5 +95,13 @@ public class RDBAnalyze {
 
 	public void setClusterId(Long clusterId) {
 		this.clusterId = clusterId;
+	}
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
 	}
 }

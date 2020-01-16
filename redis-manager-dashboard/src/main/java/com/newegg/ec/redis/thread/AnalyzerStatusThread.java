@@ -102,7 +102,7 @@ public class AnalyzerStatusThread implements Runnable {
                 }catch (Exception e) {
                     LOG.error("reportDataWriteToDb has error.", e);
                 }
-				if(rdbAnalyze.getReport()) {
+				if(rdbAnalyze.isReport()) {
 					EmailSendReport emailSendReport = new EmailSendReport();
 					emailSendReport.sendEmailReport(rdbAnalyze, emailInfo, reportData, latestPrefixData);
 				}
