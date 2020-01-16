@@ -6,7 +6,12 @@ import com.newegg.ec.redis.cache.AppCache;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.config.RCTConfig;
 import com.newegg.ec.redis.dao.IRdbAnalyze;
-import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.entity.AnalyzeInstance;
+import com.newegg.ec.redis.entity.AnalyzeStatus;
+import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.RDBAnalyze;
+import com.newegg.ec.redis.entity.ScheduleDetail;
+import com.newegg.ec.redis.entity.ScheduleInfo;
 import com.newegg.ec.redis.service.IRdbAnalyzeService;
 import com.newegg.ec.redis.thread.AnalyzerStatusThread;
 import com.newegg.ec.redis.util.EurekaUtil;
@@ -24,8 +29,13 @@ import org.springframework.web.client.RestTemplate;
 import redis.clients.jedis.Jedis;
 
 import java.net.InetAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 
 @Service
@@ -35,7 +45,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 	RCTConfig config;
 
 	@Autowired
-	IRdbAnalyze rdbAnalyzeMapper;
+	IRdbAnalyze iRdbAnalyze;
 
 	@Autowired
 	ClusterService clusterService;
@@ -282,26 +292,26 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 
 	@Override
 	public boolean update(RDBAnalyze rdbAnalyze) {
-		int result = rdbAnalyzeMapper.updateRdbAnalyze(rdbAnalyze);
+		int result = iRdbAnalyze.updateRdbAnalyze(rdbAnalyze);
 		return checkResult(result);
 	}
 
 	@Override
 	public RDBAnalyze selectById(Long cluster_id) {
-		RDBAnalyze rdbAnalyze = rdbAnalyzeMapper.getRDBAnalyzeByCluster_id(cluster_id);
+		RDBAnalyze rdbAnalyze = iRdbAnalyze.getRDBAnalyzeByCluster_id(cluster_id);
 		return rdbAnalyze;
 	}
 
 	@Override
 	public boolean add(RDBAnalyze rdbAnalyze) {
 		//rdbAnalyze.setRedisInfo(null);
-		int result = rdbAnalyzeMapper.insert(rdbAnalyze);
+		int result = iRdbAnalyze.insert(rdbAnalyze);
 		return checkResult(result);
 	}
 
 	@Override
 	public List<RDBAnalyze> list() {
-		List<RDBAnalyze> results = rdbAnalyzeMapper.queryList();
+		List<RDBAnalyze> results = iRdbAnalyze.queryList();
 		return results;
 	}
 
@@ -316,13 +326,13 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 
 	@Override
 	public RDBAnalyze getRDBAnalyzeByPid(Long cluster_id) {
-		RDBAnalyze rdbAnalyze = rdbAnalyzeMapper.getRDBAnalyzeByCluster_id(cluster_id);
+		RDBAnalyze rdbAnalyze = iRdbAnalyze.getRDBAnalyzeByCluster_id(cluster_id);
 		return rdbAnalyze;
 	}
 
 	@Override
 	public RDBAnalyze getRDBAnalyzeById(Long id) {
-		RDBAnalyze rdbAnalyze = rdbAnalyzeMapper.getRDBAnalyzeById(id);
+		RDBAnalyze rdbAnalyze = iRdbAnalyze.getRDBAnalyzeById(id);
 		return rdbAnalyze;
 	}
 
@@ -359,12 +369,12 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 		if (null == cluster_id) {
 			return null;
 		}
-		return rdbAnalyzeMapper.getRDBAnalyzeIdByCluster_id(cluster_id);
+		return iRdbAnalyze.getRDBAnalyzeIdByCluster_id(cluster_id);
 	}
 
 	@Override
 	public boolean updateRdbAnalyze(RDBAnalyze rdbAnalyze) {
-		return checkResult(rdbAnalyzeMapper.updateRdbAnalyze(rdbAnalyze));
+		return checkResult(iRdbAnalyze.updateRdbAnalyze(rdbAnalyze));
 	}
 
 	public void updateJob() {
@@ -413,11 +423,11 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 		if (null == id) {
 			return null;
 		}
-		return rdbAnalyzeMapper.selectClusterIdById(id);
+		return iRdbAnalyze.selectClusterIdById(id);
 	}
 
 	@Override
 	public void createRdbAnalyzeTable() {
-		rdbAnalyzeMapper.createRdbAnalyzeTable();
+		iRdbAnalyze.createRdbAnalyzeTable();
 	}
 }

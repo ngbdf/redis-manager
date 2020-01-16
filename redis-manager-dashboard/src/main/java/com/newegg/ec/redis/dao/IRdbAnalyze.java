@@ -1,7 +1,6 @@
 package com.newegg.ec.redis.dao;
 
 
-import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.newegg.ec.redis.entity.RDBAnalyze;
 import com.newegg.ec.redis.entity.RDBAnalyzeProvider;
 import org.apache.ibatis.annotations.*;
@@ -13,7 +12,7 @@ import java.util.List;
  * @date 1/8/2020 16:26
  */
 @Mapper
-public interface IRdbAnalyze extends BaseMapper<RDBAnalyze> {
+public interface IRdbAnalyze {
 
     @UpdateProvider(type = RDBAnalyzeProvider.class, method = "updateRdbAnalyze")
     Integer updateRdbAnalyze(@Param("rdbAnalyze") RDBAnalyze rdbAnalyze);

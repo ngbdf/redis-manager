@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.cache.AppCache;
 import com.newegg.ec.redis.dao.IRdbAnalyzeResult;
+import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RDBAnalyze;
 import com.newegg.ec.redis.entity.RDBAnalyzeResult;
 import com.newegg.ec.redis.entity.ReportData;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -34,7 +36,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 	}
 	@Override
 	public void add(RDBAnalyzeResult rdbAnalyzeResult) {
-		int count = rdbAnalyzeResultMapper.selectCount(null);
+		int count = rdbAnalyzeResultMapper.selectCount();
 		if(count >= totalCount) {
 			rdbAnalyzeResultMapper.deleteOld();
 		}
@@ -43,8 +45,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 
 	@Override
 	public List<RDBAnalyzeResult> selectList() {
-		List<RDBAnalyzeResult> resList = rdbAnalyzeResultMapper.selectList(null);
-		return resList;
+		return rdbAnalyzeResultMapper.selectList();
 	}
 
 	/**
@@ -53,13 +54,13 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 	 * @return List<RDBAnalyzeResult>
 	 */
 	@Override
-	public List<RDBAnalyzeResult> selectAllResultById(Long cluster_id) {
+	public List<RDBAnalyzeResult> selectAllResultByClusterId(Long cluster_id) {
 		if(null == cluster_id) {
 			return null;
 		}
 		List<RDBAnalyzeResult> results = null;
 		try {
-			results = rdbAnalyzeResultMapper.selectAllResultById(cluster_id);
+			results = rdbAnalyzeResultMapper.selectAllResultByClusterId(cluster_id);
 		} catch (Exception e) {
 			LOG.error("selectAllResultById failed!", e);
 		}
@@ -124,10 +125,8 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 		return result;
 	}
 
-	@Override
-	public List<RDBAnalyzeResult> selectByMap(Map<String, Object> map) {
-		return rdbAnalyzeResultMapper.selectByMap(map);
-	}
+
+
 
 	@Override
 	public boolean checkResult(int result) {
@@ -201,7 +200,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 
 	/**
 	 * gong zhe xian tu shi yong,
-	 * @param id
+	 * @param clusterId
 	 * @param scheduleId
 	 * @param key
 	 * @return
@@ -555,5 +554,20 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 	@Override
 	public void createRdbAnalyzeResultTable() {
 		rdbAnalyzeResultMapper.createRdbAnalyzeResult();
+	}
+
+	/**
+	 * 获取所有的分析结果，并设置clusterName
+	 * @param clusters all cluster
+	 * @param results all result
+	 * @return
+	 */
+	public List<RDBAnalyzeResult> getAllAnalyzeResult(List<RDBAnalyzeResult> results, List<Cluster> clusters) {
+		Map<Integer, String> clusterName = clusters.stream().collect(Collectors.toMap(Cluster::getClusterId,
+				Cluster::getClusterName));
+		for (RDBAnalyzeResult result : results) {
+			result.setClusterName(clusterName.get(result.getClusterId().intValue()));
+		}
+		return results;
 	}
 }

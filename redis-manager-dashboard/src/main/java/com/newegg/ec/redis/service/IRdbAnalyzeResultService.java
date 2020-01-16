@@ -17,7 +17,7 @@ public interface IRdbAnalyzeResultService {
 
     public List<RDBAnalyzeResult> selectList();
 
-    public List<RDBAnalyzeResult> selectAllResultById(Long cluster_id);
+    public List<RDBAnalyzeResult> selectAllResultByClusterId(Long cluster_id);
 
     public List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long cluster_id);
 
@@ -25,7 +25,6 @@ public interface IRdbAnalyzeResultService {
 
     public RDBAnalyzeResult selectResultByRIDandSID(Long cluster_id, Long scheduleId);
 
-    public List<RDBAnalyzeResult> selectByMap(Map<String, Object> map);
 
     public boolean checkResult(int result);
 

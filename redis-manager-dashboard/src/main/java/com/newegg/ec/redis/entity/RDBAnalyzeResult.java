@@ -1,23 +1,28 @@
 package com.newegg.ec.redis.entity;
 
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
-import com.baomidou.mybatisplus.annotations.TableName;
-import com.baomidou.mybatisplus.enums.IdType;
 
 /**
  * @author Kyle.K.Zhao
  * @date 1/8/2020 16:26
  */
-@TableName("rdb_analyze_result")
 public class RDBAnalyzeResult {
-	@TableId(value="id",type= IdType.AUTO)
 	private Long id;
-	@TableField(value="schedule_id")
 	private Long scheduleId;
-	@TableField(value="cluster_id")
 	private Long clusterId;
+	private String analyzeConfig;
+
+	private String result;
+
+	private String clusterName;
+
+	public String getClusterName() {
+		return clusterName;
+	}
+
+	public void setClusterName(String clusterName) {
+		this.clusterName = clusterName;
+	}
 
 	public Long getClusterId() {
 		return clusterId;
@@ -27,7 +32,6 @@ public class RDBAnalyzeResult {
 		this.clusterId = clusterId;
 	}
 
-	private String result;
 	public Long getId() {
 		return id;
 	}
@@ -46,5 +50,13 @@ public class RDBAnalyzeResult {
 	}
 	public void setResult(String result) {
 		this.result = result;
+	}
+
+	public String getAnalyzeConfig() {
+		return analyzeConfig;
+	}
+
+	public void setAnalyzeConfig(String analyzeConfig) {
+		this.analyzeConfig = analyzeConfig;
 	}
 }

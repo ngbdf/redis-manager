@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.cache.AppCache;
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.impl.*;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
@@ -23,9 +24,12 @@ public class RDBAnalyzeController {
 	RdbAnalyzeService rdbAnalyzeService;
 	@Autowired
     RdbAnalyzeResultService rdbAnalyzeResultService;
-//
+
 	@Autowired
 	ScheduleTaskService taskService;
+
+	@Autowired
+	private IClusterService clusterService;
 
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.GET)
 	@ResponseBody
@@ -221,9 +225,9 @@ public class RDBAnalyzeController {
 			if (null == clusterId) {
 				return Result.failResult("clusterId not null!");
 			}
-			Map<String, Object> queryMap = new HashMap<>(2);
-			queryMap.put("cluster_id", clusterId);
-			List<RDBAnalyzeResult> rdbAnalyzeResultList = rdbAnalyzeResultService.selectByMap(queryMap);
+//			Map<String, Object> queryMap = new HashMap<>(2);
+//			queryMap.put("cluster_id", clusterId);
+			List<RDBAnalyzeResult> rdbAnalyzeResultList = rdbAnalyzeResultService.selectAllResultByClusterId(clusterId);
 			List<JSONObject> result = new ArrayList<>(500);
 			JSONObject obj;
 			for (RDBAnalyzeResult rdbAnalyzeResult : rdbAnalyzeResultList) {
@@ -363,6 +367,22 @@ public class RDBAnalyzeController {
 		}
 	}
 
+	/**
+	 * 获取所有的分析列表
+	 * @return result
+	 */
+	@GetMapping("/results")
+	public Result getAllAnalyzeResults() {
+		try {
+			List<RDBAnalyzeResult> results = rdbAnalyzeResultService.selectList();
+			List<Cluster> clusters = clusterService.getAllClusterList();
+			results = rdbAnalyzeResultService.getAllAnalyzeResult(results, clusters);
+			return Result.successResult(results);
+		} catch (Exception e) {
+			LOG.error("get analyze result failed", e);
+			return Result.failResult("get analyze result failed!");
+		}
+	}
 
 
 }
