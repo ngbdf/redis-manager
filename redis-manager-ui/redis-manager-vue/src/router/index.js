@@ -17,6 +17,7 @@ import DataOperation from '@/components/tool/DataOperation'
 import NotFound from '@/components/error/404'
 import EditHistory from '@/components/history/EditHistory'
 import Analysis from '@/components/plugin/Analysis'
+import TaskProgress from '@/components/plugin/TaskProgress'
 
 import API from '@/api/api.js'
 import { store } from '@/vuex/store.js'
@@ -107,6 +108,11 @@ const router = new Router({
           name: 'Analysis',
           path: '/plugin/analysis',
           component: Analysis
+
+        }, {
+          name: 'TaskProgress',
+          path: '/plugin/taskProgress',
+          component: TaskProgress
 
         }
       ]

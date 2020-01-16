@@ -113,6 +113,9 @@
                 <el-menu-item-group>
                   <el-menu-item index="9-1" @click="toAnalysis()">Analysis</el-menu-item>
                 </el-menu-item-group>
+                <el-menu-item-group>
+                  <el-menu-item index="9-2" @click="toTaskProgress()">TaskProgress</el-menu-item>
+                </el-menu-item-group>
               </el-submenu>
               <el-menu-item index="4" @click="toMachineManage()" v-if="currentUser.userRole < 2">
                 <i class="el-icon-monitor"></i>
@@ -227,7 +230,11 @@ export default {
       this.$router.push({
         name: 'Analysis'
       })
-    },
+    },toTaskProgress () {
+							this.$router.push({
+						name: 'TaskProgress'
+					  })
+		},
     toRuleManage () {
       this.$router.push({
         name: 'rule-manage',
