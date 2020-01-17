@@ -213,6 +213,10 @@ public class RedisClient implements IRedisClient {
             String[] item = SignUtil.splitBySpace(line);
             String nodeId = item[0].trim();
             String ipPort = item[1];
+            //noaddr 可知有此标记的节点属于无用节点
+            if (line.contains("noaddr")){
+                continue;
+            }
             Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(SignUtil.splitByAite(ipPort)[0]);
             HostAndPort hostAndPort = hostAndPortSet.iterator().next();
             String flags = item[2];

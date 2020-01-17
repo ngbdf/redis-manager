@@ -5,6 +5,18 @@ server:
     min-response-size: 1024
   tomcat.uri-encoding: UTF-8
   port: 8182
+eureka:
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 10000
+    max-threads-for-peer-replication: 0
+  dashboard:
+    path: /eureka-ui
+  client:
+    service-url:
+      defaultZone: http://localhost:8182/eureka
+    register-with-eureka: false
+    fetch-registry: false
 
 spring:
   application:
@@ -27,7 +39,10 @@ spring:
       max-active: 10
       min-idle: 0
       max-wait: 10000
-
+  freemarker:
+    template-loader-path:
+      - classpath:/templates/
+    prefer-file-system-access: false
 mybatis:
   configuration:
     mapUnderscoreToCamelCase: true
@@ -71,3 +86,10 @@ redis-manager:
       humpback-host: http://%s:8500/dockerapi/v2/
   alert:
     data-keep-days: 15
+
+logging:
+  level:
+    com:
+      netflix:
+        eureka: OFF
+        discovery: OFF

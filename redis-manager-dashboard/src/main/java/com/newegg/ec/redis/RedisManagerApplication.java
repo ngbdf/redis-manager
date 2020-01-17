@@ -3,7 +3,7 @@ package com.newegg.ec.redis;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @EnableScheduling
 @EnableAsync
+@EnableEurekaServer
 @EnableTransactionManagement
 @MapperScan({"com.newegg.ec.redis.dao", "com.newegg.ec.redis.plugin"})
 @SpringBootApplication

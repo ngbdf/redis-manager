@@ -1,12 +1,7 @@
 package com.newegg.ec.redis.dao;
 
 import com.newegg.ec.redis.entity.RDBAnalyzeResult;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -14,6 +9,7 @@ import java.util.List;
  * @author Kyle.K.Zhao
  * @date 1/8/2020 16:27
  */
+@Mapper
 public interface IRdbAnalyzeResult {
 
     @Delete("delete from rdb_analyze_result where id = #{id}")
