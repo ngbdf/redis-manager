@@ -2,16 +2,18 @@ import axios from 'axios'
 import message from '@/utils/message.js'
 import { store } from '@/vuex/store.js'
 
-function API (url, method = 'GET', params = {}) {
-  return service({
-    method: method,
-    url: url,
-    headers: {'UserIp': store.getters.getUserIp},
-    data: method === 'POST' || method === 'PUT' ? params : null,
-    params: method === 'GET' || method === 'DELETE' ? params : null
-  })
-}
-
+/**
+ * use RCTAPI or API
+ * eg: getAnalyseResults
+ * async getAnalyseResults (groupId) {
+ *   const res = await getAnalyzeResults()
+ *   //处理数据
+ *   console.log(res.data.data)
+ * }
+ * @param {*} url url
+ * @param {*} method GET | POST | DELETE | PUT, default GET
+ * @param {*} params {}
+ */
 function RCTAPI (url, params = {}, method = 'GET') {
   return new Promise((resolve, reject) => {
     service({
@@ -28,6 +30,28 @@ function RCTAPI (url, params = {}, method = 'GET') {
       // reject(err)
       message.error(err.message)
     })
+  })
+}
+
+/**
+ * eg: deletAnalyze
+ * async deletAnalyze (groupId) {
+ *   const res = await deletAnalyze(1).then(res => {
+ *   //处理数据
+ *   console.log(res.data.data)
+ *   })
+ * }
+ * @param {*} url url
+ * @param {*} method GET | POST | DELETE | PUT, default GET
+ * @param {*} params {}
+ */
+function API (url, method = 'GET', params = {}) {
+  return service({
+    method: method,
+    url: url,
+    headers: {'UserIp': store.getters.getUserIp},
+    data: method === 'POST' || method === 'PUT' ? params : null,
+    params: method === 'GET' || method === 'DELETE' ? params : null
   })
 }
 
