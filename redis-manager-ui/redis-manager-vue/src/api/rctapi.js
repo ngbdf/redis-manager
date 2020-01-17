@@ -12,6 +12,25 @@ function API (url, method = 'GET', params = {}) {
   })
 }
 
+function RCTAPI (url, params = {}, method = 'GET') {
+  return new Promise((resolve, reject) => {
+    service({
+      method: method,
+      url: url,
+      headers: {'UserIp': store.getters.getUserIp},
+      data: method === 'POST' || method === 'PUT' ? params : null,
+      params: method === 'GET' || method === 'DELETE' ? params : null
+      // baseURL: root,
+      // withCredentials: true //开启cookies
+    }).then(res => {
+      resolve(res)
+    }).catch(err => {
+      // reject(err)
+      message.error(err.message)
+    })
+  })
+}
+
 if (process.env.NODE_ENV === 'development') {
   axios.defaults.baseURL = '/apis'
 } else if (process.env.NODE_ENV === 'production') {
@@ -53,4 +72,4 @@ export const updateAnalyzeList = (data) => API(`/rdb`, 'PUT', data)
 
 export const deletAnalyze = (id) => API(`/rdb?id=${id}`, 'DELETE')
 
-export const getAnalyzeResults = () => API('/rdb/results')
+export const getAnalyzeResults = () => RCTAPI('/rdb/results')
