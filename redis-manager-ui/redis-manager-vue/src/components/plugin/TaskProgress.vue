@@ -117,7 +117,8 @@ export default {
   },
   mounted() {
     this.getData();
-    let groupId = this.currentGroup.groupId;
+    console.log('clusterid', this)
+    let groupId = this.currentGroup.groupId
   }
 };
 </script>

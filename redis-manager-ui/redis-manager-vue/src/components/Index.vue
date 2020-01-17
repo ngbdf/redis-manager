@@ -113,8 +113,11 @@
                 <el-menu-item-group>
                   <el-menu-item index="9-1" @click="toAnalysis()">Analysis</el-menu-item>
                 </el-menu-item-group>
-                <el-menu-item-group>
+                <!-- <el-menu-item-group>
                   <el-menu-item index="9-2" @click="toTaskProgress()">TaskProgress</el-menu-item>
+                </el-menu-item-group> -->
+                <el-menu-item-group>
+                  <el-menu-item index="9-2" @click="toJobList()">JobList</el-menu-item>
                 </el-menu-item-group>
               </el-submenu>
               <el-menu-item index="4" @click="toMachineManage()" v-if="currentUser.userRole < 2">
@@ -226,15 +229,22 @@ export default {
         params: { groupId: this.selectGroupId }
       })
     },
+    toJobList () {
+      this.$router.push({
+        name: 'jobList',
+        params: { groupId: this.selectGroupId }
+      })
+    },
     toAnalysis () {
       this.$router.push({
         name: 'Analysis'
       })
-    },toTaskProgress () {
-							this.$router.push({
-						name: 'TaskProgress'
-					  })
-		},
+    },
+    toTaskProgress () {
+      this.$router.push({
+        name: 'TaskProgress'
+      })
+    },
     toRuleManage () {
       this.$router.push({
         name: 'rule-manage',

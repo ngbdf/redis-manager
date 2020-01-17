@@ -18,6 +18,7 @@ import NotFound from '@/components/error/404'
 import EditHistory from '@/components/history/EditHistory'
 import Analysis from '@/components/plugin/Analysis'
 import TaskProgress from '@/components/plugin/TaskProgress'
+import JobList from '@/components/plugin/JobList'
 
 import API from '@/api/api.js'
 import { store } from '@/vuex/store.js'
@@ -111,8 +112,13 @@ const router = new Router({
 
         }, {
           name: 'TaskProgress',
-          path: '/plugin/taskProgress',
+          path: '/plugin/taskProgress/:clusterId',
           component: TaskProgress
+
+        }, {
+          name: 'jobList',
+          path: '/plugin/jobList',
+          component: JobList
 
         }
       ]

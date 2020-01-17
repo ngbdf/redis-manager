@@ -1,19 +1,22 @@
 import axios from 'axios'
 import message from '@/utils/message.js'
+import { store } from '@/vuex/store.js'
 
-function ajax (url, data = {}, type = 'GET') {
+function ajax (url, params = {}, method = 'GET') {
   return new Promise((resolve, reject) => {
-    let promise
-    if (type === 'GET') {
-      promise = axios.get(url, { params: data })
-    } else {
-      promise = axios.post(url, data)
-    }
-    promise.then(response => {
-      resolve(response)
-    }).catch(error => {
-      reject(error)
-      message.error(error.message)
+    axios({
+      method: method,
+      url: url,
+      headers: {'UserIp': store.getters.getUserIp},
+      data: method === 'POST' || method === 'PUT' ? params : null,
+      params: method === 'GET' || method === 'DELETE' ? params : null
+      // baseURL: root,
+      // withCredentials: true //开启cookies
+    }).then(res => {
+      resolve(res)
+    }).catch(err => {
+      reject(err)
+      message.error(err.message)
     })
   })
 }
@@ -79,3 +82,5 @@ export const deletAnalyze = (id) => {
     method: 'delete'
   })
 }
+
+export const getAnalyzeResults = () => ajax('/rdb/results')

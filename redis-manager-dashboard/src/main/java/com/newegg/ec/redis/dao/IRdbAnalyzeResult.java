@@ -66,10 +66,10 @@ public interface IRdbAnalyzeResult {
 
     @Select("create TABLE IF NOT EXISTS `rdb_analyze_result`( " +
             "id integer AUTO_INCREMENT, " +
-            "schedule_id integer NOT NULL, " +
+            "schedule_id bigint NOT NULL, " +
             "cluster_id integer, " +
-            "result varchar(1024), " +
-            "analyze_config varchar(1024)," +
+            "result longtext, " +
+            "analyze_config longtext," +
             "PRIMARY KEY (id) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createRdbAnalyzeResult();
