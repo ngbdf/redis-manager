@@ -2,22 +2,13 @@ import axios from 'axios'
 import message from '@/utils/message.js'
 import { store } from '@/vuex/store.js'
 
-function ajax (url, params = {}, method = 'GET') {
-  return new Promise((resolve, reject) => {
-    axios({
-      method: method,
-      url: url,
-      headers: {'UserIp': store.getters.getUserIp},
-      data: method === 'POST' || method === 'PUT' ? params : null,
-      params: method === 'GET' || method === 'DELETE' ? params : null
-      // baseURL: root,
-      // withCredentials: true //开启cookies
-    }).then(res => {
-      resolve(res)
-    }).catch(err => {
-      reject(err)
-      message.error(err.message)
-    })
+function API (url, method = 'GET', params = {}) {
+  return service({
+    method: method,
+    url: url,
+    headers: {'UserIp': store.getters.getUserIp},
+    data: method === 'POST' || method === 'PUT' ? params : null,
+    params: method === 'GET' || method === 'DELETE' ? params : null
   })
 }
 
@@ -52,35 +43,14 @@ service.interceptors.response.use(
   }
 )
 
-export const getAnalysisList = () => {
-  return service({
-    url: `/rdb`,
-    method: 'get'
+export const getCluster = (id) => API(`/cluster/getClusterList/${id}`)
 
-  })
-}
+export const getAnalysisList = () => API(`/rdb`)
 
-export const addAnalysisList = (data) => {
-  return service({
-    url: `/rdb`,
-    method: 'post',
-    data
-  })
-}
+export const addAnalysisList = (data) => API(`/rdb`, 'POST', data)
 
-export const updateAnalyzeList = (data) => {
-  return service({
-    url: `/rdb`,
-    method: 'put',
-    data
-  })
-}
+export const updateAnalyzeList = (data) => API(`/rdb`, 'PUT', data)
 
-export const deletAnalyze = (id) => {
-  return service({
-    url: `/rdb?id=${id}`,
-    method: 'delete'
-  })
-}
+export const deletAnalyze = (id) => API(`/rdb?id=${id}`, 'DELETE')
 
-export const getAnalyzeResults = () => ajax('/rdb/results')
+export const getAnalyzeResults = () => API('/rdb/results')
