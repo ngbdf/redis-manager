@@ -5,7 +5,8 @@ import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import org.apache.commons.lang.StringUtils;
-import org.checkerframework.checker.units.qual.C;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.MigrateParams;
@@ -25,7 +26,7 @@ import static com.newegg.ec.redis.util.RedisUtil.*;
  * @date 2019/7/22
  */
 public class RedisClient implements IRedisClient {
-
+    private static final Logger logger = LoggerFactory.getLogger(RedisClient.class);
     private static final String OK = "OK";
 
     private static final String PONG = "PONG";
@@ -215,6 +216,7 @@ public class RedisClient implements IRedisClient {
             String ipPort = item[1];
             //noaddr 可知有此标记的节点属于无用节点
             if (line.contains("noaddr")){
+                logger.warn("find a useless node: {}",line);
                 continue;
             }
             Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(SignUtil.splitByAite(ipPort)[0]);

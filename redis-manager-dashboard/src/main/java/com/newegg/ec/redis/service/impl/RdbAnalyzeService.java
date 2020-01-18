@@ -81,24 +81,19 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 			return responseResult;
 		}
 		JSONArray tempArray = new JSONArray();
-
-		RDBAnalyze rdbAnalyze = rdbAnalyzeService.selectById(id);
-		Long clusterId = rdbAnalyzeService.selectClusterIdById(id);
-		rdbAnalyze.setClusterId(clusterId);
+		RDBAnalyze rdbAnalyze = rdbAnalyzeService.getRDBAnalyzeById(id);
+		Long clusterId = rdbAnalyze.getClusterId();
 		Cluster cluster = clusterService.getClusterById(Math.toIntExact(clusterId));
-
 		RedisClient redisClient = null;
 		Map<String, String> clusterNodesIP = new HashMap<>();
 		Map<String, Set<String>> generateRule = new HashMap<>();
 		try {
-
 			if (config.isDevEnable()) {
 				clusterNodesIP.put(InetAddress.getLocalHost().getHostAddress(), config.getDevRDBPort());
 				Set<String> set = new HashSet<>();
 				set.add(config.getDevRDBPort());
 				generateRule.put(InetAddress.getLocalHost().getHostAddress(), set);
 			} else {
-				//List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
 				clusterNodesIP = redisClient.nodesIP(cluster);
 				generateRule = RedisClient.generateAnalyzeRule(redisClient.nodesMap(cluster));
 			}
@@ -296,11 +291,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 		return checkResult(result);
 	}
 
-	@Override
-	public RDBAnalyze selectById(Long cluster_id) {
-		RDBAnalyze rdbAnalyze = iRdbAnalyze.getRDBAnalyzeByCluster_id(cluster_id);
-		return rdbAnalyze;
-	}
+
 
 	@Override
 	public boolean add(RDBAnalyze rdbAnalyze) {

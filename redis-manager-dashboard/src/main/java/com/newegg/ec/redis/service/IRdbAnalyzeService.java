@@ -13,8 +13,6 @@ public interface IRdbAnalyzeService {
 
     public boolean update(RDBAnalyze rdbAnalyze);
 
-    public RDBAnalyze selectById(Long id);
-
     public boolean add(RDBAnalyze rdbAnalyze);
 
     public List<RDBAnalyze> list();

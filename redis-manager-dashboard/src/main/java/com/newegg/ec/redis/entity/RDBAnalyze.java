@@ -14,6 +14,9 @@ public class RDBAnalyze {
 	private String prefixes;
 	private boolean report;
 	private String mailTo;
+	/**
+	 *analyzer 例：0,5,6     0代表report  5 代表ExportKeyByPrefix  6代表ExportKeyByFilter
+ 	 */
 	private String analyzer;
 	private Long clusterId;
 
