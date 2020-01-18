@@ -1,9 +1,10 @@
 <template>
   <div id="taskProgress" class="body-wrapper">
     <div class="header-wrapper">
-      <div>{{ currentGroup.groupName }}</div>
-      <div><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
-      <div><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
+      <div><i class="el-icon-back" @click="backHistory()"></i></div>
+      <div class="filedStyle">instance:</div>
+      <div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
+      <div class="buttonStyle"><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
     </div>
     <div>
       <el-table :data="analyseisJobDetail">
@@ -38,6 +39,8 @@ import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
 import message from "@/utils/message.js";
 
+import { getScheduleDetail } from '@/api/rctapi.js'
+import { cancelAnalyzeTask } from '@/api/rctapi.js'
 export default {
   data() {
     return {
@@ -47,9 +50,20 @@ export default {
       searchData: "",
     };
   },
+  created() {
+    let clusterId = this.$route.params.clusterId;
+    this.timer = setInterval(() => {
+      this.getAllScheduleDetail(clusterId);
+    }, 3000);
+  },
+  beforeDestroy() {
+    if(this.timer) {
+        clearInterval(this.timer);
+    }
+  },
   methods: {
-    getData1(clusterId) {
-        this.originalData = [
+    async getAllScheduleDetail(id) {
+      this.originalData = [
             {
                 instance: "6.6.6.6:9002",
                 status: "RUNNING",
@@ -83,51 +97,70 @@ export default {
                 process: Math.floor(Math.random() * 100)
             }
         ]
-        if(this.searchData) {
-              let list = this.originalData.filter((item, index) =>
-                item.instance.includes(this.searchData)
-              )
-              this.analyseisJobDetail = list;
+      // const result = await getScheduleDetail(id)
+      // this.originalData = result.data
+      // this.analyseisJobDetail = result.data
+      if(this.searchData) {
+        let list = this.originalData.filter((item, index) =>
+          item.instance.includes(this.searchData)
+        )
+        this.analyseisJobDetail = list;
+      }
+      let count = 0;
+      for(let i = 0; i < this.originalData.length; i++) {
+        if(this.originalData[i].status === 'DONE') {
+          count += 1;
         }
-        let count = 0;
-        for(let i = 0; i < this.originalData.length; i++) {
-          if(this.originalData[i].status === 'DONE') {
-            count += 1;
-          }
-        }
-        if (count === this.originalData.length) {
-          this.cancelButtonDisabled = true
-        } else {
-          this.cancelButtonDisabled = false
-        }
-
+      }
+      if (count === this.originalData.length) {
+        this.cancelButtonDisabled = true
+      } else {
+        this.cancelButtonDisabled = false
+      }
     },
-    cancelAnalysis() {
+      backHistory(){
+        this.$router.go(-1);
+      },
+      stopTimer() {
+        if(this.timer) {
+          clearInterval(this.timer);
+        }
+      },
+      cancelAnalysis() {
+      let clusterId = this.$route.params.clusterId;
       this.$confirm("Are you sure you want to stop all task processes ?", "Message", {
         confirmButtonText: "Yes",
         cancelButtonText: "No",
         type: "warning"
       })
-        .then(() => {
+      .then(() => {
+        // const result = cancelAnalyzeTask(clusterId).then(result => {
+          if (true) {
+          this.stopTimer()
+          this.cancelButtonDisabled = true
           this.$message({
             type: "success",
             message: "Stop Success!"
           });
-        })
-        .catch(() => {
+        } else {
           this.$message({
-            type: "info",
-            message: "Cancel"
+            type: "success",
+            message: "Stop Error!"
           });
+        }
+        // })
+      })
+      .catch(() => {
+        this.$message({
+          type: "info",
+          message: "Cancel"
         });
+      });
     },
   },
+
   computed: {
     currentGroup() {
-      let clusterId = this.$route.params.clusterId;
-      this.timer = setInterval(() => {
-        this.getData1(clusterId);
-      }, 3000);
       return store.getters.getCurrentGroup;
     }
   },
@@ -143,7 +176,7 @@ export default {
 
   mounted() {
     let clusterId = this.$route.params.clusterId;
-    this.getData1(clusterId);
+    this.getAllScheduleDetail(clusterId);
   }
 };
 </script>
@@ -153,10 +186,15 @@ export default {
   min-width: 1000px;
 }
 .header-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #dcdfe6;
+float:left;
+}
+.filedStyle {
+  margin-left: 100px
+}
+.searchStyle {
+  margin-left: 10px
+}
+.buttonStyle {
+  margin-left: 1200px
 }
 </style>

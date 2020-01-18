@@ -99,3 +99,7 @@ export const updateAnalyzeList = (data) => API(`/rdb`, 'PUT', data)
 export const deletAnalyze = (id) => API(`/rdb?id=${id}`, 'DELETE')
 
 export const getAnalyzeResults = () => RCTAPI('/rdb/results')
+
+export const getScheduleDetail = (id) => API(`/rdb/schedule_detail/${id}`)
+
+export const cancelAnalyzeTask = (id) => API(`/rdb/cance_job/${id}`)
