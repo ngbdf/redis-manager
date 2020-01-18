@@ -430,4 +430,14 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 	public void createRdbAnalyzeTable() {
 		iRdbAnalyze.createRdbAnalyzeTable();
 	}
+
+	@Override
+	public boolean deleteRdbAnalyze(Long id) {
+	return 	checkResult(iRdbAnalyze.delete(id));
+	}
+
+	@Override
+	public boolean exitsRdbAnalyze(RDBAnalyze rdbAnalyze) {
+		return checkResult(iRdbAnalyze.exits(rdbAnalyze));
+	}
 }

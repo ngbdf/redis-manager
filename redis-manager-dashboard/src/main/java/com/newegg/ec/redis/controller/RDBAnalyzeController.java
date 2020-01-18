@@ -37,6 +37,17 @@ public class RDBAnalyzeController {
 		return Result.successResult(rdbAnalyzeService.list());
 	}
 
+	@RequestMapping(value = { "", "/" }, method = RequestMethod.DELETE)
+	@ResponseBody
+	public Result deleteAnalyze(@RequestParam("id") String id){
+		if(rdbAnalyzeService.deleteRdbAnalyze(Long.parseLong(id))){
+			return Result.successResult("delete success");
+		}else {
+			return Result.successResult("delete faild");
+		}
+
+	}
+
 	// update
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.PUT)
 	@ResponseBody
@@ -65,18 +76,23 @@ public class RDBAnalyzeController {
 	// add
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.POST)
 	public Result addRdbAnalyze(@RequestBody RDBAnalyze rdbAnalyze) {
-		if (rdbAnalyzeService.add(rdbAnalyze)) {
-			if (rdbAnalyze.isAutoAnalyze()) {
-				try {
-					taskService.addTask(rdbAnalyze, RdbScheduleJob.class);
-				} catch (SchedulerException e) {
-					LOG.error("schedule job add faild!message:{}", e.getMessage());
+		if(!rdbAnalyzeService.exitsRdbAnalyze(rdbAnalyze)){
+			if (rdbAnalyzeService.add(rdbAnalyze)) {
+				if (rdbAnalyze.isAutoAnalyze()) {
+					try {
+						taskService.addTask(rdbAnalyze, RdbScheduleJob.class);
+					} catch (SchedulerException e) {
+						LOG.error("schedule job add faild!message:{}", e.getMessage());
+					}
 				}
+				return Result.successResult("add success! ：" + rdbAnalyze.getId());
+			} else {
+				return Result.failResult("add fail!");
 			}
-			return Result.successResult("add success! ：" + rdbAnalyze.getId());
-		} else {
-			return Result.failResult("add fail!");
+		}else{
+			return Result.failResult();
 		}
+
 	}
 
 	/**

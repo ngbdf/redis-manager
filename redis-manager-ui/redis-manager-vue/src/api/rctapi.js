@@ -86,6 +86,8 @@ service.interceptors.response.use(
   }
 )
 
+export const getClusterNodes = (id) => API(`/node-manage/getAllNodeList/${id}`)
+
 export const getCluster = (id) => API(`/cluster/getClusterList/${id}`)
 
 export const getAnalysisList = () => API(`/rdb`)

@@ -38,4 +38,8 @@ public interface IRdbAnalyzeService {
     public Long selectClusterIdById(Long id);
 
     void createRdbAnalyzeTable();
+
+    boolean deleteRdbAnalyze(Long id);
+
+    boolean exitsRdbAnalyze(RDBAnalyze rdbAnalyze);
 }

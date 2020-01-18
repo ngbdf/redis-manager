@@ -17,9 +17,18 @@ public class RDBAnalyze {
 	private String analyzer;
 	private Long clusterId;
 
+	private Cluster cluster;
+
 
 	private Long groupId;
 
+	public Cluster getCluster() {
+		return cluster;
+	}
+
+	public void setCluster(Cluster cluster) {
+		this.cluster = cluster;
+	}
 
 	public Long getId() {
 		return id;

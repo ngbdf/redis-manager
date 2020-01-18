@@ -7,52 +7,52 @@
 </template>
 
 <script>
-import { store } from "@/vuex/store.js";
-import { isEmpty } from "@/utils/validate.js";
-import API from "@/api/api.js";
-import message from "@/utils/message.js";
+import { store } from '@/vuex/store.js'
+import { isEmpty } from '@/utils/validate.js'
+import API from '@/api/api.js'
+import message from '@/utils/message.js'
 export default {
-  name: "App",
+  name: 'App',
   methods: {
-    getInstallationEnvironmentList() {
-      let url = "/system/getInstallationEnvironment";
+    getInstallationEnvironmentList () {
+      let url = '/system/getInstallationEnvironment'
       API.get(
         url,
         null,
         response => {
-          let environmentList = response.data.data;
-          let installationEnvironmentList = [];
+          let environmentList = response.data.data
+          let installationEnvironmentList = []
           environmentList.forEach(environment => {
-            let name = "";
+            let name = ''
             if (environment == 0) {
-              name = "Docker";
+              name = 'Docker'
             } else if (environment == 1) {
-              name = "Machine";
+              name = 'Machine'
             } else if (environment == 3) {
-              name = "Humpback";
+              name = 'Humpback'
             }
             if (!isEmpty(name)) {
               installationEnvironmentList.push({
                 type: environment,
                 name: name
-              });
+              })
             }
-          });
+          })
           store.dispatch(
-            "setInstallationEnvironmentList",
+            'setInstallationEnvironmentList',
             installationEnvironmentList
-          );
+          )
         },
         err => {
-          message.error("Get installation environment failed");
+          message.error('Get installation environment failed')
         }
-      );
+      )
     }
   },
-  mounted() {
-    this.getInstallationEnvironmentList();
+  mounted () {
+    this.getInstallationEnvironmentList()
   }
-};
+}
 </script>
 
 <style>

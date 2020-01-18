@@ -13,11 +13,26 @@ import java.util.List;
  */
 @Mapper
 public interface IRdbAnalyze {
-
-    @UpdateProvider(type = RDBAnalyzeProvider.class, method = "updateRdbAnalyze")
-    Integer updateRdbAnalyze(@Param("rdbAnalyze") RDBAnalyze rdbAnalyze);
+    @Update("UPDATE rdb_analyze SET schedule = #{schedule},auto_analyze=#{autoAnalyze}, " +
+            "dataPath=#{dataPath}," +
+            "prefixes=#{prefixes},is_report=#{report},analyzer=#{analyzer},mailTo=#{mailTo}" +
+            "WHERE cluster_id = #{clusterId} AND group_id = #{groupId}")
+    Integer updateRdbAnalyze(RDBAnalyze rdbAnalyze);
 
     @Select("select * from rdb_analyze")
+    @Results({
+            @Result(column = "id", property = "id"),
+            @Result(column = "schedule", property = "schedule"),
+            @Result(column = "auto_analyze", property = "autoAnalyze"),
+            @Result(column = "dataPath", property = "dataPath"),
+            @Result(column = "cluster_id", property = "cluster",one=@One(select="com.newegg.ec.redis.dao.IClusterDao.selectClusterById")),
+            @Result(column = "prefixes", property = "prefixes"),
+            @Result(column = "report", property = "report"),
+            @Result(column = "analyzer", property = "analyzer"),
+            @Result(column = "cluster_id", property = "clusterId"),
+            @Result(column = "mailTo", property = "mailTo"),
+            @Result(column = "group_id", property = "groupId")
+    })
     List<RDBAnalyze> queryList();
 
     @Select("create TABLE IF NOT EXISTS `rdb_analyze`( " +
@@ -51,4 +66,9 @@ public interface IRdbAnalyze {
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     Integer insert(RDBAnalyze rdbAnalyze);
 
+    @Delete("DELETE FROM rdb_analyze WHERE id = #{id}")
+    Integer delete(Long id);
+
+    @Select("select count(1) from rdb_analyze where group_id=#{groupId} and cluster_id=#{clusterId}")
+    int exits(RDBAnalyze rdbAnalyze);
 }
