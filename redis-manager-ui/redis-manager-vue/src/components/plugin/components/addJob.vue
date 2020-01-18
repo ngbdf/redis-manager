@@ -9,7 +9,7 @@
     <el-form-item label="Cluster Name" prop="clusterId">
       <el-select v-model="analyseisJobFrom.clusterId" :disabled="this.edit" placeholder="Select Redis Cluster" class="input" >
         <el-option
-          v-for="item in redisClusterList"
+          v-for="item in this.redisClusterList"
           :key="item.clusterId"
           :label="item.clusterName"
           :value="item.clusterId"
@@ -80,6 +80,9 @@ export default {
     },
     edit: {
       type: Boolean
+    },
+    redisClusterList: {
+      type: Array
     }
 
   },
@@ -129,7 +132,6 @@ export default {
           }
         ]
       },
-      redisClusterList: [],
       scheduleCron: ['2020-01-21 07:10:00', '2020-01-21 07:10:10'],
       labelPosition: 'right'
     }
@@ -195,7 +197,7 @@ export default {
     }
   },
   mounted () {
-    this.getRedisClusterList()
+    // this.getRedisClusterList()
   }
 
 }

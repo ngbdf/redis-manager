@@ -113,11 +113,13 @@
           :groupId="this.currentGroup.groupId"
           :from="this.analyseisJobFrom"
           :edit="this.isEdit"
+          :redisClusterList="this.redisClusterList"
           v-if="!this.analyseisVisable"
         />
         <analyzeJob
          v-on:cancel="cancel"
          :from="this.analyseisJobFrom"
+          :redisClusterList="this.redisClusterList"
           :analyze="this.analyseisVisable"
          v-else />
       </div>
@@ -148,7 +150,7 @@
 
 <script>
 import { store } from '@/vuex/store.js'
-import { getAnalysisList, deletAnalyze } from '@/api/rctapi.js'
+import { getAnalysisList, deletAnalyze, getCluster } from '@/api/rctapi.js'
 import AddJob from './components/addJob'
 import AnalyzeJob from './components/analyzeJob'
 export default {
@@ -184,20 +186,7 @@ export default {
 
       analyseisVisable: false,
 
-      analyzeOption: [
-        {
-          label: 'Report',
-          key: 0
-        },
-        {
-          label: 'ExportKeyByFilter',
-          key: 6
-        },
-        {
-          label: 'ExportKeyByPrefix',
-          key: 5
-        }
-      ]
+      redisClusterList: []
     }
   },
   methods: {
@@ -213,7 +202,7 @@ export default {
     handleAnalyze (index, row) {
       this.jobDialogVisible = true
       this.analyseisVisable = true
-      this.analyseisJobFrom = row
+      this.analyseisJobFrom = Object.assign({}, row)
     },
     deleteAnalyzeJob (id) {
       deletAnalyze(id).then(response => {
@@ -252,6 +241,11 @@ export default {
       if (this.analyseisVisable) {
         this.analyseisVisable = visable
       }
+    },
+    getRedisClusterList (groupId) {
+      getCluster(groupId).then(response => {
+        this.redisClusterList = response.data
+      })
     }
   },
   computed: {
@@ -275,6 +269,7 @@ export default {
   mounted () {
     let groupId = this.currentGroup.groupId
     this.getAnalysisJobList(groupId)
+    this.getRedisClusterList(groupId)
   }
 }
 </script>

@@ -44,6 +44,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         InterceptorRegistration addInterceptor = registry.addInterceptor(getSecurityInterceptor());
         // 排除配置
         addInterceptor.excludePathPatterns("/")
+                .excludePathPatterns("/eureka-ui")
                 .excludePathPatterns("/index")
                 .excludePathPatterns("/login")
                 .excludePathPatterns("/user/login")

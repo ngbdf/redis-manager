@@ -1,4 +1,5 @@
 <template>
+<div>
   <el-form
     :model="analyseisJobFrom"
     :rules="rules"
@@ -6,21 +7,21 @@
     label-width="30%"
     class="demo-ruleForm"
   >
-    <el-form-item label="Cluster Name" prop="clusterId">
+    <el-form-item label="Cluster Name">
       <el-select
         v-model="analyseisJobFrom.clusterId"
-        :disabled="this.analyze"
         placeholder="Select Redis Cluster"
         class="input"
+        :disabled="this.analyze"
       >
-        <el-option
-          v-for="item in redisClusterList"
+     <el-option
+          v-for="item in this.redisClusterList"
           :key="item.clusterId"
           :label="item.clusterName"
           :value="item.clusterId"
         ></el-option>
-         <!-- <el-input v-model="analyseisJobFrom.clusterId" placeholder="Please schedule" class="input"></el-input> -->
-      </el-select>
+
+     </el-select>
     </el-form-item>
       <el-form-item label="Nodes" prop="nodes">
     <el-select v-model="analyseisJobFrom.nodes" placeholder="Select Analyze Nodes" class="input" multiple >
@@ -65,17 +66,35 @@
           @click="cancelAnalyzeJobDialog('analyseisJobFrom')"
           plain
         >Cancel</el-button>
-        <el-button size="mini" type="primary" @click="saveAnalyzeJob('analyseisJobFrom')">Confirm</el-button>
+        <el-button size="mini" type="danger" @click="openAnalyzeDialog('analyseisJobFrom')">Analyze</el-button>
       </div>
     </el-form-item>
   </el-form>
-</template>>
+   <el-dialog
+      title="Analyze Job"
+      :visible.sync="analyzeVisable"
+      width="30%"
+    >
+      <span>
+        Are you sure to Analyze this job?
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="mini"  @click="analyzeVisable = false"
+          >No</el-button
+        >
+        <el-button
+          size="mini"
+          type="danger"
+          @click="AnalyzeJob(analyseisJobFrom)"
+          >Yes</el-button
+        >
+      </span>
+    </el-dialog></div>
+</template>
 
 <script>
 import {
-  addAnalysisList,
-  getClusterNodes,
-  getCluster
+  getClusterNodes
 } from '@/api/rctapi.js'
 import message from '@/utils/message.js'
 
@@ -89,6 +108,9 @@ export default {
     },
     from: {
       type: Object
+    },
+    redisClusterList: {
+      type: Array
     }
   },
 
@@ -138,7 +160,7 @@ export default {
         ]
       },
       redisNodeList: [],
-      redisClusterList: [],
+      analyzeVisable: false,
       scheduleCron: ['2020-01-21 07:10:00', '2020-01-21 07:10:10'],
       labelPosition: 'right'
     }
@@ -148,14 +170,16 @@ export default {
       this.$refs[analyseisJobFrom].resetFields()
       this.$emit('cancel', false)
     },
-    saveAnalyzeJob (analyseisJobFrom) {
+    AnalyzeJob (analyseisJobFrom) {
+      const body = Object.assign({}, this.analyseisJobFrom)
+      body.analyzer = body.analyzer.toString()
+      console.log('data', body)
+    },
+    openAnalyzeDialog (analyseisJobFrom) {
       this.$refs[analyseisJobFrom].validate(valid => {
         if (valid) {
-          const body = Object.assign({}, this.analyseisJobFrom)
-          body.analyzer = body.analyzer.toString()
-          console.log('data', body)
+          this.analyzeVisable = true
         } else {
-          console.log('error submit!!')
           return false
         }
       })
