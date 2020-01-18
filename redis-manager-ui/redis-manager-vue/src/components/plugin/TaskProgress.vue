@@ -2,9 +2,8 @@
   <div id="taskProgress" class="body-wrapper">
     <div class="header-wrapper">
       <div>{{ currentGroup.groupName }}</div>
-      <div>
-        <el-button size="mini" type="success" @click="cancelAnalysis()">Cancel</el-button>
-      </div>
+      <div><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
+      <div><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
     </div>
     <div>
       <el-table :data="analyseisJobDetail">
@@ -24,7 +23,8 @@
         </el-table-column>
         <el-table-column label="Process" property="process">
           <template slot-scope="scope">
-            <el-progress :percentage="scope.row.process"></el-progress>
+            <el-progress  v-if="scope.row.status === 'CANCELED'" :percentage="scope.row.process"></el-progress>
+            <el-progress  v-else :percentage="scope.row.process"></el-progress>
           </template>
         </el-table-column>
       </el-table>
@@ -41,31 +41,31 @@ import message from "@/utils/message.js";
 export default {
   data() {
     return {
-      analyseisJobDetail: []
+      originalData: [],
+      analyseisJobDetail: [],
+      cancelButtonDisabled: false,
+      searchData: "",
     };
   },
   methods: {
-    // getData() {
-    //   let url = "/rdb/test";
-    //   API.get(
-    //     url,
-    //     null,
-    //     response => {
-    //       let result = response.data;
-    //       if (result.code == 0) {
-    //         this.analyseisJobDetail = result.data;
-    //       } else {
-    //         message.error(result.message);
-    //       }
-    //     },
-    //     err => {
-    //       message.error(err);
-    //     }
-    //   );
-    // },
-
-
-    getData() {
+    getData1(clusterId) {
+        this.originalData = [
+            {
+                instance: "6.6.6.6:9002",
+                status: "RUNNING",
+                process: Math.floor(Math.random() * 100)
+            },
+            {
+                instance: "8.8.8.8:9002",
+                status: "CANCELED",
+                process: Math.floor(Math.random() * 100)
+            } ,
+            {
+                instance: "9.9.9.9:9002",
+                status: "READY",
+                process: Math.floor(Math.random() * 100)
+            }
+        ]
         this.analyseisJobDetail = [
             {
                 instance: "6.6.6.6:9002",
@@ -83,6 +83,24 @@ export default {
                 process: Math.floor(Math.random() * 100)
             }
         ]
+        if(this.searchData) {
+              let list = this.originalData.filter((item, index) =>
+                item.instance.includes(this.searchData)
+              )
+              this.analyseisJobDetail = list;
+        }
+        let count = 0;
+        for(let i = 0; i < this.originalData.length; i++) {
+          if(this.originalData[i].status === 'DONE') {
+            count += 1;
+          }
+        }
+        if (count === this.originalData.length) {
+          this.cancelButtonDisabled = true
+        } else {
+          this.cancelButtonDisabled = false
+        }
+
     },
     cancelAnalysis() {
       this.$confirm("Are you sure you want to stop all task processes ?", "Message", {
@@ -102,23 +120,30 @@ export default {
             message: "Cancel"
           });
         });
-    }
+    },
   },
   computed: {
     currentGroup() {
+      let clusterId = this.$route.params.clusterId;
       this.timer = setInterval(() => {
-        this.getData();
+        this.getData1(clusterId);
       }, 3000);
       return store.getters.getCurrentGroup;
     }
   },
+
   watch: {
-    currentGroup() {}
+    searchData(val) {
+        let list = this.originalData.filter((item, index) =>
+            item.instance.includes(val)
+        )
+        this.analyseisJobDetail = list
+    }
   },
+
   mounted() {
-    this.getData();
-    console.log('clusterid', this)
-    let groupId = this.currentGroup.groupId
+    let clusterId = this.$route.params.clusterId;
+    this.getData1(clusterId);
   }
 };
 </script>
