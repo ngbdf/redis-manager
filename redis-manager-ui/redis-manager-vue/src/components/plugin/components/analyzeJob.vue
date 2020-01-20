@@ -76,6 +76,7 @@
       title="Analyze Job"
       :visible.sync="analyzeVisable"
       width="30%"
+       v-loading="loading"
     >
       <span>
         Are you sure to Analyze this job?
@@ -132,6 +133,7 @@ export default {
         mailTo: ''
       },
       isAllNodes: false,
+      loading: false,
       rules: {
         name: [
           {
@@ -175,9 +177,12 @@ export default {
       this.$emit('cancel', false)
     },
     AnalyzeJob (analyseisJobFrom) {
+      this.loading = true
       const body = Object.assign({}, this.analyseisJobFrom)
       body.analyzer = body.analyzer.toString()
-      analyzeJob(body)
+      analyzeJob(body).then(response => {
+
+      })
       this.$router.push({
         name: 'TaskProgress',
         params: { clusterId: body.clusterId }

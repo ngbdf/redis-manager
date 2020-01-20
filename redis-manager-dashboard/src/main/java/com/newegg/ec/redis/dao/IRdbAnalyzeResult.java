@@ -26,6 +26,9 @@ public interface IRdbAnalyzeResult {
     @Select("SELECT * FROM rdb_analyze_result")
     List<RDBAnalyzeResult> selectList();
 
+    @Update("Update rdb_analyze_result set result=#{result} where id=#{id} ")
+    Integer updateResult(RDBAnalyzeResult rdbAnalyzeResult);
+
     @Delete("delete from rdb_analyze_result where schedule_id IN (select min(schedule_id) from rdb_analyze_result)")
     void deleteOld();
 

@@ -33,7 +33,7 @@ public class RdbScheduleJob implements IRdbScheduleJob {
 			strings = new int[1];
 			strings[0] = Integer.parseInt(rdbAnalyze.getAnalyzer());
 		}
-		JSONObject status = rdbAnalyzeService.allocationRDBAnalyzeJob(rdbAnalyze.getId(), strings);
+		JSONObject status = rdbAnalyzeService.allocationRDBAnalyzeJob(rdbAnalyze.getId());
 		LOG.info("cron :{}", rdbAnalyze.getSchedule());
 		if ((boolean) status.get("status")) {
 			LOG.info("cron success,message:{}", status.get("message"));

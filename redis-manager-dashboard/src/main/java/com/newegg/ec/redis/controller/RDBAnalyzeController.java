@@ -166,10 +166,10 @@ public class RDBAnalyzeController {
 
 	@RequestMapping(value = "allocation_job", method = RequestMethod.POST)
 	public Result allocationJob(@RequestBody RDBAnalyze rdbAnalyze) {
-	    RDBAnalyzeResult rdbAnalyzeResult = new RDBAnalyzeResult();
-	    rdbAnalyzeResult.setAnalyzeConfig(JSONObject.toJSONString(rdbAnalyze));
-	    rdbAnalyzeResult.setClusterId(rdbAnalyze.getClusterId());
-        rdbAnalyzeResultService.add(rdbAnalyzeResult);
+//	    RDBAnalyzeResult rdbAnalyzeResult = new RDBAnalyzeResult();
+//	    rdbAnalyzeResult.setAnalyzeConfig(JSONObject.toJSONString(rdbAnalyze));
+//	    rdbAnalyzeResult.setClusterId(Long.parseLong(rdbAnalyze.getCluster().getClusterId().toString()));
+//        rdbAnalyzeResultService.add(rdbAnalyzeResult);
 		JSONObject responseResult = rdbAnalyzeService.allocationRDBAnalyzeJob(rdbAnalyze);
 		return Result.successResult(responseResult);
 	}

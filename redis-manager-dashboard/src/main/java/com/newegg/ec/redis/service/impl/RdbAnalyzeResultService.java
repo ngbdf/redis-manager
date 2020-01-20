@@ -158,11 +158,18 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 				}
 			}
 			String result = JSON.toJSONString(dbResult);
-			RDBAnalyzeResult rdbAnalyzeResult = new RDBAnalyzeResult();
-			rdbAnalyzeResult.setClusterId(redisClusterId);
-			rdbAnalyzeResult.setScheduleId(scheduleId);
-			rdbAnalyzeResult.setResult(result);
-			add(rdbAnalyzeResult);
+			RDBAnalyzeResult rdbAnalyzeResult =null;
+			if(rdbAnalyze.isManual()){
+				rdbAnalyzeResult = rdbAnalyzeResultMapper.selectByRedisIdAndSId(redisClusterId,scheduleId);
+				rdbAnalyzeResult.setResult(result);
+				rdbAnalyzeResultMapper.updateResult(rdbAnalyzeResult);
+			}else {
+				rdbAnalyzeResult= new RDBAnalyzeResult();
+				rdbAnalyzeResult.setClusterId(redisClusterId);
+				rdbAnalyzeResult.setScheduleId(scheduleId);
+				rdbAnalyzeResult.setResult(result);
+				add(rdbAnalyzeResult);
+			}
 			return rdbAnalyzeResult;
 		} catch (Exception e) {
 			LOG.error("reportDataWriteToDb write to db error!", e);
