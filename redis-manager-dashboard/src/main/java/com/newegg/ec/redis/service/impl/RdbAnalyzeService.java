@@ -157,11 +157,11 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         }
         List<AnalyzeInstance> needAnalyzeInstances = new ArrayList<>();
         //指定节点分析
-        if (rdbAnalyze.getNodes()!=null ){
-        	for (String redisIpPort : rdbAnalyze.getNodes()){
+        if (rdbAnalyze.getNodes()!=null && !"-1".equals(rdbAnalyze.getNodes().get(0))){
+        	for (String selectNodeHostPort : rdbAnalyze.getNodes()){
         		clusterNodesIP.clear();
-        		String host = redisIpPort.split(":")[0];
-				clusterNodesIP.put(host, host);
+        		String selectNodeHost = selectNodeHostPort.split(":")[0];
+				clusterNodesIP.put(selectNodeHost, selectNodeHost);
 			}
 		}
 			// 如果存在某个节点不存活，则拒绝执行本次任务
@@ -176,10 +176,17 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 				needAnalyzeInstances.add(analyzeInstance);
 				}
         for (String host : clusterNodesIP.keySet()) {
-
             // 处理无RDB备份策略情况
             if ((!config.isDevEnable()) && config.isRdbGenerateEnable()) {
-                Set<String> ports = generateRule.get(host);
+				Set<String> ports = new HashSet<>();
+            	if (rdbAnalyze.getNodes()!=null && !"-1".equals(rdbAnalyze.getNodes())){
+					for (String selectNodeHostPort : rdbAnalyze.getNodes()){
+						String selectNodePort = selectNodeHostPort.split(":")[1];
+						ports.add(selectNodePort);
+					}
+				}else {
+					ports = generateRule.get(host);
+				}
                 ports.forEach(p -> {
                     Jedis jedis = null;
                     try {
