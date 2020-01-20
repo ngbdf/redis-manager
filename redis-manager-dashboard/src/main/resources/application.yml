@@ -86,7 +86,11 @@ redis-manager:
       humpback-host: http://%s:8500/dockerapi/v2/
   alert:
     data-keep-days: 15
-
+rct:
+  dev:
+    enable: true
+    rdb:
+      port: 9002
 logging:
   level:
     com:
