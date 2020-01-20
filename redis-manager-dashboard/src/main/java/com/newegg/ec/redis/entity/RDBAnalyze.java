@@ -15,7 +15,7 @@ public class RDBAnalyze {
 	private String prefixes;
 	private boolean report;
 	private String mailTo;
-	private boolean isManual;
+	private boolean manual;
 	/**
 	 *analyzer 例：0,5,6     0代表report  5 代表ExportKeyByPrefix  6代表ExportKeyByFilter
  	 */
@@ -31,12 +31,13 @@ public class RDBAnalyze {
 		return nodes;
 	}
 
+
 	public boolean isManual() {
-		return isManual;
+		return manual;
 	}
 
 	public void setManual(boolean manual) {
-		isManual = manual;
+		this.manual = manual;
 	}
 
 	public void setNodes(List<String> nodes) {

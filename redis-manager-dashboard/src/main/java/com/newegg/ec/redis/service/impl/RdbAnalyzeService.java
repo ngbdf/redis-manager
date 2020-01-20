@@ -25,6 +25,8 @@ import org.springframework.web.client.RestTemplate;
 import redis.clients.jedis.Jedis;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -221,6 +223,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                     LOG.error("allocation {} scheduleJob response error. responseMessage:{}",
                             analyzeInstance.toString(), responseMessage.toJSONString());
                     scheduleResult.put("status", false);
+                    responseResult.put("status", false);
                     responseResult.put("message", "allocation " + analyzeInstance.getHost()
                             + " scheduleJob response error:" + responseMessage.toJSONString());
                     return responseResult;
@@ -282,12 +285,13 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 	    RDBAnalyzeResult rdbAnalyzeResult = new RDBAnalyzeResult();
 	    rdbAnalyzeResult.setAnalyzeConfig(JSONObject.toJSONString(rdbAnalyze));
 	    rdbAnalyzeResult.setClusterId(Long.parseLong(rdbAnalyze.getCluster().getClusterId().toString()));
+	    rdbAnalyzeResult.setScheduleId(scheduleId);
         rdbAnalyzeResultService.add(rdbAnalyzeResult);
     }
 
 
     @Override
-	public JSONObject canceRDBAnalyze(String instance) {
+	public JSONObject canceRDBAnalyze(String instance)  {
 		JSONObject result = new JSONObject();
 		if (null == instance || "".equals(instance)) {
 			LOG.warn("instance is null!");
@@ -309,7 +313,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 			result.put("canceled", false);
 			return result;
 		}
-		// String url = "http://127.0.0.1:8082/cancel";
+	//	 String url = "http://127.0.0.1:8082/cancel";
 		String url = "http://" + analyzeInstance.getHost() + ":" + analyzeInstance.getPort() + "/cancel";
 		try {
 			ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);

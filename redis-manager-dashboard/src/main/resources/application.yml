@@ -9,7 +9,7 @@ eureka:
   server:
     enable-self-preservation: false
     eviction-interval-timer-in-ms: 10000
-    max-threads-for-peer-replication: 0
+    max-threads-for-peer- replication: 0
   dashboard:
     path: /eureka-ui
   client:

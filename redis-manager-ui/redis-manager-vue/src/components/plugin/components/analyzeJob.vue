@@ -76,7 +76,7 @@
       title="Analyze Job"
       :visible.sync="analyzeVisable"
       width="30%"
-       v-loading="loading"
+      v-loading.fullscreen.lock="loading"
     >
       <span>
         Are you sure to Analyze this job?
@@ -130,6 +130,7 @@ export default {
         prefixes: '',
         report: false,
         groupId: this.groupId,
+        manual: false,
         mailTo: ''
       },
       isAllNodes: false,
@@ -180,12 +181,17 @@ export default {
       this.loading = true
       const body = Object.assign({}, this.analyseisJobFrom)
       body.analyzer = body.analyzer.toString()
+      body.manual = true
       analyzeJob(body).then(response => {
-
-      })
-      this.$router.push({
-        name: 'TaskProgress',
-        params: { clusterId: body.clusterId }
+        if (response.data.status) {
+          this.$router.push({
+            name: 'TaskProgress',
+            params: { clusterId: body.clusterId }
+          })
+        } else {
+          message.error(response.data.message)
+        }
+        this.loading = false
       })
     },
     openAnalyzeDialog (analyseisJobFrom) {

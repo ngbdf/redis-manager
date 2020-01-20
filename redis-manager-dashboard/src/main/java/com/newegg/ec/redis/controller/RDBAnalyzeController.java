@@ -172,6 +172,7 @@ public class RDBAnalyzeController {
 //        rdbAnalyzeResultService.add(rdbAnalyzeResult);
 		JSONObject responseResult = rdbAnalyzeService.allocationRDBAnalyzeJob(rdbAnalyze);
 		return Result.successResult(responseResult);
+
 	}
 
 	/**
