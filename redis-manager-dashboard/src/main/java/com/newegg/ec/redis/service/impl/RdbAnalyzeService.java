@@ -156,17 +156,25 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             analyzeInstancesMap.put(instance.getHost(), instance);
         }
         List<AnalyzeInstance> needAnalyzeInstances = new ArrayList<>();
-        // 如果存在某个节点不存活，则拒绝执行本次任务
-        for (String host : clusterNodesIP.keySet()) {
-            AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
-            if (analyzeInstance == null) {
-                LOG.error("analyzeInstance inactive. ip:{}", host);
-                responseResult.put("status", false);
-                responseResult.put("message", host + " analyzeInstance inactive!");
-                return responseResult;
-            }
-            needAnalyzeInstances.add(analyzeInstance);
-        }
+        //指定节点分析
+        if (rdbAnalyze.getNodes()!=null ){
+        	for (String redisIpPort : rdbAnalyze.getNodes()){
+        		clusterNodesIP.clear();
+        		String host = redisIpPort.split(":")[0];
+				clusterNodesIP.put(host, host);
+			}
+		}
+			// 如果存在某个节点不存活，则拒绝执行本次任务
+			for (String host : clusterNodesIP.keySet()) {
+				AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
+				if (analyzeInstance == null) {
+					LOG.error("analyzeInstance inactive. ip:{}", host);
+					responseResult.put("status", false);
+					responseResult.put("message", host + " analyzeInstance inactive!");
+					return responseResult;
+				}
+				needAnalyzeInstances.add(analyzeInstance);
+				}
         for (String host : clusterNodesIP.keySet()) {
 
             // 处理无RDB备份策略情况

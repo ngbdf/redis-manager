@@ -216,7 +216,7 @@ public class RedisClient implements IRedisClient {
             String ipPort = item[1];
             //noaddr 可知有此标记的节点属于无用节点
             if (line.contains("noaddr")){
-                logger.warn("find a useless node: {}",line);
+               // logger.warn("find a useless node: {}",line);
                 continue;
             }
             Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(SignUtil.splitByAite(ipPort)[0]);
