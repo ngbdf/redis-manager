@@ -1,0 +1,174 @@
+<template>
+  <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
+    <el-card shadow="hover" class="box-card">
+      <!-- <div id="prefixKeysCount" class="chart"></div> -->
+      <highcharts :options="chartOptions" :callback="myCallback"></highcharts>
+    </el-card>
+  </el-col>
+</template>
+<script>
+import { getPrefixKeysCount, getTimeData } from '@/api/rctapi.js'
+import { formatTime } from '@/utils/time.js'
+import { formatBytes } from '@/utils/format.js'
+import { Chart } from 'highcharts-vue'
+// let echarts = require('echarts/lib/echarts')
+export default {
+  components: {
+    highcharts: Chart
+  },
+  data () {
+    return {
+      echartsData: [],
+      // legendData: [],
+      xAxisData: [],
+      chartOptions: {}
+    }
+  },
+  methods: {
+    myCallback () {
+      console.log('this is callback function')
+    },
+    async initCharts () {
+      console.log('init')
+      const res = await getTimeData(2, 1550109815828)
+
+      let timeList = res.data.map(value => {
+        console.log(typeof value.value)
+        return formatTime(parseInt(value.value, 10))
+      })
+      //
+      this.xAxisData = timeList
+      console.log('xAxisData', this.xAxisData)
+
+      const response = await getPrefixKeysCount(2, 1550109815828)
+      //
+      this.echartsData = response.data.map(value => {
+        return {
+          name: value.key,
+          type: 'line',
+          pointStart: 0,
+          data: value.value.split(',').map(value => parseInt(value, 10))
+        }
+      })
+      console.log('echartsData', this.echartsData)
+      //
+      // this.legendData = response.data.map(value => value.key)
+
+      this.chartOptions = {
+        credits: {
+          enabled: false
+        },
+        chart: {
+          type: 'line'
+        },
+        title: {
+          text: ''
+        },
+        tooltip: {
+          formatter () {
+            return [`<b>${this.x}</b>`].concat(
+              this.points.map((point) => {
+                return `${point.series.name}: ${formatBytes(point.y)}`
+              })
+            )
+          },
+          split: true
+        },
+        xAxis: {
+          title: {
+            text: 'time'
+          },
+          categories: this.xAxisData
+        },
+        yAxis: [
+          {
+            title: {
+              text: 'Bytes'
+            },
+            tickInterval: 300,
+            labels: {
+              formatter () {
+                return formatBytes(this.value)
+              }
+            }
+          }
+        ],
+        series: this.echartsData
+      }
+
+      // let myChart = echarts.init(document.getElementById('prefixKeysCount'))
+      // myChart.setOption({
+      //   title: {
+      //     text: 'Prefix Keys Count'
+      //   },
+      //   legend: {
+      //     data: this.legendData,
+      //     type: 'scroll',
+      //     bottom: '5'
+      //   },
+      //   tooltip: {
+      //     trigger: 'axis'
+      //   },
+      //   xAxis: {
+      //     type: 'category',
+      //     data: this.xAxisData
+      //   },
+      //   yAxis: {
+      //     title: {
+      //       text: 'Count'
+      //     },
+      //     type: 'value'
+      //   },
+      //   series: this.echartsData
+      // })
+    },
+    async getXAxisData () {
+      const res = await getTimeData(2, 1550109815828)
+      let timeList = res.data.map(value => value.value)
+      console.log('timeList', timeList)
+      this.xAxisData = timeList
+      console.log('xAxisData', this.xAxisData)
+    },
+    async refreshData () {
+      const response = await getPrefixKeysCount(2, 1550109815828)
+      console.log('getPrefixKeysCount', response)
+      this.echartsData = response.data.map(value => {
+        return {
+          name: value.key,
+          type: 'line',
+          data: value.value
+        }
+      })
+      this.legendData = response.data.map(value => {
+        return value.key
+      })
+    }
+  },
+  mounted () {
+    this.initCharts()
+  },
+  watch: {
+    // 深度监听 clusterId and schedule 变化
+    clusterId: {
+      handler: function () {
+        this.refreshData()
+      },
+      deep: true
+    }
+  }
+}
+</script>
+<style scoped>
+.box-card {
+  margin: 5px;
+}
+
+.chart {
+  min-height: 400px;
+  width: 100%;
+}
+
+.chart-no-data {
+  height: 0 !important;
+}
+</style>
