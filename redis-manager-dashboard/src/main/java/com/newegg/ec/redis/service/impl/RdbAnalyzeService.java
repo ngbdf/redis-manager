@@ -117,7 +117,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                     redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(port)),null);
                 }
 
-                if(rdbAnalyze.getNodes().size()==1 && "-1".equalsIgnoreCase(rdbAnalyze.getNodes().get(0))){
+                if((rdbAnalyze.getNodes().size()==1 && "-1".equalsIgnoreCase(rdbAnalyze.getNodes().get(0))) || !rdbAnalyze.isManual()){
                     clusterNodesIP = redisClient.nodesIP(cluster);
                     generateRule =  RedisClient.generateAnalyzeRule(redisClient.nodesMap(cluster));
                 }else{
