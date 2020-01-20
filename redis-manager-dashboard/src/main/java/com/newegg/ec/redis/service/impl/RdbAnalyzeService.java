@@ -38,40 +38,40 @@ import java.util.Set;
 
 @Service
 public class RdbAnalyzeService implements IRdbAnalyzeService {
-	private static final Logger LOG = LoggerFactory.getLogger(RdbAnalyzeService.class);
-	@Autowired
-	RCTConfig config;
+    private static final Logger LOG = LoggerFactory.getLogger(RdbAnalyzeService.class);
+    @Autowired
+    RCTConfig config;
 
-	@Autowired
-	IRdbAnalyze iRdbAnalyze;
+    @Autowired
+    IRdbAnalyze iRdbAnalyze;
 
-	@Autowired
-	ClusterService clusterService;
-	@Autowired
-	RedisService redisService;
-	@Autowired
-	RdbAnalyzeService rdbAnalyzeService;
+    @Autowired
+    ClusterService clusterService;
+    @Autowired
+    RedisService redisService;
+    @Autowired
+    RdbAnalyzeService rdbAnalyzeService;
 
-	@Autowired
+    @Autowired
     RestTemplate restTemplate;
 
-	@Autowired
-	RdbAnalyzeResultService rdbAnalyzeResultService;
+    @Autowired
+    RdbAnalyzeResultService rdbAnalyzeResultService;
 
-	@Autowired
-	ScheduleTaskService taskService;
+    @Autowired
+    ScheduleTaskService taskService;
 
-	/**
-	 * 执行RDB分析任务
-	 * 
-	 * @param id
-	 * @return { status：true/false, message:"...." }
-	 */
-	@Override
-	public JSONObject allocationRDBAnalyzeJob(Long id) {
-	    RDBAnalyze rdbAnalyze = this.selectById(id);
-	    return allocationRDBAnalyzeJob(rdbAnalyze);
-	}
+    /**
+     * 执行RDB分析任务
+     *
+     * @param id
+     * @return { status：true/false, message:"...." }
+     */
+    @Override
+    public JSONObject allocationRDBAnalyzeJob(Long id) {
+        RDBAnalyze rdbAnalyze = this.selectById(id);
+        return allocationRDBAnalyzeJob(rdbAnalyze);
+    }
 
 
     @Override
@@ -159,25 +159,17 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             analyzeInstancesMap.put(instance.getHost(), instance);
         }
         List<AnalyzeInstance> needAnalyzeInstances = new ArrayList<>();
-        //指定节点分析
-//        if (rdbAnalyze.getNodes()!=null ){
-//        	for (String redisIpPort : rdbAnalyze.getNodes()){
-//        		clusterNodesIP.clear();
-//        		String host = redisIpPort.split(":")[0];
-//				clusterNodesIP.put(host, host);
-//			}
-//		}
-			// 如果存在某个节点不存活，则拒绝执行本次任务
-			for (String host : clusterNodesIP.keySet()) {
-				AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
-				if (analyzeInstance == null) {
-					LOG.error("analyzeInstance inactive. ip:{}", host);
-					responseResult.put("status", false);
-					responseResult.put("message", host + " analyzeInstance inactive!");
-					return responseResult;
-				}
-				needAnalyzeInstances.add(analyzeInstance);
-				}
+        // 如果存在某个节点不存活，则拒绝执行本次任务
+        for (String host : clusterNodesIP.keySet()) {
+            AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
+            if (analyzeInstance == null) {
+                LOG.error("analyzeInstance inactive. ip:{}", host);
+                responseResult.put("status", false);
+                responseResult.put("message", host + " analyzeInstance inactive!");
+                return responseResult;
+            }
+            needAnalyzeInstances.add(analyzeInstance);
+        }
         for (String host : clusterNodesIP.keySet()) {
 
             // 处理无RDB备份策略情况
@@ -293,56 +285,56 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
     }
 
     public void saveToResult(RDBAnalyze rdbAnalyze,Long scheduleId){
-	    RDBAnalyzeResult rdbAnalyzeResult = new RDBAnalyzeResult();
-	    rdbAnalyzeResult.setAnalyzeConfig(JSONObject.toJSONString(rdbAnalyze));
-	    rdbAnalyzeResult.setClusterId(Long.parseLong(rdbAnalyze.getCluster().getClusterId().toString()));
-	    rdbAnalyzeResult.setScheduleId(scheduleId);
+        RDBAnalyzeResult rdbAnalyzeResult = new RDBAnalyzeResult();
+        rdbAnalyzeResult.setAnalyzeConfig(JSONObject.toJSONString(rdbAnalyze));
+        rdbAnalyzeResult.setClusterId(Long.parseLong(rdbAnalyze.getCluster().getClusterId().toString()));
+        rdbAnalyzeResult.setScheduleId(scheduleId);
         rdbAnalyzeResultService.add(rdbAnalyzeResult);
     }
 
 
     @Override
-	public JSONObject canceRDBAnalyze(String instance)  {
-		JSONObject result = new JSONObject();
-		if (null == instance || "".equals(instance)) {
-			LOG.warn("instance is null!");
-			result.put("canceled", false);
-			return result;
-		}
-		Cluster cluster = clusterService.getClusterById(Integer.valueOf(instance));
-		String[] hostAndPort = cluster.getNodes().split(",")[0].split(":");
-		List<AnalyzeInstance> analyzeInstances = EurekaUtil.getRegisterNodes();
-		AnalyzeInstance analyzeInstance = null;
-		for (AnalyzeInstance analyze : analyzeInstances) {
-			if (hostAndPort[0].equals(analyze.getHost())) {
-				analyzeInstance = analyze;
-				break;
-			}
-		}
-		if (null == analyzeInstance) {
-			LOG.warn("analyzeInstance is null!");
-			result.put("canceled", false);
-			return result;
-		}
-	//	 String url = "http://127.0.0.1:8082/cancel";
-		String url = "http://" + analyzeInstance.getHost() + ":" + analyzeInstance.getPort() + "/cancel";
-		try {
-			ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
-			result = JSONObject.parseObject(responseEntity.getBody());
-			if (null == result) {
-				LOG.warn("URL :" + url + " no response");
-				result = new JSONObject();
-				result.put("canceled", false);
-				return result;
-			}
-		} catch (Exception e) {
-			LOG.error("canceledInstance is failed!", e);
-			result = new JSONObject();
-			result.put("canceled", false);
-			return result;
-		}
-		return result;
-	}
+    public JSONObject canceRDBAnalyze(String instance)  {
+        JSONObject result = new JSONObject();
+        if (null == instance || "".equals(instance)) {
+            LOG.warn("instance is null!");
+            result.put("canceled", false);
+            return result;
+        }
+        Cluster cluster = clusterService.getClusterById(Integer.valueOf(instance));
+        String[] hostAndPort = cluster.getNodes().split(",")[0].split(":");
+        List<AnalyzeInstance> analyzeInstances = EurekaUtil.getRegisterNodes();
+        AnalyzeInstance analyzeInstance = null;
+        for (AnalyzeInstance analyze : analyzeInstances) {
+            if (hostAndPort[0].equals(analyze.getHost())) {
+                analyzeInstance = analyze;
+                break;
+            }
+        }
+        if (null == analyzeInstance) {
+            LOG.warn("analyzeInstance is null!");
+            result.put("canceled", false);
+            return result;
+        }
+        //	 String url = "http://127.0.0.1:8082/cancel";
+        String url = "http://" + analyzeInstance.getHost() + ":" + analyzeInstance.getPort() + "/cancel";
+        try {
+            ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+            result = JSONObject.parseObject(responseEntity.getBody());
+            if (null == result) {
+                LOG.warn("URL :" + url + " no response");
+                result = new JSONObject();
+                result.put("canceled", false);
+                return result;
+            }
+        } catch (Exception e) {
+            LOG.error("canceledInstance is failed!", e);
+            result = new JSONObject();
+            result.put("canceled", false);
+            return result;
+        }
+        return result;
+    }
 
     @Override
     public RDBAnalyze selectById(Long id) {
@@ -350,149 +342,149 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
     }
 
     @Override
-	public boolean update(RDBAnalyze rdbAnalyze) {
-		int result = iRdbAnalyze.updateRdbAnalyze(rdbAnalyze);
-		return checkResult(result);
-	}
+    public boolean update(RDBAnalyze rdbAnalyze) {
+        int result = iRdbAnalyze.updateRdbAnalyze(rdbAnalyze);
+        return checkResult(result);
+    }
 
 
 
-	@Override
-	public boolean add(RDBAnalyze rdbAnalyze) {
-		//rdbAnalyze.setRedisInfo(null);
-		int result = iRdbAnalyze.insert(rdbAnalyze);
-		return checkResult(result);
-	}
+    @Override
+    public boolean add(RDBAnalyze rdbAnalyze) {
+        //rdbAnalyze.setRedisInfo(null);
+        int result = iRdbAnalyze.insert(rdbAnalyze);
+        return checkResult(result);
+    }
 
-	@Override
-	public List<RDBAnalyze> list() {
-		List<RDBAnalyze> results = iRdbAnalyze.queryList();
-		return results;
-	}
+    @Override
+    public List<RDBAnalyze> list() {
+        List<RDBAnalyze> results = iRdbAnalyze.queryList();
+        return results;
+    }
 
-	@Override
-	public boolean checkResult(Integer result) {
-		if (result > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean checkResult(Integer result) {
+        if (result > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	@Override
-	public RDBAnalyze getRDBAnalyzeByPid(Long cluster_id) {
-		RDBAnalyze rdbAnalyze = iRdbAnalyze.getRDBAnalyzeByCluster_id(cluster_id);
-		return rdbAnalyze;
-	}
+    @Override
+    public RDBAnalyze getRDBAnalyzeByPid(Long cluster_id) {
+        RDBAnalyze rdbAnalyze = iRdbAnalyze.getRDBAnalyzeByCluster_id(cluster_id);
+        return rdbAnalyze;
+    }
 
-	@Override
-	public RDBAnalyze getRDBAnalyzeById(Long id) {
-		RDBAnalyze rdbAnalyze = iRdbAnalyze.getRDBAnalyzeById(id);
-		return rdbAnalyze;
-	}
+    @Override
+    public RDBAnalyze getRDBAnalyzeById(Long id) {
+        RDBAnalyze rdbAnalyze = iRdbAnalyze.getRDBAnalyzeById(id);
+        return rdbAnalyze;
+    }
 
-	/**
-	 *
-	 * @param
-	 * @return boolean true: has task running false: no task running
-	 */
-	@Override
-	public boolean ifRDBAnalyzeIsRunning(Long id) {
-		List<ScheduleDetail> scheduleDetail = AppCache.scheduleDetailMap.get(id);
-		// default no task running
-		boolean result = false;
-		if (scheduleDetail != null && scheduleDetail.size() > 0) {
-			for (ScheduleDetail scheduleDetails : scheduleDetail) {
-				AnalyzeStatus stautStatus = scheduleDetails.getStatus();
-				if ((!stautStatus.equals(AnalyzeStatus.DONE)) && (!stautStatus.equals(AnalyzeStatus.CANCELED))
-						&& (!stautStatus.equals(AnalyzeStatus.ERROR))) {
-					result = true;
-					break;
-				}
-			}
-		}
-		return result;
-	}
+    /**
+     *
+     * @param
+     * @return boolean true: has task running false: no task running
+     */
+    @Override
+    public boolean ifRDBAnalyzeIsRunning(Long id) {
+        List<ScheduleDetail> scheduleDetail = AppCache.scheduleDetailMap.get(id);
+        // default no task running
+        boolean result = false;
+        if (scheduleDetail != null && scheduleDetail.size() > 0) {
+            for (ScheduleDetail scheduleDetails : scheduleDetail) {
+                AnalyzeStatus stautStatus = scheduleDetails.getStatus();
+                if ((!stautStatus.equals(AnalyzeStatus.DONE)) && (!stautStatus.equals(AnalyzeStatus.CANCELED))
+                        && (!stautStatus.equals(AnalyzeStatus.ERROR))) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 
-	/**
-	 * get Redis Id Base
-	 *
-	 * @return rdb_analyze.id
-	 */
-	@Override
-	public Long getRedisIDBasePID(Long cluster_id) {
-		if (null == cluster_id) {
-			return null;
-		}
-		return iRdbAnalyze.getRDBAnalyzeIdByCluster_id(cluster_id);
-	}
+    /**
+     * get Redis Id Base
+     *
+     * @return rdb_analyze.id
+     */
+    @Override
+    public Long getRedisIDBasePID(Long cluster_id) {
+        if (null == cluster_id) {
+            return null;
+        }
+        return iRdbAnalyze.getRDBAnalyzeIdByCluster_id(cluster_id);
+    }
 
-	@Override
-	public boolean updateRdbAnalyze(RDBAnalyze rdbAnalyze) {
-		return checkResult(iRdbAnalyze.updateRdbAnalyze(rdbAnalyze));
-	}
+    @Override
+    public boolean updateRdbAnalyze(RDBAnalyze rdbAnalyze) {
+        return checkResult(iRdbAnalyze.updateRdbAnalyze(rdbAnalyze));
+    }
 
-	public void updateJob() {
-		updateJob();
-	}
+    public void updateJob() {
+        updateJob();
+    }
 
-	@Override
-	public void updateJob(RDBAnalyze rdbAnalyze) {
-		try {
-			taskService.addTask(rdbAnalyze, RdbScheduleJob.class);
-		} catch (SchedulerException e) {
-			LOG.warn("schedule job update faild!message:{}", e.getMessage());
-		}
-	}
-	
-	@Override
-	public void rdbBgsave(Jedis jedis, String host, String port) {
-		Long currentTime = System.currentTimeMillis();
-		Long oldLastsave = jedis.lastsave();
-		LOG.info("RCT start to generate redis rdb file.{}:{}", host, port);
-		jedis.bgsave();
-		boolean isCheck = true;
-		while(isCheck) {
-			try {
-				//等待5s，查看rdb文件是否生成完毕！
-				Thread.sleep(5000);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			Long lastsave = jedis.lastsave();
-			if(!lastsave.equals(oldLastsave)) {
-				isCheck = false;
-			}
-		}
-		LOG.info("RCT generate redis rdb file success. cost time:{} ms", (System.currentTimeMillis()-currentTime));
-	}
+    @Override
+    public void updateJob(RDBAnalyze rdbAnalyze) {
+        try {
+            taskService.addTask(rdbAnalyze, RdbScheduleJob.class);
+        } catch (SchedulerException e) {
+            LOG.warn("schedule job update faild!message:{}", e.getMessage());
+        }
+    }
 
-	/**
-	 * 根据id查询pid
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@Override
-	public Long selectClusterIdById(Long id) {
-		if (null == id) {
-			return null;
-		}
-		return iRdbAnalyze.selectClusterIdById(id);
-	}
+    @Override
+    public void rdbBgsave(Jedis jedis, String host, String port) {
+        Long currentTime = System.currentTimeMillis();
+        Long oldLastsave = jedis.lastsave();
+        LOG.info("RCT start to generate redis rdb file.{}:{}", host, port);
+        jedis.bgsave();
+        boolean isCheck = true;
+        while(isCheck) {
+            try {
+                //等待5s，查看rdb文件是否生成完毕！
+                Thread.sleep(5000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Long lastsave = jedis.lastsave();
+            if(!lastsave.equals(oldLastsave)) {
+                isCheck = false;
+            }
+        }
+        LOG.info("RCT generate redis rdb file success. cost time:{} ms", (System.currentTimeMillis()-currentTime));
+    }
 
-	@Override
-	public void createRdbAnalyzeTable() {
-		iRdbAnalyze.createRdbAnalyzeTable();
-	}
+    /**
+     * 根据id查询pid
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public Long selectClusterIdById(Long id) {
+        if (null == id) {
+            return null;
+        }
+        return iRdbAnalyze.selectClusterIdById(id);
+    }
 
-	@Override
-	public boolean deleteRdbAnalyze(Long id) {
-	return 	checkResult(iRdbAnalyze.delete(id));
-	}
+    @Override
+    public void createRdbAnalyzeTable() {
+        iRdbAnalyze.createRdbAnalyzeTable();
+    }
 
-	@Override
-	public boolean exitsRdbAnalyze(RDBAnalyze rdbAnalyze) {
-		return checkResult(iRdbAnalyze.exits(rdbAnalyze));
-	}
+    @Override
+    public boolean deleteRdbAnalyze(Long id) {
+        return 	checkResult(iRdbAnalyze.delete(id));
+    }
+
+    @Override
+    public boolean exitsRdbAnalyze(RDBAnalyze rdbAnalyze) {
+        return checkResult(iRdbAnalyze.exits(rdbAnalyze));
+    }
 }
