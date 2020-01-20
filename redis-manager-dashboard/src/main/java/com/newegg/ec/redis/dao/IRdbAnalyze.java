@@ -35,6 +35,22 @@ public interface IRdbAnalyze {
     })
     List<RDBAnalyze> queryList();
 
+    @Select("select * from rdb_analyze where id=#{id}")
+    @Results({
+            @Result(column = "id", property = "id"),
+            @Result(column = "schedule", property = "schedule"),
+            @Result(column = "auto_analyze", property = "autoAnalyze"),
+            @Result(column = "dataPath", property = "dataPath"),
+            @Result(column = "cluster_id", property = "cluster",one=@One(select="com.newegg.ec.redis.dao.IClusterDao.selectClusterById")),
+            @Result(column = "prefixes", property = "prefixes"),
+            @Result(column = "report", property = "report"),
+            @Result(column = "analyzer", property = "analyzer"),
+            @Result(column = "cluster_id", property = "clusterId"),
+            @Result(column = "mailTo", property = "mailTo"),
+            @Result(column = "group_id", property = "groupId")
+    })
+    RDBAnalyze selectById(Long id);
+
     @Select("create TABLE IF NOT EXISTS `rdb_analyze`( " +
             "id integer AUTO_INCREMENT, " +
             "auto_analyze integer NOT NULL, " +
