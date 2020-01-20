@@ -1,7 +1,7 @@
 <template>
   <div id="taskProgress" class="body-wrapper">
     <div class="header-wrapper">
-      <div><i class="el-icon-back" @click="backHistory()"></i></div>
+      <div><el-button size="mini"  type="primary" icon="el-icon-back" @click="backHistory()">Back</el-button></div>
       <div class="filedStyle">instance:</div>
       <div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
       <div class="buttonStyle"><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
@@ -63,6 +63,9 @@ export default {
   },
   methods: {
     async getAllScheduleDetail(id) {
+      /**
+       * 下面两组数据为测试数据，如果需要正式测试，把这两组数据注释掉，同时把下面三行注释放开
+       */
       this.originalData = [
             {
                 instance: "6.6.6.6:9002",
@@ -96,7 +99,7 @@ export default {
                 status: "READY",
                 process: Math.floor(Math.random() * 100)
             }
-        ]
+        ] 
       // const result = await getScheduleDetail(id)
       // this.originalData = result.data
       // this.analyseisJobDetail = result.data
@@ -135,6 +138,7 @@ export default {
       })
       .then(() => {
         // const result = cancelAnalyzeTask(clusterId).then(result => {
+        //   if (result.data.canceled) {
           if (true) {
           this.stopTimer()
           this.cancelButtonDisabled = true
@@ -186,10 +190,10 @@ export default {
   min-width: 1000px;
 }
 .header-wrapper {
-float:left;
+  float:left;
 }
 .filedStyle {
-  margin-left: 100px
+  margin-left: 20px
 }
 .searchStyle {
   margin-left: 10px
