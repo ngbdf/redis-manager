@@ -383,7 +383,9 @@ public class RDBAnalyzeController {
 	 * @return JSONArray
 	 */
 	@GetMapping("/line/prefix/{type}")
-	public Result getPrefixLineByCountOrMem(@PathVariable String type, @RequestParam Long clusterId, @RequestParam(value = "prefixKey", required = false) String prefixKey) {
+	public Result getPrefixLineByCountOrMem(@PathVariable String type, @RequestParam Long clusterId,
+											@RequestParam Long scheduleId,
+											@RequestParam(value = "prefixKey", required = false) String prefixKey) {
 		try {
 			JSONArray result = rdbAnalyzeResultService.getPrefixLineByCountOrMem(clusterId, type, 20, prefixKey);
 			return Result.successResult(result);
