@@ -86,6 +86,8 @@ service.interceptors.response.use(
   }
 )
 
+export const analyzeJob = (data) => API(`/rdb/allocation_job`, 'POST', data)
+
 export const getClusterNodes = (id) => API(`/node-manage/getAllNodeList/${id}`)
 
 export const getCluster = (id) => API(`/cluster/getClusterList/${id}`)

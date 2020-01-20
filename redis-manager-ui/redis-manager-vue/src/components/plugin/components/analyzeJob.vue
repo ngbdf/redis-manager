@@ -13,6 +13,7 @@
         placeholder="Select Redis Cluster"
         class="input"
         :disabled="this.analyze"
+
       >
      <el-option
           v-for="item in this.redisClusterList"
@@ -24,8 +25,9 @@
      </el-select>
     </el-form-item>
       <el-form-item label="Nodes" prop="nodes">
-    <el-select v-model="analyseisJobFrom.nodes" placeholder="Select Analyze Nodes" class="input" multiple >
-      <el-option v-for="item in this.redisNodeList" :key="item.host+':'+item.port" :label="item.host+':'+item.port" :value="item.host+':'+item.port"></el-option>
+    <el-select v-model="analyseisJobFrom.nodes" placeholder="Select Analyze Nodes" class="input" multiple @change="changeNodes" >
+      <el-option key="-1" value="-1" label="ALL"></el-option>
+      <el-option v-for="item in this.redisNodeList" :key="item.host+':'+item.port" :label="item.flags+' '+item.host+':'+item.port" :value="item.host+':'+item.port" :disabled="isAllNodes"></el-option>
     </el-select>
       </el-form-item>
     <el-form-item label="Schedule" prop="schedule" v-if="analyseisJobFrom.autoAnalyze">
@@ -94,7 +96,8 @@
 
 <script>
 import {
-  getClusterNodes
+  getClusterNodes,
+  analyzeJob
 } from '@/api/rctapi.js'
 import message from '@/utils/message.js'
 
@@ -128,6 +131,7 @@ export default {
         groupId: this.groupId,
         mailTo: ''
       },
+      isAllNodes: false,
       rules: {
         name: [
           {
@@ -173,7 +177,11 @@ export default {
     AnalyzeJob (analyseisJobFrom) {
       const body = Object.assign({}, this.analyseisJobFrom)
       body.analyzer = body.analyzer.toString()
-      console.log('data', body)
+      analyzeJob(body)
+      this.$router.push({
+        name: 'TaskProgress',
+        params: { clusterId: body.clusterId }
+      })
     },
     openAnalyzeDialog (analyseisJobFrom) {
       this.$refs[analyseisJobFrom].validate(valid => {
@@ -187,6 +195,17 @@ export default {
     getRedisNodeList () {
       getClusterNodes(this.from.clusterId).then(response => {
         this.redisNodeList = response.data
+      })
+    },
+    changeNodes (element) {
+      if (element.length === 0) {
+        this.isAllNodes = false
+      }
+      element.map((value, index) => {
+        if (value === '-1') {
+          this.isAllNodes = true
+          this.analyseisJobFrom.nodes = ['-1']
+        }
       })
     }
   },
