@@ -116,10 +116,12 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                 } else {
                     redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(port)),null);
                 }
-                clusterNodesIP = redisClient.nodesIP(cluster);
+
                 if(rdbAnalyze.getNodes().size()==1 && "-1".equalsIgnoreCase(rdbAnalyze.getNodes().get(0))){
+                    clusterNodesIP = redisClient.nodesIP(cluster);
                     generateRule =  RedisClient.generateAnalyzeRule(redisClient.nodesMap(cluster));
                 }else{
+                    //指定节点进行分析
                     List<String> nodeList = rdbAnalyze.getNodes();
                     Set<String> ports = null;
                     for (String node :nodeList){
@@ -129,6 +131,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                         }else {
                             ports = new HashSet<>();
                         }
+                        clusterNodesIP.put(nodeStr[0],nodeStr[0]);
                         ports.add(nodeStr[1]);
                         generateRule.put(nodeStr[0],ports);
                     }
@@ -157,13 +160,13 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         }
         List<AnalyzeInstance> needAnalyzeInstances = new ArrayList<>();
         //指定节点分析
-        if (rdbAnalyze.getNodes()!=null ){
-        	for (String redisIpPort : rdbAnalyze.getNodes()){
-        		clusterNodesIP.clear();
-        		String host = redisIpPort.split(":")[0];
-				clusterNodesIP.put(host, host);
-			}
-		}
+//        if (rdbAnalyze.getNodes()!=null ){
+//        	for (String redisIpPort : rdbAnalyze.getNodes()){
+//        		clusterNodesIP.clear();
+//        		String host = redisIpPort.split(":")[0];
+//				clusterNodesIP.put(host, host);
+//			}
+//		}
 			// 如果存在某个节点不存活，则拒绝执行本次任务
 			for (String host : clusterNodesIP.keySet()) {
 				AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
