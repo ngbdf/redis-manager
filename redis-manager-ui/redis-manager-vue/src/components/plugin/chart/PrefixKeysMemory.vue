@@ -1,92 +1,108 @@
 <template>
-  <!-- <div >
-    <div id="prefixKeysCount"></div>
-    <div>fdasfd</div>
-  </div> -->
   <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
     <el-card shadow="hover" class="box-card">
-      <div id="prefixKeysMemory" class="chart"></div>
-      <!-- <div id="infoItem" class="chart" :class="{ 'chart-no-data' : noNodeInfoData }"></div> -->
+      <!-- <div id="prefixKeysCount" class="chart"></div> -->
+      <highcharts :options="chartOptions" :callback="myCallback"></highcharts>
     </el-card>
   </el-col>
 </template>
 <script>
-import { getPrefixKeysCount } from '@/api/rctapi.js'
-let echarts = require('echarts/lib/echarts')
-// require('echarts/lib/chart/line')
-// import echarts from 'echarts'
+import { getPrefixKeysMemory, getTimeData } from '@/api/rctapi.js'
 import { formatTime } from '@/utils/time.js'
+import { formatBytes } from '@/utils/format.js'
+import { Chart } from 'highcharts-vue'
 export default {
+  components: {
+    highcharts: Chart
+  },
   data () {
     return {
-      echartsData: []
+      echartsData: [],
+      xAxisData: [],
+      chartOptions: {}
     }
   },
   methods: {
-    initCharts () {
-      console.log('init')
-      let myChart = echarts.init(document.getElementById('prefixKeysMemory'))
-      myChart.setOption({
+    myCallback () {
+    },
+    async initCharts () {
+      const res = await getTimeData(2, 1550109815828)
+
+      let timeList = res.data.map(value => {
+        return formatTime(parseInt(value.value, 10))
+      })
+      //
+      this.xAxisData = timeList
+
+      const response = await getPrefixKeysMemory(2, 1550109815828)
+      //
+      this.echartsData = response.data.map(value => {
+        return {
+          name: value.key,
+          type: 'line',
+          pointStart: 0,
+          data: value.value.split(',').map(value => parseInt(value, 10))
+        }
+      })
+
+      this.chartOptions = {
+        credits: {
+          enabled: false
+        },
+        chart: {
+          type: 'line'
+        },
         title: {
           text: 'Prefix Keys Memory'
         },
         tooltip: {
-          trigger: 'axis'
+          formatter () {
+            return [`<b>${this.x}</b>`].concat(
+              this.points.map((point) => {
+                return `${point.series.name}: ${formatBytes(point.y)}`
+              })
+            )
+          },
+          split: true
         },
         xAxis: {
-          type: 'time',
-          data: ['2019-04-16 15:59:21', '2019-04-18 15:59:21', '2019-04-10 15:59:21']
+          title: {
+            text: 'time'
+          },
+          categories: this.xAxisData
         },
         yAxis: [
           {
             title: {
-              text: 'Count'
+              text: 'Bytes'
+            },
+            labels: {
+              formatter () {
+                return formatBytes(this.value)
+              }
             }
           }
         ],
-        series: [
-          {
-            name: 'pe*',
-            type: 'line',
-            data: ['441147957', '441147957', '630271092']
-          },
-          {
-            name: 'pe1*',
-            type: 'line',
-            data: ['441147957', '441147957', '630271092']
-          },
-          {
-            name: 'pe2*',
-            type: 'line',
-            data: ['441147957', '441147957', '630271092']
-          },
-          {
-            name: 'pe3*',
-            type: 'line',
-            data: ['441147957', '441147957', '630271092']
-          },
-          {
-            name: 'pe4*',
-            type: 'line',
-            data: ['441147957', '441147957', '630271092']
-          },
-          {
-            name: 'pe5*',
-            type: 'line',
-            data: ['441147957', '441147957', '630271092']
-          },
-          {
-            name: 'pe6*',
-            type: 'line',
-            data: ['441147957', '441147957', '630271092']
-          }
-        ]
-      })
+        series: this.echartsData
+      }
+    },
+    async getXAxisData () {
+      const res = await getTimeData(2, 1550109815828)
+      let timeList = res.data.map(value => value.value)
+      this.xAxisData = timeList
     },
     async refreshData () {
-      console.log('refreshData')
-      const res = await getPrefixKeysCount(2, 1550109815828)
-      this.echartsData = res.data
+      const response = await getPrefixKeysMemory(2, 1550109815828)
+      this.echartsData = response.data.map(value => {
+        return {
+          name: value.key,
+          type: 'line',
+          data: value.value
+        }
+      })
+      this.legendData = response.data.map(value => {
+        return value.key
+      })
     }
   },
   mounted () {
@@ -106,6 +122,7 @@ export default {
 <style scoped>
 .box-card {
   margin: 5px;
+  height: 450px;
 }
 
 .chart {
