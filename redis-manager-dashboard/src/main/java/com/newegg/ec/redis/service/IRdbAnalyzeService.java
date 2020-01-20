@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.RDBAnalyze;
 import redis.clients.jedis.Jedis;
 
+import java.net.UnknownHostException;
 import java.util.List;
 
 public interface IRdbAnalyzeService {
@@ -11,7 +12,7 @@ public interface IRdbAnalyzeService {
 
     public JSONObject allocationRDBAnalyzeJob(RDBAnalyze rdbAnalyze);
 
-    public JSONObject canceRDBAnalyze(String instance);
+    public JSONObject canceRDBAnalyze(String instance) throws UnknownHostException;
 
     public RDBAnalyze selectById(Long id);
 
