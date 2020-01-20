@@ -10,7 +10,7 @@
         <el-table-column label="Analyse Time" sortable property="scheduleId" :formatter="dateFormatter"></el-table-column>
         <el-table-column label="Status">
           <template slot-scope="scope">
-            <el-button type="warning" icon="el-icon-loading" circle v-if="scope.row.result" size="small" @click="toTaskProgress(scope.row)"></el-button>
+            <el-button type="warning" icon="el-icon-loading" circle v-if="!scope.row.result" size="small" @click="toTaskProgress(scope.row)"></el-button>
             <el-button type="success" icon="el-icon-circle-check" circle v-else size="small" @click="toReportDetail(scope.row)"></el-button>
           </template>
         </el-table-column>
@@ -36,13 +36,28 @@ export default {
     async getAnalyseResults (groupId) {
       const res = await getAnalyzeResults()
       // 按照分析时间排序
-      this.analyseResults = res.data.data
+      this.analyseResults = res.data
     },
+    // getAnalyseResults (groupId) {
+    //   const res = getAnalyzeResults()
+    //   // 按照分析时间排序
+    //   console.log('res.data.data', res)
+    //   this.analyseResults = res.data.data
+    // },
     toTaskProgress (row) {
-      console.log('clusterId', row.clusterId)
       this.$router.push({
         name: 'TaskProgress',
         params: { clusterId: row.clusterId }
+      })
+    },
+    toReportDetail (row) {
+      this.$router.push({
+        name: 'jobResultDetail',
+        // path: '/plugin/jobResultDetail',
+        query: {
+          clusterId: row.clusterId,
+          detailId: row.id
+        }
       })
     }
   },

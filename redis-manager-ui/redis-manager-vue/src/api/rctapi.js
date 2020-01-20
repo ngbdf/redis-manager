@@ -8,13 +8,13 @@ import { store } from '@/vuex/store.js'
  * async getAnalyseResults (groupId) {
  *   const res = await getAnalyzeResults()
  *   //处理数据
- *   console.log(res.data.data)
+ *   console.log(res.data)
  * }
  * @param {*} url url
  * @param {*} method GET | POST | DELETE | PUT, default GET
  * @param {*} params {}
  */
-function RCTAPI (url, params = {}, method = 'GET') {
+function RCTAPI (url, method = 'GET', params = {}) {
   return new Promise((resolve, reject) => {
     service({
       method: method,
@@ -101,6 +101,26 @@ export const updateAnalyzeList = (data) => API(`/rdb`, 'PUT', data)
 export const deletAnalyze = (id) => API(`/rdb?id=${id}`, 'DELETE')
 
 export const getAnalyzeResults = () => RCTAPI('/rdb/results')
+
+export const getPieByType = (clusterId, scheduleId) => RCTAPI('/rdb/chart/DataTypeAnalyze', 'GET', {clusterId, scheduleId})
+
+export const getPrefixKeysCount = (clusterId, scheduleId) => RCTAPI('/rdb/line/prefix/PrefixKeyByCount', 'GET', {clusterId, scheduleId})
+
+export const getPrefixKeysMemory = (clusterId, scheduleId) => RCTAPI('/rdb/line/prefix/PrefixKeyByMemory', 'GET', {clusterId, scheduleId})
+
+export const getTop1000KeysByPrefix = (clusterId, scheduleId) => RCTAPI('/rdb/table/prefix', 'GET', {clusterId, scheduleId})
+
+export const getKeysTTLInfo = (clusterId, scheduleId) => RCTAPI('/rdb/chart/TTLAnalyze', 'GET', {clusterId, scheduleId})
+
+export const getTop1000KeysByString = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 0 })
+
+export const getTop1000KeysByHash = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 5 })
+
+export const getTop1000KeysByList = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 10 })
+
+export const getTop1000KeysBySet = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 15 })
+
+export const getTimeData = (clusterId, scheduleId) => RCTAPI('/rdb/all/schedule_id', 'GET', { clusterId, scheduleId })
 
 export const getScheduleDetail = (id) => API(`/rdb/schedule_detail/${id}`)
 
