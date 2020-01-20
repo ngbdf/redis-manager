@@ -163,6 +163,12 @@ public class RDBAnalyzeController {
 		return Result.successResult(responseResult);
 	}
 
+	@RequestMapping(value = "allocation_job", method = RequestMethod.POST)
+	public Result allocationJob(@RequestBody RDBAnalyze rdbAnalyze) {
+		JSONObject responseResult = rdbAnalyzeService.allocationRDBAnalyzeJob(rdbAnalyze);
+		return Result.successResult(responseResult);
+	}
+
 	/**
 	 * 根据ID查询调度进程
 	 *

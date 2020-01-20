@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.entity;
 
 
+import java.util.List;
 
 /**
  * @author Kyle.K.Zhao
@@ -21,9 +22,17 @@ public class RDBAnalyze {
 	private Long clusterId;
 
 	private Cluster cluster;
-
+	private List<String> nodes;
 
 	private Long groupId;
+
+	public List<String> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(List<String> nodes) {
+		this.nodes = nodes;
+	}
 
 	public Cluster getCluster() {
 		return cluster;

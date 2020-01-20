@@ -9,6 +9,8 @@ import java.util.List;
 public interface IRdbAnalyzeService {
     public JSONObject allocationRDBAnalyzeJob(Long id, int[] analyzer);
 
+    public JSONObject allocationRDBAnalyzeJob(RDBAnalyze rdbAnalyze);
+
     public JSONObject canceRDBAnalyze(String instance);
 
     public boolean update(RDBAnalyze rdbAnalyze);
