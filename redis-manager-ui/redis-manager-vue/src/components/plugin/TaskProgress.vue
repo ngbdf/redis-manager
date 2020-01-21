@@ -1,14 +1,15 @@
 <template>
   <div id="taskProgress" class="body-wrapper">
     <div class="header-wrapper">
-      <div><el-button size="mini"  type="primary" icon="el-icon-back" @click="backHistory()">Back</el-button></div>
-      <div><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
-      <div><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
+      <div><el-image src="../../../static/back.svg" @click="backHistory()"></el-image></div>
+      <div class="fieldStyle">instance:</div>
+      <div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
     </div>
+    <div class="cancelStyle"><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
     <div>
       <el-table v-loading="loading" :data="analyseisJobDetail">
         <el-table-column type="index" width="50"></el-table-column>
-        <el-table-column label="Redis Instance" property="instance"></el-table-column>
+        <el-table-column sortable label="Redis Instance" property="instance"></el-table-column>
         <el-table-column label="Status" property="status">
           <template slot-scope="scope">
             <font v-if="scope.row.status === 'RUNNING'" color="#5485F7">RUNNING</font>
@@ -157,10 +158,18 @@ export default {
   min-width: 1000px;
 }
 .header-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #dcdfe6;
+float: left;
+}
+.fieldStyle {
+  margin-top: 8px;
+  margin-left: 50px
+}
+.searchStyle {
+  margin-top: 8px;
+  margin-left: 10px
+}
+.cancelStyle {
+  margin-top: 18px;
+  margin-left: 95%
 }
 </style>
