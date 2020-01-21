@@ -13,6 +13,14 @@ import { formatBytes } from '@/utils/format.js'
 import { Chart } from 'highcharts-vue'
 // let echarts = require('echarts/lib/echarts')
 export default {
+  props: {
+    clusterId: {
+      type: String
+    },
+    scheduleId: {
+      type: String
+    }
+  },
   components: {
     highcharts: Chart
   },
@@ -28,7 +36,7 @@ export default {
     myCallback () {
     },
     async initCharts () {
-      const res = await getTimeData(2, 1550109815828)
+      const res = await getTimeData(2, 1579481459916)
 
       let timeList = res.data.map(value => {
         return formatTime(parseInt(value.value, 10))
@@ -36,7 +44,7 @@ export default {
       //
       this.xAxisData = timeList
 
-      const response = await getPrefixKeysCount(2, 1550109815828)
+      const response = await getPrefixKeysCount(2, 1579481459916)
       //
       this.echartsData = response.data.map(value => {
         return {
@@ -91,12 +99,12 @@ export default {
       }
     },
     async getXAxisData () {
-      const res = await getTimeData(2, 1550109815828)
+      const res = await getTimeData(2, 1579481459916)
       let timeList = res.data.map(value => value.value)
       this.xAxisData = timeList
     },
     async refreshData () {
-      const response = await getPrefixKeysCount(2, 1550109815828)
+      const response = await getPrefixKeysCount(2, 1579481459916)
       this.echartsData = response.data.map(value => {
         return {
           name: value.key,
@@ -113,10 +121,10 @@ export default {
     this.initCharts()
   },
   watch: {
-    // 深度监听 clusterId and schedule 变化
-    clusterId: {
+    // 深度监听 schedule 变化
+    scheduleId: {
       handler: function () {
-        this.refreshData()
+        this.initCharts()
       },
       deep: true
     }

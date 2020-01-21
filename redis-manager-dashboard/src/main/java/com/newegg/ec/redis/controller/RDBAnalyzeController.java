@@ -272,7 +272,7 @@ public class RDBAnalyzeController {
 	 */
 	@GetMapping("/chart/{type}")
 	public Result getChartDataByType(@PathVariable("type") String type, @RequestParam Long clusterId,
-                                           @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
+                                           @RequestParam(value = "scheduleId") Long scheduleId) {
 		try {
 			return Result.successResult(rdbAnalyzeResultService.getListStringFromResult(clusterId, scheduleId, type));
 		} catch (Exception e) {
