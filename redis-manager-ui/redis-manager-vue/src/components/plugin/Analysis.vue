@@ -5,8 +5,7 @@
         <div>{{ currentGroup.groupName }}</div>
         <div>
           <el-button size="small" type="primary" plain @click="addAnalysisJob()"
-            >New Job</el-button
-          >
+            >New Job</el-button>
         </div>
       </div>
       <div>

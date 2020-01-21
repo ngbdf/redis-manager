@@ -30,7 +30,7 @@
       <el-option v-for="item in this.redisNodeList" :key="item.host+':'+item.port" :label="item.flags+' '+item.host+':'+item.port" :value="item.host+':'+item.port" :disabled="isAllNodes"></el-option>
     </el-select>
       </el-form-item>
-    <el-form-item label="Schedule" prop="schedule" v-if="analyseisJobFrom.autoAnalyze">
+    <!-- <el-form-item label="Schedule" prop="schedule" v-if="analyseisJobFrom.autoAnalyze">
       <el-input v-model="analyseisJobFrom.schedule" placeholder="Please schedule" class="input"></el-input>
       <el-tooltip class="item" effect="dark" placement="right">
         <div slot="content">
@@ -40,7 +40,7 @@
         </div>
         <i class="el-icon-message-solid"></i>
       </el-tooltip>
-    </el-form-item>
+    </el-form-item> -->
     <el-form-item label="Analyzer" prop="analyzer">
       <el-checkbox-group v-model="analyseisJobFrom.analyzer">
         <el-checkbox label="0">Report</el-checkbox>

@@ -8,6 +8,7 @@ import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.config.RCTConfig;
 import com.newegg.ec.redis.dao.IRdbAnalyze;
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.schedule.RDBScheduleJob;
 import com.newegg.ec.redis.service.IRdbAnalyzeService;
 import com.newegg.ec.redis.thread.AnalyzerStatusThread;
 import com.newegg.ec.redis.util.EurekaUtil;
@@ -428,7 +429,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
     @Override
     public void updateJob(RDBAnalyze rdbAnalyze) {
         try {
-            taskService.addTask(rdbAnalyze, RdbScheduleJob.class);
+            taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
         } catch (SchedulerException e) {
             LOG.warn("schedule job update faild!message:{}", e.getMessage());
         }

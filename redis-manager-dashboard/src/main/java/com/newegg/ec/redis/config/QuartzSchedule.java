@@ -2,7 +2,7 @@ package com.newegg.ec.redis.config;
 
 
 import com.newegg.ec.redis.common.JobFactory;
-import com.newegg.ec.redis.service.impl.RdbScheduleJob;
+import com.newegg.ec.redis.schedule.RDBScheduleJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +34,7 @@ public class QuartzSchedule {
     @Bean(name = "rdbScheduleJob")
     public JobDetailFactoryBean rdbScheduleJob() {
         JobDetailFactoryBean jobDetail = new JobDetailFactoryBean();
-        jobDetail.setJobClass(RdbScheduleJob.class);
+        jobDetail.setJobClass(RDBScheduleJob.class);
         return jobDetail;
     }
 }

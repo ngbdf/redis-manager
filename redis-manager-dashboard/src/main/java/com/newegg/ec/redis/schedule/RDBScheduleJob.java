@@ -1,9 +1,10 @@
-package com.newegg.ec.redis.service.impl;
+package com.newegg.ec.redis.schedule;
 
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.RDBAnalyze;
-import com.newegg.ec.redis.service.IRdbScheduleJob;
+import com.newegg.ec.redis.service.impl.RdbAnalyzeService;
 import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -11,28 +12,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @DisallowConcurrentExecution
-public class RdbScheduleJob implements IRdbScheduleJob {
+public class RDBScheduleJob implements Job {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RdbScheduleJob.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RDBScheduleJob.class);
 
 	@Autowired
-    RdbAnalyzeService rdbAnalyzeService;
+	RdbAnalyzeService rdbAnalyzeService;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		RDBAnalyze rdbAnalyze = (RDBAnalyze) context.getJobDetail().getJobDataMap().get("rdbAnalyzeJob");
-		
-		int[] strings = null;
-		if (rdbAnalyze.getAnalyzer().contains(",")) {
-			String[] str = rdbAnalyze.getAnalyzer().split(",");
-			strings = new int[str.length];
-			for (int i = 0; i < str.length; i++) {
-				strings[i] = Integer.parseInt(str[i]);
-			}
-		} else {
-			strings = new int[1];
-			strings[0] = Integer.parseInt(rdbAnalyze.getAnalyzer());
-		}
 		JSONObject status = rdbAnalyzeService.allocationRDBAnalyzeJob(rdbAnalyze.getId());
 		LOG.info("cron :{}", rdbAnalyze.getSchedule());
 		if ((boolean) status.get("status")) {
