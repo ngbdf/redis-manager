@@ -116,11 +116,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                 } else {
                     redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(port)),null);
                 }
-
-                if((rdbAnalyze.getNodes().size()==1 && "-1".equalsIgnoreCase(rdbAnalyze.getNodes().get(0))) || !rdbAnalyze.isManual()){
-                    clusterNodesIP = redisClient.nodesIP(cluster);
-                    generateRule =  RedisClient.generateAnalyzeRule(redisClient.nodesMap(cluster));
-                }else{
+                if(rdbAnalyze.getNodes() != null && !"-1".equalsIgnoreCase(rdbAnalyze.getNodes().get(0))){
                     //指定节点进行分析
                     List<String> nodeList = rdbAnalyze.getNodes();
                     Set<String> ports = null;
@@ -135,6 +131,9 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                         ports.add(nodeStr[1]);
                         generateRule.put(nodeStr[0],ports);
                     }
+                }else{
+                    clusterNodesIP = redisClient.nodesIP(cluster);
+                    generateRule =  RedisClient.generateAnalyzeRule(redisClient.nodesMap(cluster));
                 }
 
             }
