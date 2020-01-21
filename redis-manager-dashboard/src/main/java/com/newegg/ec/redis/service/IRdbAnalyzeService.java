@@ -12,7 +12,7 @@ public interface IRdbAnalyzeService {
 
     public JSONObject allocationRDBAnalyzeJob(RDBAnalyze rdbAnalyze);
 
-    public JSONObject canceRDBAnalyze(String instance) throws UnknownHostException;
+    public JSONObject canceRDBAnalyze(String instance,String scheduleID) throws UnknownHostException;
 
     public RDBAnalyze selectById(Long id);
 

@@ -18,6 +18,12 @@ export default {
   props: {
     pieType: {
       type: String
+    },
+    clusterId: {
+      type: String
+    },
+    resultId: {
+      type: String
     }
   },
   data () {
@@ -28,19 +34,15 @@ export default {
   },
   methods: {
     myCallback () {
-      console.log('this is callback function')
     },
     async initCharts () {
-      console.log('init')
-      const res = await getPieByType(2, 1579483762405)
+      const res = await getPieByType(2, 1579481459916)
       this.echartsData = res.data.map(value => {
         return {
           name: value.dataType,
           y: this.pieType === 'count' ? parseInt(value['itemCount']) : parseInt(value['bytes'])
         }
       })
-      console.log(`${this.pieType} echartsDataPie`, this.echartsData)
-      console.log('this.pieType === count', this.pieType === 'count')
       this.chartOptions = {
         chart: {
           height: 300,
@@ -94,10 +96,10 @@ export default {
     this.initCharts()
   },
   watch: {
-    // 深度监听 clusterId and schedule 变化
-    clusterId: {
+    // 深度监听 schedule 变化
+    scheduleId: {
       handler: function () {
-        this.refreshData()
+        this.initCharts()
       },
       deep: true
     }

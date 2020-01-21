@@ -1,14 +1,9 @@
 <template>
-  <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
-    <el-card shadow="hover" class="box-card">
-      <div>
-        <span style="position: 'relative';textAlign: 'center';display: 'block';fontSize: '20px'">Top 1000 Largest Keys By Perfix</span>
-      </div>
-      <el-input v-model="search" size="mini" placeholder="search" />
-      <el-table :data="pageData.filter(data => !search || data.prefixKey.toLowerCase().includes(search.toLowerCase()))" @sort-change='sortChange'>
-        <el-table-column label="PrefixKey" property="prefixKey"></el-table-column>
-        <el-table-column label="Count" sortable property="keyCount" :formatter="formatterCount"></el-table-column>
-        <el-table-column label="Memory Size" sortable property="memorySize" :formatter="formatMemory"></el-table-column>
+  <div>
+      <el-table :data="pageData" @sort-change='sortChange'>
+        <el-table-column label="PrefixKey" property="key"></el-table-column>
+        <el-table-column label="itemCount" sortable property="itemCount" :formatter="formatterCount"></el-table-column>
+        <el-table-column label="Bytes" sortable property="bytes" :formatter="formatMemory"></el-table-column>
       </el-table>
       <div>
         <el-pagination
@@ -21,14 +16,16 @@
         >
         </el-pagination>
       </div>
-    </el-card>
-  </el-col>
+  </div>
 </template>
 <script>
-import { getTop1000KeysByPrefix } from '@/api/rctapi.js'
+import { getTop1000KeysByType } from '@/api/rctapi.js'
 import { formatBytes, formatterInput } from '@/utils/format.js'
 export default {
   props: {
+    tabKey: {
+      type: String
+    },
     clusterId: {
       type: String
     },
@@ -41,18 +38,17 @@ export default {
       tableData: [],
       currentPage: 1,
       pagesize: 10,
-      pageData: [],
-      search: ''
+      pageData: []
     }
   },
   methods: {
     async initTable () {
-      let res = await getTop1000KeysByPrefix(2, 1579481459916)
+      let res = await getTop1000KeysByType(2, 1579481459916, this.tabKey)
       this.tableData = res.data.map(value => {
         return {
-          keyCount: parseInt(value.keyCount),
-          memorySize: parseInt(value.memorySize),
-          prefixKey: value.prefixKey
+          bytes: parseInt(value.bytes),
+          itemCount: parseInt(value.itemCount),
+          key: value.key
         }
       })
       this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
@@ -99,18 +95,3 @@ export default {
   }
 }
 </script>
-<style scoped>
-.box-card {
-  margin: 5px;
-  height: 700px;
-}
-
-.chart {
-  min-height: 400px;
-  width: 100%;
-}
-
-.chart-no-data {
-  height: 0 !important;
-}
-</style>

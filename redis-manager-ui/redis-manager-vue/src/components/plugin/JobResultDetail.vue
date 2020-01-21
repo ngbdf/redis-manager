@@ -5,11 +5,13 @@
     </div>
     <div style="margin-top: 20px;">
       <el-row class="echart-wrapper" id="monitor-charts">
-        <KeyByTypePie pieType="count"></KeyByTypePie>
-        <KeyByTypePie pieType="memory"></KeyByTypePie>
-        <PrefixKeysCount></PrefixKeysCount>
-        <PrefixKeysMemory></PrefixKeysMemory>
-        <Top1000KeysByPrefix></Top1000KeysByPrefix>
+        <KeyByTypePie pieType="count" :resultId="resultId" :clusterId="clusterId" :scheduleId="scheduleId"></KeyByTypePie>
+        <KeyByTypePie pieType="memory" :resultId="resultId"></KeyByTypePie>
+        <PrefixKeysCount :resultId="resultId"></PrefixKeysCount>
+        <PrefixKeysMemory :resultId="resultId"></PrefixKeysMemory>
+        <Top1000KeysByPrefix :resultId="resultId"></Top1000KeysByPrefix>
+        <KeysTTLInfo :resultId="resultId"></KeysTTLInfo>
+        <Top1000KeysByType :resultId="resultId"></Top1000KeysByType>
       </el-row>
   </div>
   </div>
@@ -21,16 +23,25 @@ import PrefixKeysCount from '@/components/plugin/chart/PrefixKeysCount'
 import PrefixKeysMemory from '@/components/plugin/chart/PrefixKeysMemory'
 import KeyByTypePie from '@/components/plugin/chart/KeyByTypePie'
 import Top1000KeysByPrefix from '@/components/plugin/chart/Top1000LargestKeysByPrefix'
+import KeysTTLInfo from '@/components/plugin/chart/KeysTTLInfo'
+import Top1000KeysByType from '@/components/plugin/chart/Top1000KeysByType'
 export default {
   components: {
     PrefixKeysCount,
     PrefixKeysMemory,
     KeyByTypePie,
-    Top1000KeysByPrefix
+    Top1000KeysByPrefix,
+    KeysTTLInfo,
+    Top1000KeysByType
   },
   data () {
     return {
-      analyseResults: []
+      analyseResults: [],
+      //clusterId: String(this.$route.query.clusterId),
+      //resultId: String(this.$route.query.detailId)
+      clusterId: '2',
+      scheduleId: '1579481459916',
+      resultId: String(this.$route.query.detailId)
     }
   },
   methods: {

@@ -114,6 +114,8 @@ export const getTop1000KeysByPrefix = (clusterId, scheduleId) => RCTAPI('/rdb/ta
 
 export const getKeysTTLInfo = (clusterId, scheduleId) => RCTAPI('/rdb/chart/TTLAnalyze', 'GET', {clusterId, scheduleId})
 
+export const getTop1000KeysByType = (clusterId, scheduleId, type) => RCTAPI('/rdb/top_key', 'GET', { clusterId, scheduleId, type })
+
 export const getTop1000KeysByString = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 0 })
 
 export const getTop1000KeysByHash = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 5 })
@@ -126,4 +128,4 @@ export const getTimeData = (clusterId, scheduleId) => RCTAPI('/rdb/all/schedule_
 
 export const getScheduleDetail = (id) => API(`/rdb/schedule_detail/${id}`)
 
-export const cancelAnalyzeTask = (id) => API(`/rdb/cance_job/${id}`)
+export const cancelAnalyzeTask = (id, scheduleID) => API(`/rdb/cance_job/${id}/${scheduleID}`)

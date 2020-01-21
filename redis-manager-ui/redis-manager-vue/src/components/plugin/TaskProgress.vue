@@ -2,12 +2,11 @@
   <div id="taskProgress" class="body-wrapper">
     <div class="header-wrapper">
       <div><el-button size="mini"  type="primary" icon="el-icon-back" @click="backHistory()">Back</el-button></div>
-      <div class="filedStyle">instance:</div>
-      <div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
-      <div class="buttonStyle"><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
+      <div><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
+      <div><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
     </div>
     <div>
-      <el-table :data="analyseisJobDetail">
+      <el-table v-loading="loading" :data="analyseisJobDetail">
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column label="Redis Instance" property="instance"></el-table-column>
         <el-table-column label="Status" property="status">
@@ -33,156 +32,124 @@
   </div>
 </template>
 <script>
-import { store } from '@/vuex/store.js'
-import { isEmpty } from '@/utils/validate.js'
-import { formatTime } from '@/utils/time.js'
-import API from '@/api/api.js'
-import message from '@/utils/message.js'
+import { store } from "@/vuex/store.js";
+import { isEmpty } from "@/utils/validate.js";
+import { formatTime } from "@/utils/time.js";
+import API from "@/api/api.js";
+import message from "@/utils/message.js";
 
-import { getScheduleDetail, cancelAnalyzeTask } from '@/api/rctapi.js'
-
+import { getScheduleDetail } from '@/api/rctapi.js'
+import { cancelAnalyzeTask } from '@/api/rctapi.js'
 export default {
-  data () {
+  data() {
     return {
       originalData: [],
       analyseisJobDetail: [],
       cancelButtonDisabled: false,
-      searchData: ''
-    }
+      searchData: "",
+      loading: false,
+    };
   },
-  created () {
-    let clusterId = this.$route.params.clusterId
+  created() {
+    let clusterId = this.$route.params.clusterId;
     this.timer = setInterval(() => {
-      this.getAllScheduleDetail(clusterId)
-    }, 3000)
+      this.getAllScheduleDetail(clusterId);
+    }, 3000);
   },
-  beforeDestroy () {
-    if (this.timer) {
-      clearInterval(this.timer)
+  beforeDestroy() {
+    if(this.timer) {
+        clearInterval(this.timer);
     }
   },
   methods: {
-    async getAllScheduleDetail (id) {
-      /**
-       * 下面两组数据为测试数据，如果需要正式测试，把这两组数据注释掉，同时把下面三行注释放开
-       */
-    //   this.originalData = [
-    //         {
-    //             instance: "6.6.6.6:9002",
-    //             status: "RUNNING",
-    //             process: Math.floor(Math.random() * 100)
-    //         },
-    //         {
-    //             instance: "8.8.8.8:9002",
-    //             status: "CANCELED",
-    //             process: Math.floor(Math.random() * 100)
-    //         } ,
-    //         {
-    //             instance: "9.9.9.9:9002",
-    //             status: "READY",
-    //             process: Math.floor(Math.random() * 100)
-    //         }
-    //     ]
-    //     this.analyseisJobDetail = [
-    //         {
-    //             instance: "6.6.6.6:9002",
-    //             status: "RUNNING",
-    //             process: Math.floor(Math.random() * 100)
-    //         },
-    //         {
-    //             instance: "8.8.8.8:9002",
-    //             status: "CANCELED",
-    //             process: Math.floor(Math.random() * 100)
-    //         } ,
-    //         {
-    //             instance: "9.9.9.9:9002",
-    //             status: "READY",
-    //             process: Math.floor(Math.random() * 100)
-    //         }
-    //     ]
-      const result = await getScheduleDetail(id)
+    getAllScheduleDetail(id) {
+      const result =  getScheduleDetail(id).then(result => {
       this.originalData = result.data
       this.analyseisJobDetail = result.data
-      if (this.searchData) {
+      if(this.searchData) {
         let list = this.originalData.filter((item, index) =>
           item.instance.includes(this.searchData)
         )
-        this.analyseisJobDetail = list
+        this.analyseisJobDetail = list;
       }
-      let count = 0
-      for (let i = 0; i < this.originalData.length; i++) {
-        if (this.originalData[i].status === 'DONE') {
-          count += 1
+      let count = 0;
+      for(let i = 0; i < this.originalData.length; i++) {
+        if(this.originalData[i].status === 'DONE') {
+          count += 1;
+        }
+        if(this.originalData[i].status === 'CANCELED') {
+          this.originalData[i].process = 0
+          this.cancelButtonDisabled = true
+          this.loading=false
+          this.stopTimer()
         }
       }
       if (count === this.originalData.length) {
         this.cancelButtonDisabled = true
-      } else {
-        this.cancelButtonDisabled = false
-      }
-    },
-    backHistory () {
-      this.$router.go(-1)
-    },
-    stopTimer () {
-      if (this.timer) {
-        clearInterval(this.timer)
-      }
-    },
-    cancelAnalysis () {
-      let clusterId = this.$route.params.clusterId
-      this.$confirm('Are you sure you want to stop all task processes ?', 'Message', {
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No',
-        type: 'warning'
+      } 
       })
-        .then(() => {
-          const result = cancelAnalyzeTask(clusterId).then(result => {
-            if (result.data.canceled) {
-              //   if (true) {
-              this.stopTimer()
-              this.cancelButtonDisabled = true
-              this.$message({
-                type: 'success',
-                message: 'Stop Success!'
-              })
-            } else {
-              this.$message({
-                type: 'success',
-                message: 'Stop Error!'
-              })
-            }
-          })
-        })
-        .catch(() => {
+
+    },
+      backHistory(){
+        this.$router.push({
+        name: 'jobList'
+      })
+      },
+      stopTimer() {
+        if(this.timer) {
+          clearInterval(this.timer);
+        }
+      },
+      cancelAnalysis() {
+      let scheduleID = this.originalData[0].scheduleID
+      let clusterId = this.$route.params.clusterId;
+      this.$confirm("Are you sure you want to stop all task processes ?", "Message", {
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        type: "warning"
+      })
+      .then(() => {
+        this.cancelButtonDisabled = true
+        cancelAnalyzeTask(clusterId,scheduleID).then(result => {
+          if (result.data.canceled) {
+            this.loading=true
+        } else {
           this.$message({
-            type: 'info',
-            message: 'Cancel'
-          })
+            type: "success",
+            message: "Stop Error!"
+          });
+        }
         })
-    }
+      })
+      .catch(() => {
+        this.$message({
+          type: "info",
+          message: "Cancel"
+        });
+      });
+    },
   },
 
   computed: {
-    currentGroup () {
-      return store.getters.getCurrentGroup
+    currentGroup() {
+      return store.getters.getCurrentGroup;
     }
   },
 
   watch: {
-    searchData (val) {
-      let list = this.originalData.filter((item, index) =>
-        item.instance.includes(val)
-      )
-      this.analyseisJobDetail = list
+    searchData(val) {
+        let list = this.originalData.filter((item, index) =>
+            item.instance.includes(val)
+        )
+        this.analyseisJobDetail = list
     }
   },
 
-  mounted () {
-    let clusterId = this.$route.params.clusterId
-    this.getAllScheduleDetail(clusterId)
+  mounted() {
+    let clusterId = this.$route.params.clusterId;
+    this.getAllScheduleDetail(clusterId);
   }
-}
+};
 </script>
 
 <style scoped>
@@ -190,15 +157,10 @@ export default {
   min-width: 1000px;
 }
 .header-wrapper {
-  float:left;
-}
-.filedStyle {
-  margin-left: 20px
-}
-.searchStyle {
-  margin-left: 10px
-}
-.buttonStyle {
-  margin-left: 1200px
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #dcdfe6;
 }
 </style>

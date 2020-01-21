@@ -7,6 +7,7 @@ import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.config.RCTConfig;
 import com.newegg.ec.redis.dao.IRdbAnalyze;
+import com.newegg.ec.redis.dao.IRdbAnalyzeResult;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.schedule.RDBScheduleJob;
 import com.newegg.ec.redis.service.IRdbAnalyzeService;
@@ -61,6 +62,9 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 
     @Autowired
     ScheduleTaskService taskService;
+    
+	@Autowired
+	IRdbAnalyzeResult rdbAnalyzeResultMapper;
 
     /**
      * 执行RDB分析任务
@@ -292,13 +296,17 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 
 
     @Override
-    public JSONObject canceRDBAnalyze(String instance)  {
+    public JSONObject canceRDBAnalyze(String instance,String scheduleID)  {
         JSONObject result = new JSONObject();
         if (null == instance || "".equals(instance)) {
             LOG.warn("instance is null!");
             result.put("canceled", false);
             return result;
         }
+    	Map<String, Long> rdbAnalyzeResult = new HashMap<String, Long>();
+        rdbAnalyzeResult.put("cluster_id", Long.valueOf(instance));
+        rdbAnalyzeResult.put("schedule_id", Long.valueOf(scheduleID));
+        rdbAnalyzeResultMapper.deleteRdbAnalyzeResult(rdbAnalyzeResult);
         Cluster cluster = clusterService.getClusterById(Integer.valueOf(instance));
         String[] hostAndPort = cluster.getNodes().split(",")[0].split(":");
         List<AnalyzeInstance> analyzeInstances = EurekaUtil.getRegisterNodes();

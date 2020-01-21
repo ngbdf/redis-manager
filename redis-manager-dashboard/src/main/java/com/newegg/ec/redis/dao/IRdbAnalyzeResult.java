@@ -4,6 +4,7 @@ import com.newegg.ec.redis.entity.RDBAnalyzeResult;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Kyle.K.Zhao
@@ -14,7 +15,10 @@ public interface IRdbAnalyzeResult {
 
     @Delete("delete from rdb_analyze_result where id = #{id}")
     int deleteById(Long id);
-
+    
+    @Delete("delete from rdb_analyze_result where cluster_id = #{rdbAnalyzeResult.cluster_id} and schedule_id = #{rdbAnalyzeResult.schedule_id}")
+    int deleteRdbAnalyzeResult(@Param("rdbAnalyzeResult") Map<String, Long> rdbAnalyzeResult);
+    
     @Select("SELECT COUNT(*) FROM cluster")
     int selectCount();
 

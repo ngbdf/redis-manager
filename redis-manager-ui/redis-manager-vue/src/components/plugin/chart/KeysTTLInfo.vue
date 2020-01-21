@@ -2,13 +2,13 @@
   <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
     <el-card shadow="hover" class="box-card">
       <div>
-        <span style="position: 'relative';textAlign: 'center';display: 'block';fontSize: '20px'">Top 1000 Largest Keys By Perfix</span>
+        <span style="position: 'relative';textAlign: 'center';display: 'block';fontSize: '20px'">Keys TTL Info</span>
       </div>
       <el-input v-model="search" size="mini" placeholder="search" />
-      <el-table :data="pageData.filter(data => !search || data.prefixKey.toLowerCase().includes(search.toLowerCase()))" @sort-change='sortChange'>
-        <el-table-column label="PrefixKey" property="prefixKey"></el-table-column>
-        <el-table-column label="Count" sortable property="keyCount" :formatter="formatterCount"></el-table-column>
-        <el-table-column label="Memory Size" sortable property="memorySize" :formatter="formatMemory"></el-table-column>
+      <el-table :data="pageData.filter(data => !search || data.prefix.toLowerCase().includes(search.toLowerCase()))" @sort-change='sortChange'>
+        <el-table-column label="Prefix" property="prefix"></el-table-column>
+        <el-table-column label="TTL" sortable property="TTL" :formatter="formatterCount"></el-table-column>
+        <el-table-column label="noTTL" sortable property="noTTL" :formatter="formatterCount"></el-table-column>
       </el-table>
       <div>
         <el-pagination
@@ -25,8 +25,8 @@
   </el-col>
 </template>
 <script>
-import { getTop1000KeysByPrefix } from '@/api/rctapi.js'
-import { formatBytes, formatterInput } from '@/utils/format.js'
+import { getKeysTTLInfo } from '@/api/rctapi.js'
+import { formatterInput } from '@/utils/format.js'
 export default {
   props: {
     clusterId: {
@@ -47,12 +47,12 @@ export default {
   },
   methods: {
     async initTable () {
-      let res = await getTop1000KeysByPrefix(2, 1579481459916)
+      let res = await getKeysTTLInfo(2, 1579481459916)
       this.tableData = res.data.map(value => {
         return {
-          keyCount: parseInt(value.keyCount),
-          memorySize: parseInt(value.memorySize),
-          prefixKey: value.prefixKey
+          noTTL: parseInt(value.noTTL),
+          TTL: parseInt(value.TTL),
+          prefix: value.prefix
         }
       })
       this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
@@ -80,9 +80,6 @@ export default {
     },
     formatterCount (row, column, cellValue) {
       return formatterInput(cellValue)
-    },
-    formatMemory (row, column, cellValue) {
-      return formatBytes(cellValue)
     }
   },
   mounted () {
