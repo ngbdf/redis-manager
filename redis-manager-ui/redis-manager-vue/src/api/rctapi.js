@@ -124,7 +124,7 @@ export const getTop1000KeysByList = (analyzeResultId) => RCTAPI('/rdb/top_key', 
 
 export const getTop1000KeysBySet = (analyzeResultId) => RCTAPI('/rdb/top_key', 'GET', { analyzeResultId, type: 15 })
 
-export const getTimeData = (clusterId, scheduleId) => RCTAPI('/rdb/all/schedule_id', 'GET', { clusterId, scheduleId })
+export const getTimeData = (analyzeResultId) => RCTAPI('/rdb/all/schedule_id', 'GET', { analyzeResultId })
 
 export const getScheduleDetail = (id) => API(`/rdb/schedule_detail/${id}`)
 

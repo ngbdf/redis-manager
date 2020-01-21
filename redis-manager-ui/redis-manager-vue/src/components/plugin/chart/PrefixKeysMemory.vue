@@ -13,10 +13,7 @@ import { formatBytes } from '@/utils/format.js'
 import { Chart } from 'highcharts-vue'
 export default {
   props: {
-    clusterId: {
-      type: String
-    },
-    scheduleId: {
+    resultId: {
       type: String
     }
   },
@@ -34,7 +31,7 @@ export default {
     myCallback () {
     },
     async initCharts () {
-      const res = await getTimeData(26)
+      const res = await getTimeData(this.resultId)
 
       let timeList = res.data.map(value => {
         return formatTime(parseInt(value.value, 10))
@@ -42,7 +39,7 @@ export default {
       //
       this.xAxisData = timeList
 
-      const response = await getPrefixKeysMemory(26)
+      const response = await getPrefixKeysMemory(this.resultId)
       //
       this.echartsData = response.data.map(value => {
         return {
@@ -95,12 +92,12 @@ export default {
       }
     },
     async getXAxisData () {
-      const res = await getTimeData(2, 1579481459916)
+      const res = await getTimeData(this.resultId)
       let timeList = res.data.map(value => value.value)
       this.xAxisData = timeList
     },
     async refreshData () {
-      const response = await getPrefixKeysMemory(2, 1579481459916)
+      const response = await getPrefixKeysMemory(this.resultId)
       this.echartsData = response.data.map(value => {
         return {
           name: value.key,
@@ -115,15 +112,6 @@ export default {
   },
   mounted () {
     this.initCharts()
-  },
-  watch: {
-    // 深度监听 schedule 变化
-    scheduleId: {
-      handler: function () {
-        this.initCharts()
-      },
-      deep: true
-    }
   }
 }
 </script>

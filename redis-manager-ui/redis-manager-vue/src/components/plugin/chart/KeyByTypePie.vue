@@ -19,9 +19,6 @@ export default {
     pieType: {
       type: String
     },
-    clusterId: {
-      type: String
-    },
     resultId: {
       type: String
     }
@@ -36,7 +33,7 @@ export default {
     myCallback () {
     },
     async initCharts () {
-      const res = await getPieByType(26)
+      const res = await getPieByType(this.resultId)
       this.echartsData = res.data.map(value => {
         return {
           name: value.dataType,
@@ -94,15 +91,6 @@ export default {
   },
   mounted () {
     this.initCharts()
-  },
-  watch: {
-    // 深度监听 schedule 变化
-    scheduleId: {
-      handler: function () {
-        this.initCharts()
-      },
-      deep: true
-    }
   }
 }
 </script>

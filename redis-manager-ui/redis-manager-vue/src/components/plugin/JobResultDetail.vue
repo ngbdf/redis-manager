@@ -1,17 +1,19 @@
 <template>
   <div id="analysis" class="body-wrapper">
-         <!-- <div class="header-wrapper"> -->
-      <!-- <div>{{ currentGroup.groupName }}</div>  -->
- <!-- <el-row class="echart-wrapper" id="monitor-charts"><el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item"> -->
-    <el-card shadow="hover" class="box-card">
+
+    <!-- <el-card shadow="hover" class="box-card">
       {{ currentGroup.groupName }}
-    </el-card>
-  <!-- </el-col></el-row> -->
-    <!-- </div> -->
+    </el-card> -->
+
+   <el-card shadow="hover" class="box-card">
+     <div><el-image src="../../../static/back.svg" @click="backHistory()"></el-image></div>
+    <div class="fieldStyle">{{ currentGroup.groupName }}</div>
+     </el-card>
+
     <div>
     <div style="margin-top: 20px;" class="main-body">
       <el-row class="echart-wrapper" id="monitor-charts">
-        <KeyByTypePie pieType="count" :resultId="resultId" :clusterId="clusterId" :scheduleId="scheduleId"></KeyByTypePie>
+        <KeyByTypePie pieType="count" :resultId="resultId"></KeyByTypePie>
         <KeyByTypePie pieType="memory" :resultId="resultId"></KeyByTypePie>
         <PrefixKeysCount :resultId="resultId"></PrefixKeysCount>
         <PrefixKeysMemory :resultId="resultId"></PrefixKeysMemory>
@@ -104,6 +106,11 @@ export default {
     }
   },
   methods: {
+    backHistory () {
+      this.$router.push({
+        name: 'jobList'
+      })
+    },
     dateFormatter (row) {
       return formatTime(row.scheduleId)
     },
@@ -248,5 +255,9 @@ export default {
 
 .main-body{
     background-color: #ffffff !important;
+}
+.fieldStyle {
+  margin-top: 8px;
+  margin-left: 50px
 }
 </style>

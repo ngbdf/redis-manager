@@ -29,10 +29,7 @@ import { getKeysTTLInfo } from '@/api/rctapi.js'
 import { formatterInput } from '@/utils/format.js'
 export default {
   props: {
-    clusterId: {
-      type: String
-    },
-    scheduleId: {
+    resultId: {
       type: String
     }
   },
@@ -47,7 +44,7 @@ export default {
   },
   methods: {
     async initTable () {
-      let res = await getKeysTTLInfo(26)
+      let res = await getKeysTTLInfo(this.resultId)
       this.tableData = res.data.map(value => {
         return {
           noTTL: parseInt(value.noTTL),
@@ -84,15 +81,6 @@ export default {
   },
   mounted () {
     this.initTable()
-  },
-  watch: {
-    // 深度监听 schedule 变化
-    scheduleId: {
-      handler: function () {
-        this.initTable()
-      },
-      deep: true
-    }
   }
 }
 </script>

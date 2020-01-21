@@ -1,6 +1,5 @@
 package com.newegg.ec.redis.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.cache.AppCache;

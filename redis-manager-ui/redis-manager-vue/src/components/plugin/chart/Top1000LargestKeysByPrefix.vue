@@ -36,10 +36,7 @@ import { getTop1000KeysByPrefix } from '@/api/rctapi.js'
 import { formatBytes, formatterInput } from '@/utils/format.js'
 export default {
   props: {
-    clusterId: {
-      type: String
-    },
-    scheduleId: {
+    resultId: {
       type: String
     }
   },
@@ -54,7 +51,7 @@ export default {
   },
   methods: {
     async initTable () {
-      let res = await getTop1000KeysByPrefix(26)
+      let res = await getTop1000KeysByPrefix(this.resultId)
       this.tableData = res.data.map(value => {
         return {
           keyCount: parseInt(value.keyCount),
