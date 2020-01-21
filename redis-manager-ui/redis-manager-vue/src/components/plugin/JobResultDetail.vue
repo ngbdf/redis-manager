@@ -5,8 +5,11 @@
     </div>
     <div style="margin-top: 20px;">
       <el-row class="echart-wrapper" id="monitor-charts">
+        <KeyByTypePie pieType="count"></KeyByTypePie>
+        <KeyByTypePie pieType="memory"></KeyByTypePie>
         <PrefixKeysCount></PrefixKeysCount>
         <PrefixKeysMemory></PrefixKeysMemory>
+        <Top1000KeysByPrefix></Top1000KeysByPrefix>
       </el-row>
   </div>
   </div>
@@ -16,10 +19,14 @@ import { formatTime } from '@/utils/time.js'
 import { store } from '@/vuex/store.js'
 import PrefixKeysCount from '@/components/plugin/chart/PrefixKeysCount'
 import PrefixKeysMemory from '@/components/plugin/chart/PrefixKeysMemory'
+import KeyByTypePie from '@/components/plugin/chart/KeyByTypePie'
+import Top1000KeysByPrefix from '@/components/plugin/chart/Top1000LargestKeysByPrefix'
 export default {
   components: {
     PrefixKeysCount,
-    PrefixKeysMemory
+    PrefixKeysMemory,
+    KeyByTypePie,
+    Top1000KeysByPrefix
   },
   data () {
     return {

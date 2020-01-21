@@ -26,19 +26,15 @@ export default {
   },
   methods: {
     myCallback () {
-      console.log('this is callback function')
     },
     async initCharts () {
-      console.log('init')
       const res = await getTimeData(2, 1550109815828)
 
       let timeList = res.data.map(value => {
-        console.log(typeof value.value)
         return formatTime(parseInt(value.value, 10))
       })
       //
       this.xAxisData = timeList
-      console.log('xAxisData', this.xAxisData)
 
       const response = await getPrefixKeysCount(2, 1550109815828)
       //
@@ -50,7 +46,6 @@ export default {
           data: value.value.split(',').map(value => parseInt(value, 10))
         }
       })
-      console.log('echartsData', this.echartsData)
       //
       // this.legendData = response.data.map(value => value.key)
 
@@ -62,7 +57,7 @@ export default {
           type: 'line'
         },
         title: {
-          text: ''
+          text: 'Prefix Keys Count'
         },
         tooltip: {
           formatter () {
@@ -85,7 +80,6 @@ export default {
             title: {
               text: 'Bytes'
             },
-            tickInterval: 300,
             labels: {
               formatter () {
                 return formatBytes(this.value)
@@ -95,43 +89,14 @@ export default {
         ],
         series: this.echartsData
       }
-
-      // let myChart = echarts.init(document.getElementById('prefixKeysCount'))
-      // myChart.setOption({
-      //   title: {
-      //     text: 'Prefix Keys Count'
-      //   },
-      //   legend: {
-      //     data: this.legendData,
-      //     type: 'scroll',
-      //     bottom: '5'
-      //   },
-      //   tooltip: {
-      //     trigger: 'axis'
-      //   },
-      //   xAxis: {
-      //     type: 'category',
-      //     data: this.xAxisData
-      //   },
-      //   yAxis: {
-      //     title: {
-      //       text: 'Count'
-      //     },
-      //     type: 'value'
-      //   },
-      //   series: this.echartsData
-      // })
     },
     async getXAxisData () {
       const res = await getTimeData(2, 1550109815828)
       let timeList = res.data.map(value => value.value)
-      console.log('timeList', timeList)
       this.xAxisData = timeList
-      console.log('xAxisData', this.xAxisData)
     },
     async refreshData () {
       const response = await getPrefixKeysCount(2, 1550109815828)
-      console.log('getPrefixKeysCount', response)
       this.echartsData = response.data.map(value => {
         return {
           name: value.key,
@@ -161,6 +126,7 @@ export default {
 <style scoped>
 .box-card {
   margin: 5px;
+  height: 450px;
 }
 
 .chart {

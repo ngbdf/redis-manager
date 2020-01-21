@@ -5,3 +5,7 @@ export function formatBytes (bytes) {
   let i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`
 }
+
+export function formatterInput (value) {
+  return value.toString().replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,')
+};
