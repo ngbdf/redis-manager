@@ -94,8 +94,12 @@ public class RDBAnalyzeService {
 			rdbPath = basePath + port + "/dump.rdb";
 			rdbFile = new File(rdbPath);
 			if (!rdbFile.exists()) {
-				allPathValid = false;
-				msg.put(port, rdbPath + " NOT EXIST!");
+				rdbPath = basePath + port +"/data"+ "/dump.rdb";
+				rdbFile=new File(rdbPath);
+				if(rdbFile.exists()) {
+					allPathValid = false;
+					msg.put(port, rdbPath + " NOT EXIST!");
+				}
 			} else {
 				rdbPaths.put(port, rdbPath);
 			}

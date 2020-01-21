@@ -138,38 +138,9 @@ public class RDBAnalyzeController {
 
 	}
 
-	/**
-	 * 根据id下发分析任务到指定的agent 中
-	 * 
-	 * @param id
-	 * @return {message:"",status:true/false }
-	 */
-
-//	@RequestMapping(value = "allocation_job/{id}", method = RequestMethod.GET)
-//	public Result allocationJob(@PathVariable("id") Long id) {
-//		RDBAnalyze rdbAnalyze = rdbAnalyzeService.getRDBAnalyzeById(id);
-//		int[] result = null;
-//		if (rdbAnalyze.getAnalyzer().contains(",")) {
-//			String[] str = rdbAnalyze.getAnalyzer().split(",");
-//			result = new int[str.length];
-//			for (int i = 0; i < str.length; i++) {
-//				result[i] = Integer.parseInt(str[i]);
-//
-//			}
-//		} else {
-//			result = new int[1];
-//			result[0] = Integer.parseInt(rdbAnalyze.getAnalyzer());
-//		}
-//		JSONObject responseResult = rdbAnalyzeService.allocationRDBAnalyzeJob(id, result);
-//		return Result.successResult(responseResult);
-//	}
 
 	@RequestMapping(value = "allocation_job", method = RequestMethod.POST)
 	public Result allocationJob(@RequestBody RDBAnalyze rdbAnalyze) {
-//	    RDBAnalyzeResult rdbAnalyzeResult = new RDBAnalyzeResult();
-//	    rdbAnalyzeResult.setAnalyzeConfig(JSONObject.toJSONString(rdbAnalyze));
-//	    rdbAnalyzeResult.setClusterId(Long.parseLong(rdbAnalyze.getCluster().getClusterId().toString()));
-//        rdbAnalyzeResultService.add(rdbAnalyzeResult);
 		JSONObject responseResult = rdbAnalyzeService.allocationRDBAnalyzeJob(rdbAnalyze);
 		return Result.successResult(responseResult);
 
@@ -413,6 +384,22 @@ public class RDBAnalyzeController {
 			return Result.failResult("get analyze result failed!");
 		}
 	}
+
+
+	/**
+	 * 测试corn表达式
+	 *
+	 * @param body
+	 * @return
+	 */
+	@RequestMapping(value = "test_corn", method = RequestMethod.POST)
+	@ResponseBody
+	public Result testCorn(@RequestBody Map<String, String> body) {
+		String schedule = body.get("schedule");
+		List<String> list = taskService.getRecentTriggerTime(schedule);
+		return Result.successResult(list);
+	}
+
 
 
 }

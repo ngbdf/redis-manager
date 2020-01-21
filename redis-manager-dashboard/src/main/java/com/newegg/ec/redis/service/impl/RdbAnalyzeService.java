@@ -148,9 +148,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             }
         }
         long scheduleID = System.currentTimeMillis();
-        if(rdbAnalyze.isManual()){
-            saveToResult(rdbAnalyze,scheduleID);
-        }
+        saveToResult(rdbAnalyze,scheduleID);
         List<AnalyzeInstance> analyzeInstances = EurekaUtil.getRegisterNodes();
         Map<String, AnalyzeInstance> analyzeInstancesMap = new HashMap<>(analyzeInstances.size());
         // 本次场景只会一个host一个AnalyzeInstance

@@ -20,7 +20,7 @@
     <el-switch v-model="analyseisJobFrom.autoAnalyze"></el-switch>
   </el-form-item>
     <el-form-item label="Schedule" prop="schedule" v-if="analyseisJobFrom.autoAnalyze">
-      <el-input v-model="analyseisJobFrom.schedule" placeholder="Please schedule" class="input"></el-input>
+      <el-input v-model="analyseisJobFrom.schedule" placeholder="Please schedule" class="input" @change="inputChange"></el-input>
       <el-tooltip class="item" effect="dark" placement="right">
         <div slot="content">
           <ul>
@@ -68,7 +68,7 @@
 </template>>
 
 <script>
-import { addAnalysisList, updateAnalyzeList, getCluster } from '@/api/rctapi.js'
+import { addAnalysisList, updateAnalyzeList, getCluster, cronExpress } from '@/api/rctapi.js'
 import message from '@/utils/message.js'
 export default {
   props: {
@@ -132,7 +132,7 @@ export default {
           }
         ]
       },
-      scheduleCron: ['2020-01-21 07:10:00', '2020-01-21 07:10:10'],
+      scheduleCron: [],
       labelPosition: 'right'
     }
   },
@@ -170,6 +170,16 @@ export default {
       getCluster(this.groupId).then(response => {
         this.redisClusterList = response.data
       })
+    },
+    inputChange (cron) {
+      // const express = cron.replace(/\s+/g, '')
+      const express = cron.trim()
+      if (express) {
+        const data = { schedule: express }
+        cronExpress(data).then(response => {
+          this.scheduleCron = response.data
+        })
+      }
     }
   },
   watch: {
