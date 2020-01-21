@@ -43,7 +43,7 @@ export default {
   },
   methods: {
     async initTable () {
-      let res = await getTop1000KeysByType(2, 1579481459916, this.tabKey)
+      let res = await getTop1000KeysByType(26, this.tabKey)
       this.tableData = res.data.map(value => {
         return {
           bytes: parseInt(value.bytes),

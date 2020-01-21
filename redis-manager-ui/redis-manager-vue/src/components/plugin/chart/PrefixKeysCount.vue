@@ -36,7 +36,7 @@ export default {
     myCallback () {
     },
     async initCharts () {
-      const res = await getTimeData(2, 1579481459916)
+      const res = await getTimeData(26)
 
       let timeList = res.data.map(value => {
         return formatTime(parseInt(value.value, 10))
@@ -44,7 +44,7 @@ export default {
       //
       this.xAxisData = timeList
 
-      const response = await getPrefixKeysCount(2, 1579481459916)
+      const response = await getPrefixKeysCount(26)
       //
       this.echartsData = response.data.map(value => {
         return {

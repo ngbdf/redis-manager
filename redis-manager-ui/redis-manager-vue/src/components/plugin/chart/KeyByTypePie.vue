@@ -36,7 +36,7 @@ export default {
     myCallback () {
     },
     async initCharts () {
-      const res = await getPieByType(2, 1579481459916)
+      const res = await getPieByType(26)
       this.echartsData = res.data.map(value => {
         return {
           name: value.dataType,

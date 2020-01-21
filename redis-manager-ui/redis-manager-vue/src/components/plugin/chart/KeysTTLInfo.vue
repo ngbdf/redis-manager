@@ -47,7 +47,7 @@ export default {
   },
   methods: {
     async initTable () {
-      let res = await getKeysTTLInfo(2, 1579481459916)
+      let res = await getKeysTTLInfo(26)
       this.tableData = res.data.map(value => {
         return {
           noTTL: parseInt(value.noTTL),

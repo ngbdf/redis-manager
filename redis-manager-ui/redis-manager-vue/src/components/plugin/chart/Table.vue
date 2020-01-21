@@ -2,19 +2,21 @@
   <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
     <el-card shadow="hover" class="box-card">
       <div class="text-div">
-        <span class="text-span">Top 1000 Largest Keys By Perfix</span>
-      </div>
-      <!-- <el-input v-model="search" size="mini" placeholder="search" /> -->
-      <div class="input">
-           <el-input placeholder="search" v-model="search" class="input-with-select" size="small">
-           <el-button  slot="append" icon="el-icon-search"></el-button>
-           </el-input>
+        <span class="text-span">{{this.tableObj.title}}</span>
       </div>
 
-      <el-table :data="pageData.filter(data => !search || data.prefixKey.toLowerCase().includes(search.toLowerCase()))" @sort-change='sortChange'>
-        <el-table-column label="PrefixKey" property="prefixKey"></el-table-column>
+      <div class="input" v-show="this.tableObj.searchVis">
+           <!-- <el-input placeholder="search" v-model="search" class="input-with-select" size="small">
+           <el-button  slot="append" icon="el-icon-search"></el-button>
+           </el-input> -->
+            <el-input v-model="search" size="small" placeholder="search" />
+      </div>
+
+      <el-table :data="pageData.filter(data => !search || data[`${prefix}`].toLowerCase().includes(search.toLowerCase()))" @sort-change='sortChange'>
+        <el-table-column v-for="column in this.tableObj.columns" :key="column.label" :label="column.label" :sortable="column.sort" :formatter="column.formatter"  :prop="column.prop" ></el-table-column>
+        <!-- <el-table-column label="PrefixKey" property="prefixKey"></el-table-column>
         <el-table-column label="Count" sortable property="keyCount" :formatter="formatterCount"></el-table-column>
-        <el-table-column label="Memory Size" sortable property="memorySize" :formatter="formatMemory"></el-table-column>
+        <el-table-column label="Memory Size" sortable property="memorySize" :formatter="formatMemory"></el-table-column> -->
       </el-table>
       <div>
         <el-pagination
@@ -32,7 +34,6 @@
   </el-col>
 </template>
 <script>
-import { getTop1000KeysByPrefix } from '@/api/rctapi.js'
 import { formatBytes, formatterInput } from '@/utils/format.js'
 export default {
   props: {
@@ -41,6 +42,9 @@ export default {
     },
     scheduleId: {
       type: String
+    },
+    tableObj: {
+      type: Object
     }
   },
   data () {
@@ -49,27 +53,44 @@ export default {
       currentPage: 1,
       pagesize: 10,
       pageData: [],
-      search: ''
+      search: '',
+      prefix: this.tableObj.searchColumn
     }
   },
   methods: {
-    async initTable () {
-      let res = await getTop1000KeysByPrefix(26)
-      this.tableData = res.data.map(value => {
-        return {
-          keyCount: parseInt(value.keyCount),
-          memorySize: parseInt(value.memorySize),
-          prefixKey: value.prefixKey
-        }
+    initTable (obj) {
+    //   let res = await getTop1000KeysByPrefix(2, 1579481459916)
+    //   this.tableData = this.tableObj.data.map(value => {
+    //     return {
+    //       keyCount: parseInt(value.keyCount),
+    //       memorySize: parseInt(value.memorySize),
+    //       prefixKey: value.prefixKey
+    //     }
+    //   })
+      console.log('tableObj', obj)
+      this.tableData = obj.data.map(value => {
+        console.log('columns', obj.columns)
+        // tableObj.columns.forEach(colum => {
+        //   if (colum.sort) {
+        //     console.log('prop', value[colum.prop])
+        //     value[colum.prop] = parseInt(value[colum.prop])
+        //   }
+        // })
+        console.log('value', value)
+        return value
       })
-      this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
+      this.pageData = obj.data.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
+      //   this.pageData.filter(data => {
+      //     console.log('datas', data[`${this.tableObj.searchColumn}`])
+      //   })
+    //   console.log('pageData', this.pageData)
     },
     compareValue (property, order) {
       return function (obj1, obj2) {
         if (order === 'ascending') {
-          return obj1[property] - obj2[property]
+          return parseInt(obj1[property]) - parseInt(obj2[property])
         }
-        return obj2[property] - obj1[property]
+        return parseInt(obj2[property]) - parseInt(obj1[property])
       }
     },
     sortChange (column) {
@@ -93,7 +114,7 @@ export default {
     }
   },
   mounted () {
-    this.initTable()
+    this.initTable(this.tableObj)
   },
   watch: {
     // 深度监听 schedule 变化
@@ -102,6 +123,12 @@ export default {
         this.initTable()
       },
       deep: true
+    },
+    tableObj: {
+      immediate: true,
+      handler (newValue, old) {
+        this.initTable(newValue)
+      }
     }
   }
 }
