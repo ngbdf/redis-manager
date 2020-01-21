@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.cache.AppCache;
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.schedule.RDBScheduleJob;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.impl.*;
 import org.quartz.SchedulerException;
@@ -63,7 +64,7 @@ public class RDBAnalyzeController {
 
 			if (rdbAnalyze.isAutoAnalyze()) {
 				try {
-					taskService.addTask(rdbAnalyze, RdbScheduleJob.class);
+					taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
 				} catch (SchedulerException e) {
 					LOG.error("schedule job add faild!message:{}", e.getMessage());
 				}
@@ -81,7 +82,7 @@ public class RDBAnalyzeController {
 			if (rdbAnalyzeService.add(rdbAnalyze)) {
 				if (rdbAnalyze.isAutoAnalyze()) {
 					try {
-						taskService.addTask(rdbAnalyze, RdbScheduleJob.class);
+						taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
 					} catch (SchedulerException e) {
 						LOG.error("schedule job add faild!message:{}", e.getMessage());
 					}
