@@ -45,6 +45,9 @@ export default {
     },
     tableObj: {
       type: Object
+    },
+    initData: {
+      type: Function
     }
   },
   data () {
@@ -58,32 +61,19 @@ export default {
     }
   },
   methods: {
-    initTable (obj) {
-    //   let res = await getTop1000KeysByPrefix(2, 1579481459916)
-    //   this.tableData = this.tableObj.data.map(value => {
-    //     return {
-    //       keyCount: parseInt(value.keyCount),
-    //       memorySize: parseInt(value.memorySize),
-    //       prefixKey: value.prefixKey
-    //     }
-    //   })
-      console.log('tableObj', obj)
-      this.tableData = obj.data.map(value => {
-        console.log('columns', obj.columns)
-        // tableObj.columns.forEach(colum => {
-        //   if (colum.sort) {
-        //     console.log('prop', value[colum.prop])
-        //     value[colum.prop] = parseInt(value[colum.prop])
-        //   }
-        // })
-        console.log('value', value)
-        return value
+    async initTable () {
+      await this.initData().then(data => {
+        // this.tableData = data
+        this.tableData = data.map(value => {
+          this.tableObj.columns.forEach(colum => {
+            if (colum.sort) {
+              value[colum.prop] = parseInt(value[colum.prop])
+            }
+          })
+          return value
+        })
       })
-      this.pageData = obj.data.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
-      //   this.pageData.filter(data => {
-      //     console.log('datas', data[`${this.tableObj.searchColumn}`])
-      //   })
-    //   console.log('pageData', this.pageData)
+      this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
     },
     compareValue (property, order) {
       return function (obj1, obj2) {
@@ -114,7 +104,7 @@ export default {
     }
   },
   mounted () {
-    this.initTable(this.tableObj)
+    this.initTable()
   },
   watch: {
     // 深度监听 schedule 变化

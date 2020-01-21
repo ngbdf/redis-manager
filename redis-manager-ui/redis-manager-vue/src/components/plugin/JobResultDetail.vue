@@ -15,8 +15,8 @@
         <KeyByTypePie pieType="memory" :resultId="resultId"></KeyByTypePie>
         <PrefixKeysCount :resultId="resultId"></PrefixKeysCount>
         <PrefixKeysMemory :resultId="resultId"></PrefixKeysMemory>
-        <Tables :resultId="resultId" :tableObj="top1000keysPrefix"/>
-        <Tables :resultId="resultId" :tableObj="keysTTL"/>
+        <Tables :resultId="resultId" :tableObj="top1000keysPrefix" :initData="initTop1000Keys"/>
+        <Tables :resultId="resultId" :tableObj="keysTTL" :initData="initKeysTTL"/>
         <!-- <Top1000KeysByPrefix :resultId="resultId"></Top1000KeysByPrefix> -->
         <!-- <KeysTTLInfo :resultId="resultId"></KeysTTLInfo> -->
         <Top1000KeysByType :resultId="resultId"></Top1000KeysByType>
@@ -71,7 +71,7 @@ export default {
         searchVis: true,
         searchColumn: 'prefixKey',
         title: 'Top 1000 Largest Keys By Perfix',
-        data: []
+        refreshData: this.initTop1000Keys
       },
       keysTTL: {
         columns: [{
@@ -94,7 +94,7 @@ export default {
         searchVis: true,
         searchColumn: 'prefix',
         title: 'Keys TTL Info',
-        data: []
+        refreshData: this.initKeysTTL
       },
       // clusterId: String(this.$route.query.clusterId),
       // resultId: String(this.$route.query.detailId)
@@ -113,7 +113,7 @@ export default {
     formatMemory (row, column, cellValue) {
       return formatBytes(cellValue)
     },
-    async initTop1000Keys () {
+    async initTop1000Keys (callback) {
       let res = await getTop1000KeysByPrefix(26)
       //   this.tableData = res.data.map(value => {
       //     return {
@@ -122,12 +122,12 @@ export default {
       //       prefixKey: value.prefixKey
       //     }
       //   })
-      this.top1000keysPrefix.data = res.data
-      let res1 = await getKeysTTLInfo(26)
-      this.keysTTL.data = res1.data
+      return res.data
+    //   let res1 = await getKeysTTLInfo(26)
+    //   this.keysTTL.data = res1.data
       //   this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
     },
-    async initKeysTTL () {
+    async initKeysTTL (callback) {
       let res = await getKeysTTLInfo(26)
       //   this.tableData = res.data.map(value => {
       //     return {
@@ -136,7 +136,7 @@ export default {
       //       prefixKey: value.prefixKey
       //     }
       //   })
-      this.keysTTL.data = res.data
+      return res.data
       //   this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
     }
 
