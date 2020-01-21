@@ -146,7 +146,6 @@ export default {
         if (valid) {
           const body = Object.assign({}, this.analyseisJobFrom)
           body.analyzer = body.analyzer.toString()
-          debugger
           if (body.id === '') {
             addAnalysisList(body).then(response => {
               message.success(response.message)

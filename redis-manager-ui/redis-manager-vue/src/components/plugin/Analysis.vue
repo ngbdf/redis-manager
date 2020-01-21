@@ -58,12 +58,12 @@
           <el-table-column
             label="Data Path"
             property="dataPath"
-            width="250"
+            width="350"
           ></el-table-column>
           <el-table-column
             label="Prefixed"
             property="prefixes"
-            width="200"
+            width="150"
           ></el-table-column>
           <!-- <el-table-column label="Status" width="150">
             <template slot-scope="scope" width="150">
@@ -71,7 +71,7 @@
               <i class="el-icon-circle-check" v-else></i>
             </template>
           </el-table-column>-->
-          <el-table-column label="Operation" width="250px;">
+          <el-table-column label="Operation" width="200px;">
             <template slot-scope="scope">
               <el-button
                 type="primary"
