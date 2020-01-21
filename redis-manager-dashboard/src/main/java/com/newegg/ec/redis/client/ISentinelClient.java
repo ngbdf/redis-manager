@@ -1,5 +1,9 @@
 package com.newegg.ec.redis.client;
 
+import redis.clients.jedis.Jedis;
+
+import java.util.Map;
+
 /**
  * Sentinel client operation interface
  *
@@ -11,13 +15,14 @@ public interface ISentinelClient {
     /**
      * Get sentinel client
      */
-    void getSentinelClient();
+    Jedis getSentinelClient();
 
     /**
      * Get sentinel base info
      */
-    void getSentinelInfo();
+    Map<String, String> getSentinelInfo() throws Exception;
 
+    void close();
 
 
 }
