@@ -4,7 +4,7 @@
       <div>{{ currentGroup.groupName }}</div>
     </div>
     <div>
-      <el-table :data="analyseResults" :default-sort="{prop: 'scheduleId', order: 'descending'}">
+      <el-table :data="pageData" @sort-change='sortChange'>
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column label="Cluster Name" property="clusterName"></el-table-column>
         <el-table-column label="Analyse Time" sortable property="scheduleId" :formatter="dateFormatter"></el-table-column>
@@ -15,6 +15,18 @@
           </template>
         </el-table-column>
       </el-table>
+      <div>
+        <el-pagination
+          background
+          @current-change="handleCurrentChange"
+          :current-page.sync="currentPage"
+          :page-size="pagesize"
+          layout="prev, pager, next, jumper"
+          :total="analyseResults.length"
+        >
+        </el-pagination>
+      </div>
+      </div>
     </div>
   </div>
 </template>
@@ -26,17 +38,43 @@ import { formatTime } from '@/utils/time.js'
 export default {
   data () {
     return {
-      analyseResults: []
+      analyseResults: [],
+      currentPage: 1,
+      pagesize: 10,
+      pageData: []
     }
   },
   methods: {
     dateFormatter (row) {
       return formatTime(row.scheduleId)
     },
+    handleCurrentChange (val) {
+      this.currentPage = val
+      this.pageData = this.analyseResults.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
+    },
+    compareValue (property, order) {
+      return function (obj1, obj2) {
+        if (order === 'ascending') {
+          return obj1[property] - obj2[property]
+        }
+        return obj2[property] - obj1[property]
+      }
+    },
+    sortChange (column) {
+      // 操作表格数据
+      if (!column.order) {
+        console.log('nullllll', column.order)
+        return
+      }
+      this.analyseResults = this.analyseResults.sort(this.compareValue(column.prop, column.order))
+      this.pageData = this.analyseResults.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
+      this.currentPage = this.currentPage
+    },
     async getAnalyseResults (groupId) {
       const res = await getAnalyzeResults()
       // 按照分析时间排序
       this.analyseResults = res.data
+      this.pageData = res.data.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
     },
     // getAnalyseResults (groupId) {
     //   const res = getAnalyzeResults()
