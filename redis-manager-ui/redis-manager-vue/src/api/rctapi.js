@@ -126,4 +126,4 @@ export const getTimeData = (clusterId, scheduleId) => RCTAPI('/rdb/all/schedule_
 
 export const getScheduleDetail = (id) => API(`/rdb/schedule_detail/${id}`)
 
-export const cancelAnalyzeTask = (id) => API(`/rdb/cance_job/${id}`)
+export const cancelAnalyzeTask = (id, scheduleID) => API(`/rdb/cance_job/${id}/${scheduleID}`)

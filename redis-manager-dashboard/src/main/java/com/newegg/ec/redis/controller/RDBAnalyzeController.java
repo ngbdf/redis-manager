@@ -198,9 +198,9 @@ public class RDBAnalyzeController {
 	 *            }
 	 *         </code>
 	 */
-	@RequestMapping(value = "cance_job/{instance}", method = RequestMethod.GET)
-	public Result canceJob(@PathVariable String instance) {
-		JSONObject result = rdbAnalyzeService.canceRDBAnalyze(instance);
+	@RequestMapping(value = "cance_job/{instance}/{scheduleID}", method = RequestMethod.GET)
+	public Result canceJob(@PathVariable String instance,@PathVariable String scheduleID) {
+		JSONObject result = rdbAnalyzeService.canceRDBAnalyze(instance,scheduleID);
 		return Result.successResult(result);
 	}
 
