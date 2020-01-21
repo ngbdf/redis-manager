@@ -207,16 +207,16 @@ public class RDBAnalyzeController {
 	/**
 	 * get schedule_id list
 	 * 
-	 * @param clusterId clusterId
+	 * @param analyzeResultId analyzeResultId
 	 * @return schedule_id List
 	 */
 	@GetMapping("/all/schedule_id")
-	public Result getAllScheduleId(@RequestParam Long clusterId) {
+	public Result getAllScheduleId(@RequestParam Long analyzeResultId) {
 		try {
-			if (null == clusterId) {
-				return Result.failResult("clusterId not null!");
+			if (null == analyzeResultId) {
+				return Result.failResult("analyzeResultId not null!");
 			}
-			List<RDBAnalyzeResult> rdbAnalyzeResultList = rdbAnalyzeResultService.selectAllResultByClusterId(clusterId);
+			List<RDBAnalyzeResult> rdbAnalyzeResultList = rdbAnalyzeResultService.selectAllRecentlyResultById(analyzeResultId);
 			List<JSONObject> result = new ArrayList<>(500);
 			JSONObject obj;
 			for (RDBAnalyzeResult rdbAnalyzeResult : rdbAnalyzeResultList) {
@@ -232,49 +232,47 @@ public class RDBAnalyzeController {
 		}
 	}
 
-	/**
-	 * get all key_prefix
-	 * 
-	 * @param clusterId
-	 * @param scheduleId
-	 * @return
-	 */
-	@GetMapping("/all/key_prefix")
-	public Result getAllKeyPrefix(@RequestParam Long clusterId, @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
-		try {
-			if (null == clusterId) {
-				return Result.failResult("clusterId should not null!");
-			}
-			RDBAnalyzeResult rdbAnalyzeResult;
-			if(null != scheduleId){
-				rdbAnalyzeResult = rdbAnalyzeResultService.selectResultByRIDandSID(clusterId, scheduleId);
-			} else {
-				rdbAnalyzeResult = rdbAnalyzeResultService.selectLatestResultByRID(clusterId);
-			}
-			if(null == rdbAnalyzeResult) {
-				return Result.successResult(null);
-			}
-			return Result.successResult(rdbAnalyzeResultService.getAllKeyPrefixByResult(rdbAnalyzeResult.getResult()));
-		} catch (Exception e) {
-			LOG.error("getAllKey_prefix failed!", e);
-			return Result.failResult("getAllKey_prefix failed!");
-		}
-	}
+//	/**
+//	 * get all key_prefix
+//	 *
+//	 * @param clusterId
+//	 * @param scheduleId
+//	 * @return
+//	 */
+//	@GetMapping("/all/key_prefix")
+//	public Result getAllKeyPrefix(@RequestParam Long clusterId, @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
+//		try {
+//			if (null == clusterId) {
+//				return Result.failResult("clusterId should not null!");
+//			}
+//			RDBAnalyzeResult rdbAnalyzeResult;
+//			if(null != scheduleId){
+//				rdbAnalyzeResult = rdbAnalyzeResultService.selectResultByRIDandSID(clusterId, scheduleId);
+//			} else {
+//				rdbAnalyzeResult = rdbAnalyzeResultService.selectLatestResultByRID(clusterId);
+//			}
+//			if(null == rdbAnalyzeResult) {
+//				return Result.successResult(null);
+//			}
+//			return Result.successResult(rdbAnalyzeResultService.getAllKeyPrefixByResult(rdbAnalyzeResult.getResult()));
+//		} catch (Exception e) {
+//			LOG.error("getAllKey_prefix failed!", e);
+//			return Result.failResult("getAllKey_prefix failed!");
+//		}
+//	}
+
 
 	/**
 	 * get cheat data
-	 * 
 	 * @param type       value:
 	 *                   PrefixKeyByCount,PrefixKeyByMemory,DataTypeAnalyze,TTLAnalyze
-	 * @param clusterId
-	 * @param scheduleId
+	 * @param analyzeResultId
 	 * @return
 	 */
 	@GetMapping("/chart/{type}")
-	public Result getChartDataByType(@PathVariable("type") String type, @RequestParam Long clusterId,
-                                           @RequestParam(value = "scheduleId") Long scheduleId) {
+	public Result getChartDataByType(@PathVariable("type") String type, @RequestParam Long analyzeResultId) {
 		try {
-			return Result.successResult(rdbAnalyzeResultService.getListStringFromResult(clusterId, scheduleId, type));
+			return Result.successResult(rdbAnalyzeResultService.getListStringFromResult(analyzeResultId, type));
 		} catch (Exception e) {
 			LOG.error("getChartDataByType failed!", e);
 			return Result.failResult("getChartDataByType failed!");
@@ -283,14 +281,13 @@ public class RDBAnalyzeController {
 	/**
 	 * get table data
 	 *
-	 * @param clusterId
-	 * @param scheduleId
+	 * @param analyzeResultId
 	 * @return
 	 */
 	@GetMapping("/table/prefix")
-	public Result getPrefixType(@RequestParam Long clusterId, @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
+	public Result getPrefixType(@RequestParam Long analyzeResultId) {
 		try {
-			return Result.successResult(rdbAnalyzeResultService.getPrefixType(clusterId, scheduleId));
+			return Result.successResult(rdbAnalyzeResultService.getPrefixType(analyzeResultId));
 		}
 		catch (Exception e) {
 			LOG.error("getPrefixType failed!", e);
@@ -302,16 +299,15 @@ public class RDBAnalyzeController {
 	/**
 	 * getTopKey data
 	 * 
-	 * @param clusterId
-	 * @param scheduleId
+	 * @param analyzeResultId
 	 * @param type       0:string 5:hash 10:list 15:set
 	 * @return
 	 */
 	@GetMapping("/top_key")
-	public Result getPrefixKeyByMem(@RequestParam Long clusterId, @RequestParam(value = "scheduleId", required = false) Long scheduleId,
+	public Result getPrefixKeyByMem(@RequestParam Long analyzeResultId,
                                           @RequestParam Long type) {
 		try {
-			return Result.successResult(rdbAnalyzeResultService.getTopKeyFromResultByKey(clusterId, scheduleId, type));
+			return Result.successResult(rdbAnalyzeResultService.getTopKeyFromResultByKey(analyzeResultId, type));
 		} catch (Exception e) {
 			LOG.error("getPrefixKeyByMem failed!", e);
 			return Result.failResult("getPrefixKeyByMem failed!");
@@ -319,37 +315,36 @@ public class RDBAnalyzeController {
 
 	}
 
-	/**
-	 * 折线图
-	 * 
-	 * @param type       PrefixKeyByCount,PrefixKeyByMemory
-	 * @param clusterId
-	 * @param scheduleId
-	 * @return
-	 */
-	@GetMapping("/line/{type}")
-	public Result getPerfixLine(@PathVariable("type") String type, @RequestParam Long clusterId,
-                                      @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
-		try {
-			return Result.successResult(rdbAnalyzeResultService.getLineStringFromResult(clusterId, scheduleId, type));
-		} catch (Exception e) {
-			LOG.error("getPerfixLine failed!", e);
-			return Result.failResult("getPerfixLine failed!");
-		}
-	}
+//	/**
+//	 * 折线图
+//	 *
+//	 * @param type       PrefixKeyByCount,PrefixKeyByMemory
+//	 * @param clusterId
+//	 * @param scheduleId
+//	 * @return
+//	 */
+//	@GetMapping("/line/{type}")
+//	public Result getPerfixLine(@PathVariable("type") String type, @RequestParam Long clusterId,
+//                                      @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
+//		try {
+//			return Result.successResult(rdbAnalyzeResultService.getLineStringFromResult(clusterId, scheduleId, type));
+//		} catch (Exception e) {
+//			LOG.error("getPerfixLine failed!", e);
+//			return Result.failResult("getPerfixLine failed!");
+//		}
+//	}
 
 	/**
 	 *
 	 * @param type PrefixKeyByCount,PrefixKeyByMemory
-	 * @param clusterId clusterId
+	 * @param analyzeResultId analyzeResultId
 	 * @return JSONArray
 	 */
 	@GetMapping("/line/prefix/{type}")
-	public Result getPrefixLineByCountOrMem(@PathVariable String type, @RequestParam Long clusterId,
-											@RequestParam Long scheduleId,
+	public Result getPrefixLineByCountOrMem(@PathVariable String type, @RequestParam Long analyzeResultId,
 											@RequestParam(value = "prefixKey", required = false) String prefixKey) {
 		try {
-			JSONArray result = rdbAnalyzeResultService.getPrefixLineByCountOrMem(clusterId, type, 20, prefixKey);
+			JSONArray result = rdbAnalyzeResultService.getPrefixLineByCountOrMem(analyzeResultId, type, 20, prefixKey);
 			return Result.successResult(result);
 		}
 		catch (Exception e) {

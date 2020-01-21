@@ -104,25 +104,25 @@ export const deletAnalyze = (id) => API(`/rdb?id=${id}`, 'DELETE')
 
 export const getAnalyzeResults = () => RCTAPI('/rdb/results')
 
-export const getPieByType = (clusterId, scheduleId) => RCTAPI('/rdb/chart/DataTypeAnalyze', 'GET', {clusterId, scheduleId})
+export const getPieByType = (analyzeResultId) => RCTAPI('/rdb/chart/DataTypeAnalyze', 'GET', {analyzeResultId})
 
-export const getPrefixKeysCount = (clusterId, scheduleId) => RCTAPI('/rdb/line/prefix/PrefixKeyByCount', 'GET', {clusterId, scheduleId})
+export const getPrefixKeysCount = (analyzeResultId) => RCTAPI('/rdb/line/prefix/PrefixKeyByCount', 'GET', {analyzeResultId})
 
-export const getPrefixKeysMemory = (clusterId, scheduleId) => RCTAPI('/rdb/line/prefix/PrefixKeyByMemory', 'GET', {clusterId, scheduleId})
+export const getPrefixKeysMemory = (analyzeResultId) => RCTAPI('/rdb/line/prefix/PrefixKeyByMemory', 'GET', {analyzeResultId})
 
-export const getTop1000KeysByPrefix = (clusterId, scheduleId) => RCTAPI('/rdb/table/prefix', 'GET', {clusterId, scheduleId})
+export const getTop1000KeysByPrefix = (analyzeResultId) => RCTAPI('/rdb/table/prefix', 'GET', {analyzeResultId})
 
-export const getKeysTTLInfo = (clusterId, scheduleId) => RCTAPI('/rdb/chart/TTLAnalyze', 'GET', {clusterId, scheduleId})
+export const getKeysTTLInfo = (analyzeResultId) => RCTAPI('/rdb/chart/TTLAnalyze', 'GET', {analyzeResultId})
 
-export const getTop1000KeysByType = (clusterId, scheduleId, type) => RCTAPI('/rdb/top_key', 'GET', { clusterId, scheduleId, type })
+export const getTop1000KeysByType = (analyzeResultId, type) => RCTAPI('/rdb/top_key', 'GET', { analyzeResultId, type })
 
-export const getTop1000KeysByString = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 0 })
+export const getTop1000KeysByString = (analyzeResultId) => RCTAPI('/rdb/top_key', 'GET', { analyzeResultId, type: 0 })
 
-export const getTop1000KeysByHash = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 5 })
+export const getTop1000KeysByHash = (analyzeResultId) => RCTAPI('/rdb/top_key', 'GET', { analyzeResultId, type: 5 })
 
-export const getTop1000KeysByList = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 10 })
+export const getTop1000KeysByList = (analyzeResultId) => RCTAPI('/rdb/top_key', 'GET', { analyzeResultId, type: 10 })
 
-export const getTop1000KeysBySet = (clusterId, scheduleId) => RCTAPI('/rdb/top_key', 'GET', { clusterId: clusterId, scheduleId: scheduleId, type: 15 })
+export const getTop1000KeysBySet = (analyzeResultId) => RCTAPI('/rdb/top_key', 'GET', { analyzeResultId, type: 15 })
 
 export const getTimeData = (clusterId, scheduleId) => RCTAPI('/rdb/all/schedule_id', 'GET', { clusterId, scheduleId })
 

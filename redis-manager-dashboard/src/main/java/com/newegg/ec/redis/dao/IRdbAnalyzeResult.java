@@ -22,6 +22,9 @@ public interface IRdbAnalyzeResult {
     @Select("SELECT COUNT(*) FROM cluster")
     int selectCount();
 
+    @Select("SELECT * FROM rdb_analyze_result WHERE id = #{id}")
+    RDBAnalyzeResult selectByResultId(Long id);
+
     @Insert("INSERT INTO rdb_analyze_result(schedule_id, cluster_id, result, analyze_config) " +
             "VALUES (#{scheduleId}, #{clusterId}, #{result}, #{analyzeConfig})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
@@ -54,7 +57,7 @@ public interface IRdbAnalyzeResult {
      * @param cluster_id queryId
      * @return List<RDBAnalyzeResult>
      */
-    @Select("select * from rdb_analyze_result where cluster_id= #{cluster_id}")
+    @Select("select * from rdb_analyze_result where cluster_id= #{cluster_id} ORDER BY schedule_id DESC LIMIT 0,7")
     List<RDBAnalyzeResult> selectAllResultByClusterId(Long cluster_id);
 
     /**
@@ -69,6 +72,25 @@ public interface IRdbAnalyzeResult {
             @Result(column = "result", property = "result"),
             @Result(column = "analyze_config", property = "analyzeConfig")})
     List<RDBAnalyzeResult> selectAllResultByIdExceptLatest(Long cluster_id);
+
+
+    /**
+     * query all result by redis_info_id
+     * @param clusterId queryId
+     * @param resultId queryId
+     * @return List<RDBAnalyzeResult>
+     */
+    @Select("SELECT * FROM `rdb_analyze_result` WHERE id != #{resultId} AND cluster_id = #{clusterId} AND schedule_id" +
+            " < #{scheduleId} ORDER BY " +
+            "schedule_id DESC " +
+            "LIMIT 0,6")
+    @Results({ @Result(id = true, column = "id", property = "id"),
+            @Result(column = "schedule_id", property = "scheduleId"),
+            @Result(column = "cluster_id", property = "clusterId"),
+            @Result(column = "result", property = "result"),
+            @Result(column = "analyze_config", property = "analyzeConfig")})
+    List<RDBAnalyzeResult> selectRecentlyResultByIdExceptSelf(Long resultId, Long clusterId, Long scheduleId);
+
 
 
     @Select("create TABLE IF NOT EXISTS `rdb_analyze_result`( " +
