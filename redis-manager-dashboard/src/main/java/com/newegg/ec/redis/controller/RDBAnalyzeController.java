@@ -56,7 +56,7 @@ public class RDBAnalyzeController {
 
 		if (rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)) {
 			try {
-				taskService.delTask("rdb" + String.valueOf(rdbAnalyze.getId()));
+				taskService.delTask("rdb" + rdbAnalyze.getId());
 			} catch (SchedulerException e) {
 				LOG.error("schedule job delete faild!message:{}", e.getMessage());
 			}
@@ -104,7 +104,7 @@ public class RDBAnalyzeController {
 	@RequestMapping(value = "/cance/{id}", method = RequestMethod.GET)
 	public Result canceRdbAnalyze(@PathVariable("id") Long id) {
 		try {
-			taskService.delTask("rdb" + String.valueOf(id));
+			taskService.delTask("rdb" + id);
 		} catch (SchedulerException e) {
 			LOG.error("schedule job delete faild!message:{}", e.getMessage());
 		}
@@ -115,14 +115,10 @@ public class RDBAnalyzeController {
 	public Result getRDBAnalyzeByParentID(@PathVariable Long clusterId) {
 		JSONObject data = new JSONObject();
 		RDBAnalyze rdbAnalyze = rdbAnalyzeService.getRDBAnalyzeByPid(clusterId);
-		Cluster clusterInfo;
 		if (null == rdbAnalyze) {
 			rdbAnalyze = new RDBAnalyze();
-			rdbAnalyze.setClusterId(clusterId);
 		}
-		if (null != rdbAnalyze) {
-			rdbAnalyze.setClusterId(clusterId);
-		}
+		rdbAnalyze.setClusterId(clusterId);
 		data.put("info", rdbAnalyze);
 		Long id = rdbAnalyzeService.getRedisIDBasePID(clusterId);
 		if(id!=null) {
@@ -154,7 +150,7 @@ public class RDBAnalyzeController {
 	public Result scheduleDetail(@PathVariable("id") Long rdbAnalyzeID) {
 		RDBAnalyze  rdbAnalyze = rdbAnalyzeService.getRDBAnalyzeByPid(rdbAnalyzeID);
 		List<ScheduleDetail> scheduleDetail = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
-		List<ScheduleDetail> result = new ArrayList<ScheduleDetail>();
+		List<ScheduleDetail> result = new ArrayList<>();
 		if (scheduleDetail != null && scheduleDetail.size() > 0) {
 			for (ScheduleDetail scheduleDetails : scheduleDetail) {
 				AnalyzeStatus stautStatus = scheduleDetails.getStatus();
@@ -172,15 +168,11 @@ public class RDBAnalyzeController {
 				result.add(scheduleDetails);
 			}
 		}
-		Collections.sort(result, new Comparator<ScheduleDetail>() {
-			@Override
-			public int compare(ScheduleDetail o1, ScheduleDetail o2) {
-				if ("DONE".equals(o1.getStatus().name()) || "DONE".equals(o2.getStatus().name())){
-					return o1.getProcess() - o2.getProcess();
-				}
-				else {
-					return o1.getInstance().compareTo(o2.getInstance());
-				}
+		result.sort((o1, o2) -> {
+			if ("DONE".equals(o1.getStatus().name()) || "DONE".equals(o2.getStatus().name())) {
+				return o1.getProcess() - o2.getProcess();
+			} else {
+				return o1.getInstance().compareTo(o2.getInstance());
 			}
 		});
 		return Result.successResult(result);
@@ -224,8 +216,6 @@ public class RDBAnalyzeController {
 			if (null == clusterId) {
 				return Result.failResult("clusterId not null!");
 			}
-//			Map<String, Object> queryMap = new HashMap<>(2);
-//			queryMap.put("cluster_id", clusterId);
 			List<RDBAnalyzeResult> rdbAnalyzeResultList = rdbAnalyzeResultService.selectAllResultByClusterId(clusterId);
 			List<JSONObject> result = new ArrayList<>(500);
 			JSONObject obj;
