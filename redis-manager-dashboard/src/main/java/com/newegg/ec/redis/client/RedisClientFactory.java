@@ -43,4 +43,8 @@ public class RedisClientFactory {
         return buildRedisClient(redisURI);
     }
 
+    public static SentinelClient buildSentinelClient(RedisURI redisURI) {
+        return new SentinelClient(redisURI);
+    }
+
 }

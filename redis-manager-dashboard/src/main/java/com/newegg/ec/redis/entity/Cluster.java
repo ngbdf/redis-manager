@@ -105,6 +105,12 @@ public class Cluster {
      */
     private int clusterSize;
 
+    private int sentinelOk;
+
+    private int monitorMasters;
+
+    private int masterOk;
+
     private String redisPassword;
 
     private Integer installationEnvironment;
@@ -305,6 +311,30 @@ public class Cluster {
 
     public void setClusterSize(int clusterSize) {
         this.clusterSize = clusterSize;
+    }
+
+    public int getSentinelOk() {
+        return sentinelOk;
+    }
+
+    public void setSentinelOk(int sentinelOk) {
+        this.sentinelOk = sentinelOk;
+    }
+
+    public int getMonitorMasters() {
+        return monitorMasters;
+    }
+
+    public void setMonitorMasters(int monitorMasters) {
+        this.monitorMasters = monitorMasters;
+    }
+
+    public int getMasterOk() {
+        return masterOk;
+    }
+
+    public void setMasterOk(int masterOk) {
+        this.masterOk = masterOk;
     }
 
     public String getRedisPassword() {

@@ -48,6 +48,27 @@ public interface IClusterDao {
     @Options(useGeneratedKeys = true, keyProperty = "clusterId", keyColumn = "cluster_id")
     Integer insertCluster(Cluster cluster);
 
+    @Insert("INSERT INTO cluster " +
+            "(group_id, user_id, cluster_token, " +
+            "cluster_name, nodes, redis_mode, " +
+            "os, redis_version, image, " +
+            "initialized, total_used_memory, total_keys, total_expires, " +
+            "db_size, cluster_state, cluster_slots_assigned, " +
+            "cluster_slots_ok, cluster_slots_pfail, cluster_slots_fail, " +
+            "cluster_known_nodes, cluster_size, redis_password, " +
+            "installation_environment, installation_type, update_time) " +
+            "VALUES " +
+            "(#{groupId}, #{userId}, #{clusterToken}, " +
+            "#{clusterName}, #{nodes}, #{redisMode}, " +
+            "#{os}, #{redisVersion}, #{image}, " +
+            "#{initialized}, #{totalUsedMemory}, #{totalKeys}, #{totalExpires}, " +
+            "#{dbSize}, #{clusterState}, #{clusterSlotsAssigned}, " +
+            "#{clusterSlotsOk}, #{clusterSlotsPfail}, #{clusterSlotsFail}, " +
+            "#{clusterKnownNodes}, #{clusterSize}, #{redisPassword}, " +
+            "#{installationEnvironment}, #{installationType},  NOW())")
+    @Options(useGeneratedKeys = true, keyProperty = "clusterId", keyColumn = "cluster_id")
+    Integer insertSentinel(Cluster cluster);
+
     @Update("UPDATE cluster SET " +
             "cluster_token = #{clusterToken}, user_id = #{userId}, cluster_name = #{clusterName}, " +
             "nodes = #{nodes}, redis_mode = #{redisMode}, os = #{os}, " +
@@ -112,5 +133,44 @@ public interface IClusterDao {
             "UNIQUE KEY (cluster_name) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createClusterTable();
+
+    // TODO: 添加 Sentinel
+    @Select("create TABLE IF NOT EXISTS `cluster` ( " +
+            "cluster_id integer(4) NOT NULL AUTO_INCREMENT COMMENT '自增ID', " +
+            "group_id integer(4) NOT NULL, " +
+            "user_id integer(4) NOT NULL, " +
+            "cluster_token varchar(255) DEFAULT NULL, " +
+            "cluster_name varchar(255) NOT NULL, " +
+            "nodes varchar(255) NOT NULL, " +
+            "redis_mode varchar(25) NOT NULL, " +
+            "os varchar(255) NOT NULL, " +
+            "redis_version varchar(25) NOT NULL, " +
+            "image varchar(255) DEFAULT NULL, " +
+            "initialized tinyint(1) NOT NULL, " +
+            "total_used_memory bigint(20) NOT NULL, " +
+            "total_keys bigint(20) NOT NULL, " +
+            "total_expires bigint(20) NOT NULL, " +
+            "db_size integer(8) NOT NULL, " +
+            "cluster_state varchar(50) NOT NULL, " +
+            "cluster_slots_assigned integer(4) DEFAULT NULL, " +
+            "cluster_slots_ok integer(4) DEFAULT NULL, " +
+            "cluster_slots_pfail integer(4) DEFAULT NULL, " +
+            "cluster_slots_fail integer(4) DEFAULT NULL, " +
+            "cluster_known_nodes integer(4) NOT NULL, " +
+            "cluster_size integer(4) NOT NULL, " +
+            "sentinel_ok integer(4) NOT NULL, " +
+            "monitor_masters integer(4) NOT NULL, " +
+            "master_ok integer(4) NOT NULL, " +
+            "redis_password varchar(50) DEFAULT NULL, " +
+            "rule_ids varchar(255) DEFAULT NULL, " +
+            "channel_ids varchar(255) DEFAULT NULL, " +
+            "cluster_alert tinyint(1) DEFAULT 1, " +
+            "installation_environment integer(2) NOT NULL, " +
+            "installation_type tinyint(1) NOT NULL, " +
+            "update_time datetime(0) NOT NULL, " +
+            "PRIMARY KEY (cluster_id), " +
+            "UNIQUE KEY (cluster_name) " +
+            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
+    void createClusterTable2();
 
 }
