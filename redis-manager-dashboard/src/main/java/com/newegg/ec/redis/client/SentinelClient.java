@@ -3,25 +3,27 @@ package com.newegg.ec.redis.client;
 import com.newegg.ec.redis.util.RedisUtil;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisSentinelPool;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static com.newegg.ec.redis.client.RedisURI.TIMEOUT;
 
 public class SentinelClient implements ISentinelClient {
 
     private Jedis jedis;
-    private JedisSentinelPool sentinelPool;
 
-    public SentinelClient(String masterName, RedisURI redisURI) {
-        Set<String> sentinels = new HashSet<>();
+    public SentinelClient(RedisURI redisURI) {
         Set<HostAndPort> hostAndPortSet = redisURI.getHostAndPortSet();
         for (HostAndPort hostAndPort : hostAndPortSet) {
-            sentinels.add(hostAndPort.getHost() + ":" + hostAndPort.getPort());
+            try {
+                jedis = new Jedis(hostAndPort.getHost(), hostAndPort.getPort(), TIMEOUT, TIMEOUT);
+            } catch (JedisConnectionException e) {
+                close();
+            }
         }
-        sentinelPool = new JedisSentinelPool(masterName, sentinels);
-        jedis = sentinelPool.getResource();
     }
 
     @Override
@@ -35,12 +37,53 @@ public class SentinelClient implements ISentinelClient {
     }
 
     @Override
+    public List<Map<String, String>> getSentinelMasters() {
+        return jedis.sentinelMasters();
+    }
+
+    @Override
+    public List<String> getMasterAddrByName(String masterName) {
+        return jedis.sentinelGetMasterAddrByName(masterName);
+    }
+
+    @Override
+    public List<Map<String, String>> getSentinelSlaves(String masterName) {
+        return jedis.sentinelSlaves(masterName);
+    }
+
+    @Override
+    public String monitorMaster(String masterName, String ip, int port, int quorum) {
+        return jedis.sentinelMonitor(masterName, ip, port, quorum);
+    }
+
+    @Override
+    public String failoverMaster(String masterName) {
+        return jedis.sentinelFailover(masterName);
+    }
+
+    @Override
+    public String removeMaster(String masterName) {
+        return jedis.sentinelRemove(masterName);
+    }
+
+    @Override
+    public Long resetConfig(String pattern) {
+        return jedis.sentinelReset(pattern);
+    }
+
+    @Override
+    public String setConfig(String masterName, Map<String, String> parameterMap) {
+        return jedis.sentinelSet(masterName, parameterMap);
+    }
+
+    @Override
     public void close() {
-        if (jedis != null) {
-            jedis.close();
-        }
-        if (sentinelPool != null) {
-            sentinelPool.destroy();
+        try {
+            if (jedis != null) {
+                jedis.close();
+            }
+        } catch (Exception ignored) {
+
         }
     }
 }
