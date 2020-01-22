@@ -770,4 +770,128 @@ public class RedisService implements IRedisService {
             redisClient.close();
         }
     }
+
+    @Override
+    public boolean setSentinelConfig(SentinelMaster sentinelMaster, SentinelConfigUtil.SentinelConfig redisConfig) {
+        SentinelClient sentinelClient = null;
+        try {
+            String nodes = sentinelMaster.getNodes();
+            String masterName = sentinelMaster.getMasterName();
+            String configKey = redisConfig.getConfigKey();
+            String configValue = redisConfig.getConfigValue();
+            if (Strings.isNullOrEmpty(configValue)) {
+                configValue = "";
+            }
+            RedisURI redisURI = new RedisURI(nodes, null);
+            Map<String, String> parameterMap = new HashMap<>();
+            parameterMap.put(configKey, configValue);
+            sentinelClient = RedisClientFactory.buildSentinelClient(redisURI);
+            sentinelClient.setConfig(masterName, parameterMap);
+            return true;
+        } catch (Exception e) {
+            logger.error(" change config failed, ", e);
+            return false;
+        } finally {
+            close(sentinelClient);
+        }
+
+    }
+
+    @Override
+    public Map<String, String> getSentinelConfig(SentinelMaster sentinelMaster) {
+        SentinelClient sentinelClient = null;
+        try {
+            String nodes = sentinelMaster.getNodes();
+            RedisURI redisURI = new RedisURI(nodes, null);
+            sentinelClient = RedisClientFactory.buildSentinelClient(redisURI);
+            return sentinelClient.getSentinelInfo();
+        } catch (Exception e) {
+            logger.error(" get config failed.", e);
+            return null;
+        } finally {
+            close(sentinelClient);
+        }
+
+    }
+
+    @Override
+    public List<String> getMasterAddrByName(SentinelMaster sentinelMaster) {
+        SentinelClient sentinelClient = null;
+        try {
+            String masterName = sentinelMaster.getMasterName();
+            String nodes = sentinelMaster.getNodes();
+            RedisURI redisURI = new RedisURI(nodes, null);
+            sentinelClient = RedisClientFactory.buildSentinelClient(redisURI);
+            return sentinelClient.getMasterAddrByName(masterName);
+        } catch (Exception e) {
+            logger.error(" get config failed.", e);
+            return null;
+        } finally {
+            close(sentinelClient);
+        }
+
+    }
+
+    @Override
+    public boolean failOverMaster(SentinelMaster sentinelMaster) {
+        SentinelClient sentinelClient = null;
+        try {
+            String nodes = sentinelMaster.getNodes();
+            String masterName = sentinelMaster.getMasterName();
+            RedisURI redisURI = new RedisURI(nodes, null);
+            sentinelClient = RedisClientFactory.buildSentinelClient(redisURI);
+            sentinelClient.failoverMaster(masterName);
+            return true;
+        } catch (Exception e) {
+            logger.error(" failover failed.", e);
+            return false;
+        } finally {
+            close(sentinelClient);
+        }
+    }
+
+    @Override
+    public List<Map<String, String>> getMastersInfo(SentinelMaster sentinelMaster) {
+        SentinelClient sentinelClient = null;
+        try {
+            String nodes = sentinelMaster.getNodes();
+            RedisURI redisURI = new RedisURI(nodes, null);
+            sentinelClient = RedisClientFactory.buildSentinelClient(redisURI);
+            return sentinelClient.getSentinelMasters();
+        } catch (Exception e) {
+            logger.error(" get masters info failed.", e);
+            return null;
+        } finally {
+            close(sentinelClient);
+        }
+    }
+
+    @Override
+    public boolean getMasterState(SentinelMaster sentinelMaster) {
+        SentinelClient sentinelClient = null;
+        try {
+            String nodes = sentinelMaster.getNodes();
+            String masterName = sentinelMaster.getMasterName();
+            String ip = sentinelMaster.getMasterHost();
+            int port = sentinelMaster.getMasterPort();
+            int quorum = sentinelMaster.getQuorum();
+            RedisURI redisURI = new RedisURI(nodes, null);
+            sentinelClient = RedisClientFactory.buildSentinelClient(redisURI);
+             sentinelClient.monitorMaster(masterName, ip, port, quorum);
+        } catch (Exception e) {
+            logger.error(" get masters info failed.", e);
+//            return null;
+        } finally {
+            close(sentinelClient);
+        }
+        return false;
+    }
+
+
+    private void close(ISentinelClient sentinelClient) {
+        if (sentinelClient != null) {
+            sentinelClient.close();
+        }
+    }
+
 }

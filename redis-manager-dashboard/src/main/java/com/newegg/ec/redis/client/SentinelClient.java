@@ -11,6 +11,11 @@ import java.util.Set;
 
 import static com.newegg.ec.redis.client.RedisURI.TIMEOUT;
 
+/**
+
+ * @author Everly.J.Ju
+ * @date 2020/01/22
+ */
 public class SentinelClient implements ISentinelClient {
 
     private Jedis jedis;
