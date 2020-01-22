@@ -25,6 +25,10 @@
             <directory>target/lib/</directory>
             <outputDirectory>lib</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>template</directory>
+            <outputDirectory>template</outputDirectory>
+        </fileSet>
     </fileSets>
     <files>
         <file>
