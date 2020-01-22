@@ -1,6 +1,6 @@
 package com.newegg.ec.redis.entity;
 
-public class SentinelMasterConfig {
+public class SentinelMaster {
     private Integer port;
     private String masterName;
     private String pattern;
