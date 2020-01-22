@@ -24,6 +24,8 @@ public class RedisUtil {
 
     public static final String CLUSTER = "cluster";
 
+    public static final String SENTINEL = "sentinel";
+
     /**
      * nodes 相关
      */

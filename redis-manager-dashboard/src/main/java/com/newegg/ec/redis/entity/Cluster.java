@@ -76,24 +76,24 @@ public class Cluster {
     /**
      * 已分配到集群节点的哈希槽数量（不是没有被绑定的数量）。16384个哈希槽全部被分配到集群节点是集群正常运行的必要条件
      */
-    private int clusterSlotsAssigned;
+    private int clusterSlotsAssigned = 0;
 
     /**
      * 哈希槽状态不是FAIL 和 PFAIL 的数量
      */
-    private int clusterSlotsOk;
+    private int clusterSlotsOk = 0;
 
     /**
      * 哈希槽状态是 PFAIL的数量。只要哈希槽状态没有被升级到FAIL状态，这些哈希槽仍然可以被正常处理。
      * PFAIL状态表示我们当前不能和节点进行交互，但这种状态只是临时的错误状态。
      */
-    private int clusterSlotsPfail;
+    private int clusterSlotsPfail = 0;
 
     /**
      * 哈希槽状态是FAIL的数量。如果值不是0，那么集群节点将无法提供查询服务，
      * 除非cluster-require-full-coverage被设置为no
      */
-    private int clusterSlotsFail;
+    private int clusterSlotsFail = 0;
 
     /**
      * The total number of known nodes in the cluster, including nodes in HANDSHAKE state that may not currently be proper members of the cluster.
@@ -107,7 +107,7 @@ public class Cluster {
 
     private int sentinelOk;
 
-    private int monitorMasters;
+    private int sentinelMasters;
 
     private int masterOk;
 
@@ -321,12 +321,12 @@ public class Cluster {
         this.sentinelOk = sentinelOk;
     }
 
-    public int getMonitorMasters() {
-        return monitorMasters;
+    public int getSentinelMasters() {
+        return sentinelMasters;
     }
 
-    public void setMonitorMasters(int monitorMasters) {
-        this.monitorMasters = monitorMasters;
+    public void setSentinelMasters(int sentinelMasters) {
+        this.sentinelMasters = sentinelMasters;
     }
 
     public int getMasterOk() {

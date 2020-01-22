@@ -39,6 +39,8 @@ public class RedisClient implements IRedisClient {
 
     public static final String REPLICATION = "replication";
 
+    public static final String SENTINEL = "sentinel";
+
     private Jedis jedis;
 
     private RedisURI redisURI;
@@ -367,12 +369,12 @@ public class RedisClient implements IRedisClient {
         } else if (cmd.startsWith(RPUSH)) {
             result = jedis.rpush(key, items);
         } else if (cmd.startsWith(LINDEX)) {
-            result = jedis.lindex(key, Integer.valueOf(list[2]));
+            result = jedis.lindex(key, Integer.parseInt(list[2]));
         } else if (cmd.startsWith(LLEN)) {
             result = jedis.llen(key);
         } else if (cmd.startsWith(LRANGE)) {
-            int start = Integer.valueOf(list[2]);
-            int stop = Integer.valueOf(list[3]);
+            int start = Integer.parseInt(list[2]);
+            int stop = Integer.parseInt(list[3]);
             result = jedis.lrange(key, start, stop);
         }
         return result;
@@ -395,7 +397,7 @@ public class RedisClient implements IRedisClient {
         } else if (cmd.startsWith(SRANDMEMBER)) {
             int count = 1;
             if (list.length > 2) {
-                count = Integer.valueOf(list[2]);
+                count = Integer.parseInt(list[2]);
             }
             result = jedis.srandmember(key, count);
         }
@@ -419,8 +421,8 @@ public class RedisClient implements IRedisClient {
         } else if (cmd.startsWith(ZCOUNT)) {
             result = jedis.zcount(key, param1, param2);
         } else if (cmd.startsWith(ZRANGE)) {
-            int start = Integer.valueOf(param1);
-            int stop = Integer.valueOf(param2);
+            int start = Integer.parseInt(param1);
+            int stop = Integer.parseInt(param2);
             if (list.length > 4) {
                 result = jedis.zrangeWithScores(key, start, stop);
             } else {

@@ -56,11 +56,7 @@ public class MachineService implements IMachineService {
     @Override
     public List<Machine> getMachineByGroupId(Integer groupId) {
         try {
-            List<Machine> machineList = machineDao.selectMachineByGroupId(groupId);
-            if (machineList == null) {
-                return null;
-            }
-            return machineList;
+            return machineDao.selectMachineByGroupId(groupId);
         } catch (Exception e) {
             logger.error("Get machine by group id failed, group id = " + groupId, e);
             return null;

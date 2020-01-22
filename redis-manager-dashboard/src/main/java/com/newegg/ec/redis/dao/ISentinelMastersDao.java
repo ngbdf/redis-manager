@@ -42,7 +42,8 @@ public interface ISentinelMastersDao {
             "group_id integer(4) NOT NULL,\n" +
             "user_id integer(4) NOT NULL,\n" +
             "master_name varchar(255) NOT NULL,\n" +
-            "master_node varchar(255) NOT NULL,\n" +
+            "master_host varchar(255) NOT NULL,\n" +
+            "master_port integer(4) NOT NULL,\n" +
             "last_master_node varchar(255) NOT NULL,\n" +
             "flags varchar(255) NOT NULL,\n" +
             "s_down_time bigint(20) NOT NULL,\n" +
@@ -51,7 +52,8 @@ public interface ISentinelMastersDao {
             "num_slaves integer(4) NOT NULL,\n" +
             "quorum integer(4) NOT NULL,\n" +
             "failover_timeout bigint(4) NOT NULL,\n" +
-            "parallel-syncs integer(4) NOT NULL,\n" +
+            "parallel_syncs integer(4) NOT NULL,\n" +
+            "in_sentinel tinyint(1) NOT NULL,\n" +
             "update_time datetime(0) NOT NULL,\n" +
             "PRIMARY KEY (sentinel_master_id)\n" +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")

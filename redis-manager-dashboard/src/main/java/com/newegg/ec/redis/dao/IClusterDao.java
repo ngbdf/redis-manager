@@ -159,7 +159,7 @@ public interface IClusterDao {
             "cluster_known_nodes integer(4) NOT NULL, " +
             "cluster_size integer(4) NOT NULL, " +
             "sentinel_ok integer(4) NOT NULL, " +
-            "monitor_masters integer(4) NOT NULL, " +
+            "sentinel_masters integer(4) NOT NULL, " +
             "master_ok integer(4) NOT NULL, " +
             "redis_password varchar(50) DEFAULT NULL, " +
             "rule_ids varchar(255) DEFAULT NULL, " +
