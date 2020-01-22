@@ -231,6 +231,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                     responseResult.put("status", false);
                     responseResult.put("message", "allocation " + analyzeInstance.getHost()
                             + " scheduleJob response error:" + responseMessage.toJSONString());
+                    deleteResult(rdbAnalyze,scheduleID);
                     return responseResult;
                 } else {
                     scheduleResult.put("status", true);
@@ -238,6 +239,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 
             } catch (RestClientException e) {
                 LOG.error("allocation {} scheduleJob fail. ", analyzeInstance.toString(), e);
+                deleteResult(rdbAnalyze,scheduleID);
                 return responseResult;
             }
 
@@ -286,7 +288,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         return responseResult;
     }
 
-    public void saveToResult(RDBAnalyze rdbAnalyze,Long scheduleId){
+    private void saveToResult(RDBAnalyze rdbAnalyze,Long scheduleId){
         RDBAnalyzeResult rdbAnalyzeResult = new RDBAnalyzeResult();
         rdbAnalyzeResult.setAnalyzeConfig(JSONObject.toJSONString(rdbAnalyze));
         rdbAnalyzeResult.setClusterId(Long.parseLong(rdbAnalyze.getCluster().getClusterId().toString()));
@@ -294,6 +296,12 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         rdbAnalyzeResultService.add(rdbAnalyzeResult);
     }
 
+    private void deleteResult(RDBAnalyze rdbAnalyze,Long scheduleId){
+        Map<String,Long> map = new HashMap<>();
+        map.put("cluster_id",rdbAnalyze.getClusterId());
+        map.put("schedule_id",scheduleId);
+        rdbAnalyzeResultMapper.deleteRdbAnalyzeResult(map);
+    }
 
     @Override
     public JSONObject canceRDBAnalyze(String instance,String scheduleID)  {
