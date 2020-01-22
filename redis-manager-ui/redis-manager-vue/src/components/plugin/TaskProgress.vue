@@ -1,9 +1,12 @@
 <template>
   <div id="taskProgress" class="body-wrapper">
     <div class="header-wrapper">
-      <div><el-image src="../../../static/back.svg" @click="backHistory()"></el-image></div>
+      <!-- <div><el-image src="../../../static/back.svg" @click="backHistory()"></el-image></div>
       <div class="fieldStyle">instance:</div>
-      <div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
+      <div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div> -->
+      <div class="fieldStyle"><el-image src="../../../static/back.svg" @click="backHistory()" class="images"> </el-image>
+<div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
+         </div>
     </div>
     <div class="cancelStyle"><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
     <div>
@@ -33,124 +36,123 @@
   </div>
 </template>
 <script>
-import { store } from "@/vuex/store.js";
-import { isEmpty } from "@/utils/validate.js";
-import { formatTime } from "@/utils/time.js";
-import API from "@/api/api.js";
-import message from "@/utils/message.js";
+import { store } from '@/vuex/store.js'
+import { isEmpty } from '@/utils/validate.js'
+import { formatTime } from '@/utils/time.js'
+import API from '@/api/api.js'
+import message from '@/utils/message.js'
 
-import { getScheduleDetail } from '@/api/rctapi.js'
-import { cancelAnalyzeTask } from '@/api/rctapi.js'
+import { getScheduleDetail, cancelAnalyzeTask } from '@/api/rctapi.js'
+
 export default {
-  data() {
+  data () {
     return {
       originalData: [],
       analyseisJobDetail: [],
       cancelButtonDisabled: false,
-      searchData: "",
-      loading: false,
-    };
+      searchData: '',
+      loading: false
+    }
   },
-  created() {
-    let clusterId = this.$route.params.clusterId;
+  created () {
+    let clusterId = this.$route.params.clusterId
     this.timer = setInterval(() => {
-      this.getAllScheduleDetail(clusterId);
-    }, 3000);
+      this.getAllScheduleDetail(clusterId)
+    }, 3000)
   },
-  beforeDestroy() {
-    if(this.timer) {
-        clearInterval(this.timer);
+  beforeDestroy () {
+    if (this.timer) {
+      clearInterval(this.timer)
     }
   },
   methods: {
-    getAllScheduleDetail(id) {
-      const result =  getScheduleDetail(id).then(result => {
-      this.originalData = result.data
-      this.analyseisJobDetail = result.data
-      if(this.searchData) {
-        let list = this.originalData.filter((item, index) =>
-          item.instance.includes(this.searchData)
-        )
-        this.analyseisJobDetail = list;
-      }
-      let count = 0;
-      for(let i = 0; i < this.originalData.length; i++) {
-        if(this.originalData[i].status === 'DONE') {
-          count += 1;
+    getAllScheduleDetail (id) {
+      const result = getScheduleDetail(id).then(result => {
+        this.originalData = result.data
+        this.analyseisJobDetail = result.data
+        if (this.searchData) {
+          let list = this.originalData.filter((item, index) =>
+            item.instance.includes(this.searchData)
+          )
+          this.analyseisJobDetail = list
         }
-        if(this.originalData[i].status === 'CANCELED') {
-          this.originalData[i].process = 0
+        let count = 0
+        for (let i = 0; i < this.originalData.length; i++) {
+          if (this.originalData[i].status === 'DONE') {
+            count += 1
+          }
+          if (this.originalData[i].status === 'CANCELED') {
+            this.originalData[i].process = 0
+            this.cancelButtonDisabled = true
+            this.loading = false
+            this.stopTimer()
+          }
+        }
+        if (count === this.originalData.length) {
           this.cancelButtonDisabled = true
-          this.loading=false
-          this.stopTimer()
         }
-      }
-      if (count === this.originalData.length) {
-        this.cancelButtonDisabled = true
-      } 
       })
-
     },
-      backHistory(){
-        this.$router.push({
+    backHistory () {
+      this.$router.push({
         name: 'jobList'
       })
-      },
-      stopTimer() {
-        if(this.timer) {
-          clearInterval(this.timer);
-        }
-      },
-      cancelAnalysis() {
-      let scheduleID = this.originalData[0].scheduleID
-      let clusterId = this.$route.params.clusterId;
-      this.$confirm("Are you sure you want to stop all task processes ?", "Message", {
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
-        type: "warning"
-      })
-      .then(() => {
-        this.cancelButtonDisabled = true
-        cancelAnalyzeTask(clusterId,scheduleID).then(result => {
-          if (result.data.canceled) {
-            this.loading=true
-        } else {
-          this.$message({
-            type: "success",
-            message: "Stop Error!"
-          });
-        }
-        })
-      })
-      .catch(() => {
-        this.$message({
-          type: "info",
-          message: "Cancel"
-        });
-      });
     },
+    stopTimer () {
+      if (this.timer) {
+        clearInterval(this.timer)
+      }
+    },
+    cancelAnalysis () {
+      let scheduleID = this.originalData[0].scheduleID
+      let clusterId = this.$route.params.clusterId
+      this.$confirm('Are you sure you want to stop all task processes ?', 'Message', {
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        type: 'warning'
+      })
+        .then(() => {
+          this.cancelButtonDisabled = true
+          cancelAnalyzeTask(clusterId, scheduleID).then(result => {
+            if (result.data.canceled) {
+              this.loading = true
+            } else {
+              this.$message({
+                type: 'success',
+                message: 'Stop Error!'
+              })
+            }
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: 'Cancel'
+          })
+        })
+    }
   },
 
   computed: {
-    currentGroup() {
-      return store.getters.getCurrentGroup;
+    currentGroup () {
+      return store.getters.getCurrentGroup
     }
   },
 
   watch: {
-    searchData(val) {
-        let list = this.originalData.filter((item, index) =>
-            item.instance.includes(val)
-        )
-        this.analyseisJobDetail = list
+    searchData (val) {
+      let list = this.originalData.filter((item, index) =>
+        item.instance.includes(val)
+      )
+      this.analyseisJobDetail = list
     }
   },
 
-  mounted() {
-    let clusterId = this.$route.params.clusterId;
-    this.getAllScheduleDetail(clusterId);
+  mounted () {
+    let clusterId = this.$route.params.clusterId
+    this.getAllScheduleDetail(clusterId)
   }
-};
+}
 </script>
 
 <style scoped>
@@ -162,7 +164,7 @@ float: left;
 }
 .fieldStyle {
   margin-top: 8px;
-  margin-left: 50px
+  display: inline-flex;
 }
 .searchStyle {
   margin-top: 8px;
@@ -171,5 +173,10 @@ float: left;
 .cancelStyle {
   margin-top: 18px;
   margin-left: 95%
+}
+.images{
+    height: 26px;
+    margin-top: 5px;
+    width: 26px;
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
     <el-card shadow="hover" class="box-card">
-      <div class="text-div">
+      <div class="text-div" v-show="this.tableObj.title">
         <span class="text-span">{{this.tableObj.title}}</span>
       </div>
 
@@ -9,10 +9,10 @@
            <!-- <el-input placeholder="search" v-model="search" class="input-with-select" size="small">
            <el-button  slot="append" icon="el-icon-search"></el-button>
            </el-input> -->
-            <el-input v-model="search" size="small" placeholder="search" />
+            <el-input v-model="search" size="small" placeholder="search" @input="searchFilter"/>
       </div>
 
-      <el-table :data="pageData.filter(data => !search || data[`${prefix}`].toLowerCase().includes(search.toLowerCase()))" @sort-change='sortChange'>
+      <el-table :data="pageData" @sort-change='sortChange'>
         <el-table-column v-for="column in this.tableObj.columns" :key="column.label" :label="column.label" :sortable="column.sort" :formatter="column.formatter"  :prop="column.prop" ></el-table-column>
         <!-- <el-table-column label="PrefixKey" property="prefixKey"></el-table-column>
         <el-table-column label="Count" sortable property="keyCount" :formatter="formatterCount"></el-table-column>
@@ -25,7 +25,7 @@
           :current-page.sync="currentPage"
           :page-size="pagesize"
           layout="prev, pager, next, jumper"
-          :total="tableData.length"
+          :total="length"
           class="pagination"
         >
         </el-pagination>
@@ -37,12 +37,6 @@
 import { formatBytes, formatterInput } from '@/utils/format.js'
 export default {
   props: {
-    clusterId: {
-      type: String
-    },
-    scheduleId: {
-      type: String
-    },
     tableObj: {
       type: Object
     },
@@ -57,14 +51,15 @@ export default {
       pagesize: 10,
       pageData: [],
       search: '',
-      prefix: this.tableObj.searchColumn
+      prefix: this.tableObj.searchColumn,
+      length: 0
     }
   },
   methods: {
     async initTable () {
-      await this.initData().then(data => {
+      await this.initData().then(response => {
         // this.tableData = data
-        this.tableData = data.map(value => {
+        this.tableData = response.data.map(value => {
           this.tableObj.columns.forEach(colum => {
             if (colum.sort) {
               value[colum.prop] = parseInt(value[colum.prop])
@@ -73,7 +68,15 @@ export default {
           return value
         })
       })
+      this.length = this.tableData.length
       this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
+    },
+    searchFilter (value) {
+      if (value) {
+        const data = this.tableData.filter(data => !value || data[`${this.prefix}`].toLowerCase().includes(value.toLowerCase()))
+        this.length = data.length
+        this.pageData = data.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
+      }
     },
     compareValue (property, order) {
       return function (obj1, obj2) {

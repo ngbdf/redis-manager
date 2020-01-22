@@ -1,17 +1,10 @@
 <template>
   <div id="analysis" class="body-wrapper">
-
-    <!-- <el-card shadow="hover" class="box-card">
-      {{ currentGroup.groupName }}
-    </el-card> -->
-
    <el-card shadow="hover" class="box-card">
-     <div><el-image src="../../../static/back.svg" @click="backHistory()"></el-image></div>
-    <div class="fieldStyle">{{ currentGroup.groupName }}</div>
+    <div class="fieldStyle"><el-image src="../../../static/back.svg" @click="backHistory()" class="images"></el-image><span style="margin-left:30px;font-size:20px">{{ currentGroup.groupName }}</span></div>
      </el-card>
-
     <div>
-    <div style="margin-top: 20px;" class="main-body">
+    <div  class="main-body" style="margin-top: 20px;">
       <el-row class="echart-wrapper" id="monitor-charts">
         <KeyByTypePie pieType="count" :resultId="resultId"></KeyByTypePie>
         <KeyByTypePie pieType="memory" :resultId="resultId"></KeyByTypePie>
@@ -19,8 +12,6 @@
         <PrefixKeysMemory :resultId="resultId"></PrefixKeysMemory>
         <Tables :resultId="resultId" :tableObj="top1000keysPrefix" :initData="initTop1000Keys"/>
         <Tables :resultId="resultId" :tableObj="keysTTL" :initData="initKeysTTL"/>
-        <!-- <Top1000KeysByPrefix :resultId="resultId"></Top1000KeysByPrefix> -->
-        <!-- <KeysTTLInfo :resultId="resultId"></KeysTTLInfo> -->
         <Top1000KeysByType :resultId="resultId"></Top1000KeysByType>
       </el-row>
   </div>
@@ -72,8 +63,7 @@ export default {
         }],
         searchVis: true,
         searchColumn: 'prefixKey',
-        title: 'Top 1000 Largest Keys By Perfix',
-        refreshData: this.initTop1000Keys
+        title: 'Top 1000 Largest Keys By Perfix'
       },
       keysTTL: {
         columns: [{
@@ -95,13 +85,8 @@ export default {
         }],
         searchVis: true,
         searchColumn: 'prefix',
-        title: 'Keys TTL Info',
-        refreshData: this.initKeysTTL
+        title: 'Keys TTL Info'
       },
-      // clusterId: String(this.$route.query.clusterId),
-      // resultId: String(this.$route.query.detailId)
-      clusterId: '2',
-      scheduleId: '1579481459916',
       resultId: String(this.$route.query.detailId)
     }
   },
@@ -120,39 +105,17 @@ export default {
     formatMemory (row, column, cellValue) {
       return formatBytes(cellValue)
     },
-    async initTop1000Keys (callback) {
-      let res = await getTop1000KeysByPrefix(26)
-      //   this.tableData = res.data.map(value => {
-      //     return {
-      //       keyCount: parseInt(value.keyCount),
-      //       memorySize: parseInt(value.memorySize),
-      //       prefixKey: value.prefixKey
-      //     }
-      //   })
-      return res.data
-    //   let res1 = await getKeysTTLInfo(26)
-    //   this.keysTTL.data = res1.data
-      //   this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
+    initTop1000Keys () {
+      let res = getTop1000KeysByPrefix(this.resultId)
+      return res
     },
-    async initKeysTTL (callback) {
-      let res = await getKeysTTLInfo(26)
-      //   this.tableData = res.data.map(value => {
-      //     return {
-      //       keyCount: parseInt(value.keyCount),
-      //       memorySize: parseInt(value.memorySize),
-      //       prefixKey: value.prefixKey
-      //     }
-      //   })
-      return res.data
-      //   this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
+    initKeysTTL () {
+      let res = getKeysTTLInfo(this.resultId)
+      return res
     }
 
   },
   mounted () {
-    // console.log(this.$route.query.detailId)
-    // console.log(this.$route.query.clusterId)
-    this.initTop1000Keys()
-    // this.initKeysTTL()
   },
   computed: {
     currentGroup () {
@@ -258,6 +221,11 @@ export default {
 }
 .fieldStyle {
   margin-top: 8px;
-  margin-left: 50px
+}
+
+.images{
+    height: 26px;
+    width: 26px;
+    position: absolute;
 }
 </style>

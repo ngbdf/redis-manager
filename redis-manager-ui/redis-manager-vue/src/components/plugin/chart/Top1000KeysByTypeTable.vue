@@ -13,6 +13,7 @@
           :page-size="pagesize"
           layout="prev, pager, next, jumper"
           :total="tableData.length"
+          class="pagination"
         >
         </el-pagination>
       </div>
@@ -26,10 +27,7 @@ export default {
     tabKey: {
       type: String
     },
-    clusterId: {
-      type: String
-    },
-    scheduleId: {
+    resultId: {
       type: String
     }
   },
@@ -43,7 +41,7 @@ export default {
   },
   methods: {
     async initTable () {
-      let res = await getTop1000KeysByType(26, this.tabKey)
+      let res = await getTop1000KeysByType(this.resultId, this.tabKey)
       this.tableData = res.data.map(value => {
         return {
           bytes: parseInt(value.bytes),
@@ -95,3 +93,9 @@ export default {
   }
 }
 </script>
+<style scoped>
+.pagination{
+    float: right;
+    margin-top: 20px;
+}
+</style>

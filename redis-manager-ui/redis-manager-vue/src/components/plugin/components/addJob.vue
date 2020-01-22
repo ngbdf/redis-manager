@@ -88,6 +88,14 @@ export default {
   },
 
   data () {
+    var validatePrefix = (rule, value, callback) => {
+      if (this.analyseisJobFrom.analyzer.includes('5')) {
+        if (value === '' || value === null) {
+          return callback(new Error('if you choose ExportKeyByPrefix,you must input the prefix'))
+        }
+      }
+      return callback()
+    }
     return {
       analyseisJobFrom: {
         id: '',
@@ -101,6 +109,7 @@ export default {
         groupId: this.groupId,
         mailTo: ''
       },
+
       rules: {
         name: [
           {
@@ -128,6 +137,12 @@ export default {
           {
             required: true,
             message: "dataPath can't be empty",
+            trigger: 'blur'
+          }
+        ],
+        prefixes: [
+          {
+            validator: validatePrefix,
             trigger: 'blur'
           }
         ]

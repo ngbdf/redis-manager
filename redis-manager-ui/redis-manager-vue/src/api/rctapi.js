@@ -110,9 +110,9 @@ export const getPrefixKeysCount = (analyzeResultId) => RCTAPI('/rdb/line/prefix/
 
 export const getPrefixKeysMemory = (analyzeResultId) => RCTAPI('/rdb/line/prefix/PrefixKeyByMemory', 'GET', {analyzeResultId})
 
-export const getTop1000KeysByPrefix = (analyzeResultId) => RCTAPI('/rdb/table/prefix', 'GET', {analyzeResultId})
+export const getTop1000KeysByPrefix = (analyzeResultId) => API('/rdb/table/prefix', 'GET', {analyzeResultId})
 
-export const getKeysTTLInfo = (analyzeResultId) => RCTAPI('/rdb/chart/TTLAnalyze', 'GET', {analyzeResultId})
+export const getKeysTTLInfo = (analyzeResultId) => API('/rdb/chart/TTLAnalyze', 'GET', {analyzeResultId})
 
 export const getTop1000KeysByType = (analyzeResultId, type) => RCTAPI('/rdb/top_key', 'GET', { analyzeResultId, type })
 
