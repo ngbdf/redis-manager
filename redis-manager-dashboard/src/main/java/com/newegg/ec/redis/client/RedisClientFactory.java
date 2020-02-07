@@ -4,6 +4,8 @@ import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
+import java.util.Set;
+
 /**
  * Build redis client
  *
@@ -41,6 +43,10 @@ public class RedisClientFactory {
     public static RedisClient buildRedisClient(HostAndPort hostAndPort, String requirePass) {
         RedisURI redisURI = new RedisURI(hostAndPort, requirePass);
         return buildRedisClient(redisURI);
+    }
+
+    public static RedisClient buildRedisClient(Set<HostAndPort> hostAndPorts, String requirePass) {
+        return buildRedisClient(hostAndPorts.iterator().next(), requirePass);
     }
 
     public static SentinelClient buildSentinelClient(RedisURI redisURI) {

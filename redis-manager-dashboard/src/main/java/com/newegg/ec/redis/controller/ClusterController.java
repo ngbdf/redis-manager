@@ -222,4 +222,17 @@ public class ClusterController {
         return cluster == null ? Result.successResult() : Result.failResult(cluster);
     }
 
+    /**
+     * TODO: 建议用户填入所有 sentinel 节点，保存时给予提示
+     *
+     * @param cluster
+     * @return
+     */
+    @RequestMapping(value = "/validateSentinelNode", method = RequestMethod.POST)
+    @ResponseBody
+    public Result validateSentinelNode(Cluster cluster) {
+
+        return Result.successResult();
+    }
+
 }

@@ -57,21 +57,21 @@ public class Cluster {
     /**
      * 集群 key 总数
      */
-    private long totalKeys;
+    private long totalKeys = 0;
 
     /**
      * 集群 expire 总数
      */
-    private long totalExpires;
+    private long totalExpires = 0;
 
-    private long totalUsedMemory;
+    private long totalUsedMemory = 0;
 
-    private int dbSize;
+    private int dbSize = 0;
 
     /**
      *
      */
-    private ClusterState clusterState;
+    private ClusterState clusterState = ClusterState.HEALTH;
 
     /**
      * 已分配到集群节点的哈希槽数量（不是没有被绑定的数量）。16384个哈希槽全部被分配到集群节点是集群正常运行的必要条件
@@ -98,12 +98,12 @@ public class Cluster {
     /**
      * The total number of known nodes in the cluster, including nodes in HANDSHAKE state that may not currently be proper members of the cluster.
      */
-    private int clusterKnownNodes;
+    private int clusterKnownNodes = 0;
 
     /**
      * The number of master nodes serving at least one hash slot in the cluster.
      */
-    private int clusterSize;
+    private int clusterSize = 0;
 
     private int sentinelOk;
 
@@ -128,6 +128,7 @@ public class Cluster {
     private Timestamp updateTime;
 
     public enum ClusterState {
+
         UNKNOWN,
 
         HEALTH,

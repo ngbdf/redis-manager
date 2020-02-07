@@ -17,10 +17,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import redis.clients.jedis.HostAndPort;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.newegg.ec.redis.client.RedisClient.SERVER;
@@ -269,27 +271,57 @@ public class ClusterService implements IClusterService {
         cluster.setClusterKnownNodes(redisNodeList.size());
     }
 
-    // TODO: 具体实现
+    /**
+     * sentinel_ok
+     * sentinel_masters
+     * master_ok
+     *
+     * @param cluster
+     */
     private void fillSentinelInfo(Cluster cluster) {
         try {
             List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
             cluster.setClusterKnownNodes(redisNodeList.size());
-            // TODO: 判断是否 down 掉
+
             cluster.setSentinelOk(redisNodeList.size());
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(cluster.getNodes()), null);
+            Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts, null);
             Map<String, String> sentinelInfo = redisClient.getInfo(RedisClient.SENTINEL);
-            String sentinelMasters = sentinelInfo.get(SENTINEL_MASTERS);
-            cluster.setSentinelMasters(Integer.parseInt(sentinelMasters));
+
+            int sentinelMasters = Integer.parseInt(sentinelInfo.get(SENTINEL_MASTERS));
+            cluster.setSentinelMasters(sentinelMasters);
+
             AtomicInteger masterOk = new AtomicInteger();
             sentinelInfo.forEach((key, val) -> {
+                // master0:name=master,status=ok,address=10.16.50.219:16379,slaves=3,sentinels=6
                 if (key.startsWith(MASTER_PREFIX) && val.contains("ok")) {
                     masterOk.getAndIncrement();
                 }
             });
             cluster.setMasterOk(masterOk.get());
+            cluster.setSentinelOk(getSentinelOkNumber(hostAndPorts));
         } catch (Exception e) {
             logger.error("Fill redis base info failed, " + cluster.getClusterName(), e);
         }
+    }
+
+    /**
+     * 判断 sentinel node 是否 down 掉
+     *
+     * @param hostAndPorts
+     * @return
+     */
+    private int getSentinelOkNumber(Set<HostAndPort> hostAndPorts) {
+        AtomicInteger sentinelOk = new AtomicInteger();
+        for (HostAndPort hostAndPort : hostAndPorts) {
+            try {
+                RedisClientFactory.buildRedisClient(hostAndPort, null);
+                sentinelOk.incrementAndGet();
+            } catch (Exception e) {
+                logger.warn("Sentinel node is down, please check.", e);
+            }
+        }
+        return sentinelOk.get();
     }
 
     private void fillBaseInfo(Cluster cluster) {
