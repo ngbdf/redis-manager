@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * @author Jay.H.Zou
  * @date 1/22/2020
+ * List<SentinelMaster> getSentinelMasterByClusterId(Integer clusterId);
  */
 public interface ISentinelMastersService {
 

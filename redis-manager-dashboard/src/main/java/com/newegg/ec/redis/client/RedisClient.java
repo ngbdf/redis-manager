@@ -76,7 +76,7 @@ public class RedisClient implements IRedisClient {
 
     @Override
     public Map<String, String> getInfo() throws Exception {
-        return RedisUtil.parseInfoToMap(jedis.info());
+        return RedisUtil.parseInfoToMap(jedis.info(RedisClient.SENTINEL));
     }
 
     @Override

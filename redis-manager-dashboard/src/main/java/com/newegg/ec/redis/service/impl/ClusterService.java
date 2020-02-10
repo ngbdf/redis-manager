@@ -3,6 +3,7 @@ package com.newegg.ec.redis.service.impl;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
+import com.newegg.ec.redis.client.SentinelClient;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
@@ -285,9 +286,8 @@ public class ClusterService implements IClusterService {
 
             cluster.setSentinelOk(redisNodeList.size());
             Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts, null);
-            Map<String, String> sentinelInfo = redisClient.getInfo(RedisClient.SENTINEL);
-
+            SentinelClient sentinelClient = RedisClientFactory.buildSentinelClient(hostAndPorts);
+            Map<String, String> sentinelInfo = sentinelClient.getSentinelInfo();
             int sentinelMasters = Integer.parseInt(sentinelInfo.get(SENTINEL_MASTERS));
             cluster.setSentinelMasters(sentinelMasters);
 

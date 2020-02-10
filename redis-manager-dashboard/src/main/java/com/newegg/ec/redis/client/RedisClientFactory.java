@@ -58,4 +58,7 @@ public class RedisClientFactory {
         return buildSentinelClient(redisURI);
     }
 
+    public static SentinelClient buildSentinelClient(Set<HostAndPort> hostAndPorts) {
+        return buildSentinelClient(hostAndPorts.iterator().next());
+    }
 }

@@ -108,44 +108,6 @@ public interface IClusterDao {
             "cluster_slots_fail integer(4) DEFAULT NULL, " +
             "cluster_known_nodes integer(4) NOT NULL, " +
             "cluster_size integer(4) NOT NULL, " +
-            "redis_password varchar(50) DEFAULT NULL, " +
-            "rule_ids varchar(255) DEFAULT NULL, " +
-            "channel_ids varchar(255) DEFAULT NULL, " +
-            "cluster_alert tinyint(1) DEFAULT 1, " +
-            "installation_environment integer(2) NOT NULL, " +
-            "installation_type tinyint(1) NOT NULL, " +
-            "update_time datetime(0) NOT NULL, " +
-            "PRIMARY KEY (cluster_id), " +
-            "UNIQUE KEY (cluster_name) " +
-            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
-    void createClusterTable();
-
-    /**
-     * create cluster(cluster, standalone, sentinel)
-     */
-    @Select("create TABLE IF NOT EXISTS `cluster` ( " +
-            "cluster_id integer(4) NOT NULL AUTO_INCREMENT COMMENT '自增ID', " +
-            "group_id integer(4) NOT NULL, " +
-            "user_id integer(4) NOT NULL, " +
-            "cluster_token varchar(255) DEFAULT NULL, " +
-            "cluster_name varchar(255) NOT NULL, " +
-            "nodes varchar(255) NOT NULL, " +
-            "redis_mode varchar(25) NOT NULL, " +
-            "os varchar(255) NOT NULL, " +
-            "redis_version varchar(25) NOT NULL, " +
-            "image varchar(255) DEFAULT NULL, " +
-            "initialized tinyint(1) NOT NULL, " +
-            "total_used_memory bigint(20) NOT NULL, " +
-            "total_keys bigint(20) NOT NULL, " +
-            "total_expires bigint(20) NOT NULL, " +
-            "db_size integer(8) NOT NULL, " +
-            "cluster_state varchar(50) NOT NULL, " +
-            "cluster_slots_assigned integer(4) DEFAULT NULL, " +
-            "cluster_slots_ok integer(4) DEFAULT NULL, " +
-            "cluster_slots_pfail integer(4) DEFAULT NULL, " +
-            "cluster_slots_fail integer(4) DEFAULT NULL, " +
-            "cluster_known_nodes integer(4) NOT NULL, " +
-            "cluster_size integer(4) NOT NULL, " +
             "sentinel_ok integer(4) DEFAULT NULL, " +
             "sentinel_masters integer(4) DEFAULT NULL, " +
             "master_ok integer(4) DEFAULT NULL, " +
@@ -159,6 +121,6 @@ public interface IClusterDao {
             "PRIMARY KEY (cluster_id), " +
             "UNIQUE KEY (cluster_name) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
-    void createClusterTable2();
+    void createClusterTable();
 
 }
