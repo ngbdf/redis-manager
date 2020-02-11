@@ -76,7 +76,7 @@ public class RedisClient implements IRedisClient {
 
     @Override
     public Map<String, String> getInfo() throws Exception {
-        return RedisUtil.parseInfoToMap(jedis.info(RedisClient.SENTINEL));
+        return RedisUtil.parseInfoToMap(jedis.info());
     }
 
     @Override
@@ -254,6 +254,25 @@ public class RedisClient implements IRedisClient {
             }
             redisNodeList.add(redisNode);
         }
+        return redisNodeList;
+    }
+
+    @Override
+    public List<RedisNode> sentinelNodes(Set<HostAndPort> hostAndPorts) throws Exception {
+        List<RedisNode> redisNodeList = new ArrayList<>();
+        hostAndPorts.forEach(hostAndPort -> {
+            RedisNode redisNode = RedisNode.masterRedisNode(hostAndPort);
+            String linkSate;
+            try {
+                RedisClientFactory.buildRedisClient(hostAndPort);
+                linkSate = "connected";
+            } catch (Exception e) {
+                linkSate = "unknown";
+            }
+            redisNode.setLinkState(linkSate);
+            redisNode.setNodeId(hostAndPort.toString());
+            redisNodeList.add(redisNode);
+        });
         return redisNodeList;
     }
 

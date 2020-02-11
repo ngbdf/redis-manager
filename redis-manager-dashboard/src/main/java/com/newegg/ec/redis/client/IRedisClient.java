@@ -4,6 +4,7 @@ import com.newegg.ec.redis.entity.AutoCommandParam;
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.ClusterReset;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.MigrateParams;
 import redis.clients.jedis.util.Slowlog;
@@ -71,6 +72,8 @@ public interface IRedisClient extends IDatabaseCommand {
     List<RedisNode> nodes() throws Exception;
 
     List<RedisNode> clusterNodes() throws Exception;
+
+    List<RedisNode> sentinelNodes(Set<HostAndPort> hostAndPorts) throws Exception;
 
     Long dbSize();
 

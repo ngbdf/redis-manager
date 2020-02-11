@@ -45,20 +45,16 @@ public class RedisClientFactory {
         return buildRedisClient(redisURI);
     }
 
-    public static RedisClient buildRedisClient(Set<HostAndPort> hostAndPorts, String requirePass) {
-        return buildRedisClient(hostAndPorts.iterator().next(), requirePass);
+    public static RedisClient buildRedisClient(HostAndPort hostAndPort) {
+        return buildRedisClient(hostAndPort, null);
     }
 
-    public static RedisClient buildSentinelClient(RedisURI redisURI) {
-        return new RedisClient(redisURI);
+    public static RedisClient buildRedisClient(String host, int port) {
+        return buildRedisClient(new HostAndPort(host, port));
     }
 
-    public static RedisClient buildSentinelClient(HostAndPort hostAndPort) {
-        RedisURI redisURI = new RedisURI(hostAndPort, null);
-        return buildSentinelClient(redisURI);
+    public static RedisClient buildRedisClient(Set<HostAndPort> hostAndPorts) {
+        return buildRedisClient(hostAndPorts.iterator().next());
     }
 
-    public static RedisClient buildSentinelClient(Set<HostAndPort> hostAndPorts) {
-        return buildSentinelClient(hostAndPorts.iterator().next());
-    }
 }

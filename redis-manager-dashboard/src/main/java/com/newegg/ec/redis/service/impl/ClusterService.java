@@ -285,8 +285,8 @@ public class ClusterService implements IClusterService {
 
             cluster.setSentinelOk(redisNodeList.size());
             Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
-            RedisClient sentinelClient = RedisClientFactory.buildSentinelClient(hostAndPorts);
-            Map<String, String> sentinelInfo = sentinelClient.getInfo();
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts);
+            Map<String, String> sentinelInfo = redisClient.getInfo(RedisClient.SENTINEL);
             int sentinelMasters = Integer.parseInt(sentinelInfo.get(SENTINEL_MASTERS));
             cluster.setSentinelMasters(sentinelMasters);
 
@@ -299,6 +299,7 @@ public class ClusterService implements IClusterService {
             });
             cluster.setMasterOk(masterOk.get());
             cluster.setSentinelOk(getSentinelOkNumber(hostAndPorts));
+            redisClient.close();
         } catch (Exception e) {
             logger.error("Fill redis base info failed, " + cluster.getClusterName(), e);
         }
@@ -332,6 +333,7 @@ public class ClusterService implements IClusterService {
             cluster.setOs(serverInfo.get(OS));
             cluster.setRedisMode(serverInfo.get(REDIS_MODE));
             cluster.setRedisVersion(serverInfo.get(REDIS_VERSION));
+            redisClient.close();
         } catch (Exception e) {
             logger.error("Fill redis base info failed, " + cluster.getClusterName(), e);
         }

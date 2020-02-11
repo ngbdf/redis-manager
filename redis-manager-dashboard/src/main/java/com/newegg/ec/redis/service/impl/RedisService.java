@@ -169,6 +169,8 @@ public class RedisService implements IRedisService {
                 nodeList = redisClient.nodes();
             } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
                 nodeList = redisClient.clusterNodes();
+            } else if (SENTINEL.equalsIgnoreCase(redisMode)) {
+                nodeList = redisClient.sentinelNodes(nodesToHostAndPortSet(cluster.getNodes()));
             }
         } catch (Exception e) {
             logger.error("Get redis node list failed, " + cluster.getClusterName(), e);
@@ -199,7 +201,7 @@ public class RedisService implements IRedisService {
         RedisClient redisClient = null;
         try {
             String redisPassword = cluster.getRedisPassword();
-            Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
+            Set<HostAndPort> hostAndPortSet = nodesToHostAndPortSet(cluster.getNodes());
             RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
             redisClient = RedisClientFactory.buildRedisClient(redisURI);
             return redisClient.getClusterInfo();
@@ -243,14 +245,14 @@ public class RedisService implements IRedisService {
         return redisSlowLogList;
     }
 
-    private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
+    /*private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
         List<RedisNode> redisNodeList = getRedisNodeList(cluster);
         Set<HostAndPort> hostAndPortSet = new HashSet<>();
         for (RedisNode redisNode : redisNodeList) {
             hostAndPortSet.add(new HostAndPort(redisNode.getHost(), redisNode.getPort()));
         }
         return hostAndPortSet;
-    }
+    }*/
 
     @Override
     public Set<String> scan(Cluster cluster, AutoCommandParam autoCommandParam) {
@@ -853,17 +855,16 @@ public class RedisService implements IRedisService {
 
     @Override
     public List<Map<String, String>> getMastersInfo(SentinelMaster sentinelMaster) {
-        RedisClient sentinelClient = null;
+        RedisClient redisClient = null;
         try {
             String nodes = sentinelMaster.getNodes();
-            RedisURI redisURI = new RedisURI(nodes, null);
-            sentinelClient = RedisClientFactory.buildSentinelClient(redisURI);
-            return sentinelClient.getSentinelMasters();
+            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes));
+            return redisClient.getSentinelMasters();
         } catch (Exception e) {
             logger.error(" get masters info failed.", e);
             return null;
         } finally {
-            close(sentinelClient);
+            close(redisClient);
         }
     }
 
@@ -877,8 +878,8 @@ public class RedisService implements IRedisService {
             int port = sentinelMaster.getMasterPort();
             int quorum = sentinelMaster.getQuorum();
             RedisURI redisURI = new RedisURI(nodes, null);
-            sentinelClient = RedisClientFactory.buildSentinelClient(redisURI);
-             sentinelClient.monitorMaster(masterName, ip, port, quorum);
+            sentinelClient = RedisClientFactory.buildRedisClient(redisURI);
+            sentinelClient.monitorMaster(masterName, ip, port, quorum);
         } catch (Exception e) {
             logger.error(" get masters info failed.", e);
 //            return null;

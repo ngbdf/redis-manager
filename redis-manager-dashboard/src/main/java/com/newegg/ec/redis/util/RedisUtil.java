@@ -81,7 +81,7 @@ public class RedisUtil {
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             String[] keyValue = SignUtil.splitByColon(line);
-            if (keyValue.length != 2) {
+            if (keyValue.length < 2) {
                 continue;
             }
             String key = keyValue[0];

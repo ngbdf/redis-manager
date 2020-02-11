@@ -1,7 +1,5 @@
 package com.newegg.ec.redis.schedule;
 
-import com.newegg.ec.redis.client.RedisClientFactory;
-import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
@@ -15,6 +13,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import redis.clients.jedis.HostAndPort;
 
 import java.util.*;
+
+import static com.newegg.ec.redis.client.RedisClient.SENTINEL;
 
 /**
  * @author Jay.H.Zou
@@ -71,6 +71,9 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         int clusterId = cluster.getClusterId();
         for (HostAndPort hostAndPort : hostAndPortSet) {
             NodeInfo nodeInfo = getNodeInfo(clusterId, hostAndPort, redisPassword, timeType);
+            if (SENTINEL.equalsIgnoreCase(cluster.getRedisMode())) {
+                nodeInfo.setRole(NodeRole.MASTER);
+            }
             if (nodeInfo == null) {
                 continue;
             }
