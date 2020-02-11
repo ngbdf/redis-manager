@@ -641,4 +641,51 @@ public class RedisClient implements IRedisClient {
 
         }
     }
+
+    //************************sentinel client
+
+    @Override
+    public Jedis getSentinelClient() {
+        return jedis;
+    }
+
+    @Override
+    public List<Map<String, String>> getSentinelMasters() {
+        return jedis.sentinelMasters();
+    }
+
+    @Override
+    public List<String> getMasterAddrByName(String masterName) {
+        return jedis.sentinelGetMasterAddrByName(masterName);
+    }
+
+    @Override
+    public List<Map<String, String>> getSentinelSlaves(String masterName) {
+        return jedis.sentinelSlaves(masterName);
+    }
+
+    @Override
+    public String monitorMaster(String masterName, String ip, int port, int quorum) {
+        return jedis.sentinelMonitor(masterName, ip, port, quorum);
+    }
+
+    @Override
+    public String failoverMaster(String masterName) {
+        return jedis.sentinelFailover(masterName);
+    }
+
+    @Override
+    public String removeMaster(String masterName) {
+        return jedis.sentinelRemove(masterName);
+    }
+
+    @Override
+    public Long resetConfig(String pattern) {
+        return jedis.sentinelReset(pattern);
+    }
+
+    @Override
+    public String setConfig(String masterName, Map<String, String> parameterMap) {
+        return jedis.sentinelSet(masterName, parameterMap);
+    }
 }

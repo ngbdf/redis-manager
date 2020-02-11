@@ -771,9 +771,10 @@ public class RedisService implements IRedisService {
         }
     }
 
+    //***********************sentinel
     @Override
     public boolean setSentinelConfig(SentinelMaster sentinelMaster, SentinelConfigUtil.SentinelConfig redisConfig) {
-        SentinelClient sentinelClient = null;
+        RedisClient sentinelClient = null;
         try {
             String nodes = sentinelMaster.getNodes();
             String masterName = sentinelMaster.getMasterName();
@@ -799,12 +800,12 @@ public class RedisService implements IRedisService {
 
     @Override
     public Map<String, String> getSentinelConfig(SentinelMaster sentinelMaster) {
-        SentinelClient sentinelClient = null;
+        RedisClient sentinelClient = null;
         try {
             String nodes = sentinelMaster.getNodes();
             RedisURI redisURI = new RedisURI(nodes, null);
             sentinelClient = RedisClientFactory.buildSentinelClient(redisURI);
-            return sentinelClient.getSentinelInfo();
+            return sentinelClient.getInfo();
         } catch (Exception e) {
             logger.error(" get config failed.", e);
             return null;
@@ -816,7 +817,7 @@ public class RedisService implements IRedisService {
 
     @Override
     public List<String> getMasterAddrByName(SentinelMaster sentinelMaster) {
-        SentinelClient sentinelClient = null;
+        RedisClient sentinelClient = null;
         try {
             String masterName = sentinelMaster.getMasterName();
             String nodes = sentinelMaster.getNodes();
@@ -834,7 +835,7 @@ public class RedisService implements IRedisService {
 
     @Override
     public boolean failOverMaster(SentinelMaster sentinelMaster) {
-        SentinelClient sentinelClient = null;
+        RedisClient sentinelClient = null;
         try {
             String nodes = sentinelMaster.getNodes();
             String masterName = sentinelMaster.getMasterName();
@@ -852,7 +853,7 @@ public class RedisService implements IRedisService {
 
     @Override
     public List<Map<String, String>> getMastersInfo(SentinelMaster sentinelMaster) {
-        SentinelClient sentinelClient = null;
+        RedisClient sentinelClient = null;
         try {
             String nodes = sentinelMaster.getNodes();
             RedisURI redisURI = new RedisURI(nodes, null);
@@ -868,7 +869,7 @@ public class RedisService implements IRedisService {
 
     @Override
     public boolean getMasterState(SentinelMaster sentinelMaster) {
-        SentinelClient sentinelClient = null;
+        RedisClient sentinelClient = null;
         try {
             String nodes = sentinelMaster.getNodes();
             String masterName = sentinelMaster.getMasterName();
@@ -888,9 +889,9 @@ public class RedisService implements IRedisService {
     }
 
 
-    private void close(ISentinelClient sentinelClient) {
-        if (sentinelClient != null) {
-            sentinelClient.close();
+    private void close(RedisClient redisClient) {
+        if (redisClient != null) {
+            redisClient.close();
         }
     }
 

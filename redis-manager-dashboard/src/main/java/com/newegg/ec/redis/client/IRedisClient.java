@@ -229,4 +229,28 @@ public interface IRedisClient extends IDatabaseCommand {
      * @return
      */
     void close();
+
+    //**********************************sentinel client
+
+    /**
+     * Get sentinel client
+     */
+    Jedis getSentinelClient();
+
+    List<Map<String, String>> getSentinelMasters();
+
+    List<String> getMasterAddrByName(String masterName);
+
+    List<Map<String, String>> getSentinelSlaves(String masterName);
+
+    String monitorMaster(String masterName, String ip, int port, int quorum);
+
+    String failoverMaster(String masterName);
+
+    String removeMaster(String masterName);
+
+    Long resetConfig(String pattern);
+
+    String setConfig(String masterName, Map<String, String> parameterMap);
+
 }

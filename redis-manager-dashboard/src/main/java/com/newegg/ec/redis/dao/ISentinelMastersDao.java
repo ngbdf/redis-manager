@@ -24,16 +24,16 @@ public interface ISentinelMastersDao {
     @Update("")
     int updateSentinelMaster(SentinelMaster sentinelMaster);
 
-    @Insert("")
+    @Insert("INSERT into 'sentinel_masters' (master_host,master_port) values (#{sentinelMaster.masterHost},#{sentinelMaster.masterPort}) ")
     int insertSentinelMaster(SentinelMaster sentinelMaster);
 
     @Delete("")
     int deleteSentinelMaster(SentinelMaster sentinelMaster);
 
-    @Delete("")
+    @Delete("DELETE FROM sentinel_masters WHERE sentinel_master_id = #{sentinelMasterId}")
     int deleteSentinelMasterById(Integer sentinelMasterId);
 
-    @Delete("")
+    @Delete("DELETE FROM sentinel_masters WHERE sentinel_master_id = #{cluster_id}")
     int deleteSentinelMasterByClusterId(Integer clusterId);
 
     @Select("create TABLE IF NOT EXISTS `sentinel_masters` (\n" +

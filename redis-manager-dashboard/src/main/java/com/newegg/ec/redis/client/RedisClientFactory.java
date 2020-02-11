@@ -49,16 +49,16 @@ public class RedisClientFactory {
         return buildRedisClient(hostAndPorts.iterator().next(), requirePass);
     }
 
-    public static SentinelClient buildSentinelClient(RedisURI redisURI) {
-        return new SentinelClient(redisURI);
+    public static RedisClient buildSentinelClient(RedisURI redisURI) {
+        return new RedisClient(redisURI);
     }
 
-    public static SentinelClient buildSentinelClient(HostAndPort hostAndPort) {
+    public static RedisClient buildSentinelClient(HostAndPort hostAndPort) {
         RedisURI redisURI = new RedisURI(hostAndPort, null);
         return buildSentinelClient(redisURI);
     }
 
-    public static SentinelClient buildSentinelClient(Set<HostAndPort> hostAndPorts) {
+    public static RedisClient buildSentinelClient(Set<HostAndPort> hostAndPorts) {
         return buildSentinelClient(hostAndPorts.iterator().next());
     }
 }

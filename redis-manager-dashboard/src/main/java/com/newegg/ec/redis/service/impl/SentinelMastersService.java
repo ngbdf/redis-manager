@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.ISentinelMastersDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.SentinelMaster;
+import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.service.ISentinelMastersService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,9 @@ public class SentinelMastersService implements ISentinelMastersService {
 
     @Autowired
     private ISentinelMastersDao sentinelMastersDao;
+
+    @Autowired
+    private IRedisService redisService;
 
     @Override
     public List<SentinelMaster> getSentinelMasterByClusterId(Integer clusterId) {
@@ -72,6 +76,10 @@ public class SentinelMastersService implements ISentinelMastersService {
     public boolean addSentinelMaster(Cluster cluster) {
         try {
             // TODO: get sentinel masters
+            SentinelMaster sentinelMaster=new SentinelMaster();
+            List<String> masterAddrByName = redisService.getMasterAddrByName(sentinelMaster);
+            sentinelMastersDao.insertSentinelMaster(sentinelMaster);
+
             return true;
         } catch (Exception e) {
             logger.error("Add sentinel master failed, " + cluster.getClusterName(), e);
@@ -81,6 +89,9 @@ public class SentinelMastersService implements ISentinelMastersService {
 
     @Override
     public boolean addSentinelMaster(SentinelMaster sentinelMaster) {
+
+        sentinelMastersDao.insertSentinelMaster(sentinelMaster);
+
         return false;
     }
 
@@ -91,11 +102,22 @@ public class SentinelMastersService implements ISentinelMastersService {
 
     @Override
     public boolean deleteSentinelMasterById(Integer sentinelMasterId) {
-        return false;
+        try {
+            return sentinelMastersDao.deleteSentinelMasterById(sentinelMasterId) > 0;
+        }catch (Exception e){
+            logger.error("Delete sentinel master failed. ", e);
+            return false;
+        }
+
     }
 
     @Override
     public boolean deleteSentinelMasterByClusterId(Integer clusterId) {
-        return false;
+        try{
+            return sentinelMastersDao.deleteSentinelMasterByClusterId(clusterId) > 0;
+        }catch (Exception e){
+            logger.error("Delete sentinel master failed. ", e);
+            return false;
+        }
     }
 }
