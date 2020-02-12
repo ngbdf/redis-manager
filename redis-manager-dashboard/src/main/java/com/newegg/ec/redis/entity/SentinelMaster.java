@@ -15,6 +15,8 @@ public class SentinelMaster {
 
     private Integer masterNode;
 
+    private String lastMasterNode;
+
     private String flags;
 
     private Long sDownTime;
@@ -32,8 +34,6 @@ public class SentinelMaster {
     private Integer masterPort;
 
     private String masterName;
-
-    private String nodes;
 
     private Integer quorum;
 
@@ -83,6 +83,14 @@ public class SentinelMaster {
 
     public void setMasterNode(Integer masterNode) {
         this.masterNode = masterNode;
+    }
+
+    public String getLastMasterNode() {
+        return lastMasterNode;
+    }
+
+    public void setLastMasterNode(String lastMasterNode) {
+        this.lastMasterNode = lastMasterNode;
     }
 
     public String getFlags() {
@@ -156,15 +164,6 @@ public class SentinelMaster {
     public void setMasterName(String masterName) {
         this.masterName = masterName;
     }
-
-    public String getNodes() {
-        return nodes;
-    }
-
-    public void setNodes(String nodes) {
-        this.nodes = nodes;
-    }
-
 
     public Integer getQuorum() {
         return quorum;
