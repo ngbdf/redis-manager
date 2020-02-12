@@ -15,8 +15,6 @@ public class SentinelMaster {
 
     private Integer masterNode;
 
-    private String lastMasterNode;
-
     private String flags;
 
     private Long sDownTime;
@@ -35,19 +33,17 @@ public class SentinelMaster {
 
     private String masterName;
 
-    private String pattern;
-
     private String nodes;
 
     private Integer quorum;
-
-    private Long downAfterMilliSeconds;
 
     private Long failoverTimeout;
 
     private Integer parallelSync;
 
     private String authPass;
+
+    private String state;
 
     public Integer getSentinelMasterId() {
         return sentinelMasterId;
@@ -87,14 +83,6 @@ public class SentinelMaster {
 
     public void setMasterNode(Integer masterNode) {
         this.masterNode = masterNode;
-    }
-
-    public String getLastMasterNode() {
-        return lastMasterNode;
-    }
-
-    public void setLastMasterNode(String lastMasterNode) {
-        this.lastMasterNode = lastMasterNode;
     }
 
     public String getFlags() {
@@ -169,14 +157,6 @@ public class SentinelMaster {
         this.masterName = masterName;
     }
 
-    public String getPattern() {
-        return pattern;
-    }
-
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
-    }
-
     public String getNodes() {
         return nodes;
     }
@@ -192,14 +172,6 @@ public class SentinelMaster {
 
     public void setQuorum(Integer quorum) {
         this.quorum = quorum;
-    }
-
-    public Long getDownAfterMilliSeconds() {
-        return downAfterMilliSeconds;
-    }
-
-    public void setDownAfterMilliSeconds(Long downAfterMilliSeconds) {
-        this.downAfterMilliSeconds = downAfterMilliSeconds;
     }
 
     public Long getFailoverTimeout() {
@@ -224,5 +196,13 @@ public class SentinelMaster {
 
     public void setAuthPass(String authPass) {
         this.authPass = authPass;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }

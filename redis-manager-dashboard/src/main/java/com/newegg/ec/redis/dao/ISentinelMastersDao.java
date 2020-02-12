@@ -15,13 +15,17 @@ public interface ISentinelMastersDao {
     @Select("")
     List<SentinelMaster> selectSentinelMasterByClusterId(Integer clusterId);
 
-    @Select("")
+    @Select("SELECT * from 'sentinel_masters' where cluster_id = #{clusterId} and master_name =#{masterName}")
     SentinelMaster selectSentinelMasterByMasterName(Integer clusterId, String masterName);
 
-    @Select("")
+    @Select("SELECT * from 'sentinel_masters' where sentinel_master_id = #{sentinelMasterId}")
     SentinelMaster selectSentinelMasterById(Integer sentinelMasterId);
 
-    @Update("")
+    @Update("UPDATE sentinel_masters set group_id = #{groupId}, user_id = #{userId}, " +
+            "flags = #{flags}, s_down_time = #{sDownTime}, o_down_time = #{oDownTime},  down_after_milliseconds = #{downAfterMilliseconds}," +
+            "num_slaves = #{numSlaves} , master_host = #{masterHost} , master_port = #{masterPort}, state = #{state} " +
+            "master_name = #{masterName} , quorum = #{quorum} , failover_timeout = #{failoverTimeout},parallel_syncs = #{parallelSync} ," +
+            "update_time = NOW() where cluster_id = #{clusterId}")
     int updateSentinelMaster(SentinelMaster sentinelMaster);
 
     @Insert("INSERT into 'sentinel_masters' (master_host,master_port) values (#{sentinelMaster.masterHost},#{sentinelMaster.masterPort}) ")
@@ -44,7 +48,6 @@ public interface ISentinelMastersDao {
             "master_name varchar(255) NOT NULL,\n" +
             "master_host varchar(255) NOT NULL,\n" +
             "master_port integer(4) NOT NULL,\n" +
-            "last_master_node varchar(255) NOT NULL,\n" +
             "flags varchar(255) NOT NULL,\n" +
             "s_down_time bigint(20) NOT NULL,\n" +
             "o_down_time bigint(20) NOT NULL,\n" +
@@ -55,6 +58,7 @@ public interface ISentinelMastersDao {
             "parallel_syncs integer(4) NOT NULL,\n" +
             "in_sentinel tinyint(1) NOT NULL,\n" +
             "update_time datetime(0) NOT NULL,\n" +
+            "state varchar(50) NOT NULL,\n" +
             "PRIMARY KEY (sentinel_master_id)\n" +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createSentinelMastersTable();
