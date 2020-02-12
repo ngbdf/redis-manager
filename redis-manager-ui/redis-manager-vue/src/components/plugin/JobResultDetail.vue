@@ -31,6 +31,12 @@ import Tables from '@/components/plugin/chart/Table'
 import { formatBytes, formatterInput } from '@/utils/format.js'
 import { getTop1000KeysByPrefix, getKeysTTLInfo } from '@/api/rctapi.js'
 export default {
+   beforeCreate: function() {
+      document.querySelector('body').setAttribute('style', 'overflow:auto');
+  },
+  beforeDestroy: function() {
+      document.querySelector('body').removeAttribute('style');
+  },
   components: {
     PrefixKeysCount,
     PrefixKeysMemory,
@@ -40,6 +46,7 @@ export default {
     Top1000KeysByType,
     Tables
   },
+  
   data () {
     return {
       analyseResults: [],
