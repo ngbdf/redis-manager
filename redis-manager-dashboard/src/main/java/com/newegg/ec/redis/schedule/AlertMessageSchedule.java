@@ -272,6 +272,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 logger.error("Connected " + cluster.getClusterName() + " failed.", e);
                 alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, e.getMessage()));
                 cluster.setClusterState(Cluster.ClusterState.BAD);
+                clusterService.updateClusterState(cluster);
                 return alertRecordList;
             } finally {
                 if (redisClient != null) {
@@ -280,7 +281,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
             }
 
             List<RedisNode> redisNodeList = redisNodeService.getRedisNodeListByClusterId(cluster.getClusterId());
-            if (redisClient == null || redisNodeList.isEmpty()) {
+            if (redisNodeList == null || redisNodeList.isEmpty()) {
                 alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Get nodes failed"));
                 cluster.setClusterState(Cluster.ClusterState.BAD);
                 continue;

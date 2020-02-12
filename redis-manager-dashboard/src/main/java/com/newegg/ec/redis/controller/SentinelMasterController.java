@@ -22,9 +22,12 @@ import java.util.List;
 @RequestMapping("/sentinel/*")
 @Controller
 public class SentinelMasterController {
+
     private static final Logger logger = LoggerFactory.getLogger(SentinelMasterController.class);
+
     @Autowired
     private IRedisService redisService;
+
     @Autowired
     private ISentinelMastersService sentinelMastersService;
 
@@ -34,12 +37,4 @@ public class SentinelMasterController {
         List<SentinelMaster> sentinelMaster = sentinelMastersService.getSentinelMasterByClusterId(clusterId);
         return Result.successResult(sentinelMaster);
     }
-
-    @RequestMapping(value = "/getSentinelMasterDetail/{sentinelMasterId}",method = RequestMethod.GET)
-    @ResponseBody
-    public Result getSentinelDetail(@PathParam("sentinelMasterId") Integer sentinelMasterId){
-
-        return Result.successResult();
-    }
-
 }
