@@ -5,6 +5,7 @@ package com.newegg.ec.redis.entity;
  * @date 2020/01/22
  */
 public class SentinelMaster {
+
     private Integer sentinelMasterId;
 
     private Integer clusterId;

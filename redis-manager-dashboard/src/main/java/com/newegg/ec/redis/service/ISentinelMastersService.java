@@ -20,8 +20,6 @@ public interface ISentinelMastersService {
 
     boolean updateSentinelMaster(SentinelMaster sentinelMaster);
 
-    boolean addSentinelMaster(Cluster cluster);
-
     boolean addSentinelMaster(SentinelMaster sentinelMaster);
 
     boolean deleteSentinelMaster(SentinelMaster sentinelMaster);

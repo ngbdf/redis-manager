@@ -30,6 +30,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import redis.clients.jedis.HostAndPort;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -41,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.newegg.ec.redis.util.RedisClusterInfoUtil.parseClusterInfoToObject;
-import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
+import static com.newegg.ec.redis.util.RedisUtil.*;
 import static com.newegg.ec.redis.util.SignUtil.EQUAL_SIGN;
 import static com.newegg.ec.redis.util.TimeUtil.FIVE_SECONDS;
 import static javax.management.timer.Timer.ONE_MINUTE;
@@ -83,6 +84,9 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
 
     @Autowired
     private IRedisService redisService;
+
+    @Autowired
+    private ISentinelMastersService sentinelMastersService;
 
     @Autowired
     private IAlertRuleService alertRuleService;
@@ -279,7 +283,6 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     redisClient.close();
                 }
             }
-
             List<RedisNode> redisNodeList = redisNodeService.getRedisNodeListByClusterId(cluster.getClusterId());
             if (redisNodeList == null || redisNodeList.isEmpty()) {
                 alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Get nodes failed"));
@@ -295,6 +298,50 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 }
             });
         }
+        clusterService.updateClusterState(cluster);
+        return alertRecordList;
+    }
+
+    private List<AlertRecord> getSentinelMasterRecord(Group group, Cluster cluster, AlertRule alertRule) {
+        List<AlertRecord> alertRecordList = new ArrayList<>();
+        String seedNodes = cluster.getNodes();
+        sentinelMastersService.getSentinelMasterByClusterId(cluster.getClusterId());
+        RedisClient redisClient = null;
+        try {
+            redisClient = RedisClientFactory.buildRedisClient(RedisUtil.nodesToHostAndPort(seedNodes), cluster.getRedisPassword());
+            if (Objects.equals(CLUSTER, cluster.getRedisMode())) {
+                Map<String, String> clusterInfo = redisClient.getClusterInfo();
+                Cluster currentCluster = parseClusterInfoToObject(clusterInfo);
+                Cluster.ClusterState clusterState = currentCluster.getClusterState();
+                if (!Objects.equals(Cluster.ClusterState.HEALTH, currentCluster.getClusterState())) {
+                    alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Cluster state not ok"));
+                    cluster.setClusterState(clusterState);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Connected " + cluster.getClusterName() + " failed.", e);
+            alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, e.getMessage()));
+            cluster.setClusterState(Cluster.ClusterState.BAD);
+            clusterService.updateClusterState(cluster);
+            return alertRecordList;
+        } finally {
+            if (redisClient != null) {
+                redisClient.close();
+            }
+        }
+        List<RedisNode> redisNodeList = redisNodeService.getRedisNodeListByClusterId(cluster.getClusterId());
+        if (redisNodeList == null || redisNodeList.isEmpty()) {
+            alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Get nodes failed"));
+            cluster.setClusterState(Cluster.ClusterState.BAD);
+        }
+        redisNodeList.forEach(redisNode -> {
+            String node = RedisUtil.getNodeString(redisNode);
+            String reason = !redisNode.getRunStatus() ? node + " is shutdown" : !redisNode.getInCluster() ? node + " not in cluster" : null;
+            if (!Strings.isNullOrEmpty(reason)) {
+                alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, node, reason));
+                cluster.setClusterState(Cluster.ClusterState.WARN);
+            }
+        });
         clusterService.updateClusterState(cluster);
         return alertRecordList;
     }

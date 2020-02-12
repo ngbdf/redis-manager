@@ -161,6 +161,8 @@ public interface IRedisService {
 
     /*-----------------sentinel monitor-----------------*/
 
+    List<SentinelMaster> getSentinelMasters(Cluster cluster);
+
     /**
      * 修改sentinel节点配置文件(只对当前sentinel节点有用)
      * 建议sentinel节点配置尽可能一直,才能在故障转移和发现时容易达成一致

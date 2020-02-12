@@ -752,6 +752,32 @@ public class RedisService implements IRedisService {
 
     }
 
+    @Override
+    public List<SentinelMaster> getSentinelMasters(Cluster cluster) {
+        List<SentinelMaster> sentinelMasterList = new ArrayList<>();
+        try {
+            Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts);
+            List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
+            for (Map<String, String> master : sentinelMasters) {
+                SentinelMaster sentinelMaster = new SentinelMaster();
+                sentinelMaster.setFlags(master.get("flags"));
+                sentinelMaster.setNumSlaves(Integer.parseInt(master.get("num-slaves")));
+                sentinelMaster.setMasterHost(master.get("ip"));
+                sentinelMaster.setMasterPort(Integer.parseInt(master.get("port")));
+                sentinelMaster.setMasterName(master.get("name"));
+                sentinelMaster.setQuorum(Integer.parseInt(master.get("quorum")));
+                sentinelMaster.setDownAfterMilliseconds(Long.parseLong(master.get("down-after-milliseconds")));
+                sentinelMaster.setFailoverTimeout(Long.parseLong(master.get("failover-timeout")));
+                sentinelMaster.setParallelSync(Integer.parseInt(master.get("parallel-syncs")));
+                sentinelMasterList.add(sentinelMaster);
+            }
+        } catch (Exception e) {
+            logger.error("Add sentinel master host and port failed, " + cluster.getClusterName(), e);
+        }
+        return sentinelMasterList;
+    }
+
     private IDatabaseCommand buildDatabaseCommandClient(Cluster cluster) {
         IDatabaseCommand client = null;
         String redisMode = cluster.getRedisMode();
@@ -877,7 +903,6 @@ public class RedisService implements IRedisService {
             redisClient.monitorMaster(masterName, ip, port, quorum);
         } catch (Exception e) {
             logger.error(" get masters info failed.", e);
-//            return null;
         } finally {
             close(redisClient);
         }

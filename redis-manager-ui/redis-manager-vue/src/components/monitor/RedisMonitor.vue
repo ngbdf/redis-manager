@@ -9,7 +9,7 @@
               <i class="el-icon-sunny health" v-if="cluster.clusterState == 'HEALTH'"></i>
               <i class="el-icon-heavy-rain bad" title="Status" v-else></i>
             </span>
-            <div>
+            <div v-if="!isSentinelMode">
               <el-button
                 size="mini"
                 type="primary"
@@ -44,37 +44,76 @@
           </el-col>
           <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
+              Nodes:
+              <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="!isSentinelMode">
+            <div class="base-info-item">
               Master:
               <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
             </div>
           </el-col>
-          <el-col :xl="3" :lg="4" :md="6" :sm="8">
-            <div class="base-info-item">
-              Node:
-              <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
-            </div>
-          </el-col>
-          <el-col :xl="3" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="!isSentinelMode">
             <div class="base-info-item">
               Total Memory:
               <el-tag size="mini">{{ cluster.totalUsedMemory }}MB</el-tag>
             </div>
           </el-col>
-          <el-col :xl="3" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="!isSentinelMode">
             <div class="base-info-item">
               Total Keys:
               <el-tag size="mini">{{ cluster.totalKeys }}</el-tag>
             </div>
           </el-col>
-          <el-col :xl="3" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="!isSentinelMode">
             <div class="base-info-item">
               Total Expires:
               <el-tag size="mini">{{ cluster.totalExpires }}</el-tag>
             </div>
           </el-col>
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="isSentinelMode">
+            <div class="base-info-item">
+              Sentinel OK:
+              <el-tag size="mini">{{ cluster.sentinelOk }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="isSentinelMode">
+            <div class="base-info-item">
+              Sentinel Masters:
+              <el-tag size="mini">{{ cluster.sentinelMasters }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="isSentinelMode">
+            <div class="base-info-item">
+              Master OK:
+              <el-tag size="mini">{{ cluster.masterOk }}</el-tag>
+            </div>
+          </el-col>
         </el-row>
       </div>
     </div>
+
+    <div
+      class="body-wrapper"
+      style="margin-top: 20px;"
+      v-loading="clusterLoading"
+      v-if="isSentinelMode"
+    >
+      <div class="base-info-wrapper">
+        <el-table :data="sentinelMasterList">
+          <el-table-column property="masterName" label="Master Name"></el-table-column>
+          <el-table-column property="flags" label="Flags"></el-table-column>
+          <el-table-column label="Master Node"></el-table-column>
+          <el-table-column property="lastMasterNode" label="Last Master Node"></el-table-column>
+          <el-table-column property="masterNode" label="Master Node"></el-table-column>
+          <el-table-column property="numSlaves" label="Num Slaves"></el-table-column>
+          <el-table-column property="parallelSync" label="Parallel Sync"></el-table-column>
+          <el-table-column label="Detail"></el-table-column>
+        </el-table>
+      </div>
+    </div>
+
     <div style="margin-top: 20px;">
       <div class="monitor-condition-wrapper">
         <div class="condition-wrapper">
@@ -398,7 +437,9 @@ export default {
       slowLogList: [],
       clusterLoading: false,
       slowLogLoading: false,
-      conditionSelectedLoading: false
+      conditionSelectedLoading: false,
+      isSentinelMode: false,
+      sentinelMasterList: []
     };
   },
   methods: {
@@ -414,7 +455,7 @@ export default {
     },
     getAllNodeList(clusterId) {
       let url = "/node-manage/getAllNodeList/" + clusterId;
-      this.slowLogRedisNodeList.push({label: "All"})
+      this.slowLogRedisNodeList.push({ label: "All" });
       API.get(
         url,
         null,
@@ -432,7 +473,7 @@ export default {
                 label: hostAndPort + " " + role
               };
               redisNodeList.push(redisNode);
-               this.slowLogRedisNodeList.push(redisNode);
+              this.slowLogRedisNodeList.push(redisNode);
             });
             this.redisNodeList = redisNodeList;
             this.nodeType = "ALL_MASTER";
@@ -492,6 +533,22 @@ export default {
       setTimeout(() => {
         this.refresh();
       }, 300);
+    },
+    getSentinelMasterList(clusterId) {
+      let url = "/sentinel/getSentinelMasterList/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.sentinelMasterList = result.data;
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
     }
   },
   watch: {
@@ -558,6 +615,7 @@ export default {
       this.slowLogParam.clusterId = clusterId;
       this.pickerDateTime();
       this.timedRefresh();
+      this.isSentinelMode = cluster.redisMode == "sentinel";
     });
   },
   destroyed() {

@@ -6,6 +6,7 @@ import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.entity.SentinelMaster;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.HumpbackNodeOperation;
@@ -135,8 +136,8 @@ public class ClusterService implements IClusterService {
         }
         nodeInfoService.createNodeInfoTable(cluster.getClusterId());
         if (Objects.equals(redisMode, SENTINEL)) {
-            // TODO: get sentinel masters; save sentinel masters to database;
-            sentinelMastersService.addSentinelMaster(cluster);
+            List<SentinelMaster> sentinelMasters = redisService.getSentinelMasters(cluster);
+            sentinelMasters.forEach(sentinelMaster -> sentinelMastersService.addSentinelMaster(sentinelMaster));
         }
         return true;
     }

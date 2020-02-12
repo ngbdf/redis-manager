@@ -80,42 +80,6 @@ public class SentinelMastersService implements ISentinelMastersService {
     }
 
     @Override
-    public boolean addSentinelMaster(Cluster cluster) {
-        try {
-            // TODO: get sentinel masters info
-            Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts);
-            List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
-            for (Map<String, String> sentinel : sentinelMasters) {
-                SentinelMaster sentinelMaster = new SentinelMaster();
-                String flags = sentinel.get("flags");
-                String numSlaves = sentinel.get("num-slaves");
-                String host = sentinel.get("ip");
-                String port = sentinel.get("port");
-                String masterName = sentinel.get("name");
-                String quorum = sentinel.get("quorum");
-                String downAfterMilliseconds = sentinel.get("down-after-milliseconds");
-                String failoverTimeout = sentinel.get("failover-timeout");
-                String parallelSync = sentinel.get("parallel-syncs");
-                sentinelMaster.setFlags(flags);
-                sentinelMaster.setNumSlaves(Integer.parseInt(numSlaves));
-                sentinelMaster.setMasterHost(host);
-                sentinelMaster.setMasterPort(Integer.parseInt(port));
-                sentinelMaster.setMasterName(masterName);
-                sentinelMaster.setQuorum(Integer.parseInt(quorum));
-                sentinelMaster.setDownAfterMilliseconds(Long.parseLong(downAfterMilliseconds));
-                sentinelMaster.setFailoverTimeout(Long.parseLong(failoverTimeout));
-                sentinelMaster.setParallelSync(Integer.parseInt(parallelSync));
-                addSentinelMaster(sentinelMaster);
-            }
-            return true;
-        } catch (Exception e) {
-            logger.error("Add sentinel master host and port failed, " + cluster.getClusterName(), e);
-            return false;
-        }
-    }
-
-    @Override
     public boolean addSentinelMaster(SentinelMaster sentinelMaster) {
         try {
             return sentinelMastersDao.insertSentinelMaster(sentinelMaster) > 0;

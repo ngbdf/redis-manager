@@ -206,8 +206,6 @@ public interface IRedisClient extends IDatabaseCommand {
     String migrate(String host, int port, int destinationDB,
                    int timeout, MigrateParams params, String... keys);
 
-//    String clusterSlaves(String nodeId);
-
     /**
      * old name: slaveOf
      *
@@ -226,20 +224,6 @@ public interface IRedisClient extends IDatabaseCommand {
 
     String memoryPurge();
 
-    /**
-     * Close client
-     *
-     * @return
-     */
-    void close();
-
-    //**********************************sentinel client
-
-    /**
-     * Get sentinel client
-     */
-    Jedis getSentinelClient();
-
     List<Map<String, String>> getSentinelMasters();
 
     List<String> getMasterAddrByName(String masterName);
@@ -255,5 +239,12 @@ public interface IRedisClient extends IDatabaseCommand {
     Long resetConfig(String pattern);
 
     String setConfig(String masterName, Map<String, String> parameterMap);
+
+    /**
+     * Close client
+     *
+     * @return
+     */
+    void close();
 
 }

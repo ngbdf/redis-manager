@@ -139,8 +139,8 @@ public class RedisClient implements IRedisClient {
         List<RedisNode> nodeList = new ArrayList<>();
         Map<String, String> infoMap = getInfo(REPLICATION);
         String role = infoMap.get(ROLE);
-        String masterHost = null;
-        Integer masterPort = null;
+        String masterHost;
+        Integer masterPort;
         // 使用 master node 进行连接
         if (Objects.equals(role, NodeRole.SLAVE.getValue())) {
             close();
@@ -651,24 +651,6 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public void close() {
-        try {
-            if (jedis != null) {
-                jedis.close();
-            }
-        } catch (Exception ignored) {
-
-        }
-    }
-
-    //************************sentinel client
-
-    @Override
-    public Jedis getSentinelClient() {
-        return jedis;
-    }
-
-    @Override
     public List<Map<String, String>> getSentinelMasters() {
         return jedis.sentinelMasters();
     }
@@ -706,5 +688,15 @@ public class RedisClient implements IRedisClient {
     @Override
     public String setConfig(String masterName, Map<String, String> parameterMap) {
         return jedis.sentinelSet(masterName, parameterMap);
+    }
+
+    @Override
+    public void close() {
+        try {
+            if (jedis != null) {
+                jedis.close();
+            }
+        } catch (Exception ignored) {
+        }
     }
 }
