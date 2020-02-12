@@ -13,7 +13,7 @@ public class SentinelMaster {
 
     private Integer userId;
 
-    private Integer masterNode;
+    private String masterNode;
 
     private String lastMasterNode;
 
@@ -77,11 +77,11 @@ public class SentinelMaster {
         this.userId = userId;
     }
 
-    public Integer getMasterNode() {
+    public String getMasterNode() {
         return masterNode;
     }
 
-    public void setMasterNode(Integer masterNode) {
+    public void setMasterNode(String masterNode) {
         this.masterNode = masterNode;
     }
 

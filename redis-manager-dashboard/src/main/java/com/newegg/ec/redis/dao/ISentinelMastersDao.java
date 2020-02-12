@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface ISentinelMastersDao {
 
-    @Select("")
+    @Select("SELECT * from 'sentinel_masters' where cluster_id = #{clusterId}")
     List<SentinelMaster> selectSentinelMasterByClusterId(Integer clusterId);
 
     @Select("SELECT * from 'sentinel_masters' where cluster_id = #{clusterId} and master_name =#{masterName}")
