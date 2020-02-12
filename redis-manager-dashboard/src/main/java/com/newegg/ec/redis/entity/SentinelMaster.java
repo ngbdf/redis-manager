@@ -46,6 +46,10 @@ public class SentinelMaster {
 
     private String state;
 
+    private boolean monitor;
+
+    private boolean masterChanged;
+
     public Integer getSentinelMasterId() {
         return sentinelMasterId;
     }
@@ -204,5 +208,21 @@ public class SentinelMaster {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public boolean getMonitor() {
+        return monitor;
+    }
+
+    public void setMonitor(boolean monitor) {
+        this.monitor = monitor;
+    }
+
+    public boolean getMasterChanged() {
+        return masterChanged;
+    }
+
+    public void setMasterChanged(boolean masterChanged) {
+        this.masterChanged = masterChanged;
     }
 }

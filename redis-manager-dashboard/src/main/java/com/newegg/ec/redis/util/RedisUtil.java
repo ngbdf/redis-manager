@@ -169,9 +169,7 @@ public class RedisUtil {
     }
 
     public static String getNodeString(RedisNode redisNode) {
-        StringBuilder result = new StringBuilder();
-        result.append(redisNode.getHost()).append(SignUtil.COLON).append(redisNode.getPort());
-        return result.toString();
+        return redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
     }
 
     public static String generateContainerName(String clusterName, int port) {

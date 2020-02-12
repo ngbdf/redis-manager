@@ -5,18 +5,20 @@ import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.dao.ISentinelMastersDao;
 import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.entity.SentinelMaster;
+import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.service.ISentinelMastersService;
+import com.newegg.ec.redis.util.NetworkUtil;
+import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.HostAndPort;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.newegg.ec.redis.util.RedisUtil.nodesToHostAndPortSet;
 
@@ -35,14 +37,49 @@ public class SentinelMastersService implements ISentinelMastersService {
     @Autowired
     private IRedisService redisService;
 
+    @Autowired
+    private IClusterService clusterService;
+
     @Override
     public List<SentinelMaster> getSentinelMasterByClusterId(Integer clusterId) {
         try {
-            return sentinelMastersDao.selectSentinelMasterByClusterId(clusterId);
+            List<SentinelMaster> realSentinelMasterList = redisService.getSentinelMasters(clusterService.getClusterById(clusterId));
+            List<SentinelMaster> dbSentinelMasterList = sentinelMastersDao.selectSentinelMasterByClusterId(clusterId);
+            return mergeRedisNode(realSentinelMasterList, dbSentinelMasterList);
         } catch (Exception e) {
             logger.error("Get sentinel masters by cluster id failed.", e);
             return null;
         }
+    }
+
+    private List<SentinelMaster> mergeRedisNode(List<SentinelMaster> realSentinelMasterList, List<SentinelMaster> dbSentinelMasterList) {
+        List<SentinelMaster> sentinelMasterList = new LinkedList<>();
+        Iterator<SentinelMaster> realIterator = realSentinelMasterList.iterator();
+        while (realIterator.hasNext()) {
+            SentinelMaster realSentinelMaster = realIterator.next();
+            realSentinelMaster.setMonitor(true);
+
+            Iterator<SentinelMaster> dbIterator = dbSentinelMasterList.iterator();
+            while (dbIterator.hasNext()) {
+                SentinelMaster dbSentinelMaster = dbIterator.next();
+                if (Objects.equals(realSentinelMaster.getMasterName(), dbSentinelMaster.getMasterName())) {
+                    boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), dbSentinelMaster.getMasterNode());
+                    realSentinelMaster.setMasterChanged(masterNodeChanged);
+                    realSentinelMaster.setLastMasterNode(dbSentinelMaster.getLastMasterNode());
+                    realIterator.remove();
+                    dbIterator.remove();
+                }
+            }
+            sentinelMasterList.add(realSentinelMaster);
+        }
+        if (dbSentinelMasterList.isEmpty()) {
+            return sentinelMasterList;
+        }
+        dbSentinelMasterList.forEach(dbSentinelMaster -> {
+            dbSentinelMaster.setMonitor(false);
+            sentinelMasterList.add(dbSentinelMaster);
+        });
+        return sentinelMasterList;
     }
 
     @Override

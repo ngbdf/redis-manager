@@ -754,7 +754,7 @@ public class RedisService implements IRedisService {
 
     @Override
     public List<SentinelMaster> getSentinelMasters(Cluster cluster) {
-        List<SentinelMaster> sentinelMasterList = new ArrayList<>();
+        List<SentinelMaster> sentinelMasterList = new LinkedList<>();
         try {
             Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
             RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts);
