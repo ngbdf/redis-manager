@@ -40,7 +40,7 @@ public class SentinelMaster {
 
     private String authPass;
 
-    private String state;
+    private String status;
 
     private Integer sentinels;
 
@@ -184,12 +184,12 @@ public class SentinelMaster {
         this.authPass = authPass;
     }
 
-    public String getState() {
-        return state;
+    public String getStatus() {
+        return status;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Integer getSentinels() {

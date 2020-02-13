@@ -58,7 +58,8 @@ public class SentinelMastersService implements ISentinelMastersService {
             while (dbIterator.hasNext()) {
                 SentinelMaster dbSentinelMaster = dbIterator.next();
                 if (Objects.equals(realSentinelMaster.getMasterName(), dbSentinelMaster.getMasterName())) {
-                    boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), dbSentinelMaster.getMasterNode());
+                    String masterNode = dbSentinelMaster.getMasterHost() + SignUtil.COLON + dbSentinelMaster.getMasterPort();
+                    boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), masterNode);
                     realSentinelMaster.setMasterChanged(masterNodeChanged);
                     realSentinelMaster.setLastMasterNode(dbSentinelMaster.getLastMasterNode());
                     realIterator.remove();
@@ -72,7 +73,8 @@ public class SentinelMastersService implements ISentinelMastersService {
         }
         dbSentinelMasterList.forEach(dbSentinelMaster -> {
             dbSentinelMaster.setMonitor(false);
-            boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), dbSentinelMaster.getMasterNode());
+            String masterNode = dbSentinelMaster.getMasterHost() + SignUtil.COLON + dbSentinelMaster.getMasterPort();
+            boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), masterNode);
             dbSentinelMaster.setMasterChanged(masterNodeChanged);
             sentinelMasterList.add(dbSentinelMaster);
         });

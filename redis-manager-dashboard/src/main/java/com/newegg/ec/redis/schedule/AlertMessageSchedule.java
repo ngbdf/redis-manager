@@ -297,52 +297,53 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     cluster.setClusterState(Cluster.ClusterState.WARN);
                 }
             });
+            if (Objects.equals(SENTINEL, cluster.getRedisMode())) {
+                List<AlertRecord> sentinelMasterRecord = getSentinelMasterRecord(group, cluster, alertRule);
+                alertRecordList.addAll(sentinelMasterRecord);
+            }
         }
         clusterService.updateClusterState(cluster);
         return alertRecordList;
     }
 
+    /**
+     * 1. not monitor
+     * 2. master changed
+     * 3. status or state not ok
+     *
+     * @param group
+     * @param cluster
+     * @param alertRule
+     * @return
+     */
     private List<AlertRecord> getSentinelMasterRecord(Group group, Cluster cluster, AlertRule alertRule) {
         List<AlertRecord> alertRecordList = new ArrayList<>();
-        String seedNodes = cluster.getNodes();
-        sentinelMastersService.getSentinelMasterByClusterId(cluster.getClusterId());
-        RedisClient redisClient = null;
-        try {
-            redisClient = RedisClientFactory.buildRedisClient(RedisUtil.nodesToHostAndPort(seedNodes), cluster.getRedisPassword());
-            if (Objects.equals(CLUSTER, cluster.getRedisMode())) {
-                Map<String, String> clusterInfo = redisClient.getClusterInfo();
-                Cluster currentCluster = parseClusterInfoToObject(clusterInfo);
-                Cluster.ClusterState clusterState = currentCluster.getClusterState();
-                if (!Objects.equals(Cluster.ClusterState.HEALTH, currentCluster.getClusterState())) {
-                    alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Cluster state not ok"));
-                    cluster.setClusterState(clusterState);
-                }
+        List<SentinelMaster> sentinelMasterList = sentinelMastersService.getSentinelMasterByClusterId(cluster.getClusterId());
+        sentinelMasterList.forEach(sentinelMaster -> {
+            String node = sentinelMaster.getMasterHost() + SignUtil.COLON + sentinelMaster.getMasterPort();
+            String masterName = sentinelMaster.getMasterName();
+            StringBuilder reason = new StringBuilder();
+            if (!sentinelMaster.getMonitor()) {
+                reason.append(masterName).append(" is not being monitored now.\n");
             }
-        } catch (Exception e) {
-            logger.error("Connected " + cluster.getClusterName() + " failed.", e);
-            alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, e.getMessage()));
-            cluster.setClusterState(Cluster.ClusterState.BAD);
-            clusterService.updateClusterState(cluster);
-            return alertRecordList;
-        } finally {
-            if (redisClient != null) {
-                redisClient.close();
+            if (sentinelMaster.getMasterChanged()) {
+                reason.append(masterName).append(" failover, old master: ")
+                        .append(sentinelMaster.getLastMasterNode())
+                        .append(", new master: ")
+                        .append(sentinelMaster.getMasterHost())
+                        .append(SignUtil.COLON)
+                        .append(sentinelMaster.getMasterPort()).append(".\n");
             }
-        }
-        List<RedisNode> redisNodeList = redisNodeService.getRedisNodeListByClusterId(cluster.getClusterId());
-        if (redisNodeList == null || redisNodeList.isEmpty()) {
-            alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Get nodes failed"));
-            cluster.setClusterState(Cluster.ClusterState.BAD);
-        }
-        redisNodeList.forEach(redisNode -> {
-            String node = RedisUtil.getNodeString(redisNode);
-            String reason = !redisNode.getRunStatus() ? node + " is shutdown" : !redisNode.getInCluster() ? node + " not in cluster" : null;
-            if (!Strings.isNullOrEmpty(reason)) {
-                alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, node, reason));
-                cluster.setClusterState(Cluster.ClusterState.WARN);
+            String flags = sentinelMaster.getFlags();
+            if (!Objects.equals("master", flags)) {
+                reason.append(masterName).append(" flags: ").append(flags).append(".\n");
             }
+            String status = sentinelMaster.getStatus();
+            if (!Objects.equals("ok", status)) {
+                reason.append(masterName).append(" status: ").append(status).append(".\n");
+            }
+            alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, node, reason.toString()));
         });
-        clusterService.updateClusterState(cluster);
         return alertRecordList;
     }
 

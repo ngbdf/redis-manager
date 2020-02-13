@@ -53,7 +53,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         @Override
         public void run() {
             try {
-                int clusterId = cluster.getClusterId();
+                Integer clusterId = cluster.getClusterId();
                 logger.debug("Start collecting cluster: " + cluster.getClusterName());
                 List<NodeInfo> nodeInfoList = getNodeInfoList(cluster, timeType);
                 // clean last time data and save new data to db
@@ -61,7 +61,9 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
                 if (TimeType.MINUTE.equals(timeType)) {
                     clusterService.updateCluster(cluster);
-                    updateSentinelMasters(cluster);
+                    if (Objects.equals(SENTINEL, cluster.getRedisMode())) {
+                        updateSentinelMasters(cluster);
+                    }
                 }
             } catch (Exception e) {
                 logger.error("Collect " + timeType + " data for " + cluster.getClusterName() + " failed.", e);
@@ -70,24 +72,22 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
     }
 
     private void updateSentinelMasters(Cluster cluster) {
-        if (Objects.equals(SENTINEL, cluster.getRedisMode())) {
-            Integer clusterId = cluster.getClusterId();
-            List<SentinelMaster> newSentinelMasters = new LinkedList<>();
-            List<SentinelMaster> realSentinelMasterList = redisService.getSentinelMasters(clusterService.getClusterById(clusterId));
-            Iterator<SentinelMaster> iterator = realSentinelMasterList.iterator();
-            while (iterator.hasNext()) {
-                SentinelMaster sentinelMaster = iterator.next();
-                SentinelMaster sentinelMasterByMasterName = sentinelMastersService.getSentinelMasterByMasterName(clusterId, sentinelMaster.getMasterName());
-                if (sentinelMasterByMasterName == null) {
-                    sentinelMaster.setGroupId(cluster.getGroupId());
-                    sentinelMaster.setClusterId(clusterId);
-                    newSentinelMasters.add(sentinelMaster);
-                    iterator.remove();
-                }
+        Integer clusterId = cluster.getClusterId();
+        List<SentinelMaster> newSentinelMasters = new LinkedList<>();
+        List<SentinelMaster> realSentinelMasterList = redisService.getSentinelMasters(clusterService.getClusterById(clusterId));
+        Iterator<SentinelMaster> iterator = realSentinelMasterList.iterator();
+        while (iterator.hasNext()) {
+            SentinelMaster sentinelMaster = iterator.next();
+            SentinelMaster sentinelMasterByMasterName = sentinelMastersService.getSentinelMasterByMasterName(clusterId, sentinelMaster.getMasterName());
+            if (sentinelMasterByMasterName == null) {
+                sentinelMaster.setGroupId(cluster.getGroupId());
+                sentinelMaster.setClusterId(clusterId);
+                newSentinelMasters.add(sentinelMaster);
+                iterator.remove();
             }
-            realSentinelMasterList.forEach(sentinelMaster -> sentinelMastersService.updateSentinelMaster(sentinelMaster));
-            newSentinelMasters.forEach(sentinelMaster -> sentinelMastersService.addSentinelMaster(sentinelMaster));
         }
+        realSentinelMasterList.forEach(sentinelMaster -> sentinelMastersService.updateSentinelMaster(sentinelMaster));
+        newSentinelMasters.forEach(sentinelMaster -> sentinelMastersService.addSentinelMaster(sentinelMaster));
     }
 
     private List<NodeInfo> getNodeInfoList(Cluster cluster, Integer timeType) {
