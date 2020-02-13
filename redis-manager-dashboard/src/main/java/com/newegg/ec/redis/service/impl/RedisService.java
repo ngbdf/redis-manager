@@ -783,8 +783,8 @@ public class RedisService implements IRedisService {
                 sentinelMaster.setFailoverTimeout(Long.parseLong(master.get("failover-timeout")));
                 sentinelMaster.setParallelSync(Integer.parseInt(master.get("parallel-syncs")));
                 sentinelMaster.setSentinels(Integer.parseInt(master.get("num-other-sentinels")) + 1);
-                String state = nameAndStatus.get(master.get("name"));
-                sentinelMaster.setState(state);
+                String status = nameAndStatus.get(master.get("name"));
+                sentinelMaster.setStatus(status);
                 sentinelMasterList.add(sentinelMaster);
             }
         } catch (Exception e) {
