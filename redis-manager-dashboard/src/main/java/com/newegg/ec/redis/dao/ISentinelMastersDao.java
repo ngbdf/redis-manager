@@ -15,29 +15,26 @@ public interface ISentinelMastersDao {
     @Select("SELECT * FROM sentinel_masters WHERE cluster_id = #{clusterId}")
     List<SentinelMaster> selectSentinelMasterByClusterId(Integer clusterId);
 
-    @Select("SELECT * FROM sentinel_masters WHERE cluster_id = #{clusterId} and master_name =#{masterName}")
+    @Select("SELECT * FROM sentinel_masters WHERE cluster_id = #{clusterId} and master_name = #{masterName}")
     SentinelMaster selectSentinelMasterByMasterName(Integer clusterId, String masterName);
 
     @Select("SELECT * FROM sentinel_masters WHERE sentinel_master_id = #{sentinelMasterId}")
     SentinelMaster selectSentinelMasterById(Integer sentinelMasterId);
 
-    @Update("UPDATE sentinel_masters SET group_id = #{groupId}, " +
-            "flags = #{flags}, s_down_time = #{sDownTime}, o_down_time = #{oDownTime},  down_after_milliseconds = #{downAfterMilliseconds}," +
-            "num_slaves = #{numSlaves} , master_host = #{masterHost} , master_port = #{masterPort}, status = #{status} " +
-            "master_name = #{masterName} , quorum = #{quorum} , failover_timeout = #{failoverTimeout},parallel_syncs = #{parallelSync} ," +
+    @Update("UPDATE sentinel_masters SET flags = #{flags}, s_down_time = #{sDownTime}, o_down_time = #{oDownTime}, down_after_milliseconds = #{downAfterMilliseconds}," +
+            "num_slaves = #{numSlaves} , master_host = #{masterHost} , master_port = #{masterPort}, status = #{status}, " +
+            "quorum = #{quorum} , failover_timeout = #{failoverTimeout}, parallel_syncs = #{parallelSync}, " +
             "update_time = NOW() " +
-            "WHERE cluster_id = #{clusterId}")
+            "WHERE cluster_id = #{clusterId} AND master_name = #{masterName}")
     int updateSentinelMaster(SentinelMaster sentinelMaster);
 
     @Insert("INSERT into sentinel_masters (cluster_id, group_id, master_name, master_host, " +
             "master_port, last_master_node, flags, s_down_time, o_down_time, down_after_milliseconds, " +
             "num_slaves, quorum, failover_timeout, parallel_syncs, status, update_time) " +
             "VALUES " +
-            "(#{sentinelMaster.clusterId}, #{sentinelMaster.groupId}, #{sentinelMaster.masterName}, #{sentinelMaster.masterHost}, " +
-            "#{sentinelMaster.masterPort}, #{sentinelMaster.lastMasterNode}, #{sentinelMaster.flags}, #{sentinelMaster.sDownTime}, #{sentinelMaster.oDownTime}, " +
-            "#{sentinelMaster.downAfterMilliseconds}, #{sentinelMaster.numSlaves}, #{sentinelMaster.quorum}, #{sentinelMaster.failoverTimeout}, " +
-            "#{sentinelMaster.numSlaves}, #{sentinelMaster.numSlaves}, " +
-            "#{sentinelMaster.parallelSync}, #{sentinelMaster.status}, NOW())")
+            "(#{clusterId}, #{groupId}, #{masterName}, #{masterHost}, " +
+            "#{masterPort}, #{lastMasterNode}, #{flags}, #{sDownTime}, #{oDownTime}, #{downAfterMilliseconds}, " +
+            "#{numSlaves}, #{quorum}, #{failoverTimeout}, #{parallelSync}, #{status}, NOW())")
     int insertSentinelMaster(SentinelMaster sentinelMaster);
 
     @Delete("DELETE FROM sentinel_masters WHERE sentinel_master_id = #{sentinelMasterId}")
@@ -55,6 +52,7 @@ public interface ISentinelMastersDao {
             "master_port integer(4) NOT NULL,\n" +
             "flags varchar(255) NOT NULL,\n" +
             "status varchar(50) NOT NULL,\n" +
+            "last_master_node varchar(255) NOT NULL,\n" +
             "s_down_time bigint(20) NOT NULL,\n" +
             "o_down_time bigint(20) NOT NULL,\n" +
             "down_after_milliseconds bigint(20) NOT NULL,\n" +
@@ -62,7 +60,6 @@ public interface ISentinelMastersDao {
             "quorum integer(4) NOT NULL,\n" +
             "failover_timeout bigint(4) NOT NULL,\n" +
             "parallel_syncs integer(4) NOT NULL,\n" +
-            "monitor tinyint(1) DEFAULT 1,\n" +
             "update_time datetime(0) NOT NULL,\n" +
             "PRIMARY KEY (sentinel_master_id)\n" +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")

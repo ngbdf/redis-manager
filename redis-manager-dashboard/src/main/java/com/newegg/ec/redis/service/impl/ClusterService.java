@@ -137,7 +137,11 @@ public class ClusterService implements IClusterService {
         nodeInfoService.createNodeInfoTable(cluster.getClusterId());
         if (Objects.equals(redisMode, SENTINEL)) {
             List<SentinelMaster> sentinelMasters = redisService.getSentinelMasters(cluster);
-            sentinelMasters.forEach(sentinelMaster -> sentinelMastersService.addSentinelMaster(sentinelMaster));
+            sentinelMasters.forEach(sentinelMaster -> {
+                sentinelMaster.setClusterId(cluster.getClusterId());
+                sentinelMaster.setGroupId(cluster.getGroupId());
+                sentinelMastersService.addSentinelMaster(sentinelMaster);
+            });
         }
         return true;
     }
@@ -230,7 +234,9 @@ public class ClusterService implements IClusterService {
             logger.error("Fill base info failed, " + cluster);
             return false;
         }
-        fillTotalData(cluster);
+        if(!Objects.equals(redisMode, SENTINEL)) {
+            fillTotalData(cluster);
+        }
         if (Objects.equals(redisMode, CLUSTER)) {
             if (!fillClusterInfo(cluster)) {
                 logger.error("Fill cluster info failed, " + cluster);

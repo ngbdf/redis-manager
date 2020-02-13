@@ -2,6 +2,7 @@ package com.newegg.ec.redis.client;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import redis.clients.jedis.*;
@@ -258,18 +259,12 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public List<RedisNode> sentinelNodes(Set<HostAndPort> hostAndPorts) throws Exception {
+    public List<RedisNode> sentinelNodes(Set<HostAndPort> hostAndPorts) {
         List<RedisNode> redisNodeList = new ArrayList<>();
         hostAndPorts.forEach(hostAndPort -> {
             RedisNode redisNode = RedisNode.masterRedisNode(hostAndPort);
-            String linkSate;
-            try {
-                RedisClientFactory.buildRedisClient(hostAndPort);
-                linkSate = "connected";
-            } catch (Exception e) {
-                linkSate = "unknown";
-            }
-            redisNode.setLinkState(linkSate);
+            boolean run = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
+            redisNode.setLinkState(run ? "connected" : "unconnected");
             redisNode.setNodeId(hostAndPort.toString());
             redisNodeList.add(redisNode);
         });

@@ -151,9 +151,7 @@ public class RedisService implements IRedisService {
     public Map<String, Long> getDatabase(Cluster cluster) {
         Map<String, Long> database = new LinkedHashMap<>();
         Map<String, Map<String, Long>> keyspaceInfo = getKeyspaceInfo(cluster);
-        keyspaceInfo.forEach((key, val) -> {
-            database.put(key, val.get(KEYS));
-        });
+        keyspaceInfo.forEach((key, val) -> database.put(key, val.get(KEYS)));
         return database;
     }
 
@@ -782,14 +780,39 @@ public class RedisService implements IRedisService {
                 sentinelMaster.setFailoverTimeout(Long.parseLong(master.get("failover-timeout")));
                 sentinelMaster.setParallelSync(Integer.parseInt(master.get("parallel-syncs")));
                 sentinelMaster.setSentinels(Integer.parseInt(master.get("num-other-sentinels")) + 1);
-                String status = nameAndStatus.get(master.get("name"));
-                sentinelMaster.setStatus(status);
+                String sDownTimeStr = master.get("s-down-time");
+                Long sDownTime = Strings.isNullOrEmpty(sDownTimeStr) ? 0 : Long.parseLong(sDownTimeStr);
+                sentinelMaster.setsDownTime(sDownTime);
+                String oDownTimeStr = master.get("o-down-time");
+                Long oDownTime = Strings.isNullOrEmpty(oDownTimeStr) ? 0 : Long.parseLong(oDownTimeStr);
+                sentinelMaster.setoDownTime(oDownTime);
+                sentinelMaster.setStatus(nameAndStatus.get(master.get("name")));
                 sentinelMasterList.add(sentinelMaster);
             }
         } catch (Exception e) {
             logger.error("Add sentinel master host and port failed, " + cluster.getClusterName(), e);
         }
         return sentinelMasterList;
+    }
+
+    @Override
+    public Map<String, String> getSentinelMasterInfoByName(SentinelMaster sentinelMaster) {
+        RedisClient redisClient = null;
+        try {
+            Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPortSet(cluster.getNodes()));
+            List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
+            for (Map<String, String> masterMap : sentinelMasters) {
+                if (Objects.equals(masterMap.get("name"), sentinelMaster.getMasterName())) {
+                    return masterMap;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Get sentinel master info by master name failed.", e);
+        } finally {
+            close(redisClient);
+        }
+        return null;
     }
 
     private IDatabaseCommand buildDatabaseCommandClient(Cluster cluster) {

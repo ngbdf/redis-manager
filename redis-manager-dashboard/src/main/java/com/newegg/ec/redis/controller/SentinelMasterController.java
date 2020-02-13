@@ -8,13 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.PathParam;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Everly.J.Ju
@@ -34,9 +32,16 @@ public class SentinelMasterController {
 
     @RequestMapping(value = "/getSentinelMasterList/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
-    public Result getMasterInformation(@PathParam("clusterId") Integer clusterId) {
+    public Result getMasterInformation(@PathVariable("clusterId") Integer clusterId) {
         List<SentinelMaster> sentinelMaster = sentinelMastersService.getSentinelMasterByClusterId(clusterId);
         return Result.successResult(sentinelMaster);
+    }
+
+    @RequestMapping(value = "/getSentinelMaster", method = RequestMethod.POST)
+    @ResponseBody
+    public Result getMasterInformation(@RequestBody SentinelMaster sentinelMaster) {
+        Map<String, String> masterMap = redisService.getSentinelMasterInfoByName(sentinelMaster);
+        return masterMap != null ? Result.successResult(masterMap) : Result.failResult();
     }
 
     //新增，移除 sentinel master

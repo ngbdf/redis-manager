@@ -54,7 +54,7 @@ public interface IAlertRecordDao {
             "rule_id integer(4) NOT NULL, " +
             "redis_node varchar(50) NOT NULL, " +
             "alert_rule varchar(50) NOT NULL, " +
-            "actual_data varchar(50) NOT NULL, " +
+            "actual_data varchar(255) NOT NULL, " +
             "check_cycle integer(4) NOT NULL, " +
             "rule_info varchar(255) DEFAULT NULL, " +
             "update_time datetime(0) NOT NULL, " +

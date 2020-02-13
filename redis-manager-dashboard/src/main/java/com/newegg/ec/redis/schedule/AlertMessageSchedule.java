@@ -342,7 +342,9 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
             if (!Objects.equals("ok", status)) {
                 reason.append(masterName).append(" status: ").append(status).append(".\n");
             }
-            alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, node, reason.toString()));
+            if (!Strings.isNullOrEmpty(reason.toString())) {
+                alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, node, reason.toString()));
+            }
         });
         return alertRecordList;
     }

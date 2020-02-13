@@ -161,4 +161,6 @@ public interface IRedisService {
 
     List<SentinelMaster> getSentinelMasters(Cluster cluster);
 
+    Map<String, String> getSentinelMasterInfoByName(SentinelMaster sentinelMaster);
+
 }

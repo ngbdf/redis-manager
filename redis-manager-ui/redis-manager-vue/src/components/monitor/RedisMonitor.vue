@@ -9,13 +9,14 @@
               <i class="el-icon-sunny health" v-if="cluster.clusterState == 'HEALTH'"></i>
               <i class="el-icon-heavy-rain bad" title="Status" v-else></i>
             </span>
-            <div v-if="!isSentinelMode">
+            <div>
               <el-button
                 size="mini"
                 type="primary"
                 title="Query"
                 icon="el-icon-search"
                 @click="handleQuery(cluster.clusterId)"
+                :disabled="isSentinelMode"
               >Query</el-button>
               <el-button
                 size="mini"
@@ -23,6 +24,7 @@
                 icon="el-icon-ali-slow"
                 title="Slow log"
                 @click="slowLogVisible = true"
+                :disabled="isSentinelMode"
               >Slow Log</el-button>
             </div>
           </div>
@@ -103,12 +105,25 @@
       <div class="base-info-wrapper">
         <el-table :data="sentinelMasterList">
           <el-table-column property="masterName" label="Master Name"></el-table-column>
-          <el-table-column property="flags" label="Flags"></el-table-column>
-          <el-table-column label="Master Node"></el-table-column>
+          <el-table-column property="status" label="Status">
+            <template slot-scope="scope">
+              <el-tag size="mini" v-if="scope.row.status == 'ok'">{{ scope.row.status }}</el-tag>
+              <el-tag size="mini" type="danger" v-else>{{ scope.row.status }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column property="flags" label="Flags">
+            <template slot-scope="scope">
+              <el-tag size="mini" v-if="scope.row.flags == 'master'">{{ scope.row.flags }}</el-tag>
+              <el-tag size="mini" type="danger" v-else>{{ scope.row.flags }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="Master Node">
+            <template slot-scope="scope">{{ scope.row.masterHost }}:{{ scope.row.masterPort }}</template>
+          </el-table-column>
           <el-table-column property="lastMasterNode" label="Last Master Node"></el-table-column>
-          <el-table-column property="masterNode" label="Master Node"></el-table-column>
           <el-table-column property="numSlaves" label="Num Slaves"></el-table-column>
           <el-table-column property="parallelSync" label="Parallel Sync"></el-table-column>
+          <el-table-column property="sentinels" label="Sentinels"></el-table-column>
           <el-table-column label="Detail"></el-table-column>
         </el-table>
       </div>
@@ -616,6 +631,20 @@ export default {
       this.pickerDateTime();
       this.timedRefresh();
       this.isSentinelMode = cluster.redisMode == "sentinel";
+      if (this.isSentinelMode) {
+        this.getSentinelMasterList(clusterId);
+        this.infoItemList = [
+          "connections_received",
+          "rejected_connections",
+          "connected_clients",
+          "blocked_clients",
+          "commands_processed",
+          "instantaneous_ops_per_sec",
+          "cpu_sys",
+          "cpu_user"
+        ];
+        this.selectedInfoItemList = this.infoItemList;
+      }
     });
   },
   destroyed() {
