@@ -212,6 +212,11 @@ public class ClusterService implements IClusterService {
         if (clusterId == null) {
             return false;
         }
+        Cluster cluster = getClusterById(clusterId);
+        String redisMode = cluster.getRedisMode();
+        if (SENTINEL.equalsIgnoreCase(redisMode)) {
+            sentinelMastersService.deleteSentinelMasterByClusterId(clusterId);
+        }
         clusterDao.deleteClusterById(clusterId);
         nodeInfoService.deleteNodeInfoTable(clusterId);
         redisNodeService.deleteRedisNodeListByClusterId(clusterId);

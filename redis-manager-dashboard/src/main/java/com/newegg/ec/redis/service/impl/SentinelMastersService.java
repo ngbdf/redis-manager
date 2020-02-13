@@ -1,26 +1,18 @@
 package com.newegg.ec.redis.service.impl;
 
 import com.google.common.base.Strings;
-import com.newegg.ec.redis.client.RedisClient;
-import com.newegg.ec.redis.client.RedisClientFactory;
+import com.newegg.ec.redis.client.IRedisClient;
 import com.newegg.ec.redis.dao.ISentinelMastersDao;
-import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.entity.SentinelMaster;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.service.ISentinelMastersService;
-import com.newegg.ec.redis.util.NetworkUtil;
-import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.HostAndPort;
 
 import java.util.*;
-
-import static com.newegg.ec.redis.util.RedisUtil.nodesToHostAndPortSet;
 
 /**
  * @author Jay.H.Zou
@@ -39,6 +31,9 @@ public class SentinelMastersService implements ISentinelMastersService {
 
     @Autowired
     private IClusterService clusterService;
+
+    @Autowired
+    private IRedisClient redisClient;
 
     @Override
     public List<SentinelMaster> getSentinelMasterByClusterId(Integer clusterId) {
@@ -133,6 +128,15 @@ public class SentinelMastersService implements ISentinelMastersService {
 
     @Override
     public boolean deleteSentinelMasterById(Integer sentinelMasterId) {
+
+        try {
+            SentinelMaster sentinelMaster = getSentinelMasterById(sentinelMasterId);
+            String masterName = sentinelMaster.getMasterName();
+            redisClient.removeMaster(masterName);
+        } catch (Exception e) {
+            logger.error("Client remove sentinel master failed. ", e);
+            return false;
+        }
         try {
             return sentinelMastersDao.deleteSentinelMasterById(sentinelMasterId) > 0;
         } catch (Exception e) {
