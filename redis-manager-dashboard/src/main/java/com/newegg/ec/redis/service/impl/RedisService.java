@@ -759,6 +759,18 @@ public class RedisService implements IRedisService {
             Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
             RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts);
             List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
+            Map<String, String> info = redisClient.getInfo(SENTINEL);
+            Map<String, String> nameAndStatus = new HashMap<>();
+            for (String value : info.values()) {
+                String[] keyValues = SignUtil.splitByCommas(value);
+                if (keyValues.length == 1) {
+                    continue;
+                }
+                String name = SignUtil.splitByEqualSign(keyValues[0])[1];
+                String status = SignUtil.splitByEqualSign(keyValues[1])[1];
+                nameAndStatus.put(name, status);
+            }
+
             for (Map<String, String> master : sentinelMasters) {
                 SentinelMaster sentinelMaster = new SentinelMaster();
                 sentinelMaster.setFlags(master.get("flags"));
@@ -770,6 +782,9 @@ public class RedisService implements IRedisService {
                 sentinelMaster.setDownAfterMilliseconds(Long.parseLong(master.get("down-after-milliseconds")));
                 sentinelMaster.setFailoverTimeout(Long.parseLong(master.get("failover-timeout")));
                 sentinelMaster.setParallelSync(Integer.parseInt(master.get("parallel-syncs")));
+                sentinelMaster.setSentinels(Integer.parseInt(master.get("num-other-sentinels")) + 1);
+                String state = nameAndStatus.get(master.get("name"));
+                sentinelMaster.setState(state);
                 sentinelMasterList.add(sentinelMaster);
             }
         } catch (Exception e) {
