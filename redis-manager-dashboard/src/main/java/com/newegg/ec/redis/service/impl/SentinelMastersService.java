@@ -33,9 +33,6 @@ public class SentinelMastersService implements ISentinelMastersService {
     @Autowired
     private IClusterService clusterService;
 
-    @Autowired
-    private IRedisClient redisClient;
-
     @Override
     public List<SentinelMaster> getSentinelMasterByClusterId(Integer clusterId) {
         try {
@@ -108,76 +105,41 @@ public class SentinelMastersService implements ISentinelMastersService {
     @Override
     public boolean updateSentinelMaster(SentinelMaster sentinelMaster) {
         try {
-            String masterName = sentinelMaster.getMasterName();
-            String ip = sentinelMaster.getMasterHost();
-            int port = sentinelMaster.getMasterPort();
-            int quorum = sentinelMaster.getQuorum();
-            if (Strings.isNullOrEmpty(masterName) && Strings.isNullOrEmpty(ip) && Strings.isNullOrEmpty(String.valueOf(port)) && Strings.isNullOrEmpty(String.valueOf(quorum))) {
-                redisClient.monitorMaster(masterName, ip, port, quorum);
-            }
             return sentinelMastersDao.updateSentinelMaster(sentinelMaster) > 0;
         } catch (Exception e) {
             logger.error("Update sentinel master failed, " + sentinelMaster, e);
             return false;
-        } finally {
-            redisClient.close();
         }
     }
 
     @Override
     public boolean addSentinelMaster(SentinelMaster sentinelMaster) {
         try {
-            String masterName = sentinelMaster.getMasterName();
-            String ip = sentinelMaster.getMasterHost();
-            int port = sentinelMaster.getMasterPort();
-            int quorum = sentinelMaster.getQuorum();
-            if (Strings.isNullOrEmpty(masterName) && Strings.isNullOrEmpty(ip) && Strings.isNullOrEmpty(String.valueOf(port)) && Strings.isNullOrEmpty(String.valueOf(quorum))) {
-                redisClient.monitorMaster(masterName, ip, port, quorum);
-            }
             sentinelMaster.setLastMasterNode(sentinelMaster.getMasterHost() + SignUtil.COLON + sentinelMaster.getMasterPort());
             return sentinelMastersDao.insertSentinelMaster(sentinelMaster) > 0;
         } catch (Exception e) {
             logger.error("Add sentinel master failed. ", e);
             return false;
-        } finally {
-            redisClient.close();
         }
-    }
-
-    @Override
-    public boolean deleteSentinelMaster(SentinelMaster sentinelMaster) {
-        return false;
     }
 
     @Override
     public boolean deleteSentinelMasterById(Integer sentinelMasterId) {
         try {
-            SentinelMaster sentinelMaster = getSentinelMasterById(sentinelMasterId);
-            String masterName = sentinelMaster.getMasterName();
-            redisClient.removeMaster(masterName);
             return sentinelMastersDao.deleteSentinelMasterById(sentinelMasterId) > 0;
         } catch (Exception e) {
             logger.error("Remove sentinel master failed.", e);
             return false;
-        } finally {
-            redisClient.close();
         }
     }
 
     @Override
     public boolean deleteSentinelMasterByClusterId(Integer clusterId) {
         try {
-            List<SentinelMaster> sentinelMasters = getSentinelMasterByClusterId(clusterId);
-            for (SentinelMaster sentinelMaster : sentinelMasters) {
-                String masterName = sentinelMaster.getMasterName();
-                redisClient.removeMaster(masterName);
-            }
             return sentinelMastersDao.deleteSentinelMasterByClusterId(clusterId) > 0;
         } catch (Exception e) {
             logger.error("Delete sentinel master failed. ", e);
             return false;
-        } finally {
-            redisClient.close();
         }
     }
 }

@@ -159,46 +159,6 @@ public interface IRedisService {
      */
     void autoGenerateConfigFile(Cluster cluster);
 
-    /*-----------------sentinel monitor-----------------*/
-
     List<SentinelMaster> getSentinelMasters(Cluster cluster);
-
-    /**
-     * 修改sentinel节点配置文件(只对当前sentinel节点有用)
-     * 建议sentinel节点配置尽可能一直,才能在故障转移和发现时容易达成一致
-     * @param SentinelMaster
-     * @return
-     */
-    boolean setSentinelConfig(SentinelMaster SentinelMaster, SentinelConfigUtil.SentinelConfig redisConfig);
-
-    /**
-     * 查看sentinel节点info
-     * @param SentinelMaster
-     * @return
-     */
-    Map<String, String> getSentinelConfig(SentinelMaster SentinelMaster);
-
-    /**
-     * 返回指定主节点的ip地址和端口
-     */
-
-    List<String> getMasterAddrByName(SentinelMaster SentinelMaster);
-
-    /**
-     * 对主节点强制故障转移
-     */
-    boolean failOverMaster(SentinelMaster SentinelMaster);
-
-    /**
-     * 展示所有被监控的主节点状态及相关信息
-     * @param SentinelMaster
-     */
-    List<Map<String, String>> getMastersInfo(SentinelMaster SentinelMaster);
-
-    /**
-     * 对主节点监控
-     */
-    boolean getMasterState(SentinelMaster SentinelMaster);
-
 
 }

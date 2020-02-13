@@ -758,19 +758,18 @@ public class RedisService implements IRedisService {
         try {
             Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
             RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts);
-            List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
             Map<String, String> info = redisClient.getInfo(SENTINEL);
             Map<String, String> nameAndStatus = new HashMap<>();
-            for (String value : info.values()) {
-                String[] keyValues = SignUtil.splitByCommas(value);
-                if (keyValues.length == 1) {
-                    continue;
+            for (String key : info.keySet()) {
+                if (key.startsWith("master")) {
+                    String value = info.get(key);
+                    String[] keyValues = SignUtil.splitByCommas(value);
+                    String name = SignUtil.splitByEqualSign(keyValues[0])[1];
+                    String status = SignUtil.splitByEqualSign(keyValues[1])[1];
+                    nameAndStatus.put(name, status);
                 }
-                String name = SignUtil.splitByEqualSign(keyValues[0])[1];
-                String status = SignUtil.splitByEqualSign(keyValues[1])[1];
-                nameAndStatus.put(name, status);
             }
-
+            List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
             for (Map<String, String> master : sentinelMasters) {
                 SentinelMaster sentinelMaster = new SentinelMaster();
                 sentinelMaster.setFlags(master.get("flags"));
@@ -809,117 +808,6 @@ public class RedisService implements IRedisService {
     }
 
     private void close(IRedisClient redisClient) {
-        if (redisClient != null) {
-            redisClient.close();
-        }
-    }
-
-    //***********************sentinel
-    @Override
-    public boolean setSentinelConfig(SentinelMaster sentinelMaster, SentinelConfigUtil.SentinelConfig redisConfig) {
-        RedisClient redisClient = null;
-        try {
-            String masterName = sentinelMaster.getMasterName();
-            String configKey = redisConfig.getConfigKey();
-            String configValue = redisConfig.getConfigValue();
-            if (Strings.isNullOrEmpty(configValue)) {
-                configValue = "";
-            }
-            Map<String, String> parameterMap = new HashMap<>();
-            parameterMap.put(configKey, configValue);
-            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
-            redisClient.setConfig(masterName, parameterMap);
-            return true;
-        } catch (Exception e) {
-            logger.error(" change config failed, ", e);
-            return false;
-        } finally {
-            close(redisClient);
-        }
-
-    }
-
-    @Override
-    public Map<String, String> getSentinelConfig(SentinelMaster sentinelMaster) {
-        RedisClient redisClient = null;
-        try {
-            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
-            return redisClient.getInfo();
-        } catch (Exception e) {
-            logger.error(" get config failed.", e);
-            return null;
-        } finally {
-            close(redisClient);
-        }
-
-    }
-
-    @Override
-    public List<String> getMasterAddrByName(SentinelMaster sentinelMaster) {
-        RedisClient redisClient = null;
-        try {
-            String masterName = sentinelMaster.getMasterName();
-            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
-            return redisClient.getMasterAddrByName(masterName);
-        } catch (Exception e) {
-            logger.error(" get config failed.", e);
-            return null;
-        } finally {
-            close(redisClient);
-        }
-
-    }
-
-    @Override
-    public boolean failOverMaster(SentinelMaster sentinelMaster) {
-        RedisClient redisClient = null;
-        try {
-            String masterName = sentinelMaster.getMasterName();
-            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
-            redisClient.failoverMaster(masterName);
-            return true;
-        } catch (Exception e) {
-            logger.error(" failover failed.", e);
-            return false;
-        } finally {
-            close(redisClient);
-        }
-    }
-
-    @Override
-    public List<Map<String, String>> getMastersInfo(SentinelMaster sentinelMaster) {
-        RedisClient redisClient = null;
-        try {
-            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
-            return redisClient.getSentinelMasters();
-        } catch (Exception e) {
-            logger.error(" get masters info failed.", e);
-            return null;
-        } finally {
-            close(redisClient);
-        }
-    }
-
-    @Override
-    public boolean getMasterState(SentinelMaster sentinelMaster) {
-        RedisClient redisClient = null;
-        try {
-            String masterName = sentinelMaster.getMasterName();
-            String ip = sentinelMaster.getMasterHost();
-            int port = sentinelMaster.getMasterPort();
-            int quorum = sentinelMaster.getQuorum();
-            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
-            redisClient.monitorMaster(masterName, ip, port, quorum);
-        } catch (Exception e) {
-            logger.error(" get masters info failed.", e);
-        } finally {
-            close(redisClient);
-        }
-        return false;
-    }
-
-
-    private void close(RedisClient redisClient) {
         if (redisClient != null) {
             redisClient.close();
         }

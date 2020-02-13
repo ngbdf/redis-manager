@@ -1,6 +1,5 @@
 package com.newegg.ec.redis.service;
 
-import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.SentinelMaster;
 
 import java.util.List;
@@ -8,7 +7,6 @@ import java.util.List;
 /**
  * @author Jay.H.Zou
  * @date 1/22/2020
- * List<SentinelMaster> getSentinelMasterByClusterId(Integer clusterId);
  */
 public interface ISentinelMastersService {
 
@@ -21,8 +19,6 @@ public interface ISentinelMastersService {
     boolean updateSentinelMaster(SentinelMaster sentinelMaster);
 
     boolean addSentinelMaster(SentinelMaster sentinelMaster);
-
-    boolean deleteSentinelMaster(SentinelMaster sentinelMaster);
 
     boolean deleteSentinelMasterById(Integer sentinelMasterId);
 
