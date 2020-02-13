@@ -829,8 +829,7 @@ public class RedisService implements IRedisService {
     public Map<String, String> getSentinelConfig(SentinelMaster sentinelMaster) {
         RedisClient redisClient = null;
         try {
-            String nodes = sentinelMaster.getMasterNode();
-            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes));
+            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
             return redisClient.getInfo();
         } catch (Exception e) {
             logger.error(" get config failed.", e);

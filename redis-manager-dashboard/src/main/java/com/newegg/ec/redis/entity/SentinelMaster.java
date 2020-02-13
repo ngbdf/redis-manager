@@ -12,10 +12,6 @@ public class SentinelMaster {
 
     private Integer groupId;
 
-    private Integer userId;
-
-    private String masterNode;
-
     private String lastMasterNode;
 
     private String flags;
@@ -46,6 +42,8 @@ public class SentinelMaster {
 
     private String state;
 
+    private Integer sentinels;
+
     private boolean monitor;
 
     private boolean masterChanged;
@@ -72,22 +70,6 @@ public class SentinelMaster {
 
     public void setGroupId(Integer groupId) {
         this.groupId = groupId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getMasterNode() {
-        return masterNode;
-    }
-
-    public void setMasterNode(String masterNode) {
-        this.masterNode = masterNode;
     }
 
     public String getLastMasterNode() {
@@ -208,6 +190,14 @@ public class SentinelMaster {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public Integer getSentinels() {
+        return sentinels;
+    }
+
+    public void setSentinels(Integer sentinels) {
+        this.sentinels = sentinels;
     }
 
     public boolean getMonitor() {

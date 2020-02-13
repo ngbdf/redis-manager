@@ -7,6 +7,7 @@ import com.newegg.ec.redis.entity.SentinelMaster;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.service.ISentinelMastersService;
+import com.newegg.ec.redis.util.SignUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,6 @@ public class SentinelMastersService implements ISentinelMastersService {
         while (realIterator.hasNext()) {
             SentinelMaster realSentinelMaster = realIterator.next();
             realSentinelMaster.setMonitor(true);
-
             Iterator<SentinelMaster> dbIterator = dbSentinelMasterList.iterator();
             while (dbIterator.hasNext()) {
                 SentinelMaster dbSentinelMaster = dbIterator.next();
@@ -72,6 +72,8 @@ public class SentinelMastersService implements ISentinelMastersService {
         }
         dbSentinelMasterList.forEach(dbSentinelMaster -> {
             dbSentinelMaster.setMonitor(false);
+            boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), dbSentinelMaster.getMasterNode());
+            dbSentinelMaster.setMasterChanged(masterNodeChanged);
             sentinelMasterList.add(dbSentinelMaster);
         });
         return sentinelMasterList;
@@ -114,6 +116,7 @@ public class SentinelMastersService implements ISentinelMastersService {
     @Override
     public boolean addSentinelMaster(SentinelMaster sentinelMaster) {
         try {
+            sentinelMaster.setLastMasterNode(sentinelMaster.getMasterHost() + SignUtil.COLON + sentinelMaster.getMasterPort());
             return sentinelMastersDao.insertSentinelMaster(sentinelMaster) > 0;
         } catch (Exception e) {
             logger.error("Add sentinel master failed. ", e);
@@ -128,22 +131,17 @@ public class SentinelMastersService implements ISentinelMastersService {
 
     @Override
     public boolean deleteSentinelMasterById(Integer sentinelMasterId) {
-
         try {
             SentinelMaster sentinelMaster = getSentinelMasterById(sentinelMasterId);
             String masterName = sentinelMaster.getMasterName();
             redisClient.removeMaster(masterName);
-        } catch (Exception e) {
-            logger.error("Client remove sentinel master failed. ", e);
-            return false;
-        }
-        try {
             return sentinelMastersDao.deleteSentinelMasterById(sentinelMasterId) > 0;
         } catch (Exception e) {
-            logger.error("Delete sentinel master failed. ", e);
+            logger.error("Remove sentinel master failed.", e);
             return false;
+        } finally {
+            redisClient.close();
         }
-
     }
 
     @Override

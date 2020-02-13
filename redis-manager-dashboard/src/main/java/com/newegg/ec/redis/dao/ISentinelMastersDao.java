@@ -28,15 +28,15 @@ public interface ISentinelMastersDao {
             "update_time = NOW() where cluster_id = #{clusterId}")
     int updateSentinelMaster(SentinelMaster sentinelMaster);
 
-    @Insert("INSERT into 'sentinel_masters' (cluster_id, group_id, user_id, master_name, master_host, " +
-            "master_port, flags, s_down_time, o_down_time, down_after_milliseconds" +
+    @Insert("INSERT into 'sentinel_masters' (cluster_id, group_id, master_name, master_host, " +
+            "master_port, last_master_node, flags, s_down_time, o_down_time, down_after_milliseconds" +
             "num_slaves, quorum, failover_timeout, parallel_syncs, state, update_time) " +
             "VALUES " +
-            "(#{sentinelMaster.clusterId}, #{sentinelMaster.groupId}, #{sentinelMaster.userId}, #{sentinelMaster.masterName}, #{sentinelMaster.masterHost}," +
-            "#{sentinelMaster.masterPort},#{sentinelMaster.flags},#{sentinelMaster.sDownTime},#{sentinelMaster.oDownTime}," +
-            "#{sentinelMaster.downAfterMilliseconds},#{sentinelMaster.numSlaves},#{sentinelMaster.quorum},#{sentinelMaster.failoverTimeout}," +
-            "#{sentinelMaster.numSlaves},#{sentinelMaster.numSlaves}," +
-            "#{sentinelMaster.parallelSync},#{sentinelMaster.state},NOW()) ")
+            "(#{sentinelMaster.clusterId}, #{sentinelMaster.groupId}, #{sentinelMaster.masterName}, #{sentinelMaster.masterHost}," +
+            "#{sentinelMaster.masterPort}, #{sentinelMaster.lastMasterNode}, #{sentinelMaster.flags}, #{sentinelMaster.sDownTime}, #{sentinelMaster.oDownTime}," +
+            "#{sentinelMaster.downAfterMilliseconds}, #{sentinelMaster.numSlaves}, #{sentinelMaster.quorum}, #{sentinelMaster.failoverTimeout}," +
+            "#{sentinelMaster.numSlaves}, #{sentinelMaster.numSlaves}," +
+            "#{sentinelMaster.parallelSync}, #{sentinelMaster.state}, NOW()) ")
     int insertSentinelMaster(SentinelMaster sentinelMaster);
 
     @Delete("")
