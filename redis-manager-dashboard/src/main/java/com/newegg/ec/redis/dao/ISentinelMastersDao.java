@@ -21,7 +21,7 @@ public interface ISentinelMastersDao {
     @Select("SELECT * from 'sentinel_masters' where sentinel_master_id = #{sentinelMasterId}")
     SentinelMaster selectSentinelMasterById(Integer sentinelMasterId);
 
-    @Update("UPDATE sentinel_masters set group_id = #{groupId}, user_id = #{userId}, " +
+    @Update("UPDATE sentinel_masters set group_id = #{groupId}, " +
             "flags = #{flags}, s_down_time = #{sDownTime}, o_down_time = #{oDownTime},  down_after_milliseconds = #{downAfterMilliseconds}," +
             "num_slaves = #{numSlaves} , master_host = #{masterHost} , master_port = #{masterPort}, state = #{state} " +
             "master_name = #{masterName} , quorum = #{quorum} , failover_timeout = #{failoverTimeout},parallel_syncs = #{parallelSync} ," +
@@ -52,7 +52,6 @@ public interface ISentinelMastersDao {
             "sentinel_master_id integer(4) NOT NULL AUTO_INCREMENT,\n" +
             "cluster_id integer(4) NOT NULL,\n" +
             "group_id integer(4) NOT NULL,\n" +
-            "user_id integer(4) NOT NULL,\n" +
             "master_name varchar(255) NOT NULL,\n" +
             "master_host varchar(255) NOT NULL,\n" +
             "master_port integer(4) NOT NULL,\n" +
@@ -64,7 +63,7 @@ public interface ISentinelMastersDao {
             "quorum integer(4) NOT NULL,\n" +
             "failover_timeout bigint(4) NOT NULL,\n" +
             "parallel_syncs integer(4) NOT NULL,\n" +
-            "in_sentinel tinyint(1) NOT NULL,\n" +
+            "monitor tinyint(1) DEFAULT 1,\n" +
             "update_time datetime(0) NOT NULL,\n" +
             "state varchar(50) NOT NULL,\n" +
             "PRIMARY KEY (sentinel_master_id)\n" +

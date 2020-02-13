@@ -804,7 +804,6 @@ public class RedisService implements IRedisService {
     public boolean setSentinelConfig(SentinelMaster sentinelMaster, SentinelConfigUtil.SentinelConfig redisConfig) {
         RedisClient redisClient = null;
         try {
-            String nodes = sentinelMaster.getMasterNode();
             String masterName = sentinelMaster.getMasterName();
             String configKey = redisConfig.getConfigKey();
             String configValue = redisConfig.getConfigValue();
@@ -813,7 +812,7 @@ public class RedisService implements IRedisService {
             }
             Map<String, String> parameterMap = new HashMap<>();
             parameterMap.put(configKey, configValue);
-            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes));
+            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
             redisClient.setConfig(masterName, parameterMap);
             return true;
         } catch (Exception e) {
@@ -845,8 +844,7 @@ public class RedisService implements IRedisService {
         RedisClient redisClient = null;
         try {
             String masterName = sentinelMaster.getMasterName();
-            String nodes = sentinelMaster.getMasterNode();
-            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes));
+            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
             return redisClient.getMasterAddrByName(masterName);
         } catch (Exception e) {
             logger.error(" get config failed.", e);
@@ -861,9 +859,8 @@ public class RedisService implements IRedisService {
     public boolean failOverMaster(SentinelMaster sentinelMaster) {
         RedisClient redisClient = null;
         try {
-            String nodes = sentinelMaster.getMasterNode();
             String masterName = sentinelMaster.getMasterName();
-            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes));
+            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
             redisClient.failoverMaster(masterName);
             return true;
         } catch (Exception e) {
@@ -878,8 +875,7 @@ public class RedisService implements IRedisService {
     public List<Map<String, String>> getMastersInfo(SentinelMaster sentinelMaster) {
         RedisClient redisClient = null;
         try {
-            String nodes = sentinelMaster.getMasterNode();
-            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes));
+            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
             return redisClient.getSentinelMasters();
         } catch (Exception e) {
             logger.error(" get masters info failed.", e);
@@ -893,12 +889,11 @@ public class RedisService implements IRedisService {
     public boolean getMasterState(SentinelMaster sentinelMaster) {
         RedisClient redisClient = null;
         try {
-            String nodes = sentinelMaster.getMasterNode();
             String masterName = sentinelMaster.getMasterName();
             String ip = sentinelMaster.getMasterHost();
             int port = sentinelMaster.getMasterPort();
             int quorum = sentinelMaster.getQuorum();
-            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes));
+            redisClient = RedisClientFactory.buildRedisClient(new HostAndPort(sentinelMaster.getMasterHost(), sentinelMaster.getMasterPort()));
             redisClient.monitorMaster(masterName, ip, port, quorum);
         } catch (Exception e) {
             logger.error(" get masters info failed.", e);
