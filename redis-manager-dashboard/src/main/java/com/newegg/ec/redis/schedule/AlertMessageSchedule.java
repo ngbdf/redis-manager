@@ -320,8 +320,8 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         List<AlertRecord> alertRecordList = new ArrayList<>();
         List<SentinelMaster> sentinelMasterList = sentinelMastersService.getSentinelMasterByClusterId(cluster.getClusterId());
         sentinelMasterList.forEach(sentinelMaster -> {
-            String node = sentinelMaster.getMasterHost() + SignUtil.COLON + sentinelMaster.getMasterPort();
-            String masterName = sentinelMaster.getMasterName();
+            String node = sentinelMaster.getHost() + SignUtil.COLON + sentinelMaster.getPort();
+            String masterName = sentinelMaster.getName();
             StringBuilder reason = new StringBuilder();
             if (!sentinelMaster.getMonitor()) {
                 reason.append(masterName).append(" is not being monitored now.\n");
@@ -330,9 +330,9 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 reason.append(masterName).append(" failover, old master: ")
                         .append(sentinelMaster.getLastMasterNode())
                         .append(", new master: ")
-                        .append(sentinelMaster.getMasterHost())
+                        .append(sentinelMaster.getHost())
                         .append(SignUtil.COLON)
-                        .append(sentinelMaster.getMasterPort()).append(".\n");
+                        .append(sentinelMaster.getPort()).append(".\n");
             }
             String flags = sentinelMaster.getFlags();
             if (!Objects.equals("master", flags)) {

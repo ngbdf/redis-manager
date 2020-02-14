@@ -5,10 +5,10 @@
         <el-tag size="small">{{ currentGroup.groupName }}</el-tag>
       </el-form-item>
       <el-form-item label="Cluster Name" prop="clusterName">
-        <el-input v-model="cluster.clusterName" maxlength="30" show-word-limit></el-input>
+        <el-input v-model="cluster.clusterName" maxlength="30" show-word-limit autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="Redis Password" prop="redisPassword">
-        <el-input v-model.trim="cluster.redisPassword" maxlength="255" show-password></el-input>
+        <el-input v-model.trim="cluster.redisPassword" maxlength="255" show-password autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item
         v-for="(node, index) in cluster.nodeList"

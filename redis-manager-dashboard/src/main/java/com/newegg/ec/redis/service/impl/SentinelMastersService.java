@@ -54,8 +54,8 @@ public class SentinelMastersService implements ISentinelMastersService {
             Iterator<SentinelMaster> dbIterator = dbSentinelMasterList.iterator();
             while (dbIterator.hasNext()) {
                 SentinelMaster dbSentinelMaster = dbIterator.next();
-                if (Objects.equals(realSentinelMaster.getMasterName(), dbSentinelMaster.getMasterName())) {
-                    String masterNode = dbSentinelMaster.getMasterHost() + SignUtil.COLON + dbSentinelMaster.getMasterPort();
+                if (Objects.equals(realSentinelMaster.getName(), dbSentinelMaster.getName())) {
+                    String masterNode = dbSentinelMaster.getHost() + SignUtil.COLON + dbSentinelMaster.getPort();
                     boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), masterNode);
                     realSentinelMaster.setMasterChanged(masterNodeChanged);
                     realSentinelMaster.setLastMasterNode(dbSentinelMaster.getLastMasterNode());
@@ -70,7 +70,7 @@ public class SentinelMastersService implements ISentinelMastersService {
         }
         dbSentinelMasterList.forEach(dbSentinelMaster -> {
             dbSentinelMaster.setMonitor(false);
-            String masterNode = dbSentinelMaster.getMasterHost() + SignUtil.COLON + dbSentinelMaster.getMasterPort();
+            String masterNode = dbSentinelMaster.getHost() + SignUtil.COLON + dbSentinelMaster.getPort();
             boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), masterNode);
             dbSentinelMaster.setMasterChanged(masterNodeChanged);
             sentinelMasterList.add(dbSentinelMaster);
@@ -115,7 +115,7 @@ public class SentinelMastersService implements ISentinelMastersService {
     @Override
     public boolean addSentinelMaster(SentinelMaster sentinelMaster) {
         try {
-            sentinelMaster.setLastMasterNode(sentinelMaster.getMasterHost() + SignUtil.COLON + sentinelMaster.getMasterPort());
+            sentinelMaster.setLastMasterNode(sentinelMaster.getHost() + SignUtil.COLON + sentinelMaster.getPort());
             return sentinelMastersDao.insertSentinelMaster(sentinelMaster) > 0;
         } catch (Exception e) {
             logger.error("Add sentinel master failed. ", e);

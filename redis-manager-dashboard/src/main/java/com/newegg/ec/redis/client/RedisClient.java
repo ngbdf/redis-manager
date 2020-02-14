@@ -266,6 +266,7 @@ public class RedisClient implements IRedisClient {
             boolean run = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
             redisNode.setLinkState(run ? "connected" : "unconnected");
             redisNode.setNodeId(hostAndPort.toString());
+            redisNode.setFlags("master");
             redisNodeList.add(redisNode);
         });
         return redisNodeList;
@@ -656,23 +657,23 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public List<Map<String, String>> getSentinelSlaves(String masterName) {
+    public List<Map<String, String>> sentinelSlaves(String masterName) {
         return jedis.sentinelSlaves(masterName);
     }
 
     @Override
-    public String monitorMaster(String masterName, String ip, int port, int quorum) {
-        return jedis.sentinelMonitor(masterName, ip, port, quorum);
+    public boolean monitorMaster(String masterName, String ip, int port, int quorum) {
+        return Objects.equals(jedis.sentinelMonitor(masterName, ip, port, quorum), OK);
     }
 
     @Override
-    public String failoverMaster(String masterName) {
-        return jedis.sentinelFailover(masterName);
+    public boolean failoverMaster(String masterName) {
+        return Objects.equals(jedis.sentinelFailover(masterName), OK);
     }
 
     @Override
-    public String removeMaster(String masterName) {
-        return jedis.sentinelRemove(masterName);
+    public boolean removeMaster(String masterName) {
+        return Objects.equals(jedis.sentinelRemove(masterName), OK);
     }
 
     @Override
@@ -681,8 +682,8 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public String setConfig(String masterName, Map<String, String> parameterMap) {
-        return jedis.sentinelSet(masterName, parameterMap);
+    public boolean sentinelSet(String masterName, Map<String, String> parameterMap) {
+        return Objects.equals(jedis.sentinelSet(masterName, parameterMap), OK);
     }
 
     @Override

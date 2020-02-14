@@ -15,26 +15,30 @@ public interface ISentinelMastersDao {
     @Select("SELECT * FROM sentinel_masters WHERE cluster_id = #{clusterId}")
     List<SentinelMaster> selectSentinelMasterByClusterId(Integer clusterId);
 
-    @Select("SELECT * FROM sentinel_masters WHERE cluster_id = #{clusterId} and master_name = #{masterName}")
-    SentinelMaster selectSentinelMasterByMasterName(Integer clusterId, String masterName);
+    @Select("SELECT * FROM sentinel_masters WHERE cluster_id = #{clusterId} AND name = #{name}")
+    SentinelMaster selectSentinelMasterByMasterName(@Param("clusterId") Integer clusterId, @Param("name") String name);
 
     @Select("SELECT * FROM sentinel_masters WHERE sentinel_master_id = #{sentinelMasterId}")
     SentinelMaster selectSentinelMasterById(Integer sentinelMasterId);
 
-    @Update("UPDATE sentinel_masters SET flags = #{flags}, s_down_time = #{sDownTime}, o_down_time = #{oDownTime}, down_after_milliseconds = #{downAfterMilliseconds}," +
-            "num_slaves = #{numSlaves} , master_host = #{masterHost} , master_port = #{masterPort}, status = #{status}, " +
-            "quorum = #{quorum} , failover_timeout = #{failoverTimeout}, parallel_syncs = #{parallelSync}, " +
-            "update_time = NOW() " +
-            "WHERE cluster_id = #{clusterId} AND master_name = #{masterName}")
+    @Update("UPDATE sentinel_masters SET host = #{host} , port = #{port}, flags = #{flags}, " +
+            "status = #{status}, link_pending_commands = #{linkPendingCommands}, link_refcount = #{linkRefcount}, " +
+            "last_ping_sent = #{lastPingSent}, last_ok_ping_reply = #{lastOkPingReply}, last_ping_reply = #{lastPingReply}, " +
+            "s_down_time = #{sDownTime}, o_down_time = #{oDownTime}, down_after_milliseconds = #{downAfterMilliseconds}, info_refresh = #{infoRefresh}, " +
+            "role_reported = #{roleReported}, role_reported_time = #{roleReportedTime}, config_epoch = #{configEpoch}, num_slaves = #{numSlaves}, sentinels = #{sentinels}, " +
+            "quorum = #{quorum} , failover_timeout = #{failoverTimeout}, parallel_syncs = #{parallelSyncs}, auth_pass = #{authPass}, update_time = NOW() " +
+            "WHERE cluster_id = #{clusterId} AND name = #{name}")
     int updateSentinelMaster(SentinelMaster sentinelMaster);
 
-    @Insert("INSERT into sentinel_masters (cluster_id, group_id, master_name, master_host, " +
-            "master_port, last_master_node, flags, s_down_time, o_down_time, down_after_milliseconds, " +
-            "num_slaves, quorum, failover_timeout, parallel_syncs, status, update_time) " +
+    @Insert("INSERT INTO sentinel_masters (cluster_id, group_id, name, host, port, flags, last_master_node, " +
+            "status, link_pending_commands, link_refcount, last_ping_sent, last_ok_ping_reply, last_ping_reply, " +
+            "s_down_time, o_down_time, down_after_milliseconds, info_refresh, role_reported, role_reported_time, config_epoch, " +
+            "num_slaves, sentinels, quorum, failover_timeout, parallel_syncs, auth_pass, update_time) " +
             "VALUES " +
-            "(#{clusterId}, #{groupId}, #{masterName}, #{masterHost}, " +
-            "#{masterPort}, #{lastMasterNode}, #{flags}, #{sDownTime}, #{oDownTime}, #{downAfterMilliseconds}, " +
-            "#{numSlaves}, #{quorum}, #{failoverTimeout}, #{parallelSync}, #{status}, NOW())")
+            "(#{clusterId}, #{groupId}, #{name}, #{host}, #{port}, #{flags}, #{lastMasterNode}, " +
+            "#{status}, #{linkPendingCommands}, #{linkRefcount}, #{lastPingSent}, #{lastOkPingReply}, #{lastPingReply}, " +
+            "#{sDownTime}, #{oDownTime}, #{downAfterMilliseconds}, #{infoRefresh}, #{roleReported}, #{roleReportedTime}, #{configEpoch}, " +
+            "#{numSlaves}, #{sentinels}, #{quorum}, #{failoverTimeout}, #{parallelSyncs}, #{authPass}, NOW())")
     int insertSentinelMaster(SentinelMaster sentinelMaster);
 
     @Delete("DELETE FROM sentinel_masters WHERE sentinel_master_id = #{sentinelMasterId}")
@@ -47,19 +51,30 @@ public interface ISentinelMastersDao {
             "sentinel_master_id integer(4) NOT NULL AUTO_INCREMENT,\n" +
             "cluster_id integer(4) NOT NULL,\n" +
             "group_id integer(4) NOT NULL,\n" +
-            "master_name varchar(255) NOT NULL,\n" +
-            "master_host varchar(255) NOT NULL,\n" +
-            "master_port integer(4) NOT NULL,\n" +
+            "name varchar(255) NOT NULL,\n" +
+            "host varchar(255) NOT NULL,\n" +
+            "port integer(4) NOT NULL,\n" +
             "flags varchar(255) NOT NULL,\n" +
-            "status varchar(50) NOT NULL,\n" +
             "last_master_node varchar(255) NOT NULL,\n" +
-            "s_down_time bigint(20) NOT NULL,\n" +
-            "o_down_time bigint(20) NOT NULL,\n" +
+            "status varchar(50) NOT NULL,\n" +
+            "link_pending_commands bigint(20) NOT NULL,\n" +
+            "link_refcount bigint(20) NOT NULL,\n" +
+            "last_ping_sent bigint(20) NOT NULL,\n" +
+            "last_ok_ping_reply bigint(20) NOT NULL,\n" +
+            "last_ping_reply bigint(20) NOT NULL,\n" +
+            "s_down_time bigint(20) DEFAULT NULL,\n" +
+            "o_down_time bigint(20) DEFAULT NULL,\n" +
             "down_after_milliseconds bigint(20) NOT NULL,\n" +
+            "info_refresh bigint(20) NOT NULL,\n" +
+            "role_reported varchar(50) NOT NULL,\n" +
+            "role_reported_time bigint(20) NOT NULL,\n" +
+            "config_epoch bigint(20) NOT NULL,\n" +
             "num_slaves integer(4) NOT NULL,\n" +
+            "sentinels integer(4) NOT NULL,\n" +
             "quorum integer(4) NOT NULL,\n" +
             "failover_timeout bigint(4) NOT NULL,\n" +
             "parallel_syncs integer(4) NOT NULL,\n" +
+            "auth_pass varchar(255) DEFAULT NULL,\n" +
             "update_time datetime(0) NOT NULL,\n" +
             "PRIMARY KEY (sentinel_master_id)\n" +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")

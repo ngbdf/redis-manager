@@ -35,7 +35,6 @@ public class RedisNode {
     private NodeRole nodeRole;
 
     /**
-     * 节点状态: 当节点为 myself. master, slave 时, 此值为空
      * myself: 当前连接的节点
      * master: 节点是master.
      * slave: 节点是slave.

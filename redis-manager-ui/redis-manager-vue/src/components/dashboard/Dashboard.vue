@@ -137,6 +137,7 @@
               icon="el-icon-search"
               circle
               @click="handleQuery(cluster)"
+              :disabled="cluster.redisMode == 'sentinel'"
             ></el-button>
             <el-button
               size="mini"

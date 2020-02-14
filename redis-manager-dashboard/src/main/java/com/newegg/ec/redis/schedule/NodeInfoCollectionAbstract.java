@@ -78,7 +78,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         Iterator<SentinelMaster> iterator = realSentinelMasterList.iterator();
         while (iterator.hasNext()) {
             SentinelMaster sentinelMaster = iterator.next();
-            SentinelMaster sentinelMasterByMasterName = sentinelMastersService.getSentinelMasterByMasterName(clusterId, sentinelMaster.getMasterName());
+            SentinelMaster sentinelMasterByMasterName = sentinelMastersService.getSentinelMasterByMasterName(clusterId, sentinelMaster.getName());
             sentinelMaster.setGroupId(cluster.getGroupId());
             sentinelMaster.setClusterId(clusterId);
             if (sentinelMasterByMasterName == null) {

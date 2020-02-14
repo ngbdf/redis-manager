@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.*;
 import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
@@ -769,24 +771,19 @@ public class RedisService implements IRedisService {
             }
             List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
             for (Map<String, String> master : sentinelMasters) {
-                SentinelMaster sentinelMaster = new SentinelMaster();
-                sentinelMaster.setFlags(master.get("flags"));
-                sentinelMaster.setNumSlaves(Integer.parseInt(master.get("num-slaves")));
-                sentinelMaster.setMasterHost(master.get("ip"));
-                sentinelMaster.setMasterPort(Integer.parseInt(master.get("port")));
-                sentinelMaster.setMasterName(master.get("name"));
-                sentinelMaster.setQuorum(Integer.parseInt(master.get("quorum")));
-                sentinelMaster.setDownAfterMilliseconds(Long.parseLong(master.get("down-after-milliseconds")));
-                sentinelMaster.setFailoverTimeout(Long.parseLong(master.get("failover-timeout")));
-                sentinelMaster.setParallelSync(Integer.parseInt(master.get("parallel-syncs")));
-                sentinelMaster.setSentinels(Integer.parseInt(master.get("num-other-sentinels")) + 1);
-                String sDownTimeStr = master.get("s-down-time");
-                Long sDownTime = Strings.isNullOrEmpty(sDownTimeStr) ? 0 : Long.parseLong(sDownTimeStr);
-                sentinelMaster.setsDownTime(sDownTime);
-                String oDownTimeStr = master.get("o-down-time");
-                Long oDownTime = Strings.isNullOrEmpty(oDownTimeStr) ? 0 : Long.parseLong(oDownTimeStr);
-                sentinelMaster.setoDownTime(oDownTime);
-                sentinelMaster.setStatus(nameAndStatus.get(master.get("name")));
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("sentinels", Integer.parseInt(master.get("num-other-sentinels")) + 1);
+                jsonObject.put("host", master.get("ip"));
+                for (String key : master.keySet()) {
+                    // eg: down-after-milliseconds -> downAfterMilliseconds
+                    String field = CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, key);
+                    jsonObject.put(field, master.get(key));
+                }
+                SentinelMaster sentinelMaster = JSONObject.toJavaObject(jsonObject, SentinelMaster.class);
+                sentinelMaster.setLastMasterNode(sentinelMaster.getHost() + SignUtil.COLON + sentinelMaster.getPort());
+                sentinelMaster.setStatus(nameAndStatus.get(sentinelMaster.getName()));
+                sentinelMaster.setGroupId(cluster.getGroupId());
+                sentinelMaster.setClusterId(cluster.getClusterId());
                 sentinelMasterList.add(sentinelMaster);
             }
         } catch (Exception e) {
@@ -803,7 +800,7 @@ public class RedisService implements IRedisService {
             redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPortSet(cluster.getNodes()));
             List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
             for (Map<String, String> masterMap : sentinelMasters) {
-                if (Objects.equals(masterMap.get("name"), sentinelMaster.getMasterName())) {
+                if (Objects.equals(masterMap.get("name"), sentinelMaster.getName())) {
                     return masterMap;
                 }
             }
@@ -813,6 +810,76 @@ public class RedisService implements IRedisService {
             close(redisClient);
         }
         return null;
+    }
+
+    @Override
+    public boolean monitorMaster(SentinelMaster sentinelMaster) {
+        RedisClient redisClient = null;
+        try {
+            Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPortSet(cluster.getNodes()));
+            return redisClient.monitorMaster(sentinelMaster.getName(), sentinelMaster.getHost(), sentinelMaster.getPort(), sentinelMaster.getQuorum())
+                    && sentinelSet(redisClient, sentinelMaster);
+        } catch (Exception e) {
+            logger.error("Monitor master failed, master name: " + sentinelMaster.getName(), e);
+            return false;
+        } finally {
+            close(redisClient);
+        }
+    }
+
+    @Override
+    public boolean sentinelSet(SentinelMaster sentinelMaster) {
+        RedisClient redisClient = null;
+        try {
+            Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPortSet(cluster.getNodes()));
+            return sentinelSet(redisClient, sentinelMaster);
+        } catch (Exception e) {
+            logger.error("Set master config failed, master name: " + sentinelMaster.getName(), e);
+            return false;
+        } finally {
+            close(redisClient);
+        }
+    }
+
+    private boolean sentinelSet(RedisClient redisClient, SentinelMaster sentinelMaster) {
+        Map<String, String> param = new HashMap<>(3);
+        param.put("down-after-milliseconds", String.valueOf(sentinelMaster.getDownAfterMilliseconds()));
+        param.put("parallel-syncs", String.valueOf(sentinelMaster.getParallelSyncs()));
+        param.put("failover-timeout", String.valueOf(sentinelMaster.getFailoverTimeout()));
+        param.put("quorum", String.valueOf(sentinelMaster.getQuorum()));
+        return redisClient.sentinelSet(sentinelMaster.getName(), param);
+    }
+
+    @Override
+    public boolean failoverMaster(SentinelMaster sentinelMaster) {
+        RedisClient redisClient = null;
+        try {
+            Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPortSet(cluster.getNodes()));
+            return redisClient.failoverMaster(sentinelMaster.getName());
+        } catch (Exception e) {
+            logger.error("Failover master failed, master name: " + sentinelMaster.getName(), e);
+            return false;
+        } finally {
+            close(redisClient);
+        }
+    }
+
+    @Override
+    public List<Map<String, String>> sentinelSlaves(SentinelMaster sentinelMaster) {
+        RedisClient redisClient = null;
+        try {
+            Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPortSet(cluster.getNodes()));
+            return redisClient.sentinelSlaves(sentinelMaster.getName());
+        } catch (Exception e) {
+            logger.error("Failover master failed, master name: " + sentinelMaster.getName(), e);
+            return null;
+        } finally {
+            close(redisClient);
+        }
     }
 
     private IDatabaseCommand buildDatabaseCommandClient(Cluster cluster) {

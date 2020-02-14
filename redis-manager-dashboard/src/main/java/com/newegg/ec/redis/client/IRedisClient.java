@@ -228,17 +228,17 @@ public interface IRedisClient extends IDatabaseCommand {
 
     List<String> getMasterAddrByName(String masterName);
 
-    List<Map<String, String>> getSentinelSlaves(String masterName);
+    List<Map<String, String>> sentinelSlaves(String masterName);
 
-    String monitorMaster(String masterName, String ip, int port, int quorum);
+    boolean monitorMaster(String masterName, String ip, int port, int quorum);
 
-    String failoverMaster(String masterName);
+    boolean failoverMaster(String masterName);
 
-    String removeMaster(String masterName);
+    boolean removeMaster(String masterName);
 
     Long resetConfig(String pattern);
 
-    String setConfig(String masterName, Map<String, String> parameterMap);
+    boolean sentinelSet(String masterName, Map<String, String> parameterMap);
 
     /**
      * Close client

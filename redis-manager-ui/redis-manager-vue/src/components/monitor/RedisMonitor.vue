@@ -104,7 +104,7 @@
     >
       <div class="base-info-wrapper">
         <el-table :data="sentinelMasterList">
-          <el-table-column property="masterName" label="Master Name"></el-table-column>
+          <el-table-column property="name" label="Master Name"></el-table-column>
           <el-table-column property="status" label="Status">
             <template slot-scope="scope">
               <el-tag size="mini" v-if="scope.row.status == 'ok'">{{ scope.row.status }}</el-tag>
@@ -118,13 +118,19 @@
             </template>
           </el-table-column>
           <el-table-column label="Master Node">
-            <template slot-scope="scope">{{ scope.row.masterHost }}:{{ scope.row.masterPort }}</template>
+            <template slot-scope="scope">{{ scope.row.host }}:{{ scope.row.port }}</template>
           </el-table-column>
           <el-table-column property="lastMasterNode" label="Last Master Node"></el-table-column>
           <el-table-column property="numSlaves" label="Num Slaves"></el-table-column>
-          <el-table-column property="parallelSync" label="Parallel Sync"></el-table-column>
           <el-table-column property="sentinels" label="Sentinels"></el-table-column>
-          <el-table-column label="Detail"></el-table-column>
+          <el-table-column label="Detail">
+            <el-button
+              size="mini"
+              type="primary"
+              slot-scope="scope"
+              @click="sentinelMasterInfoVisible = true; sentinelMaster = scope.row"
+            >Detail</el-button>
+          </el-table-column>
         </el-table>
       </div>
     </div>
@@ -261,6 +267,16 @@
         </el-table>
       </div>
     </el-dialog>
+
+    <el-dialog
+      title="Sentinel Master Info"
+      :visible.sync="sentinelMasterInfoVisible"
+      :close-on-click-modal="false"
+      v-if="sentinelMasterInfoVisible"
+      width="40%"
+    >
+      <sentinelMasterInfo :sentinelMaster="sentinelMaster"></sentinelMasterInfo>
+    </el-dialog>
   </div>
 </template>
 
@@ -275,6 +291,7 @@ require("echarts/lib/component/title"); //  title组件
 require("echarts/lib/component/legend"); // legend组件
 import "echarts/lib/component/legendScroll";
 import query from "@/components/tool/Query";
+import sentinelMasterInfo from "@/components/view/SentinelMasterInfo";
 import echartsItem from "@/components/monitor/EchartsItem";
 import API from "@/api/api.js";
 import { formatTime, formatTimeForChart } from "@/utils/time.js";
@@ -285,7 +302,8 @@ import message from "@/utils/message.js";
 export default {
   components: {
     query,
-    echartsItem
+    echartsItem,
+    sentinelMasterInfo
   },
   data() {
     return {
@@ -454,7 +472,9 @@ export default {
       slowLogLoading: false,
       conditionSelectedLoading: false,
       isSentinelMode: false,
-      sentinelMasterList: []
+      sentinelMasterList: [],
+      sentinelMaster: {},
+      sentinelMasterInfoVisible: false
     };
   },
   methods: {

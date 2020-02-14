@@ -163,4 +163,11 @@ public interface IRedisService {
 
     Map<String, String> getSentinelMasterInfoByName(SentinelMaster sentinelMaster);
 
+    boolean monitorMaster(SentinelMaster sentinelMaster);
+
+    boolean sentinelSet(SentinelMaster sentinelMaster);
+
+    boolean failoverMaster(SentinelMaster sentinelMaster);
+
+    List<Map<String, String>> sentinelSlaves(SentinelMaster sentinelMaster);
 }
