@@ -11,11 +11,11 @@
         </fileSet>
         <fileSet>
             <directory>target/classes/static</directory>
-            <outputDirectory>web/static</outputDirectory>
+            <outputDirectory>conf/static</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>target/classes/templates</directory>
-            <outputDirectory>web/templates</outputDirectory>
+            <outputDirectory>conf/templates</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../bin</directory>
@@ -45,7 +45,7 @@
         </file>
         <file>
             <source>target/classes/logo.ico</source>
-            <outputDirectory>web</outputDirectory>
+            <outputDirectory>conf</outputDirectory>
         </file>
     </files>
 </assembly>

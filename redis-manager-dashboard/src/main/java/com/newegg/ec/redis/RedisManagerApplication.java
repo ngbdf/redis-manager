@@ -16,9 +16,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @EnableScheduling
 @EnableAsync
-@EnableEurekaServer
 @EnableTransactionManagement
 @MapperScan({"com.newegg.ec.redis.dao", "com.newegg.ec.redis.plugin"})
+@EnableEurekaServer
 @SpringBootApplication
 public class RedisManagerApplication {
 

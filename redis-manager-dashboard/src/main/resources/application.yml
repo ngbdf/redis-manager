@@ -4,17 +4,28 @@ server:
     mime-types: application/json
     min-response-size: 1024
   tomcat.uri-encoding: UTF-8
-  port: 8182
+  port: 8080
+
+#eureka:
+#  client:
+#    registerWithEureka: false # 单点的时候设置为 false 禁止注册自身
+#    fetchRegistry: false
+#    serviceUrl:
+#      defaultZone: http://localhost:8182/eureka
+#  server:
+#    enableSelfPreservation: false
+#    evictionIntervalTimerInMs: 4000
+#  dashboard:
+#    path: /eureka-ui
+
 eureka:
-  server:
-    enable-self-preservation: false
-    eviction-interval-timer-in-ms: 10000
-    max-threads-for-peer- replication: 0
+#  server:
+#    enable-self-preservation: false
+#    eviction-interval-timer-in-ms: 10000
+#    max-threads-for-peer- replication: 0
   dashboard:
     path: /eureka-ui
   client:
-    service-url:
-      defaultZone: http://localhost:8182/eureka
     register-with-eureka: false
     fetch-registry: false
 

@@ -6,7 +6,7 @@ import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.command.PullImageResultCallback;
-import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
+import com.github.dockerjava.netty.NettyDockerCmdExecFactory;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.util.CommonUtil;
 import com.newegg.ec.redis.util.SignUtil;
@@ -35,11 +35,12 @@ public class DockerClientOperation {
 
     public static final String REDIS_DEFAULT_WORK_DIR = "/data/";
 
-    static DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
-            .withReadTimeout(300000)
-            .withConnectTimeout(300000)
-            .withMaxTotalConnections(1000)
-            .withMaxPerRouteConnections(100);
+    static DockerCmdExecFactory dockerCmdExecFactory = new NettyDockerCmdExecFactory()
+
+          //  .withReadTimeout(300000)
+            .withConnectTimeout(300000);
+        //    .withMaxTotalConnections(1000)
+           // .withMaxPerRouteConnections(100);
 
     /**
      * Get docker client
