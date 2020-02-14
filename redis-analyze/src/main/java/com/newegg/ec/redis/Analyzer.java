@@ -3,6 +3,10 @@ import com.newegg.ec.redis.base.ElasticSearchUtil;
 import com.newegg.ec.redis.entity.AnalyzeStatus;
 import com.newegg.ec.redis.service.RDBAnalyzeService;
 import com.newegg.ec.redis.utils.Report;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +64,9 @@ public class Analyzer implements CommandLineRunner {
   public static String  KEY_PREFIX_INDEX_LOCATION;
   public static String  KEY_PREFIX_SEPARATORS;
 
+  // 分析器所需参数
+  public static Map<String, String> configMap = new HashMap<String, String>();
+  
   public static void main(String[] args) {
     SpringApplication.run(Analyzer.class, args);
     LOG.info("RCT analyzer start success!");
@@ -68,10 +75,11 @@ public class Analyzer implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     RDBAnalyzeService.setStatus(AnalyzeStatus.NOTINIT);
+    
+    // 从配置文件中获取参数
     if(elasticsearchEnable) {
     	ElasticSearchUtil.init(30000, 30000, esUrls);
     }
-   
     Report.init(30000, 30000, serviceUrl);
     ESINDEX = this.esIndex;
     FILTER_Bytes = this.filterBytes;
@@ -80,5 +88,18 @@ public class Analyzer implements CommandLineRunner {
     MAX_QUEUE_SIZE = 1000;
     KEY_PREFIX_INDEX_LOCATION = this.keyPrefixIndexLocation;
     KEY_PREFIX_SEPARATORS = this.keyPrefixSeparators;
+    
+    // 从configMap中获取参数	(使用时放开以下注释，同时注释掉以上代码)
+//    if(Boolean.valueOf(System.getenv().get(AnalyzerConstant.RCT_ELASTICSEARCH_ENABLE))) {
+//    	ElasticSearchUtil.init(30000, 30000, System.getenv().get(AnalyzerConstant.RCT_ELASTICSEARCH_REST_URLS));
+//    }
+//    Report.init(30000, 30000, System.getenv().get(AnalyzerConstant.EUREKA_CLIENT_SERVICEURL_DEFAULTZONE));
+//    ESINDEX = System.getenv().get(AnalyzerConstant.RCT_ELASTICSEARCH_INDEX);
+//    FILTER_Bytes = Long.valueOf(System.getenv().get(AnalyzerConstant.RCT_FILTER_BYTES));
+//    FILTER_ItemCount = Integer.valueOf(System.getenv().get(AnalyzerConstant.RCT_FILTER_ITEM_COUNT));
+//    MAX_EsSenderThreadNum = Integer.valueOf(System.getenv().get(AnalyzerConstant.RCT_MAX_ES_THREAD_NUM));
+//    MAX_QUEUE_SIZE = 1000;
+//    KEY_PREFIX_INDEX_LOCATION = System.getenv().get(AnalyzerConstant.RCT_ANALYZE_KEY_PREFIX_INDEX_LOCATION);
+//    KEY_PREFIX_SEPARATORS =System.getenv().get(AnalyzerConstant.RCT_ANALYZE_KEY_PREFIX_SEPARATORS);
   }
 }

@@ -50,7 +50,6 @@ export default {
 <style scoped>
 .box-card {
   margin: 5px;
-  height: 900px;
 }
 
 .chart {
