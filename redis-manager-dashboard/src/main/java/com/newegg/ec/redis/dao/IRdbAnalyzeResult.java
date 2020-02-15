@@ -104,6 +104,11 @@ public interface IRdbAnalyzeResult {
     void createRdbAnalyzeResult();
 
 
-    @Select("select * from rdb_analyze_result where schedule_id= #{scheduleId} and cluster_id = #{cluster_id}")
-    RDBAnalyzeResult selectByRedisIdAndSId(Long cluster_id, Long scheduleId);
+    @Select("select * from `rdb_analyze_result` where schedule_id= #{scheduleId} and cluster_id = #{cluster_id}")
+    @Results({ @Result(id = true, column = "id", property = "id"),
+            @Result(column = "schedule_id", property = "scheduleId"),
+            @Result(column = "cluster_id", property = "clusterId"),
+            @Result(column = "result", property = "result"),
+            @Result(column = "analyze_config", property = "analyzeConfig")})
+    RDBAnalyzeResult selectByRedisIdAndSId(@Param("cluster_id") Long cluster_id, @Param("scheduleId") Long scheduleId);
 }

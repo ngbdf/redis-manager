@@ -108,16 +108,16 @@
                <el-submenu index="9" v-if="currentUser.userRole < 2">
                 <template slot="title">
                   <i class="el-icon-cpu"></i>
-                  <span>Plugin</span>
+                  <span>RCT</span>
                 </template>
                 <el-menu-item-group>
-                  <el-menu-item index="9-1" @click="toAnalysis()">Analysis</el-menu-item>
+                  <el-menu-item index="9-1" @click="toRct()">Config</el-menu-item>
                 </el-menu-item-group>
                 <!-- <el-menu-item-group>
                   <el-menu-item index="9-2" @click="toTaskProgress()">TaskProgress</el-menu-item>
                 </el-menu-item-group> -->
                 <el-menu-item-group>
-                  <el-menu-item index="9-2" @click="toJobList()">JobList</el-menu-item>
+                  <el-menu-item index="9-2" @click="toJobList()">Job List</el-menu-item>
                 </el-menu-item-group>
               </el-submenu>
               <el-menu-item index="4" @click="toMachineManage()" v-if="currentUser.userRole < 2">
@@ -235,9 +235,9 @@ export default {
         params: { groupId: this.selectGroupId }
       })
     },
-    toAnalysis () {
+    toRct () {
       this.$router.push({
-        name: 'Analysis'
+        name: 'Config'
       })
     },
     toTaskProgress () {

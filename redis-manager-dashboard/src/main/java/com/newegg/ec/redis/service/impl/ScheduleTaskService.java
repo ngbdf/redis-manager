@@ -81,6 +81,9 @@ public class ScheduleTaskService implements IScheduleTaskService {
         return list;
     }
 
+    public boolean vaildCronExpress(String cron){
+        return CronExpression.isValidExpression(cron);
+    }
     public String getJobStatus(String triggerName) throws SchedulerException {
         TriggerKey triggerKey = TriggerKey.triggerKey(triggerName, "Group");
         Trigger.TriggerState status = getScheduler().getTriggerState(triggerKey);

@@ -63,7 +63,11 @@ public class RDBAnalyzeController {
 
 			if (rdbAnalyze.isAutoAnalyze()) {
 				try {
-					taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
+					if(taskService.vaildCronExpress(rdbAnalyze.getSchedule())){
+						taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
+					}else{
+						return Result.failResult("schedule cron expression is not vaild,please check!");
+					}
 				} catch (SchedulerException e) {
 					LOG.error("schedule job add faild!message:{}", e.getMessage());
 				}
@@ -81,7 +85,11 @@ public class RDBAnalyzeController {
 			if (rdbAnalyzeService.add(rdbAnalyze)) {
 				if (rdbAnalyze.isAutoAnalyze()) {
 					try {
-						taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
+						if(taskService.vaildCronExpress(rdbAnalyze.getSchedule())){
+							taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
+						}else{
+							return Result.failResult("schedule cron expression is not vaild,please check!");
+						}
 					} catch (SchedulerException e) {
 						LOG.error("schedule job add faild!message:{}", e.getMessage());
 					}
@@ -91,7 +99,7 @@ public class RDBAnalyzeController {
 				return Result.failResult("add fail!");
 			}
 		}else{
-			return Result.failResult();
+			return Result.failResult("add Job faild!");
 		}
 
 	}

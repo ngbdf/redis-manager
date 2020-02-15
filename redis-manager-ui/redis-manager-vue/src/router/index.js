@@ -16,10 +16,10 @@ import Profile from '@/components/user/Profile'
 import DataOperation from '@/components/tool/DataOperation'
 import NotFound from '@/components/error/404'
 import EditHistory from '@/components/history/EditHistory'
-import Analysis from '@/components/plugin/Analysis'
-import TaskProgress from '@/components/plugin/TaskProgress'
-import JobList from '@/components/plugin/JobList'
-import JobResultDetail from '@/components/plugin/JobResultDetail'
+import Config from '@/components/rct/Config'
+import TaskProgress from '@/components/rct/TaskProgress'
+import JobList from '@/components/rct/JobList'
+import JobResultDetail from '@/components/rct/JobResultDetail'
 
 import API from '@/api/api.js'
 import { store } from '@/vuex/store.js'
@@ -107,22 +107,22 @@ const router = new Router({
           path: '/data-operation/group/:groupId',
           component: DataOperation
         }, {
-          name: 'Analysis',
-          path: '/plugin/analysis',
-          component: Analysis
+          name: 'Config',
+          path: '/rct/config',
+          component: Config
 
         }, {
           name: 'TaskProgress',
-          path: '/plugin/taskProgress/:clusterId',
+          path: '/rct/taskProgress/:clusterId',
           component: TaskProgress
 
         }, {
           name: 'jobList',
-          path: '/plugin/jobList',
+          path: '/rct/jobList',
           component: JobList
         }, {
           name: 'jobResultDetail',
-          path: '/plugin/jobResultDetail',
+          path: '/rct/jobResultDetail',
           component: JobResultDetail
         }
       ]
