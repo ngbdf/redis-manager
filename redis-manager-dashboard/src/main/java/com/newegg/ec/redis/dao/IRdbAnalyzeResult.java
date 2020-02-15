@@ -30,7 +30,7 @@ public interface IRdbAnalyzeResult {
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     Integer insert(RDBAnalyzeResult rdbAnalyzeResult);
 
-    @Select("SELECT * FROM rdb_analyze_result")
+    @Select("SELECT * FROM rdb_analyze_result  ORDER BY schedule_id DESC ")
     List<RDBAnalyzeResult> selectList();
 
     @Update("Update rdb_analyze_result set result=#{result} where id=#{id} ")
