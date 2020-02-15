@@ -6,24 +6,25 @@ import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.entity.SentinelMaster;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.HumpbackNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.MachineNodeOperation;
-import com.newegg.ec.redis.service.IClusterService;
-import com.newegg.ec.redis.service.INodeInfoService;
-import com.newegg.ec.redis.service.IRedisNodeService;
-import com.newegg.ec.redis.service.IRedisService;
+import com.newegg.ec.redis.service.*;
 import com.newegg.ec.redis.util.RedisClusterInfoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import redis.clients.jedis.HostAndPort;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.newegg.ec.redis.client.RedisClient.SERVER;
 import static com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment.*;
@@ -59,6 +60,9 @@ public class ClusterService implements IClusterService {
 
     @Autowired
     private HumpbackNodeOperation humpbackNodeOperation;
+
+    @Autowired
+    private ISentinelMastersService sentinelMastersService;
 
     @Override
     public List<Cluster> getAllClusterList() {
@@ -122,7 +126,8 @@ public class ClusterService implements IClusterService {
         if (!fillResult) {
             return false;
         }
-        if (Objects.equals(STANDALONE, cluster.getRedisMode())) {
+        String redisMode = cluster.getRedisMode();
+        if (Objects.equals(redisMode, STANDALONE) || Objects.equals(redisMode, SENTINEL)) {
             cluster.setClusterState(Cluster.ClusterState.HEALTH);
         }
         int row = clusterDao.insertCluster(cluster);
@@ -130,6 +135,14 @@ public class ClusterService implements IClusterService {
             throw new RuntimeException("Save cluster failed.");
         }
         nodeInfoService.createNodeInfoTable(cluster.getClusterId());
+        if (Objects.equals(redisMode, SENTINEL)) {
+            List<SentinelMaster> sentinelMasters = redisService.getSentinelMasters(cluster);
+            sentinelMasters.forEach(sentinelMaster -> {
+                sentinelMaster.setClusterId(cluster.getClusterId());
+                sentinelMaster.setGroupId(cluster.getGroupId());
+                sentinelMastersService.addSentinelMaster(sentinelMaster);
+            });
+        }
         return true;
     }
 
@@ -203,6 +216,11 @@ public class ClusterService implements IClusterService {
         if (clusterId == null) {
             return false;
         }
+        Cluster cluster = getClusterById(clusterId);
+        String redisMode = cluster.getRedisMode();
+        if (SENTINEL.equalsIgnoreCase(redisMode)) {
+            sentinelMastersService.deleteSentinelMasterByClusterId(clusterId);
+        }
         clusterDao.deleteClusterById(clusterId);
         nodeInfoService.deleteNodeInfoTable(clusterId);
         redisNodeService.deleteRedisNodeListByClusterId(clusterId);
@@ -216,7 +234,9 @@ public class ClusterService implements IClusterService {
             logger.error("Fill base info failed, " + cluster);
             return false;
         }
-        fillTotalData(cluster);
+        if(!Objects.equals(redisMode, SENTINEL)) {
+            fillTotalData(cluster);
+        }
         if (Objects.equals(redisMode, CLUSTER)) {
             if (!fillClusterInfo(cluster)) {
                 logger.error("Fill cluster info failed, " + cluster);
@@ -224,6 +244,8 @@ public class ClusterService implements IClusterService {
             }
         } else if (Objects.equals(redisMode, STANDALONE)) {
             fillStandaloneInfo(cluster);
+        } else if (Objects.equals(redisMode, SENTINEL)) {
+            fillSentinelInfo(cluster);
         }
         return true;
     }
@@ -259,10 +281,59 @@ public class ClusterService implements IClusterService {
         List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
         cluster.setClusterSize(1);
         cluster.setClusterKnownNodes(redisNodeList.size());
-        cluster.setClusterSlotsAssigned(0);
-        cluster.setClusterSlotsFail(0);
-        cluster.setClusterSlotsPfail(0);
-        cluster.setClusterSlotsOk(0);
+    }
+
+    /**
+     * sentinel_ok
+     * sentinel_masters
+     * master_ok
+     *
+     * @param cluster
+     */
+    private void fillSentinelInfo(Cluster cluster) {
+        try {
+            List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
+            cluster.setClusterKnownNodes(redisNodeList.size());
+
+            cluster.setSentinelOk(redisNodeList.size());
+            Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts);
+            Map<String, String> sentinelInfo = redisClient.getInfo(RedisClient.SENTINEL);
+            int sentinelMasters = Integer.parseInt(sentinelInfo.get(SENTINEL_MASTERS));
+            cluster.setSentinelMasters(sentinelMasters);
+
+            AtomicInteger masterOk = new AtomicInteger();
+            sentinelInfo.forEach((key, val) -> {
+                // master0:name=master,status=ok,address=10.16.50.219:16379,slaves=3,sentinels=6
+                if (key.startsWith(MASTER_PREFIX) && val.contains("ok")) {
+                    masterOk.getAndIncrement();
+                }
+            });
+            cluster.setMasterOk(masterOk.get());
+            cluster.setSentinelOk(getSentinelOkNumber(hostAndPorts));
+            redisClient.close();
+        } catch (Exception e) {
+            logger.error("Fill redis base info failed, " + cluster.getClusterName(), e);
+        }
+    }
+
+    /**
+     * 判断 sentinel node 是否 down 掉
+     *
+     * @param hostAndPorts
+     * @return
+     */
+    private int getSentinelOkNumber(Set<HostAndPort> hostAndPorts) {
+        AtomicInteger sentinelOk = new AtomicInteger();
+        for (HostAndPort hostAndPort : hostAndPorts) {
+            try {
+                RedisClientFactory.buildRedisClient(hostAndPort, null);
+                sentinelOk.incrementAndGet();
+            } catch (Exception e) {
+                logger.warn("Sentinel node is down, please check.", e);
+            }
+        }
+        return sentinelOk.get();
     }
 
     private void fillBaseInfo(Cluster cluster) {
@@ -274,6 +345,7 @@ public class ClusterService implements IClusterService {
             cluster.setOs(serverInfo.get(OS));
             cluster.setRedisMode(serverInfo.get(REDIS_MODE));
             cluster.setRedisVersion(serverInfo.get(REDIS_VERSION));
+            redisClient.close();
         } catch (Exception e) {
             logger.error("Fill redis base info failed, " + cluster.getClusterName(), e);
         }

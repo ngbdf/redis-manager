@@ -52,6 +52,9 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
     @Autowired
     private IOperationLogDao operationLogDao;
 
+    @Autowired
+    private ISentinelMastersDao sentinelMastersDao;
+
     @Value("${redis-manager.auth.user-name:admin}")
     private String userName;
 
@@ -75,6 +78,7 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
         alertRecordDao.createAlertRecordTable();
         redisNodeDao.createRedisNodeTable();
         operationLogDao.createLogTable();
+        sentinelMastersDao.createSentinelMastersTable();
     }
 
     @Transactional

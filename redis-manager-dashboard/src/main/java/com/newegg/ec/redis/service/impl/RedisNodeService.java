@@ -87,7 +87,7 @@ public class RedisNodeService implements IRedisNodeService {
         List<RedisNode> redisNodeList = new ArrayList<>();
         realRedisNodeList.forEach(realRedisNode -> {
             realRedisNode.setInCluster(true);
-            realRedisNode.setRunStatus(true);
+            realRedisNode.setRunStatus(Objects.equals(realRedisNode.getLinkState(), "connected"));
             if (dbRedisNodeList != null && !dbRedisNodeList.isEmpty()) {
                 dbRedisNodeList.forEach(dbRedisNode -> {
                     if (RedisUtil.equals(dbRedisNode, realRedisNode)) {
@@ -118,7 +118,7 @@ public class RedisNodeService implements IRedisNodeService {
             redisNode.setInCluster(false);
             boolean run = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
             redisNode.setRunStatus(run);
-            redisNode.setLinkState("unknown");
+            redisNode.setLinkState("unconnected");
             redisNodeList.add(redisNode);
         });
         return redisNodeList;

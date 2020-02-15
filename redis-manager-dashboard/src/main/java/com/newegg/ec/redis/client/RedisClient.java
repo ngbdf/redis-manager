@@ -2,6 +2,7 @@ package com.newegg.ec.redis.client;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import redis.clients.jedis.*;
@@ -38,6 +39,8 @@ public class RedisClient implements IRedisClient {
     public static final String MEMORY = "memory";
 
     public static final String REPLICATION = "replication";
+
+    public static final String SENTINEL = "sentinel";
 
     private Jedis jedis;
 
@@ -137,8 +140,8 @@ public class RedisClient implements IRedisClient {
         List<RedisNode> nodeList = new ArrayList<>();
         Map<String, String> infoMap = getInfo(REPLICATION);
         String role = infoMap.get(ROLE);
-        String masterHost = null;
-        Integer masterPort = null;
+        String masterHost;
+        Integer masterPort;
         // 使用 master node 进行连接
         if (Objects.equals(role, NodeRole.SLAVE.getValue())) {
             close();
@@ -256,6 +259,20 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
+    public List<RedisNode> sentinelNodes(Set<HostAndPort> hostAndPorts) {
+        List<RedisNode> redisNodeList = new ArrayList<>();
+        hostAndPorts.forEach(hostAndPort -> {
+            RedisNode redisNode = RedisNode.masterRedisNode(hostAndPort);
+            boolean run = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
+            redisNode.setLinkState(run ? "connected" : "unconnected");
+            redisNode.setNodeId(hostAndPort.toString());
+            redisNode.setFlags("master");
+            redisNodeList.add(redisNode);
+        });
+        return redisNodeList;
+    }
+
+    @Override
     public boolean exists(String key) {
         return jedis.exists(key);
     }
@@ -367,12 +384,12 @@ public class RedisClient implements IRedisClient {
         } else if (cmd.startsWith(RPUSH)) {
             result = jedis.rpush(key, items);
         } else if (cmd.startsWith(LINDEX)) {
-            result = jedis.lindex(key, Integer.valueOf(list[2]));
+            result = jedis.lindex(key, Integer.parseInt(list[2]));
         } else if (cmd.startsWith(LLEN)) {
             result = jedis.llen(key);
         } else if (cmd.startsWith(LRANGE)) {
-            int start = Integer.valueOf(list[2]);
-            int stop = Integer.valueOf(list[3]);
+            int start = Integer.parseInt(list[2]);
+            int stop = Integer.parseInt(list[3]);
             result = jedis.lrange(key, start, stop);
         }
         return result;
@@ -395,7 +412,7 @@ public class RedisClient implements IRedisClient {
         } else if (cmd.startsWith(SRANDMEMBER)) {
             int count = 1;
             if (list.length > 2) {
-                count = Integer.valueOf(list[2]);
+                count = Integer.parseInt(list[2]);
             }
             result = jedis.srandmember(key, count);
         }
@@ -419,8 +436,8 @@ public class RedisClient implements IRedisClient {
         } else if (cmd.startsWith(ZCOUNT)) {
             result = jedis.zcount(key, param1, param2);
         } else if (cmd.startsWith(ZRANGE)) {
-            int start = Integer.valueOf(param1);
-            int stop = Integer.valueOf(param2);
+            int start = Integer.parseInt(param1);
+            int stop = Integer.parseInt(param2);
             if (list.length > 4) {
                 result = jedis.zrangeWithScores(key, start, stop);
             } else {
@@ -630,13 +647,52 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
+    public List<Map<String, String>> getSentinelMasters() {
+        return jedis.sentinelMasters();
+    }
+
+    @Override
+    public List<String> getMasterAddrByName(String masterName) {
+        return jedis.sentinelGetMasterAddrByName(masterName);
+    }
+
+    @Override
+    public List<Map<String, String>> sentinelSlaves(String masterName) {
+        return jedis.sentinelSlaves(masterName);
+    }
+
+    @Override
+    public boolean monitorMaster(String masterName, String ip, int port, int quorum) {
+        return Objects.equals(jedis.sentinelMonitor(masterName, ip, port, quorum), OK);
+    }
+
+    @Override
+    public boolean failoverMaster(String masterName) {
+        return Objects.equals(jedis.sentinelFailover(masterName), OK);
+    }
+
+    @Override
+    public boolean sentinelRemove(String masterName) {
+        return Objects.equals(jedis.sentinelRemove(masterName), OK);
+    }
+
+    @Override
+    public Long resetConfig(String pattern) {
+        return jedis.sentinelReset(pattern);
+    }
+
+    @Override
+    public boolean sentinelSet(String masterName, Map<String, String> parameterMap) {
+        return Objects.equals(jedis.sentinelSet(masterName, parameterMap), OK);
+    }
+
+    @Override
     public void close() {
         try {
             if (jedis != null) {
                 jedis.close();
             }
         } catch (Exception ignored) {
-
         }
     }
 }

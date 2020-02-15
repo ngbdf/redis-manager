@@ -1,11 +1,10 @@
 package com.newegg.ec.redis.schedule;
 
-import com.newegg.ec.redis.client.RedisClientFactory;
-import com.newegg.ec.redis.client.RedisURI;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
+import com.newegg.ec.redis.service.ISentinelMastersService;
 import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import redis.clients.jedis.HostAndPort;
 
 import java.util.*;
+
+import static com.newegg.ec.redis.client.RedisClient.SENTINEL;
 
 /**
  * @author Jay.H.Zou
@@ -33,6 +34,9 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
     @Autowired
     private INodeInfoService nodeInfoService;
 
+    @Autowired
+    private ISentinelMastersService sentinelMastersService;
+
     protected int coreSize;
 
     protected class CollectNodeInfoTask implements Runnable {
@@ -49,7 +53,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
         @Override
         public void run() {
             try {
-                int clusterId = cluster.getClusterId();
+                Integer clusterId = cluster.getClusterId();
                 logger.debug("Start collecting cluster: " + cluster.getClusterName());
                 List<NodeInfo> nodeInfoList = getNodeInfoList(cluster, timeType);
                 // clean last time data and save new data to db
@@ -57,11 +61,33 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
                 if (TimeType.MINUTE.equals(timeType)) {
                     clusterService.updateCluster(cluster);
+                    if (Objects.equals(SENTINEL, cluster.getRedisMode())) {
+                        updateSentinelMasters(cluster);
+                    }
                 }
             } catch (Exception e) {
                 logger.error("Collect " + timeType + " data for " + cluster.getClusterName() + " failed.", e);
             }
         }
+    }
+
+    private void updateSentinelMasters(Cluster cluster) {
+        Integer clusterId = cluster.getClusterId();
+        List<SentinelMaster> newSentinelMasters = new LinkedList<>();
+        List<SentinelMaster> realSentinelMasterList = redisService.getSentinelMasters(clusterService.getClusterById(clusterId));
+        Iterator<SentinelMaster> iterator = realSentinelMasterList.iterator();
+        while (iterator.hasNext()) {
+            SentinelMaster sentinelMaster = iterator.next();
+            SentinelMaster sentinelMasterByMasterName = sentinelMastersService.getSentinelMasterByMasterName(clusterId, sentinelMaster.getName());
+            sentinelMaster.setGroupId(cluster.getGroupId());
+            sentinelMaster.setClusterId(clusterId);
+            if (sentinelMasterByMasterName == null) {
+                newSentinelMasters.add(sentinelMaster);
+                iterator.remove();
+            }
+        }
+        realSentinelMasterList.forEach(sentinelMaster -> sentinelMastersService.updateSentinelMaster(sentinelMaster));
+        newSentinelMasters.forEach(sentinelMaster -> sentinelMastersService.addSentinelMaster(sentinelMaster));
     }
 
     private List<NodeInfo> getNodeInfoList(Cluster cluster, Integer timeType) {
@@ -73,6 +99,9 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
             NodeInfo nodeInfo = getNodeInfo(clusterId, hostAndPort, redisPassword, timeType);
             if (nodeInfo == null) {
                 continue;
+            }
+            if (SENTINEL.equalsIgnoreCase(cluster.getRedisMode())) {
+                nodeInfo.setRole(NodeRole.MASTER);
             }
             nodeInfo.setNode(hostAndPort.toString());
             nodeInfoList.add(nodeInfo);

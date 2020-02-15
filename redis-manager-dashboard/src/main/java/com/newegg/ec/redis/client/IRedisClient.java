@@ -4,6 +4,7 @@ import com.newegg.ec.redis.entity.AutoCommandParam;
 import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.ClusterReset;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.MigrateParams;
 import redis.clients.jedis.util.Slowlog;
@@ -71,6 +72,8 @@ public interface IRedisClient extends IDatabaseCommand {
     List<RedisNode> nodes() throws Exception;
 
     List<RedisNode> clusterNodes() throws Exception;
+
+    List<RedisNode> sentinelNodes(Set<HostAndPort> hostAndPorts) throws Exception;
 
     Long dbSize();
 
@@ -203,8 +206,6 @@ public interface IRedisClient extends IDatabaseCommand {
     String migrate(String host, int port, int destinationDB,
                    int timeout, MigrateParams params, String... keys);
 
-//    String clusterSlaves(String nodeId);
-
     /**
      * old name: slaveOf
      *
@@ -223,10 +224,27 @@ public interface IRedisClient extends IDatabaseCommand {
 
     String memoryPurge();
 
+    List<Map<String, String>> getSentinelMasters();
+
+    List<String> getMasterAddrByName(String masterName);
+
+    List<Map<String, String>> sentinelSlaves(String masterName);
+
+    boolean monitorMaster(String masterName, String ip, int port, int quorum);
+
+    boolean failoverMaster(String masterName);
+
+    boolean sentinelRemove(String masterName);
+
+    Long resetConfig(String pattern);
+
+    boolean sentinelSet(String masterName, Map<String, String> parameterMap);
+
     /**
      * Close client
      *
      * @return
      */
     void close();
+
 }

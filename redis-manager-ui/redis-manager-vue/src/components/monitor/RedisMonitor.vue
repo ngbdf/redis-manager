@@ -16,6 +16,7 @@
                 title="Query"
                 icon="el-icon-search"
                 @click="handleQuery(cluster.clusterId)"
+                :disabled="isSentinelMode"
               >Query</el-button>
               <el-button
                 size="mini"
@@ -23,6 +24,7 @@
                 icon="el-icon-ali-slow"
                 title="Slow log"
                 @click="slowLogVisible = true"
+                :disabled="isSentinelMode"
               >Slow Log</el-button>
             </div>
           </div>
@@ -44,37 +46,101 @@
           </el-col>
           <el-col :xl="3" :lg="4" :md="6" :sm="8">
             <div class="base-info-item">
+              Nodes:
+              <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="!isSentinelMode">
+            <div class="base-info-item">
               Master:
               <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
             </div>
           </el-col>
-          <el-col :xl="3" :lg="4" :md="6" :sm="8">
-            <div class="base-info-item">
-              Node:
-              <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
-            </div>
-          </el-col>
-          <el-col :xl="3" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="!isSentinelMode">
             <div class="base-info-item">
               Total Memory:
               <el-tag size="mini">{{ cluster.totalUsedMemory }}MB</el-tag>
             </div>
           </el-col>
-          <el-col :xl="3" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="!isSentinelMode">
             <div class="base-info-item">
               Total Keys:
               <el-tag size="mini">{{ cluster.totalKeys }}</el-tag>
             </div>
           </el-col>
-          <el-col :xl="3" :lg="4" :md="6" :sm="8">
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="!isSentinelMode">
             <div class="base-info-item">
               Total Expires:
               <el-tag size="mini">{{ cluster.totalExpires }}</el-tag>
             </div>
           </el-col>
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="isSentinelMode">
+            <div class="base-info-item">
+              Sentinel OK:
+              <el-tag size="mini">{{ cluster.sentinelOk }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="isSentinelMode">
+            <div class="base-info-item">
+              Sentinel Masters:
+              <el-tag size="mini">{{ cluster.sentinelMasters }}</el-tag>
+            </div>
+          </el-col>
+          <el-col :xl="3" :lg="4" :md="6" :sm="8" v-if="isSentinelMode">
+            <div class="base-info-item">
+              Master OK:
+              <el-tag size="mini">{{ cluster.masterOk }}</el-tag>
+            </div>
+          </el-col>
         </el-row>
       </div>
     </div>
+
+    <div
+      class="body-wrapper"
+      style="margin-top: 20px;"
+      v-loading="clusterLoading"
+      v-if="isSentinelMode"
+    >
+      <div class="base-info-wrapper">
+        <el-table :data="sentinelMasterList">
+          <el-table-column property="name" label="Master Name"></el-table-column>
+          <el-table-column property="status" label="Status">
+            <template slot-scope="scope">
+              <el-tag size="mini" v-if="scope.row.status == 'ok'">{{ scope.row.status }}</el-tag>
+              <el-tag size="mini" type="danger" v-else>{{ scope.row.status }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column property="flags" label="Flags">
+            <template slot-scope="scope">
+              <el-tag size="mini" v-if="scope.row.flags == 'master'">{{ scope.row.flags }}</el-tag>
+              <el-tag size="mini" type="danger" v-else>{{ scope.row.flags }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="monitor" label="Monitor" align="center" sortable>
+            <template slot-scope="scope">
+              <i class="el-icon-success status-icon normal-status" v-if="scope.row.monitor"></i>
+              <i class="el-icon-error status-icon normal-bad" v-else></i>
+            </template>
+          </el-table-column>
+          <el-table-column label="Master Node">
+            <template slot-scope="scope">{{ scope.row.host }}:{{ scope.row.port }}</template>
+          </el-table-column>
+          <el-table-column property="lastMasterNode" label="Last Master Node"></el-table-column>
+          <el-table-column property="numSlaves" label="Num Slaves"></el-table-column>
+          <el-table-column property="sentinels" label="Sentinels"></el-table-column>
+          <el-table-column label="Detail">
+            <el-button
+              size="mini"
+              type="primary"
+              slot-scope="scope"
+              @click="sentinelMasterInfoVisible = true; sentinelMaster = scope.row"
+            >Detail</el-button>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+
     <div style="margin-top: 20px;">
       <div class="monitor-condition-wrapper">
         <div class="condition-wrapper">
@@ -207,6 +273,16 @@
         </el-table>
       </div>
     </el-dialog>
+
+    <el-dialog
+      title="Sentinel Master Info"
+      :visible.sync="sentinelMasterInfoVisible"
+      :close-on-click-modal="false"
+      v-if="sentinelMasterInfoVisible"
+      width="40%"
+    >
+      <sentinelMasterInfo :sentinelMaster="sentinelMaster"></sentinelMasterInfo>
+    </el-dialog>
   </div>
 </template>
 
@@ -221,6 +297,7 @@ require("echarts/lib/component/title"); //  title组件
 require("echarts/lib/component/legend"); // legend组件
 import "echarts/lib/component/legendScroll";
 import query from "@/components/tool/Query";
+import sentinelMasterInfo from "@/components/view/SentinelMasterInfo";
 import echartsItem from "@/components/monitor/EchartsItem";
 import API from "@/api/api.js";
 import { formatTime, formatTimeForChart } from "@/utils/time.js";
@@ -231,7 +308,8 @@ import message from "@/utils/message.js";
 export default {
   components: {
     query,
-    echartsItem
+    echartsItem,
+    sentinelMasterInfo
   },
   data() {
     return {
@@ -398,7 +476,11 @@ export default {
       slowLogList: [],
       clusterLoading: false,
       slowLogLoading: false,
-      conditionSelectedLoading: false
+      conditionSelectedLoading: false,
+      isSentinelMode: false,
+      sentinelMasterList: [],
+      sentinelMaster: {},
+      sentinelMasterInfoVisible: false
     };
   },
   methods: {
@@ -414,7 +496,7 @@ export default {
     },
     getAllNodeList(clusterId) {
       let url = "/node-manage/getAllNodeList/" + clusterId;
-      this.slowLogRedisNodeList.push({label: "All"})
+      this.slowLogRedisNodeList.push({ label: "All" });
       API.get(
         url,
         null,
@@ -432,7 +514,7 @@ export default {
                 label: hostAndPort + " " + role
               };
               redisNodeList.push(redisNode);
-               this.slowLogRedisNodeList.push(redisNode);
+              this.slowLogRedisNodeList.push(redisNode);
             });
             this.redisNodeList = redisNodeList;
             this.nodeType = "ALL_MASTER";
@@ -492,6 +574,22 @@ export default {
       setTimeout(() => {
         this.refresh();
       }, 300);
+    },
+    getSentinelMasterList(clusterId) {
+      let url = "/sentinel/getSentinelMasterList/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.sentinelMasterList = result.data;
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
     }
   },
   watch: {
@@ -558,6 +656,21 @@ export default {
       this.slowLogParam.clusterId = clusterId;
       this.pickerDateTime();
       this.timedRefresh();
+      this.isSentinelMode = cluster.redisMode == "sentinel";
+      if (this.isSentinelMode) {
+        this.getSentinelMasterList(clusterId);
+        this.infoItemList = [
+          "connections_received",
+          "rejected_connections",
+          "connected_clients",
+          "blocked_clients",
+          "commands_processed",
+          "instantaneous_ops_per_sec",
+          "cpu_sys",
+          "cpu_user"
+        ];
+        this.selectedInfoItemList = this.infoItemList;
+      }
     });
   },
   destroyed() {
@@ -656,4 +769,13 @@ export default {
 .chart-no-data {
   height: 0 !important;
 }
+
+.normal-status {
+  color: #40c9c6;
+}
+
+.bad-status {
+  color: #f4516c;
+}
+
 </style>

@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.*;
 import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
@@ -151,9 +153,7 @@ public class RedisService implements IRedisService {
     public Map<String, Long> getDatabase(Cluster cluster) {
         Map<String, Long> database = new LinkedHashMap<>();
         Map<String, Map<String, Long>> keyspaceInfo = getKeyspaceInfo(cluster);
-        keyspaceInfo.forEach((key, val) -> {
-            database.put(key, val.get(KEYS));
-        });
+        keyspaceInfo.forEach((key, val) -> database.put(key, val.get(KEYS)));
         return database;
     }
 
@@ -169,6 +169,8 @@ public class RedisService implements IRedisService {
                 nodeList = redisClient.nodes();
             } else if (CLUSTER.equalsIgnoreCase(redisMode)) {
                 nodeList = redisClient.clusterNodes();
+            } else if (SENTINEL.equalsIgnoreCase(redisMode)) {
+                nodeList = redisClient.sentinelNodes(nodesToHostAndPortSet(cluster.getNodes()));
             }
         } catch (Exception e) {
             logger.error("Get redis node list failed, " + cluster.getClusterName(), e);
@@ -199,7 +201,7 @@ public class RedisService implements IRedisService {
         RedisClient redisClient = null;
         try {
             String redisPassword = cluster.getRedisPassword();
-            Set<HostAndPort> hostAndPortSet = getHostAndPortSet(cluster);
+            Set<HostAndPort> hostAndPortSet = nodesToHostAndPortSet(cluster.getNodes());
             RedisURI redisURI = new RedisURI(hostAndPortSet, redisPassword);
             redisClient = RedisClientFactory.buildRedisClient(redisURI);
             return redisClient.getClusterInfo();
@@ -243,14 +245,14 @@ public class RedisService implements IRedisService {
         return redisSlowLogList;
     }
 
-    private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
+    /*private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
         List<RedisNode> redisNodeList = getRedisNodeList(cluster);
         Set<HostAndPort> hostAndPortSet = new HashSet<>();
         for (RedisNode redisNode : redisNodeList) {
             hostAndPortSet.add(new HostAndPort(redisNode.getHost(), redisNode.getPort()));
         }
         return hostAndPortSet;
-    }
+    }*/
 
     @Override
     public Set<String> scan(Cluster cluster, AutoCommandParam autoCommandParam) {
@@ -750,6 +752,185 @@ public class RedisService implements IRedisService {
 
     }
 
+    @Override
+    public List<SentinelMaster> getSentinelMasters(Cluster cluster) {
+        List<SentinelMaster> sentinelMasterList = new LinkedList<>();
+        try {
+            Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
+            RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts);
+            Map<String, String> info = redisClient.getInfo(SENTINEL);
+            Map<String, String> nameAndStatus = new HashMap<>();
+            for (String key : info.keySet()) {
+                if (key.startsWith("master")) {
+                    String value = info.get(key);
+                    String[] keyValues = SignUtil.splitByCommas(value);
+                    String name = SignUtil.splitByEqualSign(keyValues[0])[1];
+                    String status = SignUtil.splitByEqualSign(keyValues[1])[1];
+                    nameAndStatus.put(name, status);
+                }
+            }
+            List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
+            for (Map<String, String> master : sentinelMasters) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("sentinels", Integer.parseInt(master.get("num-other-sentinels")) + 1);
+                jsonObject.put("host", master.get("ip"));
+                for (String key : master.keySet()) {
+                    // eg: down-after-milliseconds -> downAfterMilliseconds
+                    String field = CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, key);
+                    jsonObject.put(field, master.get(key));
+                }
+                SentinelMaster sentinelMaster = JSONObject.toJavaObject(jsonObject, SentinelMaster.class);
+                sentinelMaster.setLastMasterNode(sentinelMaster.getHost() + SignUtil.COLON + sentinelMaster.getPort());
+                sentinelMaster.setStatus(nameAndStatus.get(sentinelMaster.getName()));
+                sentinelMaster.setGroupId(cluster.getGroupId());
+                sentinelMaster.setClusterId(cluster.getClusterId());
+                sentinelMasterList.add(sentinelMaster);
+            }
+        } catch (Exception e) {
+            logger.error("Add sentinel master host and port failed, " + cluster.getClusterName(), e);
+        }
+        return sentinelMasterList;
+    }
+
+    @Override
+    public Map<String, String> getSentinelMasterInfoByName(SentinelMaster sentinelMaster) {
+        RedisClient redisClient = null;
+        try {
+            Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPortSet(cluster.getNodes()));
+            List<Map<String, String>> sentinelMasters = redisClient.getSentinelMasters();
+            for (Map<String, String> masterMap : sentinelMasters) {
+                if (Objects.equals(masterMap.get("name"), sentinelMaster.getName())) {
+                    return masterMap;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Get sentinel master info by master name failed.", e);
+        } finally {
+            close(redisClient);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean monitorMaster(SentinelMaster sentinelMaster) {
+        Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+        if (cluster == null) {
+            return false;
+        }
+        boolean result = false;
+        Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
+        for (HostAndPort hostAndPort : hostAndPorts) {
+            RedisClient redisClient = null;
+            try {
+                redisClient = RedisClientFactory.buildRedisClient(hostAndPort);
+                result = redisClient.monitorMaster(sentinelMaster.getName(), sentinelMaster.getHost(), sentinelMaster.getPort(), sentinelMaster.getQuorum())
+                        && sentinelSet(redisClient, sentinelMaster);
+            } catch (Exception e) {
+                logger.error("Monitor master failed, master name: " + sentinelMaster.getName(), e);
+                result = false;
+            } finally {
+                close(redisClient);
+            }
+        }
+        return result;
+
+    }
+
+    @Override
+    public boolean sentinelSet(SentinelMaster sentinelMaster) {
+        Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+        if (cluster == null) {
+            return false;
+        }
+        boolean result = false;
+        Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
+        for (HostAndPort hostAndPort : hostAndPorts) {
+            RedisClient redisClient = null;
+            try {
+                redisClient = RedisClientFactory.buildRedisClient(hostAndPort);
+                result = sentinelSet(redisClient, sentinelMaster);
+            } catch (Exception e) {
+                logger.error("Set master config failed, master name: " + sentinelMaster.getName() + ", sentinel node: " + hostAndPort, e);
+                result = false;
+            } finally {
+                close(redisClient);
+            }
+        }
+        return result;
+    }
+
+    private boolean sentinelSet(RedisClient redisClient, SentinelMaster sentinelMaster) {
+        Map<String, String> param = new HashMap<>(3);
+        if (sentinelMaster.getDownAfterMilliseconds() != null) {
+            param.put("down-after-milliseconds", String.valueOf(sentinelMaster.getDownAfterMilliseconds()));
+        }
+        if (sentinelMaster.getParallelSyncs() != null) {
+            param.put("parallel-syncs", String.valueOf(sentinelMaster.getParallelSyncs()));
+        }
+        if (sentinelMaster.getFailoverTimeout() != null) {
+            param.put("failover-timeout", String.valueOf(sentinelMaster.getFailoverTimeout()));
+        }
+        if (!Strings.isNullOrEmpty(sentinelMaster.getAuthPass())) {
+            param.put("auth-pass", sentinelMaster.getAuthPass());
+        }
+        param.put("quorum", String.valueOf(sentinelMaster.getQuorum()));
+        return redisClient.sentinelSet(sentinelMaster.getName(), param);
+    }
+
+    @Override
+    public boolean failoverMaster(SentinelMaster sentinelMaster) {
+        RedisClient redisClient = null;
+        try {
+            Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPortSet(cluster.getNodes()));
+            return redisClient.failoverMaster(sentinelMaster.getName());
+        } catch (Exception e) {
+            logger.error("Failover master failed, master name: " + sentinelMaster.getName(), e);
+            return false;
+        } finally {
+            close(redisClient);
+        }
+    }
+
+    @Override
+    public boolean sentinelRemove(SentinelMaster sentinelMaster) {
+        Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+        if (cluster == null) {
+            return false;
+        }
+        boolean result = false;
+        Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
+        for (HostAndPort hostAndPort : hostAndPorts) {
+            RedisClient redisClient = null;
+            try {
+                redisClient = RedisClientFactory.buildRedisClient(hostAndPort);
+                result = redisClient.sentinelRemove(sentinelMaster.getName());
+            } catch (Exception e) {
+                logger.error("sentinel remove failed, master name: " + sentinelMaster.getName() + ", sentinel node: " + hostAndPort, e);
+                result = e.getMessage().contains("ERR No such master with that name");
+            } finally {
+                close(redisClient);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<Map<String, String>> sentinelSlaves(SentinelMaster sentinelMaster) {
+        RedisClient redisClient = null;
+        try {
+            Cluster cluster = clusterService.getClusterById(sentinelMaster.getClusterId());
+            redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPortSet(cluster.getNodes()));
+            return redisClient.sentinelSlaves(sentinelMaster.getName());
+        } catch (Exception e) {
+            logger.error("Failover master failed, master name: " + sentinelMaster.getName(), e);
+            return null;
+        } finally {
+            close(redisClient);
+        }
+    }
+
     private IDatabaseCommand buildDatabaseCommandClient(Cluster cluster) {
         IDatabaseCommand client = null;
         String redisMode = cluster.getRedisMode();
@@ -770,4 +951,5 @@ public class RedisService implements IRedisService {
             redisClient.close();
         }
     }
+
 }

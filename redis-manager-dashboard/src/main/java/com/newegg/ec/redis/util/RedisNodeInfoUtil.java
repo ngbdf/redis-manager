@@ -106,6 +106,13 @@ public class RedisNodeInfoUtil {
     public static final String KEYS = "keys";
     public static final String EXPIRES = "expires";
 
+    /**
+     * Sentinel
+     */
+    public static final String SENTINEL_MASTERS = "sentinel_masters";
+
+    public static final String MASTER_PREFIX = "master";
+
     private RedisNodeInfoUtil() {
     }
 

@@ -9,12 +9,24 @@
 
       <div class="base-info-operation-wrapper">
         <span class="base-info-item">
+          Node:
+          <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
+        </span>
+        <span class="base-info-item" v-if="cluster.redisMode != 'sentinel'">
           Master:
           <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
         </span>
-        <span class="base-info-item">
-          Node:
-          <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
+        <span class="base-info-item" v-else>
+          Sentinel OK:
+          <el-tag size="mini">{{ cluster.sentinelOk }}</el-tag>
+        </span>
+        <span class="base-info-item" v-if="cluster.redisMode == 'sentinel'">
+          Sentinel Masters:
+          <el-tag size="mini">{{ cluster.sentinelMasters }}</el-tag>
+        </span>
+        <span class="base-info-item" v-if="cluster.redisMode == 'sentinel'">
+          Master OK:
+          <el-tag size="mini">{{ cluster.masterOk }}</el-tag>
         </span>
         <span class="base-info-item">
           Environment:
@@ -24,7 +36,7 @@
         </span>
         <span class="base-info-item" v-if="cluster.image != null && cluster.image != ''">
           Image:
-          <el-tag size="mini" >{{ cluster.image }}</el-tag>
+          <el-tag size="mini">{{ cluster.image }}</el-tag>
         </span>
         <span class="base-info-item">
           Type:
@@ -33,12 +45,67 @@
         </span>
       </div>
     </div>
-
+    <div v-if="sentinelMasterList.length > 0" style="margin-buttom: 20px">
+      <el-table :data="sentinelMasterList">
+        <el-table-column property="name" label="Master Name"></el-table-column>
+        <el-table-column property="status" label="Status">
+          <template slot-scope="scope">
+            <el-tag size="mini" v-if="scope.row.status == 'ok'">{{ scope.row.status }}</el-tag>
+            <el-tag size="mini" type="danger" v-else>{{ scope.row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column property="flags" label="Flags">
+          <template slot-scope="scope">
+            <el-tag size="mini" v-if="scope.row.flags == 'master'">{{ scope.row.flags }}</el-tag>
+            <el-tag size="mini" type="danger" v-else>{{ scope.row.flags }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="monitor" label="Monitor" align="center" sortable>
+          <template slot-scope="scope">
+            <i class="el-icon-success status-icon normal-status" v-if="scope.row.monitor"></i>
+            <i class="el-icon-error status-icon normal-bad" v-else></i>
+          </template>
+        </el-table-column>
+        <el-table-column label="Master Node">
+          <template slot-scope="scope">{{ scope.row.host }}:{{ scope.row.port }}</template>
+        </el-table-column>
+        <el-table-column property="lastMasterNode" label="Last Master Node"></el-table-column>
+        <el-table-column property="numSlaves" label="Num Slaves"></el-table-column>
+        <el-table-column property="sentinels" label="Sentinels"></el-table-column>
+        <el-table-column width="220px">
+          <template slot-scope="scope">
+            <el-dropdown size="mini" split-button type="primary" trigger="click">
+              Info
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item
+                  @click.native="sentinelMasterInfoVisible = true; sentinelMaster = scope.row"
+                >Detail</el-dropdown-item>
+                <el-dropdown-item
+                  @click.native="sentinelMasterSlavesVisible = true; sentinelMaster = scope.row"
+                >Slaves</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+            <el-dropdown size="mini" split-button type="danger" trigger="click">
+              Operate
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item @click.native="editSentinelMaster(scope.row)">Edit</el-dropdown-item>
+                <el-dropdown-item
+                  @click.native="failoverSentinelMasterVisible = true; sentinelMaster = scope.row"
+                >Failover</el-dropdown-item>
+                <el-dropdown-item
+                  @click.native="deleteSentinelMasterVisible = true; sentinelMaster = scope.row"
+                >Delete</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
     <div class="nodes-wrapper" v-loading="nodeListLoading">
       <div class="batch-operation-wrapper">
-        <div class="batch-title">Batch Operation</div>
+        <div class="batch-title">Cluster Operation</div>
         <div style="display: flex; justify-content: space-between;">
-          <div>
+          <div v-if="cluster.redisMode != 'sentinel'">
             <!-- <el-link :underline="false" icon="el-icon-finished">Memory Purge</el-link>
             <el-divider direction="vertical"></el-divider>
             <el-link :underline="false" icon="el-icon-zoom-out">Forget</el-link>
@@ -67,13 +134,22 @@
               >Init Slot</el-link>
             </span>
           </div>
+          <div></div>
           <div style="display: flex;align-items: center;">
             <el-link
               :underline="false"
               icon="el-icon-plus"
               type="primary"
               @click="importNodeVisible = true"
+              v-if="cluster.redisMode != 'sentinel'"
             >Import Node</el-link>
+            <el-link
+              :underline="false"
+              icon="el-icon-plus"
+              type="primary"
+              @click="sentinelMasterEditVisible = true; isUpdateSentinelMaster = false; sentinelMaster = {}"
+              v-else
+            >Monitor Master</el-link>
             <el-divider direction="vertical"></el-divider>
             <i class="el-icon-refresh-left refresh" @click="refresh()"></i>
           </div>
@@ -107,10 +183,12 @@
           </el-table-column>
           <el-table-column label="Flags" width="90px">
             <template slot-scope="scope">
-              <el-tag
-                size="mini"
-                v-if="scope.row.flags == 'master'"
-              >{{ scope.row.flags }} [{{scope.row.replicaNumber }}]</el-tag>
+              <el-tag size="mini" v-if="scope.row.flags == 'master'">
+                {{ scope.row.flags }}
+                <span
+                  v-if="scope.row.replicaNumber > 0"
+                >[{{scope.row.replicaNumber }}]</span>
+              </el-tag>
               <el-tag size="mini" class="pointer" type="info" v-else>{{ scope.row.flags }}</el-tag>
             </template>
           </el-table-column>
@@ -142,11 +220,16 @@
           <el-table-column label="Meta" width="130px;">
             <template slot-scope="scope">
               <el-tag size="mini" class="pointer" @click="getNodeInfo(scope.row)">Info</el-tag>
-              <el-tag size="mini" class="pointer" @click="getConfig(scope.row)">Config</el-tag>
+              <el-tag
+                size="mini"
+                class="pointer"
+                @click="getConfig(scope.row)"
+                v-if="cluster.redisMode != 'sentinel'"
+              >Config</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="time" label="Time" sortable></el-table-column>
-          <el-table-column label="Operation" width="230px">
+          <el-table-column label="Operation" width="230px" v-if="cluster.redisMode != 'sentinel'">
             <template slot-scope="scope">
               <el-dropdown size="mini" split-button type="warning" trigger="click">
                 Cluster
@@ -157,7 +240,7 @@
                   >Move Slot</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleForget(scope.row)"
-                    v-if="scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA' || (scope.row.nodeRole == 'MASTER' && scope.row.children.length == 0)"
+                    v-if="scope.row.nodeRole == 'SLAVE' || scope.row.nodeRole == 'REPLICA' || (scope.row.nodeRole == 'MASTER' && (scope.row.children == null || scope.row.children.length == 0))"
                   >Forget</el-dropdown-item>
                   <el-dropdown-item
                     @click.native="handleReplicateOf(scope.row)"
@@ -463,12 +546,118 @@
     >
       <config :redisNode="operationNode"></config>
     </el-dialog>
+    <el-dialog
+      title="Sentinel Master Info"
+      :visible.sync="sentinelMasterInfoVisible"
+      :close-on-click-modal="false"
+      v-if="sentinelMasterInfoVisible"
+      width="40%"
+    >
+      <sentinelMasterInfo :sentinelMaster="sentinelMaster"></sentinelMasterInfo>
+    </el-dialog>
+
+    <el-dialog
+      title="Sentinel Master Slaves"
+      :visible.sync="sentinelMasterSlavesVisible"
+      :close-on-click-modal="false"
+      v-if="sentinelMasterSlavesVisible"
+      width="40%"
+    >
+      <sentinelMasterSlaves :sentinelMaster="sentinelMaster"></sentinelMasterSlaves>
+    </el-dialog>
+
+    <el-dialog
+      title="Sentinel Master Edit"
+      :visible.sync="sentinelMasterEditVisible"
+      :close-on-click-modal="false"
+      v-if="sentinelMasterEditVisible"
+      width="40%"
+    >
+      <div>
+        <el-form
+          :model="sentinelMaster"
+          :rules="rules"
+          ref="sentinelMaster"
+          label-width="200px"
+          size="small"
+        >
+          <el-form-item label="Master Name" prop="name">
+            <el-tag size="small" v-if="isUpdateSentinelMaster">{{ sentinelMaster.name }}</el-tag>
+            <el-input v-model="sentinelMaster.name" maxlength="30" show-word-limit v-else></el-input>
+          </el-form-item>
+          <el-form-item label="Redis Node" prop="redisNode">
+            <el-tag
+              size="small"
+              v-if="isUpdateSentinelMaster"
+            >{{ sentinelMaster.host }}:{{ sentinelMaster.port }}</el-tag>
+            <el-input v-model="sentinelMaster.redisNode" v-else></el-input>
+          </el-form-item>
+          <el-form-item label="Quorum" prop="quorum">
+            <el-input v-model.number="sentinelMaster.quorum"></el-input>
+          </el-form-item>
+          <el-form-item label="Down After Milliseconds" prop="downAfterMilliseconds">
+            <el-input v-model.number="sentinelMaster.downAfterMilliseconds"></el-input>
+          </el-form-item>
+          <el-form-item label="Parallel Syncs" prop="parallelSyncs">
+            <el-input v-model.number="sentinelMaster.parallelSyncs"></el-input>
+          </el-form-item>
+          <el-form-item label="Failover Timeout" prop="failoverTimeout">
+            <el-input v-model.number="sentinelMaster.failoverTimeout"></el-input>
+          </el-form-item>
+          <el-form-item label="Auth Pass" prop="authPass">
+            <el-input v-model="sentinelMaster.authPass"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button
+            size="small"
+            type="primary"
+            @click="updateSentinelMaster('sentinelMaster')"
+            v-if="isUpdateSentinelMaster"
+          >Update</el-button>
+          <el-button
+            size="small"
+            type="primary"
+            @click="monitorMaster('sentinelMaster')"
+            v-else
+          >Confirm</el-button>
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+      title="Delete Sentinel Master"
+      :visible.sync="deleteSentinelMasterVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
+      <span>{{ sentinelMaster.host }}:{{ sentinelMaster.port }} will be not monitored</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="deleteSentinelMasterVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteSentinelMaster()">Delete</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog
+      title="Failover Sentinel Master"
+      :visible.sync="failoverSentinelMasterVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
+      <span>{{ sentinelMaster.host }}:{{ sentinelMaster.port }} will failover</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="failoverSentinelMasterVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="failoverSentinelMaster()">Failover</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import info from "@/components/view/Info";
 import config from "@/components/view/Config";
+import sentinelMasterInfo from "@/components/view/SentinelMasterInfo";
+import sentinelMasterSlaves from "@/components/view/SentinelMasterSlaves";
 import { isEmpty, validateIpAndPort } from "@/utils/validate.js";
 import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
@@ -478,7 +667,9 @@ import message from "@/utils/message.js";
 export default {
   components: {
     info,
-    config
+    config,
+    sentinelMasterInfo,
+    sentinelMasterSlaves
   },
   data() {
     var validateRedisNode = (rule, value, callback) => {
@@ -488,8 +679,12 @@ export default {
       callback();
     };
     var validateConnection = (rule, value, callback) => {
+      let redisPassword =
+        this.cluster.redisMode != "sentinel"
+          ? this.cluster.redisPassword
+          : this.sentinelMaster.authPass;
       let data = {
-        redisPassword: this.cluster.redisPassword
+        redisPassword: redisPassword
       };
       let ipAndPort = value.split(":");
       let redisNode = {
@@ -530,6 +725,31 @@ export default {
         callback(new Error("End slot must be greater than the start slot"));
       }
       callback();
+    };
+    var validateMasterName = (rule, value, callback) => {
+      if (this.isUpdateSentinelMaster) {
+        return callback();
+      }
+      let url = "/sentinel/getSentinelMasterByName";
+      let sentinelMaster = {
+        clusterId: this.cluster.clusterId,
+        groupId: this.cluster.groupId,
+        name: value
+      };
+      API.post(
+        url,
+        sentinelMaster,
+        response => {
+          if (response.data.code == 0) {
+            return callback(new Error("Master name has been exist."));
+          } else {
+            callback();
+          }
+        },
+        err => {
+          return callback(new Error("Network error, " + err));
+        }
+      );
     };
     return {
       cluster: {},
@@ -588,11 +808,60 @@ export default {
             message: "Please select or enter config key",
             trigger: "blur"
           }
+        ],
+        name: [
+          {
+            required: true,
+            message: "Please enter master name",
+            trigger: "blur"
+          },
+          { required: true, validator: validateMasterName, trigger: "blur" }
+        ],
+        downAfterMilliseconds: [
+          {
+            type: "number",
+            message: "Please enter integer",
+            trigger: "blur"
+          }
+        ],
+        parallelSyncs: [
+          {
+            type: "number",
+            message: "Please enter integer",
+            trigger: "blur"
+          }
+        ],
+        failoverTimeout: [
+          {
+            type: "number",
+            message: "Please enter integer",
+            trigger: "blur"
+          }
+        ],
+        quorum: [
+          {
+            required: true,
+            message: "Please enter quorum",
+            trigger: "blur"
+          },
+          {
+            type: "number",
+            message: "Please enter integer",
+            trigger: "blur"
+          }
         ]
       },
       clusterLoading: false,
       nodeListLoading: false,
-      operationLoading: false
+      operationLoading: false,
+      sentinelMasterList: [],
+      sentinelMaster: {},
+      sentinelMasterInfoVisible: false,
+      sentinelMasterEditVisible: false,
+      isUpdateSentinelMaster: false,
+      deleteSentinelMasterVisible: false,
+      failoverSentinelMasterVisible: false,
+      sentinelMasterSlavesVisible: false
     };
   },
   methods: {
@@ -1100,9 +1369,134 @@ export default {
     refresh() {
       let clusterId = this.cluster.clusterId;
       getClusterById(clusterId, cluster => {
-      this.cluster = cluster;
-      this.getAllNodeList(clusterId);
-    });
+        this.cluster = cluster;
+        this.getAllNodeList(clusterId);
+      });
+    },
+    getSentinelMasterList(clusterId) {
+      let url = "/sentinel/getSentinelMasterList/" + clusterId;
+      API.get(
+        url,
+        null,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.sentinelMasterList = result.data;
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
+    },
+    monitorMaster(sentinelMaster) {
+      this.$refs[sentinelMaster].validate(valid => {
+        if (valid) {
+          let hostAndPort = this.sentinelMaster.redisNode.split(":");
+          this.sentinelMaster.host = hostAndPort[0];
+          this.sentinelMaster.port = hostAndPort[1];
+          this.sentinelMaster.clusterId = this.cluster.clusterId;
+          this.sentinelMaster.groupId = this.cluster.groupId;
+          let url = "/sentinel/monitorMaster";
+          API.post(
+            url,
+            this.sentinelMaster,
+            response => {
+              if (response.data.code == 0) {
+                this.sentinelMasterEditVisible = false;
+              } else {
+                message.error("Monitor new master failed.");
+              }
+              this.getSentinelMasterList(this.cluster.clusterId);
+            },
+            err => {
+              message.error(err);
+            }
+          );
+        }
+      });
+    },
+    updateSentinelMaster(sentinelMaster) {
+      this.$refs[sentinelMaster].validate(valid => {
+        if (valid) {
+          let url = "/sentinel/updateSentinelMaster";
+          API.post(
+            url,
+            this.sentinelMaster,
+            response => {
+              if (response.data.code == 0) {
+                this.sentinelMasterEditVisible = false;
+              } else {
+                message.error("Update sentinel master failed.");
+              }
+              this.getSentinelMasterList(this.cluster.clusterId);
+            },
+            err => {
+              message.error(err);
+            }
+          );
+        }
+      });
+    },
+    editSentinelMaster(sentinelMaster) {
+      this.isUpdateSentinelMaster = true;
+      this.sentinelMasterEditVisible = true;
+      let url = "/sentinel/getSentinelMasterByName";
+      API.post(
+        url,
+        sentinelMaster,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.sentinelMaster = result.data;
+            this.sentinelMaster.redisNode =
+              this.sentinelMaster.host + ":" + this.sentinelMaster.port;
+          } else {
+            message.error("Get sentinel master failed.");
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
+    },
+    deleteSentinelMaster() {
+      let url = "/sentinel/deleteSentinelMaster";
+      API.post(
+        url,
+        this.sentinelMaster,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.deleteSentinelMasterVisible = false;
+            this.getSentinelMasterList(this.cluster.clusterId);
+          } else {
+            message.error("Remove sentinel master failed.");
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
+    },
+    failoverSentinelMaster() {
+      let url = "/sentinel/failoverSentinelMaster";
+      API.post(
+        url,
+        this.sentinelMaster,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.deleteSentinelMasterVisible = false;
+            this.getSentinelMasterList(this.cluster.clusterId);
+          } else {
+            message.error("Failover sentinel master failed.");
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
     }
   },
   computed: {
@@ -1136,6 +1530,9 @@ export default {
       this.cluster = cluster;
       this.getAllNodeList(clusterId);
       this.getConfigKeyList();
+      if (cluster.redisMode == "sentinel") {
+        this.getSentinelMasterList(clusterId);
+      }
     });
   }
 };
@@ -1204,5 +1601,10 @@ export default {
 
 .refresh:hover {
   color: #2c3e50;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

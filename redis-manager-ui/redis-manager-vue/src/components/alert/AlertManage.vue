@@ -155,29 +155,6 @@
           </div>
           <el-table :data="alertChannelList" :default-sort="{prop: 'time', order: 'descending'}">
             <el-table-column type="index" width="50"></el-table-column>
-            <!-- <el-table-column type="expand">
-              <template slot-scope="props">
-                <el-form label-position="left" inline class="table-expand">
-                  <div v-if="props.row.channelType == 0">
-                    <el-form-item label="Email From">
-                      <span>{{ props.row.emailFrom }}</span>
-                    </el-form-item>
-                    <el-form-item label="Email To">
-                      <span>{{ props.row.emailTo }}</span>
-                    </el-form-item>
-                  </div>
-                  <div v-if="props.row.channelType == 1 || props.row.channelType == 2">
-                    <el-form-item label="Web Hook">
-                      <span>{{ props.row.webhook }}</span>
-                    </el-form-item>
-                  </div>
-                  <div v-if="props.row.channelType == 3"></div>
-                  <el-form-item label>
-                    <span>{{ props.row.name }}</span>
-                  </el-form-item>
-                </el-form>
-              </template>
-            </el-table-column>-->
             <el-table-column property="channelName" label="Channel Name"></el-table-column>
             <el-table-column label="Channel Type">
               <template slot-scope="scope">
@@ -691,7 +668,7 @@ export default {
       return store.getters.getCurrentGroup;
     },
     indexBasic() {
-      return (this.currentPageNo - 1) * this.pageSize;
+      return (this.alertRecordCurrentPageNo - 1) * this.alertRecordPageSize;
     }
   },
   watch: {

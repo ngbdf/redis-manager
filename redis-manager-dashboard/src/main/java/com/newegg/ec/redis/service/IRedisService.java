@@ -2,6 +2,7 @@ package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisConfigUtil;
+import com.newegg.ec.redis.util.SentinelConfigUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
 import redis.clients.jedis.HostAndPort;
 
@@ -158,4 +159,17 @@ public interface IRedisService {
      */
     void autoGenerateConfigFile(Cluster cluster);
 
+    List<SentinelMaster> getSentinelMasters(Cluster cluster);
+
+    Map<String, String> getSentinelMasterInfoByName(SentinelMaster sentinelMaster);
+
+    boolean monitorMaster(SentinelMaster sentinelMaster);
+
+    boolean sentinelSet(SentinelMaster sentinelMaster);
+
+    boolean failoverMaster(SentinelMaster sentinelMaster);
+
+    boolean sentinelRemove(SentinelMaster sentinelMaster);
+
+    List<Map<String, String>> sentinelSlaves(SentinelMaster sentinelMaster);
 }

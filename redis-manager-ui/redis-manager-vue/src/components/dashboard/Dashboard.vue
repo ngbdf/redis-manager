@@ -87,28 +87,36 @@
               <el-tag size="mini">{{ cluster.redisVersion }}</el-tag>
             </div>
             <div class="text item">
-              Master:
-              <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
-            </div>
-            <div class="text item">
               Nodes:
               <el-tag size="mini">{{ cluster.clusterKnownNodes }}</el-tag>
             </div>
-            <div class="text item">
+            <div class="text item" v-if="cluster.redisMode != 'sentinel'">
+              Master:
+              <el-tag size="mini">{{ cluster.clusterSize }}</el-tag>
+            </div>
+            <div class="text item" v-else>
+              Sentinel OK:
+              <el-tag size="mini">{{ cluster.sentinelOk }}</el-tag>
+            </div>
+            <div class="text item" v-if="cluster.redisMode != 'sentinel'">
               Total Momery:
               <el-tag size="mini">{{ cluster.totalUsedMemory }}MB</el-tag>
+            </div>
+            <div class="text item" v-else>
+              Sentinel Masters:
+              <el-tag size="mini">{{ cluster.sentinelMasters }}</el-tag>
             </div>
             <div class="text item" v-if="cluster.redisMode == 'cluster'">
               Slots Assigned(ok/assigned):
               <el-tag size="mini">{{ cluster.clusterSlotsOk }}/{{ cluster.clusterSlotsAssigned }}</el-tag>
             </div>
-            <!-- <div class="text item" v-if="cluster.redisMode == 'cluster'">
-              Slots Bad(pfail/fail):
-              <el-tag size="mini">{{ cluster.clusterSlotsPfail }}/{{ cluster.clusterSlotsFail }}</el-tag>
-            </div>-->
             <div class="text item" v-if="cluster.redisMode == 'standalone'">
               DB Size:
               <el-tag size="mini">{{ cluster.dbSize }}</el-tag>
+            </div>
+            <div class="text item" v-if="cluster.redisMode == 'sentinel'">
+              Master OK:
+              <el-tag size="mini">{{ cluster.masterOk }}</el-tag>
             </div>
             <div class="text item">
               Environment:
@@ -129,6 +137,7 @@
               icon="el-icon-search"
               circle
               @click="handleQuery(cluster)"
+              :disabled="cluster.redisMode == 'sentinel'"
             ></el-button>
             <el-button
               size="mini"
@@ -213,7 +222,7 @@ import editCluster from "@/components/manage/EditCluster";
 import { store } from "@/vuex/store.js";
 import { isEmpty } from "@/utils/validate.js";
 import API from "@/api/api.js";
-import message from "@/utils/message.js"
+import message from "@/utils/message.js";
 export default {
   components: {
     query,
@@ -335,9 +344,9 @@ export default {
     },
     deleteCluster(clusterId) {
       let url = "/cluster/deleteCluster";
-      let data = { 
+      let data = {
         clusterId: clusterId,
-        groupId: this.currentGroupId,
+        groupId: this.currentGroupId
       };
       API.post(
         url,
@@ -359,7 +368,7 @@ export default {
     },
     closeEditClusterDialog(editClusterVisible) {
       this.editClusterVisible = editClusterVisible;
-      this.getClusterList(this.currentGroupId)
+      this.getClusterList(this.currentGroupId);
     }
   },
   computed: {

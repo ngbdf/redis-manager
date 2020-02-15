@@ -24,6 +24,8 @@ public class RedisUtil {
 
     public static final String CLUSTER = "cluster";
 
+    public static final String SENTINEL = "sentinel";
+
     /**
      * nodes 相关
      */
@@ -79,7 +81,7 @@ public class RedisUtil {
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             String[] keyValue = SignUtil.splitByColon(line);
-            if (keyValue.length != 2) {
+            if (keyValue.length < 2) {
                 continue;
             }
             String key = keyValue[0];
@@ -167,9 +169,7 @@ public class RedisUtil {
     }
 
     public static String getNodeString(RedisNode redisNode) {
-        StringBuilder result = new StringBuilder();
-        result.append(redisNode.getHost()).append(SignUtil.COLON).append(redisNode.getPort());
-        return result.toString();
+        return redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
     }
 
     public static String generateContainerName(String clusterName, int port) {
