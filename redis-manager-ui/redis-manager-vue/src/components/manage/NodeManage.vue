@@ -679,8 +679,12 @@ export default {
       callback();
     };
     var validateConnection = (rule, value, callback) => {
+      let redisPassword =
+        this.cluster.redisMode != "sentinel"
+          ? this.cluster.redisPassword
+          : this.sentinelMaster.authPass;
       let data = {
-        redisPassword: this.cluster.redisPassword
+        redisPassword: redisPassword
       };
       let ipAndPort = value.split(":");
       let redisNode = {
@@ -1526,7 +1530,9 @@ export default {
       this.cluster = cluster;
       this.getAllNodeList(clusterId);
       this.getConfigKeyList();
-      this.getSentinelMasterList(clusterId);
+      if (cluster.redisMode == "sentinel") {
+        this.getSentinelMasterList(clusterId);
+      }
     });
   }
 };

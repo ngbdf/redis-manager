@@ -22,7 +22,7 @@ public interface IOperationLogDao {
             "user_id integer(4) NOT NULL, " +
             "user_ip varchar(50) DEFAULT NULL, " +
             "operation_info varchar(50) DEFAULT NULL, " +
-            "request_params varchar(3000) DEFAULT NULL, " + //在出现问题的时候
+            "request_params TEXT DEFAULT NULL, " +
             "log_time datetime(0) NOT NULL, " +
             "PRIMARY KEY (log_id) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")

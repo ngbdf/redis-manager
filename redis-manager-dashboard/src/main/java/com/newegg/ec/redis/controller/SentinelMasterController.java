@@ -72,7 +72,7 @@ public class SentinelMasterController {
     //新增，移除 sentinel master
     @RequestMapping(value = "/addSentinelMaster", method = RequestMethod.POST)
     @ResponseBody
-    @OperationLog(type = OperationType.ADD, objType = OperationObjectType.CLUSTER)
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.CLUSTER)
     public Result add(@RequestBody SentinelMaster sentinelMaster) {
         boolean result = sentinelMastersService.addSentinelMaster(sentinelMaster);
         return result ? Result.successResult() : Result.failResult();
@@ -80,16 +80,16 @@ public class SentinelMasterController {
 
     @RequestMapping(value = "/deleteSentinelMaster", method = RequestMethod.POST)
     @ResponseBody
-    @OperationLog(type = OperationType.DELETE, objType = OperationObjectType.CLUSTER)
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.CLUSTER)
     public Result deleteSentinelMaster(@RequestBody SentinelMaster sentinelMaster) {
-        Integer sentinelMasterId = sentinelMaster.getSentinelMasterId();
-        boolean result = redisService.sentinelRemove(sentinelMaster) && sentinelMastersService.deleteSentinelMasterById(sentinelMasterId);
+        boolean result = redisService.sentinelRemove(sentinelMaster)
+                && sentinelMastersService.deleteSentinelMasterByName(sentinelMaster.getClusterId(), sentinelMaster.getName());
         return result ? Result.successResult() : Result.failResult();
     }
 
     @RequestMapping(value = "/monitorMaster", method = RequestMethod.POST)
     @ResponseBody
-    @OperationLog(type = OperationType.ADD, objType = OperationObjectType.CLUSTER)
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.CLUSTER)
     public Result monitorMaster(@RequestBody SentinelMaster sentinelMaster) {
         boolean result = redisService.monitorMaster(sentinelMaster);
         if (result) {

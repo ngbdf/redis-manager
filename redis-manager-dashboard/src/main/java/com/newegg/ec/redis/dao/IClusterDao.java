@@ -91,7 +91,7 @@ public interface IClusterDao {
             "user_id integer(4) NOT NULL, " +
             "cluster_token varchar(255) DEFAULT NULL, " +
             "cluster_name varchar(255) NOT NULL, " +
-            "nodes varchar(255) NOT NULL, " +
+            "nodes TEXT NOT NULL, " +
             "redis_mode varchar(25) NOT NULL, " +
             "os varchar(255) NOT NULL, " +
             "redis_version varchar(25) NOT NULL, " +

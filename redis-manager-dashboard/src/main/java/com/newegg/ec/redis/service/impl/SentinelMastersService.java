@@ -125,9 +125,9 @@ public class SentinelMastersService implements ISentinelMastersService {
     }
 
     @Override
-    public boolean deleteSentinelMasterById(Integer sentinelMasterId) {
+    public boolean deleteSentinelMasterByName(Integer clusterId, String masterName) {
         try {
-            return sentinelMastersDao.deleteSentinelMasterById(sentinelMasterId) > 0;
+            return sentinelMastersDao.deleteSentinelMasterByName(clusterId, masterName) > 0;
         } catch (Exception e) {
             logger.error("Remove sentinel master failed.", e);
             return false;

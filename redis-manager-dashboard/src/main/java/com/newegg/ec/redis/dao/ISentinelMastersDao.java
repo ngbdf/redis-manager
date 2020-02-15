@@ -41,8 +41,8 @@ public interface ISentinelMastersDao {
             "#{numSlaves}, #{sentinels}, #{quorum}, #{failoverTimeout}, #{parallelSyncs}, #{authPass}, NOW())")
     int insertSentinelMaster(SentinelMaster sentinelMaster);
 
-    @Delete("DELETE FROM sentinel_masters WHERE sentinel_master_id = #{sentinelMasterId}")
-    int deleteSentinelMasterById(Integer sentinelMasterId);
+    @Delete("DELETE FROM sentinel_masters WHERE cluster_id = #{clusterId} AND name = #{name}")
+    int deleteSentinelMasterByName(@Param("clusterId") Integer clusterId, @Param("name") String name);
 
     @Delete("DELETE FROM sentinel_masters WHERE sentinel_master_id = #{cluster_id}")
     int deleteSentinelMasterByClusterId(Integer clusterId);
@@ -76,7 +76,8 @@ public interface ISentinelMastersDao {
             "parallel_syncs integer(4) DEFAULT NULL,\n" +
             "auth_pass varchar(255) DEFAULT NULL,\n" +
             "update_time datetime(0) NOT NULL,\n" +
-            "PRIMARY KEY (sentinel_master_id)\n" +
+            "PRIMARY KEY (sentinel_master_id),\n" +
+            "UNIQUE KEY `master_name` (cluster_id, name) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createSentinelMastersTable();
 }

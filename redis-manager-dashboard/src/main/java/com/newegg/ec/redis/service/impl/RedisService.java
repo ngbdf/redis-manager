@@ -871,6 +871,9 @@ public class RedisService implements IRedisService {
         if (sentinelMaster.getFailoverTimeout() != null) {
             param.put("failover-timeout", String.valueOf(sentinelMaster.getFailoverTimeout()));
         }
+        if (!Strings.isNullOrEmpty(sentinelMaster.getAuthPass())) {
+            param.put("auth-pass", sentinelMaster.getAuthPass());
+        }
         param.put("quorum", String.valueOf(sentinelMaster.getQuorum()));
         return redisClient.sentinelSet(sentinelMaster.getName(), param);
     }
@@ -905,7 +908,7 @@ public class RedisService implements IRedisService {
                 result = redisClient.sentinelRemove(sentinelMaster.getName());
             } catch (Exception e) {
                 logger.error("sentinel remove failed, master name: " + sentinelMaster.getName() + ", sentinel node: " + hostAndPort, e);
-                result = Objects.equals("ERR No such master with that name", e.getMessage());
+                result = e.getMessage().contains("ERR No such master with that name");
             } finally {
                 close(redisClient);
             }

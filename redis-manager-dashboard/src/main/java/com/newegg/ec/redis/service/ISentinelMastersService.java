@@ -20,7 +20,7 @@ public interface ISentinelMastersService {
 
     boolean addSentinelMaster(SentinelMaster sentinelMaster);
 
-    boolean deleteSentinelMasterById(Integer sentinelMasterId);
+    boolean deleteSentinelMasterByName(Integer clusterId, String masterName);
 
     boolean deleteSentinelMasterByClusterId(Integer clusterId);
 
