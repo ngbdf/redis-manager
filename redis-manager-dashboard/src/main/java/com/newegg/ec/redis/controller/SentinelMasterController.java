@@ -1,9 +1,8 @@
 package com.newegg.ec.redis.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.newegg.ec.redis.entity.Cluster;
-import com.newegg.ec.redis.entity.Result;
-import com.newegg.ec.redis.entity.SentinelMaster;
+import com.newegg.ec.redis.aop.annotation.OperationLog;
+import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.service.ISentinelMastersService;
@@ -73,6 +72,7 @@ public class SentinelMasterController {
     //新增，移除 sentinel master
     @RequestMapping(value = "/addSentinelMaster", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.ADD, objType = OperationObjectType.CLUSTER)
     public Result add(@RequestBody SentinelMaster sentinelMaster) {
         boolean result = sentinelMastersService.addSentinelMaster(sentinelMaster);
         return result ? Result.successResult() : Result.failResult();
@@ -80,14 +80,16 @@ public class SentinelMasterController {
 
     @RequestMapping(value = "/deleteSentinelMaster", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.DELETE, objType = OperationObjectType.CLUSTER)
     public Result deleteSentinelMaster(@RequestBody SentinelMaster sentinelMaster) {
         Integer sentinelMasterId = sentinelMaster.getSentinelMasterId();
-        boolean result = sentinelMastersService.deleteSentinelMasterById(sentinelMasterId);
+        boolean result = redisService.sentinelRemove(sentinelMaster) && sentinelMastersService.deleteSentinelMasterById(sentinelMasterId);
         return result ? Result.successResult() : Result.failResult();
     }
 
     @RequestMapping(value = "/monitorMaster", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.ADD, objType = OperationObjectType.CLUSTER)
     public Result monitorMaster(@RequestBody SentinelMaster sentinelMaster) {
         boolean result = redisService.monitorMaster(sentinelMaster);
         if (result) {
@@ -99,6 +101,7 @@ public class SentinelMasterController {
 
     @RequestMapping(value = "/updateSentinelMaster", method = RequestMethod.POST)
     @ResponseBody
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.CLUSTER)
     public Result updateSentinelMaster(@RequestBody SentinelMaster sentinelMaster) {
         boolean result = redisService.sentinelSet(sentinelMaster);
         if (result) {
@@ -108,9 +111,10 @@ public class SentinelMasterController {
         return Result.failResult();
     }
 
-    @RequestMapping(value = "/failoverMaster", method = RequestMethod.POST)
+    @RequestMapping(value = "/failoverSentinelMaster", method = RequestMethod.POST)
     @ResponseBody
-    public Result failoverMaster(@RequestBody SentinelMaster sentinelMaster) {
+    @OperationLog(type = OperationType.UPDATE, objType = OperationObjectType.CLUSTER)
+    public Result failoverSentinelMaster(@RequestBody SentinelMaster sentinelMaster) {
         boolean result = redisService.failoverMaster(sentinelMaster);
         if (result) {
             Map<String, String> sentinelMasterInfoByName = redisService.getSentinelMasterInfoByName(sentinelMaster);
@@ -125,11 +129,23 @@ public class SentinelMasterController {
         return Result.failResult();
     }
 
-    @RequestMapping(value = "/getMasterSlaves", method = RequestMethod.POST)
+    @RequestMapping(value = "/getSentinelMasterSlaves", method = RequestMethod.POST)
     @ResponseBody
-    public Result getMasterSlaves(@RequestBody SentinelMaster sentinelMaster) {
+    public Result getSentinelMasterSlaves(@RequestBody SentinelMaster sentinelMaster) {
         List<Map<String, String>> slaves = redisService.sentinelSlaves(sentinelMaster);
-        return slaves != null ? Result.successResult(slaves) : Result.failResult();
+        if (slaves == null) {
+            return Result.failResult();
+        }
+        List<JSONObject> infoList = new ArrayList<>();
+        for (Map<String, String> slave : slaves) {
+            slave.forEach((key, value) -> {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("key", key);
+                jsonObject.put("value", value);
+                infoList.add(jsonObject);
+            });
+        }
+        return Result.successResult(infoList);
     }
 
 }

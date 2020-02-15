@@ -1,6 +1,6 @@
 <template>
   <div v-loading="saveClusterLoading">
-    <el-form :model="cluster" ref="cluster" :rules="rules" label-width="120px" size="small">
+    <el-form :model="cluster" ref="cluster" :rules="rules" label-width="130px" size="small">
       <el-form-item label="Group Name">
         <el-tag size="small">{{ currentGroup.groupName }}</el-tag>
       </el-form-item>
@@ -216,7 +216,7 @@ export default {
       }
     },
     addNode() {
-      if (this.cluster.nodeList.length >= 5) {
+      if (this.cluster.nodeList.length >= 20) {
         return;
       }
       this.cluster.nodeList.push({

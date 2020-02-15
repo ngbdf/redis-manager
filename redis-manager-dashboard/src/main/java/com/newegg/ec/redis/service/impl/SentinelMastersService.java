@@ -57,6 +57,7 @@ public class SentinelMastersService implements ISentinelMastersService {
                 if (Objects.equals(realSentinelMaster.getName(), dbSentinelMaster.getName())) {
                     String masterNode = dbSentinelMaster.getHost() + SignUtil.COLON + dbSentinelMaster.getPort();
                     boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), masterNode);
+                    realSentinelMaster.setSentinelMasterId(dbSentinelMaster.getSentinelMasterId());
                     realSentinelMaster.setMasterChanged(masterNodeChanged);
                     realSentinelMaster.setLastMasterNode(dbSentinelMaster.getLastMasterNode());
                     realIterator.remove();

@@ -60,25 +60,43 @@
             <el-tag size="mini" type="danger" v-else>{{ scope.row.flags }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="monitor" label="Monitor" align="center" sortable>
+          <template slot-scope="scope">
+            <i class="el-icon-success status-icon normal-status" v-if="scope.row.monitor"></i>
+            <i class="el-icon-error status-icon normal-bad" v-else></i>
+          </template>
+        </el-table-column>
         <el-table-column label="Master Node">
           <template slot-scope="scope">{{ scope.row.host }}:{{ scope.row.port }}</template>
         </el-table-column>
         <el-table-column property="lastMasterNode" label="Last Master Node"></el-table-column>
         <el-table-column property="numSlaves" label="Num Slaves"></el-table-column>
         <el-table-column property="sentinels" label="Sentinels"></el-table-column>
-        <el-table-column label="Operation" width="250px">
+        <el-table-column width="220px">
           <template slot-scope="scope">
-            <el-button
-              size="mini"
-              type="primary"
-              @click="sentinelMasterInfoVisible = true; sentinelMaster = scope.row"
-            >Detail</el-button>
-            <el-button size="mini" type="warning" @click="editSentinelMaster(scope.row)">Edit</el-button>
-            <el-button
-              size="mini"
-              type="danger"
-              @click="sentinelMasterFailoverVisible = true; sentinelMaster = scope.row"
-            >Failover</el-button>
+            <el-dropdown size="mini" split-button type="primary" trigger="click">
+              Info
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item
+                  @click.native="sentinelMasterInfoVisible = true; sentinelMaster = scope.row"
+                >Detail</el-dropdown-item>
+                <el-dropdown-item
+                  @click.native="sentinelMasterSlavesVisible = true; sentinelMaster = scope.row"
+                >Slaves</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+            <el-dropdown size="mini" split-button type="danger" trigger="click">
+              Operate
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item @click.native="editSentinelMaster(scope.row)">Edit</el-dropdown-item>
+                <el-dropdown-item
+                  @click.native="failoverSentinelMasterVisible = true; sentinelMaster = scope.row"
+                >Failover</el-dropdown-item>
+                <el-dropdown-item
+                  @click.native="deleteSentinelMasterVisible = true; sentinelMaster = scope.row"
+                >Delete</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -539,6 +557,16 @@
     </el-dialog>
 
     <el-dialog
+      title="Sentinel Master Slaves"
+      :visible.sync="sentinelMasterSlavesVisible"
+      :close-on-click-modal="false"
+      v-if="sentinelMasterSlavesVisible"
+      width="40%"
+    >
+      <sentinelMasterSlaves :sentinelMaster="sentinelMaster"></sentinelMasterSlaves>
+    </el-dialog>
+
+    <el-dialog
       title="Sentinel Master Edit"
       :visible.sync="sentinelMasterEditVisible"
       :close-on-click-modal="false"
@@ -596,6 +624,32 @@
         </div>
       </div>
     </el-dialog>
+
+    <el-dialog
+      title="Delete Sentinel Master"
+      :visible.sync="deleteSentinelMasterVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
+      <span>{{ sentinelMaster.host }}:{{ sentinelMaster.port }} will be not monitored</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="deleteSentinelMasterVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="deleteSentinelMaster()">Delete</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog
+      title="Failover Sentinel Master"
+      :visible.sync="failoverSentinelMasterVisible"
+      width="30%"
+      :close-on-click-modal="false"
+    >
+      <span>{{ sentinelMaster.host }}:{{ sentinelMaster.port }} will failover</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="failoverSentinelMasterVisible = false">Cancel</el-button>
+        <el-button size="small" type="danger" @click="failoverSentinelMaster()">Failover</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -603,6 +657,7 @@
 import info from "@/components/view/Info";
 import config from "@/components/view/Config";
 import sentinelMasterInfo from "@/components/view/SentinelMasterInfo";
+import sentinelMasterSlaves from "@/components/view/SentinelMasterSlaves";
 import { isEmpty, validateIpAndPort } from "@/utils/validate.js";
 import { formatTime } from "@/utils/time.js";
 import API from "@/api/api.js";
@@ -613,7 +668,8 @@ export default {
   components: {
     info,
     config,
-    sentinelMasterInfo
+    sentinelMasterInfo,
+    sentinelMasterSlaves
   },
   data() {
     var validateRedisNode = (rule, value, callback) => {
@@ -759,11 +815,6 @@ export default {
         ],
         downAfterMilliseconds: [
           {
-            required: true,
-            message: "Please enter down after milliseconds",
-            trigger: "blur"
-          },
-          {
             type: "number",
             message: "Please enter integer",
             trigger: "blur"
@@ -771,22 +822,12 @@ export default {
         ],
         parallelSyncs: [
           {
-            required: true,
-            message: "Please enter parallel syncs",
-            trigger: "blur"
-          },
-          {
             type: "number",
             message: "Please enter integer",
             trigger: "blur"
           }
         ],
         failoverTimeout: [
-          {
-            required: true,
-            message: "Please enter down failover timeout",
-            trigger: "blur"
-          },
           {
             type: "number",
             message: "Please enter integer",
@@ -813,8 +854,10 @@ export default {
       sentinelMaster: {},
       sentinelMasterInfoVisible: false,
       sentinelMasterEditVisible: false,
-      sentinelMasterFailoverVisible: false,
-      isUpdateSentinelMaster: false
+      isUpdateSentinelMaster: false,
+      deleteSentinelMasterVisible: false,
+      failoverSentinelMasterVisible: false,
+      sentinelMasterSlavesVisible: false
     };
   },
   methods: {
@@ -1406,6 +1449,44 @@ export default {
               this.sentinelMaster.host + ":" + this.sentinelMaster.port;
           } else {
             message.error("Get sentinel master failed.");
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
+    },
+    deleteSentinelMaster() {
+      let url = "/sentinel/deleteSentinelMaster";
+      API.post(
+        url,
+        this.sentinelMaster,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.deleteSentinelMasterVisible = false;
+            this.getSentinelMasterList(this.cluster.clusterId);
+          } else {
+            message.error("Remove sentinel master failed.");
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
+    },
+    failoverSentinelMaster() {
+      let url = "/sentinel/failoverSentinelMaster";
+      API.post(
+        url,
+        this.sentinelMaster,
+        response => {
+          let result = response.data;
+          if (result.code == 0) {
+            this.deleteSentinelMasterVisible = false;
+            this.getSentinelMasterList(this.cluster.clusterId);
+          } else {
+            message.error("Failover sentinel master failed.");
           }
         },
         err => {

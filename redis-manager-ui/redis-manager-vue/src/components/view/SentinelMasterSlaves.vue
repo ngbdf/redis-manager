@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     getSentinelMasterInfo() {
-      let url = "/sentinel/getSentinelMasterInfo";
+      let url = "/sentinel/getSentinelMasterSlaves";
       API.post(
         url,
         this.sentinelMaster,
@@ -34,7 +34,7 @@ export default {
           if (result.code == 0) {
             this.infoList = result.data;
           } else {
-            message.error("Get sentinel master info failed");
+            message.error("Get sentinel master slaves failed");
           }
         },
         err => {

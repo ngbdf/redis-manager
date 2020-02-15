@@ -672,7 +672,7 @@ public class RedisClient implements IRedisClient {
     }
 
     @Override
-    public boolean removeMaster(String masterName) {
+    public boolean sentinelRemove(String masterName) {
         return Objects.equals(jedis.sentinelRemove(masterName), OK);
     }
 

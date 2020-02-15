@@ -234,7 +234,7 @@ public interface IRedisClient extends IDatabaseCommand {
 
     boolean failoverMaster(String masterName);
 
-    boolean removeMaster(String masterName);
+    boolean sentinelRemove(String masterName);
 
     Long resetConfig(String pattern);
 

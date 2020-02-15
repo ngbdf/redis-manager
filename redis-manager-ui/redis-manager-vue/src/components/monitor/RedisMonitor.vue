@@ -117,6 +117,12 @@
               <el-tag size="mini" type="danger" v-else>{{ scope.row.flags }}</el-tag>
             </template>
           </el-table-column>
+          <el-table-column prop="monitor" label="Monitor" align="center" sortable>
+            <template slot-scope="scope">
+              <i class="el-icon-success status-icon normal-status" v-if="scope.row.monitor"></i>
+              <i class="el-icon-error status-icon normal-bad" v-else></i>
+            </template>
+          </el-table-column>
           <el-table-column label="Master Node">
             <template slot-scope="scope">{{ scope.row.host }}:{{ scope.row.port }}</template>
           </el-table-column>
@@ -763,4 +769,13 @@ export default {
 .chart-no-data {
   height: 0 !important;
 }
+
+.normal-status {
+  color: #40c9c6;
+}
+
+.bad-status {
+  color: #f4516c;
+}
+
 </style>

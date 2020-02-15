@@ -54,26 +54,26 @@ public interface ISentinelMastersDao {
             "name varchar(255) NOT NULL,\n" +
             "host varchar(255) NOT NULL,\n" +
             "port integer(4) NOT NULL,\n" +
-            "flags varchar(255) NOT NULL,\n" +
-            "last_master_node varchar(255) NOT NULL,\n" +
-            "status varchar(50) NOT NULL,\n" +
-            "link_pending_commands bigint(20) NOT NULL,\n" +
-            "link_refcount bigint(20) NOT NULL,\n" +
-            "last_ping_sent bigint(20) NOT NULL,\n" +
-            "last_ok_ping_reply bigint(20) NOT NULL,\n" +
-            "last_ping_reply bigint(20) NOT NULL,\n" +
+            "flags varchar(255) DEFAULT NULL,\n" +
+            "last_master_node varchar(255) DEFAULT NULL,\n" +
+            "status varchar(50) DEFAULT NULL,\n" +
+            "link_pending_commands bigint(20) DEFAULT NULL,\n" +
+            "link_refcount bigint(20) DEFAULT NULL,\n" +
+            "last_ping_sent bigint(20) DEFAULT NULL,\n" +
+            "last_ok_ping_reply bigint(20) DEFAULT NULL,\n" +
+            "last_ping_reply bigint(20) DEFAULT NULL,\n" +
             "s_down_time bigint(20) DEFAULT NULL,\n" +
             "o_down_time bigint(20) DEFAULT NULL,\n" +
-            "down_after_milliseconds bigint(20) NOT NULL,\n" +
-            "info_refresh bigint(20) NOT NULL,\n" +
-            "role_reported varchar(50) NOT NULL,\n" +
-            "role_reported_time bigint(20) NOT NULL,\n" +
-            "config_epoch bigint(20) NOT NULL,\n" +
-            "num_slaves integer(4) NOT NULL,\n" +
-            "sentinels integer(4) NOT NULL,\n" +
-            "quorum integer(4) NOT NULL,\n" +
-            "failover_timeout bigint(4) NOT NULL,\n" +
-            "parallel_syncs integer(4) NOT NULL,\n" +
+            "down_after_milliseconds bigint(20) DEFAULT NULL,\n" +
+            "info_refresh bigint(20) DEFAULT NULL,\n" +
+            "role_reported varchar(50) DEFAULT NULL,\n" +
+            "role_reported_time bigint(20) DEFAULT NULL,\n" +
+            "config_epoch bigint(20) DEFAULT NULL,\n" +
+            "num_slaves integer(4) DEFAULT NULL,\n" +
+            "sentinels integer(4) DEFAULT NULL,\n" +
+            "quorum integer(4) DEFAULT NULL,\n" +
+            "failover_timeout bigint(4) DEFAULT NULL,\n" +
+            "parallel_syncs integer(4) DEFAULT NULL,\n" +
             "auth_pass varchar(255) DEFAULT NULL,\n" +
             "update_time datetime(0) NOT NULL,\n" +
             "PRIMARY KEY (sentinel_master_id)\n" +

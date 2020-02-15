@@ -169,5 +169,7 @@ public interface IRedisService {
 
     boolean failoverMaster(SentinelMaster sentinelMaster);
 
+    boolean sentinelRemove(SentinelMaster sentinelMaster);
+
     List<Map<String, String>> sentinelSlaves(SentinelMaster sentinelMaster);
 }
