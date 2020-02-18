@@ -26,7 +26,7 @@
     </el-form-item>
       <el-form-item label="Nodes" prop="nodes">
     <el-select v-model="analyseisJobFrom.nodes" placeholder="Select Analyze Nodes" class="input" multiple @change="changeNodes" >
-      <el-option key="-1" value="-1" label="ALL"></el-option>
+      <el-option  value="-1" label="Cluster"></el-option>
       <el-option v-for="item in this.redisNodeList" :key="item.host+':'+item.port" :label="item.flags+' '+item.host+':'+item.port" :value="item.host+':'+item.port" :disabled="isAllNodes"></el-option>
     </el-select>
       </el-form-item>
@@ -41,17 +41,18 @@
         <i class="el-icon-message-solid"></i>
       </el-tooltip>
     </el-form-item> -->
-    <el-form-item label="Analyzer" prop="analyzer">
+    <!-- <el-form-item label="Analyzer" prop="analyzer">
       <el-checkbox-group v-model="analyseisJobFrom.analyzer">
         <el-checkbox label="0">Report</el-checkbox>
         <!-- <el-checkbox label="6">ExportKeyByFilter</el-checkbox>
         <el-checkbox label="5">ExportKeyByPrefix</el-checkbox> -->
-      </el-checkbox-group>
-    </el-form-item>
+      <!-- </el-checkbox-group>
+    </el-form-item> -->
     <el-form-item label="DataPath" prop="dataPath">
-      <el-input v-model="analyseisJobFrom.dataPath" placeholder="Please dataPath" class="input"></el-input>
+        <!-- <span>{{analyseisJobFrom.dataPath }}</span> -->
+      <el-input v-model="analyseisJobFrom.dataPath" placeholder="Please dataPath" class="input" :disabled="this.analyze"></el-input>
     </el-form-item>
-    <el-form-item label="Custom Prefixe" prop="prefixes">
+    <el-form-item label="Custom Prefixes" prop="prefixes">
            <el-input type="textarea" :rows="2" v-model="analyseisJobFrom.prefixes" placeholder="Please input your custom prefixe with ','" class="input"></el-input>
 
     </el-form-item>
@@ -124,9 +125,9 @@ export default {
       analyseisJobFrom: {
         id: '',
         clusterId: '',
-        nodes: [],
+        nodes: ['-1'],
         schedule: '',
-        analyzer: [],
+        analyzer: '0',
         dataPath: '',
         prefixes: '',
         report: false,
@@ -150,26 +151,25 @@ export default {
             message: "schedule can't be empty",
             trigger: 'blur'
           }
-        ],
-        analyzer: [
-          {
-            type: 'array',
-            required: true,
-            message: "analyzer can't be empty",
-            trigger: 'change'
-          }
-        ],
-        dataPath: [
-          {
-            required: true,
-            message: "dataPath can't be empty",
-            trigger: 'blur'
-          }
         ]
+        // analyzer: [
+        //   {
+        //     type: 'array',
+        //     required: true,
+        //     message: "analyzer can't be empty",
+        //     trigger: 'change'
+        //   }
+        // ],
+        // dataPath: [
+        //   {
+        //     required: true,
+        //     message: "dataPath can't be empty",
+        //     trigger: 'blur'
+        //   }
+        // ]
       },
       redisNodeList: [],
       analyzeVisable: false,
-      scheduleCron: ['2020-01-21 07:10:00', '2020-01-21 07:10:10'],
       labelPosition: 'right'
     }
   },
@@ -181,7 +181,7 @@ export default {
     AnalyzeJob (analyseisJobFrom) {
       this.loading = true
       const body = Object.assign({}, this.analyseisJobFrom)
-      body.analyzer = body.analyzer.toString()
+      // body.analyzer = body.analyzer.toString()
       body.manual = true
       analyzeJob(body).then(response => {
         if (response.data.status) {
@@ -208,6 +208,8 @@ export default {
       getClusterNodes(this.from.clusterId).then(response => {
         this.redisNodeList = response.data
       })
+      this.analyseisJobFrom.nodes = ['0']
+      this.isAllNodes = true
     },
     changeNodes (element) {
       if (element.length === 0) {
@@ -228,6 +230,8 @@ export default {
         this.$nextTick(() => {
           if (newValue !== old) {
             this.analyseisJobFrom = newValue
+            this.analyseisJobFrom.nodes = ['-1']
+            console.log('newValue', this.analyseisJobFrom)
           }
         })
       }

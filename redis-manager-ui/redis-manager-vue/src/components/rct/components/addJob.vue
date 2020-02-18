@@ -30,17 +30,15 @@
         <i class="el-icon-message-solid"></i>
       </el-tooltip>
     </el-form-item>
-    <el-form-item label="Analyzer" prop="analyzer">
+    <!-- <el-form-item label="Analyzer" prop="analyzer">
       <el-checkbox-group v-model="analyseisJobFrom.analyzer">
         <el-checkbox label="0">Report</el-checkbox>
-        <!-- <el-checkbox label="6">ExportKeyByFilter</el-checkbox>
-        <el-checkbox label="5">ExportKeyByPrefix</el-checkbox> -->
       </el-checkbox-group>
-    </el-form-item>
+    </el-form-item> -->
     <el-form-item label="DataPath" prop="dataPath">
       <el-input v-model="analyseisJobFrom.dataPath" placeholder="Please dataPath" class="input"></el-input>
     </el-form-item>
-    <el-form-item label="Custom Prefixe" prop="prefixes">
+    <el-form-item label="Custom Prefixes" prop="prefixes">
       <el-input type="textarea" :rows="2" v-model="analyseisJobFrom.prefixes" placeholder="Please input your custom prefixe with ','" class="input"></el-input>
     </el-form-item>
     <el-form-item label="Report" prop="report">
@@ -102,7 +100,7 @@ export default {
         clusterId: '',
         autoAnalyze: false,
         schedule: '',
-        analyzer: [],
+        analyzer: '0',
         dataPath: '',
         prefixes: '',
         report: false,

@@ -70,7 +70,7 @@ export default {
         }],
         searchVis: true,
         searchColumn: 'prefixKey',
-        title: 'Top 1000 Largest Keys By Perfix'
+        title: 'Top 1000 Largest Keys By Custom Prefixes'
       },
       keysTTL: {
         columns: [{

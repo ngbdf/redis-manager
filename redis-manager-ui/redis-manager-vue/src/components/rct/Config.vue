@@ -13,9 +13,9 @@
           <el-table-column
             label="Cluster Name"
             property="cluster.clusterName"
-            width="150"
+
           ></el-table-column>
-          <el-table-column label="Schedule" property="schedule" width="150">
+          <el-table-column label="Schedule" property="schedule" >
             <template slot-scope="scope">
               <span
                 v-if="scope.row.schedule !== '' && scope.row.schedule !== null"
@@ -27,16 +27,15 @@
           <el-table-column
             label="AutoAnalyze"
             property="autoAnalyze"
-            width="150"
           >
-            <template slot-scope="scope" width="100">
+            <template slot-scope="scope">
               <el-tag size="small" v-if="scope.row.autoAnalyze" type="success"
                 >true</el-tag
               >
               <el-tag size="small" v-else type="success">false</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="Analyzer" property="analyzer" width="100">
+          <!-- <el-table-column label="Analyzer" property="analyzer" width="100">
             <template slot-scope="scope">
               <div slot="reference" class="name-wrapper">
                 <el-tag
@@ -52,9 +51,9 @@
                 </el-tag>
               </div>
             </template>
-          </el-table-column>
+          </el-table-column> -->
 
-          <el-table-column
+          <!-- <el-table-column
             label="Data Path"
             property="dataPath"
             width="350"
@@ -63,14 +62,14 @@
             label="Custom Prefixe"
             property="prefixes"
             width="150"
-          ></el-table-column>
+          ></el-table-column> -->
           <!-- <el-table-column label="Status" width="150">
             <template slot-scope="scope" width="150">
               <i class="el-icon-loading" v-if="scope.row.status"></i>
               <i class="el-icon-circle-check" v-else></i>
             </template>
           </el-table-column>-->
-          <el-table-column label="Operation" width="200px;">
+          <el-table-column label="Operation" >
             <template slot-scope="scope">
               <el-button
                 type="primary"
@@ -170,7 +169,7 @@ export default {
         clusterId: '',
         autoAnalyze: false,
         schedule: '',
-        analyzer: [],
+        analyzer: '0',
         dataPath: '',
         prefixes: '',
         report: false,
@@ -229,10 +228,10 @@ export default {
     async getAnalysisJobList (groupId) {
       await getAnalysisList('/rdb').then(response => {
         const data = response.data
-        data.map((obj, key) => {
-          obj.analyzer = this.changeAnalyzeToArray(obj.analyzer)
-          return obj
-        })
+        // data.map((obj, key) => {
+        //   obj.analyzer = this.changeAnalyzeToArray(obj.analyzer)
+        //   return obj
+        // })
         this.analyseisJobs = data
       })
     },
