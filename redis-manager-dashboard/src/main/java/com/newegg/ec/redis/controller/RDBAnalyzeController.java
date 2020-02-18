@@ -68,7 +68,7 @@ public class RDBAnalyzeController {
                     return Result.failResult("update data faild!");
                 }
             }else{
-                return Result.failResult("cross expression has error,please check!");
+                return Result.failResult("cron expression has error,please check!");
             }
         }else{
             if(rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)){
@@ -87,7 +87,7 @@ public class RDBAnalyzeController {
 	            if(taskService.vaildCronExpress(rdbAnalyze.getSchedule())){
                     return addAnalyze(rdbAnalyze);
                 }else{
-                    return Result.failResult("cross expression has error,please check!");
+                    return Result.failResult("cron expression has error,please check!");
                 }
             }else{
                return addAnalyze(rdbAnalyze);

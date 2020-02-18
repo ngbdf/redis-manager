@@ -4,7 +4,7 @@ server:
     mime-types: application/json
     min-response-size: 1024
   tomcat.uri-encoding: UTF-8
-  port: 8080
+  port: 8182
 
 #eureka:
 #  client:
@@ -40,9 +40,9 @@ spring:
       charset: UTF-8
   datasource:
     # 必填，与数据库同名
-    database: redis_manager3
+    database: redis_manager2_dev
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.16.236.126:3306/redis_manager3?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://10.16.236.126:3306/redis_manager2_dev?useUnicode=true&characterEncoding=utf-8
     username: root
     password: 123456
     druid:
@@ -98,10 +98,17 @@ redis-manager:
   alert:
     data-keep-days: 15
 rct:
+  email:
+    smtp: 172.16.35.30
+    from-name: redismanager@newegg.com
+    user-name:
+    password:
+    subject: Redis Analyze Report
   dev:
-    enable: false
+    enable: true
     rdb:
       port: 9002
+
 logging:
   level:
     com:
