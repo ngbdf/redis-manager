@@ -161,13 +161,13 @@ export default {
           body.analyzer = body.analyzer.toString()
           if (body.id === '') {
             addAnalysisList(body).then(response => {
-              message.success(response.message)
+              message.success(response.data)
               this.$emit('cancel', false)
               this.$emit('refresh')
             })
           } else {
             updateAnalyzeList(body).then(response => {
-              message.success(response.message)
+              message.success(response.data)
               this.$emit('cancel', false)
               this.$emit('refresh')
             })

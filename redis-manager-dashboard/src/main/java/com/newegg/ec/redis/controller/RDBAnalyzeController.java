@@ -53,57 +53,68 @@ public class RDBAnalyzeController {
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.PUT)
 	@ResponseBody
 	public Result updateRdbAnalyze(@RequestBody RDBAnalyze rdbAnalyze) {
-
-		if (rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)) {
-			try {
-				taskService.delTask("rdb" + rdbAnalyze.getId());
-			} catch (SchedulerException e) {
-				LOG.error("schedule job delete faild!message:{}", e.getMessage());
-			}
-
-			if (rdbAnalyze.isAutoAnalyze()) {
-				try {
-					if(taskService.vaildCronExpress(rdbAnalyze.getSchedule())){
-						taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
-					}else{
-						return Result.failResult("schedule cron expression is not vaild,please check!");
-					}
-				} catch (SchedulerException e) {
-					LOG.error("schedule job add faild!message:{}", e.getMessage());
-				}
-			}
-			return Result.successResult("update success!");
-		} else {
-			return Result.failResult("update fail!");
-		}
+        if(rdbAnalyze.isAutoAnalyze()){
+            if(taskService.vaildCronExpress(rdbAnalyze.getSchedule())){
+                if(rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)){
+                    try {
+                        taskService.delTask("rdb" + rdbAnalyze.getId());
+                        taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
+                        return Result.successResult("update success!");
+                    } catch (SchedulerException e) {
+                        LOG.error("schedule job update faild!message:{}", e.getMessage());
+                        return Result.failResult("schedule job update faild!");
+                    }
+                }else {
+                    return Result.failResult("update data faild!");
+                }
+            }else{
+                return Result.failResult("cross expression has error,please check!");
+            }
+        }else{
+            if(rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)){
+                return Result.successResult("update success!");
+            }else{
+                return Result.failResult("update data faild!");
+            }
+        }
 	}
 
 	// add
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.POST)
 	public Result addRdbAnalyze(@RequestBody RDBAnalyze rdbAnalyze) {
-		if(!rdbAnalyzeService.exitsRdbAnalyze(rdbAnalyze)){
-			if (rdbAnalyzeService.add(rdbAnalyze)) {
-				if (rdbAnalyze.isAutoAnalyze()) {
-					try {
-						if(taskService.vaildCronExpress(rdbAnalyze.getSchedule())){
-							taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
-						}else{
-							return Result.failResult("schedule cron expression is not vaild,please check!");
-						}
-					} catch (SchedulerException e) {
-						LOG.error("schedule job add faild!message:{}", e.getMessage());
-					}
-				}
-				return Result.successResult("add success! ：" + rdbAnalyze.getId());
-			} else {
-				return Result.failResult("add fail!");
-			}
-		}else{
-			return Result.failResult("add Job faild!");
-		}
+	    if(!rdbAnalyzeService.exitsRdbAnalyze(rdbAnalyze)){
+	        if(rdbAnalyze.isAutoAnalyze()){
+	            if(taskService.vaildCronExpress(rdbAnalyze.getSchedule())){
+                    return addAnalyze(rdbAnalyze);
+                }else{
+                    return Result.failResult("cross expression has error,please check!");
+                }
+            }else{
+               return addAnalyze(rdbAnalyze);
+            }
+        }else{
+            return Result.failResult("add Job faild,job exits!");
+        }
+
 
 	}
 
+	private Result addAnalyze(RDBAnalyze rdbAnalyze){
+        if(rdbAnalyzeService.add(rdbAnalyze)){
+            if(rdbAnalyze.isAutoAnalyze()){
+                try{
+                    taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
+                 //   return Result.successResult("add success! ：" + rdbAnalyze.getId());
+                }catch (SchedulerException e){
+                    LOG.error("schedule job add faild!message:{}", e.getMessage());
+                    return Result.failResult("schedule job add faild!");
+                }
+            }
+            return Result.successResult("add success!" );
+        }else {
+            return Result.failResult("add job to database has error,please check!" );
+        }
+    }
 	/**
 	 * 取消定时任务
 	 * 
@@ -116,7 +127,7 @@ public class RDBAnalyzeController {
 		} catch (SchedulerException e) {
 			LOG.error("schedule job delete faild!message:{}", e.getMessage());
 		}
-		return Result.successResult();
+		return Result.successResult("cancel job success!");
 	}
 
 	@RequestMapping(value = { "/clusterId/{clusterId}" }, method = RequestMethod.GET)

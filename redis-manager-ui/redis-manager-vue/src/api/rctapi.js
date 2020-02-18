@@ -69,8 +69,8 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     if (res.code !== 0) {
-      message.error(res.message || 'error')
-      return Promise.reject(new Error(res.message || 'error'))
+      message.error(res.data || 'error')
+      return Promise.reject(new Error(res.data || 'error'))
     } else {
       return Promise.resolve(res)
     }

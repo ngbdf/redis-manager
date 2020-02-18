@@ -89,7 +89,7 @@ public interface IRdbAnalyzeResult {
             @Result(column = "cluster_id", property = "clusterId"),
             @Result(column = "result", property = "result"),
             @Result(column = "analyze_config", property = "analyzeConfig")})
-    List<RDBAnalyzeResult> selectRecentlyResultByIdExceptSelf(Long resultId, Long clusterId, Long scheduleId);
+    List<RDBAnalyzeResult> selectRecentlyResultByIdExceptSelf(@Param("id") Long resultId, @Param("cluster_id") Long clusterId, @Param("schedule_id") Long scheduleId);
 
 
 
