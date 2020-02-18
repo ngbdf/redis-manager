@@ -79,6 +79,7 @@
       :visible.sync="analyzeVisable"
       width="30%"
       v-loading.fullscreen.lock="loading"
+      :close-on-click-modal="false"
     >
       <span>
         Are you sure to Analyze this job?
