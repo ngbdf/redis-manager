@@ -90,23 +90,20 @@ public class RDBAnalyzeService {
 				: scheduleInfo.getDataPath() + "/";
 		String rdbPath = null;
 		JSONObject msg = new JSONObject();
-		for (String port : scheduleInfo.getPorts()) {
-			rdbPath = basePath + port + "/dump.rdb";
-			rdbFile = new File(rdbPath);
-			if (!rdbFile.exists()) {
-				rdbPath = basePath + port +"/data"+ "/dump.rdb";
-				rdbFile=new File(rdbPath);
-				if(rdbFile.exists()) {
-					allPathValid = false;
-					msg.put(port, rdbPath + " NOT EXIST!");
-				}
-			} else {
-				rdbPaths.put(port, rdbPath);
-			}
-		}
+        for (String port : scheduleInfo.getPorts()) {
+            rdbPath = basePath + port + "/dump.rdb";
+            rdbFile = new File(rdbPath);
+            if (!rdbFile.exists()) {
+                allPathValid = false;
+                msg.put(port, rdbPath + " NOT EXIST!");
+            } else {
+                rdbPaths.put(port, rdbPath);
+            }
+        }
 		ret.put("checked", allPathValid);
 		if (!allPathValid) {
 			ret.put("message", msg);
+//            setStatus(AnalyzeStatus.ERROR);
 			return ret;
 		}
 		setStatus(AnalyzeStatus.READY);

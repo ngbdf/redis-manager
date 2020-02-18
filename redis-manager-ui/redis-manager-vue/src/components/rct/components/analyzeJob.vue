@@ -60,7 +60,7 @@
       <el-switch v-model="analyseisJobFrom.report"></el-switch>
     </el-form-item>
     <el-form-item label="Mail" prop="mailTo">
-      <el-input type="textarea" :rows="2" class="input" v-model="analyseisJobFrom.mailTo"></el-input>
+      <el-input type="textarea" :rows="2" class="input" v-model="analyseisJobFrom.mailTo" placeholder="Please input email address with ';'"></el-input>
     </el-form-item>
     <el-form-item>
       <div class="footer">
@@ -122,6 +122,14 @@ export default {
   },
 
   data () {
+    var validateMailTo = (rule, value, callback) => {
+      if (this.analyseisJobFrom.report) {
+        if (value === '' || value === null) {
+          return callback(new Error('if you need open the report switch,you must input the email'))
+        }
+      }
+      return callback()
+    }
     return {
       analyseisJobFrom: {
         id: '',
@@ -152,22 +160,13 @@ export default {
             message: "schedule can't be empty",
             trigger: 'blur'
           }
+        ],
+        mailTo: [
+          {
+            validator: validateMailTo,
+            trigger: 'blur'
+          }
         ]
-        // analyzer: [
-        //   {
-        //     type: 'array',
-        //     required: true,
-        //     message: "analyzer can't be empty",
-        //     trigger: 'change'
-        //   }
-        // ],
-        // dataPath: [
-        //   {
-        //     required: true,
-        //     message: "dataPath can't be empty",
-        //     trigger: 'blur'
-        //   }
-        // ]
       },
       redisNodeList: [],
       analyzeVisable: false,
@@ -179,12 +178,12 @@ export default {
       this.$refs[analyseisJobFrom].resetFields()
       this.$emit('cancel', false)
     },
-    AnalyzeJob (analyseisJobFrom) {
+    async AnalyzeJob (analyseisJobFrom) {
       this.loading = true
       const body = Object.assign({}, this.analyseisJobFrom)
       // body.analyzer = body.analyzer.toString()
       body.manual = true
-      analyzeJob(body).then(response => {
+      await analyzeJob(body).then(response => {
         if (response.data.status) {
           this.$router.push({
             name: 'TaskProgress',

@@ -45,7 +45,7 @@
         <el-switch v-model="analyseisJobFrom.report"></el-switch>
     </el-form-item>
     <el-form-item label="Mail" prop="mailTo">
-      <el-input type="textarea" :rows="2" class="input" v-model="analyseisJobFrom.mailTo"></el-input>
+      <el-input type="textarea" :rows="2" class="input" v-model="analyseisJobFrom.mailTo"  placeholder="Please input email address with ';'"></el-input>
     </el-form-item>
     <el-form-item>
        <div class="footer">
@@ -86,10 +86,10 @@ export default {
   },
 
   data () {
-    var validatePrefix = (rule, value, callback) => {
-      if (this.analyseisJobFrom.analyzer.includes('5')) {
+    var validateMailTo = (rule, value, callback) => {
+      if (this.analyseisJobFrom.report) {
         if (value === '' || value === null) {
-          return callback(new Error('if you choose ExportKeyByPrefix,you must input the prefix'))
+          return callback(new Error('if you need open the report switch,you must input the email'))
         }
       }
       return callback()
@@ -138,9 +138,9 @@ export default {
             trigger: 'blur'
           }
         ],
-        prefixes: [
+        mailTo: [
           {
-            validator: validatePrefix,
+            validator: validateMailTo,
             trigger: 'blur'
           }
         ]

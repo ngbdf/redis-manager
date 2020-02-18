@@ -153,7 +153,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             }
         }
         long scheduleID = System.currentTimeMillis();
-        saveToResult(rdbAnalyze,scheduleID);
+
         List<AnalyzeInstance> analyzeInstances = EurekaUtil.getRegisterNodes();
         Map<String, AnalyzeInstance> analyzeInstancesMap = new HashMap<>(analyzeInstances.size());
         // 本次场景只会一个host一个AnalyzeInstance
@@ -172,6 +172,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             }
             needAnalyzeInstances.add(analyzeInstance);
         }
+        saveToResult(rdbAnalyze,scheduleID);
         for (String host : clusterNodesIP.keySet()) {
 
             // 处理无RDB备份策略情况
@@ -227,11 +228,12 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                 if (!responseMessage.getBooleanValue("checked")) {
                     LOG.error("allocation {} scheduleJob response error. responseMessage:{}",
                             analyzeInstance.toString(), responseMessage.toJSONString());
+                    deleteResult(rdbAnalyze,scheduleID);
                     scheduleResult.put("status", false);
                     responseResult.put("status", false);
                     responseResult.put("message", "allocation " + analyzeInstance.getHost()
                             + " scheduleJob response error:" + responseMessage.toJSONString());
-                    deleteResult(rdbAnalyze,scheduleID);
+
                     return responseResult;
                 } else {
                     scheduleResult.put("status", true);
