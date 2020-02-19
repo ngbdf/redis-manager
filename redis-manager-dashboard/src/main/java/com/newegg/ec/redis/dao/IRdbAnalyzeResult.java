@@ -80,8 +80,8 @@ public interface IRdbAnalyzeResult {
      * @param resultId queryId
      * @return List<RDBAnalyzeResult>
      */
-    @Select("SELECT * FROM `rdb_analyze_result` WHERE id != #{resultId} AND cluster_id = #{clusterId} AND schedule_id" +
-            " < #{scheduleId} ORDER BY " +
+    @Select("SELECT * FROM `rdb_analyze_result` WHERE id != #{result.resultId} AND cluster_id = #{result.clusterId} AND schedule_id" +
+            " < #{result.scheduleId} ORDER BY " +
             "schedule_id DESC " +
             "LIMIT 0,6")
     @Results({ @Result(id = true, column = "id", property = "id"),
@@ -89,8 +89,7 @@ public interface IRdbAnalyzeResult {
             @Result(column = "cluster_id", property = "clusterId"),
             @Result(column = "result", property = "result"),
             @Result(column = "analyze_config", property = "analyzeConfig")})
-    List<RDBAnalyzeResult> selectRecentlyResultByIdExceptSelf(@Param("id") Long resultId, @Param("cluster_id") Long clusterId, @Param("schedule_id") Long scheduleId);
-
+    List<RDBAnalyzeResult> selectRecentlyResultByIdExceptSelf(@Param("result") Map<String, Long> result);
 
 
     @Select("create TABLE IF NOT EXISTS `rdb_analyze_result`( " +

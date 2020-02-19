@@ -80,8 +80,12 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService{
 		try {
 			RDBAnalyzeResult analyzeResult = rdbAnalyzeResultMapper.selectByResultId(resultId);
 			results.add(analyzeResult);
-			results.addAll(rdbAnalyzeResultMapper.selectRecentlyResultByIdExceptSelf(resultId,
-					analyzeResult.getClusterId(), analyzeResult.getScheduleId()));
+			Map<String, Long> dataMap = new HashMap<String, Long>();
+			dataMap.put("resultId", resultId);
+			dataMap.put("clusterId", analyzeResult.getClusterId());
+			dataMap.put("scheduleId", analyzeResult.getScheduleId());
+			List<RDBAnalyzeResult> rDBAnalyzeResults = rdbAnalyzeResultMapper.selectRecentlyResultByIdExceptSelf(dataMap);
+			results.addAll(rDBAnalyzeResults);
 			//results = rdbAnalyzeResultMapper.selectAllResultByClusterId(cluster_id);
 		} catch (Exception e) {
 			LOG.error("selectAllResultById failed!", e);
@@ -118,7 +122,11 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService{
 		}
 		List<RDBAnalyzeResult> results = null;
 		try {
-			results = rdbAnalyzeResultMapper.selectRecentlyResultByIdExceptSelf(resultId, clusterId, scheduleId);
+			Map<String, Long> dataMap = new HashMap<String, Long>();
+			dataMap.put("resultId", resultId);
+			dataMap.put("clusterId", clusterId);
+			dataMap.put("scheduleId", scheduleId);
+			results = rdbAnalyzeResultMapper.selectRecentlyResultByIdExceptSelf(dataMap);
 		} catch (Exception e) {
 			LOG.error("selectAllResultById failed!", e);
 		}
@@ -380,9 +388,11 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService{
 		List<Long> scheduleList = new ArrayList<>(7);
 		scheduleList.add(rdbAnalyzeLatestResult.getScheduleId());
 		for(RDBAnalyzeResult rdbAnalyzeResult : rdbAnalyzeResultList) {
-			arrayResult = getJSONArrayFromResultByKey(rdbAnalyzeResult.getResult(), type);
-			resultMap.put(String.valueOf(rdbAnalyzeResult.getScheduleId()) ,getMapJSONByResult(rdbAnalyzeResult, arrayResult));
-			scheduleList.add(rdbAnalyzeResult.getScheduleId());
+			if(null != rdbAnalyzeResult.getResult()) {
+				arrayResult = getJSONArrayFromResultByKey(rdbAnalyzeResult.getResult(), type);
+				resultMap.put(String.valueOf(rdbAnalyzeResult.getScheduleId()) ,getMapJSONByResult(rdbAnalyzeResult, arrayResult));
+				scheduleList.add(rdbAnalyzeResult.getScheduleId());
+			}
 		}
 		Collections.sort(scheduleList);
 		JSONArray result = new JSONArray();

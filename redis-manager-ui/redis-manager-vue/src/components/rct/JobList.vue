@@ -21,6 +21,18 @@
             <el-button type="success" icon="el-icon-circle-check" circle v-else size="small" @click="toReportDetail(scope.row)"></el-button> -->
           </template>
         </el-table-column>
+
+        <el-table-column
+            label="IsCluster"
+          >
+            <template slot-scope="scope">
+              <el-tag size="small" v-if="JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'" type="success"
+                >Yes</el-tag
+              >
+              <el-tag size="small" v-else type="danger">No</el-tag>
+            </template>
+        </el-table-column>
+
       </el-table>
         <el-pagination
           background
@@ -115,6 +127,7 @@ export default {
     toReportDetail (row) {
       this.$router.push({
         name: 'jobResultDetail',
+        params: { analyzeConfig: row.analyzeConfig },
         // path: '/plugin/jobResultDetail',
         query: {
           detailId: row.id
