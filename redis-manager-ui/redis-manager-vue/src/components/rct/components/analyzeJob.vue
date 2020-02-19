@@ -127,7 +127,8 @@ export default {
         if (value === '' || value === null) {
           return callback(new Error('if you need open the report switch,you must input the email'))
         } else {
-          const reg = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
+          //    const reg = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
+          const reg = /^([a-zA-Z0-9]+[_|\\_|\\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\\_|\\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
           if (value.search(';') !== -1) {
             const data = value.split(';')
             data.map((obj) => {
