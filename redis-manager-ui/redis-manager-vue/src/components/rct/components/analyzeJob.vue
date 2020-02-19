@@ -126,6 +126,20 @@ export default {
       if (this.analyseisJobFrom.report) {
         if (value === '' || value === null) {
           return callback(new Error('if you need open the report switch,you must input the email'))
+        } else {
+          const reg = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
+          if (value.search(';') !== -1) {
+            const data = value.split(';')
+            data.map((obj) => {
+              if (!reg.test(obj)) {
+                return callback(new Error('email address is invaild,please check!'))
+              }
+            })
+          } else {
+            if (!reg.test(value)) {
+              return callback(new Error('email address is invaild,please check!'))
+            }
+          }
         }
       }
       return callback()

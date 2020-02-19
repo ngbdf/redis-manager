@@ -119,7 +119,7 @@ export default {
             } else {
               this.$message({
                 type: 'success',
-                message: 'Stop Error!'
+                message: 'cancel job has error,Please pay attention to the task status!'
               })
             }
           })
