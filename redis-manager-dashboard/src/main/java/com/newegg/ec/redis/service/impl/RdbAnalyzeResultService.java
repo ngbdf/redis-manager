@@ -44,8 +44,8 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService{
 	}
 
 	@Override
-	public List<RDBAnalyzeResult> selectList() {
-		return rdbAnalyzeResultMapper.selectList();
+	public List<RDBAnalyzeResult> selectList(Long groupId) {
+		return rdbAnalyzeResultMapper.selectList(groupId);
 	}
 
 //	/**

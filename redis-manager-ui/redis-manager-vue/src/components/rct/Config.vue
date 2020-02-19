@@ -207,7 +207,7 @@ export default {
       deletAnalyze(id).then(response => {
         this.deleteVisible = false
         this.analyseisJobFrom = {}
-        this.getAnalysisJobList()
+        this.getAnalysisJobList(this.currentGroup.groupId)
       })
     },
     addAnalysisJob () {
@@ -226,12 +226,8 @@ export default {
       return analyzer
     },
     async getAnalysisJobList (groupId) {
-      await getAnalysisList('/rdb').then(response => {
+      await getAnalysisList(groupId).then(response => {
         const data = response.data
-        // data.map((obj, key) => {
-        //   obj.analyzer = this.changeAnalyzeToArray(obj.analyzer)
-        //   return obj
-        // })
         this.analyseisJobs = data
       })
     },
@@ -255,6 +251,7 @@ export default {
   watch: {
     currentGroup (group) {
       this.getAnalysisJobList(group.groupId)
+      this.getRedisClusterList(group.groupId)
     },
     visable: {
       immediate: true,

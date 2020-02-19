@@ -34,8 +34,8 @@ public class RDBAnalyzeController {
 
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.GET)
 	@ResponseBody
-	public Result rdbAnalyzeList(){
-		return Result.successResult(rdbAnalyzeService.list());
+	public Result rdbAnalyzeList(@RequestParam("groupId") String groupId){
+		return Result.successResult(rdbAnalyzeService.list(Long.parseLong(groupId)));
 	}
 
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.DELETE)
@@ -377,11 +377,12 @@ public class RDBAnalyzeController {
 	 * @return result
 	 */
 	@GetMapping("/results")
-	public Result getAllAnalyzeResults() {
+	public Result getAllAnalyzeResults(@RequestParam String groupId) {
 		try {
-			List<RDBAnalyzeResult> results = rdbAnalyzeResultService.selectList();
-			List<Cluster> clusters = clusterService.getAllClusterList();
-			results = rdbAnalyzeResultService.getAllAnalyzeResult(results, clusters);
+			Long group_id = Long.parseLong(groupId);
+			List<RDBAnalyzeResult> results = rdbAnalyzeResultService.selectList(group_id);
+		//	List<Cluster> clusters = clusterService.getAllClusterList();
+		//	results = rdbAnalyzeResultService.getAllAnalyzeResult(results, clusters);
 			return Result.successResult(results);
 		} catch (Exception e) {
 			LOG.error("get analyze result failed", e);

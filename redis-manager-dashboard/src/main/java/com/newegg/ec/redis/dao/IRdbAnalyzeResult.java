@@ -25,13 +25,18 @@ public interface IRdbAnalyzeResult {
     @Select("SELECT * FROM rdb_analyze_result WHERE id = #{id}")
     RDBAnalyzeResult selectByResultId(Long id);
 
-    @Insert("INSERT INTO rdb_analyze_result(schedule_id, cluster_id, result, analyze_config) " +
-            "VALUES (#{scheduleId}, #{clusterId}, #{result}, #{analyzeConfig})")
+    @Insert("INSERT INTO rdb_analyze_result(schedule_id, cluster_id, result, analyze_config,group_id) " +
+            "VALUES (#{scheduleId}, #{clusterId}, #{result}, #{analyzeConfig},#{groupId})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     Integer insert(RDBAnalyzeResult rdbAnalyzeResult);
 
-    @Select("SELECT * FROM rdb_analyze_result  ORDER BY schedule_id DESC ")
-    List<RDBAnalyzeResult> selectList();
+    @Select("SELECT * FROM rdb_analyze_result where group_id=#{groupId} ORDER BY schedule_id DESC ")
+    @Results({ @Result(id = true, column = "id", property = "id"),
+            @Result(column = "schedule_id", property = "scheduleId"),
+            @Result(column = "cluster_id",  property = "clusterName",one=@One(select="com.newegg.ec.redis.dao.IClusterDao.selectClusterNameById")),
+            @Result(column = "result", property = "result"),
+            @Result(column = "analyze_config", property = "analyzeConfig")})
+    List<RDBAnalyzeResult> selectList(@Param("groupId") Long groupId);
 
     @Update("Update rdb_analyze_result set result=#{result} where id=#{id} ")
     Integer updateResult(RDBAnalyzeResult rdbAnalyzeResult);

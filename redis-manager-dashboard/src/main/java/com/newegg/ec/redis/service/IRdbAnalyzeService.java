@@ -20,7 +20,9 @@ public interface IRdbAnalyzeService {
 
     public boolean add(RDBAnalyze rdbAnalyze);
 
-    public List<RDBAnalyze> list();
+    public List<RDBAnalyze> list(Long groupId);
+
+    public List<RDBAnalyze> selectALL();
 
     public boolean checkResult(Integer result);
 

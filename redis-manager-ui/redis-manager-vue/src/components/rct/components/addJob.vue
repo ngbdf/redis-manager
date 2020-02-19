@@ -30,11 +30,6 @@
         <i class="el-icon-message-solid"></i>
       </el-tooltip>
     </el-form-item>
-    <!-- <el-form-item label="Analyzer" prop="analyzer">
-      <el-checkbox-group v-model="analyseisJobFrom.analyzer">
-        <el-checkbox label="0">Report</el-checkbox>
-      </el-checkbox-group>
-    </el-form-item> -->
     <el-form-item label="DataPath" prop="dataPath">
       <el-input v-model="analyseisJobFrom.dataPath" placeholder="Please dataPath" class="input"></el-input>
     </el-form-item>
@@ -177,13 +172,13 @@ export default {
             addAnalysisList(body).then(response => {
               message.success(response.data)
               this.$emit('cancel', false)
-              this.$emit('refresh')
+              this.$emit('refresh', this.groupId)
             })
           } else {
             updateAnalyzeList(body).then(response => {
               message.success(response.data)
               this.$emit('cancel', false)
-              this.$emit('refresh')
+              this.$emit('refresh', this.groupId)
             })
           }
         } else {

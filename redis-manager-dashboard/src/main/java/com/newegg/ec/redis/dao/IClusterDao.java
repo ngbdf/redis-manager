@@ -21,6 +21,8 @@ public interface IClusterDao {
     @Select("SELECT * FROM cluster WHERE cluster_id = #{clusterId}")
     Cluster selectClusterById(Integer clusterId);
 
+    @Select("SELECT cluster_name FROM cluster WHERE cluster_id = #{clusterId}")
+    String selectClusterNameById(Integer clusterId);
     @Select("SELECT * FROM cluster WHERE group_id = #{groupId} AND cluster_id = #{clusterId}")
     Cluster getClusterByIdAndGroup(@Param("groupId") Integer groupId, @Param("clusterId") Integer clusterId);
 

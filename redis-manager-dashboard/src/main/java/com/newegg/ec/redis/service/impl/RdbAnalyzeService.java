@@ -295,6 +295,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         rdbAnalyzeResult.setAnalyzeConfig(JSONObject.toJSONString(rdbAnalyze));
         rdbAnalyzeResult.setClusterId(Long.parseLong(rdbAnalyze.getCluster().getClusterId().toString()));
         rdbAnalyzeResult.setScheduleId(scheduleId);
+        rdbAnalyzeResult.setGroupId(rdbAnalyze.getGroupId());
         rdbAnalyzeResultService.add(rdbAnalyzeResult);
     }
 
@@ -373,9 +374,14 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
     }
 
     @Override
-    public List<RDBAnalyze> list() {
-        List<RDBAnalyze> results = iRdbAnalyze.queryList();
+    public List<RDBAnalyze> list(Long groupId) {
+        List<RDBAnalyze> results = iRdbAnalyze.queryList(groupId);
         return results;
+    }
+
+    @Override
+    public List<RDBAnalyze> selectALL() {
+        return iRdbAnalyze.list();
     }
 
     @Override

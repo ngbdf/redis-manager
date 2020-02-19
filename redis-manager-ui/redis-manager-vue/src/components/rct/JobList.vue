@@ -4,9 +4,20 @@
       <div>{{ currentGroup.groupName }}</div>
     </div>
 
-      <el-table :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick">
+      <el-table :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
         <el-table-column type="index" width="50"></el-table-column>
-        <el-table-column label="Cluster Name" property="clusterName"></el-table-column>
+        <el-table-column label="Cluster Name" property="clusterName" width="150"></el-table-column>
+        <el-table-column
+            label="IsCluster"
+            width="100"
+          >
+            <template slot-scope="scope">
+              <el-tag size="small" v-if="JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'" type="success"
+                >Yes</el-tag
+              >
+              <el-tag size="small" v-else type="danger">No</el-tag>
+            </template>
+        </el-table-column>
         <el-table-column
           label="Analyse Time"
           sortable
@@ -20,17 +31,6 @@
             <!-- <el-button type="warning" icon="el-icon-loading" circle v-if="!scope.row.result" size="small" @click="toTaskProgress(scope.row)"></el-button>
             <el-button type="success" icon="el-icon-circle-check" circle v-else size="small" @click="toReportDetail(scope.row)"></el-button> -->
           </template>
-        </el-table-column>
-
-        <el-table-column
-            label="IsCluster"
-          >
-            <template slot-scope="scope">
-              <el-tag size="small" v-if="JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'" type="success"
-                >Yes</el-tag
-              >
-              <el-tag size="small" v-else type="danger">No</el-tag>
-            </template>
         </el-table-column>
 
       </el-table>
@@ -89,7 +89,6 @@ export default {
     sortChange (column) {
       // 操作表格数据
       if (!column.order) {
-        console.log('nullllll', column.order)
         return
       }
       this.analyseResults = this.analyseResults.sort(
@@ -103,7 +102,7 @@ export default {
     },
     async getAnalyseResults (groupId) {
       this.loading = true
-      const res = await getAnalyzeResults()
+      const res = await getAnalyzeResults(groupId)
       // 按照分析时间排序
       this.analyseResults = res.data
       this.pageData = res.data.slice(
@@ -153,7 +152,9 @@ export default {
 </script>
 
 <style scoped>
-
+.el-table .el-table__body tr:hover td {
+    cursor: pointer  !important;
+}
 .header-wrapper {
   display: flex;
   justify-content: space-between;
@@ -165,4 +166,15 @@ export default {
   text-align:right;
   margin-top: 15px;
 }
+/* 用来设置当前页面element全局table 选中某行时的背景色*/
+.el-table__body tr.current-row>td{
+  background-color: #f19944 !important;
+  /* color: #f19944; */  /* 设置文字颜色，可以选择不设置 */
+}
+/* 用来设置当前页面element全局table 鼠标移入某行时的背景色*/
+.el-table--enable-row-hover .el-table__body tr:hover>td {
+  background-color: #f19944;
+  /* color: #f19944; */ /* 设置文字颜色，可以选择不设置 */
+}
+
 </style>

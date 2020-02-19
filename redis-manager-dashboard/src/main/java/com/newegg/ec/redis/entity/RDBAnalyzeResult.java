@@ -8,13 +8,21 @@ package com.newegg.ec.redis.entity;
  */
 public class RDBAnalyzeResult {
 	private Long id;
+	private Long groupId;
 	private Long scheduleId;
 	private Long clusterId;
 	private String analyzeConfig;
-
 	private String result;
 
 	private String clusterName;
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
 
 	public String getClusterName() {
 		return clusterName;

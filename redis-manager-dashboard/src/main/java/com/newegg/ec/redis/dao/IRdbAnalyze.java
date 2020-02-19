@@ -19,6 +19,23 @@ public interface IRdbAnalyze {
             "WHERE cluster_id = #{clusterId} AND group_id = #{groupId}")
     Integer updateRdbAnalyze(RDBAnalyze rdbAnalyze);
 
+    @Select("select * from rdb_analyze where group_id=#{groupId}")
+    @Results({
+            @Result(column = "id", property = "id"),
+            @Result(column = "schedule", property = "schedule"),
+            @Result(column = "auto_analyze", property = "autoAnalyze"),
+            @Result(column = "dataPath", property = "dataPath"),
+            @Result(column = "cluster_id", property = "cluster",one=@One(select="com.newegg.ec.redis.dao.IClusterDao.selectClusterById")),
+            @Result(column = "prefixes", property = "prefixes"),
+            @Result(column = "is_report", property = "report"),
+            @Result(column = "analyzer", property = "analyzer"),
+            @Result(column = "cluster_id", property = "clusterId"),
+            @Result(column = "mailTo", property = "mailTo"),
+            @Result(column = "group_id", property = "groupId")
+    })
+    List<RDBAnalyze> queryList(@Param("groupId") Long groupId);
+
+
     @Select("select * from rdb_analyze")
     @Results({
             @Result(column = "id", property = "id"),
@@ -33,7 +50,7 @@ public interface IRdbAnalyze {
             @Result(column = "mailTo", property = "mailTo"),
             @Result(column = "group_id", property = "groupId")
     })
-    List<RDBAnalyze> queryList();
+    List<RDBAnalyze> list();
 
     @Select("select * from rdb_analyze where id=#{id}")
     @Results({

@@ -13,7 +13,7 @@ import java.util.Set;
 public interface IRdbAnalyzeResultService {
     void delete(Long id);
     void add(RDBAnalyzeResult rdbAnalyzeResult);
-    List<RDBAnalyzeResult> selectList();
+    List<RDBAnalyzeResult> selectList(Long groupId);
     RDBAnalyzeResult reportDataWriteToDb(RDBAnalyze rdbAnalyze, Map<String, Set<String>> data);
     Object getListStringFromResult(Long analyzeResultId, String key) throws Exception;
     JSONArray getPrefixLineByCountOrMem(Long analyzeResultId, String type, int top, String prefixKey);

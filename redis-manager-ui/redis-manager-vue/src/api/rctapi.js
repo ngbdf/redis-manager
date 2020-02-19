@@ -94,7 +94,7 @@ export const getClusterNodes = (id) => API(`/node-manage/getAllNodeList/${id}`)
 
 export const getCluster = (id) => API(`/cluster/getClusterList/${id}`)
 
-export const getAnalysisList = () => API(`/rdb`)
+export const getAnalysisList = (id) => API(`/rdb?groupId=${id}`)
 
 export const addAnalysisList = (data) => API(`/rdb`, 'POST', data)
 
@@ -102,7 +102,7 @@ export const updateAnalyzeList = (data) => API(`/rdb`, 'PUT', data)
 
 export const deletAnalyze = (id) => API(`/rdb?id=${id}`, 'DELETE')
 
-export const getAnalyzeResults = () => RCTAPI('/rdb/results')
+export const getAnalyzeResults = (groupId) => RCTAPI(`/rdb/results?groupId=${groupId}`)
 
 export const getPieByType = (analyzeResultId) => RCTAPI('/rdb/chart/DataTypeAnalyze', 'GET', {analyzeResultId})
 

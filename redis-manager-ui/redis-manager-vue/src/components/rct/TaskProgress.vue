@@ -90,6 +90,7 @@ export default {
         }
         if (count === this.originalData.length) {
           this.cancelButtonDisabled = true
+          this.stopTimer()
         }
       })
     },

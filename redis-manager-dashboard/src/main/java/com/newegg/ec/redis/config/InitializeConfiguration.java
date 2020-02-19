@@ -84,7 +84,7 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
     }
 
     private void initRDBJob() {
-        List<RDBAnalyze> rdbAnalyzes = rdbAnalyzeService.list();
+        List<RDBAnalyze> rdbAnalyzes = rdbAnalyzeService.selectALL();
         for (RDBAnalyze rdbAnalyze : rdbAnalyzes) {
             try {
                 if (rdbAnalyze.isAutoAnalyze()) {
