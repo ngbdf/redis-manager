@@ -242,5 +242,6 @@ export default {
     height: 26px;
     width: 26px;
     position: absolute;
+    cursor: pointer;
 }
 </style>

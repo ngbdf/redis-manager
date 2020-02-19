@@ -4,7 +4,7 @@
       <div>{{ currentGroup.groupName }}</div>
     </div>
 
-      <el-table :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
+      <el-table style="cursor: pointer" :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
         <el-table-column type="index" ></el-table-column>
         <el-table-column label="Cluster Name" property="clusterName" ></el-table-column>
         <el-table-column
@@ -18,7 +18,7 @@
             </template>
         </el-table-column>
         <el-table-column
-          label="Analyse Time"
+          label="Analyze Time"
           sortable
           property="scheduleId"
           :formatter="dateFormatter"
@@ -187,7 +187,7 @@ export default {
       this.clusterName =row.clusterName;
       this.ConfigDetail = JSON.parse(row.analyzeConfig);;
       this.ConfigDetailVisible = true;
-      this.setNodes(this.ConfigDetail.nodes); 
+      this.setNodes(this.ConfigDetail.nodes);
     },
     setNodes(value) {
       var temp = "";
