@@ -32,7 +32,16 @@
             <el-button type="success" icon="el-icon-circle-check" circle v-else size="small" @click="toReportDetail(scope.row)"></el-button> -->
           </template>
         </el-table-column>
-
+        <el-table-column label="Config">
+          <template slot-scope="scope">
+            <el-button
+                type="primary"
+                size="mini"
+                icon="el-icon-view"
+                @click.stop="getConfig(scope.$index, scope.row)"
+              ></el-button>
+          </template>
+        </el-table-column>
       </el-table>
         <el-pagination
           background
@@ -43,6 +52,38 @@
           :total="analyseResults.length"
           class="pagination"
         ></el-pagination>
+        <el-dialog
+          title="Config Detail"
+          :visible.sync="ConfigDetailVisible"
+          :close-on-click-modal="false"
+          @close="closeHandler()">
+          <el-form :model="ConfigDetail" ref="ConfigDetail" label-width="120px" size="small">
+            <el-form-item label="Cluster Name " prop="clusterName">
+              <el-input readonly  v-model="clusterName" maxlength="50" show-word-limit></el-input>
+            </el-form-item>
+            <el-form-item label="Nodes "  prop="nodes">
+              <el-input readonly autoSize type ="textarea" v-model="nodes"  show-word-limit></el-input>
+            </el-form-item>
+            <el-form-item label="Auto Analyze " prop="autoAnalyze">
+              <el-switch  disabled v-model="ConfigDetail.autoAnalyze"></el-switch>
+            </el-form-item>
+            <el-form-item label="Schedule " prop="schedule" >
+              <el-input readonly v-model="ConfigDetail.schedule" maxlength="50" show-word-limit></el-input>
+            </el-form-item>
+            <el-form-item label="DataPath " prop="dataPath">
+              <el-input readonly v-model="ConfigDetail.dataPath" maxlength="50" show-word-limit></el-input>
+            </el-form-item>
+            <el-form-item label="Custom Prefixes " prop="prefixes">
+              <el-input readonly  v-model="ConfigDetail.prefixes"  show-word-limit></el-input>
+            </el-form-item>
+            <el-form-item label="Report " prop="report">
+              <el-switch  disabled v-model="ConfigDetail.report"></el-switch>
+            </el-form-item>
+            <el-form-item label="Mail " prop="mailTo">
+              <el-input readonly v-model="ConfigDetail.mailTo" maxlength="50" show-word-limit></el-input>
+            </el-form-item>
+          </el-form>
+        </el-dialog>
   </div>
 </template>
 
@@ -57,7 +98,12 @@ export default {
       analyseResults: [],
       currentPage: 1,
       pagesize: 10,
-      pageData: []
+      pageData: [],
+      ConfigDetailVisible: false,
+      ConfigDetail:{
+      },
+      nodes:'',
+      clusterName:''
     }
   },
   methods: {
@@ -132,6 +178,29 @@ export default {
           detailId: row.id
         }
       })
+    },
+    closeHandler() {
+      this.ConfigDetail = {};
+      this.clusterName = '';
+      this.nodes = '';
+    },
+    getConfig(index, row) {
+      this.clusterName =row.clusterName;
+      this.ConfigDetail = JSON.parse(row.analyzeConfig);;
+      this.ConfigDetailVisible = true;
+      this.setNodes(this.ConfigDetail.nodes); 
+    },
+    setNodes(value) {
+      var temp = "";
+      for(let i in value){
+        if(value[0]==='-1'){
+          temp = "All Cluster Nodes";
+        }else{
+          temp = temp + value[i]+" ,";
+          temp = temp.substring(0, temp.lastIndexOf(','));
+        }
+      }
+      this.nodes = temp;
     }
   },
   computed: {
