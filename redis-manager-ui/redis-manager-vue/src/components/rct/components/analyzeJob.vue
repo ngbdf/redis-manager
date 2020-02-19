@@ -231,7 +231,6 @@ export default {
           if (newValue !== old) {
             this.analyseisJobFrom = newValue
             this.analyseisJobFrom.nodes = ['-1']
-            console.log('newValue', this.analyseisJobFrom)
           }
         })
       }
