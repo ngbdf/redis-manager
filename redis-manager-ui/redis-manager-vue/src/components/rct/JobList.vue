@@ -79,7 +79,7 @@
               <el-switch  disabled v-model="ConfigDetail.report"></el-switch>
             </el-form-item>
             <el-form-item label="Mail " prop="mailTo">
-              <el-input readonly v-model="ConfigDetail.mailTo" maxlength="50" show-word-limit></el-input>
+              <el-input readonly  type="textarea" :rows="2" class="input" v-model="ConfigDetail.mailTo" ></el-input>
             </el-form-item>
           </el-form>
         </el-dialog>
@@ -99,10 +99,10 @@ export default {
       pagesize: 10,
       pageData: [],
       ConfigDetailVisible: false,
-      ConfigDetail:{
+      ConfigDetail: {
       },
-      nodes:'',
-      clusterName:''
+      nodes: '',
+      clusterName: ''
     }
   },
   methods: {
@@ -178,28 +178,28 @@ export default {
         }
       })
     },
-    closeHandler() {
-      this.ConfigDetail = {};
-      this.clusterName = '';
-      this.nodes = '';
+    closeHandler () {
+      this.ConfigDetail = {}
+      this.clusterName = ''
+      this.nodes = ''
     },
-    getConfig(index, row) {
-      this.clusterName =row.clusterName;
-      this.ConfigDetail = JSON.parse(row.analyzeConfig);;
-      this.ConfigDetailVisible = true;
-      this.setNodes(this.ConfigDetail.nodes);
+    getConfig (index, row) {
+      this.clusterName = row.clusterName
+      this.ConfigDetail = JSON.parse(row.analyzeConfig)
+      this.ConfigDetailVisible = true
+      this.setNodes(this.ConfigDetail.nodes)
     },
-    setNodes(value) {
-      var temp = "";
-      for(let i in value){
-        if(value[0]==='-1'){
-          temp = "All Cluster Nodes";
-        }else{
-          temp = temp + value[i]+" ,";
-          temp = temp.substring(0, temp.lastIndexOf(','));
+    setNodes (value) {
+      var temp = ''
+      for (let i in value) {
+        if (value[0] === '-1') {
+          temp = 'All Cluster Nodes'
+        } else {
+          temp = temp + value[i] + ' ,'
+          temp = temp.substring(0, temp.lastIndexOf(','))
         }
       }
-      this.nodes = temp;
+      this.nodes = temp
     }
   },
   computed: {
