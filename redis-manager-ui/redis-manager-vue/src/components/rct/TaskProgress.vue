@@ -179,5 +179,6 @@ float: left;
     height: 26px;
     margin-top: 5px;
     width: 26px;
+    cursor: pointer;
 }
 </style>

@@ -4,7 +4,7 @@
       <div>{{ currentGroup.groupName }}</div>
     </div>
 
-      <el-table :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
+      <el-table style="cursor: pointer" :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column label="Cluster Name" property="clusterName" width="150"></el-table-column>
         <el-table-column
@@ -19,7 +19,7 @@
             </template>
         </el-table-column>
         <el-table-column
-          label="Analyse Time"
+          label="Analyze Time"
           sortable
           property="scheduleId"
           :formatter="dateFormatter"
