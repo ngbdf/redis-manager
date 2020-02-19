@@ -8,8 +8,8 @@
       <el-row class="echart-wrapper" id="monitor-charts">
         <KeyByTypePie pieType="count" :resultId="resultId"></KeyByTypePie>
         <KeyByTypePie pieType="memory" :resultId="resultId"></KeyByTypePie>
-        <PrefixKeysCount :resultId="resultId"></PrefixKeysCount>
-        <PrefixKeysMemory :resultId="resultId"></PrefixKeysMemory>
+        <PrefixKeysCount v-show="isCluster" :resultId="resultId"></PrefixKeysCount>
+        <PrefixKeysMemory v-show="isCluster" :resultId="resultId"></PrefixKeysMemory>
         <Tables :resultId="resultId" :tableObj="top1000keysPrefix" :initData="initTop1000Keys"/>
         <Tables :resultId="resultId" :tableObj="keysTTL" :initData="initKeysTTL"/>
         <Top1000KeysByType :resultId="resultId"></Top1000KeysByType>
@@ -49,6 +49,7 @@ export default {
 
   data () {
     return {
+      isCluster:"",
       analyseResults: [],
       top1000keysPrefix: {
         columns: [{
@@ -123,6 +124,13 @@ export default {
 
   },
   mounted () {
+    let analyzeConfig = this.$route.params.analyzeConfig
+    let analyzeConfigObj = JSON.parse(analyzeConfig);
+    if(analyzeConfigObj.nodes[0] === "-1") {
+      this.isCluster = true;
+    } else {
+      this.isCluster = false;
+    }
   },
   computed: {
     currentGroup () {
