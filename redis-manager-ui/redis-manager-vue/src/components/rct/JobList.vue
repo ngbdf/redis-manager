@@ -5,11 +5,10 @@
     </div>
 
       <el-table :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
-        <el-table-column type="index" width="50"></el-table-column>
-        <el-table-column label="Cluster Name" property="clusterName" width="150"></el-table-column>
+        <el-table-column type="index" ></el-table-column>
+        <el-table-column label="Cluster Name" property="clusterName" ></el-table-column>
         <el-table-column
             label="IsCluster"
-            width="100"
           >
             <template slot-scope="scope">
               <el-tag size="small" v-if="JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'" type="success"
@@ -37,7 +36,7 @@
             <el-button
                 type="primary"
                 size="mini"
-                icon="el-icon-view"
+                icon="el-icon-search" circle plain
                 @click.stop="getConfig(scope.$index, scope.row)"
               ></el-button>
           </template>
