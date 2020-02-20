@@ -24,8 +24,6 @@ import { store } from '@/vuex/store.js'
 import PrefixKeysCount from '@/components/rct/chart/PrefixKeysCount'
 import PrefixKeysMemory from '@/components/rct/chart/PrefixKeysMemory'
 import KeyByTypePie from '@/components/rct/chart/KeyByTypePie'
-import Top1000KeysByPrefix from '@/components/rct/chart/Top1000LargestKeysByPrefix'
-import KeysTTLInfo from '@/components/rct/chart/KeysTTLInfo'
 import Top1000KeysByType from '@/components/rct/chart/Top1000KeysByType'
 import Tables from '@/components/rct/chart/Table'
 import { formatBytes, formatterInput } from '@/utils/format.js'
@@ -41,8 +39,6 @@ export default {
     PrefixKeysCount,
     PrefixKeysMemory,
     KeyByTypePie,
-    Top1000KeysByPrefix,
-    KeysTTLInfo,
     Top1000KeysByType,
     Tables
   },
