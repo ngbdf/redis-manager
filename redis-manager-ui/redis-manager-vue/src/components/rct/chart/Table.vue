@@ -71,12 +71,10 @@ export default {
       this.length = this.tableData.length
       this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
     },
-    searchFilter (value) {
-      if (value) {
+    searchFilter (value) {   
         const data = this.tableData.filter(data => !value || data[`${this.prefix}`].toLowerCase().includes(value.toLowerCase()))
         this.length = data.length
         this.pageData = data.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
-      }
     },
     compareValue (property, order) {
       return function (obj1, obj2) {
