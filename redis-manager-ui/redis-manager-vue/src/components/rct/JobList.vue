@@ -191,12 +191,16 @@ export default {
     },
     setNodes (value) {
       var temp = ''
-      for (let i in value) {
-        if (value[0] === '-1') {
-          temp = 'All Cluster Nodes'
-        } else {
-          temp = temp + value[i] + ' ,'
-          temp = temp.substring(0, temp.lastIndexOf(','))
+      if(value == undefined){
+        temp = 'All Cluster Nodes'
+      }else{
+        for (let i in value) {
+          if (value[0] === '-1') {
+            temp = 'All Cluster Nodes'
+          } else {
+            temp = temp + value[i] + ' ,'
+            temp = temp.substring(0, temp.lastIndexOf(','))
+          }
         }
       }
       this.nodes = temp
