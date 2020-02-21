@@ -45,7 +45,7 @@ export default {
 
   data () {
     return {
-      isCluster:"",
+      isCluster: '',
       analyseResults: [],
       top1000keysPrefix: {
         columns: [{
@@ -121,11 +121,11 @@ export default {
   },
   mounted () {
     let analyzeConfig = this.$route.params.analyzeConfig
-    let analyzeConfigObj = JSON.parse(analyzeConfig);
-    if(analyzeConfigObj.nodes[0] === "-1") {
-      this.isCluster = true;
+    let analyzeConfigObj = JSON.parse(analyzeConfig)
+    if (!analyzeConfigObj.nodes || analyzeConfigObj.nodes[0] === '-1') {
+      this.isCluster = true
     } else {
-      this.isCluster = false;
+      this.isCluster = false
     }
   },
   computed: {

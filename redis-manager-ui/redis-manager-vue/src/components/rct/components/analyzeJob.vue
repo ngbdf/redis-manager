@@ -220,6 +220,7 @@ export default {
       })
     },
     getRedisNodeList () {
+      console.log('clusterId', this.from.clusterId)
       getClusterNodes(this.from.clusterId).then(response => {
         this.redisNodeList = response.data
       })
@@ -260,6 +261,14 @@ export default {
         })
       }
     }
+    // groupId: {
+    //   immediate: true,
+    //   handler (newValue, old) {
+    //     this.$nextTick(() => {
+    //       this.getRedisNodeList()
+    //     })
+    //   }
+    // }
   },
   mounted () {
     this.getRedisNodeList()

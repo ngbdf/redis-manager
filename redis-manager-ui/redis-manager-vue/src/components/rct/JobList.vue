@@ -11,7 +11,7 @@
             label="IsCluster"
           >
             <template slot-scope="scope">
-              <el-tag size="small" v-if="JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'" type="success"
+              <el-tag size="small" v-if="!JSON.parse(scope.row.analyzeConfig).nodes || JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'" type="success"
                 >Yes</el-tag
               >
               <el-tag size="small" v-else type="danger">No</el-tag>
