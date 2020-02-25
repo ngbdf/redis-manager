@@ -13,6 +13,7 @@
       <el-table v-loading="loading" :data="analyseisJobDetail">
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column sortable label="Redis Instance" property="instance"></el-table-column>
+        <el-table-column label="Cluster Name" property="clusterName"></el-table-column>
         <el-table-column label="Status" property="status">
           <template slot-scope="scope">
             <font v-if="scope.row.status === 'RUNNING'" color="#5485F7">RUNNING</font>
@@ -51,7 +52,8 @@ export default {
       analyseisJobDetail: [],
       cancelButtonDisabled: false,
       searchData: '',
-      loading: false
+      loading: false,
+      clusterName: ''
     }
   },
   created () {
@@ -151,6 +153,7 @@ export default {
 
   mounted () {
     let clusterId = this.$route.params.clusterId
+    let clusterName = this.$route.params.clusterName
     this.getAllScheduleDetail(clusterId)
   }
 }
