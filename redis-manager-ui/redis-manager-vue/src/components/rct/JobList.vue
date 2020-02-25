@@ -4,17 +4,17 @@
       <div>{{ currentGroup.groupName }}</div>
     </div>
 
-      <el-table style="cursor: pointer" :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
+      <el-table   v-loading.fullscreen.lock="loading" style="cursor: pointer" :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
         <el-table-column type="index" ></el-table-column>
         <el-table-column label="Cluster Name" property="clusterName" ></el-table-column>
         <el-table-column
             label="IsCluster"
           >
             <template slot-scope="scope">
-              <el-tag size="small" v-if="!JSON.parse(scope.row.analyzeConfig).nodes || JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'" type="success"
-                >Yes</el-tag
+              <span v-if="!JSON.parse(scope.row.analyzeConfig).nodes || JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'"
+                >Yes</span
               >
-              <el-tag size="small" v-else type="danger">No</el-tag>
+              <span size="small" v-else type="danger">No</span>
             </template>
         </el-table-column>
         <el-table-column
@@ -25,11 +25,11 @@
         ></el-table-column>
         <el-table-column label="Status">
           <template slot-scope="scope">
-              <i v-if="!scope.row.result" class="el-icon-loading" style="font-size: 20px;color:orange"></i>
-              <i v-else class="el-icon-circle-check" style="font-size: 20px;color:green"></i>
-            <!-- <el-button type="warning" icon="el-icon-loading" circle v-if="!scope.row.result" size="small" @click="toTaskProgress(scope.row)"></el-button>
-            <el-button type="success" icon="el-icon-circle-check" circle v-else size="small" @click="toReportDetail(scope.row)"></el-button> -->
-          </template>
+              <!-- <i v-if="!scope.row.result" class="el-icon-loading" style="font-size: 20px;color:orange"></i>
+              <i v-else class="el-icon-circle-check" style="font-size: 20px;color:green"></i> -->
+            <i class="el-icon-success status-icon normal-status" v-if="scope.row.done"></i>
+            <i class="el-icon-loading status-icon bad-status" v-else></i>
+           </template>
         </el-table-column>
         <el-table-column label="Config">
           <template slot-scope="scope">
@@ -39,6 +39,7 @@
                 icon="el-icon-search" circle plain
                 @click.stop="getConfig(scope.$index, scope.row)"
               ></el-button>
+               <!-- <a class="link"   @click="getConfig(scope.$index, scope.row)">Config</a> -->
           </template>
         </el-table-column>
       </el-table>
@@ -110,7 +111,7 @@ export default {
       return formatTime(row.scheduleId)
     },
     handdleRowClick (row, event, column) {
-      if (!row.result) {
+      if (!row.done) {
         this.toTaskProgress(row)
       } else {
         this.toReportDetail(row)
@@ -171,7 +172,7 @@ export default {
     toReportDetail (row) {
       this.$router.push({
         name: 'jobResultDetail',
-        params: { analyzeConfig: row.analyzeConfig },
+        params: { analyzeConfig: row.analyzeConfig, clusterName: row.clusterName },
         // path: '/plugin/jobResultDetail',
         query: {
           detailId: row.id
@@ -244,5 +245,17 @@ export default {
   background-color: #f19944;
   /* color: #f19944; */ /* 设置文字颜色，可以选择不设置 */
 }
+.normal-status {
+  color: #40c9c6;
+}
 
+.bad-status {
+  color: #f4516c;
+}
+ .link {
+    margin: 0 5px;
+    color: rgba(49, 128, 253, 0.65);
+    cursor: pointer;
+    text-decoration: none;
+  }
 </style>

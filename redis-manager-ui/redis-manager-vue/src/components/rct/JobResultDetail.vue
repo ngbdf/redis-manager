@@ -1,7 +1,7 @@
 <template>
   <div id="analysis" class="body-wrapper">
    <el-card shadow="hover" class="box-card">
-    <div class="fieldStyle"><el-image src="../../../static/back.svg" @click="backHistory()" class="images"></el-image><span style="margin-left:30px;font-size:20px">{{ currentGroup.groupName }}</span></div>
+    <div class="fieldStyle"><el-image src="../../../static/back.svg" @click="backHistory()" class="images"></el-image><span style="margin-left:30px;font-size:20px">{{ name }}</span></div>
      </el-card>
     <div>
     <div  class="main-body" style="margin-top: 20px;">
@@ -47,6 +47,7 @@ export default {
     return {
       isCluster: '',
       analyseResults: [],
+      name: '',
       top1000keysPrefix: {
         columns: [{
           label: 'Prefix',
@@ -127,6 +128,8 @@ export default {
     } else {
       this.isCluster = false
     }
+    let clusterName = this.$route.params.clusterName
+    this.name = clusterName
   },
   computed: {
     currentGroup () {
