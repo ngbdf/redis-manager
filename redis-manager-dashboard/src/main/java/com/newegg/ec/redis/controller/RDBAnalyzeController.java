@@ -2,8 +2,9 @@ package com.newegg.ec.redis.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.newegg.ec.redis.cache.AppCache;
+
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.plugin.rct.cache.AppCache;
 import com.newegg.ec.redis.schedule.RDBScheduleJob;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.impl.*;

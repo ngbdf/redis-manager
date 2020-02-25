@@ -3,14 +3,16 @@ package com.newegg.ec.redis.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.newegg.ec.redis.cache.AppCache;
+;
 import com.newegg.ec.redis.dao.IRdbAnalyzeResult;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RDBAnalyze;
 import com.newegg.ec.redis.entity.RDBAnalyzeResult;
 import com.newegg.ec.redis.entity.ReportData;
-import com.newegg.ec.redis.report.IAnalyzeDataConverse;
-import com.newegg.ec.redis.report.converseFactory.ReportDataConverseFacotry;
+
+import com.newegg.ec.redis.plugin.rct.cache.AppCache;
+import com.newegg.ec.redis.plugin.rct.report.IAnalyzeDataConverse;
+import com.newegg.ec.redis.plugin.rct.report.converseFactory.ReportDataConverseFacotry;
 import com.newegg.ec.redis.service.IRdbAnalyzeResultService;
 import com.newegg.ec.redis.util.ListSortUtil;
 import org.slf4j.Logger;
@@ -218,6 +220,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService{
 			RDBAnalyzeResult rdbAnalyzeResult =null;
 			rdbAnalyzeResult = rdbAnalyzeResultMapper.selectByRedisIdAndSId(redisClusterId,scheduleId);
 			rdbAnalyzeResult.setResult(result);
+			rdbAnalyzeResult.setDone(true);
 			rdbAnalyzeResultMapper.updateResult(rdbAnalyzeResult);
 //			if(rdbAnalyze.isManual()){
 //

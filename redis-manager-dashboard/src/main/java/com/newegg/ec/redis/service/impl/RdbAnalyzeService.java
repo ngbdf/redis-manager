@@ -2,16 +2,18 @@ package com.newegg.ec.redis.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.newegg.ec.redis.cache.AppCache;
+
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.config.RCTConfig;
 import com.newegg.ec.redis.dao.IRdbAnalyze;
 import com.newegg.ec.redis.dao.IRdbAnalyzeResult;
 import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.plugin.rct.cache.AppCache;
+import com.newegg.ec.redis.plugin.rct.thread.AnalyzerStatusThread;
 import com.newegg.ec.redis.schedule.RDBScheduleJob;
 import com.newegg.ec.redis.service.IRdbAnalyzeService;
-import com.newegg.ec.redis.thread.AnalyzerStatusThread;
+
 import com.newegg.ec.redis.util.EurekaUtil;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.SchedulerException;
@@ -296,6 +298,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         rdbAnalyzeResult.setClusterId(Long.parseLong(rdbAnalyze.getCluster().getClusterId().toString()));
         rdbAnalyzeResult.setScheduleId(scheduleId);
         rdbAnalyzeResult.setGroupId(rdbAnalyze.getGroupId());
+        rdbAnalyzeResult.setDone(false);
         rdbAnalyzeResultService.add(rdbAnalyzeResult);
     }
 

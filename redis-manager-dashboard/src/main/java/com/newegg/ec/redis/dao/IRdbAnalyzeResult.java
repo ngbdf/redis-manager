@@ -25,16 +25,16 @@ public interface IRdbAnalyzeResult {
     @Select("SELECT * FROM rdb_analyze_result WHERE id = #{id}")
     RDBAnalyzeResult selectByResultId(Long id);
 
-    @Insert("INSERT INTO rdb_analyze_result(schedule_id, cluster_id, result, analyze_config,group_id) " +
-            "VALUES (#{scheduleId}, #{clusterId}, #{result}, #{analyzeConfig},#{groupId})")
+    @Insert("INSERT INTO rdb_analyze_result(schedule_id, cluster_id, result, analyze_config,group_id,done) " +
+            "VALUES (#{scheduleId}, #{clusterId}, #{result}, #{analyzeConfig},#{groupId},#{done})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     Integer insert(RDBAnalyzeResult rdbAnalyzeResult);
 
-    @Select("SELECT * FROM rdb_analyze_result where group_id=#{groupId} ORDER BY schedule_id DESC ")
+    @Select("SELECT id,schedule_id,cluster_id,analyze_config,group_id,done FROM rdb_analyze_result where group_id=#{groupId} ORDER BY schedule_id DESC ")
     @Results({ @Result(id = true, column = "id", property = "id"),
             @Result(column = "schedule_id", property = "scheduleId"),
             @Result(column = "cluster_id",  property = "clusterName",one=@One(select="com.newegg.ec.redis.dao.IClusterDao.selectClusterNameById")),
-            @Result(column = "result", property = "result"),
+            @Result(column = "done", property = "done"),
             @Result(column = "analyze_config", property = "analyzeConfig")})
     List<RDBAnalyzeResult> selectList(@Param("groupId") Long groupId);
 
@@ -97,14 +97,15 @@ public interface IRdbAnalyzeResult {
     List<RDBAnalyzeResult> selectRecentlyResultByIdExceptSelf(@Param("result") Map<String, Long> result);
 
 
-    @Select("create TABLE IF NOT EXISTS `rdb_analyze_result`( " +
-            "id integer AUTO_INCREMENT, " +
-            "schedule_id bigint NOT NULL, " +
-            "cluster_id integer, " +
-            "result longtext, " +
-            "analyze_config longtext," +
-            "PRIMARY KEY (id) " +
-            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
+    @Select("CREATE TABLE IF NOT EXISTS `rdb_analyze_result` (" +
+            "  `id` int(11) NOT NULL AUTO_INCREMENT," +
+            "  `schedule_id` bigint(13) NOT NULL," +
+            "  `cluster_id` int(13) DEFAULT NULL," +
+            "  `result` longtext DEFAULT NULL," +
+            "  `analyze_config` longtext DEFAULT NULL," +
+            "  `group_id` int(11) NOT NULL," +
+            "  PRIMARY KEY (`id`)" +
+            ") ENGINE=InnoDB AUTO_INCREMENT=204 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;")
     void createRdbAnalyzeResult();
 
 

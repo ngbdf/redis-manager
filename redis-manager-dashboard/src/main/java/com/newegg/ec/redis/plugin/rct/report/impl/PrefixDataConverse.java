@@ -1,10 +1,10 @@
-package com.newegg.ec.redis.report.impl;
+package com.newegg.ec.redis.plugin.rct.report.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.ExcelData;
 import com.newegg.ec.redis.entity.ReportData;
-import com.newegg.ec.redis.report.IAnalyzeDataConverse;
+import com.newegg.ec.redis.plugin.rct.report.IAnalyzeDataConverse;
 import com.newegg.ec.redis.util.BytesConverseUtil;
 import com.newegg.ec.redis.util.ListSortUtil;
 import org.slf4j.Logger;

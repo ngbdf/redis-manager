@@ -1,11 +1,12 @@
-package com.newegg.ec.redis.report;
+package com.newegg.ec.redis.plugin.rct.report;
 
-import com.newegg.ec.redis.cache.AppCache;
+
 import com.newegg.ec.redis.config.RCTConfig;
 import com.newegg.ec.redis.entity.ExcelData;
 import com.newegg.ec.redis.entity.RDBAnalyze;
 import com.newegg.ec.redis.entity.ReportData;
-import com.newegg.ec.redis.report.converseFactory.ReportDataConverseFacotry;
+import com.newegg.ec.redis.plugin.rct.cache.AppCache;
+import com.newegg.ec.redis.plugin.rct.report.converseFactory.ReportDataConverseFacotry;
 import com.newegg.ec.redis.util.ExcelUtil;
 import com.newegg.ec.redis.util.FileUtil;
 import org.slf4j.Logger;

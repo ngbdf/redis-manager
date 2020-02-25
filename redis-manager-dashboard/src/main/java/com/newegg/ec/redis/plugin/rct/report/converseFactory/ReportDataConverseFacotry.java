@@ -1,11 +1,11 @@
-package com.newegg.ec.redis.report.converseFactory;
+package com.newegg.ec.redis.plugin.rct.report.converseFactory;
 
 import com.newegg.ec.redis.entity.AnalyzerConstant;
-import com.newegg.ec.redis.report.IAnalyzeDataConverse;
-import com.newegg.ec.redis.report.impl.DataTypeDataConverse;
-import com.newegg.ec.redis.report.impl.PrefixDataConverse;
-import com.newegg.ec.redis.report.impl.TTLDataConverse;
-import com.newegg.ec.redis.report.impl.TopKeyDataConverse;
+import com.newegg.ec.redis.plugin.rct.report.IAnalyzeDataConverse;
+import com.newegg.ec.redis.plugin.rct.report.impl.DataTypeDataConverse;
+import com.newegg.ec.redis.plugin.rct.report.impl.PrefixDataConverse;
+import com.newegg.ec.redis.plugin.rct.report.impl.TTLDataConverse;
+import com.newegg.ec.redis.plugin.rct.report.impl.TopKeyDataConverse;
 
 
 /**

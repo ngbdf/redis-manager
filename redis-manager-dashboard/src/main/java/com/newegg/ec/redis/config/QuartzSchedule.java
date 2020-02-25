@@ -1,7 +1,8 @@
 package com.newegg.ec.redis.config;
 
 
-import com.newegg.ec.redis.common.JobFactory;
+
+import com.newegg.ec.redis.plugin.rct.common.JobFactory;
 import com.newegg.ec.redis.schedule.RDBScheduleJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

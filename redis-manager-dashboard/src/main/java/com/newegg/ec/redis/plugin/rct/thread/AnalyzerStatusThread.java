@@ -1,13 +1,15 @@
-package com.newegg.ec.redis.thread;
+package com.newegg.ec.redis.plugin.rct.thread;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.newegg.ec.redis.cache.AppCache;
+
 import com.newegg.ec.redis.config.RCTConfig;
 import com.newegg.ec.redis.entity.*;
+
+import com.newegg.ec.redis.plugin.rct.cache.AppCache;
+import com.newegg.ec.redis.plugin.rct.report.EmailSendReport;
 import com.newegg.ec.redis.service.impl.RdbAnalyzeResultService;
-import com.newegg.ec.redis.report.EmailSendReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +34,7 @@ public class AnalyzerStatusThread implements Runnable {
 	private RdbAnalyzeResultService rdbAnalyzeResultService;
 
 	public AnalyzerStatusThread(List<AnalyzeInstance> analyzeInstances, RestTemplate restTemplate,
-								RDBAnalyze rdbAnalyze, RCTConfig.Email emailInfo, RdbAnalyzeResultService rdbAnalyzeResultService) {
+                                RDBAnalyze rdbAnalyze, RCTConfig.Email emailInfo, RdbAnalyzeResultService rdbAnalyzeResultService) {
 		this.scheduleDetails = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
 		this.analyzeInstances = analyzeInstances;
 		this.restTemplate = restTemplate;

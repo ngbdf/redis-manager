@@ -68,18 +68,19 @@ public interface IRdbAnalyze {
     })
     RDBAnalyze selectById(Long id);
 
-    @Select("create TABLE IF NOT EXISTS `rdb_analyze`( " +
-            "id integer AUTO_INCREMENT, " +
-            "auto_analyze integer NOT NULL, " +
-            "schedule varchar(255), " +
-            "dataPath varchar(255), " +
-            "prefixes varchar(255), " +
-            "is_report integer, " +
-            "mailTo varchar(255), " +
-            "analyzer varchar(255), " +
-            "cluster_id integer, " + // redis id
-            "PRIMARY KEY (id) " +
-            ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
+    @Select("CREATE TABLE IF NOT EXISTS `rdb_analyze` (" +
+            "  `id` int(11) NOT NULL AUTO_INCREMENT," +
+            "  `auto_analyze` int(11) NOT NULL," +
+            "  `schedule` varchar(255) DEFAULT NULL," +
+            "  `dataPath` varchar(255) DEFAULT NULL," +
+            "  `prefixes` varchar(255) DEFAULT NULL," +
+            "  `is_report` int(11) DEFAULT NULL," +
+            "  `mailTo` varchar(255) DEFAULT NULL," +
+            "  `analyzer` varchar(255) DEFAULT NULL," +
+            "  `cluster_id` int(11) DEFAULT NULL," +
+            "  `group_id` int(11) DEFAULT NULL," +
+            "  PRIMARY KEY (`id`)" +
+            ") ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;")
     void createRdbAnalyzeTable();
 
     @Select("select id from rdb_analyze where cluster_id = #{cluster_id}")

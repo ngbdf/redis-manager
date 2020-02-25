@@ -1,4 +1,4 @@
-package com.newegg.ec.redis.cache;
+package com.newegg.ec.redis.plugin.rct.cache;
 
 import com.newegg.ec.redis.entity.AnalyzeStatus;
 import com.newegg.ec.redis.entity.RDBAnalyze;

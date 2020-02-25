@@ -1,4 +1,4 @@
-package com.newegg.ec.redis.report;
+package com.newegg.ec.redis.plugin.rct.report;
 
 
 import com.newegg.ec.redis.entity.ExcelData;

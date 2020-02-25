@@ -40,9 +40,9 @@ spring:
       charset: UTF-8
   datasource:
     # 必填，与数据库同名
-    database: redis_manager3
+    database: redis_manager2_dev
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.16.236.126:3306/redis_manager3?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://10.16.236.126:3306/redis_manager2_dev?useUnicode=true&characterEncoding=utf-8
     username: root
     password: 123456
     druid:

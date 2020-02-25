@@ -13,8 +13,17 @@ public class RDBAnalyzeResult {
 	private Long clusterId;
 	private String analyzeConfig;
 	private String result;
+	private boolean done;
 
 	private String clusterName;
+
+	public boolean isDone() {
+		return done;
+	}
+
+	public void setDone(boolean done) {
+		this.done = done;
+	}
 
 	public Long getGroupId() {
 		return groupId;
