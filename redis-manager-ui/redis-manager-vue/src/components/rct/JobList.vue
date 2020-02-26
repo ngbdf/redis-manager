@@ -49,11 +49,12 @@
           class="pagination"
         ></el-pagination>
         <el-dialog
-          title="Config Detail"
+          title="Job Config"
           :visible.sync="ConfigDetailVisible"
           :close-on-click-modal="false"
+          width="30%"
           @close="closeHandler()">
-          <div>
+          <div style="padding:10px 20px;text-align:center">
             <ul>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Cluster Name:</div>
@@ -65,7 +66,7 @@
                   </li>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Auto Analyze:</div>
-                    <el-switch  disabled v-model="ConfigDetail.autoAnalyze"></el-switch>
+                    <el-switch  disabled v-model="ConfigDetail.autoAnalyze" active-color="#00a000" inactive-color="#404040"></el-switch>
                   </li>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Schedule:</div>
@@ -86,7 +87,8 @@
                   </li>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Report:</div>
-                    <el-switch  disabled v-model="ConfigDetail.report"></el-switch>
+                    <!-- <el-switch  disabled v-model="ConfigDetail.report"></el-switch> -->
+                     <el-switch  disabled v-model="ConfigDetail.report" active-color="#00a000" inactive-color="#404040"></el-switch>
                   </li>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Mail:</div>
@@ -95,6 +97,18 @@
                     </div>
                   </li>
                 </ul>
+                 <span slot="footer" class="dialog-footer">
+        <!-- <el-button size="mini" type="warning" @click="deleteVisible = false"
+          >Cancel</el-button
+        > -->
+         <el-button size="mini"  type="primary"  @click="ConfigDetailVisible=false">Ok</el-button>
+        <!-- <el-button
+          size="mini"
+          type="danger"
+          @click="deleteAnalyzeJob(analyseisJobFrom.id)"
+          >Delete</el-button
+        > -->
+      </span>
           </div>
         </el-dialog>
   </div>
