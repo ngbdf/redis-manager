@@ -204,7 +204,6 @@ export default {
       })
     },
     getRedisNodeList () {
-      console.log('clusterId', this.from.clusterId)
       getClusterNodes(this.from.clusterId).then(response => {
         this.redisNodeList = response.data
       })
