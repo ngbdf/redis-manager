@@ -4,16 +4,15 @@
       <!-- <div><el-image src="../../../static/back.svg" @click="backHistory()"></el-image></div>
       <div class="fieldStyle">instance:</div>
       <div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div> -->
-      <div class="fieldStyle"><el-image src="../../../static/back.svg" @click="backHistory()" class="images"> </el-image>
-<div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
-         </div>
+      <div class="fieldStyle"><el-image src="../../../static/back.svg" @click="backHistory()" class="images"> </el-image><span style="margin-left:30px;font-size:20px">{{clusterName}}</span></div>
+      <div class="searchStyle"><el-input size="mini" v-model="searchData" prefix-icon="el-icon-search" placeholder="input redis instance"></el-input></div>
+         <!-- </div> -->
     </div>
     <div class="cancelStyle"><el-button size="mini" :disabled="this.cancelButtonDisabled" type="success" @click="cancelAnalysis()">Cancel</el-button></div>
     <div>
       <el-table v-loading="loading" :data="analyseisJobDetail">
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column sortable label="Redis Instance" property="instance"></el-table-column>
-        <el-table-column label="Cluster Name" property="clusterName"></el-table-column>
         <el-table-column label="Status" property="status">
           <template slot-scope="scope">
             <font v-if="scope.row.status === 'RUNNING'" color="#5485F7">RUNNING</font>
@@ -180,8 +179,8 @@ float: left;
 }
 .images{
     height: 26px;
-    margin-top: 5px;
     width: 26px;
+    position: absolute;
     cursor: pointer;
 }
 </style>

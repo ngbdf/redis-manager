@@ -33,14 +33,15 @@
     <el-form-item label="DataPath" prop="dataPath">
       <el-input v-model="analyseisJobFrom.dataPath" placeholder="Please dataPath" class="input"></el-input>
     </el-form-item>
-    <el-form-item label="Custom Prefixes" prop="prefixes">
-      <el-input type="textarea" :rows="2" v-model="analyseisJobFrom.prefixes" placeholder="Please input your custom prefixe with ','" class="input"></el-input>
-    </el-form-item>
+
     <el-form-item label="Report" prop="report">
         <el-switch v-model="analyseisJobFrom.report"></el-switch>
     </el-form-item>
-    <el-form-item label="Mail" prop="mailTo">
+    <el-form-item label="Mail" prop="mailTo" v-if="analyseisJobFrom.report">
       <el-input type="textarea" :rows="2" class="input" v-model="analyseisJobFrom.mailTo"  placeholder="Please input email address with ';'"></el-input>
+    </el-form-item>
+      <el-form-item label="Custom Prefixes" prop="prefixes">
+      <el-input type="textarea" :rows="2" v-model="analyseisJobFrom.prefixes" placeholder="Please input your custom prefixe with ','" class="input"></el-input>
     </el-form-item>
     <el-form-item>
        <div class="footer">

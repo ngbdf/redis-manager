@@ -2,8 +2,9 @@
   <div>
     <div id="analysis" class="body-wrapper" v-if="!jobDialogVisible">
       <div class="header-wrapper">
+          <div/>
         <div>
-          <el-button size="small" type="primary" plain @click="addAnalysisJob()"
+          <el-button size="small" type="primary" plain @click="addAnalysisJob()" icon="el-icon-plus"
             >New Job</el-button>
         </div>
       </div>
@@ -32,40 +33,6 @@
               <el-tag size="small" v-else type="danger" effect="dark">false</el-tag>
             </template>
           </el-table-column>
-          <!-- <el-table-column label="Analyzer" property="analyzer" width="100">
-            <template slot-scope="scope">
-              <div slot="reference" class="name-wrapper">
-                <el-tag
-                  size="small"
-                  v-for="a in scope.row.analyzer"
-                  :key="a"
-                  class="tags"
-                  type="info"
-                >
-                  {{ a == "5" ? "ExportKeyByPrefix" : "" }}
-                  {{ a == "6" ? "ExportKeyByFilter" : "" }}
-                  {{ a == "0" ? "Report" : "" }}
-                </el-tag>
-              </div>
-            </template>
-          </el-table-column> -->
-
-          <!-- <el-table-column
-            label="Data Path"
-            property="dataPath"
-            width="350"
-          ></el-table-column>
-          <el-table-column
-            label="Custom Prefixe"
-            property="prefixes"
-            width="150"
-          ></el-table-column> -->
-          <!-- <el-table-column label="Status" width="150">
-            <template slot-scope="scope" width="150">
-              <i class="el-icon-loading" v-if="scope.row.status"></i>
-              <i class="el-icon-circle-check" v-else></i>
-            </template>
-          </el-table-column>-->
           <el-table-column label="Operation" >
             <template slot-scope="scope">
               <el-button
@@ -164,6 +131,7 @@ export default {
       analyseisJobFrom: {
         id: '',
         clusterId: '',
+        cluster: '',
         autoAnalyze: false,
         schedule: '',
         analyzer: '0',

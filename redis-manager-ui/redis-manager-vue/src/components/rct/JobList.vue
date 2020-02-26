@@ -166,7 +166,7 @@ export default {
     toTaskProgress (row) {
       this.$router.push({
         name: 'TaskProgress',
-        params: { clusterId: row.clusterId }
+        params: { clusterId: row.clusterId, clusterName: row.clusterName }
       })
     },
     toReportDetail (row) {

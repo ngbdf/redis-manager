@@ -30,37 +30,20 @@
       <el-option v-for="item in this.redisNodeList" :key="item.host+':'+item.port" :label="item.flags+' '+item.host+':'+item.port" :value="item.host+':'+item.port" :disabled="isAllNodes"></el-option>
     </el-select>
       </el-form-item>
-    <!-- <el-form-item label="Schedule" prop="schedule" v-if="analyseisJobFrom.autoAnalyze">
-      <el-input v-model="analyseisJobFrom.schedule" placeholder="Please schedule" class="input"></el-input>
-      <el-tooltip class="item" effect="dark" placement="right">
-        <div slot="content">
-          <ul>
-            <li v-for="time in scheduleCron " :key="time">{{time}}</li>
-          </ul>
-        </div>
-        <i class="el-icon-message-solid"></i>
-      </el-tooltip>
-    </el-form-item> -->
-    <!-- <el-form-item label="Analyzer" prop="analyzer">
-      <el-checkbox-group v-model="analyseisJobFrom.analyzer">
-        <el-checkbox label="0">Report</el-checkbox>
-        <!-- <el-checkbox label="6">ExportKeyByFilter</el-checkbox>
-        <el-checkbox label="5">ExportKeyByPrefix</el-checkbox> -->
-      <!-- </el-checkbox-group>
-    </el-form-item> -->
     <el-form-item label="DataPath" prop="dataPath">
         <!-- <span>{{analyseisJobFrom.dataPath }}</span> -->
       <el-input v-model="analyseisJobFrom.dataPath" placeholder="Please dataPath" class="input" :disabled="this.analyze"></el-input>
     </el-form-item>
-    <el-form-item label="Custom Prefixes" prop="prefixes">
-           <el-input type="textarea" :rows="2" v-model="analyseisJobFrom.prefixes" placeholder="Please input your custom prefixe with ','" class="input"></el-input>
 
-    </el-form-item>
     <el-form-item label="Report" prop="report">
       <el-switch v-model="analyseisJobFrom.report"></el-switch>
     </el-form-item>
-    <el-form-item label="Mail" prop="mailTo">
+    <el-form-item label="Mail" prop="mailTo" v-if="analyseisJobFrom.report">
       <el-input type="textarea" :rows="2" class="input" v-model="analyseisJobFrom.mailTo" placeholder="Please input email address with ';'"></el-input>
+    </el-form-item>
+     <el-form-item label="Custom Prefixes" prop="prefixes">
+           <el-input type="textarea" :rows="2" v-model="analyseisJobFrom.prefixes" placeholder="Please input your custom prefixe with ','" class="input"></el-input>
+
     </el-form-item>
     <el-form-item>
       <div class="footer">
@@ -149,6 +132,7 @@ export default {
       analyseisJobFrom: {
         id: '',
         clusterId: '',
+        cluster: '',
         nodes: ['-1'],
         schedule: '',
         analyzer: '0',
@@ -202,7 +186,7 @@ export default {
         if (response.data.status) {
           this.$router.push({
             name: 'TaskProgress',
-            params: { clusterId: body.clusterId , clusterName:body.cluster.clusterName}
+            params: { clusterId: body.clusterId, clusterName: body.cluster.clusterName}
           })
         } else {
           message.error(response.data.message)
