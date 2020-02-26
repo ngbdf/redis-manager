@@ -33,13 +33,9 @@
         </el-table-column>
         <el-table-column label="Config">
           <template slot-scope="scope">
-            <el-button
-                type="primary"
-                size="mini"
-                icon="el-icon-search" circle plain
-                @click.stop="getConfig(scope.$index, scope.row)"
-              ></el-button>
-               <!-- <a class="link"   @click="getConfig(scope.$index, scope.row)">Config</a> -->
+          <a  style="cursor: pointer; color: rgba(49, 128, 253, 0.65)" @click.stop="getConfig(scope.$index, scope.row)">
+            Detail
+          </a>
           </template>
         </el-table-column>
       </el-table>
@@ -57,32 +53,49 @@
           :visible.sync="ConfigDetailVisible"
           :close-on-click-modal="false"
           @close="closeHandler()">
-          <el-form :model="ConfigDetail" ref="ConfigDetail" label-width="120px" size="small">
-            <el-form-item label="Cluster Name " prop="clusterName">
-              <el-input readonly  v-model="clusterName" maxlength="50" show-word-limit></el-input>
-            </el-form-item>
-            <el-form-item label="Nodes "  prop="nodes">
-              <el-input readonly autoSize type ="textarea" v-model="nodes"  show-word-limit></el-input>
-            </el-form-item>
-            <el-form-item label="Auto Analyze " prop="autoAnalyze">
-              <el-switch  disabled v-model="ConfigDetail.autoAnalyze"></el-switch>
-            </el-form-item>
-            <el-form-item label="Schedule " prop="schedule" >
-              <el-input readonly v-model="ConfigDetail.schedule" maxlength="50" show-word-limit></el-input>
-            </el-form-item>
-            <el-form-item label="DataPath " prop="dataPath">
-              <el-input readonly v-model="ConfigDetail.dataPath" maxlength="50" show-word-limit></el-input>
-            </el-form-item>
-            <el-form-item label="Custom Prefixes " prop="prefixes">
-              <el-input readonly  v-model="ConfigDetail.prefixes"  show-word-limit></el-input>
-            </el-form-item>
-            <el-form-item label="Report " prop="report">
-              <el-switch  disabled v-model="ConfigDetail.report"></el-switch>
-            </el-form-item>
-            <el-form-item label="Mail " prop="mailTo">
-              <el-input readonly  type="textarea" :rows="2" class="input" v-model="ConfigDetail.mailTo" ></el-input>
-            </el-form-item>
-          </el-form>
+          <div>
+            <ul>
+                  <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
+                    <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Cluster Name:</div>
+                    <div >{{clusterName}}</div>
+                  </li>
+                  <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
+                    <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Nodes:</div>
+                    <div >{{nodes}}</div>
+                  </li>
+                  <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
+                    <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Auto Analyze:</div>
+                    <el-switch  disabled v-model="ConfigDetail.autoAnalyze"></el-switch>
+                  </li>
+                  <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
+                    <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Schedule:</div>
+                    <div >{{ConfigDetail.schedule}}</div>
+                  </li>
+
+                  <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
+                    <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">DataPath:</div>
+                    <div >
+                    {{ConfigDetail.dataPath}}
+                    </div>
+                  </li>
+                  <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
+                    <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Custom Prefixes:</div>
+                    <div>
+                      {{ConfigDetail.prefixes}}
+                    </div>
+                  </li>
+                  <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
+                    <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Report:</div>
+                    <el-switch  disabled v-model="ConfigDetail.report"></el-switch>
+                  </li>
+                  <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
+                    <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Mail:</div>
+                    <div >
+                      {{ConfigDetail.mailTo}}
+                    </div>
+                  </li>
+                </ul>
+          </div>
         </el-dialog>
   </div>
 </template>
