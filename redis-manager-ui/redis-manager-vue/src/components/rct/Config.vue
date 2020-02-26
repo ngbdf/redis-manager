@@ -29,8 +29,8 @@
             property="autoAnalyze"
           >
             <template slot-scope="scope">
-              <el-tag size="small" type="success" effect="dark" v-if="scope.row.autoAnalyze">true</el-tag>
-              <el-tag size="small" v-else type="danger" effect="dark">false</el-tag>
+              <el-image v-if="scope.row.autoAnalyze" src="../../../static/yes.svg"> </el-image>
+              <el-image v-else src="../../../static/no.svg"> </el-image>
             </template>
           </el-table-column>
           <el-table-column label="Operation" >
