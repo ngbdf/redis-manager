@@ -4,7 +4,7 @@
       <div>{{ currentGroup.groupName }}</div>
     </div>
 
-      <el-table   v-loading.fullscreen.lock="loading" style="cursor: pointer" :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
+      <el-table   v-loading="loading" style="cursor: pointer" :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
         <el-table-column type="index" ></el-table-column>
         <el-table-column label="Cluster Name" property="clusterName" ></el-table-column>
         <el-table-column
@@ -192,9 +192,9 @@ export default {
     },
     setNodes (value) {
       var temp = ''
-      if(value == undefined){
+      if (value == undefined) {
         temp = 'All Cluster Nodes'
-      }else{
+      } else {
         for (let i in value) {
           if (value[0] === '-1') {
             temp = 'All Cluster Nodes'
@@ -215,6 +215,10 @@ export default {
   watch: {
     currentGroup (group) {
       this.getAnalyseResults(group.groupId)
+      this.$router.push({
+        name: 'jobList',
+        params: { groupId: group.groupId }
+      })
     }
   },
   mounted () {
