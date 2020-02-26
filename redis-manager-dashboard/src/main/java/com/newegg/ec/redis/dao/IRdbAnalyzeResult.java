@@ -38,7 +38,7 @@ public interface IRdbAnalyzeResult {
             @Result(column = "analyze_config", property = "analyzeConfig")})
     List<RDBAnalyzeResult> selectList(@Param("groupId") Long groupId);
 
-    @Update("Update rdb_analyze_result set result=#{result} where id=#{id} ")
+    @Update("Update rdb_analyze_result set result=#{result} ,done=#{done} where id=#{id} ")
     Integer updateResult(RDBAnalyzeResult rdbAnalyzeResult);
 
     @Delete("delete from rdb_analyze_result where schedule_id IN (select min(schedule_id) from rdb_analyze_result)")

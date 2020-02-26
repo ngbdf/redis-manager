@@ -1,11 +1,11 @@
 <template>
-  <div id="analysis" class="body-wrapper">
-   <el-card shadow="hover" class="box-card">
-    <div class="fieldStyle"><el-image src="../../../static/back.svg" @click="backHistory()" class="images"></el-image><span style="margin-left:30px;font-size:20px">{{ name }}</span></div>
+  <div id="analysis">
+   <el-card >
+    <div ><el-image src="../../../static/back.svg" @click="backHistory()" class="images"></el-image><span style="margin-left:30px;font-size:20px">{{ name }}</span></div>
      </el-card>
-    <div>
+    <!-- <div> -->
     <div  class="main-body" style="margin-top: 20px;">
-      <el-row class="echart-wrapper" id="monitor-charts">
+      <!-- <el-row class="echart-wrapper" id="monitor-charts"> -->
         <KeyByTypePie pieType="count" :resultId="resultId"></KeyByTypePie>
         <KeyByTypePie pieType="memory" :resultId="resultId"></KeyByTypePie>
         <PrefixKeysCount v-show="isCluster" :resultId="resultId"></PrefixKeysCount>
@@ -13,9 +13,9 @@
         <Tables :resultId="resultId" :tableObj="top1000keysPrefix" :initData="initTop1000Keys"/>
         <Tables :resultId="resultId" :tableObj="keysTTL" :initData="initKeysTTL"/>
         <Top1000KeysByType :resultId="resultId"></Top1000KeysByType>
-      </el-row>
+      <!-- </el-row> -->
   </div>
-    </div>
+    <!-- </div> -->
   </div>
 </template>
 <script>
