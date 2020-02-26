@@ -19,7 +19,7 @@
               </div>
               <span v-if="!JSON.parse(scope.row.analyzeConfig).nodes || JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'"
                 >Yes</span
-              ><span size="small" v-else type="danger">No</span>  
+              ><span size="small" v-else type="danger">No</span>
               </el-tooltip>
             </template>
         </el-table-column>
@@ -68,7 +68,7 @@
                   </li>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Nodes:</div>
-                    <div >{{nodes}}</div>
+                    <div class="icoFontlist" :title="nodes">{{nodes}}</div>
                   </li>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Auto Analyze:</div>
@@ -239,9 +239,9 @@ export default {
       }
       this.nodes = temp
     },
-    getNodes(index, row){
-      this.getConfig(index,row);
-      return this.nodes;
+    getNodes (index, row) {
+      this.getConfig(index, row)
+      return this.nodes
     }
   },
   computed: {
@@ -303,4 +303,27 @@ export default {
     cursor: pointer;
     text-decoration: none;
   }
+  .icoFontlist:hover
+{
+    width: 225px;
+    font-size: 12px;
+    border: 0px solid #ddd;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color:blue;
+    text-decoration:underline;
+    cursor:pointer;
+}
+.icoFontlist{
+    width: 225px;
+    font-size: 12px;
+    border: 0px solid #ddd;
+    color:#5f5f5f;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 </style>
