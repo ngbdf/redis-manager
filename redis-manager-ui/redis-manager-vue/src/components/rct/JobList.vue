@@ -15,7 +15,7 @@
               <div slot="content">
                 <span v-if="!JSON.parse(scope.row.analyzeConfig).nodes || JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'"
                 > All Cluster Nodes</span
-                ><span size="small" v-else type="danger">{{JSON.stringify(JSON.parse(scope.row.analyzeConfig).nodes)}}</span>
+                ><span size="small" v-else >{{JSON.stringify(JSON.parse(scope.row.analyzeConfig).nodes)}}</span>
               </div>
               <span v-if="!JSON.parse(scope.row.analyzeConfig).nodes || JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'"
                 >Yes</span
