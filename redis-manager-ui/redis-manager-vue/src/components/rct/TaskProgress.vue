@@ -70,6 +70,9 @@ export default {
   methods: {
     getAllScheduleDetail (id) {
       const result = getScheduleDetail(id).then(result => {
+        for (var i = 0; i < result.data.length; i++) {                   
+              result.data[i].clusterName =  this.clusterName;                 
+        }
         this.originalData = result.data
         this.analyseisJobDetail = result.data
         if (this.searchData) {
