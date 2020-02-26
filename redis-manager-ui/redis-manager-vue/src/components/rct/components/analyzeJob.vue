@@ -202,7 +202,7 @@ export default {
         if (response.data.status) {
           this.$router.push({
             name: 'TaskProgress',
-            params: { clusterId: body.clusterId }
+            params: { clusterId: body.clusterId , clusterName:body.cluster.clusterName}
           })
         } else {
           message.error(response.data.message)

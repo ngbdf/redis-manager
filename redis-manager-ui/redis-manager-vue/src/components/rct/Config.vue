@@ -2,7 +2,6 @@
   <div>
     <div id="analysis" class="body-wrapper" v-if="!jobDialogVisible">
       <div class="header-wrapper">
-        <div>{{ currentGroup.groupName }}</div>
         <div>
           <el-button size="small" type="primary" plain @click="addAnalysisJob()"
             >New Job</el-button>
@@ -76,20 +75,20 @@
                 size="mini"
                 icon="el-icon-edit"
                 @click="editAnalysisJob(scope.$index, scope.row)"
-              ></el-button>
+              >Edit</el-button>
               <el-button
                 size="mini"
                 type="danger"
                 plain
                 icon="el-icon-delete"
                 @click="handleDelete(scope.$index, scope.row)"
-              ></el-button>
+              >Del</el-button>
               <el-button
                 size="mini"
                 type="warning"
                 @click="handleAnalyze(scope.$index, scope.row)"
-                icon="el-icon-data-analysis"
-              ></el-button>
+                icon="el-icon-s-data"
+              >Analyze</el-button>
             </template>
           </el-table-column>
         </el-table>

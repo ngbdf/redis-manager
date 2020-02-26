@@ -7,6 +7,7 @@ package com.newegg.ec.redis.entity;
  * @description: 调度任务进度实体
  */
 public class ScheduleDetail {
+	private String clusterName;
 	private long scheduleID;
 	/**
 	 * 分析redis节点ip:port
@@ -78,6 +79,14 @@ public class ScheduleDetail {
 
 	public void setScheduleStatus(boolean scheduleStatus) {
 		this.scheduleStatus = scheduleStatus;
+	}
+
+	public String getClusterName() {
+		return clusterName;
+	}
+
+	public void setClusterName(String clusterName) {
+		this.clusterName = clusterName;
 	}
 
 }
