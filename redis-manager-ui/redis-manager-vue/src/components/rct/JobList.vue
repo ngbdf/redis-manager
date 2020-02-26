@@ -11,10 +11,16 @@
             label="IsCluster"
           >
             <template slot-scope="scope">
+            <el-tooltip placement="top">
+              <div slot="content">
+                <span v-if="!JSON.parse(scope.row.analyzeConfig).nodes || JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'"
+                > All Cluster Nodes</span
+                ><span size="small" v-else type="danger">{{JSON.stringify(JSON.parse(scope.row.analyzeConfig).nodes)}}</span>
+              </div>
               <span v-if="!JSON.parse(scope.row.analyzeConfig).nodes || JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'"
                 >Yes</span
-              >
-              <span size="small" v-else type="danger">No</span>
+              ><span size="small" v-else type="danger">No</span>  
+              </el-tooltip>
             </template>
         </el-table-column>
         <el-table-column
@@ -218,6 +224,10 @@ export default {
         }
       }
       this.nodes = temp
+    },
+    getNodes(index, row){
+      this.getConfig(index,row);
+      return this.nodes;
     }
   },
   computed: {
