@@ -29,6 +29,7 @@
         </div>
         <i class="el-icon-message-solid"></i>
       </el-tooltip>
+       <div><a target="_blank" href="http://cron.qqe2.com/" style="text-decoration:underline;color:blue">Generate the cron expression</a></div>
     </el-form-item>
     <el-form-item label="DataPath" prop="dataPath">
       <el-input v-model="analyseisJobFrom.dataPath" placeholder="Please dataPath" class="input"></el-input>

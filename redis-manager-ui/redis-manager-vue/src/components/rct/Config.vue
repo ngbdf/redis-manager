@@ -9,7 +9,7 @@
         </div>
       </div>
       <div>
-        <el-table :data="analyseisJobs" stripe class="table">
+        <el-table :data="analyseisJobs" stripe class="table"  v-loading="loading">
           <el-table-column
             label="Cluster Name"
             property="cluster.clusterName"
@@ -144,6 +144,7 @@ export default {
       // 控制删除框是否显示
       deleteVisible: false,
 
+      loading: false,
       // 控制是否new Job和Edit时, job detail是否显示加载
       jobDialogLoading: false,
 
@@ -191,9 +192,11 @@ export default {
       return analyzer
     },
     async getAnalysisJobList (groupId) {
+      this.loading = true
       await getAnalysisList(groupId).then(response => {
         const data = response.data
         this.analyseisJobs = data
+        this.loading = false
       })
     },
     cancel (visable) {

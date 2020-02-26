@@ -122,14 +122,28 @@ export default {
   },
   mounted () {
     let analyzeConfig = this.$route.params.analyzeConfig
-    let analyzeConfigObj = JSON.parse(analyzeConfig)
-    if (!analyzeConfigObj.nodes || analyzeConfigObj.nodes[0] === '-1') {
-      this.isCluster = true
+    if (analyzeConfig) {
+      let analyzeConfigObj = JSON.parse(analyzeConfig)
+      if (!analyzeConfigObj.nodes || analyzeConfigObj.nodes[0] === '-1') {
+        this.isCluster = true
+      } else {
+        this.isCluster = false
+      }
+      let clusterName = this.$route.params.clusterName
+      this.name = clusterName
     } else {
-      this.isCluster = false
+      this.$router.push({
+        name: 'jobList'
+      })
     }
-    let clusterName = this.$route.params.clusterName
-    this.name = clusterName
+  },
+  watch: {
+    currentGroup (group) {
+      this.$router.push({
+        name: 'jobList',
+        params: { groupId: group.groupId }
+      })
+    }
   },
   computed: {
     currentGroup () {

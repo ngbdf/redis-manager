@@ -1,7 +1,7 @@
 <template>
   <div id="jobList" class="body-wrapper">
     <div class="header-wrapper">
-      <div>{{ currentGroup.groupName }}</div>
+      <!-- <div>{{ currentGroup.groupName }}</div> -->
     </div>
 
       <el-table   v-loading="loading" style="cursor: pointer" :data="pageData" @sort-change="sortChange" @row-click="handdleRowClick" highlight-current-row >
