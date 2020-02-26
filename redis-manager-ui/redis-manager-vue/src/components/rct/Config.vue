@@ -28,10 +28,8 @@
             property="autoAnalyze"
           >
             <template slot-scope="scope">
-              <el-tag size="small" v-if="scope.row.autoAnalyze" type="success"
-                >true</el-tag
-              >
-              <el-tag size="small" v-else type="success">false</el-tag>
+              <el-tag size="small" type="success" effect="dark" v-if="scope.row.autoAnalyze">true</el-tag>
+              <el-tag size="small" v-else type="danger" effect="dark">false</el-tag>
             </template>
           </el-table-column>
           <!-- <el-table-column label="Analyzer" property="analyzer" width="100">

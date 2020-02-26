@@ -168,7 +168,6 @@ public class RDBAnalyzeController {
 	 */
 	@RequestMapping(value = "schedule_detail/{id}", method = RequestMethod.GET)
 	public Result scheduleDetail(@PathVariable("id") Long rdbAnalyzeID) {
-		String clusterName = clusterService.getClusterById(rdbAnalyzeID.intValue()).getClusterName();
 		RDBAnalyze  rdbAnalyze = rdbAnalyzeService.getRDBAnalyzeByPid(rdbAnalyzeID);
 		List<ScheduleDetail> scheduleDetail = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
 		List<ScheduleDetail> result = new ArrayList<>();
@@ -185,7 +184,6 @@ public class RDBAnalyzeController {
 					}
 					scheduleDetails.setProcess((int) (ratio * 100));					
 				}
-				scheduleDetails.setClusterName(clusterName);
 				result.add(scheduleDetails);
 			}
 		}

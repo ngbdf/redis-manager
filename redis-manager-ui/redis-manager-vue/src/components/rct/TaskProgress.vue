@@ -153,7 +153,7 @@ export default {
 
   mounted () {
     let clusterId = this.$route.params.clusterId
-    let clusterName = this.$route.params.clusterName
+    this.clusterName = this.$route.params.clusterName
     this.getAllScheduleDetail(clusterId)
   }
 }
