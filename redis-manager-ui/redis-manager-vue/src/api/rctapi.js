@@ -62,7 +62,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const service = axios.create({
-  timeout: 10000
+  timeout: 120000
 })
 
 service.interceptors.response.use(

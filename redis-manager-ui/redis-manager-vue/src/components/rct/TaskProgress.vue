@@ -117,23 +117,29 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          this.cancelButtonDisabled = true
+          this.loading = true
           cancelAnalyzeTask(clusterId, scheduleID).then(result => {
             if (result.data.canceled) {
-              this.loading = true
+              this.cancelButtonDisabled = true
+              this.$message({
+                type: 'warning',
+                message: 'cancel job success!'
+              })
             } else {
               this.$message({
                 type: 'success',
                 message: 'cancel job has error,Please pay attention to the task status!'
               })
             }
+            this.loading = false
           })
         })
         .catch(() => {
           this.$message({
-            type: 'info',
-            message: 'Cancel'
+            type: 'error',
+            message: 'cancel job has error,please check!'
           })
+          this.loading = false
         })
     }
   },
