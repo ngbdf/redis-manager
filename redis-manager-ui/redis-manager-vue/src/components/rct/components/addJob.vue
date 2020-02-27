@@ -20,8 +20,8 @@
     <el-switch v-model="analyseisJobFrom.autoAnalyze"></el-switch>
   </el-form-item>
     <el-form-item label="Schedule" prop="schedule" v-if="analyseisJobFrom.autoAnalyze">
-      <el-input v-model="analyseisJobFrom.schedule" placeholder="Please schedule" class="input" @change="inputChange"></el-input>
-      <el-tooltip class="item" effect="dark" placement="right">
+      <el-input v-model="analyseisJobFrom.schedule" placeholder="Please input schedule like this: 0 0/1 * * * ? (It is executed every minute)" class="input" @input="inputChange"></el-input>
+      <el-tooltip class="item"  placement="right" effect="light">
         <div slot="content">
           <ul>
             <li v-for="time in scheduleCron " :key="time">{{time}}</li>
@@ -29,7 +29,7 @@
         </div>
         <i class="el-icon-message-solid"></i>
       </el-tooltip>
-      <div><a target="_blank" href="http://cron.qqe2.com/" style="text-decoration:underline;color:blue">Generate the cron expression</a></div>
+      <!-- <div><a target="_blank" href="http://cron.qqe2.com/" style="text-decoration:underline;color:blue">Generate the cron expression</a></div> -->
     </el-form-item>
 
     <el-form-item label="DataPath" prop="dataPath">
@@ -213,6 +213,7 @@ export default {
         this.$nextTick(() => {
           if (newValue !== old && this.edit) {
             this.analyseisJobFrom = newValue
+            this.inputChange(this.analyseisJobFrom.schedule)
           }
         }
         )
@@ -231,7 +232,6 @@ export default {
     }
   },
   mounted () {
-    // this.getRedisClusterList()
   }
 
 }

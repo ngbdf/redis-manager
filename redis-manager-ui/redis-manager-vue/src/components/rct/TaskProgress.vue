@@ -122,16 +122,18 @@ export default {
             if (result.data.canceled) {
               this.cancelButtonDisabled = true
               this.$message({
-                type: 'warning',
+                type: 'success',
                 message: 'cancel job success!'
               })
+              this.loading = false
             } else {
               this.$message({
-                type: 'success',
+                type: 'warning',
                 message: 'cancel job has error,Please pay attention to the task status!'
               })
+              this.loading = false
             }
-            this.loading = false
+            //  this.loading = false
           })
         })
         .catch(() => {

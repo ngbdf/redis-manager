@@ -11,7 +11,7 @@
             label="IsCluster"
           >
             <template slot-scope="scope">
-            <el-tooltip placement="top">
+            <el-tooltip placement="top" effect="light">
               <div slot="content">
                 <span v-if="!JSON.parse(scope.row.analyzeConfig).nodes || JSON.parse(scope.row.analyzeConfig).nodes[0]==='-1'"
                 > All Cluster Nodes</span
@@ -81,15 +81,13 @@
 
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">DataPath:</div>
-                    <div >
-                    {{ConfigDetail.dataPath}}
-                    </div>
+                    <div class="icoFontlist" :title="ConfigDetail.dataPath">{{ConfigDetail.dataPath}}</div>
                   </li>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Custom Prefixes:</div>
-                    <div>
-                      {{ConfigDetail.prefixes}}
-                    </div>
+
+                      <div class="icoFontlist" :title="ConfigDetail.prefixes">{{ConfigDetail.prefixes}}</div>
+
                   </li>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Report:</div>
@@ -98,9 +96,7 @@
                   </li>
                   <li style="padding: 15px 0px; display: flex; borderTop: 1px solid #EEEFF3">
                     <div style="marginRight: 30px;textAlign: right;width: 120px;color:#999999">Mail:</div>
-                    <div >
-                      {{ConfigDetail.mailTo}}
-                    </div>
+                   <div class="icoFontlist" :title="ConfigDetail.mailTo">{{ConfigDetail.mailTo}}</div>
                   </li>
                 </ul>
                  <span slot="footer" class="dialog-footer">

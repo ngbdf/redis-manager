@@ -34,6 +34,7 @@ export default {
     },
     async initCharts () {
       const res = await getPieByType(this.resultId)
+      const type = this.pieType
       this.echartsData = res.data.map(value => {
         return {
           name: value.dataType,
@@ -49,6 +50,7 @@ export default {
           type: 'pie'
         },
         title: {
+
           text: this.pieType === 'count' ? 'Key Count By Type' : 'Key Memory By Type'
         },
         credits: {
@@ -58,10 +60,10 @@ export default {
           shadow: true,
           animation: true,
           formatter () {
-            if (this.pieType === 'count') {
-              return ` ${this.point.name}:<b>${Highcharts.numberFormat(this.point.percentage, 2)}%</b><br/>count:${formatterInput(this.point.y)}`
+            if (type === 'count') {
+              return ` ${this.point.name}:<b>${Highcharts.numberFormat(this.point.percentage, 1)}%</b><br/>count:${formatterInput(this.point.y)}`
             } else {
-              return ` ${this.point.name}:<b>${Highcharts.numberFormat(this.point.percentage, 2)}%</b><br/>memory:${formatBytes(this.point.y)}`
+              return ` ${this.point.name}:<b>${Highcharts.numberFormat(this.point.percentage, 1)}%</b><br/>memory:${formatBytes(this.point.y)}`
             }
           }
         },
@@ -86,6 +88,19 @@ export default {
             data: this.echartsData
           }
         ]
+      }
+    }
+  },
+  watch: {
+    pieType: {
+      immediate: true,
+      handler (newValue, old) {
+        this.$nextTick(() => {
+          if (newValue !== old) {
+            this.pieType = newValue
+          }
+        }
+        )
       }
     }
   },

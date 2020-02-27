@@ -54,30 +54,36 @@ public class RDBAnalyzeController {
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.PUT)
 	@ResponseBody
 	public Result updateRdbAnalyze(@RequestBody RDBAnalyze rdbAnalyze) {
-        if(rdbAnalyze.isAutoAnalyze()){
-            if(taskService.vaildCronExpress(rdbAnalyze.getSchedule())){
-                if(rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)){
-                    try {
-                        taskService.delTask("rdb" + rdbAnalyze.getId());
-                        taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
-                        return Result.successResult("update success!");
-                    } catch (SchedulerException e) {
-                        LOG.error("schedule job update faild!message:{}", e.getMessage());
-                        return Result.failResult("schedule job update faild!");
-                    }
-                }else {
-                    return Result.failResult("update data faild!");
-                }
-            }else{
-                return Result.failResult("cron expression has error,please check!");
-            }
-        }else{
-            if(rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)){
-                return Result.successResult("update success!");
-            }else{
-                return Result.failResult("update data faild!");
-            }
-        }
+		try{
+			taskService.delTask("rdb" + rdbAnalyze.getId());
+			if(rdbAnalyze.isAutoAnalyze()){
+				if(taskService.vaildCronExpress(rdbAnalyze.getSchedule())){
+					if(rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)){
+						try {
+							taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
+							return Result.successResult("update success!");
+						} catch (SchedulerException e) {
+							LOG.error("schedule job update faild!message:{}", e.getMessage());
+							return Result.failResult("schedule job update faild!");
+						}
+					}else {
+						return Result.failResult("update data faild!");
+					}
+				}else{
+					return Result.failResult("cron expression has error,please check!");
+				}
+			}else{
+				if(rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)){
+					return Result.successResult("update success!");
+				}else{
+					return Result.failResult("update data faild!");
+				}
+			}
+		}catch (SchedulerException e){
+			LOG.error("schedule job delete faild!message:{}", e.getMessage());
+			return Result.failResult("schedule job delete faild!");
+		}
+
 	}
 
 	// add
