@@ -1,6 +1,7 @@
 import axios from 'axios'
 import message from '@/utils/message.js'
 import { store } from '@/vuex/store.js'
+import router from '@/router'
 
 /**
  * use RCTAPI or API
@@ -15,6 +16,8 @@ import { store } from '@/vuex/store.js'
  * @param {*} params {}
  */
 function RCTAPI (url, method = 'GET', params = {}) {
+  console.log('user', store.getters.getUser)
+
   return new Promise((resolve, reject) => {
     service({
       method: method,
@@ -32,6 +35,8 @@ function RCTAPI (url, method = 'GET', params = {}) {
     })
   })
 }
+// message.error('user infomation has expried,please login!')
+// router.push({ name: 'login' })
 
 /**
  * eg: deletAnalyze
@@ -76,13 +81,13 @@ service.interceptors.response.use(
     }
   },
   error => {
-    // if (error.response.code === 401) {
-    //   message.warning('Session timeout')
-    //   router.push({ name: 'login' })
-    // } else {
-    //   return Promise.reject(error)
-    // }
-    return Promise.reject(error)
+    if (error.response && (error.response.code === 401 || error.response.status === 404)) {
+      message.warning('user infomation has expried,please login!')
+      router.push({ name: 'login' })
+    }
+    return Promise.reject(new Error('error'))
+
+    // return Promise.reject(error)
   }
 )
 
