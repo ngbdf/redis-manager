@@ -308,9 +308,6 @@ export default {
     text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color:blue;
-    text-decoration:underline;
-    cursor:pointer;
 }
 .icoFontlist{
     width: 225px;
