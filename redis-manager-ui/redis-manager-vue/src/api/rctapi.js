@@ -16,8 +16,6 @@ import router from '@/router'
  * @param {*} params {}
  */
 function RCTAPI (url, method = 'GET', params = {}) {
-  console.log('user', store.getters.getUser)
-
   return new Promise((resolve, reject) => {
     service({
       method: method,
@@ -31,7 +29,11 @@ function RCTAPI (url, method = 'GET', params = {}) {
       resolve(res)
     }).catch(err => {
       // reject(err)
-      message.error(err.message)
+      if (err.response && (err.response.code === 401 || err.response.status === 404)) {
+        message.warning('user infomation has expried,please login!')
+        router.push({ name: 'login' })
+      }
+      return Promise.reject(new Error('error'))
     })
   })
 }
