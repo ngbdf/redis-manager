@@ -319,7 +319,7 @@
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
-                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                        <descriptor>assembly.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>
