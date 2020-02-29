@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="1800" status="WARN">
+
+    <Properties>
+        <Property name="LogLevel" value="${env:LogLevel:-INFO}"/>
+        <Property name="logBasePath" value="${sys:service.log.dir:-logs}"/>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+        <RollingRandomAccessFile name="INFO" fileName="${logBasePath}/info.log"
+                                 filePattern="${logBasePath}/info.log.%d{yyyy-MM-dd}_%i.log"
+                                 bufferedIO="true" bufferSize="8192">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5p [%t] %m%n"/>
+            <filters>
+                <ThresholdFilter level="${LogLevel}" onMatch="NEUTRAL" onMismatch="DENY"/>
+            </filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" maxRandomDelay="60"/>
+                <SizeBasedTriggeringPolicy size="512 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9">
+                <Delete basePath="${logBasePath}" maxDepth="1">
+                    <IfFileName glob="*info*"/>
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="ERROR" fileName="${logBasePath}/error.log"
+                                 filePattern="${logBasePath}/error.log.%d{yyyy-MM-dd}.log"
+                                 bufferedIO="true" bufferSize="8192">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5p [%t] %m%n"/>
+            <filters>
+                <ThresholdFilter level="ERROR" onMatch="NEUTRAL" onMismatch="DENY"/>
+            </filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" maxRandomDelay="60"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${logBasePath}" maxDepth="1">
+                    <IfFileName glob="*"/>
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
