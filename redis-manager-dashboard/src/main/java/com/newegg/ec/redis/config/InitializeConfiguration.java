@@ -2,6 +2,7 @@ package com.newegg.ec.redis.config;
 
 import com.newegg.ec.redis.dao.*;
 import com.newegg.ec.redis.entity.Group;
+import com.newegg.ec.redis.entity.RDBAnalyze;
 import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertChannelDao;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRecordDao;
