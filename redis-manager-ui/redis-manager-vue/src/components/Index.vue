@@ -91,11 +91,7 @@
                 <i class="el-icon-discover"></i>
                 <span slot="title">Dashboard</span>
               </el-menu-item>
-              <el-menu-item index="2" @click="toInstallation()" v-if="currentUser.userRole < 2">
-                <i class="el-icon-setting"></i>
-                <span slot="title">Installation</span>
-              </el-menu-item>
-              <el-submenu index="3" v-if="currentUser.userRole < 2">
+              <el-submenu index="2" v-if="currentUser.userRole < 2">
                 <template slot="title">
                   <i class="el-icon-bell"></i>
                   <span>Alert Manage</span>
