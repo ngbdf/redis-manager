@@ -6,23 +6,7 @@ server:
   tomcat.uri-encoding: UTF-8
   port: 8182
 
-#eureka:
-#  client:
-#    registerWithEureka: false # 单点的时候设置为 false 禁止注册自身
-#    fetchRegistry: false
-#    serviceUrl:
-#      defaultZone: http://localhost:8182/eureka
-#  server:
-#    enableSelfPreservation: false
-#    evictionIntervalTimerInMs: 4000
-#  dashboard:
-#    path: /eureka-ui
-
 eureka:
-#  server:
-#    enable-self-preservation: false
-#    eviction-interval-timer-in-ms: 10000
-#    max-threads-for-peer- replication: 0
   dashboard:
     path: /eureka-ui
   client:
@@ -40,16 +24,20 @@ spring:
       charset: UTF-8
   datasource:
     # 必填，与数据库同名
-    database: redis_manager2_dev
+    database: redis_manager
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://xxxx:3306/redis_manager2_dev?useUnicode=true&characterEncoding=utf-8
-    username: root
-    password: 123456
-    druid:
-      initial-size: 0
-      max-active: 10
-      min-idle: 0
-      max-wait: 10000
+    url: jdbc:mysql://localhost:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8
+    username:
+    password:
+    hikari:
+      pool-name: redis-manager-hikaricp
+      minimum-idle: 10
+      idle-timeout: 180000
+      maximum-pool-size: 50
+      auto-commit: true
+      max-lifetime: 600000
+      connection-timeout: 30000
+      connection-test-query: 'SELECT 1'
   freemarker:
     template-loader-path:
       - classpath:/templates/
@@ -97,6 +85,7 @@ redis-manager:
       humpback-host: http://%s:8500/dockerapi/v2/
   alert:
     data-keep-days: 15
+
 rct:
   email:
     smtp:
