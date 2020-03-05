@@ -104,8 +104,9 @@ public interface IRdbAnalyzeResult {
             "  `result` longtext DEFAULT NULL," +
             "  `analyze_config` longtext DEFAULT NULL," +
             "  `group_id` int(11) NOT NULL," +
+            "  `done` tinyint(1) DEFAULT 0," +
             "  PRIMARY KEY (`id`)" +
-            ") ENGINE=InnoDB AUTO_INCREMENT=204 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;")
+            ") ENGINE=InnoDB AUTO_INCREMENT=807 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;")
     void createRdbAnalyzeResult();
 
 
