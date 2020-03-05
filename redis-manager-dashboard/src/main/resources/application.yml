@@ -1,10 +1,18 @@
 server:
+  tomcat.uri-encoding: UTF-8
   compression:
     enabled: true
-    mime-types: application/json
-    min-response-size: 1024
-  tomcat.uri-encoding: UTF-8
+    mime-types:
+      - image/png
+      - image/jpeg
+      - image/jpg
+      - text/html
+      - application/javascript
+      - text/css
+      - application/octet-stream
+      - application/json
   port: 8182
+
 
 eureka:
   dashboard:
