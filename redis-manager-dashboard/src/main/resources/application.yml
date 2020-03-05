@@ -42,7 +42,7 @@ spring:
     # 必填，与数据库同名
     database: redis_manager2_dev
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.16.236.126:3306/redis_manager2_dev?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://xxxx:3306/redis_manager2_dev?useUnicode=true&characterEncoding=utf-8
     username: root
     password: 123456
     druid:
@@ -99,8 +99,8 @@ redis-manager:
     data-keep-days: 15
 rct:
   email:
-    smtp: 172.16.35.30
-    from-name: redismanager@newegg.com
+    smtp:
+    from-name:
     user-name:
     password:
     subject: Redis Analyze Report
