@@ -2,5 +2,5 @@
 /* eslint-disable indent */
 
 export default {
-    baseUrl: ""
+    baseUrl: "/"
 }

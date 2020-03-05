@@ -16,6 +16,10 @@ import Profile from '@/components/user/Profile'
 import DataOperation from '@/components/tool/DataOperation'
 import NotFound from '@/components/error/404'
 import EditHistory from '@/components/history/EditHistory'
+import Config from '@/components/rct/Config'
+import TaskProgress from '@/components/rct/TaskProgress'
+import JobList from '@/components/rct/JobList'
+import JobResultDetail from '@/components/rct/JobResultDetail'
 
 import API from '@/api/api.js'
 import { store } from '@/vuex/store.js'
@@ -102,6 +106,24 @@ const router = new Router({
           name: 'data-operation',
           path: '/data-operation/group/:groupId',
           component: DataOperation
+        }, {
+          name: 'Config',
+          path: '/rct/config',
+          component: Config
+
+        }, {
+          name: 'TaskProgress',
+          path: '/rct/taskProgress/:clusterId',
+          component: TaskProgress
+
+        }, {
+          name: 'jobList',
+          path: '/rct/jobList',
+          component: JobList
+        }, {
+          name: 'jobResultDetail',
+          path: '/rct/jobResultDetail',
+          component: JobResultDetail
         }
       ]
     },

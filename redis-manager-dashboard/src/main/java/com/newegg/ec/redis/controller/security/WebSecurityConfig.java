@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +44,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         InterceptorRegistration addInterceptor = registry.addInterceptor(getSecurityInterceptor());
         // 排除配置
         addInterceptor.excludePathPatterns("/")
+                .excludePathPatterns("/eureka-ui")
                 .excludePathPatterns("/index")
                 .excludePathPatterns("/login")
                 .excludePathPatterns("/user/login")
@@ -55,6 +57,11 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/logo.ico");
         // 拦截配置
         addInterceptor.addPathPatterns("/**");
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/eureka/**").addResourceLocations("classpath:/static/eureka/");
     }
 
     public class SecurityInterceptor implements HandlerInterceptor {

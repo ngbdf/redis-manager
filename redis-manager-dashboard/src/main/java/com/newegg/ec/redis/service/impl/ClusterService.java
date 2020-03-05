@@ -380,4 +380,8 @@ public class ClusterService implements IClusterService {
         }
     }
 
+
+    public Cluster selectByid(Integer id){
+        return clusterDao.selectClusterById(id);
+    }
 }

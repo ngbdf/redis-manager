@@ -11,7 +11,10 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.unit.DataSize;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.async.TimeoutCallableProcessingInterceptor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -110,6 +113,14 @@ public class SystemConfig implements WebMvcConfigurer {
     @Bean
     public TimeoutCallableProcessingInterceptor timeoutInterceptor() {
         return new TimeoutCallableProcessingInterceptor();
+    }
+
+    @Bean
+    public RestTemplate buildRestTemplate() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setReadTimeout(10000);
+        factory.setConnectTimeout(15000);
+        return  new RestTemplate(factory);
     }
 
     @Bean

@@ -6,6 +6,13 @@ import com.newegg.ec.redis.entity.User;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertChannelDao;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRecordDao;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRuleDao;
+import com.newegg.ec.redis.schedule.RDBScheduleJob;
+import com.newegg.ec.redis.service.IRdbAnalyzeResultService;
+import com.newegg.ec.redis.service.IRdbAnalyzeService;
+import com.newegg.ec.redis.service.impl.ScheduleTaskService;
+import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -22,6 +29,7 @@ import java.util.List;
 @Configuration
 public class InitializeConfiguration implements ApplicationListener<ContextRefreshedEvent> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(InitializeConfiguration.class);
     @Autowired
     private IGroupDao groupDao;
 
@@ -55,6 +63,15 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
     @Autowired
     private ISentinelMastersDao sentinelMastersDao;
 
+    @Autowired
+    private IRdbAnalyzeService rdbAnalyzeService;
+
+    @Autowired
+    private IRdbAnalyzeResultService rdbAnalyzeResultService;
+
+    @Autowired
+    private ScheduleTaskService scheduleTaskService;
+
     @Value("${redis-manager.auth.user-name:admin}")
     private String userName;
 
@@ -65,6 +82,20 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         createTables();
         initDefaultAuth();
+        initRDBJob();
+    }
+
+    private void initRDBJob() {
+        List<RDBAnalyze> rdbAnalyzes = rdbAnalyzeService.selectALL();
+        for (RDBAnalyze rdbAnalyze : rdbAnalyzes) {
+            try {
+                if (rdbAnalyze.isAutoAnalyze()) {
+                    scheduleTaskService.addTask(rdbAnalyze, RDBScheduleJob.class);
+                }
+            } catch (SchedulerException e) {
+                LOG.error("schedule job run faild!message:{}", e.getMessage());
+            }
+        }
     }
 
     private void createTables() {
@@ -79,6 +110,8 @@ public class InitializeConfiguration implements ApplicationListener<ContextRefre
         redisNodeDao.createRedisNodeTable();
         operationLogDao.createLogTable();
         sentinelMastersDao.createSentinelMastersTable();
+        rdbAnalyzeService.createRdbAnalyzeTable();
+        rdbAnalyzeResultService.createRdbAnalyzeResultTable();
     }
 
     @Transactional

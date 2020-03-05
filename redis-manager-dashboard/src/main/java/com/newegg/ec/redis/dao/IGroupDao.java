@@ -3,7 +3,6 @@ package com.newegg.ec.redis.dao;
 import com.newegg.ec.redis.entity.Group;
 import org.apache.ibatis.annotations.*;
 
-import javax.ws.rs.DELETE;
 import java.util.List;
 
 /**

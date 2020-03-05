@@ -5,6 +5,9 @@ import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.MigrateParams;
@@ -24,7 +27,7 @@ import static com.newegg.ec.redis.util.RedisUtil.*;
  * @date 2019/7/22
  */
 public class RedisClient implements IRedisClient {
-
+    private static final Logger logger = LoggerFactory.getLogger(RedisClient.class);
     private static final String OK = "OK";
 
     private static final String PONG = "PONG";
@@ -214,6 +217,11 @@ public class RedisClient implements IRedisClient {
             String[] item = SignUtil.splitBySpace(line);
             String nodeId = item[0].trim();
             String ipPort = item[1];
+            //noaddr 可知有此标记的节点属于无用节点
+            if (line.contains("noaddr")){
+               // logger.warn("find a useless node: {}",line);
+                continue;
+            }
             Set<HostAndPort> hostAndPortSet = RedisUtil.nodesToHostAndPortSet(SignUtil.splitByAite(ipPort)[0]);
             HostAndPort hostAndPort = hostAndPortSet.iterator().next();
             String flags = item[2];
@@ -693,6 +701,352 @@ public class RedisClient implements IRedisClient {
                 jedis.close();
             }
         } catch (Exception ignored) {
+        }
+    }
+    /**
+     * 获取该Redis所有节点IP信息
+     *
+     * @return
+     */
+    public  Map<String, String> nodesIP(Cluster cluster) {
+        Map<String, String> nodesIP = new HashMap<>();
+        if ("cluster".equals(cluster.getRedisMode())) {
+            nodesIP = this.clusterNodesIP(cluster);
+        } else {
+            nodesIP = this.standAloneNodesIP(cluster);
+        }
+        return nodesIP;
+    }
+
+    /**
+     * 获取该stand alone Redis所有节点IP信息
+     *
+     * @return
+     */
+    public Map<String, String> standAloneNodesIP(Cluster cluster) {
+        Map<String, String> nodesIPs = new HashMap<>();
+        List<String> nodesList = this.standAloneRedisNodes(cluster);
+        for(String node : nodesList) {
+            String host = node.split(":")[0];
+            nodesIPs.put(host, host);
+        }
+        return nodesIPs;
+    }
+
+    /**
+     * 获取该RedisCluster所有节点IP信息
+     *
+     * @return
+     */
+    public Map<String, String> clusterNodesIP(Cluster cluster) {
+        String redisUrl = cluster.getNodes().split(",")[0];
+        String redisHost = redisUrl.split(":")[0];
+        int redisPort = Integer.parseInt(redisUrl.split(":")[1]);
+        JedisCluster jedisCluster = new JedisCluster(new HostAndPort(redisHost,redisPort));
+        Map<String, JedisPool> nodes = jedisCluster.getClusterNodes();
+        Map<String, String> clusterNodesIP = new HashMap<>();
+        nodes.forEach((k, v) -> {
+            String host = k.split(":")[0];
+            clusterNodesIP.put(host, host);
+        });
+        return clusterNodesIP;
+    }
+
+    public List<String> standAloneRedisNodes(Cluster cluster) {
+        String redisUrl = cluster.getNodes().split(",")[0];
+        String redisHost = redisUrl.split(":")[0];
+        int redisPort = Integer.parseInt(redisUrl.split(":")[1]);
+        Jedis satandAloneJedis = new Jedis(redisHost,redisPort);
+        if (StringUtils.isNotBlank(cluster.getRedisPassword())) {
+            satandAloneJedis.auth(cluster.getRedisPassword());
+        }
+        Set<String> allNodes = new HashSet<>();
+        allNodes.add(redisUrl);
+        String res = satandAloneJedis.info("Replication");
+        String[] resArr = res.split("\n");
+        // master or slave
+        String role = resArr[1].split(":")[1];
+        if("slave".equals(role.trim())){
+            String masterHost = resArr[2].split(":")[1].trim();
+            String masterPort = resArr[3].split(":")[1].trim();
+            allNodes.add(masterHost+":"+masterPort);
+            satandAloneJedis = new Jedis(masterHost,Integer.parseInt(masterPort));
+            if (StringUtils.isNotBlank(cluster.getRedisPassword())) {
+                satandAloneJedis.auth(cluster.getRedisPassword());
+            }
+            res= satandAloneJedis.info("Replication");
+            resArr = res.split("\n");
+        }
+
+        for(String str : resArr) {
+            if(str.contains("ip") && str.contains("port")) {
+                String[] hostAndportArr = str.split(":")[1].split(",");
+                String host = hostAndportArr[0].substring(hostAndportArr[0].indexOf("=")+1);;
+                String port = hostAndportArr[1].substring(hostAndportArr[1].indexOf("=")+1);
+
+                if(!allNodes.contains(host+":"+port)) {
+                    allNodes.add(host+":"+port);
+                }
+
+                if(!allNodes.contains(host+":"+redisPort)) {
+                    allNodes.add(host+":"+redisPort);
+                }
+            }
+        }
+        List<String>nodes = new ArrayList<>(allNodes);
+        return nodes;
+    }
+
+    public Map<String, List<String>> nodesMap(Cluster cluster) {
+        Map<String, List<String>> nodes = new HashMap<>();
+        if ("cluster".equals(cluster.getRedisMode())) {
+            nodes = this.clusterNodesMap(cluster);
+        } else {
+            nodes = this.standAloneNodesMap(cluster);
+        }
+        return nodes;
+    }
+
+    public Map<String, List<String>> standAloneNodesMap(Cluster cluster) {
+        Map<String, List<String>> nodes = new HashMap<>();
+        String redisUrl = cluster.getNodes().split(",")[0];
+        String redisHost = redisUrl.split(":")[0];
+        int redisPort = Integer.parseInt(redisUrl.split(":")[1]);
+        Jedis satandAloneJedis = new Jedis(redisHost,redisPort);
+        if (StringUtils.isNotBlank(cluster.getRedisPassword())) {
+            satandAloneJedis.auth(cluster.getRedisPassword());
+        }
+        String res = satandAloneJedis.info("Replication");
+        String[] resArr = res.split("\n");
+        // master or slave
+        String role = resArr[1].split(":")[1];
+
+        // slave前提下的master信息
+        String masterHost = "";
+        String masterPort = "";
+
+        int flag = 0;
+
+        if("slave".equals(role.trim())) {
+            masterHost = resArr[2].split(":")[1].trim();
+            masterPort = resArr[3].split(":")[1].trim();
+            satandAloneJedis = new Jedis(masterHost,Integer.parseInt(masterPort));
+            if (StringUtils.isNotBlank(cluster.getRedisPassword())) {
+                satandAloneJedis.auth(cluster.getRedisPassword());
+            }
+            res= satandAloneJedis.info("Replication");
+            resArr = res.split("\n");
+            flag = 1;
+        }
+        List<String> slaves = new ArrayList<>();
+        for(String str : resArr) {
+            if(str.contains("ip") && str.contains("port")) {
+                String[] hostAndportArr = str.split(":")[1].split(",");
+                String host = hostAndportArr[0].substring(hostAndportArr[0].indexOf("=")+1);;
+                String port = hostAndportArr[1].substring(hostAndportArr[1].indexOf("=")+1);
+                slaves.add(host+":"+port);
+                if(flag == 0) {
+                    nodes.put(redisHost+":"+redisPort, slaves);
+                } else {
+                    nodes.put(masterHost+":"+masterPort, slaves);
+                }
+            }
+        }
+        return nodes;
+    }
+
+    /**
+     * 获取该RedisCluster所有Master对应slave 信息 <k,v> k=master ip:port v=[{slave
+     * ip:port},{slave ip:port}]
+     *
+     * @return
+     */
+    public Map<String, List<String>> clusterNodesMap(Cluster cluster) {
+        String redisUrl = cluster.getNodes().split(",")[0];
+        String redisHost = redisUrl.split(":")[0];
+        int redisPort = Integer.parseInt(redisUrl.split(":")[1]);
+        JedisCluster jedisCluster = new JedisCluster(new HostAndPort(redisHost,redisPort));
+        Map<String, JedisPool> nodes = jedisCluster.getClusterNodes();
+        Map<String, List<String>> clusterNodes = new HashMap<>();
+
+        String nodesStr = "";
+        for (String key : nodes.keySet()) {
+            JedisPool jedisPool = nodes.get(key);
+            Jedis jedisTemp = jedisPool.getResource();
+            nodesStr = jedisTemp.clusterNodes();
+            jedisTemp.close();
+            break;
+        }
+
+        String[] nodesArray = nodesStr.split("\n");
+        List<RedisNodeTemp> redisNodes = new ArrayList<>();
+
+        Map<String, String> temp = new HashMap<>();
+        for (String node : nodesArray) {
+            if (node.indexOf("fail") > 0) {
+                continue;
+            }
+            RedisNodeTemp redisNodeTemp = new RedisNodeTemp();
+            String[] detail = node.split(" ");
+            if (node.contains("master")) {
+                temp.put(detail[0], detail[1]);
+                redisNodeTemp.setRole(0);
+                redisNodeTemp.setPid("0");
+            } else {
+                redisNodeTemp.setRole(1);
+                redisNodeTemp.setPid(detail[3]);
+            }
+
+            redisNodeTemp.setHostAndPort(detail[1]);
+            redisNodeTemp.setId(detail[0]);
+            redisNodes.add(redisNodeTemp);
+
+        }
+
+        for (RedisNodeTemp node : redisNodes) {
+            if (node.getRole() == 0) {
+                continue;
+            }
+            if (temp.containsKey(node.getPid())) {
+                String key = temp.get(node.getPid());
+                if (clusterNodes.containsKey(key)) {
+                    List<String> slaves = clusterNodes.get(key);
+                    List<String> slaves2 = new ArrayList<>();
+                    slaves.add(node.getHostAndPort());
+                    key = key.split("@")[0];
+                    for (int i = 0;i<slaves.size();i++){
+                        slaves2.add(slaves.get(i).split("@")[0]);
+                    }
+                    clusterNodes.put(key, slaves2);
+                } else {
+                    List<String> slaves = new ArrayList<>();
+                    List<String> slaves2 = new ArrayList<>();
+                    slaves.add(node.getHostAndPort());
+                    key = key.split("@")[0];
+                    for (int i = 0;i<slaves.size();i++){
+                        slaves2.add(slaves.get(i).split("@")[0]);
+                    }
+                    clusterNodes.put(key, slaves2);
+                }
+            }
+        }
+        return clusterNodes;
+    }
+
+    /**
+     * 根据<master:slaves>获取执行分析任务ports规则
+     * 即获取其中一个slave,尽量保持均衡在不同机器上
+     *
+     * @param clusterNodesMap
+     * @return <ip:ports>
+     */
+    public static Map<String, Set<String>> generateAnalyzeRule(Map<String, List<String>> clusterNodesMap) {
+
+        // 通过该map存储不同IP分配的数量，按照规则，优先分配数量最小的IP
+        Map<String, Integer> staticsResult = new HashMap<>();
+        Map<String, Set<String>> generateRule = new HashMap<>();
+
+        // 此处排序是为了将slave数量最小的优先分配
+        List<Map.Entry<String, List<String>>> sortList = new LinkedList<>(clusterNodesMap.entrySet());
+        Collections.sort(sortList, new Comparator<Map.Entry<String, List<String>>>() {
+            @Override
+            public int compare(Map.Entry<String, List<String>> o1, Map.Entry<String, List<String>> o2) {
+                return o1.getValue().size() - o2.getValue().size();
+            }
+        });
+
+        for (Map.Entry<String, List<String>> entry : sortList) {
+            List<String> slaves = entry.getValue();
+            boolean isSelected = false;
+            String tempPort = null;
+            String tempIP = null;
+            int num = 0;
+            for (String slave : slaves) {
+                String ip = slave.split(":")[0];
+                String port = slave.split(":")[1];
+                // 统计组里面不存在的IP优先分配
+                if (!staticsResult.containsKey(ip)) {
+                    staticsResult.put(ip, 1);
+                    Set<String> generatePorts = generateRule.get(ip);
+                    if (generatePorts == null) {
+                        generatePorts = new HashSet<>();
+                    }
+                    generatePorts.add(port);
+                    generateRule.put(ip, generatePorts);
+                    isSelected = true;
+                    break;
+                } else {
+                    // 此处是为了求出被使用最少的IP
+                    Integer staticsNum = staticsResult.get(ip);
+                    if (num == 0) {
+                        num = staticsNum;
+                        tempPort = port;
+                        tempIP = ip;
+                        continue;
+                    }
+                    if (staticsNum < num) {
+                        tempPort = port;
+                        tempIP = ip;
+                        num = staticsNum;
+                    }
+                }
+
+            }
+
+            // 如果上面未分配,则选择staticsResult中数值最小的那个slave
+            if (!isSelected) {
+                if (slaves != null && slaves.size() > 0) {
+                    if (tempPort != null) {
+                        Set<String> generatePorts = generateRule.get(tempIP);
+                        if (generatePorts == null) {
+                            generatePorts = new HashSet<>();
+                        }
+                        generatePorts.add(tempPort);
+                        generateRule.put(tempIP, generatePorts);
+                        staticsResult.put(tempIP, staticsResult.get(tempIP) + 1);
+                    }
+                }
+            }
+        }
+        return generateRule;
+    }
+    class RedisNodeTemp {
+        private String id;
+        private String pid;
+        private String hostAndPort;
+        // 0:master 1:slave
+        private int role;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getPid() {
+            return pid;
+        }
+
+        public void setPid(String pid) {
+            this.pid = pid;
+        }
+
+        public String getHostAndPort() {
+            return hostAndPort;
+        }
+
+        public void setHostAndPort(String hostAndPort) {
+            this.hostAndPort = hostAndPort;
+        }
+
+        public int getRole() {
+            return role;
+        }
+
+        public void setRole(int role) {
+            this.role = role;
         }
     }
 }

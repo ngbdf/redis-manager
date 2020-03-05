@@ -1,19 +1,33 @@
 server:
-  # 开启压缩
   compression:
     enabled: true
-    mime-types:
-      - image/png
-      - image/jpeg
-      - image/jpg
-      - text/html
-      - application/javascript
-      - text/css
-      - application/octet-stream
-      - application/json
+    mime-types: application/json
     min-response-size: 1024
   tomcat.uri-encoding: UTF-8
-  port: ${SERVER_PORT:8182}
+  port: 8182
+
+#eureka:
+#  client:
+#    registerWithEureka: false # 单点的时候设置为 false 禁止注册自身
+#    fetchRegistry: false
+#    serviceUrl:
+#      defaultZone: http://localhost:8182/eureka
+#  server:
+#    enableSelfPreservation: false
+#    evictionIntervalTimerInMs: 4000
+#  dashboard:
+#    path: /eureka-ui
+
+eureka:
+#  server:
+#    enable-self-preservation: false
+#    eviction-interval-timer-in-ms: 10000
+#    max-threads-for-peer- replication: 0
+  dashboard:
+    path: /eureka-ui
+  client:
+    register-with-eureka: false
+    fetch-registry: false
 
 spring:
   application:
@@ -26,28 +40,20 @@ spring:
       charset: UTF-8
   datasource:
     # 必填，与数据库同名
-    database: ${DATASOURCE_DATABASE:redis_manager}
+    database: redis_manager2_dev
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DATASOURCE_URL:jdbc:mysql://127.0.0.1:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8}
-    username: ${DATASOURCE_USERNAME:root}
-    password: ${DATASOURCE_PASSWORD:xxx}
-    #hikari数据库连接池
-    hikari:
-      pool-name: redis-manager-hikaricp
-      # 最小空闲连接数量
-      minimum-idle: 10
-      # 空闲连接存活最大时间，默认600000（10分钟）
-      idle-timeout: 180000
-      # 连接池最大连接数，默认是10
-      maximum-pool-size: 50
-      # 此属性控制从池返回的连接的默认自动提交行为,默认值：true
-      auto-commit: true
-      # 此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
-      max-lifetime: 600000
-      # 数据库连接超时时间,默认30秒，即30000
-      connection-timeout: 30000
-      connection-test-query: 'SELECT 1'
-
+    url: jdbc:mysql://10.16.236.126:3306/redis_manager2_dev?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 123456
+    druid:
+      initial-size: 0
+      max-active: 10
+      min-idle: 0
+      max-wait: 10000
+  freemarker:
+    template-loader-path:
+      - classpath:/templates/
+    prefer-file-system-access: false
 mybatis:
   configuration:
     mapUnderscoreToCamelCase: true
@@ -56,8 +62,8 @@ mybatis:
 # redis manager configuration
 redis-manager:
   auth:
-    user-name: ${RM_AUTH_USERNAME:admin}
-    password: ${RM_AUTH_PASSWORD:admin}
+    user-name: admin
+    password: admin
     # avatar(absolute director)
     avatar-path: /data/avatar/
     authorization:
@@ -91,3 +97,21 @@ redis-manager:
       humpback-host: http://%s:8500/dockerapi/v2/
   alert:
     data-keep-days: 15
+rct:
+  email:
+    smtp: 172.16.35.30
+    from-name: redismanager@newegg.com
+    user-name:
+    password:
+    subject: Redis Analyze Report
+  dev:
+    enable: true
+    rdb:
+      port: 9002
+
+logging:
+  level:
+    com:
+      netflix:
+        eureka: OFF
+        discovery: OFF
