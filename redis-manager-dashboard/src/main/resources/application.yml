@@ -43,11 +43,11 @@ spring:
       charset: UTF-8
   datasource:
     # 必填，与数据库同名
-    database: ${DATASOURCE_DATABASE:redis_manager3}
+    database: ${DATASOURCE_DATABASE:redis_manager}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DATASOURCE_URL:jdbc:mysql://10.16.236.126:3306/redis_manager3?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8}
+    url: ${DATASOURCE_URL:jdbc:mysql://xxxx:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8}
     username: ${DATASOURCE_USERNAME:root}
-    password: ${DATASOURCE_PASSWORD:123456}
+    password: ${DATASOURCE_PASSWORD:xxxxxx}
     #hikari数据库连接池
     hikari:
       pool-name: redis-manager-hikaricp
@@ -110,8 +110,8 @@ redis-manager:
     data-keep-days: 15
   rct:
     email:
-      smtp: 172.16.35.30
-      from-name: redismanager@newegg.com
+      smtp:
+      from-name:
       user-name:
       password:
       subject: Redis Analyze Report
