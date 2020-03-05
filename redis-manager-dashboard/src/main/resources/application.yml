@@ -11,10 +11,15 @@ server:
       - text/css
       - application/octet-stream
       - application/json
-  port: 8182
+    min-response-size: 1024
+  port: ${SERVER_PORT:8182}
 
 
 eureka:
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 10000
+    max-threads-for-peer-replication: 0
   dashboard:
     path: /eureka-ui
   client:
@@ -22,6 +27,12 @@ eureka:
     fetch-registry: false
 
 spring:
+  devtools:
+    restart:
+      enabled: false
+  freemarker:
+    template-loader-path: classpath:/templates/
+    prefer-file-system-access: false
   application:
     name: redis-manager
   resources:
@@ -32,34 +43,38 @@ spring:
       charset: UTF-8
   datasource:
     # 必填，与数据库同名
-    database: redis_manager
+    database: ${DATASOURCE_DATABASE:redis_manager3}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8
-    username:
-    password:
+    url: ${DATASOURCE_URL:jdbc:mysql://10.16.236.126:3306/redis_manager3?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:123456}
+    #hikari数据库连接池
     hikari:
       pool-name: redis-manager-hikaricp
+      # 最小空闲连接数量
       minimum-idle: 10
+      # 空闲连接存活最大时间，默认600000（10分钟）
       idle-timeout: 180000
+      # 连接池最大连接数，默认是10
       maximum-pool-size: 50
+      # 此属性控制从池返回的连接的默认自动提交行为,默认值：true
       auto-commit: true
+      # 此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
       max-lifetime: 600000
+      # 数据库连接超时时间,默认30秒，即30000
       connection-timeout: 30000
       connection-test-query: 'SELECT 1'
-  freemarker:
-    template-loader-path:
-      - classpath:/templates/
-    prefer-file-system-access: false
 mybatis:
   configuration:
     mapUnderscoreToCamelCase: true
+
 
 # http://download.redis.io/releases/
 # redis manager configuration
 redis-manager:
   auth:
-    user-name: admin
-    password: admin
+    user-name: ${RM_AUTH_USERNAME:admin}
+    password: ${RM_AUTH_PASSWORD:admin}
     # avatar(absolute director)
     avatar-path: /data/avatar/
     authorization:
@@ -93,18 +108,17 @@ redis-manager:
       humpback-host: http://%s:8500/dockerapi/v2/
   alert:
     data-keep-days: 15
-
-rct:
-  email:
-    smtp:
-    from-name:
-    user-name:
-    password:
-    subject: Redis Analyze Report
-  dev:
-    enable: true
-    rdb:
-      port: 9002
+  rct:
+    email:
+      smtp: 172.16.35.30
+      from-name: redismanager@newegg.com
+      user-name:
+      password:
+      subject: Redis Analyze Report
+    dev:
+      enable: false
+      rdb:
+        port: 9002
 
 logging:
   level:

@@ -9,25 +9,25 @@ import org.springframework.context.annotation.Configuration;
  * @date 1/9/2020 09:35
  */
 @Configuration
-@ConfigurationProperties("rct")
+@ConfigurationProperties("redis-manager.rct")
 public class RCTConfig {
 
-    @Value("${rct.elasticsearch.rest.urls:''}")
+    @Value("${redis-manager.rct.elasticsearch.rest.urls:''}")
     private String esUrls;
 
-    @Value("${rct.elasticsearch.slowlog.index:''}")
+    @Value("${redis-manager.rct.elasticsearch.slowlog.index:''}")
     private String slowlogIndexName;
 
-    @Value("${rct.elasticsearch.client-list.index:''}")
+    @Value("${redis-manager.rct.elasticsearch.client-list.index:''}")
     private String clientIndex;
-    @Value("${rct.elasticsearch.enable:false}")
+    @Value("${redis-manager.rct.elasticsearch.enable:false}")
     private boolean elasticsearchEnable;
-    @Value("${rct.rdb.generate.enable:false}")
+    @Value("${redis-manager.rct.rdb.generate.enable:false}")
     private boolean rdbGenerateEnable;
-    @Value("${rct.dev.enable:false}")
+    @Value("${redis-manager.rct.dev.enable:false}")
     private boolean devEnable;
 
-    @Value("${rct.dev.rdb.port:9002}")
+    @Value("${redis-manager.rct.dev.rdb.port:9002}")
     private String devRDBPort;
 
     private Email email;
