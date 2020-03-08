@@ -11,6 +11,8 @@ import java.util.List;
  */
 public interface IRedisNodeService {
 
+    List<RedisNode> getMergeRedisNodeListByClusterId(Integer clusterId);
+
     List<RedisNode> getRedisNodeListByClusterId(Integer clusterId);
 
     RedisNode getRedisNodeById(Integer redisNodeId);

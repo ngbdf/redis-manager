@@ -5,7 +5,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
-import com.newegg.ec.redis.client.RedisClusterClient;
 import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
@@ -13,7 +12,9 @@ import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.*;
-import com.newegg.ec.redis.util.*;
+import com.newegg.ec.redis.util.NetworkUtil;
+import com.newegg.ec.redis.util.RedisUtil;
+import com.newegg.ec.redis.util.SSH2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,11 @@ import static com.newegg.ec.redis.entity.NodeRole.MASTER;
 import static com.newegg.ec.redis.entity.NodeRole.SLAVE;
 import static com.newegg.ec.redis.util.RedisConfigUtil.MASTER_AUTH;
 import static com.newegg.ec.redis.util.RedisConfigUtil.REQUIRE_PASS;
-import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
-import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
+import static com.newegg.ec.redis.util.RedisUtil.REDIS_MODE_CLUSTER;
 import static com.newegg.ec.redis.util.SignUtil.COLON;
 import static com.newegg.ec.redis.util.SignUtil.COMMAS;
-import static com.newegg.ec.redis.util.TimeUtil.*;
+import static com.newegg.ec.redis.util.TimeUtil.FIVE_SECONDS;
+import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
 import static javax.management.timer.Timer.ONE_MINUTE;
 import static javax.management.timer.Timer.ONE_SECOND;
 
@@ -113,7 +114,7 @@ public class InstallationTemplate {
         InstallationWebSocketHandler.appendLog(clusterName, "Start initializing...");
         logger.info(clusterName + " start initializing...");
         boolean initSuccess;
-        if (Objects.equals(redisMode, CLUSTER)) {
+        if (Objects.equals(redisMode, REDIS_MODE_CLUSTER)) {
             initSuccess = initCluster(installationParam);
         } else {
             initSuccess = initStandalone(installationParam);
@@ -492,7 +493,7 @@ public class InstallationTemplate {
         long start = System.currentTimeMillis();
         while (timeout < ONE_MINUTE) {
             try {
-                if (Objects.equals(redisMode, CLUSTER)) {
+                if (Objects.equals(redisMode, REDIS_MODE_CLUSTER)) {
                     redisNodeListWithInfo = redisClient.clusterNodes();
                 } else {
                     redisNodeListWithInfo = redisClient.nodes();
@@ -574,9 +575,16 @@ public class InstallationTemplate {
         });
     }
 
+    /**
+     * TODO: 如果某个节点更新密码时down掉，更新密码后又启动，则会有问题
+     *
+     * @param redisPassword
+     * @param cluster
+     * @return
+     */
     private String updateRedisPassword(String redisPassword, Cluster cluster) {
         StringBuffer result = new StringBuffer();
-        List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
         redisNodeList.forEach(redisNode -> {
             try {
                 RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode);
@@ -636,7 +644,6 @@ public class InstallationTemplate {
     }
 
     private boolean saveToDB(InstallationParam installationParam) {
-
         // 获取连接节点
         Cluster cluster = installationParam.getCluster();
         String nodes = generateConnectionNodes(cluster);
@@ -644,8 +651,10 @@ public class InstallationTemplate {
         cluster.setInstallationType(0);
         waitAfterOperation(ONE_SECOND);
         clusterService.addCluster(cluster);
+        // 用户定义的拓扑图
         List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
-        List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
+        // 真正的拓扑图
+        List<RedisNode> realRedisNodeList = redisService.getRealRedisNodeList(cluster, false);
         List<RedisNode> redisNodes = redisNodeService.mergeRedisNode(realRedisNodeList, redisNodeList);
         Integer groupId = cluster.getGroupId();
         Integer clusterId = cluster.getClusterId();

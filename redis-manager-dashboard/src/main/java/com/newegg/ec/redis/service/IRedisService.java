@@ -18,6 +18,8 @@ public interface IRedisService {
 
     Map<String, String> getNodeInfo(HostAndPort hostAndPort, String redisPassword);
 
+    Map<String, String> getNodeInfo(HostAndPort hostAndPort, String redisPassword, String section);
+
     /**
      * Get keyspace info
      * <p>
@@ -41,12 +43,13 @@ public interface IRedisService {
     Map<String, Long> getDatabase(Cluster cluster);
 
     /**
-     * Get node list
+     * Get real redis node list
      *
      * @param cluster
+     * @param needState 是否需要 runStatus 和 linkState
      * @return
      */
-    List<RedisNode> getRedisNodeList(Cluster cluster);
+    List<RedisNode> getRealRedisNodeList(Cluster cluster, boolean needState);
 
     /**
      * Get node list

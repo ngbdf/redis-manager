@@ -55,23 +55,23 @@ public interface IClusterDao {
     Integer insertCluster(Cluster cluster);
 
     @Update("UPDATE cluster SET " +
-            "cluster_token = #{clusterToken}, user_id = #{userId}, cluster_name = #{clusterName}, " +
-            "nodes = #{nodes}, redis_mode = #{redisMode}, os = #{os}, " +
-            "redis_version = #{redisVersion}, initialized = #{initialized}, " +
-            "total_used_memory = #{totalUsedMemory}, total_keys = #{totalKeys}, total_expires = #{totalExpires}, db_size = #{dbSize}, " +
-            "cluster_state = #{clusterState}, cluster_slots_assigned = #{clusterSlotsAssigned}, cluster_slots_ok = #{clusterSlotsOk}, " +
+            "cluster_name = #{clusterName}, nodes = #{nodes}, redis_password = #{redisPassword}, " +
+            "installation_environment = #{installationEnvironment}, update_time = NOW() " +
+            "WHERE cluster_id = #{clusterId}")
+    int updateClusterMeta(Cluster cluster);
+
+    @Update("UPDATE cluster SET " +
+            "redis_mode = #{redisMode}, os = #{os}, " +
+            "redis_version = #{redisVersion}, total_used_memory = #{totalUsedMemory}, total_keys = #{totalKeys}, total_expires = #{totalExpires}, " +
+            "db_size = #{dbSize}, cluster_state = #{clusterState}, cluster_slots_assigned = #{clusterSlotsAssigned}, cluster_slots_ok = #{clusterSlotsOk}, " +
             "cluster_slots_pfail = #{clusterSlotsPfail}, cluster_slots_fail = #{clusterSlotsFail}, cluster_known_nodes = #{clusterKnownNodes}, " +
             "cluster_size = #{clusterSize}, sentinel_ok = #{sentinelOk}, sentinel_masters = #{sentinelMasters}, master_ok = #{masterOk}, " +
-            "redis_password = #{redisPassword}, installation_environment = #{installationEnvironment}, " +
             "update_time = NOW() " +
             "WHERE cluster_id = #{clusterId}")
     int updateCluster(Cluster cluster);
 
     @Update("UPDATE cluster SET cluster_state = #{clusterState}, update_time = NOW() WHERE cluster_id = #{clusterId}")
     int updateClusterState(Cluster cluster);
-
-    @Update("UPDATE cluster SET redis_password = #{redisPassword}, update_time = NOW() WHERE cluster_id = #{clusterId}")
-    int updateRedisPassword(@Param("clusterId") Integer clusterId, @Param("redisPassword") String redisPassword);
 
     @Update("UPDATE cluster SET nodes = #{nodes}, update_time = NOW() WHERE cluster_id = #{clusterId}")
     int updateNodes(@Param("clusterId") Integer clusterId, @Param("nodes") String nodes);

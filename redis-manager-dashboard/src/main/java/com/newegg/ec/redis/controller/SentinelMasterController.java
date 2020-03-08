@@ -2,19 +2,20 @@ package com.newegg.ec.redis.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.aop.annotation.OperationLog;
-import com.newegg.ec.redis.entity.*;
+import com.newegg.ec.redis.entity.OperationObjectType;
+import com.newegg.ec.redis.entity.OperationType;
+import com.newegg.ec.redis.entity.Result;
+import com.newegg.ec.redis.entity.SentinelMaster;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.service.ISentinelMastersService;
-import com.newegg.ec.redis.util.RedisNodeInfoUtil;
-import com.newegg.ec.redis.util.SignUtil;
+import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.ws.rs.PathParam;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class SentinelMasterController {
             Integer port = Integer.parseInt(sentinelMasterInfoByName.get("port"));
             sentinelMaster.setHost(ip);
             sentinelMaster.setPort(port);
-            sentinelMaster.setLastMasterNode(ip + SignUtil.COLON + port);
+            sentinelMaster.setLastMasterNode(RedisUtil.getNodeString(ip, port));
             boolean saveResult = sentinelMastersService.updateSentinelMaster(sentinelMaster);
             return saveResult ? Result.successResult() : Result.failResult();
         }

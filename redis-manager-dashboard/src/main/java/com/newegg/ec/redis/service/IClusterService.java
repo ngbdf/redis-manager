@@ -21,9 +21,11 @@ public interface IClusterService {
 
     Cluster getClusterByName(String clusterName);
 
+    Cluster completeClusterInfo(Cluster cluster);
+
     boolean addCluster(Cluster cluster);
 
-    boolean updateCluster(Cluster cluster);
+    boolean updateClusterMeta(Cluster cluster);
 
     boolean updateClusterState(Cluster cluster);
 

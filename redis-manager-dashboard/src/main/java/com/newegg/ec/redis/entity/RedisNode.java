@@ -12,6 +12,10 @@ import java.sql.Timestamp;
  */
 public class RedisNode {
 
+    public static final String CONNECTED = "connected";
+
+    public static final String UNCONNECTED = "unconnected";
+
     /**
      * mysql table id
      */

@@ -2,7 +2,6 @@ package com.newegg.ec.redis.client;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.*;
-import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import redis.clients.jedis.*;
@@ -181,7 +180,6 @@ public class RedisClient implements IRedisClient {
             }
             if (!Strings.isNullOrEmpty(slaveIp) && !Strings.isNullOrEmpty(slavePort)) {
                 RedisNode redisNode = new RedisNode(slaveIp, Integer.parseInt(slavePort), NodeRole.SLAVE);
-                redisNode.setLinkState("connected");
                 redisNode.setFlags(NodeRole.SLAVE.getValue());
                 nodeList.add(redisNode);
             }
@@ -191,7 +189,6 @@ public class RedisClient implements IRedisClient {
             masterNode.setNodeRole(NodeRole.MASTER);
             masterNode.setHost(masterHost);
             masterNode.setPort(masterPort);
-            masterNode.setLinkState("connected");
             masterNode.setFlags(NodeRole.MASTER.getValue());
             nodeList.add(masterNode);
         }
@@ -260,13 +257,12 @@ public class RedisClient implements IRedisClient {
 
     @Override
     public List<RedisNode> sentinelNodes(Set<HostAndPort> hostAndPorts) {
-        List<RedisNode> redisNodeList = new ArrayList<>();
+        List<RedisNode> redisNodeList = new ArrayList<>(hostAndPorts.size());
         hostAndPorts.forEach(hostAndPort -> {
             RedisNode redisNode = RedisNode.masterRedisNode(hostAndPort);
-            boolean run = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
-            redisNode.setLinkState(run ? "connected" : "unconnected");
             redisNode.setNodeId(hostAndPort.toString());
-            redisNode.setFlags("master");
+            redisNode.setFlags(NodeRole.MASTER.getValue());
+            redisNode.setNodeRole(NodeRole.MASTER);
             redisNodeList.add(redisNode);
         });
         return redisNodeList;

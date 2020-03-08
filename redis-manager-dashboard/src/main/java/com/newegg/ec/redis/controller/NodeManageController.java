@@ -3,8 +3,6 @@ package com.newegg.ec.redis.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.aop.annotation.OperationLog;
-import com.newegg.ec.redis.client.RedisClient;
-import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.IClusterService;
@@ -22,8 +20,8 @@ import redis.clients.jedis.HostAndPort;
 import java.util.*;
 
 import static com.newegg.ec.redis.util.RedisConfigUtil.*;
-import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
-import static com.newegg.ec.redis.util.TimeUtil.TEN_SECONDS;
+import static com.newegg.ec.redis.util.RedisUtil.REDIS_MODE_CLUSTER;
+import static com.newegg.ec.redis.util.TimeUtil.FIVE_SECONDS;
 
 /**
  * @author Jay.H.Zou
@@ -49,7 +47,6 @@ public class NodeManageController {
 
     /**
      * 在此处理 node 之间的关系
-     * 设置 inCluster, runStatus
      *
      * @param clusterId
      * @return
@@ -61,7 +58,7 @@ public class NodeManageController {
         if (cluster == null) {
             return Result.failResult().setMessage("Get cluster failed.");
         }
-        List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
         List<RedisNode> redisNodeSorted = redisNodeService.sortRedisNodeList(redisNodeList);
         return Result.successResult(redisNodeSorted);
     }
@@ -69,8 +66,8 @@ public class NodeManageController {
     @RequestMapping(value = "/getAllNodeListWithStatus/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAllNodeListWithStatus(@PathVariable("clusterId") Integer clusterId) {
-        List<RedisNode> redisNodeSorted = redisNodeService.getRedisNodeListByClusterId(clusterId);
-        return Result.successResult(redisNodeSorted);
+        List<RedisNode> redisNodeList = redisNodeService.getMergeRedisNodeListByClusterId(clusterId);
+        return Result.successResult(redisNodeService.sortRedisNodeList(redisNodeList));
     }
 
     @RequestMapping(value = "/getNodeInfo", method = RequestMethod.POST)
@@ -119,8 +116,8 @@ public class NodeManageController {
     public Result getConfigCurrentValue(@RequestBody JSONObject jsonObject) {
         Cluster cluster = jsonObject.getObject("cluster", Cluster.class);
         String configKey = jsonObject.getString("configKey");
-        List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
-        List<JSONObject> configList = new ArrayList<>();
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
+        List<JSONObject> configList = new ArrayList<>(redisNodeList.size());
         redisNodeList.forEach(redisNode -> {
             Map<String, String> configMap = redisService.getConfig(redisNode, cluster.getRedisPassword(), configKey);
             JSONObject config = new JSONObject();
@@ -178,7 +175,7 @@ public class NodeManageController {
     @OperationLog(type = OperationType.FORGET, objType = OperationObjectType.NODE)
     public Result forget(@RequestBody List<RedisNode> redisNodeList) {
         Result result = clusterOperate(redisNodeList, (cluster, redisNode) -> {
-            String node = redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
+            String node = RedisUtil.getNodeString(redisNode);
             String nodes = cluster.getNodes();
             if (nodes.contains(node)) {
                 logger.warn("I can't forget " + node + ", because it in the database");
@@ -326,7 +323,7 @@ public class NodeManageController {
                 }
                 if (seed != null) {
                     String oneResult = null;
-                    if (Objects.equals(redisMode, CLUSTER)) {
+                    if (Objects.equals(redisMode, REDIS_MODE_CLUSTER)) {
                         oneResult = redisService.clusterMeet(cluster, seed, redisNode);
                     } else {
                         redisService.standaloneReplicaOf(cluster, seed, redisNode);
@@ -335,14 +332,12 @@ public class NodeManageController {
                         boolean exist = redisNodeService.existRedisNode(redisNode);
                         if (!exist) {
                             try {
-                                Thread.sleep(TEN_SECONDS);
+                                Thread.sleep(FIVE_SECONDS);
                             } catch (InterruptedException e) {
                             }
-                            List<RedisNode> redisNodes = redisService.getRedisNodeList(cluster);
+                            List<RedisNode> redisNodes = redisService.getRealRedisNodeList(cluster, false);
                             redisNodes.forEach(node -> {
                                 if (RedisUtil.equals(node, redisNode)) {
-                                    node.setClusterId(cluster.getClusterId());
-                                    node.setGroupId(cluster.getGroupId());
                                     redisNodeService.addRedisNode(node);
                                 }
                             });
@@ -393,7 +388,7 @@ public class NodeManageController {
         redisNodeList.forEach(redisNode -> {
             try {
                 String[] nodeArr = SignUtil.splitByCommas(cluster.getNodes());
-                String node = redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
+                String node = RedisUtil.getNodeString(redisNode);
                 if (nodeArr.length > 1) {
                     StringBuilder newNodes = new StringBuilder();
                     for (String nodeItem : nodeArr) {
@@ -434,7 +429,7 @@ public class NodeManageController {
         redisNodeList.forEach(redisNode -> {
             try {
                 String[] nodeArr = SignUtil.splitByCommas(cluster.getNodes());
-                String node = redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
+                String node = RedisUtil.getNodeString(redisNode);
                 if (nodeArr.length > 1) {
                     StringBuilder newNodes = new StringBuilder();
                     for (String nodeItem : nodeArr) {
