@@ -85,7 +85,12 @@ public class EmailAlert implements IAlertService {
 
     private JavaMailSender getJavaMailSender(AlertChannel alertChannel) {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(alertChannel.getSmtpHost());
+        String smtpHost = alertChannel.getSmtpHost();
+        String[] hostAndPort = smtpHost.split(SignUtil.COLON);
+        mailSender.setHost(hostAndPort[0]);
+        if (hostAndPort.length > 1) {
+            mailSender.setPort(Integer.parseInt(hostAndPort[0]));
+        }
         mailSender.setUsername(alertChannel.getEmailUserName());
         mailSender.setPassword(alertChannel.getEmailPassword());
         Properties props = mailSender.getJavaMailProperties();
