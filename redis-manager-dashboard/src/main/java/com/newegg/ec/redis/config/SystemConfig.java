@@ -23,8 +23,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.servlet.MultipartConfigElement;
 import java.io.File;
 
-import static com.newegg.ec.redis.util.RedisUtil.CLUSTER;
-import static com.newegg.ec.redis.util.RedisUtil.STANDALONE;
+import static com.newegg.ec.redis.util.RedisUtil.REDIS_MODE_CLUSTER;
+import static com.newegg.ec.redis.util.RedisUtil.REDIS_MODE_STANDALONE;
 import static com.newegg.ec.redis.util.TimeUtil.FIVE_MINUTES;
 
 /**
@@ -77,9 +77,9 @@ public class SystemConfig implements WebMvcConfigurer {
         }
         File file = new File(configPath);
         if (!file.exists()) {
-            File clusterConfPath = new File(configPath + CLUSTER);
+            File clusterConfPath = new File(configPath + REDIS_MODE_CLUSTER);
             clusterConfPath.mkdirs();
-            File standaloneConfPath = new File(configPath + STANDALONE);
+            File standaloneConfPath = new File(configPath + REDIS_MODE_STANDALONE);
             standaloneConfPath.mkdirs();
         }
 

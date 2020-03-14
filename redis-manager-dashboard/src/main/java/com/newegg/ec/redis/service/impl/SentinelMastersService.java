@@ -1,19 +1,21 @@
 package com.newegg.ec.redis.service.impl;
 
 import com.google.common.base.Strings;
-import com.newegg.ec.redis.client.IRedisClient;
 import com.newegg.ec.redis.dao.ISentinelMastersDao;
 import com.newegg.ec.redis.entity.SentinelMaster;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.service.ISentinelMastersService;
-import com.newegg.ec.redis.util.SignUtil;
+import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Jay.H.Zou
@@ -55,7 +57,7 @@ public class SentinelMastersService implements ISentinelMastersService {
             while (dbIterator.hasNext()) {
                 SentinelMaster dbSentinelMaster = dbIterator.next();
                 if (Objects.equals(realSentinelMaster.getName(), dbSentinelMaster.getName())) {
-                    String masterNode = dbSentinelMaster.getHost() + SignUtil.COLON + dbSentinelMaster.getPort();
+                    String masterNode = RedisUtil.getNodeString(dbSentinelMaster.getHost(), dbSentinelMaster.getPort());
                     boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), masterNode);
                     realSentinelMaster.setSentinelMasterId(dbSentinelMaster.getSentinelMasterId());
                     realSentinelMaster.setMasterChanged(masterNodeChanged);
@@ -71,7 +73,7 @@ public class SentinelMastersService implements ISentinelMastersService {
         }
         dbSentinelMasterList.forEach(dbSentinelMaster -> {
             dbSentinelMaster.setMonitor(false);
-            String masterNode = dbSentinelMaster.getHost() + SignUtil.COLON + dbSentinelMaster.getPort();
+            String masterNode = RedisUtil.getNodeString(dbSentinelMaster.getHost(), dbSentinelMaster.getPort());
             boolean masterNodeChanged = !Objects.equals(dbSentinelMaster.getLastMasterNode(), masterNode);
             dbSentinelMaster.setMasterChanged(masterNodeChanged);
             sentinelMasterList.add(dbSentinelMaster);
@@ -116,7 +118,7 @@ public class SentinelMastersService implements ISentinelMastersService {
     @Override
     public boolean addSentinelMaster(SentinelMaster sentinelMaster) {
         try {
-            sentinelMaster.setLastMasterNode(sentinelMaster.getHost() + SignUtil.COLON + sentinelMaster.getPort());
+            sentinelMaster.setLastMasterNode(RedisUtil.getNodeString(sentinelMaster.getHost(), sentinelMaster.getPort()));
             return sentinelMastersDao.insertSentinelMaster(sentinelMaster) > 0;
         } catch (Exception e) {
             logger.error("Add sentinel master failed. ", e);

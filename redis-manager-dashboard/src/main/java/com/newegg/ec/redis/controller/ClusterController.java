@@ -86,11 +86,7 @@ public class ClusterController {
             if (!addClusterResult) {
                 return Result.failResult();
             }
-            List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
-            realRedisNodeList.forEach(redisNode -> {
-                redisNode.setGroupId(cluster.getGroupId());
-                redisNode.setClusterId(cluster.getClusterId());
-            });
+            List<RedisNode> realRedisNodeList = redisService.getRealRedisNodeList(cluster, true);
             redisNodeService.addRedisNodeList(realRedisNodeList);
             return Result.successResult();
         } catch (Exception e) {
@@ -117,7 +113,7 @@ public class ClusterController {
             result.setMessage("Cluster name exist!");
             return result;
         }
-        boolean result = clusterService.updateCluster(cluster);
+        boolean result = clusterService.updateClusterMeta(cluster);
         if (!result) {
             return Result.failResult();
         }

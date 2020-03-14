@@ -1,8 +1,6 @@
 package com.newegg.ec.redis.service.impl;
 
 import com.google.common.base.Strings;
-import com.newegg.ec.redis.client.RedisClient;
-import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
@@ -12,6 +10,7 @@ import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.HumpbackNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.MachineNodeOperation;
 import com.newegg.ec.redis.service.*;
+import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisClusterInfoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.newegg.ec.redis.client.RedisClient.SENTINEL;
 import static com.newegg.ec.redis.client.RedisClient.SERVER;
 import static com.newegg.ec.redis.plugin.install.entity.InstallationEnvironment.*;
 import static com.newegg.ec.redis.util.RedisNodeInfoUtil.*;
@@ -114,32 +114,63 @@ public class ClusterService implements IClusterService {
         }
     }
 
+    /**
+     * Complete cluster info
+     *
+     * @param cluster
+     * @return
+     */
+    @Override
+    public Cluster completeClusterInfo(Cluster cluster) {
+        boolean fillBaseInfoResult = fillBaseInfo(cluster);
+        if (!fillBaseInfoResult) {
+            cluster.setClusterState(Cluster.ClusterState.UNKNOWN);
+        }
+        String redisMode = cluster.getRedisMode();
+        if (Strings.isNullOrEmpty(redisMode) || Objects.equals(Cluster.UNKNOWN_VALUE, redisMode)) {
+            logger.error("Fill base info failed, cluster name = " + cluster.getClusterName());
+            return cluster;
+        }
+        boolean fillInfoResult = false;
+        if (!Objects.equals(redisMode, REDIS_MODE_SENTINEL)) {
+            fillTotalData(cluster);
+        }
+        if (Objects.equals(redisMode, REDIS_MODE_CLUSTER)) {
+            fillInfoResult = fillInfoForCluster(cluster);
+        } else if (Objects.equals(redisMode, REDIS_MODE_STANDALONE)) {
+            fillInfoResult = fillInfoForStandalone(cluster);
+        } else if (Objects.equals(redisMode, REDIS_MODE_SENTINEL)) {
+            fillInfoResult = fillInfoForSentinel(cluster);
+        }
+        if (!fillInfoResult) {
+            logger.error("Complete cluster info failed, cluster name = " + cluster.getClusterName());
+            cluster.setClusterState(Cluster.ClusterState.BAD);
+        }
+        return cluster;
+    }
+
 
     /**
+     * Add cluster to database
+     *
      * @param cluster
      * @return
      */
     @Transactional
     @Override
     public boolean addCluster(Cluster cluster) {
-        boolean fillResult = fillCluster(cluster);
-        if (!fillResult) {
+        final Cluster completedCluster = completeClusterInfo(cluster);
+        String redisMode = completedCluster.getRedisMode();
+        int row = clusterDao.insertCluster(completedCluster);
+        if (row == 0) {
             return false;
         }
-        String redisMode = cluster.getRedisMode();
-        if (Objects.equals(redisMode, STANDALONE) || Objects.equals(redisMode, SENTINEL)) {
-            cluster.setClusterState(Cluster.ClusterState.HEALTH);
-        }
-        int row = clusterDao.insertCluster(cluster);
-        if (row == 0) {
-            throw new RuntimeException("Save cluster failed.");
-        }
-        nodeInfoService.createNodeInfoTable(cluster.getClusterId());
-        if (Objects.equals(redisMode, SENTINEL)) {
-            List<SentinelMaster> sentinelMasters = redisService.getSentinelMasters(cluster);
+        nodeInfoService.createNodeInfoTable(completedCluster.getClusterId());
+        if (Objects.equals(redisMode, REDIS_MODE_SENTINEL)) {
+            List<SentinelMaster> sentinelMasters = redisService.getSentinelMasters(completedCluster);
             sentinelMasters.forEach(sentinelMaster -> {
-                sentinelMaster.setClusterId(cluster.getClusterId());
-                sentinelMaster.setGroupId(cluster.getGroupId());
+                sentinelMaster.setClusterId(completedCluster.getClusterId());
+                sentinelMaster.setGroupId(completedCluster.getGroupId());
                 sentinelMastersService.addSentinelMaster(sentinelMaster);
             });
         }
@@ -147,13 +178,11 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
-    public boolean updateCluster(Cluster cluster) {
+    public boolean updateClusterMeta(Cluster cluster) {
         try {
-            fillCluster(cluster);
-            int row = clusterDao.updateCluster(cluster);
-            return row > 0;
+            return clusterDao.updateClusterMeta(cluster) > 0;
         } catch (Exception e) {
-            logger.error("Update cluster failed.", e);
+            logger.error("Update cluster failed, cluster name = " + cluster.getClusterName(), e);
             return false;
         }
     }
@@ -218,7 +247,7 @@ public class ClusterService implements IClusterService {
         }
         Cluster cluster = getClusterById(clusterId);
         String redisMode = cluster.getRedisMode();
-        if (SENTINEL.equalsIgnoreCase(redisMode)) {
+        if (REDIS_MODE_SENTINEL.equalsIgnoreCase(redisMode)) {
             sentinelMastersService.deleteSentinelMasterByClusterId(clusterId);
         }
         clusterDao.deleteClusterById(clusterId);
@@ -227,40 +256,16 @@ public class ClusterService implements IClusterService {
         return true;
     }
 
-    private boolean fillCluster(Cluster cluster) {
-        fillBaseInfo(cluster);
-        String redisMode = cluster.getRedisMode();
-        if (Strings.isNullOrEmpty(redisMode)) {
-            logger.error("Fill base info failed, " + cluster);
-            return false;
-        }
-        if(!Objects.equals(redisMode, SENTINEL)) {
-            fillTotalData(cluster);
-        }
-        if (Objects.equals(redisMode, CLUSTER)) {
-            if (!fillClusterInfo(cluster)) {
-                logger.error("Fill cluster info failed, " + cluster);
-                return false;
-            }
-        } else if (Objects.equals(redisMode, STANDALONE)) {
-            fillStandaloneInfo(cluster);
-        } else if (Objects.equals(redisMode, SENTINEL)) {
-            fillSentinelInfo(cluster);
-        }
-        return true;
-    }
-
     /**
      * @param cluster
      * @return
      */
-    private boolean fillClusterInfo(Cluster cluster) {
+    private boolean fillInfoForCluster(Cluster cluster) {
         try {
             Map<String, String> clusterInfo = redisService.getClusterInfo(cluster);
             if (clusterInfo == null) {
-                logger.warn("Cluster info is empty.");
-                cluster.setClusterState(Cluster.ClusterState.BAD);
-                return true;
+                logger.error("Cluster info is empty, cluster name = " + cluster.getClusterName());
+                return false;
             }
             Cluster clusterInfoObj = RedisClusterInfoUtil.parseClusterInfoToObject(clusterInfo);
             cluster.setClusterState(clusterInfoObj.getClusterState());
@@ -272,15 +277,19 @@ public class ClusterService implements IClusterService {
             cluster.setClusterKnownNodes(clusterInfoObj.getClusterKnownNodes());
             return true;
         } catch (Exception e) {
-            logger.error("Fill cluster info failed, " + cluster, e);
+            logger.error("Parse cluster info to object failed, cluster name = " + cluster.getClusterName(), e);
             return false;
         }
     }
 
-    private void fillStandaloneInfo(Cluster cluster) {
-        List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
+    private boolean fillInfoForStandalone(Cluster cluster) {
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
+        if (redisNodeList.isEmpty()) {
+            return false;
+        }
         cluster.setClusterSize(1);
         cluster.setClusterKnownNodes(redisNodeList.size());
+        return true;
     }
 
     /**
@@ -290,18 +299,25 @@ public class ClusterService implements IClusterService {
      *
      * @param cluster
      */
-    private void fillSentinelInfo(Cluster cluster) {
+    private boolean fillInfoForSentinel(Cluster cluster) {
         try {
-            List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
+            List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
             cluster.setClusterKnownNodes(redisNodeList.size());
-
             cluster.setSentinelOk(redisNodeList.size());
             Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(hostAndPorts);
-            Map<String, String> sentinelInfo = redisClient.getInfo(RedisClient.SENTINEL);
-            int sentinelMasters = Integer.parseInt(sentinelInfo.get(SENTINEL_MASTERS));
+            Map<String, String> sentinelInfo = null;
+            for (HostAndPort hostAndPort : hostAndPorts) {
+                sentinelInfo = redisService.getNodeInfo(hostAndPort, null, SENTINEL);
+                if (sentinelInfo != null) {
+                    break;
+                }
+            }
+            // 无法获取 sentinel info
+            if (sentinelInfo == null) {
+                return false;
+            }
+            Integer sentinelMasters = Integer.parseInt(sentinelInfo.get(SENTINEL_MASTERS));
             cluster.setSentinelMasters(sentinelMasters);
-
             AtomicInteger masterOk = new AtomicInteger();
             sentinelInfo.forEach((key, val) -> {
                 // master0:name=master,status=ok,address=10.16.50.219:16379,slaves=3,sentinels=6
@@ -311,10 +327,12 @@ public class ClusterService implements IClusterService {
             });
             cluster.setMasterOk(masterOk.get());
             cluster.setSentinelOk(getSentinelOkNumber(hostAndPorts));
-            redisClient.close();
+            return true;
         } catch (Exception e) {
-            logger.error("Fill redis base info failed, " + cluster.getClusterName(), e);
+            logger.error("Fill redis base info failed, cluster name = " + cluster.getClusterName(), e);
+            return false;
         }
+
     }
 
     /**
@@ -324,33 +342,51 @@ public class ClusterService implements IClusterService {
      * @return
      */
     private int getSentinelOkNumber(Set<HostAndPort> hostAndPorts) {
-        AtomicInteger sentinelOk = new AtomicInteger();
+        int sentinelOk = 0;
         for (HostAndPort hostAndPort : hostAndPorts) {
-            try {
-                RedisClientFactory.buildRedisClient(hostAndPort, null);
-                sentinelOk.incrementAndGet();
-            } catch (Exception e) {
-                logger.warn("Sentinel node is down, please check.", e);
+            boolean telnet = NetworkUtil.telnet(hostAndPort.getHost(), hostAndPort.getPort());
+            if (telnet) {
+                sentinelOk++;
+            } else {
+                logger.error("Sentinel node is down, please check, " + hostAndPort);
             }
         }
-        return sentinelOk.get();
+        return sentinelOk;
     }
 
-    private void fillBaseInfo(Cluster cluster) {
-        try {
-            String nodes = cluster.getNodes();
-            RedisClient redisClient = RedisClientFactory.buildRedisClient(nodesToHostAndPort(nodes), cluster.getRedisPassword());
-            Map<String, String> serverInfo = redisClient.getInfo(SERVER);
-            // Server
-            cluster.setOs(serverInfo.get(OS));
-            cluster.setRedisMode(serverInfo.get(REDIS_MODE));
-            cluster.setRedisVersion(serverInfo.get(REDIS_VERSION));
-            redisClient.close();
-        } catch (Exception e) {
-            logger.error("Fill redis base info failed, " + cluster.getClusterName(), e);
+    /**
+     * 注意：默认所有节点的版本一致
+     * 寻找一个节点获取集群的基本信息
+     *
+     * @param cluster
+     */
+    private boolean fillBaseInfo(Cluster cluster) {
+        String nodes = cluster.getNodes();
+        Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(nodes);
+        Map<String, String> serverInfo = null;
+        for (HostAndPort hostAndPort : hostAndPorts) {
+            serverInfo = redisService.getNodeInfo(hostAndPort, cluster.getRedisPassword(), SERVER);
+            if (serverInfo != null) {
+                break;
+            }
         }
+        if (serverInfo == null) {
+            logger.error("Fill redis base info failed, cluster name = " + cluster.getClusterName());
+            return false;
+        }
+        cluster.setOs(serverInfo.get(OS));
+        cluster.setRedisMode(serverInfo.get(REDIS_MODE));
+        cluster.setRedisVersion(serverInfo.get(REDIS_VERSION));
+        return true;
     }
 
+    /**
+     * total keys
+     * total expires
+     * total used memory
+     *
+     * @param cluster
+     */
     private void fillTotalData(Cluster cluster) {
         Map<String, Map<String, Long>> keyspaceInfoMap = redisService.getKeyspaceInfo(cluster);
         cluster.setDbSize(keyspaceInfoMap.size());
