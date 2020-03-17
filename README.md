@@ -29,7 +29,7 @@ reasonduan/redis-manager
 [redis-manager-2.0](https://github.com/ngbdf/redis-manager/releases/download/redis-manager-2.2.0/redis-manager-2.2.0.tar.gz)
 
 # 联系方式
-> 您在使用产品的过程中如果遇到问题或者发现需要改进的地方可以通过以下两种方式直接联系我们或 Pull Request。
+> 您在使用产品的过程中如果遇到问题或者发现需要改进的地方可以通过以下方式直接联系我们或 Pull Request。
 
 Redis Manager 钉钉交流群  
 
