@@ -30,10 +30,6 @@ reasonduan/redis-manager
 
 # 联系方式
 > 您在使用产品的过程中如果遇到问题或者发现需要改进的地方可以通过以下两种方式直接联系我们或 Pull Request。
- 
-Redis Manager 微信交流群 
-
-<img src="./documents/contact/wechat.jpg" width="200px"/>
 
 Redis Manager 钉钉交流群  
 
