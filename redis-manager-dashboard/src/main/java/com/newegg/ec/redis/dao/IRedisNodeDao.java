@@ -36,7 +36,8 @@ public interface IRedisNodeDao {
     int insertRedisNodeList(@Param("redisNodeList") List<RedisNode> redisNodeList);
 
     @Update("UPDATE redis_node SET master_id = #{masterId}, node_role = #{nodeRole}, flags = #{flags}, " +
-            "link_state = #{linkState}, slot_range = #{slotRange}, update_time = NOW()")
+            "link_state = #{linkState}, slot_range = #{slotRange}, slot_number = #{slotNumber}, update_time = NOW() " +
+            "WHERE cluster_id = #{clusterId} AND node_id = #{nodeId}")
     int updateRedisNode(RedisNode redisNode);
 
     @Delete("DELETE FROM redis_node WHERE cluster_id = #{clusterId}")

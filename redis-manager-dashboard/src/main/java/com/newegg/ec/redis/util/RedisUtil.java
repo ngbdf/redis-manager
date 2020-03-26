@@ -22,11 +22,11 @@ import static com.newegg.ec.redis.util.SignUtil.MINUS;
  */
 public class RedisUtil {
 
-    public static final String STANDALONE = "standalone";
+    public static final String REDIS_MODE_STANDALONE = "standalone";
 
-    public static final String CLUSTER = "cluster";
+    public static final String REDIS_MODE_CLUSTER = "cluster";
 
-    public static final String SENTINEL = "sentinel";
+    public static final String REDIS_MODE_SENTINEL = "sentinel";
 
     /**
      * nodes 相关
@@ -172,6 +172,10 @@ public class RedisUtil {
 
     public static String getNodeString(RedisNode redisNode) {
         return redisNode.getHost() + SignUtil.COLON + redisNode.getPort();
+    }
+
+    public static String getNodeString(String host, int port) {
+        return host + SignUtil.COLON + port;
     }
 
     public static String generateContainerName(String clusterName, int port) {

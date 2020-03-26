@@ -10,8 +10,6 @@ import com.newegg.ec.redis.service.IRedisNodeService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.NetworkUtil;
 import com.newegg.ec.redis.util.RedisUtil;
-import com.newegg.ec.redis.util.SignUtil;
-import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import static com.newegg.ec.redis.entity.NodeRole.MASTER;
-import static com.newegg.ec.redis.entity.NodeRole.UNKNOWN;
+import static com.newegg.ec.redis.entity.RedisNode.CONNECTED;
+import static com.newegg.ec.redis.entity.RedisNode.UNCONNECTED;
 
 /**
  * @author Jay.H.Zou
@@ -41,16 +40,25 @@ public class RedisNodeService implements IRedisNodeService {
     private IRedisService redisService;
 
     @Override
-    public List<RedisNode> getRedisNodeListByClusterId(Integer clusterId) {
+    public List<RedisNode> getMergeRedisNodeListByClusterId(Integer clusterId) {
         Cluster cluster = clusterService.getClusterById(clusterId);
         try {
-            List<RedisNode> realRedisNodeList = redisService.getRedisNodeList(cluster);
-            List<RedisNode> dbRedisNodeList = redisNodeDao.selectRedisNodeListByClusterId(clusterId);
-            List<RedisNode> redisNodeList = mergeRedisNode(realRedisNodeList, dbRedisNodeList);
-            return sortRedisNodeList(redisNodeList);
+            List<RedisNode> realRedisNodeList = redisService.getRealRedisNodeList(cluster, false);
+            List<RedisNode> dbRedisNodeList = getRedisNodeListByClusterId(clusterId);
+            return mergeRedisNode(realRedisNodeList, dbRedisNodeList);
         } catch (Exception e) {
             logger.error("Get redis node list failed, cluster: " + cluster.getClusterName(), e);
-            return null;
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<RedisNode> getRedisNodeListByClusterId(Integer clusterId) {
+        try {
+            return redisNodeDao.selectRedisNodeListByClusterId(clusterId);
+        } catch (Exception e) {
+            logger.error("Get redis node by cluster id failed.", e);
+            return new ArrayList<>();
         }
     }
 
@@ -83,11 +91,11 @@ public class RedisNodeService implements IRedisNodeService {
      * @param dbRedisNodeList
      * @return
      */
+    @Override
     public List<RedisNode> mergeRedisNode(List<RedisNode> realRedisNodeList, List<RedisNode> dbRedisNodeList) {
         List<RedisNode> redisNodeList = new ArrayList<>();
         realRedisNodeList.forEach(realRedisNode -> {
             realRedisNode.setInCluster(true);
-            realRedisNode.setRunStatus(Objects.equals(realRedisNode.getLinkState(), "connected"));
             if (dbRedisNodeList != null && !dbRedisNodeList.isEmpty()) {
                 dbRedisNodeList.forEach(dbRedisNode -> {
                     if (RedisUtil.equals(dbRedisNode, realRedisNode)) {
@@ -111,16 +119,16 @@ public class RedisNodeService implements IRedisNodeService {
                 }
             }
         }
-        if (dbRedisNodeList.isEmpty()) {
-            return redisNodeList;
-        }
         dbRedisNodeList.forEach(redisNode -> {
             redisNode.setInCluster(false);
-            boolean run = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
-            redisNode.setRunStatus(run);
-            redisNode.setLinkState("unconnected");
             redisNodeList.add(redisNode);
         });
+        // set state
+        for (RedisNode redisNode : realRedisNodeList) {
+            boolean telnet = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
+            redisNode.setRunStatus(telnet);
+            redisNode.setLinkState(telnet ? CONNECTED : UNCONNECTED);
+        }
         return redisNodeList;
     }
 
@@ -136,7 +144,7 @@ public class RedisNodeService implements IRedisNodeService {
         try {
             redisNodeList.forEach(redisNode -> {
                 if (Strings.isNullOrEmpty(redisNode.getNodeId())) {
-                    redisNode.setNodeId(redisNode.getHost() + SignUtil.COLON + redisNode.getPort());
+                    redisNode.setNodeId(RedisUtil.getNodeString(redisNode));
                 }
             });
             redisNodeDao.insertRedisNodeList(redisNodeList);
@@ -150,6 +158,9 @@ public class RedisNodeService implements IRedisNodeService {
     @Override
     public boolean updateRedisNode(RedisNode redisNode) {
         try {
+            if (Strings.isNullOrEmpty(redisNode.getNodeId())) {
+                redisNode.setNodeId(RedisUtil.getNodeString(redisNode));
+            }
             return redisNodeDao.updateRedisNode(redisNode) > 0;
         } catch (Exception e) {
             logger.error("Update redis node failed.", e);

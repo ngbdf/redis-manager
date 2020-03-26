@@ -37,7 +37,7 @@ public class NodeInfoHourCollection extends NodeInfoCollectionAbstract {
     }
 
     /**
-     * 一个小时跑一次，获取DB数据，计算所有节点以 HOUR 为单位的 avg, max, min
+     * 1 hour
      */
     @Async
     @Scheduled(cron = "0 0 0/1 * * ? ")

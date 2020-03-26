@@ -4,7 +4,6 @@ import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
-import com.newegg.ec.redis.service.ISentinelMastersService;
 import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +33,6 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
     @Autowired
     private INodeInfoService nodeInfoService;
 
-    @Autowired
-    private ISentinelMastersService sentinelMastersService;
-
     protected int coreSize;
 
     protected class CollectNodeInfoTask implements Runnable {
@@ -59,35 +55,10 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
                 // clean last time data and save new data to db
                 NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType);
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
-                if (TimeType.MINUTE.equals(timeType)) {
-                    clusterService.updateCluster(cluster);
-                    if (Objects.equals(SENTINEL, cluster.getRedisMode())) {
-                        updateSentinelMasters(cluster);
-                    }
-                }
             } catch (Exception e) {
                 logger.error("Collect " + timeType + " data for " + cluster.getClusterName() + " failed.", e);
             }
         }
-    }
-
-    private void updateSentinelMasters(Cluster cluster) {
-        Integer clusterId = cluster.getClusterId();
-        List<SentinelMaster> newSentinelMasters = new LinkedList<>();
-        List<SentinelMaster> realSentinelMasterList = redisService.getSentinelMasters(clusterService.getClusterById(clusterId));
-        Iterator<SentinelMaster> iterator = realSentinelMasterList.iterator();
-        while (iterator.hasNext()) {
-            SentinelMaster sentinelMaster = iterator.next();
-            SentinelMaster sentinelMasterByMasterName = sentinelMastersService.getSentinelMasterByMasterName(clusterId, sentinelMaster.getName());
-            sentinelMaster.setGroupId(cluster.getGroupId());
-            sentinelMaster.setClusterId(clusterId);
-            if (sentinelMasterByMasterName == null) {
-                newSentinelMasters.add(sentinelMaster);
-                iterator.remove();
-            }
-        }
-        realSentinelMasterList.forEach(sentinelMaster -> sentinelMastersService.updateSentinelMaster(sentinelMaster));
-        newSentinelMasters.forEach(sentinelMaster -> sentinelMastersService.addSentinelMaster(sentinelMaster));
     }
 
     private List<NodeInfo> getNodeInfoList(Cluster cluster, Integer timeType) {
@@ -110,7 +81,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
     }
 
     private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
-        List<RedisNode> redisNodeList = redisService.getRedisNodeList(cluster);
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
         Set<HostAndPort> hostAndPortSet = new HashSet<>();
         for (RedisNode redisNode : redisNodeList) {
             hostAndPortSet.add(new HostAndPort(redisNode.getHost(), redisNode.getPort()));
