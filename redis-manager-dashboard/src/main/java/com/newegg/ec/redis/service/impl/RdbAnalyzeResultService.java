@@ -38,10 +38,10 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService{
 	}
 	@Override
 	public void add(RDBAnalyzeResult rdbAnalyzeResult) {
-		int count = rdbAnalyzeResultMapper.selectCount();
-		if(count >= totalCount) {
-			rdbAnalyzeResultMapper.deleteOld();
-		}
+//		int count = rdbAnalyzeResultMapper.selectCount();
+//		if(count >= totalCount) {
+//			rdbAnalyzeResultMapper.deleteOld();
+//		}
 		rdbAnalyzeResultMapper.insert(rdbAnalyzeResult);
 	}
 
