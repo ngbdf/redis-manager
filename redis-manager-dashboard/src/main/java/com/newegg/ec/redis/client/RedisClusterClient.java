@@ -31,7 +31,11 @@ public class RedisClusterClient implements IRedisClusterClient {
     public RedisClusterClient(RedisURI redisURI) {
         Set<HostAndPort> hostAndPortSet = redisURI.getHostAndPortSet();
         String redisPassword = redisURI.getRequirePass();
-        jedisCluster = new JedisCluster(hostAndPortSet, TIMEOUT, TIMEOUT, MAX_ATTEMPTS, redisPassword, new GenericObjectPoolConfig());
+        if (Strings.isNullOrEmpty(redisPassword)) {
+            jedisCluster = new JedisCluster(hostAndPortSet);
+        } else {
+            jedisCluster = new JedisCluster(hostAndPortSet, TIMEOUT, TIMEOUT, MAX_ATTEMPTS, redisPassword, new GenericObjectPoolConfig());
+        }
         redisClient = RedisClientFactory.buildRedisClient(redisURI);
     }
 
