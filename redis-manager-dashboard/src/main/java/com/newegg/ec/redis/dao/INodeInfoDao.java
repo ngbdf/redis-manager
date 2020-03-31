@@ -149,7 +149,7 @@ public interface INodeInfoDao {
             "`expires` integer(8) NOT NULL, " +
             "`update_time` datetime(0) NOT NULL, " +
             "PRIMARY KEY (info_id), " +
-            "INDEX `multiple_query` (`update_time`, `time_type`, `node`) " +
+            "INDEX `multiple_query` (`node`, `update_time`) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createNodeInfoTable(@Param("clusterId") Integer clusterId);
 }
