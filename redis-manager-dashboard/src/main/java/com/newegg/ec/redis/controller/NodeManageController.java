@@ -66,7 +66,7 @@ public class NodeManageController {
     @RequestMapping(value = "/getAllNodeListWithStatus/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAllNodeListWithStatus(@PathVariable("clusterId") Integer clusterId) {
-        List<RedisNode> redisNodeList = redisNodeService.getMergeRedisNodeListByClusterId(clusterId);
+        List<RedisNode> redisNodeList = redisNodeService.getMergedRedisNodeList(clusterId);
         return Result.successResult(redisNodeService.sortRedisNodeList(redisNodeList));
     }
 

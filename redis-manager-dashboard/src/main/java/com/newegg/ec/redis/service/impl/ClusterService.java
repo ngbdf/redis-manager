@@ -124,7 +124,7 @@ public class ClusterService implements IClusterService {
     public Cluster completeClusterInfo(Cluster cluster) {
         boolean fillBaseInfoResult = fillBaseInfo(cluster);
         if (!fillBaseInfoResult) {
-            cluster.setClusterState(Cluster.ClusterState.UNKNOWN);
+            cluster.setClusterState(Cluster.ClusterState.BAD);
         }
         String redisMode = cluster.getRedisMode();
         if (Strings.isNullOrEmpty(redisMode) || Objects.equals(Cluster.UNKNOWN_VALUE, redisMode)) {
@@ -190,10 +190,9 @@ public class ClusterService implements IClusterService {
     @Override
     public boolean updateClusterState(Cluster cluster) {
         try {
-            int row = clusterDao.updateClusterState(cluster);
-            return row > 0;
+            return clusterDao.updateClusterState(cluster) > 1;
         } catch (Exception e) {
-            logger.error("Update cluster state failed.", e);
+            logger.error("Update cluster state failed, cluster name = " + cluster.getClusterName(), e);
             return false;
         }
     }
@@ -205,7 +204,7 @@ public class ClusterService implements IClusterService {
             clusterDao.updateNodes(clusterId, cluster.getNodes());
             return true;
         } catch (Exception e) {
-            logger.error("Update cluster nodes failed, " + cluster, e);
+            logger.error("Update cluster nodes failed, cluster name = " + cluster.getClusterName(), e);
             return false;
         }
     }
@@ -216,7 +215,7 @@ public class ClusterService implements IClusterService {
             clusterDao.updateClusterRuleIds(cluster.getClusterId(), cluster.getRuleIds());
             return true;
         } catch (Exception e) {
-            logger.error("Update cluster rule ids failed.", e);
+            logger.error("Update cluster rule ids failed, cluster name = " + cluster.getClusterName(), e);
             return false;
         }
     }
@@ -227,7 +226,7 @@ public class ClusterService implements IClusterService {
             clusterDao.updateClusterChannelIds(cluster.getClusterId(), cluster.getChannelIds());
             return true;
         } catch (Exception e) {
-            logger.error("Update cluster channel ids failed.", e);
+            logger.error("Update cluster channel ids failed, cluster name = " + cluster.getClusterName(), e);
             return false;
         }
     }
@@ -356,7 +355,7 @@ public class ClusterService implements IClusterService {
 
     /**
      * 注意：默认所有节点的版本一致
-     * 寻找一个节点获取集群的基本信息
+     * 寻找一个种子节点获取集群的基本信息
      *
      * @param cluster
      */
@@ -398,8 +397,8 @@ public class ClusterService implements IClusterService {
         }
         cluster.setTotalKeys(totalKeys);
         cluster.setTotalExpires(totalExpires);
-        Map<String, Long> totalMemoryInfo = redisService.getTotalMemoryInfo(cluster);
-        cluster.setTotalUsedMemory(totalMemoryInfo.get(USED_MEMORY));
+        Long totalMemory = redisService.getTotalMemoryInfo(cluster);
+        cluster.setTotalUsedMemory(totalMemory);
     }
 
     @Override
@@ -416,8 +415,4 @@ public class ClusterService implements IClusterService {
         }
     }
 
-
-    public Cluster selectByid(Integer id){
-        return clusterDao.selectClusterById(id);
-    }
 }

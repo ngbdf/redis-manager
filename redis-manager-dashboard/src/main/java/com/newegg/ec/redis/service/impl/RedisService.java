@@ -128,9 +128,8 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public Map<String, Long> getTotalMemoryInfo(Cluster cluster) {
+    public Long getTotalMemoryInfo(Cluster cluster) {
         List<RedisNode> redisMasterNodeList = getRedisMasterNodeList(cluster);
-        Map<String, Long> totalMemoryInfo = new HashMap<>();
         AtomicLong totalUsedMemory = new AtomicLong(0);
         redisMasterNodeList.forEach(redisNode -> {
             RedisClient redisClient = null;
@@ -146,13 +145,12 @@ public class RedisService implements IRedisService {
                     }
                 });
             } catch (Exception e) {
-                logger.error("Get keyspace info failed, redis node = " + redisNode.getHost() + ":" + redisNode.getPort(), e);
+                logger.error("Get keyspace info failed, cluster name = " + cluster.getClusterName() + "redis node = " + RedisUtil.getNodeString(redisNode), e);
             } finally {
                 close(redisClient);
             }
         });
-        totalMemoryInfo.put(USED_MEMORY, totalUsedMemory.get());
-        return totalMemoryInfo;
+        return totalUsedMemory.get();
     }
 
     @Override
@@ -173,32 +171,38 @@ public class RedisService implements IRedisService {
     public List<RedisNode> getRealRedisNodeList(Cluster cluster, boolean needState) {
         RedisURI redisURI = new RedisURI(cluster.getNodes(), cluster.getRedisPassword());
         String redisMode = cluster.getRedisMode();
-        List<RedisNode> nodeList = new ArrayList<>();
+        List<RedisNode> nodeList;
         RedisClient redisClient = null;
         try {
             redisClient = RedisClientFactory.buildRedisClient(redisURI);
-            if (REDIS_MODE_STANDALONE.equalsIgnoreCase(redisMode)) {
-                nodeList = redisClient.nodes();
-            } else if (REDIS_MODE_CLUSTER.equalsIgnoreCase(redisMode)) {
-                nodeList = redisClient.clusterNodes();
-            } else if (REDIS_MODE_SENTINEL.equalsIgnoreCase(redisMode)) {
-                nodeList = redisClient.sentinelNodes(nodesToHostAndPortSet(cluster.getNodes()));
+            switch (redisMode) {
+                case REDIS_MODE_STANDALONE:
+                    nodeList = redisClient.nodes();
+                    break;
+                case REDIS_MODE_CLUSTER:
+                    nodeList = redisClient.clusterNodes();
+                    break;
+                case REDIS_MODE_SENTINEL:
+                    nodeList = redisClient.sentinelNodes(nodesToHostAndPortSet(cluster.getNodes()));
+                    break;
+                default:
+                    return new ArrayList<>();
             }
+            nodeList.forEach(redisNode -> {
+                redisNode.setGroupId(cluster.getGroupId());
+                redisNode.setClusterId(cluster.getClusterId());
+                if (needState) {
+                    boolean telnet = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
+                    redisNode.setRunStatus(telnet);
+                    redisNode.setLinkState(telnet ? CONNECTED : UNCONNECTED);
+                }
+            });
         } catch (Exception e) {
             logger.error("Get redis node list failed, cluster name = " + cluster.getClusterName(), e);
         } finally {
             close(redisClient);
         }
-        nodeList.forEach(redisNode -> {
-            redisNode.setGroupId(cluster.getGroupId());
-            redisNode.setClusterId(cluster.getClusterId());
-            if (needState) {
-                boolean telnet = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
-                redisNode.setRunStatus(telnet);
-                redisNode.setLinkState(telnet ? CONNECTED : UNCONNECTED);
-            }
-        });
-        return nodeList;
+        return new ArrayList<>();
     }
 
     @Override

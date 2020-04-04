@@ -132,17 +132,20 @@ public class Cluster {
     public enum ClusterState {
 
         /**
-         * 无法获取集群状态
+         * cluster info state: ok
          */
-        UNKNOWN,
-
-        // cluster info state: ok
         HEALTH,
 
-        // cluster info state: fail
+        /**
+         * cluster info state not ok
+         * can't get cluster info
+         */
         BAD,
 
-        // redis node not good
+        /**
+         * redis node not good
+         *
+         */
         WARN;
     }
 

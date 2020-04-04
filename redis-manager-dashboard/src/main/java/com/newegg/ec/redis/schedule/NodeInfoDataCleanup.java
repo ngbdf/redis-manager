@@ -43,7 +43,7 @@ public class NodeInfoDataCleanup implements IDataCleanup {
                 nodeInfoService.cleanupNodeInfo(cluster.getClusterId());
             }
         } catch (Exception e) {
-            logger.error("Cleanup node info schedule failed.", e);
+            logger.error("Cleanup node info schedule failed, cause by getting cluster list", e);
         }
     }
 

@@ -161,15 +161,15 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
     }
 
     @Override
-    public boolean cleanupNodeInfo(int clusterId) {
+    public boolean cleanupNodeInfo(Integer clusterId) {
         Timestamp oldestTime = TimeUtil.getTime(dataKeepDays * TimeUtil.ONE_DAY);
         try {
             nodeInfoDao.deleteNodeInfoByTime(clusterId, oldestTime);
             return true;
         } catch (Exception e) {
             logger.error("Clean up node info data failed, cluster id = " + clusterId, e);
+            return false;
         }
-        return false;
     }
 
     /**

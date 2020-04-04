@@ -5,6 +5,7 @@ import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
 import com.newegg.ec.redis.service.IRedisService;
 import com.newegg.ec.redis.util.RedisNodeInfoUtil;
+import com.newegg.ec.redis.util.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
                 Integer clusterId = cluster.getClusterId();
                 logger.debug("Start collecting cluster: " + cluster.getClusterName());
                 List<NodeInfo> nodeInfoList = getNodeInfoList(cluster, timeType);
-                // clean last time data and save new data to db
+                // clean last time data and save new last data to db
                 NodeInfoParam nodeInfoParam = new NodeInfoParam(clusterId, timeType);
                 nodeInfoService.addNodeInfo(nodeInfoParam, nodeInfoList);
             } catch (Exception e) {
@@ -105,7 +106,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
             nodeInfo.setLastTime(true);
             nodeInfo.setTimeType(timeType);
         } catch (Exception e) {
-            logger.error("Build node info failed, node = " + node, e);
+            logger.error(String.format("Build node info failed, cluster id = %d, node = %s", clusterId, node), e);
         }
         return nodeInfo;
     }

@@ -3,6 +3,7 @@ package com.newegg.ec.redis.schedule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.newegg.ec.redis.dao.IClusterDao;
 import com.newegg.ec.redis.entity.Cluster;
+import com.newegg.ec.redis.entity.NodeRole;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.entity.SentinelMaster;
 import com.newegg.ec.redis.service.IClusterService;
@@ -37,11 +38,11 @@ import static com.newegg.ec.redis.util.RedisUtil.REDIS_MODE_SENTINEL;
  * 2020/03/08: 为了降低代码耦合，cluster, redis node, sentinel master 信息的更新在此进行
  * <p>
  * 1.cluster:
- * 1) cluster info 相关信息
- * 2) 根据节点状况设置健康状态
+ * 1) cluster info 相关信息更新
+ * 2) 根据节点状态（runState， inCluster, flags）设置健康状态
  * 2. redis node：
  * 1) 新增节点自动写入 database，如果写入失败，则忽略
- * 2) 更新节点状态， runState， inCluster
+ * 2) 更新节点状态， runState， inCluster, flags, linked
  *
  * @author Jay.H.Zou
  * @date 2020/3/8
@@ -82,6 +83,9 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
     @Override
     public void collect() {
         List<Cluster> clusterList = clusterService.getAllClusterList();
+        if (clusterList == null || clusterList.isEmpty()) {
+            return;
+        }
         clusterList.forEach(cluster -> threadPool.submit(new ClusterUpdateTask(cluster)));
     }
 
@@ -97,7 +101,7 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
         @Override
         public void run() {
             try {
-                addRedisNodeNotInDB(cluster);
+                addNewNodeToDB(cluster);
                 Cluster.ClusterState clusterState = updateRedisNodeState(cluster);
                 cluster.setClusterState(clusterState);
                 // update sentinel master
@@ -122,10 +126,10 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
         }
     }
 
-    private void addRedisNodeNotInDB(Cluster cluster) {
+    private void addNewNodeToDB(Cluster cluster) {
         Integer clusterId = cluster.getClusterId();
         List<RedisNode> realRedisNodeList = redisService.getRealRedisNodeList(cluster, true);
-        List<RedisNode> dbRedisNodeList = redisNodeService.getRedisNodeListByClusterId(clusterId);
+        List<RedisNode> dbRedisNodeList = redisNodeService.getRedisNodeList(clusterId);
         for (RedisNode dbRedisNode : dbRedisNodeList) {
             realRedisNodeList.removeIf(redisNode -> RedisUtil.equals(redisNode, dbRedisNode));
         }
@@ -136,19 +140,21 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
      * 更新所有 redis node 状态
      *
      * @param cluster
-     * @return 如果某个节点有问题，则改变 cluster state 为 WARN
+     * @return 如果节点有问题，则改变 cluster state 为 WARN
      */
     private Cluster.ClusterState updateRedisNodeState(Cluster cluster) {
-        Cluster.ClusterState clusterState = cluster.getClusterState();
-        List<RedisNode> redisNodeList = redisNodeService.getMergeRedisNodeListByClusterId(cluster.getClusterId());
+        Cluster.ClusterState clusterState = Cluster.ClusterState.HEALTH;
+        List<RedisNode> redisNodeList = redisNodeService.getMergedRedisNodeList(cluster.getClusterId());
         for (RedisNode redisNode : redisNodeList) {
             boolean runStatus = redisNode.getRunStatus();
             boolean inCluster = redisNode.getInCluster();
             String flags = redisNode.getFlags();
-            boolean badFlags = Objects.equals(flags, SLAVE.getValue()) || Objects.equals(flags, MASTER.getValue());
+            boolean flagsNormal = Objects.equals(flags, SLAVE.getValue()) || Objects.equals(flags, MASTER.getValue());
             String linkState = redisNode.getLinkState();
-            if (!runStatus || !inCluster
-                    || !badFlags || !Objects.equals(linkState, CONNECTED)) {
+            NodeRole nodeRole = redisNode.getNodeRole();
+            // 节点角色为 UNKNOWN
+            boolean nodeRoleNormal = Objects.equals(nodeRole, MASTER) || Objects.equals(nodeRole, SLAVE);
+            if (!runStatus || !inCluster || !flagsNormal || !Objects.equals(linkState, CONNECTED) || !nodeRoleNormal) {
                 clusterState = Cluster.ClusterState.WARN;
             }
             redisNodeService.updateRedisNode(redisNode);
@@ -156,6 +162,9 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
         return clusterState;
     }
 
+    /**
+     * @param cluster
+     */
     private void updateSentinelMasters(Cluster cluster) {
         Integer clusterId = cluster.getClusterId();
         List<SentinelMaster> newSentinelMasters = new LinkedList<>();

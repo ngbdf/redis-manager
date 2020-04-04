@@ -63,13 +63,7 @@ public class RedisClusterInfoUtil {
      * @return
      */
     private static Cluster.ClusterState calculateClusterState(String clusterState) {
-        Cluster.ClusterState state = Cluster.ClusterState.UNKNOWN;
-        if (Objects.equals(clusterState, OK)) {
-            state = Cluster.ClusterState.HEALTH;
-        } else if (Objects.equals(clusterState, FAIL)) {
-            state = Cluster.ClusterState.BAD;
-        }
-        return state;
+        return Objects.equals(clusterState, OK) ? Cluster.ClusterState.HEALTH : Cluster.ClusterState.BAD;
     }
 
 }

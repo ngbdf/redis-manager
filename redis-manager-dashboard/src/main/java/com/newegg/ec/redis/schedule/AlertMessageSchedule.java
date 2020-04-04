@@ -263,7 +263,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Cluster state not ok"));
                 }
             }
-            List<RedisNode> redisNodeList = redisNodeService.getRedisNodeListByClusterId(cluster.getClusterId());
+            List<RedisNode> redisNodeList = redisNodeService.getRedisNodeList(cluster.getClusterId());
             redisNodeList.forEach(redisNode -> {
                 String node = RedisUtil.getNodeString(redisNode);
                 boolean runStatus = redisNode.getRunStatus();

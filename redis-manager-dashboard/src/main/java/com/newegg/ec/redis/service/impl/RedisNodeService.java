@@ -40,11 +40,11 @@ public class RedisNodeService implements IRedisNodeService {
     private IRedisService redisService;
 
     @Override
-    public List<RedisNode> getMergeRedisNodeListByClusterId(Integer clusterId) {
+    public List<RedisNode> getMergedRedisNodeList(Integer clusterId) {
         Cluster cluster = clusterService.getClusterById(clusterId);
         try {
             List<RedisNode> realRedisNodeList = redisService.getRealRedisNodeList(cluster, false);
-            List<RedisNode> dbRedisNodeList = getRedisNodeListByClusterId(clusterId);
+            List<RedisNode> dbRedisNodeList = getRedisNodeList(clusterId);
             return mergeRedisNode(realRedisNodeList, dbRedisNodeList);
         } catch (Exception e) {
             logger.error("Get redis node list failed, cluster: " + cluster.getClusterName(), e);
@@ -53,22 +53,12 @@ public class RedisNodeService implements IRedisNodeService {
     }
 
     @Override
-    public List<RedisNode> getRedisNodeListByClusterId(Integer clusterId) {
+    public List<RedisNode> getRedisNodeList(Integer clusterId) {
         try {
             return redisNodeDao.selectRedisNodeListByClusterId(clusterId);
         } catch (Exception e) {
             logger.error("Get redis node by cluster id failed.", e);
             return new ArrayList<>();
-        }
-    }
-
-    @Override
-    public RedisNode getRedisNodeById(Integer redisNodeId) {
-        try {
-            return redisNodeDao.selectRedisNodeById(redisNodeId);
-        } catch (Exception e) {
-            logger.error("Get redis node by id failed.", e);
-            return null;
         }
     }
 

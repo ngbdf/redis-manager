@@ -2,7 +2,6 @@ package com.newegg.ec.redis.service;
 
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisConfigUtil;
-import com.newegg.ec.redis.util.SentinelConfigUtil;
 import com.newegg.ec.redis.util.SlotBalanceUtil;
 import redis.clients.jedis.HostAndPort;
 
@@ -30,11 +29,10 @@ public interface IRedisService {
      */
     Map<String, Map<String, Long>> getKeyspaceInfo(Cluster cluster);
 
-    Map<String, Long> getTotalMemoryInfo(Cluster cluster);
+    Long getTotalMemoryInfo(Cluster cluster);
 
     /**
      * Get database
-     * <p>
      * eg: db1 = 12345
      *
      * @param cluster
