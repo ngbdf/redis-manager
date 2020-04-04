@@ -47,10 +47,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
             <exclusions>
-            	<exclusion>
-            		<groupId>org.ow2.asm</groupId>
-            		<artifactId>asm</artifactId>
-            	</exclusion>
+                <exclusion>
+                    <groupId>org.ow2.asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -68,10 +68,10 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
             <exclusions>
-            	<exclusion>
-            		<groupId>org.ow2.asm</groupId>
-            		<artifactId>asm</artifactId>
-            	</exclusion>
+                <exclusion>
+                    <groupId>org.ow2.asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -131,24 +131,24 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
             <version>2.1.5.RELEASE</version>
-        	<exclusions>
-        		<exclusion>
-        			<groupId>org.bouncycastle</groupId>
-        			<artifactId>bcpkix-jdk15on</artifactId>
-        		</exclusion>
-        		<exclusion>
-        			<groupId>com.google.guava</groupId>
-        			<artifactId>guava</artifactId>
-        		</exclusion>
-        		<exclusion>
-        			<groupId>com.google.code.findbugs</groupId>
-        			<artifactId>jsr305</artifactId>
-        		</exclusion>
-<!--        		<exclusion>-->
-<!--        			<groupId>javax.ws.rs</groupId>-->
-<!--        			<artifactId>jsr311-api</artifactId>-->
-<!--        		</exclusion>-->
-        	</exclusions>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcpkix-jdk15on</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.code.findbugs</groupId>
+                    <artifactId>jsr305</artifactId>
+                </exclusion>
+                <!--        		<exclusion>-->
+                <!--        			<groupId>javax.ws.rs</groupId>-->
+                <!--        			<artifactId>jsr311-api</artifactId>-->
+                <!--        		</exclusion>-->
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -158,20 +158,15 @@
 
         <dependency>
             <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.12</version>
-    </dependency>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
 
-    <!--<dependency>
-        <groupId>com.aliyun</groupId>
-        <artifactId>aliyun-java-sdk-core</artifactId>
-        <version>3.2.2</version>
-    </dependency>-->
-    <!-- ssh2 -->
-    <dependency>
-        <groupId>ch.ethz.ganymed</groupId>
-        <artifactId>ganymed-ssh2</artifactId>
-        <version>262</version>
+        <!-- ssh2 -->
+        <dependency>
+            <groupId>ch.ethz.ganymed</groupId>
+            <artifactId>ganymed-ssh2</artifactId>
+            <version>262</version>
         </dependency>
 
         <dependency>
@@ -187,10 +182,10 @@
                     <artifactId>commons-compress</artifactId>
                     <groupId>org.apache.commons</groupId>
                 </exclusion>
-            	<exclusion>
-            		<groupId>org.bouncycastle</groupId>
-            		<artifactId>bcpkix-jdk15on</artifactId>
-            	</exclusion>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcpkix-jdk15on</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>javax.ws.rs</groupId>
                     <artifactId>javax.ws.rs-api</artifactId>
@@ -203,16 +198,22 @@
             <artifactId>jersey-hk2</artifactId>
             <version>2.27</version>
             <exclusions>
-            	<exclusion>
-            		<groupId>javax.ws.rs</groupId>
-            		<artifactId>javax.ws.rs-api</artifactId>
-            	</exclusion>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.46</version>
         </dependency>
 
     </dependencies>

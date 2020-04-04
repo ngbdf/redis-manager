@@ -36,8 +36,7 @@ public interface IRedisNodeDao {
     int insertRedisNodeList(@Param("redisNodeList") List<RedisNode> redisNodeList);
 
     @Update("UPDATE redis_node SET master_id = #{masterId}, node_role = #{nodeRole}, flags = #{flags}, " +
-            "link_state = #{linkState}, slot_range = #{slotRange}, slot_number = #{slotNumber}, update_time = NOW() " +
-            "WHERE cluster_id = #{clusterId} AND node_id = #{nodeId}")
+            "link_state = #{linkState}, slot_range = #{slotRange}, update_time = NOW()")
     int updateRedisNode(RedisNode redisNode);
 
     @Delete("DELETE FROM redis_node WHERE cluster_id = #{clusterId}")
@@ -63,7 +62,8 @@ public interface IRedisNodeDao {
             "`container_name` varchar(60) DEFAULT NULL, " +
             "`insert_time` datetime(0) NOT NULL, " +
             "`update_time` datetime(0) NOT NULL, " +
-            "PRIMARY KEY (redis_node_id) " +
+            "PRIMARY KEY (redis_node_id), " +
+            "INDEX `multiple_query`(`cluster_id`, `host`, `port`) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createRedisNodeTable();
 
