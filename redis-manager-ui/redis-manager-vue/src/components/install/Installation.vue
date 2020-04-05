@@ -569,7 +569,7 @@ export default {
       step: -1,
       installationLoading: false,
       humpbackEnabled: false,
-      logTimer: "",
+      logTimer: null,
       isInstallationStart: false
     };
   },
@@ -744,6 +744,7 @@ export default {
       );
     },
     getLogs() {
+      console.log(this.isInstallationStart);
       if (this.isInstallationStart) {
         let url =
           "/installation/getInstallationLogs/" + this.cluster.clusterName;
@@ -826,6 +827,7 @@ export default {
         name: "installation",
         params: { groupId: groupId }
       });
+      this.getMachineList(groupId);
     }
   },
   mounted() {
@@ -834,10 +836,17 @@ export default {
     let groupId = this.currentGroup.groupId;
     this.getMachineList(groupId);
     this.getHumpbackEnabled();
-    this.logTimer = setInterval(this.getLogs, 1000);
+    if (this.logTimer == null) {
+      this.logTimer = setInterval(this.getLogs(), 1000);
+    }
+  },
+  created() {
+    clearInterval(this.logTimer);
+    this.logTimer = null;
   },
   beforeDestroy() {
     clearInterval(this.logTimer);
+    this.logTimer = null;
   }
 };
 </script>

@@ -3,16 +3,16 @@ package com.newegg.ec.redis.util;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.RedisNode;
 import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static com.newegg.ec.redis.util.SignUtil.MINUS;
 
@@ -115,43 +115,6 @@ public class RedisUtil {
         return hostAndPortSet.iterator().next();
     }
 
-    public static BigDecimal avg(List<BigDecimal> bigDecimalList) {
-        BigDecimal summation = new BigDecimal(0);
-        BigDecimal size = new BigDecimal(bigDecimalList.size());
-        if (size.intValue() == 0) {
-            return summation;
-        }
-        for (BigDecimal bigDecimal : bigDecimalList) {
-            summation = summation.add(bigDecimal);
-        }
-
-        return summation.divide(size, 2, BigDecimal.ROUND_HALF_UP);
-    }
-
-    public static BigDecimal max(List<BigDecimal> bigDecimalList) {
-        BigDecimal maxBigDecimal = null;
-        for (BigDecimal bigDecimal : bigDecimalList) {
-            if (maxBigDecimal == null) {
-                maxBigDecimal = bigDecimal;
-                continue;
-            }
-            maxBigDecimal = maxBigDecimal.max(bigDecimal);
-        }
-        return maxBigDecimal;
-    }
-
-    public static BigDecimal min(List<BigDecimal> bigDecimalList) {
-        BigDecimal minBigDecimal = null;
-        for (BigDecimal bigDecimal : bigDecimalList) {
-            if (minBigDecimal == null) {
-                minBigDecimal = bigDecimal;
-                continue;
-            }
-            minBigDecimal = minBigDecimal.min(bigDecimal);
-        }
-        return minBigDecimal;
-    }
-
     public static String[] removeCommandAndKey(String[] list) {
         int length = list.length;
         String[] items = new String[length - 2];
@@ -163,11 +126,6 @@ public class RedisUtil {
 
     public static String getKey(String command) {
         return SignUtil.splitBySpace(command)[1];
-    }
-
-    public static boolean equals(RedisNode redisNode1, RedisNode redisNode2) {
-        return Objects.equals(redisNode1.getHost(), redisNode2.getHost())
-                && redisNode1.getPort() == redisNode2.getPort();
     }
 
     public static String getNodeString(RedisNode redisNode) {

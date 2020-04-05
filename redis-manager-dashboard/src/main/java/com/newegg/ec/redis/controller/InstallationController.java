@@ -93,21 +93,41 @@ public class InstallationController {
     public Result install(@RequestBody InstallationParam installationParam) {
         Integer installationEnvironment = installationParam.getCluster().getInstallationEnvironment();
         AbstractNodeOperation nodeOperation = clusterService.getNodeOperation(installationEnvironment);
+        try {
+            Thread thread = new Thread(() -> {
+                for (int i=0; i< 1000; i++) {
+                    InstallationLogContainer.appendLog(installationParam.getCluster().getClusterName(), "i=" + i);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            thread.start();
+            Thread.sleep(10 * 60 *1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if(installationEnvironment != null) {
+            return Result.successResult();
+        }
         boolean result = installationTemplate.installFlow(nodeOperation, installationParam);
         InstallationLogContainer.remove(installationParam.getCluster().getClusterName());
         return result ? Result.successResult() : Result.failResult();
     }
 
-    @RequestMapping(value = "validateClusterName", method = RequestMethod.GET)
+    @RequestMapping(value = "/validateClusterName/{clusterName}", method = RequestMethod.GET)
     @ResponseBody
     public Result validateClusterName(@PathVariable("clusterName") String clusterName) {
         return Result.successResult();
     }
 
-    @RequestMapping(value = "getInstallationLogs", method = RequestMethod.GET)
+    @RequestMapping(value = "/getInstallationLogs/{clusterName}", method = RequestMethod.GET)
     @ResponseBody
     public Result getInstallationLogs(@PathVariable("clusterName") String clusterName) {
         List<String> logs = InstallationLogContainer.getLogs(clusterName);
+        System.err.println(logs);
         return Result.successResult(logs);
     }
 

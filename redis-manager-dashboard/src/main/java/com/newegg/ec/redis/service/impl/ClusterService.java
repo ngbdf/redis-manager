@@ -282,7 +282,7 @@ public class ClusterService implements IClusterService {
     }
 
     private boolean fillInfoForStandalone(Cluster cluster) {
-        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster);
         if (redisNodeList.isEmpty()) {
             return false;
         }
@@ -300,7 +300,7 @@ public class ClusterService implements IClusterService {
      */
     private boolean fillInfoForSentinel(Cluster cluster) {
         try {
-            List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
+            List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster);
             cluster.setClusterKnownNodes(redisNodeList.size());
             cluster.setSentinelOk(redisNodeList.size());
             Set<HostAndPort> hostAndPorts = nodesToHostAndPortSet(cluster.getNodes());

@@ -58,7 +58,7 @@ public class NodeManageController {
         if (cluster == null) {
             return Result.failResult().setMessage("Get cluster failed.");
         }
-        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster);
         List<RedisNode> redisNodeSorted = redisNodeService.sortRedisNodeList(redisNodeList);
         return Result.successResult(redisNodeSorted);
     }
@@ -66,7 +66,7 @@ public class NodeManageController {
     @RequestMapping(value = "/getAllNodeListWithStatus/{clusterId}", method = RequestMethod.GET)
     @ResponseBody
     public Result getAllNodeListWithStatus(@PathVariable("clusterId") Integer clusterId) {
-        List<RedisNode> redisNodeList = redisNodeService.getRedisNodeList(clusterId);
+        List<RedisNode> redisNodeList = redisNodeService.getMergedRedisNodeList(clusterId);
         return Result.successResult(redisNodeService.sortRedisNodeList(redisNodeList));
     }
 
@@ -116,7 +116,7 @@ public class NodeManageController {
     public Result getConfigCurrentValue(@RequestBody JSONObject jsonObject) {
         Cluster cluster = jsonObject.getObject("cluster", Cluster.class);
         String configKey = jsonObject.getString("configKey");
-        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster);
         List<JSONObject> configList = new ArrayList<>(redisNodeList.size());
         redisNodeList.forEach(redisNode -> {
             Map<String, String> configMap = redisService.getConfig(redisNode, cluster.getRedisPassword(), configKey);
@@ -335,9 +335,9 @@ public class NodeManageController {
                                 Thread.sleep(FIVE_SECONDS);
                             } catch (InterruptedException e) {
                             }
-                            List<RedisNode> redisNodes = redisService.getRealRedisNodeList(cluster, false);
+                            List<RedisNode> redisNodes = redisService.getRealRedisNodeList(cluster);
                             redisNodes.forEach(node -> {
-                                if (RedisUtil.equals(node, redisNode)) {
+                                if (RedisNodeUtil.equals(node, redisNode)) {
                                     redisNodeService.addRedisNode(node);
                                 }
                             });

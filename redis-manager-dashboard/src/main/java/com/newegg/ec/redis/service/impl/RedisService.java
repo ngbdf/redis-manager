@@ -23,8 +23,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.newegg.ec.redis.client.IDatabaseCommand.*;
-import static com.newegg.ec.redis.entity.RedisNode.CONNECTED;
-import static com.newegg.ec.redis.entity.RedisNode.UNCONNECTED;
 import static com.newegg.ec.redis.util.RedisClusterInfoUtil.OK;
 import static com.newegg.ec.redis.util.RedisConfigUtil.PORT;
 import static com.newegg.ec.redis.util.RedisConfigUtil.*;
@@ -167,7 +165,7 @@ public class RedisService implements IRedisService {
      * @return
      */
     @Override
-    public List<RedisNode> getRealRedisNodeList(Cluster cluster, boolean needState) {
+    public List<RedisNode> getRealRedisNodeList(Cluster cluster) {
         RedisURI redisURI = new RedisURI(cluster.getNodes(), cluster.getRedisPassword());
         String redisMode = cluster.getRedisMode();
         List<RedisNode> nodeList = new ArrayList<>();
@@ -189,13 +187,7 @@ public class RedisService implements IRedisService {
             nodeList.forEach(redisNode -> {
                 redisNode.setGroupId(cluster.getGroupId());
                 redisNode.setClusterId(cluster.getClusterId());
-                if (needState) {
-                    boolean telnet = NetworkUtil.telnet(redisNode.getHost(), redisNode.getPort());
-                    redisNode.setRunStatus(telnet);
-                    redisNode.setLinkState(telnet ? CONNECTED : UNCONNECTED);
-                }
             });
-
         } catch (Exception e) {
             logger.error("Get redis node list failed, cluster name = " + cluster.getClusterName(), e);
         } finally {
@@ -207,7 +199,7 @@ public class RedisService implements IRedisService {
     @Override
     public List<RedisNode> getRedisMasterNodeList(Cluster cluster) {
         List<RedisNode> masterNodeList = new ArrayList<>();
-        List<RedisNode> redisNodeList = getRealRedisNodeList(cluster, false);
+        List<RedisNode> redisNodeList = getRealRedisNodeList(cluster);
         if (redisNodeList == null || redisNodeList.isEmpty()) {
             return masterNodeList;
         }
@@ -241,7 +233,7 @@ public class RedisService implements IRedisService {
         List<RedisNode> nodeList;
         String node = slowLogParam.getNode();
         if (Strings.isNullOrEmpty(node)) {
-            nodeList = getRealRedisNodeList(cluster, false);
+            nodeList = getRealRedisNodeList(cluster);
         } else {
             nodeList = new ArrayList<>();
             HostAndPort hostAndPort = nodesToHostAndPort(node);
@@ -360,7 +352,7 @@ public class RedisService implements IRedisService {
 
     @Override
     public boolean clusterForget(Cluster cluster, RedisNode forgetNode) {
-        List<RedisNode> nodeList = getRealRedisNodeList(cluster, false);
+        List<RedisNode> nodeList = getRealRedisNodeList(cluster);
         String clusterName = cluster.getClusterName();
         if (nodeList == null || nodeList.isEmpty()) {
             return false;
@@ -436,7 +428,7 @@ public class RedisService implements IRedisService {
         StringBuilder result = new StringBuilder();
         try {
             for (RedisNode redisNode : redisNodeList) {
-                if (RedisUtil.equals(seed, redisNode)) {
+                if (RedisNodeUtil.equals(seed, redisNode)) {
                     continue;
                 }
                 RedisClient redisClient = null;
@@ -541,7 +533,7 @@ public class RedisService implements IRedisService {
                 continue;
             }
             // 如果此 slot 就在它自己本身，则直接跳过
-            if (RedisUtil.equals(sourceNode, targetNode)) {
+            if (RedisNodeUtil.equals(sourceNode, targetNode)) {
                 continue;
             }
             // 迁移槽
@@ -716,7 +708,7 @@ public class RedisService implements IRedisService {
 
     @Override
     public boolean setConfigBatch(Cluster cluster, RedisConfigUtil.RedisConfig redisConfig) {
-        List<RedisNode> redisNodeList = getRealRedisNodeList(cluster, false);
+        List<RedisNode> redisNodeList = getRealRedisNodeList(cluster);
         boolean result = true;
         for (RedisNode redisNode : redisNodeList) {
             result = setConfig(cluster, redisNode, redisConfig);

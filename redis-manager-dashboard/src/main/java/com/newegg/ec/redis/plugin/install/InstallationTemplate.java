@@ -13,6 +13,7 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.*;
 import com.newegg.ec.redis.util.NetworkUtil;
+import com.newegg.ec.redis.util.RedisNodeUtil;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SSH2Util;
 import org.slf4j.Logger;
@@ -554,7 +555,7 @@ public class InstallationTemplate {
         for (Map.Entry<RedisNode, RedisNode> entry : topology.entries()) {
             RedisNode masterNode = entry.getKey();
             for (RedisNode redisNodeWithInfo : redisNodeListWithInfo) {
-                if (RedisUtil.equals(masterNode, redisNodeWithInfo)) {
+                if (RedisNodeUtil.equals(masterNode, redisNodeWithInfo)) {
                     realTopology.put(redisNodeWithInfo, entry.getValue());
                 }
             }
@@ -584,7 +585,7 @@ public class InstallationTemplate {
      */
     private String updateRedisPassword(String redisPassword, Cluster cluster) {
         StringBuffer result = new StringBuffer();
-        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster);
         redisNodeList.forEach(redisNode -> {
             try {
                 RedisClient redisClient = RedisClientFactory.buildRedisClient(redisNode);
@@ -633,7 +634,7 @@ public class InstallationTemplate {
     private void buildStandalone(Cluster cluster, RedisNode seed, List<RedisNode> redisNodeList) {
         String clusterName = cluster.getClusterName();
         for (RedisNode redisNode : redisNodeList) {
-            if (RedisUtil.equals(seed, redisNode)) {
+            if (RedisNodeUtil.equals(seed, redisNode)) {
                 continue;
             }
             String result = redisService.standaloneReplicaOf(cluster, seed, redisNode);
@@ -654,13 +655,11 @@ public class InstallationTemplate {
         // 用户定义的拓扑图
         List<RedisNode> redisNodeList = installationParam.getRedisNodeList();
         // 真正的拓扑图
-        List<RedisNode> realRedisNodeList = redisService.getRealRedisNodeList(cluster, false);
+        List<RedisNode> realRedisNodeList = redisService.getRealRedisNodeList(cluster);
         List<RedisNode> redisNodes = redisNodeService.mergeRedisNode(realRedisNodeList, redisNodeList);
-        Integer groupId = cluster.getGroupId();
-        Integer clusterId = cluster.getClusterId();
         redisNodes.forEach(redisNode -> {
-            redisNode.setGroupId(groupId);
-            redisNode.setClusterId(clusterId);
+            redisNode.setGroupId(cluster.getGroupId());
+            redisNode.setClusterId(cluster.getClusterId());
         });
         redisNodeService.addRedisNodeList(redisNodes);
         return true;

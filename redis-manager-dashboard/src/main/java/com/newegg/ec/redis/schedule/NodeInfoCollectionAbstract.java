@@ -82,7 +82,7 @@ public abstract class NodeInfoCollectionAbstract implements IDataCollection, App
     }
 
     private Set<HostAndPort> getHostAndPortSet(Cluster cluster) {
-        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster, false);
+        List<RedisNode> redisNodeList = redisService.getRealRedisNodeList(cluster);
         Set<HostAndPort> hostAndPortSet = new HashSet<>();
         for (RedisNode redisNode : redisNodeList) {
             hostAndPortSet.add(new HostAndPort(redisNode.getHost(), redisNode.getPort()));

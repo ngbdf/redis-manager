@@ -44,10 +44,9 @@ public interface IRedisService {
      * Get real redis node list
      *
      * @param cluster
-     * @param needState 是否需要 runStatus 和 linkState
      * @return
      */
-    List<RedisNode> getRealRedisNodeList(Cluster cluster, boolean needState);
+    List<RedisNode> getRealRedisNodeList(Cluster cluster);
 
     /**
      * Get node list
