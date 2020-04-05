@@ -1,11 +1,11 @@
 package com.newegg.ec.redis.plugin.install.service.impl;
 
 import com.google.common.base.Strings;
-import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.exception.ConfigurationException;
+import com.newegg.ec.redis.plugin.install.entity.InstallationLogContainer;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.DockerClientOperation;
@@ -73,8 +73,8 @@ public class DockerNodeOperation extends AbstractNodeOperation {
                 dockerClientOperation.getDockerInfo(host);
             } catch (Exception e) {
                 String message = "Check docker environment failed, host: " + host;
-                InstallationWebSocketHandler.appendLog(clusterName, message);
-                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                InstallationLogContainer.appendLog(clusterName, message);
+                InstallationLogContainer.appendLog(clusterName, e.getMessage());
                 logger.error(message, e);
                 return false;
             }
@@ -97,8 +97,8 @@ public class DockerNodeOperation extends AbstractNodeOperation {
                     return true;
                 } catch (InterruptedException e) {
                     String message = "Pull docker image failed, host: " + host;
-                    InstallationWebSocketHandler.appendLog(clusterName, message);
-                    InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                    InstallationLogContainer.appendLog(clusterName, message);
+                    InstallationLogContainer.appendLog(clusterName, e.getMessage());
                     logger.error(message, e);
                     return false;
                 }
@@ -110,7 +110,7 @@ public class DockerNodeOperation extends AbstractNodeOperation {
                     return false;
                 }
             } catch (Exception e) {
-                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                InstallationLogContainer.appendLog(clusterName, e.getMessage());
                 logger.error("", e);
                 return false;
             }
@@ -155,8 +155,8 @@ public class DockerNodeOperation extends AbstractNodeOperation {
             return true;
         } catch (Exception e) {
             String message = "Start container failed, host: " + host + ", port: " + port;
-            InstallationWebSocketHandler.appendLog(clusterName, message);
-            InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+            InstallationLogContainer.appendLog(clusterName, message);
+            InstallationLogContainer.appendLog(clusterName, e.getMessage());
             logger.error(message, e);
             return false;
         }

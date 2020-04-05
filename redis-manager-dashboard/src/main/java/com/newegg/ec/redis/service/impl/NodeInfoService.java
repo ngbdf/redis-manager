@@ -9,9 +9,7 @@ import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.exception.ParameterException;
 import com.newegg.ec.redis.service.INodeInfoService;
-import com.newegg.ec.redis.util.RedisNodeInfoUtil;
 import com.newegg.ec.redis.util.RedisUtil;
-import com.newegg.ec.redis.util.SignUtil;
 import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -208,7 +206,7 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
         }
         List<String> nodeList = nodeInfoParam.getNodeList();
         if (nodeList == null || nodeList.isEmpty()) {
-            List<RedisNode> redisNodes = redisNodeDao.selectRedisNodeListByClusterId(nodeInfoParam.getClusterId());
+            List<RedisNode> redisNodes = redisNodeDao.selectRedisNodeListByCluster(nodeInfoParam.getClusterId());
             nodeList = new LinkedList<>();
             for (RedisNode redisNode : redisNodes) {
                 nodeList.add(RedisUtil.getNodeString(redisNode));

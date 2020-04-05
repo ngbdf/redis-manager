@@ -18,11 +18,9 @@ import com.newegg.ec.redis.plugin.alert.service.IAlertService;
 import com.newegg.ec.redis.service.*;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
-import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Async;
@@ -30,7 +28,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +41,6 @@ import java.util.stream.Collectors;
 import static com.newegg.ec.redis.entity.NodeRole.MASTER;
 import static com.newegg.ec.redis.entity.NodeRole.SLAVE;
 import static com.newegg.ec.redis.entity.RedisNode.CONNECTED;
-import static com.newegg.ec.redis.util.RedisUtil.REDIS_MODE_CLUSTER;
 import static com.newegg.ec.redis.util.RedisUtil.REDIS_MODE_SENTINEL;
 import static com.newegg.ec.redis.util.SignUtil.EQUAL_SIGN;
 import static com.newegg.ec.redis.util.TimeUtil.FIVE_SECONDS;
@@ -112,9 +108,6 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     @Autowired
     private IAlertService wechatAppAlert;
 
-    @Value("${redis-manager.alert.data-keep-days:15}")
-    private int dataKeepDays;
-
     private ExecutorService threadPool;
 
     @Override
@@ -132,16 +125,12 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     @Scheduled(cron = "0 0/1 * * * ? ")
     @Override
     public void collect() {
-        try {
-            List<Group> allGroup = groupService.getAllGroup();
-            if (allGroup != null && !allGroup.isEmpty()) {
-                logger.info("Start to check alert rules...");
-                allGroup.forEach(group -> {
-                    threadPool.submit(new AlertTask(group));
-                });
-            }
-        } catch (Exception e) {
-            logger.error("Alert scheduled failed.", e);
+        List<Group> allGroup = groupService.getAllGroup();
+        if (allGroup != null && !allGroup.isEmpty()) {
+            logger.info("Start to check alert rules...");
+            allGroup.forEach(group -> {
+                threadPool.submit(new AlertTask(group));
+            });
         }
     }
 
@@ -152,12 +141,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     @Scheduled(cron = "0 0 0 * * ?")
     @Override
     public void cleanup() {
-        try {
-            Timestamp earliestTime = TimeUtil.getTime(dataKeepDays * TimeUtil.ONE_DAY);
-            alertRecordService.deleteAlertRecordByTime(earliestTime);
-        } catch (Exception e) {
-            logger.error("Cleanup alert data failed.", e);
-        }
+        alertRecordService.cleanAlertRecordByTime();
     }
 
     private class AlertTask implements Runnable {
@@ -178,16 +162,16 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     return;
                 }
                 // 获取有效的规则
-                List<AlertRule> validAlertRuleList = getValidAlertRule(groupId);
+                List<AlertRule> validAlertRuleList = getValidAlertRuleList(groupId);
                 if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
                     return;
                 }
                 // 更新规则
                 updateRuleLastCheckTime(validAlertRuleList);
                 // 获取 AlertChannel
-                List<AlertChannel> validAlertChannel = alertChannelService.getAlertChannelByGroupId(groupId);
+                List<AlertChannel> validAlertChannelList = alertChannelService.getAlertChannelByGroupId(groupId);
                 clusterList.forEach(cluster -> {
-                    List<Integer> ruleIdList = getRuleIdList(cluster.getRuleIds());
+                    List<Integer> ruleIdList = idsToIntegerList(cluster.getRuleIds());
                     // 获取集群规则
                     List<AlertRule> alertRuleList = validAlertRuleList.stream()
                             .filter(alertRule -> alertRule.getGlobal() || ruleIdList.contains(alertRule.getRuleId()))
@@ -195,28 +179,32 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     if (alertRuleList.isEmpty()) {
                         return;
                     }
-                    List<AlertRecord> alertRecordList = getNodeInfoAlertRecord(group, cluster, alertRuleList);
-                    // 获取集群级别的告警
-                    alertRecordList.addAll(getClusterAlertRecord(group, cluster, alertRuleList));
+                    List<AlertRecord> alertRecordList = getAlertRecords(group, cluster, alertRuleList);
                     if (alertRecordList.isEmpty()) {
                         return;
                     }
-                    logger.info("Start to send alert message...");
                     // save to database
                     saveRecordToDB(cluster.getClusterName(), alertRecordList);
+                    logger.info("Start to send alert message...");
                     // 获取告警通道并发送消息
-                    List<Integer> alertChannelIdList = getAlertChannelIdList(cluster.getChannelIds());
-                    Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannel, alertChannelIdList);
-                    if (channelMultimap != null && !channelMultimap.isEmpty()) {
-                        if (!alertRecordList.isEmpty()) {
-                            distribution(channelMultimap, alertRecordList);
-                        }
+                    Multimap<Integer, AlertChannel> channelMultimap = getAlertChannelByIds(validAlertChannelList, cluster.getChannelIds());
+                    if (channelMultimap != null && !channelMultimap.isEmpty() && !alertRecordList.isEmpty()) {
+                        distribution(channelMultimap, alertRecordList);
                     }
                 });
             } catch (Exception e) {
-                logger.error("Alert task failed, " + group, e);
+                logger.error("Alert task failed, group name = " + group.getGroupName(), e);
             }
         }
+    }
+
+    private List<AlertRecord> getAlertRecords(Group group, Cluster cluster, List<AlertRule> alertRuleList) {
+        List<AlertRecord> alertRecordList = new ArrayList<>();
+        // 获取 node info 级别告警
+        alertRecordList.addAll(getNodeInfoAlertRecord(group, cluster, alertRuleList));
+        // 获取集群级别的告警
+        alertRecordList.addAll(getClusterAlertRecord(group, cluster, alertRuleList));
+        return alertRecordList;
     }
 
     private List<AlertRecord> getNodeInfoAlertRecord(Group group, Cluster cluster, List<AlertRule> alertRuleList) {
@@ -244,7 +232,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
      * 1.connect cluster/standalone failed
      * 2.cluster(mode) cluster_state isn't ok
      * 3.node not in cluster/standalone
-     * 4.node shutdown
+     * 4.node shutdown, not in cluster, bad flags, bad link state, unknown role
      *
      * @param group
      * @param cluster
@@ -258,10 +246,9 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
             if (!alertRule.getClusterAlert()) {
                 continue;
             }
-            if (Objects.equals(REDIS_MODE_CLUSTER, cluster.getRedisMode())) {
-                if (!Objects.equals(Cluster.ClusterState.HEALTH, cluster.getClusterState())) {
-                    alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Cluster state not ok"));
-                }
+            Cluster.ClusterState clusterState = cluster.getClusterState();
+            if (!Objects.equals(Cluster.ClusterState.HEALTH, clusterState)) {
+                alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, seedNodes, "Cluster state is " + clusterState));
             }
             List<RedisNode> redisNodeList = redisNodeService.getRedisNodeList(cluster.getClusterId());
             redisNodeList.forEach(redisNode -> {
@@ -269,8 +256,11 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 boolean runStatus = redisNode.getRunStatus();
                 boolean inCluster = redisNode.getInCluster();
                 String flags = redisNode.getFlags();
-                boolean badFlags = Objects.equals(flags, SLAVE.getValue()) || Objects.equals(flags, MASTER.getValue());
+                boolean flagsNormal = Objects.equals(flags, SLAVE.getValue()) || Objects.equals(flags, MASTER.getValue());
                 String linkState = redisNode.getLinkState();
+                NodeRole nodeRole = redisNode.getNodeRole();
+                // 节点角色为 UNKNOWN
+                boolean nodeRoleNormal = Objects.equals(nodeRole, MASTER) || Objects.equals(nodeRole, SLAVE);
                 String reason = "";
                 if (!runStatus) {
                     reason = node + " is shutdown;\n";
@@ -278,11 +268,14 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                 if (!inCluster) {
                     reason += node + " not in cluster;\n";
                 }
-                if (!badFlags) {
+                if (!flagsNormal) {
                     reason += node + " has bad flags: " + flags + "\n";
                 }
                 if (!Objects.equals(linkState, CONNECTED)) {
-                    reason += node + " " + linkState;
+                    reason += node + " " + linkState + "\n";
+                }
+                if (!nodeRoleNormal) {
+                    reason += node + " role is " + nodeRole;
                 }
                 if (!Strings.isNullOrEmpty(reason)) {
                     alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, node, reason));
@@ -335,12 +328,12 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     }
 
     /**
-     * 获取 group 下没有冻结(valid==true)且满足时间周期(nowTime - lastCheckTime >= cycleTime)的规则
+     * 获取 group 下没有冻结(valid == true)且满足时间周期(nowTime - lastCheckTime >= cycleTime)的规则
      *
      * @param groupId
      * @return
      */
-    private List<AlertRule> getValidAlertRule(Integer groupId) {
+    private List<AlertRule> getValidAlertRuleList(Integer groupId) {
         List<AlertRule> validAlertRuleList = alertRuleService.getAlertRuleByGroupId(groupId);
         if (validAlertRuleList == null || validAlertRuleList.isEmpty()) {
             return null;
@@ -349,15 +342,8 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
         return validAlertRuleList;
     }
 
-    private List<Integer> getRuleIdList(String ruleIds) {
-        return idsToIntegerList(ruleIds);
-    }
-
-    private List<Integer> getAlertChannelIdList(String channelIds) {
-        return idsToIntegerList(channelIds);
-    }
-
-    private Multimap<Integer, AlertChannel> getAlertChannelByIds(List<AlertChannel> validAlertChannelList, List<Integer> channelIdList) {
+    private Multimap<Integer, AlertChannel> getAlertChannelByIds(List<AlertChannel> validAlertChannelList, String channelIds) {
+        List<Integer> channelIdList = idsToIntegerList(channelIds);
         List<AlertChannel> alertChannelList = new ArrayList<>();
         if (validAlertChannelList == null || validAlertChannelList.isEmpty()) {
             return null;
@@ -397,7 +383,7 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     }
 
     /**
-     * 校验是否需要告警
+     * 校验监控指标是否达到阈值
      *
      * @param nodeInfo
      * @param alertRule

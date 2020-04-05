@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.client.*;
-import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
 import com.newegg.ec.redis.service.INodeInfoService;
@@ -675,8 +674,6 @@ public class RedisService implements IRedisService {
         } catch (Exception e) {
             String template = "%s:%d replica of %s:%d failed, cluster name: %s";
             result.append(String.format(template, redisNode.getHost(), redisNode.getPort(), masterHost, masterPort, clusterName));
-            InstallationWebSocketHandler.appendLog(clusterName, result.toString());
-            InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
             logger.error(result.toString(), e);
             return result.toString();
         } finally {

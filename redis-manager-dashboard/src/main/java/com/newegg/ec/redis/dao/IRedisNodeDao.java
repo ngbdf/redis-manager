@@ -16,7 +16,7 @@ import java.util.List;
 public interface IRedisNodeDao {
 
     @Select("SELECT * FROM redis_node WHERE cluster_id = #{clusterId}")
-    List<RedisNode> selectRedisNodeListByClusterId(Integer clusterId);
+    List<RedisNode> selectRedisNodeListByCluster(Integer clusterId);
 
     @Select("SELECT * FROM redis_node WHERE redis_node_id = #{redisNodeId}")
     RedisNode selectRedisNodeById(Integer redisNodeId);
@@ -35,8 +35,9 @@ public interface IRedisNodeDao {
             "</script>")
     int insertRedisNodeList(@Param("redisNodeList") List<RedisNode> redisNodeList);
 
-    @Update("UPDATE redis_node SET master_id = #{masterId}, node_role = #{nodeRole}, flags = #{flags}, " +
-            "link_state = #{linkState}, slot_range = #{slotRange}, update_time = NOW()")
+    @Update("UPDATE redis_node SET node_id = #{nodeId}, master_id = #{masterId}, node_role = #{nodeRole}, flags = #{flags}, " +
+            "link_state = #{linkState}, slot_range = #{slotRange}, update_time = NOW() " +
+            "WHERE cluster_id = #{clusterId} AND host = #{host} AND port = #{port}")
     int updateRedisNode(RedisNode redisNode);
 
     @Delete("DELETE FROM redis_node WHERE cluster_id = #{clusterId}")

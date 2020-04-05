@@ -55,7 +55,7 @@ public class RedisNodeService implements IRedisNodeService {
     @Override
     public List<RedisNode> getRedisNodeList(Integer clusterId) {
         try {
-            return redisNodeDao.selectRedisNodeListByClusterId(clusterId);
+            return redisNodeDao.selectRedisNodeListByCluster(clusterId);
         } catch (Exception e) {
             logger.error("Get redis node by cluster id failed.", e);
             return new ArrayList<>();
@@ -65,8 +65,7 @@ public class RedisNodeService implements IRedisNodeService {
     @Override
     public boolean existRedisNode(RedisNode redisNode) {
         try {
-            RedisNode existRedisNode = redisNodeDao.existRedisNode(redisNode);
-            return existRedisNode != null;
+            return redisNodeDao.existRedisNode(redisNode) != null;
         } catch (Exception e) {
             logger.error("Get redis node by id failed.", e);
             return true;
@@ -75,7 +74,6 @@ public class RedisNodeService implements IRedisNodeService {
 
     /**
      * merge redis node info
-     * TODO: 未完成
      *
      * @param realRedisNodeList
      * @param dbRedisNodeList
@@ -86,15 +84,13 @@ public class RedisNodeService implements IRedisNodeService {
         List<RedisNode> redisNodeList = new ArrayList<>();
         realRedisNodeList.forEach(realRedisNode -> {
             realRedisNode.setInCluster(true);
-            if (dbRedisNodeList != null && !dbRedisNodeList.isEmpty()) {
-                dbRedisNodeList.forEach(dbRedisNode -> {
-                    if (RedisUtil.equals(dbRedisNode, realRedisNode)) {
-                        realRedisNode.setContainerId(dbRedisNode.getContainerId());
-                        realRedisNode.setContainerName(dbRedisNode.getContainerName());
-                        realRedisNode.setUpdateTime(dbRedisNode.getUpdateTime());
-                    }
-                });
-            }
+            dbRedisNodeList.forEach(dbRedisNode -> {
+                if (RedisUtil.equals(dbRedisNode, realRedisNode)) {
+                    realRedisNode.setContainerId(dbRedisNode.getContainerId());
+                    realRedisNode.setContainerName(dbRedisNode.getContainerName());
+                    realRedisNode.setUpdateTime(dbRedisNode.getUpdateTime());
+                }
+            });
             redisNodeList.add(realRedisNode);
         });
         Iterator<RedisNode> dbIterator = dbRedisNodeList.iterator();
