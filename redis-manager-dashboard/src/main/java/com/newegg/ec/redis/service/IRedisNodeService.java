@@ -11,8 +11,6 @@ import java.util.List;
  */
 public interface IRedisNodeService {
 
-    List<RedisNode> getMergedRedisNodeList(Integer clusterId);
-
     List<RedisNode> getRedisNodeList(Integer clusterId);
 
     boolean existRedisNode(RedisNode redisNode);

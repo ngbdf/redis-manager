@@ -20,10 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -70,8 +67,6 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
 
     private ExecutorService threadPool;
 
-    @Async
-    @Scheduled(cron = "30 0/1 * * * ?")
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         int coreSize = Runtime.getRuntime().availableProcessors();
@@ -80,6 +75,8 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
                 new ThreadFactoryBuilder().setNameFormat("cluster-update-pool-thread-%d").build());
     }
 
+    @Async
+    @Scheduled(cron = "30 0/1 * * * ?")
     @Override
     public void collect() {
         List<Cluster> clusterList = clusterService.getAllClusterList();
@@ -133,7 +130,9 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
         for (RedisNode dbRedisNode : dbRedisNodeList) {
             realRedisNodeList.removeIf(redisNode -> RedisUtil.equals(redisNode, dbRedisNode));
         }
-        redisNodeService.addRedisNodeList(realRedisNodeList);
+        if (!realRedisNodeList.isEmpty()) {
+            redisNodeService.addRedisNodeList(realRedisNodeList);
+        }
     }
 
     /**
@@ -144,7 +143,7 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
      */
     private Cluster.ClusterState updateRedisNodeState(Cluster cluster) {
         Cluster.ClusterState clusterState = Cluster.ClusterState.HEALTH;
-        List<RedisNode> redisNodeList = redisNodeService.getMergedRedisNodeList(cluster.getClusterId());
+        List<RedisNode> redisNodeList = getMergedRedisNodeList(cluster);
         for (RedisNode redisNode : redisNodeList) {
             boolean runStatus = redisNode.getRunStatus();
             boolean inCluster = redisNode.getInCluster();
@@ -160,6 +159,17 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
             redisNodeService.updateRedisNode(redisNode);
         }
         return clusterState;
+    }
+
+    private List<RedisNode> getMergedRedisNodeList(Cluster cluster) {
+        try {
+            List<RedisNode> realRedisNodeList = redisService.getRealRedisNodeList(cluster, true);
+            List<RedisNode> dbRedisNodeList = redisNodeService.getRedisNodeList(cluster.getClusterId());
+            return redisNodeService.mergeRedisNode(realRedisNodeList, dbRedisNodeList);
+        } catch (Exception e) {
+            logger.error("Get redis node list failed, cluster: " + cluster.getClusterName(), e);
+            return new ArrayList<>();
+        }
     }
 
     /**

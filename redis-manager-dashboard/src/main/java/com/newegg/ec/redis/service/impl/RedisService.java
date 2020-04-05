@@ -170,7 +170,8 @@ public class RedisService implements IRedisService {
     public List<RedisNode> getRealRedisNodeList(Cluster cluster, boolean needState) {
         RedisURI redisURI = new RedisURI(cluster.getNodes(), cluster.getRedisPassword());
         String redisMode = cluster.getRedisMode();
-        List<RedisNode> nodeList;
+        List<RedisNode> nodeList = new ArrayList<>();
+        ;
         RedisClient redisClient = null;
         try {
             redisClient = RedisClientFactory.buildRedisClient(redisURI);
@@ -184,8 +185,6 @@ public class RedisService implements IRedisService {
                 case REDIS_MODE_SENTINEL:
                     nodeList = redisClient.sentinelNodes(nodesToHostAndPortSet(cluster.getNodes()));
                     break;
-                default:
-                    return new ArrayList<>();
             }
             nodeList.forEach(redisNode -> {
                 redisNode.setGroupId(cluster.getGroupId());
@@ -196,12 +195,13 @@ public class RedisService implements IRedisService {
                     redisNode.setLinkState(telnet ? CONNECTED : UNCONNECTED);
                 }
             });
+
         } catch (Exception e) {
             logger.error("Get redis node list failed, cluster name = " + cluster.getClusterName(), e);
         } finally {
             close(redisClient);
         }
-        return new ArrayList<>();
+        return nodeList;
     }
 
     @Override

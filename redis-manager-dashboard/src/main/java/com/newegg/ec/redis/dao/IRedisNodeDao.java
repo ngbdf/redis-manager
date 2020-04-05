@@ -26,17 +26,18 @@ public interface IRedisNodeDao {
 
     @Insert("<script>" +
             "INSERT INTO redis_node (group_id, cluster_id, node_id, master_id, host, port, node_role, " +
-            "flags, link_state, slot_range, slot_number, container_id, container_name, insert_time, update_time) " +
+            "flags, link_state, in_cluster, run_status, slot_range, slot_number, container_id, container_name, insert_time, update_time) " +
             "VALUES " +
             "<foreach item='redisNode' collection='redisNodeList' separator=','>" +
             "(#{redisNode.groupId}, #{redisNode.clusterId}, #{redisNode.nodeId}, #{redisNode.masterId}, #{redisNode.host}, #{redisNode.port}, #{redisNode.nodeRole}, " +
-            "#{redisNode.flags}, #{redisNode.linkState}, #{redisNode.slotRange}, #{redisNode.slotNumber}, #{redisNode.containerId}, #{redisNode.containerName}, NOW(), NOW())" +
+            "#{redisNode.flags}, #{redisNode.linkState}, #{redisNode.inCluster}, #{redisNode.runStatus}, #{redisNode.slotRange}, #{redisNode.slotNumber}, #{redisNode.containerId}, #{redisNode.containerName}, NOW(), NOW())" +
             "</foreach>" +
             "</script>")
     int insertRedisNodeList(@Param("redisNodeList") List<RedisNode> redisNodeList);
 
     @Update("UPDATE redis_node SET node_id = #{nodeId}, master_id = #{masterId}, node_role = #{nodeRole}, flags = #{flags}, " +
-            "link_state = #{linkState}, slot_range = #{slotRange}, update_time = NOW() " +
+            "link_state = #{linkState}, in_cluster = #{inCluster}, run_status = #{runStatus}, " +
+            "slot_range = #{slotRange}, update_time = NOW() " +
             "WHERE cluster_id = #{clusterId} AND host = #{host} AND port = #{port}")
     int updateRedisNode(RedisNode redisNode);
 
@@ -57,6 +58,8 @@ public interface IRedisNodeDao {
             "`node_role` varchar(50) DEFAULT NULL, " +
             "`flags` varchar(50) DEFAULT NULL, " +
             "`link_state` varchar(50) DEFAULT NULL, " +
+            "`in_cluster` tinyint(1) DEFAULT 0, " +
+            "`run_status` tinyint(1) DEFAULT 0, " +
             "`slot_range` varchar(50) DEFAULT NULL, " +
             "`slot_number` integer(4) DEFAULT NULL, " +
             "`container_id` varchar(255) DEFAULT NULL, " +
