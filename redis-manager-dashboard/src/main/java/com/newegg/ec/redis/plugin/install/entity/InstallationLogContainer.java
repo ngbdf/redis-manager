@@ -29,7 +29,9 @@ public class InstallationLogContainer {
 
     public static void appendLog(String clusterName, String message) {
         BlockingDeque<String> logQueue = getLogDeque(clusterName);
-        logQueue.add("[Installation] " + message);
+        if (!Strings.isNullOrEmpty(message)) {
+            logQueue.add("[Installation] " + message);
+        }
     }
 
 
@@ -57,12 +59,6 @@ public class InstallationLogContainer {
         }
         INSTALLATION_LOG.put(clusterName, logDeque);
         return logDeque;
-    }
-
-    public static void main(String[] args) {
-        appendLog("test", "1");
-        boolean test = isNotUsed("test");
-        System.out.println(test);
     }
 
 }

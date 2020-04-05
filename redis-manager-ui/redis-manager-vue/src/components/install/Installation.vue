@@ -744,7 +744,6 @@ export default {
       );
     },
     getLogs() {
-      console.log(this.isInstallationStart);
       if (this.isInstallationStart) {
         let url =
           "/installation/getInstallationLogs/" + this.installationParam.cluster.clusterName;

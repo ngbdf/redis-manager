@@ -103,13 +103,12 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
         public void run() {
             try {
                 addNewNodeToDB(cluster);
-                Cluster.ClusterState clusterState = updateRedisNodeState(cluster);
-                cluster.setClusterState(clusterState);
+                Cluster.ClusterState clusterStateByNode = updateRedisNodeState(cluster);
                 // update sentinel master
                 if (Objects.equals(REDIS_MODE_SENTINEL, cluster.getRedisMode())) {
                     updateSentinelMasters(cluster);
                 }
-                updateCluster(cluster);
+                updateCluster(clusterStateByNode, cluster);
             } catch (Exception e) {
                 logger.error("Update cluster failed, cluster name = " + cluster.getClusterName(), e);
             }
@@ -117,10 +116,15 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
         }
     }
 
-
-    private void updateCluster(Cluster cluster) {
+    private void updateCluster(Cluster.ClusterState clusterState, Cluster cluster) {
         Cluster completedCluster = clusterService.completeClusterInfo(cluster);
+        // 再次判断集群状态
+        Cluster.ClusterState clusterStateByInfo = completedCluster.getClusterState();
+        if (Objects.equals(clusterStateByInfo, Cluster.ClusterState.BAD)) {
+            clusterState = clusterStateByInfo;
+        }
         try {
+            completedCluster.setClusterState(clusterState);
             clusterDao.updateCluster(completedCluster);
         } catch (Exception e) {
             logger.error("Update cluster completed info failed, cluster name = " + cluster.getClusterName(), e);
