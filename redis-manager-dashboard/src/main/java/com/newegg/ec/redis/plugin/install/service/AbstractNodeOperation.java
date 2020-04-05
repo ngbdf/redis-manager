@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import java.net.SocketException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -120,16 +119,10 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
     public boolean pullConfig(InstallationParam installationParam) {
         boolean sudo = installationParam.isSudo();
         String clusterName = installationParam.getCluster().getClusterName();
-        String url;
         // 模式
         String redisMode = installationParam.getCluster().getRedisMode();
-        try {
-            // eg: ip:port/redis-manager/config/cluster/redis.conf
-            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + CONFIG_ORIGINAL_PATH + redisMode + SLASH + REDIS_CONF;
-        } catch (SocketException e) {
-            logger.error("Get conf from original machine.", e);
-            return false;
-        }
+        // eg: ip:port/redis-manager/config/cluster/redis.conf
+        String url = systemConfig.getCurrentHost() + COLON + systemConfig.getServerPort() + CONFIG_ORIGINAL_PATH + redisMode + SLASH + REDIS_CONF;
         List<Machine> machineList = installationParam.getMachineList();
         String tempPath = INSTALL_BASE_PATH + redisMode;
 

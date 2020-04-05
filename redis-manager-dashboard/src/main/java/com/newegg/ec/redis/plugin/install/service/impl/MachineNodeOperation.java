@@ -11,7 +11,6 @@ import com.newegg.ec.redis.plugin.install.entity.InstallationLogContainer;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.IMachineService;
-import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.SSH2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,13 +87,8 @@ public class MachineNodeOperation extends AbstractNodeOperation {
         Cluster cluster = installationParam.getCluster();
         String clusterName = cluster.getClusterName();
         String image = cluster.getImage();
-        String url;
-        try {
-            // eg: ip:port/redis/machine/xxx.tar.gz
-            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + MACHINE_PACKAGE_ORIGINAL_PATH + image;
-        } catch (SocketException e) {
-            return false;
-        }
+        // eg: ip:port/redis/machine/xxx.tar.gz
+        String url = systemConfig.getCurrentHost() + COLON + systemConfig.getServerPort() + MACHINE_PACKAGE_ORIGINAL_PATH + image;
         List<Machine> machineList = installationParam.getMachineList();
         String tempPath = INSTALL_BASE_PATH + "data/";
         List<Future<Boolean>> resultFutureList = new ArrayList<>(machineList.size());

@@ -2,6 +2,7 @@ package com.newegg.ec.redis.config;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.exception.ConfigurationException;
+import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory;
@@ -11,7 +12,6 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.client.RestTemplate;
@@ -70,6 +70,9 @@ public class SystemConfig implements WebMvcConfigurer {
     @Value("${redis-manager.installation.humpback.enabled:false}")
     private boolean humpbackEnabled;
 
+    @Value("${redis-manager.installation.current-host}")
+    private String currentHost;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         if (Strings.isNullOrEmpty(configPath)) {
@@ -120,7 +123,7 @@ public class SystemConfig implements WebMvcConfigurer {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setReadTimeout(10000);
         factory.setConnectTimeout(15000);
-        return  new RestTemplate(factory);
+        return new RestTemplate(factory);
     }
 
     @Bean
@@ -135,6 +138,7 @@ public class SystemConfig implements WebMvcConfigurer {
 
     /**
      * for vue history mode
+     *
      * @return
      */
     @Bean
@@ -174,5 +178,13 @@ public class SystemConfig implements WebMvcConfigurer {
 
     public boolean getHumpbackEnabled() {
         return humpbackEnabled;
+    }
+
+    public String getCurrentHost() {
+        String ipAddress = LinuxInfoUtil.getIpAddress();
+        if (Strings.isNullOrEmpty(ipAddress)) {
+            ipAddress = currentHost;
+        }
+        return ipAddress;
     }
 }
