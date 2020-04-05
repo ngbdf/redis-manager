@@ -747,7 +747,7 @@ export default {
       console.log(this.isInstallationStart);
       if (this.isInstallationStart) {
         let url =
-          "/installation/getInstallationLogs/" + this.cluster.clusterName;
+          "/installation/getInstallationLogs/" + this.installationParam.cluster.clusterName;
         API.get(
           url,
           null,
@@ -757,24 +757,24 @@ export default {
               return;
             }
             logList.forEach(log => {
-              if (!isEmpty(message)) {
-                if (message.indexOf("Start preparing installation") > -1) {
+              if (!isEmpty(log)) {
+                if (log.indexOf("Start preparing installation") > -1) {
                   this.step = 0;
-                } else if (message.indexOf("Start pulling redis.conf") > -1) {
+                } else if (log.indexOf("Start pulling redis.conf") > -1) {
                   this.step = 1;
-                } else if (message.indexOf("Start pulling image") > -1) {
+                } else if (log.indexOf("Start pulling image") > -1) {
                   this.step = 2;
                 } else if (
-                  message.indexOf("Start installing redis node") > -1
+                  log.indexOf("Start installing redis node") > -1
                 ) {
                   this.step = 3;
-                } else if (message.indexOf("Start initializing") > -1) {
+                } else if (log.indexOf("Start initializing") > -1) {
                   this.step = 4;
-                } else if (message.indexOf("Start saving to database") > -1) {
+                } else if (log.indexOf("Start saving to database") > -1) {
                   this.step = 5;
                 }
                 this.installationConsole += " \n ";
-                this.installationConsole += message;
+                this.installationConsole += log;
               }
             });
           },
@@ -837,7 +837,9 @@ export default {
     this.getMachineList(groupId);
     this.getHumpbackEnabled();
     if (this.logTimer == null) {
-      this.logTimer = setInterval(this.getLogs(), 1000);
+      this.logTimer = setInterval(() => {
+        this.getLogs();
+      }, 1000);
     }
   },
   created() {
