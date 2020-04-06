@@ -44,38 +44,26 @@ public class RedisClusterInfoUtil {
             if (Strings.isNullOrEmpty(key) || Strings.isNullOrEmpty(value)) {
                 continue;
             }
-            if (Objects.equals(key, CLUSTER_STATE)) {
-                value = Objects.equals(value, OK) ? Cluster.ClusterState.HEALTH.toString() :
-                        Objects.equals(value, FAIL) ?
-                                Cluster.ClusterState.BAD.toString() : Cluster.ClusterState.UNKNOWN.toString();
-            }
             String field = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, key);
-
+            // 计算集群状态
+            if (Objects.equals(key, CLUSTER_STATE)) {
+                Cluster.ClusterState clusterState = calculateClusterState(value);
+                infoJSONObject.put(field, clusterState);
+                continue;
+            }
             infoJSONObject.put(field, value);
         }
-        // 计算集群状态
-        Cluster.ClusterState state = calculateClusterState(clusterInfoMap);
-        String stateField = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, CLUSTER_STATE);
-        infoJSONObject.put(stateField, state);
-        Cluster cluster = infoJSONObject.toJavaObject(Cluster.class);
-        return cluster;
+        return infoJSONObject.toJavaObject(Cluster.class);
     }
 
     /**
      * 目前以 cluster info 为标准
      *
-     * @param clusterInfoMap
+     * @param clusterState
      * @return
      */
-    private static Cluster.ClusterState calculateClusterState(Map<String, String> clusterInfoMap) {
-        Cluster.ClusterState state = Cluster.ClusterState.UNKNOWN;
-        String clusterState = clusterInfoMap.get(CLUSTER_STATE);
-        if (Objects.equals(clusterState, OK)) {
-            state = Cluster.ClusterState.HEALTH;
-        } else if (Objects.equals(clusterState, FAIL)) {
-            state = Cluster.ClusterState.BAD;
-        }
-        return state;
+    private static Cluster.ClusterState calculateClusterState(String clusterState) {
+        return Objects.equals(clusterState, OK) ? Cluster.ClusterState.HEALTH : Cluster.ClusterState.BAD;
     }
 
 }

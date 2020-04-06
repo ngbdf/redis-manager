@@ -17,6 +17,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Collect redis information by minute
+ *
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
@@ -43,18 +45,13 @@ public class NodeInfoMinuteCollection extends NodeInfoCollectionAbstract {
     @Scheduled(cron = "0 0/1 * * * ? ")
     @Override
     public void collect() {
-
-        try {
-            List<Cluster> allClusterList = clusterService.getAllClusterList();
-            if (allClusterList == null || allClusterList.isEmpty()) {
-                return;
-            }
-            logger.info("Start collecting node info (minute)... " + "cluster number: " + allClusterList.size());
-            for (Cluster cluster : allClusterList) {
-                threadPool.submit(new CollectNodeInfoTask(cluster, TimeType.MINUTE));
-            }
-        } catch (Exception e) {
-            logger.error("Collect node info data failed, time type = " + TimeType.MINUTE, e);
+        List<Cluster> allClusterList = clusterService.getAllClusterList();
+        if (allClusterList == null || allClusterList.isEmpty()) {
+            return;
+        }
+        logger.info("Start collecting node info (minute), cluster number = " + allClusterList.size());
+        for (Cluster cluster : allClusterList) {
+            threadPool.submit(new CollectNodeInfoTask(cluster, TimeType.MINUTE));
         }
     }
 

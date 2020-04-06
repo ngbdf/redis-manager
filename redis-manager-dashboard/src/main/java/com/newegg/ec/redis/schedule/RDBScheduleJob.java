@@ -14,23 +14,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 @DisallowConcurrentExecution
 public class RDBScheduleJob implements Job {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RDBScheduleJob.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RDBScheduleJob.class);
 
-	@Autowired
-	RdbAnalyzeService rdbAnalyzeService;
+    private static String STATUS = "status";
 
-	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
-		RDBAnalyze rdbAnalyze = (RDBAnalyze) context.getJobDetail().getJobDataMap().get("rdbAnalyzeJob");
-		JSONObject status = rdbAnalyzeService.allocationRDBAnalyzeJob(rdbAnalyze.getId());
-		LOG.info("cron :{}", rdbAnalyze.getSchedule());
-		if ((boolean) status.get("status")) {
-			LOG.info("cron success,message:{}", status.get("message"));
-		} else {
-			LOG.warn("cron faild!,message:{}", status.get("message"));
-		}
+    private static String MESSAGE = "message";
 
-	}
+    @Autowired
+    RdbAnalyzeService rdbAnalyzeService;
 
-
+    @Override
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        RDBAnalyze rdbAnalyze = (RDBAnalyze) context.getJobDetail().getJobDataMap().get("rdbAnalyzeJob");
+        JSONObject status = rdbAnalyzeService.allocationRDBAnalyzeJob(rdbAnalyze.getId());
+        LOG.info("cron :{}", rdbAnalyze.getSchedule());
+        if (status.getBoolean(STATUS)) {
+            LOG.info("cron success, message = {}", status.getString(MESSAGE));
+        } else {
+            LOG.warn("cron failed!,message : {}", status.getString(MESSAGE));
+        }
+    }
 }

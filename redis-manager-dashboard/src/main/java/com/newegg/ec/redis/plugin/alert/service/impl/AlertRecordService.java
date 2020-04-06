@@ -5,9 +5,11 @@ import com.github.pagehelper.PageHelper;
 import com.newegg.ec.redis.plugin.alert.dao.IAlertRecordDao;
 import com.newegg.ec.redis.plugin.alert.entity.AlertRecord;
 import com.newegg.ec.redis.plugin.alert.service.IAlertRecordService;
+import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -23,6 +25,9 @@ import java.util.Map;
 public class AlertRecordService implements IAlertRecordService {
 
     private static final Logger logger = LoggerFactory.getLogger(AlertRecordService.class);
+
+    @Value("${redis-manager.alert.data-keep-days:15}")
+    private int dataKeepDays;
 
     @Autowired
     private IAlertRecordDao alertRecordDao;
@@ -79,8 +84,9 @@ public class AlertRecordService implements IAlertRecordService {
     }
 
     @Override
-    public boolean deleteAlertRecordByTime(Timestamp earliestTime) {
+    public boolean cleanAlertRecordByTime() {
         try {
+            Timestamp earliestTime = TimeUtil.getTime(dataKeepDays * TimeUtil.ONE_DAY);
             alertRecordDao.deleteAlertRecordByTime(earliestTime);
             return true;
         } catch (Exception e) {

@@ -26,6 +26,8 @@ import java.sql.Timestamp;
  */
 public class Cluster {
 
+    public static String UNKNOWN_VALUE = "unknown";
+
     private Integer clusterId;
 
     private Integer groupId;
@@ -41,11 +43,11 @@ public class Cluster {
 
     private String nodes;
 
-    private String redisMode;
+    private String redisMode = UNKNOWN_VALUE;
 
-    private String os;
+    private String os = UNKNOWN_VALUE;
 
-    private String redisVersion;
+    private String redisVersion = UNKNOWN_VALUE;
 
     private String image;
 
@@ -105,11 +107,11 @@ public class Cluster {
      */
     private int clusterSize = 0;
 
-    private int sentinelOk;
+    private int sentinelOk = 0;
 
-    private int sentinelMasters;
+    private int sentinelMasters = 0;
 
-    private int masterOk;
+    private int masterOk = 0;
 
     private String redisPassword;
 
@@ -129,12 +131,21 @@ public class Cluster {
 
     public enum ClusterState {
 
-        UNKNOWN,
-
+        /**
+         * cluster info state: ok
+         */
         HEALTH,
 
+        /**
+         * cluster info state not ok
+         * can't get cluster info
+         */
         BAD,
 
+        /**
+         * redis node not good
+         *
+         */
         WARN;
     }
 

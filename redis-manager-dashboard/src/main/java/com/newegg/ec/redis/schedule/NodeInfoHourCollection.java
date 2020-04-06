@@ -17,6 +17,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Collect redis information by hour
+ *
  * @author Jay.H.Zou
  * @date 2019/7/22
  */
@@ -37,23 +39,19 @@ public class NodeInfoHourCollection extends NodeInfoCollectionAbstract {
     }
 
     /**
-     * 一个小时跑一次，获取DB数据，计算所有节点以 HOUR 为单位的 avg, max, min
+     * 1 hour
      */
     @Async
     @Scheduled(cron = "0 0 0/1 * * ? ")
     @Override
     public void collect() {
-        try {
-            List<Cluster> allClusterList = clusterService.getAllClusterList();
-            if (allClusterList == null || allClusterList.isEmpty()) {
-                return;
-            }
-            logger.info("Start collecting node info (hour)... " + "cluster number: " + allClusterList.size());
-            for (Cluster cluster : allClusterList) {
-                threadPool.submit(new CollectNodeInfoTask(cluster, TimeType.HOUR));
-            }
-        } catch (Exception e) {
-            logger.error("Collect node info data failed, time type = " + TimeType.HOUR, e);
+        List<Cluster> allClusterList = clusterService.getAllClusterList();
+        if (allClusterList == null || allClusterList.isEmpty()) {
+            return;
+        }
+        logger.info("Start collecting node info (hour), cluster number: " + allClusterList.size());
+        for (Cluster cluster : allClusterList) {
+            threadPool.submit(new CollectNodeInfoTask(cluster, TimeType.HOUR));
         }
     }
 }

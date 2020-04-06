@@ -44,7 +44,7 @@ spring:
     # 必填，与数据库同名
     database: ${DATASOURCE_DATABASE:redis_manager}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8}
+    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8}
     username: ${DATASOURCE_USERNAME:root}
     password: ${DATASOURCE_PASSWORD:xxxxxx}
     #hikari数据库连接池
@@ -90,6 +90,8 @@ redis-manager:
     slow-log-limit: 100
   # installation configuration
   installation:
+    # 当前主机的 ip，非必须填写，如果使用集群安装无法获取主机IP导致无法安装，请在此填写
+    current-host:
     # redis.conf(absolute director)
     conf-path: /data/conf/
     # physics machine

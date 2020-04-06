@@ -102,4 +102,17 @@ public class NodeInfoParam {
     public void setNodeList(List<String> nodeList) {
         this.nodeList = nodeList;
     }
+
+    @Override
+    public String toString() {
+        return "NodeInfoParam{" +
+                "clusterId=" + clusterId +
+                ", timeType=" + timeType +
+                ", infoItem='" + infoItem + '\'' +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", node='" + node + '\'' +
+                ", nodeList=" + nodeList +
+                '}';
+    }
 }

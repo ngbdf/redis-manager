@@ -203,7 +203,7 @@
                 >
                   <i class="el-icon-info info"></i>
                 </el-tooltip>
-              </el-form-item> -->
+              </el-form-item>-->
               <el-form-item label="Cluster Info" prop="clusterInfo">
                 <el-input type="input" v-model="installationParam.clusterInfo"></el-input>
               </el-form-item>
@@ -293,6 +293,29 @@ export default {
             if (result.code != 0) {
               let cluster = result.data;
               return callback(new Error(value + " has exist"));
+            } else {
+              callback();
+            }
+          },
+          err => {
+            return callback(new Error("Network error, " + err));
+          }
+        );
+      }
+    };
+    var validateClusterNameCurrentUsed = (rule, value, callback) => {
+      if (isEmpty(value) || isEmpty(value.trim())) {
+        return callback(new Error("Please enter cluster name"));
+      } else {
+        let url = "/installation/validateClusterName/" + value;
+        API.get(
+          url,
+          null,
+          response => {
+            let result = response.data;
+            if (result.code != 0) {
+              let cluster = result.data;
+              return callback(new Error(value + " is being installed"));
             } else {
               callback();
             }
@@ -427,12 +450,16 @@ export default {
       },
       installationInfoVisible: false,
       installationConsole: "Prepare to install redis...",
-      websocketURI: "",
       rules: {
         clusterName: [
           {
             required: true,
             validator: validateClusterName,
+            trigger: "blur"
+          },
+          {
+            required: true,
+            validator: validateClusterNameCurrentUsed,
             trigger: "blur"
           }
         ],
@@ -539,10 +566,11 @@ export default {
         ]
       },
       allMachineList: [],
-      websock: null,
       step: -1,
       installationLoading: false,
-      humpbackEnabled: false
+      humpbackEnabled: false,
+      logTimer: null,
+      isInstallationStart: false
     };
   },
   methods: {
@@ -579,11 +607,7 @@ export default {
         if (valid) {
           //this.installationInfoVisible = true;
           this.buildParam();
-          try {
-            this.initWebSocket();
-          } catch (err) {
-            message.error("Open websocket failed.")
-          }
+          this.isInstallationStart = true;
           this.install();
         } else {
           return false;
@@ -702,50 +726,6 @@ export default {
       );
     },
     validateMachine(machine, handler) {},
-    initWebSocket() {
-      this.websock = new WebSocket(this.websocketURI);
-      this.websock.onmessage = this.websocketonmessage;
-      this.websock.onopen = this.websocketonopen;
-      this.websock.onerror = this.websocketonerror;
-      this.websock.onclose = this.websocketclose;
-    },
-    websocketonopen() {
-      //连接建立之后执行send方法发送数据
-      message.info("Open socket");
-      this.websocketsend(this.installationParam.clusterName);
-    },
-    websocketonerror() {
-      message.error("Build websocket failed, but you can still install.");
-    },
-    websocketonmessage(msg) {
-      //数据接收
-      var message = msg.data;
-      if (!isEmpty(message)) {
-        if (message.indexOf("Start preparing installation") > -1) {
-          this.step = 0;
-        } else if (message.indexOf("Start pulling redis.conf") > -1) {
-          this.step = 1;
-        } else if (message.indexOf("Start pulling image") > -1) {
-          this.step = 2;
-        } else if (message.indexOf("Start installing redis node") > -1) {
-          this.step = 3;
-        } else if (message.indexOf("Start initializing") > -1) {
-          this.step = 4;
-        } else if (message.indexOf("Start saving to database") > -1) {
-          this.step = 5;
-        }
-        this.installationConsole += " \n ";
-        this.installationConsole += message;
-      }
-    },
-    websocketsend(data) {
-      //数据发送
-      this.websock.send(data);
-    },
-    websocketclose(e) {
-      //关闭
-      message.error("Close websocket", e);
-    },
     getHumpbackEnabled() {
       let url = "/system/humpbackEnabled";
       API.get(
@@ -763,19 +743,45 @@ export default {
         }
       );
     },
-    getServerAddress() {
-      let url = "/system/getServerAddress";
-      API.get(
-        url,
-        null,
-        response => {
-          let serverAddress = response.data.data;
-          this.websocketURI = "ws://" + serverAddress + "/websocket/install";
-        },
-        err => {
-          message.error(err);
-        }
-      );
+    getLogs() {
+      if (this.isInstallationStart) {
+        let url =
+          "/installation/getInstallationLogs/" + this.installationParam.cluster.clusterName;
+        API.get(
+          url,
+          null,
+          response => {
+            let logList = response.data.data;
+            if (logList.length == 0) {
+              return;
+            }
+            logList.forEach(log => {
+              if (!isEmpty(log)) {
+                if (log.indexOf("Start preparing installation") > -1) {
+                  this.step = 0;
+                } else if (log.indexOf("Start pulling redis.conf") > -1) {
+                  this.step = 1;
+                } else if (log.indexOf("Start pulling image") > -1) {
+                  this.step = 2;
+                } else if (
+                  log.indexOf("Start installing redis node") > -1
+                ) {
+                  this.step = 3;
+                } else if (log.indexOf("Start initializing") > -1) {
+                  this.step = 4;
+                } else if (log.indexOf("Start saving to database") > -1) {
+                  this.step = 5;
+                }
+                this.installationConsole += " \n ";
+                this.installationConsole += log;
+              }
+            });
+          },
+          err => {
+            message.error(err);
+          }
+        );
+      }
     }
   },
   computed: {
@@ -820,6 +826,7 @@ export default {
         name: "installation",
         params: { groupId: groupId }
       });
+      this.getMachineList(groupId);
     }
   },
   mounted() {
@@ -828,7 +835,19 @@ export default {
     let groupId = this.currentGroup.groupId;
     this.getMachineList(groupId);
     this.getHumpbackEnabled();
-    this.getServerAddress();
+    if (this.logTimer == null) {
+      this.logTimer = setInterval(() => {
+        this.getLogs();
+      }, 1000);
+    }
+  },
+  created() {
+    clearInterval(this.logTimer);
+    this.logTimer = null;
+  },
+  beforeDestroy() {
+    clearInterval(this.logTimer);
+    this.logTimer = null;
   }
 };
 </script>
