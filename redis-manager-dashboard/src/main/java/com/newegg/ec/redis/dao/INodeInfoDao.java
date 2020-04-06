@@ -36,6 +36,7 @@ public interface INodeInfoDao {
             "<foreach item='node' collection='nodeInfoParam.nodeList' open='(' separator=',' close=')'>" +
             "#{node}" +
             "</foreach>" +
+            " AND last_time IN (1, 0)" +
             "</script>")
     List<NodeInfo> selectNodeInfoList(@Param("nodeInfoParam") NodeInfoParam nodeInfoParam);
 
@@ -50,7 +51,7 @@ public interface INodeInfoDao {
             "<foreach item='node' collection='nodeInfoParam.nodeList' open='(' separator=',' close=')'>" +
             "#{node}" +
             "</foreach>" +
-            "AND last_time IN (1, 0)" +
+            " AND last_time IN (1, 0)" +
             "</script>")
     List<NodeInfo> selectNodeInfoListWithInfoItem(@Param("nodeInfoParam") NodeInfoParam nodeInfoParam);
 
