@@ -119,7 +119,9 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
     }
 
     /**
-     * 定时获取 node info 进行计算
+     *
+     * 获取 node info 进行计算
+     * 获取 node status 计算
      */
     @Async
     @Scheduled(cron = "0 0/1 * * * ? ")
@@ -269,13 +271,13 @@ public class AlertMessageSchedule implements IDataCollection, IDataCleanup, Appl
                     reason += node + " not in cluster;\n";
                 }
                 if (!flagsNormal) {
-                    reason += node + " has bad flags: " + flags + "\n";
+                    reason += node + " has bad flags: " + flags + ";\n";
                 }
                 if (!Objects.equals(linkState, CONNECTED)) {
-                    reason += node + " " + linkState + "\n";
+                    reason += node + " " + linkState + ";\n";
                 }
                 if (!nodeRoleNormal) {
-                    reason += node + " role is " + nodeRole;
+                    reason += node + " role is " + nodeRole + ";\n";
                 }
                 if (!Strings.isNullOrEmpty(reason)) {
                     alertRecordList.add(buildClusterAlertRecord(group, cluster, alertRule, node, reason));

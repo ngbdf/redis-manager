@@ -44,7 +44,7 @@ spring:
     # 必填，与数据库同名
     database: ${DATASOURCE_DATABASE:redis_manager}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8}
+    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8}
     username: ${DATASOURCE_USERNAME:root}
     password: ${DATASOURCE_PASSWORD:xxxxxx}
     #hikari数据库连接池
