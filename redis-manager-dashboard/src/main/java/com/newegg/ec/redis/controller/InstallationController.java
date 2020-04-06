@@ -6,6 +6,7 @@ import com.newegg.ec.redis.entity.OperationObjectType;
 import com.newegg.ec.redis.entity.OperationType;
 import com.newegg.ec.redis.entity.Result;
 import com.newegg.ec.redis.plugin.install.InstallationTemplate;
+import com.newegg.ec.redis.plugin.install.entity.InstallationLogContainer;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.plugin.install.service.impl.DockerNodeOperation;
@@ -16,10 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -96,8 +94,23 @@ public class InstallationController {
         Integer installationEnvironment = installationParam.getCluster().getInstallationEnvironment();
         AbstractNodeOperation nodeOperation = clusterService.getNodeOperation(installationEnvironment);
         boolean result = installationTemplate.installFlow(nodeOperation, installationParam);
+        InstallationLogContainer.remove(installationParam.getCluster().getClusterName());
         return result ? Result.successResult() : Result.failResult();
     }
+
+    @RequestMapping(value = "/validateClusterName/{clusterName}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result validateClusterName(@PathVariable("clusterName") String clusterName) {
+        return Result.successResult();
+    }
+
+    @RequestMapping(value = "/getInstallationLogs/{clusterName}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result getInstallationLogs(@PathVariable("clusterName") String clusterName) {
+        List<String> logs = InstallationLogContainer.getLogs(clusterName);
+        return Result.successResult(logs);
+    }
+
 
     /*@RequestMapping(value = "prepareForInstallation", method = RequestMethod.POST)
     @ResponseBody

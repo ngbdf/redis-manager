@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface InstallationOperation {
 
-    int MIN_MEMORY_FREE = 10;
+    double MIN_MEMORY_FREE = 0.5;
 
     /**
      * @return

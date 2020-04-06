@@ -4,14 +4,13 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
-import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.plugin.install.entity.InstallationLogContainer;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 import com.newegg.ec.redis.service.IMachineService;
-import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.SSH2Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,13 +87,8 @@ public class MachineNodeOperation extends AbstractNodeOperation {
         Cluster cluster = installationParam.getCluster();
         String clusterName = cluster.getClusterName();
         String image = cluster.getImage();
-        String url;
-        try {
-            // eg: ip:port/redis/machine/xxx.tar.gz
-            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + MACHINE_PACKAGE_ORIGINAL_PATH + image;
-        } catch (SocketException e) {
-            return false;
-        }
+        // eg: ip:port/redis/machine/xxx.tar.gz
+        String url = systemConfig.getCurrentHost() + COLON + systemConfig.getServerPort() + MACHINE_PACKAGE_ORIGINAL_PATH + image;
         List<Machine> machineList = installationParam.getMachineList();
         String tempPath = INSTALL_BASE_PATH + "data/";
         List<Future<Boolean>> resultFutureList = new ArrayList<>(machineList.size());
@@ -106,8 +99,8 @@ public class MachineNodeOperation extends AbstractNodeOperation {
                     return true;
                 } catch (Exception e) {
                     String message = "Pull machine image failed, host: " + machine.getHost();
-                    InstallationWebSocketHandler.appendLog(clusterName, message);
-                    InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                    InstallationLogContainer.appendLog(clusterName, message);
+                    InstallationLogContainer.appendLog(clusterName, e.getMessage());
                     logger.error(message, e);
                     return false;
                 }
@@ -119,7 +112,7 @@ public class MachineNodeOperation extends AbstractNodeOperation {
                     return false;
                 }
             } catch (Exception e) {
-                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                InstallationLogContainer.appendLog(clusterName, e.getMessage());
                 logger.error("", e);
                 return false;
             }
@@ -134,13 +127,13 @@ public class MachineNodeOperation extends AbstractNodeOperation {
                 // 解压到目标目录
                 String result = SSH2Util.unzipToTargetPath(machine, tempPackagePath, targetPath, sudo);
                 if (!Strings.isNullOrEmpty(result)) {
-                    InstallationWebSocketHandler.appendLog(clusterName, "Unzip failed, host: " + machine.getHost());
-                    InstallationWebSocketHandler.appendLog(clusterName, result);
+                    InstallationLogContainer.appendLog(clusterName, "Unzip failed, host: " + machine.getHost());
+                    InstallationLogContainer.appendLog(clusterName, result);
                     return false;
                 }
             } catch (Exception e) {
-                InstallationWebSocketHandler.appendLog(clusterName, "Unzip failed, host: " + machine.getHost());
-                InstallationWebSocketHandler.appendLog(clusterName, "Unzip failed, host: " + machine.getHost());
+                InstallationLogContainer.appendLog(clusterName, "Unzip failed, host: " + machine.getHost());
+                InstallationLogContainer.appendLog(clusterName, "Unzip failed, host: " + machine.getHost());
                 logger.error("", e);
                 return false;
             }
@@ -177,7 +170,7 @@ public class MachineNodeOperation extends AbstractNodeOperation {
             }
             String command = String.format(template, targetPath);
             String execute = SSH2Util.execute(machine, command);
-            InstallationWebSocketHandler.appendLog(clusterName, execute);
+            InstallationLogContainer.appendLog(clusterName, execute);
             if (Strings.isNullOrEmpty(execute)) {
                 return true;
             }
@@ -186,12 +179,12 @@ public class MachineNodeOperation extends AbstractNodeOperation {
             if (Strings.isNullOrEmpty(execute2)) {
                 return true;
             }
-            InstallationWebSocketHandler.appendLog(clusterName, execute2);
+            InstallationLogContainer.appendLog(clusterName, execute2);
             return false;
         } catch (Exception e) {
             String message = "Start the installation package failed, host: " + host + ", port: " + port;
-            InstallationWebSocketHandler.appendLog(clusterName, message);
-            InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+            InstallationLogContainer.appendLog(clusterName, message);
+            InstallationLogContainer.appendLog(clusterName, e.getMessage());
             logger.error(message, e);
             return false;
         }

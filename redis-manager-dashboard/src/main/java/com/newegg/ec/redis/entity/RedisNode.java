@@ -12,6 +12,10 @@ import java.sql.Timestamp;
  */
 public class RedisNode {
 
+    public static final String CONNECTED = "connected";
+
+    public static final String UNCONNECTED = "unconnected";
+
     /**
      * mysql table id
      */
@@ -62,8 +66,6 @@ public class RedisNode {
     private boolean inCluster;
 
     private boolean runStatus;
-
-    private boolean inDatabase;
 
     private Timestamp insertTime;
 
@@ -233,14 +235,6 @@ public class RedisNode {
 
     public void setRunStatus(boolean runStatus) {
         this.runStatus = runStatus;
-    }
-
-    public boolean getInDatabase() {
-        return inDatabase;
-    }
-
-    public void setInDatabase(boolean inDatabase) {
-        this.inDatabase = inDatabase;
     }
 
     public Timestamp getInsertTime() {

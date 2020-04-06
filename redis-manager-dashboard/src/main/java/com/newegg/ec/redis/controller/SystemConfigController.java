@@ -46,6 +46,7 @@ public class SystemConfigController implements ApplicationListener<ContextRefres
         return Result.successResult(systemConfig.getHumpbackEnabled());
     }
 
+    @Deprecated
     @RequestMapping(value = "/getServerAddress", method = RequestMethod.GET)
     @ResponseBody
     public Result getServerAddress() throws SocketException {

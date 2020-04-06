@@ -32,12 +32,10 @@ public interface INodeInfoDao {
             "WHERE update_time &gt;= #{nodeInfoParam.startTime} " +
             "AND update_time &lt;= #{nodeInfoParam.endTime} " +
             "AND time_type = #{nodeInfoParam.timeType} " +
-            "<if test='nodeInfoParam.nodeList != null and nodeInfoParam.nodeList.size() > 0'> " +
             "AND node IN " +
             "<foreach item='node' collection='nodeInfoParam.nodeList' open='(' separator=',' close=')'>" +
             "#{node}" +
             "</foreach>" +
-            "</if>" +
             "</script>")
     List<NodeInfo> selectNodeInfoList(@Param("nodeInfoParam") NodeInfoParam nodeInfoParam);
 
@@ -48,12 +46,11 @@ public interface INodeInfoDao {
             "WHERE update_time &gt;= #{nodeInfoParam.startTime} " +
             "AND update_time &lt;= #{nodeInfoParam.endTime} " +
             "AND time_type = #{nodeInfoParam.timeType} " +
-            "<if test='nodeInfoParam.nodeList != null and nodeInfoParam.nodeList.size() > 0'> " +
             "AND node IN " +
             "<foreach item='node' collection='nodeInfoParam.nodeList' open='(' separator=',' close=')'>" +
             "#{node}" +
             "</foreach>" +
-            "</if>" +
+            "AND last_time IN (1, 0)" +
             "</script>")
     List<NodeInfo> selectNodeInfoListWithInfoItem(@Param("nodeInfoParam") NodeInfoParam nodeInfoParam);
 
@@ -149,7 +146,7 @@ public interface INodeInfoDao {
             "`expires` integer(8) NOT NULL, " +
             "`update_time` datetime(0) NOT NULL, " +
             "PRIMARY KEY (info_id), " +
-            "INDEX `multiple_query` (`update_time`, `time_type`, `node`) " +
+            "INDEX `multiple_query`(`time_type`, `last_time`, `node`, `update_time`) " +
             ") ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;")
     void createNodeInfoTable(@Param("clusterId") Integer clusterId);
 }

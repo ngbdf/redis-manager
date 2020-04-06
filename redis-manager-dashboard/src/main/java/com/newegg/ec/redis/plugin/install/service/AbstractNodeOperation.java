@@ -4,9 +4,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.newegg.ec.redis.config.SystemConfig;
-import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
+import com.newegg.ec.redis.plugin.install.entity.InstallationLogContainer;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.util.LinuxInfoUtil;
 import com.newegg.ec.redis.util.NetworkUtil;
@@ -18,10 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import java.net.SocketException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.newegg.ec.redis.config.SystemConfig.CONFIG_ORIGINAL_PATH;
 import static com.newegg.ec.redis.util.LinuxInfoUtil.MEMORY_FREE;
@@ -73,19 +75,19 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
                 info = LinuxInfoUtil.getLinuxInfo(machine);
             } catch (Exception e) {
                 String message = "Get " + host + " info failed";
-                InstallationWebSocketHandler.appendLog(clusterName, message);
-                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                InstallationLogContainer.appendLog(clusterName, message);
+                InstallationLogContainer.appendLog(clusterName, e.getMessage());
                 logger.error(message, e);
                 commonCheck = false;
             }
             String memoryFreeStr = info.get(MEMORY_FREE);
             if (Strings.isNullOrEmpty(memoryFreeStr)) {
-                InstallationWebSocketHandler.appendLog(clusterName, "Can't get " + host + " memory info.");
+                InstallationLogContainer.appendLog(clusterName, "Can't get " + host + " memory info.");
                 commonCheck = false;
             } else {
                 Integer memoryFree = Integer.valueOf(memoryFreeStr);
                 if (memoryFree <= MIN_MEMORY_FREE) {
-                    InstallationWebSocketHandler.appendLog(clusterName, host + " not enough memory, free memory: " + memoryFree);
+                    InstallationLogContainer.appendLog(clusterName, host + " not enough memory, free memory: " + memoryFree);
                     commonCheck = false;
                 }
             }
@@ -106,7 +108,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
             int port = redisNode.getPort();
             // 如果端口能通，则认为该端口被占用
             if (NetworkUtil.telnet(ip, port)) {
-                InstallationWebSocketHandler.appendLog(clusterName, "The port has been used, host: " + ip + ", port: " + port);
+                InstallationLogContainer.appendLog(clusterName, "The port has been used, host: " + ip + ", port: " + port);
                 return false;
             }
         }
@@ -117,16 +119,10 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
     public boolean pullConfig(InstallationParam installationParam) {
         boolean sudo = installationParam.isSudo();
         String clusterName = installationParam.getCluster().getClusterName();
-        String url;
         // 模式
         String redisMode = installationParam.getCluster().getRedisMode();
-        try {
-            // eg: ip:port/redis-manager/config/cluster/redis.conf
-            url = LinuxInfoUtil.getIpAddress() + COLON + systemConfig.getServerPort() + CONFIG_ORIGINAL_PATH + redisMode + SLASH + REDIS_CONF;
-        } catch (SocketException e) {
-            logger.error("Get conf from original machine.", e);
-            return false;
-        }
+        // eg: ip:port/redis-manager/config/cluster/redis.conf
+        String url = systemConfig.getCurrentHost() + COLON + systemConfig.getServerPort() + CONFIG_ORIGINAL_PATH + redisMode + SLASH + REDIS_CONF;
         List<Machine> machineList = installationParam.getMachineList();
         String tempPath = INSTALL_BASE_PATH + redisMode;
 
@@ -136,16 +132,16 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
                 String result = SSH2Util.copyFileToRemote(machine, tempPath, url, sudo);
                 logger.info(result);
                 if (!result.contains("OK")) {
-                    InstallationWebSocketHandler.appendLog(clusterName, result);
+                    InstallationLogContainer.appendLog(clusterName, result);
                     String message = "Copy redis.conf to target machine failed, host: " + machine.getHost();
                     logger.error(message);
-                    InstallationWebSocketHandler.appendLog(clusterName, message);
+                    InstallationLogContainer.appendLog(clusterName, message);
                     return false;
                 }
             } catch (Exception e) {
                 String message = "Download redis.conf to target machine failed, host: " + machine.getHost();
-                InstallationWebSocketHandler.appendLog(clusterName, message);
-                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                InstallationLogContainer.appendLog(clusterName, message);
+                InstallationLogContainer.appendLog(clusterName, e.getMessage());
                 logger.error(message, e);
                 return false;
             }
@@ -161,20 +157,20 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
                 // 清理、复制
                 String copyResult = SSH2Util.copy2(machine, tempRedisConf, targetPath, sudo);
                 if (!Strings.isNullOrEmpty(copyResult)) {
-                    InstallationWebSocketHandler.appendLog(clusterName, copyResult);
+                    InstallationLogContainer.appendLog(clusterName, copyResult);
                     return false;
                 }
                 // 修改配置文件
                 Map<String, String> configs = getBaseConfigs(redisNode.getHost(), redisNode.getPort(), targetPath);
                 String changeResult = RedisConfigUtil.variableAssignment(machine, targetPath, configs, sudo);
                 if (!Strings.isNullOrEmpty(changeResult)) {
-                    InstallationWebSocketHandler.appendLog(clusterName, changeResult);
+                    InstallationLogContainer.appendLog(clusterName, changeResult);
                     return false;
                 }
             } catch (Exception e) {
                 String message = "Copy or change redis.conf to target machine failed, host: " + machine.getHost();
-                InstallationWebSocketHandler.appendLog(clusterName, message);
-                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                InstallationLogContainer.appendLog(clusterName, message);
+                InstallationLogContainer.appendLog(clusterName, e.getMessage());
                 logger.error(message, e);
                 return false;
             }

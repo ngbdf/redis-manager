@@ -25,5 +25,5 @@ public interface INodeInfoService {
 
     boolean addNodeInfo(NodeInfoParam nodeInfoParam, List<NodeInfo> nodeInfoList);
 
-    boolean cleanupNodeInfo(int clusterId);
+    boolean cleanupNodeInfo(Integer clusterId);
 }

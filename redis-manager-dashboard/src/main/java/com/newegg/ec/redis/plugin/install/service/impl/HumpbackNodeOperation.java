@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.config.SystemConfig;
-import com.newegg.ec.redis.controller.websocket.InstallationWebSocketHandler;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.Machine;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.exception.ConfigurationException;
+import com.newegg.ec.redis.plugin.install.entity.InstallationLogContainer;
 import com.newegg.ec.redis.plugin.install.entity.InstallationParam;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
@@ -106,8 +106,8 @@ public class HumpbackNodeOperation extends DockerNodeOperation {
                 humpbackAPI.getDockerVersion(host);
             } catch (Exception e) {
                 String message = "Check humpback environment failed, host: " + host;
-                InstallationWebSocketHandler.appendLog(clusterName, message);
-                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                InstallationLogContainer.appendLog(clusterName, message);
+                InstallationLogContainer.appendLog(clusterName, e.getMessage());
                 logger.error(message, e);
                 return false;
             }
@@ -131,8 +131,8 @@ public class HumpbackNodeOperation extends DockerNodeOperation {
                     return true;
                 } catch (Exception e) {
                     String message = "Pull docker image failed, host: " + host;
-                    InstallationWebSocketHandler.appendLog(clusterName, message);
-                    InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                    InstallationLogContainer.appendLog(clusterName, message);
+                    InstallationLogContainer.appendLog(clusterName, e.getMessage());
                     logger.error(message, e);
                     return false;
                 }
@@ -144,7 +144,7 @@ public class HumpbackNodeOperation extends DockerNodeOperation {
                     return false;
                 }
             } catch (Exception e) {
-                InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+                InstallationLogContainer.appendLog(clusterName, e.getMessage());
                 logger.error("", e);
                 return false;
             }
@@ -185,8 +185,8 @@ public class HumpbackNodeOperation extends DockerNodeOperation {
             return true;
         } catch (Exception e) {
             String message = "Start container failed, host: " + host + ", port: " + port;
-            InstallationWebSocketHandler.appendLog(clusterName, message);
-            InstallationWebSocketHandler.appendLog(clusterName, e.getMessage());
+            InstallationLogContainer.appendLog(clusterName, message);
+            InstallationLogContainer.appendLog(clusterName, e.getMessage());
             logger.error(message, e);
             return false;
         }

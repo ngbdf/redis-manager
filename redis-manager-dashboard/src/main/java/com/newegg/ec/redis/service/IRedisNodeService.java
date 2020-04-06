@@ -1,5 +1,6 @@
 package com.newegg.ec.redis.service;
 
+import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.plugin.install.service.AbstractNodeOperation;
 
@@ -11,9 +12,9 @@ import java.util.List;
  */
 public interface IRedisNodeService {
 
-    List<RedisNode> getRedisNodeListByClusterId(Integer clusterId);
+    List<RedisNode> getRedisNodeList(Integer clusterId);
 
-    RedisNode getRedisNodeById(Integer redisNodeId);
+    List<RedisNode> getMergedRedisNodeList(Integer clusterId);
 
     boolean existRedisNode(RedisNode redisNode);
 

@@ -5,7 +5,6 @@ import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
 
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +26,7 @@ public class LinuxInfoUtil {
     private LinuxInfoUtil() {
     }
 
-    public static String getIpAddress() throws SocketException {
+    public static String getIpAddress() {
         /*Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
         InetAddress ip;
         while (allNetInterfaces.hasMoreElements()) {
@@ -49,12 +48,12 @@ public class LinuxInfoUtil {
             ip = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
-            ip = "127.0.0.1";
+            ip = null;
         }
         return ip;
     }
 
-    public static final boolean login(Machine machine) throws Exception {
+    public static boolean login(Machine machine) throws Exception {
         Connection connection = null;
         try {
             connection = SSH2Util.getConnection(machine);
@@ -66,7 +65,7 @@ public class LinuxInfoUtil {
         return true;
     }
 
-    public static final Map<String, String> getLinuxInfo(Machine machine) throws Exception {
+    public static Map<String, String> getLinuxInfo(Machine machine) throws Exception {
         String result = SSH2Util.execute(machine, getInfoCommand());
         return formatResult(result);
     }

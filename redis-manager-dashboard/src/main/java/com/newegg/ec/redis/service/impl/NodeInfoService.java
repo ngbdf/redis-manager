@@ -2,11 +2,14 @@ package com.newegg.ec.redis.service.impl;
 
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.dao.INodeInfoDao;
+import com.newegg.ec.redis.dao.IRedisNodeDao;
 import com.newegg.ec.redis.entity.NodeInfo;
 import com.newegg.ec.redis.entity.NodeInfoParam;
+import com.newegg.ec.redis.entity.RedisNode;
 import com.newegg.ec.redis.exception.ConfigurationException;
 import com.newegg.ec.redis.exception.ParameterException;
 import com.newegg.ec.redis.service.INodeInfoService;
+import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -44,6 +48,9 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
 
     @Autowired
     private INodeInfoDao nodeInfoDao;
+
+    @Autowired
+    private IRedisNodeDao redisNodeDao;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
@@ -152,15 +159,15 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
     }
 
     @Override
-    public boolean cleanupNodeInfo(int clusterId) {
+    public boolean cleanupNodeInfo(Integer clusterId) {
         Timestamp oldestTime = TimeUtil.getTime(dataKeepDays * TimeUtil.ONE_DAY);
         try {
             nodeInfoDao.deleteNodeInfoByTime(clusterId, oldestTime);
             return true;
         } catch (Exception e) {
             logger.error("Clean up node info data failed, cluster id = " + clusterId, e);
+            return false;
         }
-        return false;
     }
 
     /**
@@ -196,6 +203,15 @@ public class NodeInfoService implements INodeInfoService, ApplicationListener<Co
             startTime = TimeUtil.getDefaultLastTimestamp();
             nodeInfoParam.setEndTime(endTime);
             nodeInfoParam.setStartTime(startTime);
+        }
+        List<String> nodeList = nodeInfoParam.getNodeList();
+        if (nodeList == null || nodeList.isEmpty()) {
+            List<RedisNode> redisNodes = redisNodeDao.selectRedisNodeListByCluster(nodeInfoParam.getClusterId());
+            nodeList = new LinkedList<>();
+            for (RedisNode redisNode : redisNodes) {
+                nodeList.add(RedisUtil.getNodeString(redisNode));
+            }
+            nodeInfoParam.setNodeList(nodeList);
         }
         return nodeInfoParam;
     }
