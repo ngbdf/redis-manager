@@ -2,7 +2,7 @@
 set encoding=utf-8
 project_path=$(cd `dirname $0`; pwd)
 cd $project_path
-mkfir logs
+mkdir logs
 cd ../
 
 CLASSPATH=conf/:web/
