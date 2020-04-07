@@ -3,7 +3,7 @@
 [![Build Status](https://user-gold-cdn.xitu.io/2019/11/5/16e3bca6874b2a56?w=90&h=20&f=svg&s=724)](https://travis-ci.org/ngbdf/redis-manager)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-**Redis Manager** 是 Redis 一站式管理平台，支持集群（cluster、master-replica、sentinel）的监控、安装（除sentinel）、管理、告警以及基本的数据操作功能
+**Redis Manager** 是 Redis 一站式管理平台，支持集群（cluster、master-replica、sentinel）的监控、安装（除sentinel）、管理、告警以及基本的数据操作功能  
 **集群监控**：支持监控 Memory、Clients 等 Redis 重要指标；可实时查看 Redis Info、Redis Config 和 Slow Log  
 **集群创建**：支持 Docker、Machine、Humpback方式  
 **集群管理**：支持节点Forget、Replicate Of、Failover、Move Slot、Start、Stop、Restart、Delete、修改配置等功能  
