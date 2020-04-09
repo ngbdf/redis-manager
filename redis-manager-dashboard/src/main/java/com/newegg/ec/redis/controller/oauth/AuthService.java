@@ -73,7 +73,7 @@ public class AuthService implements IOAuthService<String> {
         String urlTemplate = "%s/api/%s?callback=%s";
         String authorizationServer = systemConfig.getAuthorizationServer();
         String siteKey = systemConfig.getSiteKey();
-        String serverAddress = LinuxInfoUtil.getIpAddress() + SignUtil.COLON + systemConfig.getServerPort();
+        String serverAddress = LinuxInfoUtil.getIp() + SignUtil.COLON + systemConfig.getServerPort();
         try {
             HttpClientUtil.get(String.format(urlTemplate, authorizationServer, siteKey, serverAddress));
         } catch (IOException e) {
