@@ -610,7 +610,7 @@ public class InstallationTemplate {
     private String generateConnectionNodes(Cluster cluster) {
         List<RedisNode> masterNodeList = redisService.getRedisMasterNodeList(cluster);
         // 随机选前3个节点
-        StringBuffer nodes = new StringBuffer();
+        StringBuilder nodes = new StringBuilder();
         int size = masterNodeList.size();
         RedisNode redisNode1 = masterNodeList.get(0);
         nodes.append(redisNode1.getHost()).append(COLON).append(redisNode1.getPort());

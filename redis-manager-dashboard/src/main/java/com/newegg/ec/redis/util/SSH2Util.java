@@ -128,7 +128,7 @@ public class SSH2Util {
      * @throws Exception
      */
     public static String mkdir(Machine machine, String path, boolean sudo) throws Exception {
-        StringBuffer command = new StringBuffer();
+        StringBuilder command = new StringBuilder();
         if (sudo) {
             command.append("sudo ");
         }

@@ -22,27 +22,35 @@ public class NetworkUtil {
     private NetworkUtil() {
     }
 
-    /**
-     * 监测端口是否在使用
-     *
-     * @param ip
-     * @param port
-     * @return
-     */
-    public static final boolean telnet(String ip, int port) {
+    public static boolean checkFreePort(String ip, int port) {
+        try {
+            return !connect(ip, port);
+        } catch (Exception e) {
+            logger.info(ip + ":" + port + " is free.");
+            return true;
+        }
+    }
+
+    public static boolean telnet(String ip, int port) {
+        try {
+            return connect(ip, port);
+        } catch (Exception e) {
+            logger.warn(ip + ":" + port + " can't access.");
+            return false;
+        }
+    }
+
+    private static boolean connect(String ip, int port) throws IOException {
         Socket socket = new Socket();
         try {
             socket.connect(new InetSocketAddress(ip, port), TIMEOUT);
             return socket.isConnected();
-        } catch (Exception e) {
-            logger.warn(ip + ":" + port + " can't access.");
         } finally {
             try {
                 socket.close();
             } catch (IOException ignore) {
             }
         }
-        return false;
     }
 
 }

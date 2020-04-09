@@ -42,20 +42,19 @@ public class LinuxInfoUtil {
                         //获得IP
                         InetAddress inetAddress = enumIpAddr.nextElement();
                         if (!inetAddress.isLoopbackAddress()) {
-                            String ipaddress = inetAddress.getHostAddress().toString();
-                            if (!ipaddress.contains("::")
-                                    && !ipaddress.contains("0:0:")
-                                    && !ipaddress.contains("fe80")
+                            String ipAddress = inetAddress.getHostAddress().toString();
+                            if (!ipAddress.contains("::")
+                                    && !ipAddress.contains("0:0:")
+                                    && !ipAddress.contains("fe80")
                                     && !"127.0.0.1".equals(ip)) {
-                                ip = ipaddress;
+                                ip = ipAddress;
                             }
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            logger.error("get ip failed.", e);
+            logger.error("get current ip failed.", e);
             ip = null;
         }
         return ip;
