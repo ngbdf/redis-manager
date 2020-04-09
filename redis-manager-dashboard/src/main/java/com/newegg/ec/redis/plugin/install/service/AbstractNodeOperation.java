@@ -107,7 +107,7 @@ public abstract class AbstractNodeOperation implements InstallationOperation, IN
             String ip = redisNode.getHost();
             int port = redisNode.getPort();
             // 如果端口能通，则认为该端口被占用
-            if (NetworkUtil.telnet(ip, port)) {
+            if (!NetworkUtil.checkFreePort(ip, port)) {
                 InstallationLogContainer.appendLog(clusterName, "The port has been used, host: " + ip + ", port: " + port);
                 return false;
             }

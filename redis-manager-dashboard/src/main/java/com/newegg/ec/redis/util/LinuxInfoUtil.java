@@ -3,9 +3,12 @@ package com.newegg.ec.redis.util;
 import ch.ethz.ssh2.Connection;
 import com.google.common.base.Strings;
 import com.newegg.ec.redis.entity.Machine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +22,8 @@ import java.util.Map;
  */
 public class LinuxInfoUtil {
 
+    private static final Logger logger = LoggerFactory.getLogger(LinuxInfoUtil.class);
+
     public static final String MEMORY_FREE = "memory_free";
 
     public static final String VERSION = "version";
@@ -26,28 +31,30 @@ public class LinuxInfoUtil {
     private LinuxInfoUtil() {
     }
 
-    public static String getIpAddress() {
-        /*Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
-        InetAddress ip;
-        while (allNetInterfaces.hasMoreElements()) {
-            NetworkInterface netInterface = allNetInterfaces.nextElement();
-            if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
-                continue;
-            } else {
-                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    ip = addresses.nextElement();
-                    if (ip instanceof Inet4Address) {
-                        return ip.getHostAddress();
+    public static String getIp() {
+        String ip = "";
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+                NetworkInterface intf = en.nextElement();
+                String name = intf.getName();
+                if (!name.contains("docker") && !name.contains("lo")) {
+                    for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                        //获得IP
+                        InetAddress inetAddress = enumIpAddr.nextElement();
+                        if (!inetAddress.isLoopbackAddress()) {
+                            String ipAddress = inetAddress.getHostAddress().toString();
+                            if (!ipAddress.contains("::")
+                                    && !ipAddress.contains("0:0:")
+                                    && !ipAddress.contains("fe80")
+                                    && !"127.0.0.1".equals(ip)) {
+                                ip = ipAddress;
+                            }
+                        }
                     }
                 }
             }
-        }*/
-        String ip = "";
-        try {
-            ip = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
+        } catch (Exception e) {
+            logger.error("get current ip failed.", e);
             ip = null;
         }
         return ip;

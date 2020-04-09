@@ -181,10 +181,10 @@ public class SystemConfig implements WebMvcConfigurer {
     }
 
     public String getCurrentHost() {
-        String ipAddress = LinuxInfoUtil.getIpAddress();
-        if (Strings.isNullOrEmpty(ipAddress)) {
-            ipAddress = currentHost;
+        String host = currentHost;
+        if (!Strings.isNullOrEmpty(host)) {
+            return currentHost;
         }
-        return ipAddress;
+        return LinuxInfoUtil.getIp();
     }
 }
