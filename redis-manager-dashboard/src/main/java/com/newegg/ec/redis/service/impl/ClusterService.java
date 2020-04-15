@@ -122,13 +122,16 @@ public class ClusterService implements IClusterService {
      */
     @Override
     public Cluster completeClusterInfo(Cluster cluster) {
+        // reset cluster state
+        cluster.setClusterState(Cluster.ClusterState.HEALTH);
         boolean fillBaseInfoResult = fillBaseInfo(cluster);
         if (!fillBaseInfoResult) {
+            logger.error("Fill base info failed, cluster name = " + cluster.getClusterName());
             cluster.setClusterState(Cluster.ClusterState.BAD);
         }
         String redisMode = cluster.getRedisMode();
         if (Strings.isNullOrEmpty(redisMode) || Objects.equals(Cluster.UNKNOWN_VALUE, redisMode)) {
-            logger.error("Fill base info failed, cluster name = " + cluster.getClusterName());
+            logger.error("Can't get redis mode, cluster name = " + cluster.getClusterName() + ", redis mode = " + redisMode);
             return cluster;
         }
         boolean fillInfoResult = false;
