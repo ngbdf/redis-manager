@@ -164,6 +164,10 @@ public class ClusterService implements IClusterService {
     public boolean addCluster(Cluster cluster) {
         final Cluster completedCluster = completeClusterInfo(cluster);
         String redisMode = completedCluster.getRedisMode();
+        if (Strings.isNullOrEmpty(redisMode) || Objects.equals(Cluster.UNKNOWN_VALUE, redisMode)) {
+            logger.error("Can't get redis mode, cluster name = " + cluster.getClusterName() + ", redis mode = " + redisMode);
+            return false;
+        }
         int row = clusterDao.insertCluster(completedCluster);
         if (row == 0) {
             return false;
