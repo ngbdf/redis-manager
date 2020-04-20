@@ -72,9 +72,6 @@ public interface IClusterDao {
             "WHERE cluster_id = #{clusterId}")
     int updateCluster(Cluster cluster);
 
-    @Update("UPDATE cluster SET cluster_state = #{clusterState}, update_time = NOW() WHERE cluster_id = #{clusterId}")
-    int updateClusterState(Cluster cluster);
-
     @Update("UPDATE cluster SET nodes = #{nodes}, update_time = NOW() WHERE cluster_id = #{clusterId}")
     int updateNodes(@Param("clusterId") Integer clusterId, @Param("nodes") String nodes);
 

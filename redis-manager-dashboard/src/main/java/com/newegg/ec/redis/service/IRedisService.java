@@ -68,6 +68,10 @@ public interface IRedisService {
 
     boolean clusterForget(Cluster cluster, RedisNode forgetNode);
 
+    String clusterImport(Cluster cluster, RedisNode newRedisNode);
+
+    String clusterImport(Cluster cluster, List<RedisNode> newRedisNodeList);
+
     /**
      * change master
      *

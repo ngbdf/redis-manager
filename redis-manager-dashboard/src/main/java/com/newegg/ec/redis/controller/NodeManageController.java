@@ -307,47 +307,8 @@ public class NodeManageController {
         try {
             RedisNode firstRedisNode = redisNodeList.get(0);
             final Cluster cluster = getCluster(firstRedisNode.getClusterId());
-            String redisMode = cluster.getRedisMode();
-            StringBuilder message = new StringBuilder();
-            List<RedisNode> redisMasterNodeList = redisService.getRedisMasterNodeList(cluster);
-            redisNodeList.forEach(redisNode -> {
-                Iterator<RedisNode> iterator = redisMasterNodeList.iterator();
-                RedisNode seed = null;
-                while (iterator.hasNext()) {
-                    RedisNode masterNode = iterator.next();
-                    if (Objects.equals(redisNode, masterNode)) {
-                        continue;
-                    }
-                    seed = masterNode;
-                    break;
-                }
-                if (seed != null) {
-                    String oneResult = null;
-                    if (Objects.equals(redisMode, REDIS_MODE_CLUSTER)) {
-                        oneResult = redisService.clusterMeet(cluster, seed, redisNode);
-                    } else {
-                        redisService.standaloneReplicaOf(cluster, seed, redisNode);
-                    }
-                    if (Strings.isNullOrEmpty(oneResult)) {
-                        boolean exist = redisNodeService.existRedisNode(redisNode);
-                        if (!exist) {
-                            try {
-                                Thread.sleep(FIVE_SECONDS);
-                            } catch (InterruptedException e) {
-                            }
-                            List<RedisNode> redisNodes = redisService.getRealRedisNodeList(cluster);
-                            redisNodes.forEach(node -> {
-                                if (RedisNodeUtil.equals(node, redisNode)) {
-                                    redisNodeService.addRedisNode(node);
-                                }
-                            });
-                        }
-                    } else {
-                        message.append(oneResult);
-                    }
-                }
-            });
-            return Strings.isNullOrEmpty(message.toString()) ? Result.successResult() : Result.failResult().setMessage(message.toString());
+            String result = redisService.clusterImport(cluster, redisNodeList);
+            return Strings.isNullOrEmpty(result) ? Result.successResult() : Result.failResult().setMessage(result);
         } catch (Exception e) {
             e.printStackTrace();
             return Result.failResult().setMessage(e.getMessage());
