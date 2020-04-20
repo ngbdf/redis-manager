@@ -195,9 +195,9 @@ public class ClusterService implements IClusterService {
     }
 
     @Override
-    public boolean updateClusterState(Cluster cluster) {
+    public boolean updateCluster(Cluster cluster) {
         try {
-            return clusterDao.updateClusterState(cluster) > 1;
+            return clusterDao.updateCluster(cluster) > 1;
         } catch (Exception e) {
             logger.error("Update cluster state failed, cluster name = " + cluster.getClusterName(), e);
             return false;

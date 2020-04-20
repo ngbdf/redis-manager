@@ -56,9 +56,6 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
     private IClusterService clusterService;
 
     @Autowired
-    private IClusterDao clusterDao;
-
-    @Autowired
     private IRedisService redisService;
 
     @Autowired
@@ -125,7 +122,7 @@ public class ClusterUpdateSchedule implements IDataCollection, ApplicationListen
         }
         try {
             completedCluster.setClusterState(clusterState);
-            clusterDao.updateCluster(completedCluster);
+            clusterService.updateCluster(completedCluster);
         } catch (Exception e) {
             logger.error("Update cluster completed info failed, cluster name = " + cluster.getClusterName(), e);
         }
