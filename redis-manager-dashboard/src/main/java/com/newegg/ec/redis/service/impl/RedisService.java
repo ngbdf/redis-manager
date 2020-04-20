@@ -3,6 +3,7 @@ package com.newegg.ec.redis.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.newegg.ec.redis.client.*;
 import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.service.IClusterService;
@@ -389,6 +390,42 @@ public class RedisService implements IRedisService {
     }
 
     @Override
+    public String clusterImport(Cluster cluster, RedisNode newRedisNode) {
+        return clusterImport(cluster, Lists.newArrayList(newRedisNode));
+    }
+
+    @Override
+    public String clusterImport(Cluster cluster, List<RedisNode> newRedisNodeList) {
+        List<RedisNode> redisMasterNodeList = getRedisMasterNodeList(cluster);
+        String clusterName = cluster.getClusterName();
+        if (redisMasterNodeList.isEmpty()) {
+            return clusterName + " no masters, cluster is not healthy.";
+        }
+        String redisMode = cluster.getRedisMode();
+        Iterator<RedisNode> newNodeIterator = newRedisNodeList.iterator();
+        while (newNodeIterator.hasNext()) {
+            RedisNode newNode = newNodeIterator.next();
+            for (RedisNode masterNode : redisMasterNodeList) {
+                if (RedisNodeUtil.equals(newNode, masterNode)) {
+                    newNodeIterator.remove();
+                }
+            }
+        }
+        StringBuilder result = new StringBuilder();
+        RedisNode seedMasterNode = redisMasterNodeList.get(0);
+        for (RedisNode newNode : newRedisNodeList) {
+            if (Objects.equals(redisMode, REDIS_MODE_CLUSTER)) {
+                result.append(clusterMeet(cluster, seedMasterNode, newNode));
+            } else if (Objects.equals(redisMode, REDIS_MODE_STANDALONE)) {
+                result.append(standaloneReplicaOf(cluster, seedMasterNode, newNode));
+            } else {
+                return clusterName + " import node failed, redis mode is " + redisMode;
+            }
+        }
+        return result.toString();
+    }
+
+    @Override
     public boolean clusterReplicate(Cluster cluster, String masterId, RedisNode slaveNode) {
         String redisPassword = cluster.getRedisPassword();
         if (Strings.isNullOrEmpty(masterId)) {
@@ -456,9 +493,7 @@ public class RedisService implements IRedisService {
 
     @Override
     public String clusterMeet(Cluster cluster, RedisNode seed, RedisNode redisNode) {
-        List<RedisNode> redisNodeList = new ArrayList<>();
-        redisNodeList.add(redisNode);
-        return clusterMeet(cluster, seed, redisNodeList);
+        return clusterMeet(cluster, seed, Lists.newArrayList(redisNode));
     }
 
     @Override
