@@ -1,6 +1,7 @@
 package com.newegg.ec.redis.service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RDBAnalyze;
 import com.newegg.ec.redis.entity.RDBAnalyzeResult;
@@ -16,7 +17,7 @@ public interface IRdbAnalyzeResultService {
     List<RDBAnalyzeResult> selectList(Long groupId);
     RDBAnalyzeResult reportDataWriteToDb(RDBAnalyze rdbAnalyze, Map<String, Set<String>> data);
     Object getListStringFromResult(Long analyzeResultId, String key) throws Exception;
-    JSONArray getPrefixLineByCountOrMem(Long analyzeResultId, String type, int top, String prefixKey);
+    JSONObject getPrefixLineByCountOrMem(Long analyzeResultId, String type, int top, String prefixKey);
     JSONArray getPrefixType(Long analyzeResultId) throws Exception;
     Map<String, ReportData> getReportDataLatest(Long clusterId);
     void createRdbAnalyzeResultTable();

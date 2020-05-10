@@ -1,128 +1,123 @@
 <template>
   <el-col :xl="12" :lg="12" :md="24" :sm="24" class="chart-item">
     <el-card shadow="hover" class="box-card">
-      <!-- <div id="prefixKeysCount" class="chart"></div> -->
-      <highcharts :options="chartOptions" :callback="myCallback"></highcharts>
+      <div :id="id" class="chart"></div>
     </el-card>
   </el-col>
 </template>
 <script>
-import { getPrefixKeysMemory, getTimeData } from '@/api/rctapi.js'
+import { getPrefixKeysMemory } from '@/api/rctapi.js'
 import { formatTime } from '@/utils/time.js'
 import { formatBytes } from '@/utils/format.js'
-import { Chart } from 'highcharts-vue'
+var echarts = require('echarts/lib/echarts')
+
+require('echarts/lib/chart/line')
+// 以下的组件按需引入
+require('echarts/lib/component/tooltip')
+// tooltip组件
+require('echarts/lib/component/title')
+//  title组件
+require('echarts/lib/component/legend')
+// legend组件
 export default {
   props: {
     resultId: {
       type: String
+    },
+    selectPrefixValue: {
+      type: String
     }
-  },
-  components: {
-    highcharts: Chart
   },
   data () {
     return {
-      echartsData: [],
-      xAxisData: [],
-      chartOptions: {}
+      id: 'prefixKeysMemory'
     }
   },
   methods: {
-    myCallback () {
-    },
     async initCharts () {
-      const res = await getTimeData(this.resultId)
-
-      let timeList = res.data.map(value => {
-        return formatTime(parseInt(value.value, 10))
+      const response = await getPrefixKeysMemory(this.resultId, this.selectPrefixValue)
+      let timeList = response.data.time.map(value => {
+        return formatTime(parseInt(value, 10))
       })
       //
-      this.xAxisData = timeList
-
-      const response = await getPrefixKeysMemory(this.resultId)
-      //
-      this.echartsData = response.data.map(value => {
+      let echartsData = response.data.data.map(value => {
         return {
           name: value.key,
           type: 'line',
-          pointStart: 0,
+          symbol: 'circle',
           data: value.value.split(',').map(value => parseInt(value, 10))
         }
       })
-
-      this.chartOptions = {
-        credits: {
-          enabled: false
-        },
-        chart: {
-          type: 'line'
-        },
+      let chartOptions = {
         title: {
           text: 'Prefix Keys Memory'
         },
         tooltip: {
-          formatter () {
-            return [`<b>${this.x}</b>`].concat(
-              this.points.map((point) => {
-                return `${point.series.name}: ${formatBytes(point.y)}`
-              })
-            )
+          trigger: 'axis',
+          formatter: function (params) {
+            var result = ''
+            params.forEach(function (item) {
+              result += item.marker + ' ' + item.seriesName + ' : ' + formatBytes(item.value) + '</br>'
+            })
+            return result
+          }
+        },
+        grid: {
+          height: '400px',
+          containLabel: true
+        },
+        legend: {
+          icon: 'circle',
+          bottom: 0,
+          padding: [0, 50],
+          data: echartsData.map(item => item.name),
+          formatter: (name) => {
+            return echarts.format.truncateText(name, 100, '10px Microsoft Yahei', '…')
           },
-          split: true
+          tooltip: {
+            show: true
+          }
         },
         xAxis: {
-          title: {
-            text: 'time'
-          },
-          categories: this.xAxisData
+          type: 'category',
+          boundaryGap: false,
+          data: timeList
         },
-        yAxis: [
-          {
-            title: {
-              text: 'Bytes'
-            },
-            labels: {
-              formatter () {
-                return formatBytes(this.value)
-              }
+        yAxis: {
+          type: 'value',
+          scale: true,
+          axisLabel: {
+            formatter: function (value) {
+              return formatBytes(value)
             }
           }
-        ],
-        series: this.echartsData
+        },
+        series: echartsData
       }
-    },
-    async getXAxisData () {
-      const res = await getTimeData(this.resultId)
-      let timeList = res.data.map(value => value.value)
-      this.xAxisData = timeList
-    },
-    async refreshData () {
-      const response = await getPrefixKeysMemory(this.resultId)
-      this.echartsData = response.data.map(value => {
-        return {
-          name: value.key,
-          type: 'line',
-          data: value.value
-        }
-      })
-      this.legendData = response.data.map(value => {
-        return value.key
-      })
+      let infoItemObj = document.getElementById(this.id)
+      var chart = echarts.init(infoItemObj)
+      chart.clear()
+      chart.setOption(chartOptions)
     }
   },
   mounted () {
     this.initCharts()
+  },
+  watch: {
+    selectPrefixValue: function () {
+      this.initCharts()
+    }
   }
 }
 </script>
 <style scoped>
 .box-card {
   margin: 5px;
-  height: 450px;
+  height: 600px;
 }
 
 .chart {
-  min-height: 400px;
+  height: 500px;
   width: 100%;
 }
 

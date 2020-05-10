@@ -113,9 +113,9 @@ export const getAnalyzeResults = (groupId) => RCTAPI(`/rdb/results?groupId=${gro
 
 export const getPieByType = (analyzeResultId) => RCTAPI('/rdb/chart/DataTypeAnalyze', 'GET', {analyzeResultId})
 
-export const getPrefixKeysCount = (analyzeResultId) => RCTAPI('/rdb/line/prefix/PrefixKeyByCount', 'GET', {analyzeResultId})
+export const getPrefixKeysCount = (analyzeResultId, prefixKey) => RCTAPI('/rdb/line/prefix/PrefixKeyByCount', 'GET', {analyzeResultId, prefixKey})
 
-export const getPrefixKeysMemory = (analyzeResultId) => RCTAPI('/rdb/line/prefix/PrefixKeyByMemory', 'GET', {analyzeResultId})
+export const getPrefixKeysMemory = (analyzeResultId, prefixKey) => RCTAPI('/rdb/line/prefix/PrefixKeyByMemory', 'GET', {analyzeResultId, prefixKey})
 
 export const getTop1000KeysByPrefix = (analyzeResultId) => API('/rdb/table/prefix', 'GET', {analyzeResultId})
 
@@ -136,3 +136,5 @@ export const getTimeData = (analyzeResultId) => RCTAPI('/rdb/all/schedule_id', '
 export const getScheduleDetail = (id) => API(`/rdb/schedule_detail/${id}`)
 
 export const cancelAnalyzeTask = (id, scheduleID) => API(`/rdb/cance_job/${id}/${scheduleID}`)
+
+export const getSelectKeys = (analyzeResultId) => RCTAPI('/rdb/all/key_prefix', 'GET', { analyzeResultId })

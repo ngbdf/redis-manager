@@ -1,6 +1,5 @@
 package com.newegg.ec.redis.controller;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import com.newegg.ec.redis.entity.*;
@@ -257,34 +256,24 @@ public class RDBAnalyzeController {
 		}
 	}
 
-//	/**
-//	 * get all key_prefix
-//	 *
-//	 * @param clusterId
-//	 * @param scheduleId
-//	 * @return
-//	 */
-//	@GetMapping("/all/key_prefix")
-//	public Result getAllKeyPrefix(@RequestParam Long clusterId, @RequestParam(value = "scheduleId", required = false) Long scheduleId) {
-//		try {
-//			if (null == clusterId) {
-//				return Result.failResult("clusterId should not null!");
-//			}
-//			RDBAnalyzeResult rdbAnalyzeResult;
-//			if(null != scheduleId){
-//				rdbAnalyzeResult = rdbAnalyzeResultService.selectResultByRIDandSID(clusterId, scheduleId);
-//			} else {
-//				rdbAnalyzeResult = rdbAnalyzeResultService.selectLatestResultByRID(clusterId);
-//			}
-//			if(null == rdbAnalyzeResult) {
-//				return Result.successResult(null);
-//			}
-//			return Result.successResult(rdbAnalyzeResultService.getAllKeyPrefixByResult(rdbAnalyzeResult.getResult()));
-//		} catch (Exception e) {
-//			LOG.error("getAllKey_prefix failed!", e);
-//			return Result.failResult("getAllKey_prefix failed!");
-//		}
-//	}
+	/**
+	 * get all key_prefix
+	 *
+	 * @param analyzeResultId
+	 * @return
+	 */
+	@GetMapping("/all/key_prefix")
+	public Result getAllKeyPrefix(@RequestParam Long analyzeResultId) {
+		try {
+			if (null == analyzeResultId) {
+				return Result.failResult("analyzeResultId should not null!");
+			}
+			return Result.successResult(rdbAnalyzeResultService.getAllKeyPrefixById(analyzeResultId));
+		} catch (Exception e) {
+			LOG.error("getAllKey_prefix failed!", e);
+			return Result.failResult("getAllKey_prefix failed!");
+		}
+	}
 
 
 	/**
@@ -367,9 +356,13 @@ public class RDBAnalyzeController {
 	 */
 	@GetMapping("/line/prefix/{type}")
 	public Result getPrefixLineByCountOrMem(@PathVariable String type, @RequestParam Long analyzeResultId,
-											@RequestParam(value = "prefixKey", required = false) String prefixKey) {
+											@RequestParam(value = "prefixKey", required = false) String prefixKey,
+											@RequestParam(value = "top", required = false) Integer top) {
 		try {
-			JSONArray result = rdbAnalyzeResultService.getPrefixLineByCountOrMem(analyzeResultId, type, 20, prefixKey);
+			if (null == top || top == 0) {
+				top = 10;
+			}
+			JSONObject result = rdbAnalyzeResultService.getPrefixLineByCountOrMem(analyzeResultId, type, top, prefixKey);
 			return Result.successResult(result);
 		}
 		catch (Exception e) {

@@ -8,8 +8,22 @@
       <!-- <el-row class="echart-wrapper" id="monitor-charts"> -->
         <KeyByTypePie pieType="count" :resultId="resultId"></KeyByTypePie>
         <KeyByTypePie pieType="memory" :resultId="resultId"></KeyByTypePie>
-        <PrefixKeysCount v-show="isCluster" :resultId="resultId"></PrefixKeysCount>
-        <PrefixKeysMemory v-show="isCluster" :resultId="resultId"></PrefixKeysMemory>
+        <div v-if="isCluster">
+          <el-col class="chart-item">
+            <el-card shadow="hover" class="box-card">
+              <el-select v-model="selectPrefixValue" filterable clearable placeholder="select key">
+                  <el-option
+                    v-for="item in selectOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+              </el-select>
+            </el-card>
+          </el-col>
+          <PrefixKeysCount :resultId="resultId" :selectPrefixValue="selectPrefixValue"></PrefixKeysCount>
+          <PrefixKeysMemory :resultId="resultId" :selectPrefixValue="selectPrefixValue"></PrefixKeysMemory>
+        </div>
         <Tables :resultId="resultId" :tableObj="top1000keysPrefix" :initData="initTop1000Keys"/>
         <Tables :resultId="resultId" :tableObj="keysTTL" :initData="initKeysTTL"/>
         <Top1000KeysByType :resultId="resultId"></Top1000KeysByType>
@@ -27,7 +41,8 @@ import KeyByTypePie from '@/components/rct/chart/KeyByTypePie'
 import Top1000KeysByType from '@/components/rct/chart/Top1000KeysByType'
 import Tables from '@/components/rct/chart/Table'
 import { formatBytes, formatterInput } from '@/utils/format.js'
-import { getTop1000KeysByPrefix, getKeysTTLInfo } from '@/api/rctapi.js'
+import { getTop1000KeysByPrefix, getKeysTTLInfo, getSelectKeys } from '@/api/rctapi.js'
+import { error } from 'highcharts'
 export default {
   beforeCreate: function () {
     document.querySelector('body').setAttribute('style', 'overflow:auto')
@@ -45,6 +60,8 @@ export default {
 
   data () {
     return {
+      selectPrefixValue: '',
+      selectOptions: [],
       isCluster: '',
       analyseResults: [],
       name: '',
@@ -52,7 +69,9 @@ export default {
         columns: [{
           label: 'Prefix',
           type: 'String',
-          prop: 'prefixKey'
+          prop: 'prefixKey',
+          show_tooltip: true,
+          min_width: '200px'
         }, {
           label: 'Count',
           sort: true,
@@ -68,13 +87,15 @@ export default {
         }],
         searchVis: true,
         searchColumn: 'prefixKey',
-        title: 'Top 1000 Largest Keys By Custom Prefixes'
+        title: 'Key Prefix Info'
       },
       keysTTL: {
         columns: [{
           label: 'Prefix',
           prop: 'prefix',
-          type: 'String'
+          type: 'String',
+          show_tooltip: true,
+          min_width: '200px'
         }, {
           label: 'TTL',
           sort: true,
@@ -126,6 +147,15 @@ export default {
       let analyzeConfigObj = JSON.parse(analyzeConfig)
       if (!analyzeConfigObj.nodes || analyzeConfigObj.nodes[0] === '-1') {
         this.isCluster = true
+        getSelectKeys(this.resultId).then(res => {
+          if (res.code === 0) {
+            this.selectOptions = res.data
+          } else {
+            console.error(res.message)
+          }
+        }).catch(error => {
+          console.error(error)
+        })
       } else {
         this.isCluster = false
       }

@@ -1,9 +1,9 @@
 <template>
   <div>
       <el-table :data="pageData" @sort-change='sortChange'>
-        <el-table-column label="PrefixKey" property="key"></el-table-column>
-        <el-table-column label="itemCount" sortable property="itemCount" :formatter="formatterCount"></el-table-column>
-        <el-table-column label="Bytes" sortable property="bytes" :formatter="formatMemory"></el-table-column>
+        <el-table-column label="PrefixKey" property="key" show-overflow-tooltip min-width="500px"></el-table-column>
+        <el-table-column label="itemCount" sortable property="itemCount" :formatter="formatterCount" width="300px"></el-table-column>
+        <el-table-column label="Bytes" sortable property="bytes" :formatter="formatMemory" min-width="300px"></el-table-column>
       </el-table>
       <div>
         <el-pagination

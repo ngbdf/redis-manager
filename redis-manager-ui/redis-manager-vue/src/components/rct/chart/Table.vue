@@ -13,7 +13,7 @@
       </div>
 
       <el-table :data="pageData" @sort-change='sortChange'>
-        <el-table-column v-for="column in this.tableObj.columns" :key="column.label" :label="column.label" :sortable="column.sort" :formatter="column.formatter"  :prop="column.prop" ></el-table-column>
+        <el-table-column v-for="column in this.tableObj.columns" :show-overflow-tooltip="column.show_tooltip" :min-width="column.min_width" :key="column.label" :label="column.label" :sortable="column.sort" :formatter="column.formatter"  :prop="column.prop" ></el-table-column>
         <!-- <el-table-column label="PrefixKey" property="prefixKey"></el-table-column>
         <el-table-column label="Count" sortable property="keyCount" :formatter="formatterCount"></el-table-column>
         <el-table-column label="Memory Size" sortable property="memorySize" :formatter="formatMemory"></el-table-column> -->
@@ -107,21 +107,21 @@ export default {
   mounted () {
     this.initTable()
   },
-  watch: {
-    // 深度监听 schedule 变化
-    scheduleId: {
-      handler: function () {
-        this.initTable()
-      },
-      deep: true
-    },
-    tableObj: {
-      immediate: true,
-      handler (newValue, old) {
-        this.initTable(newValue)
-      }
-    }
-  }
+  // watch: {
+  //   // 深度监听 schedule 变化
+  //   scheduleId: {
+  //     handler: function () {
+  //       this.initTable()
+  //     },
+  //     deep: true
+  //   },
+  //   tableObj: {
+  //     immediate: true,
+  //     handler (newValue, old) {
+  //       this.initTable(newValue)
+  //     }
+  //   }
+  // }
 }
 </script>
 <style scoped>

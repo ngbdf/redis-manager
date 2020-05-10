@@ -1,9 +1,7 @@
 package com.newegg.ec.redis.plugin.alert.dao;
 
 import com.newegg.ec.redis.plugin.alert.entity.AlertChannel;
-import jdk.nashorn.internal.objects.annotations.Where;
 import org.apache.ibatis.annotations.*;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 

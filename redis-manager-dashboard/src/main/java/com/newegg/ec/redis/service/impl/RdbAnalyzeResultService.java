@@ -238,32 +238,41 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
         return null;
     }
 
+    /**
+     * get all keyPrefix by analyzeResultId
+     * @param analyzeResultId id
+     * @return List<JSONObject>
+     */
+    public List<JSONObject> getAllKeyPrefixById(Long analyzeResultId) {
+        RDBAnalyzeResult result = selectResultById(analyzeResultId);
+        return getAllKeyPrefixByResult(result.getResult());
+    }
 
-//	/**
-//	 * get list keyPrefix
-//	 * @param result result
-//	 * @return List<String> keyPrefix
-//	 */
-//	public List<JSONObject> getAllKeyPrefixByResult(String result){
-//		List<JSONObject> resultJsonObj = new ArrayList<>(500);
-//		if(null == result || "".equals(result.trim())) {
-//			return resultJsonObj;
-//		}
-//		JSONArray jsonArray = getJSONArrayFromResultByKey(result, IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT);
-//		if(null == jsonArray) {
-//			return resultJsonObj;
-//		}
-//		JSONObject oneRow;
-//		JSONObject jsonObject;
-//		for(Object obj : jsonArray) {
-//			oneRow = (JSONObject) obj;
-//			jsonObject = new JSONObject();
-//			jsonObject.put("value", oneRow.getString("prefixKey"));
-//			jsonObject.put("label", oneRow.getString("prefixKey"));
-//			resultJsonObj.add(jsonObject);
-//		}
-//		return resultJsonObj;
-//	}
+	/**
+	 * get list keyPrefix
+	 * @param result result
+	 * @return List<String> keyPrefix
+	 */
+	private List<JSONObject> getAllKeyPrefixByResult(String result){
+		List<JSONObject> resultJsonObj = new ArrayList<>(500);
+		if(null == result || "".equals(result.trim())) {
+			return resultJsonObj;
+		}
+		JSONArray jsonArray = getJSONArrayFromResultByKey(result, IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT);
+		if(null == jsonArray) {
+			return resultJsonObj;
+		}
+		JSONObject oneRow;
+		JSONObject jsonObject;
+		for(Object obj : jsonArray) {
+			oneRow = (JSONObject) obj;
+			jsonObject = new JSONObject();
+			jsonObject.put("value", oneRow.getString("prefixKey"));
+			jsonObject.put("label", oneRow.getString("prefixKey"));
+			resultJsonObj.add(jsonObject);
+		}
+		return resultJsonObj;
+	}
 
 //	/**
 //	 * gong zhe xian tu shi yong,
@@ -363,7 +372,8 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
      * @return JSONArray
      */
     @Override
-    public JSONArray getPrefixLineByCountOrMem(Long analyzeResultId, String type, int top, String prefixKey) {
+    public JSONObject getPrefixLineByCountOrMem(Long analyzeResultId, String type, int top, String prefixKey) {
+        JSONObject jsonResultObject = new JSONObject();
         String sortColumn = getSortColumn(type);
         // RDBAnalyzeResult rdbAnalyzeLatestResult = selectLatestResultByRID(clusterId);
         RDBAnalyzeResult rdbAnalyzeLatestResult = selectResultById(analyzeResultId);
@@ -382,6 +392,15 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
         // except Latest RDBAnalyzeResult
         List<RDBAnalyzeResult> rdbAnalyzeResultList = selectRecentlyResultByIdExceptSelf(analyzeResultId,
                 rdbAnalyzeLatestResult.getClusterId(), rdbAnalyzeLatestResult.getScheduleId());
+        // 过滤掉非集群模式的分析结果
+        rdbAnalyzeResultList = rdbAnalyzeResultList.stream().filter(rdbAnalyzeResult -> {
+            JSONObject object = JSONObject.parseObject(rdbAnalyzeResult.getAnalyzeConfig());
+            JSONArray array = object.getJSONArray("nodes");
+            if (array.size() == 1 && "-1".equals(array.getString(0))) {
+                return true;
+            }
+            return false;
+        }).collect(Collectors.toList());
         // key ：prefixKey
         Map<String, Map<String, JSONObject>> resultMap = new HashMap<>(7);
         Map<String, JSONObject> latest = getMapJSONByResult(rdbAnalyzeLatestResult, arrayResult);
@@ -423,7 +442,9 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
             arrayJsonObj.put("key", prefix);
             result.add(arrayJsonObj);
         }
-        return result;
+        jsonResultObject.put("time", scheduleList);
+        jsonResultObject.put("data", result);
+        return jsonResultObject;
 
     }
 
@@ -458,7 +479,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
     private List<String> getcolumnKeyList(String prefixKey, List<JSONObject> resultObjecList, String columnName,
                                           int top) {
         List<String> prefixKeyList = new ArrayList<>(10);
-        if (null == prefixKey) {
+        if (null == prefixKey || "".equals(prefixKey)) {
             if (top == -1) {
                 top = resultObjecList.size();
             }
