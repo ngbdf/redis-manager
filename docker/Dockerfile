@@ -13,7 +13,7 @@ COPY --from=front_build /app/redis-manager /app/redis-manager
 WORKDIR /app/redis-manager
 RUN rm -rf /app/redis-manager/redis-manager-dashboard/src/main/resources/templates/* \
     && rm -rf /app/redis-manager/redis-manager-dashboard/src/main/resources/static/* \
-	&& mv /app/redis-manager/redis-manager-ui/redis-manager-vue/dist/static/* /app/redis-manager/redis-manager-dashboard/src/main/resources/static/ \
+    && mv /app/redis-manager/redis-manager-ui/redis-manager-vue/dist/static/* /app/redis-manager/redis-manager-dashboard/src/main/resources/static/ \
     && mv /app/redis-manager/redis-manager-ui/redis-manager-vue/dist/index.html /app/redis-manager/redis-manager-dashboard/src/main/resources/templates/ \
     && mvn package -Dmaven.test.skip=true -f ./redis-manager-dashboard \
     && mv ./redis-manager-dashboard/target/redis-manager-dashboard-*.tar.gz /app/redis-manager.tar.gz \
