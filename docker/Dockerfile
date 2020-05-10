@@ -3,7 +3,7 @@ WORKDIR /app
 RUN git clone https://github.com/ngbdf/redis-manager.git 
 
 FROM node:10.16.0-alpine as front_build
-COPY --FROM=clone /app/redis-manager /app/redis-manager
+COPY --from=clone /app/redis-manager /app/redis-manager
 WORKDIR /app/redis-manager/redis-manager-ui/redis-manager-vue
 RUN npm install \
     && npm run build
