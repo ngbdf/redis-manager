@@ -96,8 +96,17 @@ public class RedisClient implements IRedisClient {
     public Set<String> scan(AutoCommandParam autoCommandParam) {
         ScanParams scanParams = autoCommandParam.buildScanParams();
         jedis.select(autoCommandParam.getDatabase());
-        ScanResult<String> scanResult = jedis.scan(autoCommandParam.getCursor(), scanParams);
-        return new LinkedHashSet<>(scanResult.getResult());
+        String cursor = autoCommandParam.getCursor();
+        boolean isComplete = false;
+        Set<String> scanKeys = new LinkedHashSet<>();
+        do {
+        	ScanResult<String> scanResult = jedis.scan(cursor, scanParams);
+        	cursor = scanResult.getCursor();
+        	isComplete = scanResult.isCompleteIteration();
+        	scanKeys.addAll(scanResult.getResult());
+        } 
+        while (!"0".equals(cursor) && !isComplete);
+        return scanKeys;
     }
 
     /**
