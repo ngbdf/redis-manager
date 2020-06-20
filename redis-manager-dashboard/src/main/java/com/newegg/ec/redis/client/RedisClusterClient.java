@@ -82,7 +82,7 @@ public class RedisClusterClient implements IRedisClusterClient {
                 value = jedisCluster.lrange(key, 0, count);
                 break;
             case TYPE_SET:
-                value = jedisCluster.srandmember(key, count);
+                value = jedisCluster.smembers(key);
                 break;
             case TYPE_ZSET:
                 value = jedisCluster.zrangeWithScores(key, 0, count);
