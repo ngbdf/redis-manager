@@ -1,11 +1,21 @@
-FROM alpine/git
+FROM alpine/git as clone
 WORKDIR /app
 RUN git clone https://github.com/ngbdf/redis-manager.git 
 
-FROM maven:3.5-jdk-8-alpine
-COPY --from=0 /app/redis-manager /app/redis-manager 
+FROM node:10.16.0-alpine as front_build
+COPY --from=clone /app/redis-manager /app/redis-manager
+WORKDIR /app/redis-manager/redis-manager-ui/redis-manager-vue
+RUN npm install \
+    && npm run build
+
+FROM maven:3.5-jdk-8-alpine as dashboard_package
+COPY --from=front_build /app/redis-manager /app/redis-manager
 WORKDIR /app/redis-manager
-RUN mvn package -Dmaven.test.skip=true -f ./redis-manager-dashboard \
+RUN rm -rf /app/redis-manager/redis-manager-dashboard/src/main/resources/templates/* \
+    && rm -rf /app/redis-manager/redis-manager-dashboard/src/main/resources/static/* \
+    && mv /app/redis-manager/redis-manager-ui/redis-manager-vue/dist/static/* /app/redis-manager/redis-manager-dashboard/src/main/resources/static/ \
+    && mv /app/redis-manager/redis-manager-ui/redis-manager-vue/dist/index.html /app/redis-manager/redis-manager-dashboard/src/main/resources/templates/ \
+    && mvn package -Dmaven.test.skip=true -f ./redis-manager-dashboard \
     && mv ./redis-manager-dashboard/target/redis-manager-dashboard-*.tar.gz /app/redis-manager.tar.gz \
     && mv ./docker /app/docker \
     && rm -rf /app/redis-manager/* \
@@ -20,6 +30,6 @@ RUN mvn package -Dmaven.test.skip=true -f ./redis-manager-dashboard \
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app/redis-manager
-COPY --from=1 /app/redis-manager /app/redis-manager
+COPY --from=dashboard_package /app/redis-manager /app/redis-manager
 
 ENTRYPOINT ["sh","./redis-manager-start.sh"]
