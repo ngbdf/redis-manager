@@ -318,13 +318,13 @@ public class RDBAnalyzeController {
 	 * @return
 	 */
 	@GetMapping("/top_key")
-	public Result getPrefixKeyByMem(@RequestParam Long analyzeResultId,
+	public Result getPrefixKeyByType(@RequestParam Long analyzeResultId,
                                           @RequestParam Long type) {
 		try {
 			return Result.successResult(rdbAnalyzeResultService.getTopKeyFromResultByKey(analyzeResultId, type));
 		} catch (Exception e) {
-			LOG.error("getPrefixKeyByMem failed!", e);
-			return Result.failResult("getPrefixKeyByMem failed!");
+			LOG.error("Function getPrefixKeyByType failed, type code:"+type, e);
+			return Result.failResult("Get top key failed!");
 		}
 
 	}
