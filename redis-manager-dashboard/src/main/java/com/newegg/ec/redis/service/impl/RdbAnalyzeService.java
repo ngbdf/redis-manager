@@ -178,7 +178,9 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         for (String host : clusterNodesIP.keySet()) {
 
             // 处理无RDB备份策略情况
-            if ((!config.isDevEnable()) && config.isRdbGenerateEnable()) {
+            if ((!config.isDevEnable()) && config.isRdbGenerateEnable()
+                && generateRule.containsKey(host)) {
+
                 Set<String> ports = generateRule.get(host);
                 ports.forEach(p -> {
                     Jedis jedis = null;
