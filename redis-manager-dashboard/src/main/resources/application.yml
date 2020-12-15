@@ -120,6 +120,7 @@ redis-manager:
       enable: false
       rdb:
         port: 9002
+        path: D:\\temp\\rct
 
 logging:
   level:

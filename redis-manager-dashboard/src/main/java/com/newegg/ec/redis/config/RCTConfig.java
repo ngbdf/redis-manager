@@ -30,6 +30,9 @@ public class RCTConfig {
     @Value("${redis-manager.rct.dev.rdb.port:9002}")
     private String devRDBPort;
 
+    @Value("${redis-manager.rct.dev.rdb.path}")
+    private String devRDBPath;
+
     private Email email;
 
     private User user;
@@ -85,7 +88,13 @@ public class RCTConfig {
         this.devEnable = devEnable;
     }
 
+    public String getDevRDBPath() {
+        return devRDBPath;
+    }
 
+    public void setDevRDBPath(String devRDBPath) {
+        this.devRDBPath = devRDBPath;
+    }
 
     public String getDevRDBPort() {
         return devRDBPort;

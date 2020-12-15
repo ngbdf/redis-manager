@@ -117,6 +117,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                 Set<String> set = new HashSet<>();
                 set.add(config.getDevRDBPort());
                 generateRule.put(InetAddress.getLocalHost().getHostAddress(), set);
+                rdbAnalyze.setDataPath(config.getDevRDBPath());
             } else {
                 if (StringUtils.isNotBlank(cluster.getRedisPassword())) {
                     redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(port)),cluster.getRedisPassword());

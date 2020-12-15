@@ -79,7 +79,8 @@ public class AppCache {
 			boolean status = false;
 			for (ScheduleDetail scheduleDetail : scheduleDetails) {
 				if (!(AnalyzeStatus.DONE.equals(scheduleDetail.getStatus())
-						|| AnalyzeStatus.CANCELED.equals(scheduleDetail.getStatus()))) {
+						|| AnalyzeStatus.CANCELED.equals(scheduleDetail.getStatus())
+							|| AnalyzeStatus.ERROR.equals(scheduleDetail.getStatus()))) {
 					status = true;
 					break;
 				}
