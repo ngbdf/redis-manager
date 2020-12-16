@@ -117,6 +117,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                 Set<String> set = new HashSet<>();
                 set.add(config.getDevRDBPort());
                 generateRule.put(InetAddress.getLocalHost().getHostAddress(), set);
+                rdbAnalyze.setDataPath(config.getDevRDBPath());
             } else {
                 if (StringUtils.isNotBlank(cluster.getRedisPassword())) {
                     redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(port)),cluster.getRedisPassword());
@@ -178,7 +179,9 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         for (String host : clusterNodesIP.keySet()) {
 
             // 处理无RDB备份策略情况
-            if ((!config.isDevEnable()) && config.isRdbGenerateEnable()) {
+            if ((!config.isDevEnable()) && config.isRdbGenerateEnable()
+                && generateRule.containsKey(host)) {
+
                 Set<String> ports = generateRule.get(host);
                 ports.forEach(p -> {
                     Jedis jedis = null;

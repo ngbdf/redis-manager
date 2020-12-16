@@ -3,18 +3,17 @@ package com.newegg.ec.redis.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
 import com.newegg.ec.redis.dao.IRdbAnalyzeResult;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RDBAnalyze;
 import com.newegg.ec.redis.entity.RDBAnalyzeResult;
 import com.newegg.ec.redis.entity.ReportData;
-
 import com.newegg.ec.redis.plugin.rct.cache.AppCache;
 import com.newegg.ec.redis.plugin.rct.report.IAnalyzeDataConverse;
 import com.newegg.ec.redis.plugin.rct.report.converseFactory.ReportDataConverseFacotry;
 import com.newegg.ec.redis.service.IRdbAnalyzeResultService;
 import com.newegg.ec.redis.util.ListSortUtil;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -342,8 +341,8 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
     }
 
     @Override
-    public Object getTopKeyFromResultByKey(Long analyzeResultId, Long key) throws Exception {
-        if (null == analyzeResultId || null == key) {
+    public Object getTopKeyFromResultByKey(Long analyzeResultId, Long type) throws Exception {
+        if (null == analyzeResultId || null == type) {
             throw new Exception("id or key should not null!");
         }
         RDBAnalyzeResult rdbAnalyzeResult = selectResultById(analyzeResultId);
@@ -352,18 +351,20 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 //		} else {
 //			rdbAnalyzeResult = selectResultByRIDandSID(clusterId, scheduleId);
 //		}
-        JSONArray result = getTopKeyFromResultByKey(rdbAnalyzeResult.getResult(), key);
+        JSONArray result = getTopKeyFromResultByKey(rdbAnalyzeResult.getResult(), type);
         return result;
     }
 
-    private JSONArray getTopKeyFromResultByKey(String result, Long startNum) {
-        if (null == result || "".equals(result.trim())) {
-            return null;
+    // 获取指定类型的TopKey数据
+    private JSONArray getTopKeyFromResultByKey(String result, Long type) {
+        if (StringUtils.isNotBlank(result)) {
+            JSONObject resultJsonObj = JSONObject.parseObject(result);
+            if(resultJsonObj != null && resultJsonObj.containsKey(IAnalyzeDataConverse.TOP_KEY_ANALYZE)){
+                JSONObject topKeyData = JSONObject.parseObject(resultJsonObj.getString(IAnalyzeDataConverse.TOP_KEY_ANALYZE));
+                return topKeyData.getJSONArray(String.valueOf(type));
+            }
         }
-        JSONObject resultJsonObj = JSONObject.parseObject(result);
-        JSONObject startNumData = JSONObject.parseObject(resultJsonObj.getString(IAnalyzeDataConverse.TOP_KEY_ANALYZE));
-        JSONArray jsonArray = startNumData.getJSONArray(String.valueOf(startNum));
-        return jsonArray;
+        return null;
     }
 
     /**

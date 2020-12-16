@@ -50,27 +50,22 @@ public class AnalyzerStatusThread implements Runnable {
 
 			for (AnalyzeInstance analyzeInstance : analyzeInstances) {
 				for (ScheduleDetail scheduleDetail : scheduleDetails) {
-					if (!(AnalyzeStatus.DONE.equals(scheduleDetail.getStatus())
-							|| AnalyzeStatus.CANCELED.equals(scheduleDetail.getStatus()))) {
-						String instanceStr = scheduleDetail.getInstance();
-						try {
-							if (analyzeInstance.getHost().equals(instanceStr.split(":")[0])) {
-								getAnalyzerStatusRest(analyzeInstance);
-								break;
-							}
 
-						} catch (Exception e) {
-							LOG.error("get analyzer status has error.", e);
+					if (!(AnalyzeStatus.DONE.equals(scheduleDetail.getStatus())
+							|| AnalyzeStatus.CANCELED.equals(scheduleDetail.getStatus())
+							|| AnalyzeStatus.ERROR.equals(scheduleDetail.getStatus()))) {
+						String instanceStr = scheduleDetail.getInstance();
+						if (analyzeInstance.getHost().equals(instanceStr.split(":")[0])) {
+							getAnalyzerStatusRest(analyzeInstance);
+							break;
 						}
 					}
 				}
 			}
-
 		}
 
 		// 当所有analyzer运行完成，获取所有analyzer报表分析结果
 		if (AppCache.isAnalyzeComplete(rdbAnalyze)) {
-
 			Map<String, Set<String>> reportData = new HashMap<>();
 			Map<String,Long>temp = new HashMap<>();
 			for (AnalyzeInstance analyzeInstance : analyzeInstances) {
@@ -143,6 +138,17 @@ public class AnalyzerStatusThread implements Runnable {
 			}
 
 		} catch (Exception e) {
+			scheduleDetails.forEach(s ->{
+				if(s.getInstance().startsWith(host)){
+					s.setStatus(AnalyzeStatus.ERROR);
+				}
+			});
+			AppCache.scheduleDetailMap.get(rdbAnalyze.getId()).forEach(s -> {
+				if(s.getInstance().startsWith(host)){
+					s.setStatus(AnalyzeStatus.ERROR);
+				}
+			});
+
 			LOG.error("getAnalyzerStatusRest failed!", e);
 		}
 	}
