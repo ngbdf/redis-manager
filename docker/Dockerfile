@@ -33,7 +33,7 @@ RUN rm -rf /app/redis-manager/redis-manager-dashboard/src/main/resources/templat
 FROM openjdk:8-jre-alpine
 WORKDIR /app/redis-manager
 COPY --from=dashboard_package /app/lib/ /app/redis-manager/lib/
-COPY --from=dashboard_package /app/redis-manager/ /app/redis-manager/
+COPY --from=dashboard_package /app/redis-manager/* /app/redis-manager/
 COPY --from=dashboard_package /app/redis-manager.jar /app/redis-manager/redis-manager.jar
 
 ENTRYPOINT ["sh","./redis-manager-start.sh"]
