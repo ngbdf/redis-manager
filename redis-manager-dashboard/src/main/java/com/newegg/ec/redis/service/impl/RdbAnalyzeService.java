@@ -210,6 +210,11 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                 });
             }
 
+            // 如果某个服务器上没有分配到分析节点，则直接跳过
+            if(generateRule.containsKey(host)){
+                continue;
+            }
+
             AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
 
             String url = "http://" + host + ":" + analyzeInstance.getPort() + "/receivedSchedule";
