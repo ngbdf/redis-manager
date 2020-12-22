@@ -26,10 +26,14 @@ RUN rm -rf /app/redis-manager/redis-manager-dashboard/src/main/resources/templat
     && mv /app/docker/log4j2.xml /app/redis-manager/conf \
     && cp conf/application.yml conf/application.yml.backup \
     && cp -r data backup_data \
-    && rm -f conf/log4j2.xml 
+    && rm -f conf/log4j2.xml \
+    && mv /app/redis-manager/lib /app/lib \
+    && mv /app/redis-manger/*.jar /app/redis-manager.jar
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app/redis-manager
-COPY --from=dashboard_package /app/redis-manager /app/redis-manager
+COPY --from=dashboard_package /app/lib/ /app/redis-manager/lib/
+COPY --from=dashboard_package /app/redis-manager/ /app/redis-manager/
+COPY --from=dashboard_package /app/redis-manager.jar /app/redis-manager/redis-manager.jar
 
 ENTRYPOINT ["sh","./redis-manager-start.sh"]
