@@ -2,7 +2,6 @@ package com.newegg.ec.redis.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
 import com.newegg.ec.redis.client.RedisClient;
 import com.newegg.ec.redis.client.RedisClientFactory;
 import com.newegg.ec.redis.config.RCTConfig;
@@ -13,7 +12,6 @@ import com.newegg.ec.redis.plugin.rct.cache.AppCache;
 import com.newegg.ec.redis.plugin.rct.thread.AnalyzerStatusThread;
 import com.newegg.ec.redis.schedule.RDBScheduleJob;
 import com.newegg.ec.redis.service.IRdbAnalyzeService;
-
 import com.newegg.ec.redis.util.EurekaUtil;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.SchedulerException;
@@ -29,15 +27,8 @@ import org.springframework.web.client.RestTemplate;
 import redis.clients.jedis.Jedis;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.rmi.server.ExportException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 
 @Service
@@ -91,6 +82,19 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             responseResult.put("message", "There is a task in progress!");
             return responseResult;
         }
+
+        // 启动状态监听线程，检查各个分析器分析状态和进程，分析完毕后，写数据库，发送邮件
+        Thread analyzerStatusThread = new Thread(new AnalyzerStatusThread(this, restTemplate,
+                rdbAnalyze, config.getEmail(), rdbAnalyzeResultService));
+        analyzerStatusThread.start();
+
+        responseResult.put("status", true);
+        return responseResult;
+    }
+
+    // 执行RCT任务分发
+    public JSONObject assignAnalyzeJob(RDBAnalyze rdbAnalyze){
+        JSONObject responseResult = new JSONObject();
         int[] analyzer = null;
         if (rdbAnalyze.getAnalyzer().contains(",")) {
             String[] str = rdbAnalyze.getAnalyzer().split(",");
@@ -109,7 +113,9 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         String redisHost = cluster.getNodes().split(",")[0].split(":")[0];
         String port = cluster.getNodes().split(",")[0].split(":")[1];
 
+        // 集群中所有的host
         Map<String, String> clusterNodesIP = new HashMap<>();
+        // 最终需要分析的机器及端口
         Map<String, Set<String>> generateRule = new HashMap<>();
         try {
             if (config.isDevEnable()) {
@@ -119,11 +125,13 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                 generateRule.put(InetAddress.getLocalHost().getHostAddress(), set);
                 rdbAnalyze.setDataPath(config.getDevRDBPath());
             } else {
+                // 获取集群中有哪些节点进行分析
                 if (StringUtils.isNotBlank(cluster.getRedisPassword())) {
                     redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(port)),cluster.getRedisPassword());
                 } else {
                     redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(port)),null);
                 }
+                // 集群中是否指定节点进行分析
                 if(rdbAnalyze.getNodes() != null && !"-1".equalsIgnoreCase(rdbAnalyze.getNodes().get(0))){
                     //指定节点进行分析
                     List<String> nodeList = rdbAnalyze.getNodes();
@@ -169,18 +177,20 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
             if (analyzeInstance == null) {
                 LOG.error("analyzeInstance inactive. ip:{}", host);
-                responseResult.put("status", false);
+                responseResult.put("status", Boolean.FALSE);
                 responseResult.put("message", host + " analyzeInstance inactive!");
                 return responseResult;
             }
             needAnalyzeInstances.add(analyzeInstance);
         }
+        // 保存分析job到数据库
         saveToResult(rdbAnalyze,scheduleID);
-        for (String host : clusterNodesIP.keySet()) {
+        responseResult.put("needAnalyzeInstances",needAnalyzeInstances);
 
+        for (String host : clusterNodesIP.keySet()) {
             // 处理无RDB备份策略情况
             if ((!config.isDevEnable()) && config.isRdbGenerateEnable()
-                && generateRule.containsKey(host)) {
+                    && generateRule.containsKey(host)) {
 
                 Set<String> ports = generateRule.get(host);
                 ports.forEach(p -> {
@@ -239,14 +249,14 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                     LOG.error("allocation {} scheduleJob response error. responseMessage:{}",
                             analyzeInstance.toString(), responseMessage.toJSONString());
                     deleteResult(rdbAnalyze,scheduleID);
-                    scheduleResult.put("status", false);
-                    responseResult.put("status", false);
+                    scheduleResult.put("status", Boolean.FALSE);
+                    responseResult.put("status", Boolean.FALSE);
                     responseResult.put("message", "allocation " + analyzeInstance.getHost()
                             + " scheduleJob response error:" + responseMessage.toJSONString());
 
                     return responseResult;
                 } else {
-                    scheduleResult.put("status", true);
+                    scheduleResult.put("status", Boolean.TRUE);
                 }
 
             } catch (RestClientException e) {
@@ -274,31 +284,35 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         }
         AppCache.scheduleDetailMap.put(rdbAnalyze.getId(), scheduleDetails);
 
-        // 启动状态监听线程，检查各个分析器分析状态和进程，分析完毕后，写数据库，发送邮件
-        Thread analyzerStatusThread = new Thread(new AnalyzerStatusThread(needAnalyzeInstances, restTemplate,
-                rdbAnalyze, config.getEmail(), rdbAnalyzeResultService));
-        analyzerStatusThread.start();
         if (!config.isDevEnable()) {
-            for (Entry<String, Set<String>> map : generateRule.entrySet()) {
-                String ip = map.getKey();
-                for (String ports : map.getValue()) {
-                    Jedis jedis = null;
-                    try {
-                        jedis = new Jedis(ip, Integer.parseInt(ports));
-                        AppCache.keyCountMap.put(ip + ":" + ports, Float.parseFloat(String.valueOf(jedis.dbSize())));
-                    } catch (Exception e) {
-                        LOG.error("jedis get db size has error!", e);
-                    } finally {
-                        if (jedis != null) {
-                            jedis.close();
-                        }
+            // 设置db数据量
+            cacheDBSize(generateRule);
+        }
+        return null;
+    }
+
+    // 将每个需要分析的redis实例的key数量写入到缓存中
+    private void cacheDBSize(Map<String, Set<String>> generateRule){
+        for (Entry<String, Set<String>> map : generateRule.entrySet()) {
+            String ip = map.getKey();
+            for (String ports : map.getValue()) {
+                Jedis jedis = null;
+                try {
+                    jedis = new Jedis(ip, Integer.parseInt(ports));
+                    AppCache.keyCountMap.put(ip + ":" + ports, Float.parseFloat(String.valueOf(jedis.dbSize())));
+                } catch (Exception e) {
+                    LOG.error("jedis get db size has error!", e);
+                } finally {
+                    if (jedis != null) {
+                        jedis.close();
                     }
                 }
             }
         }
-        responseResult.put("status", true);
-        return responseResult;
     }
+
+
+
 
     private void saveToResult(RDBAnalyze rdbAnalyze,Long scheduleId){
         RDBAnalyzeResult rdbAnalyzeResult = new RDBAnalyzeResult();
@@ -310,7 +324,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         rdbAnalyzeResultService.add(rdbAnalyzeResult);
     }
 
-    private void deleteResult(RDBAnalyze rdbAnalyze,Long scheduleId){
+    public void deleteResult(RDBAnalyze rdbAnalyze,Long scheduleId){
         Map<String,Long> map = new HashMap<>();
         map.put("cluster_id",rdbAnalyze.getClusterId());
         map.put("schedule_id",scheduleId);
