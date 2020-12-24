@@ -77,6 +77,14 @@ public class AnalyzerStatusThread implements Runnable {
 			}
 		}
 
+		AppCache.scheduleDetailMap.get(rdbAnalyze.getId()).forEach(s -> {
+			if(AnalyzeStatus.ERROR.equals(s.getStatus())){
+				rdbAnalyzeService.deleteResult(rdbAnalyze, s.getScheduleID());
+				return;
+			}
+		});
+
+
 		// 当所有analyzer运行完成，获取所有analyzer报表分析结果
 		if (AppCache.isAnalyzeComplete(rdbAnalyze)) {
 			Map<String, Set<String>> reportData = new HashMap<>();
