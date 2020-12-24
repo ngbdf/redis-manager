@@ -37,7 +37,6 @@ public class AnalyzerStatusThread implements Runnable {
 
 	public AnalyzerStatusThread(RdbAnalyzeService rdbAnalyzeService, RestTemplate restTemplate,
 								RDBAnalyze rdbAnalyze, RCTConfig.Email emailInfo, RdbAnalyzeResultService rdbAnalyzeResultService) {
-		this.scheduleDetails = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
 		this.rdbAnalyzeService = rdbAnalyzeService;
 		this.restTemplate = restTemplate;
 		this.rdbAnalyze = rdbAnalyze;
@@ -49,13 +48,16 @@ public class AnalyzerStatusThread implements Runnable {
 	public void run() {
 		JSONObject res = rdbAnalyzeService.assignAnalyzeJob(rdbAnalyze);
 
-		if(!res.getBoolean("status")){
+		if(res.containsKey("status") && !res.getBoolean("status")){
+			LOG.warn("Assign job fail.");
 			return;
 		}
 		this.analyzeInstances = (List<AnalyzeInstance>)res.get("needAnalyzeInstances");
 		if(analyzeInstances == null || analyzeInstances.isEmpty()){
+			LOG.warn("Analyze instances is empty.");
 			return;
 		}
+		scheduleDetails = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
 		// 获取所有analyzer运行状态
 		while (AppCache.isNeedAnalyzeStastus(rdbAnalyze.getId())) {
 

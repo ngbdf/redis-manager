@@ -221,14 +221,13 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             }
 
             // 如果某个服务器上没有分配到分析节点，则直接跳过
-            if(generateRule.containsKey(host)){
+            if(!generateRule.containsKey(host)){
                 continue;
             }
 
             AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
 
             String url = "http://" + host + ":" + analyzeInstance.getPort() + "/receivedSchedule";
-
             // String url = "http://127.0.0.1:8082/receivedSchedule";
             ScheduleInfo scheduleInfo = new ScheduleInfo(scheduleID, rdbAnalyze.getDataPath(), rdbAnalyze.getPrefixes(),
                     generateRule.get(host), analyzer);
@@ -288,7 +287,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             // 设置db数据量
             cacheDBSize(generateRule);
         }
-        return null;
+        return responseResult;
     }
 
     // 将每个需要分析的redis实例的key数量写入到缓存中
