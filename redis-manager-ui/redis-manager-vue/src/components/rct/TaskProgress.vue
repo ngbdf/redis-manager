@@ -80,21 +80,23 @@ export default {
           )
           this.analyseisJobDetail = list
         }
-        let count = 0
-        for (let i = 0; i < this.originalData.length; i++) {
-          if (this.originalData[i].status === 'DONE') {
-            count += 1
+        if (this.originalData.length > 0) {
+          let count = 0
+          for (let i = 0; i < this.originalData.length; i++) {
+            if (this.originalData[i].status === 'DONE') {
+              count += 1
+            }
+            if (this.originalData[i].status === 'CANCELED') {
+              this.originalData[i].process = 0
+              this.cancelButtonDisabled = true
+              this.loading = false
+              this.stopTimer()
+            }
           }
-          if (this.originalData[i].status === 'CANCELED') {
-            this.originalData[i].process = 0
+          if (count === this.originalData.length) {
             this.cancelButtonDisabled = true
-            this.loading = false
             this.stopTimer()
           }
-        }
-        if (count === this.originalData.length) {
-          this.cancelButtonDisabled = true
-          this.stopTimer()
         }
       })
     },
