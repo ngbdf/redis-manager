@@ -10,6 +10,7 @@ import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.plugin.rct.cache.AppCache;
 import com.newegg.ec.redis.plugin.rct.report.EmailSendReport;
 import com.newegg.ec.redis.service.impl.RdbAnalyzeResultService;
+import com.newegg.ec.redis.service.impl.RdbAnalyzeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -26,17 +27,17 @@ import java.util.Map.Entry;
  */
 public class AnalyzerStatusThread implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(AnalyzerStatusThread.class);
-	private List<ScheduleDetail> scheduleDetails = new ArrayList<>();
-	private List<AnalyzeInstance> analyzeInstances = new ArrayList<>();
+	private List<ScheduleDetail> scheduleDetails;
+	private List<AnalyzeInstance> analyzeInstances;
 	private RestTemplate restTemplate;
 	private RDBAnalyze rdbAnalyze;
 	private RCTConfig.Email emailInfo;
 	private RdbAnalyzeResultService rdbAnalyzeResultService;
+	private RdbAnalyzeService rdbAnalyzeService;
 
-	public AnalyzerStatusThread(List<AnalyzeInstance> analyzeInstances, RestTemplate restTemplate,
-                                RDBAnalyze rdbAnalyze, RCTConfig.Email emailInfo, RdbAnalyzeResultService rdbAnalyzeResultService) {
-		this.scheduleDetails = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
-		this.analyzeInstances = analyzeInstances;
+	public AnalyzerStatusThread(RdbAnalyzeService rdbAnalyzeService, RestTemplate restTemplate,
+								RDBAnalyze rdbAnalyze, RCTConfig.Email emailInfo, RdbAnalyzeResultService rdbAnalyzeResultService) {
+		this.rdbAnalyzeService = rdbAnalyzeService;
 		this.restTemplate = restTemplate;
 		this.rdbAnalyze = rdbAnalyze;
 		this.emailInfo = emailInfo;
@@ -45,6 +46,18 @@ public class AnalyzerStatusThread implements Runnable {
 
 	@Override
 	public void run() {
+		JSONObject res = rdbAnalyzeService.assignAnalyzeJob(rdbAnalyze);
+
+		if(res.containsKey("status") && !res.getBoolean("status")){
+			LOG.warn("Assign job fail.");
+			return;
+		}
+		this.analyzeInstances = (List<AnalyzeInstance>)res.get("needAnalyzeInstances");
+		if(analyzeInstances == null || analyzeInstances.isEmpty()){
+			LOG.warn("Analyze instances is empty.");
+			return;
+		}
+		scheduleDetails = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
 		// 获取所有analyzer运行状态
 		while (AppCache.isNeedAnalyzeStastus(rdbAnalyze.getId())) {
 
@@ -63,6 +76,14 @@ public class AnalyzerStatusThread implements Runnable {
 				}
 			}
 		}
+
+		AppCache.scheduleDetailMap.get(rdbAnalyze.getId()).forEach(s -> {
+			if(AnalyzeStatus.ERROR.equals(s.getStatus())){
+				rdbAnalyzeService.deleteResult(rdbAnalyze, s.getScheduleID());
+				return;
+			}
+		});
+
 
 		// 当所有analyzer运行完成，获取所有analyzer报表分析结果
 		if (AppCache.isAnalyzeComplete(rdbAnalyze)) {

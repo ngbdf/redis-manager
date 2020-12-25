@@ -68,6 +68,10 @@ export default {
           return value
         })
       })
+      if(this.tableObj.columns.filter(c=>c=='noTTL')){
+         this.tableData = this.tableData.sort(this.compareValue('noTTL','descending'));
+      }
+     
       this.length = this.tableData.length
       this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
     },
