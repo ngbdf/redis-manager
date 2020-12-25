@@ -221,14 +221,14 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             }
 
             // 如果某个服务器上没有分配到分析节点，则直接跳过
-            if(!generateRule.containsKey(host)){
-                continue;
-            }
+//            if(!generateRule.containsKey(host)){
+//                continue;
+//            }
 
             AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
 
-            String url = "http://" + host + ":" + analyzeInstance.getPort() + "/receivedSchedule";
-            // String url = "http://127.0.0.1:8082/receivedSchedule";
+            //String url = "http://" + host + ":" + analyzeInstance.getPort() + "/receivedSchedule";
+             String url = "http://127.0.0.1:8082/receivedSchedule";
             ScheduleInfo scheduleInfo = new ScheduleInfo(scheduleID, rdbAnalyze.getDataPath(), rdbAnalyze.getPrefixes(),
                     generateRule.get(host), analyzer);
             HttpHeaders headers = new HttpHeaders();
@@ -300,7 +300,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                     jedis = new Jedis(ip, Integer.parseInt(ports));
                     AppCache.keyCountMap.put(ip + ":" + ports, Float.parseFloat(String.valueOf(jedis.dbSize())));
                 } catch (Exception e) {
-                    LOG.error("jedis get db size has error!", e);
+                    LOG.error("redis get db size has error!", e);
                 } finally {
                     if (jedis != null) {
                         jedis.close();
@@ -331,7 +331,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
     }
 
     @Override
-    public JSONObject canceRDBAnalyze(String instance,String scheduleID)  {
+    public JSONObject cancelRDBAnalyze(String instance, String scheduleID)  {
         JSONObject result = new JSONObject();
         if (null == instance || "".equals(instance)) {
             LOG.warn("instance is null!");
@@ -392,7 +392,6 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 
     @Override
     public boolean add(RDBAnalyze rdbAnalyze) {
-        //rdbAnalyze.setRedisInfo(null);
         int result = iRdbAnalyze.insert(rdbAnalyze);
         return checkResult(result);
     }
@@ -425,8 +424,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 
     @Override
     public RDBAnalyze getRDBAnalyzeById(Long id) {
-        RDBAnalyze rdbAnalyze = iRdbAnalyze.getRDBAnalyzeById(id);
-        return rdbAnalyze;
+        return iRdbAnalyze.getRDBAnalyzeById(id);
     }
 
     /**
@@ -441,9 +439,9 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         boolean result = false;
         if (scheduleDetail != null && scheduleDetail.size() > 0) {
             for (ScheduleDetail scheduleDetails : scheduleDetail) {
-                AnalyzeStatus stautStatus = scheduleDetails.getStatus();
-                if ((!stautStatus.equals(AnalyzeStatus.DONE)) && (!stautStatus.equals(AnalyzeStatus.CANCELED))
-                        && (!stautStatus.equals(AnalyzeStatus.ERROR))) {
+                AnalyzeStatus status = scheduleDetails.getStatus();
+                if ((!status.equals(AnalyzeStatus.DONE)) && (!status.equals(AnalyzeStatus.CANCELED))
+                        && (!status.equals(AnalyzeStatus.ERROR))) {
                     result = true;
                     break;
                 }

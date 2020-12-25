@@ -83,7 +83,7 @@ export default {
         if (this.originalData.length > 0) {
           let count = 0
           for (let i = 0; i < this.originalData.length; i++) {
-            if (this.originalData[i].status === 'DONE') {
+            if (this.originalData[i].status === 'DONE' || this.originalData[i].status === 'ERROR') {
               count += 1
             }
             if (this.originalData[i].status === 'CANCELED') {
