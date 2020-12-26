@@ -49,7 +49,9 @@ public class RDBAnalyzeController {
 
 	}
 
-	// update
+	/**
+	 * update
+	 * **/
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.PUT)
 	@ResponseBody
 	public Result updateRdbAnalyze(@RequestBody RDBAnalyze rdbAnalyze) {
@@ -62,11 +64,11 @@ public class RDBAnalyzeController {
 							taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
 							return Result.successResult("update success!");
 						} catch (SchedulerException e) {
-							LOG.error("schedule job update faild!message:{}", e.getMessage());
-							return Result.failResult("schedule job update faild!");
+							LOG.error("schedule job update failed!message:{}", e.getMessage());
+							return Result.failResult("schedule job update failed!");
 						}
 					}else {
-						return Result.failResult("update data faild!");
+						return Result.failResult("update data failed!");
 					}
 				}else{
 					return Result.failResult("cron expression has error,please check!");
@@ -75,17 +77,17 @@ public class RDBAnalyzeController {
 				if(rdbAnalyzeService.updateRdbAnalyze(rdbAnalyze)){
 					return Result.successResult("update success!");
 				}else{
-					return Result.failResult("update data faild!");
+					return Result.failResult("update data failed!");
 				}
 			}
 		}catch (SchedulerException e){
-			LOG.error("schedule job delete faild!message:{}", e.getMessage());
-			return Result.failResult("schedule job delete faild!");
+			LOG.error("schedule job delete failed!message:{}", e.getMessage());
+			return Result.failResult("schedule job delete failed!");
 		}
 
 	}
 
-	// add
+	/** add **/
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.POST)
 	public Result addRdbAnalyze(@RequestBody RDBAnalyze rdbAnalyze) {
 	    if(!rdbAnalyzeService.exitsRdbAnalyze(rdbAnalyze)){
@@ -99,7 +101,7 @@ public class RDBAnalyzeController {
                return addAnalyze(rdbAnalyze);
             }
         }else{
-            return Result.failResult("add Job faild,job exits!");
+            return Result.failResult("add Job failed,job exits!");
         }
 
 
@@ -110,10 +112,9 @@ public class RDBAnalyzeController {
             if(rdbAnalyze.isAutoAnalyze()){
                 try{
                     taskService.addTask(rdbAnalyze, RDBScheduleJob.class);
-                 //   return Result.successResult("add success! ：" + rdbAnalyze.getId());
                 }catch (SchedulerException e){
-                    LOG.error("schedule job add faild!message:{}", e.getMessage());
-                    return Result.failResult("schedule job add faild!");
+                    LOG.error("schedule job add failed!message:{}", e.getMessage());
+                    return Result.failResult("schedule job add failed!");
                 }
             }
             return Result.successResult("add success!" );
@@ -127,11 +128,11 @@ public class RDBAnalyzeController {
 	 * @param id
 	 */
 	@RequestMapping(value = "/cance/{id}", method = RequestMethod.GET)
-	public Result canceRdbAnalyze(@PathVariable("id") Long id) {
+	public Result cancelRabAnalyze(@PathVariable("id") Long id) {
 		try {
 			taskService.delTask("rdb" + id);
 		} catch (SchedulerException e) {
-			LOG.error("schedule job delete faild!message:{}", e.getMessage());
+			LOG.error("schedule job delete failed!message:{}", e.getMessage());
 		}
 		return Result.successResult("cancel job success!");
 	}
@@ -178,8 +179,8 @@ public class RDBAnalyzeController {
 		List<ScheduleDetail> result = new ArrayList<>();
 		if (scheduleDetail != null && scheduleDetail.size() > 0) {
 			for (ScheduleDetail scheduleDetails : scheduleDetail) {
-				AnalyzeStatus stautStatus = scheduleDetails.getStatus();
-				if ("DONE".equalsIgnoreCase(stautStatus.name())) {
+				AnalyzeStatus analyzerStatus = scheduleDetails.getStatus();
+				if ("DONE".equalsIgnoreCase(analyzerStatus.name())) {
 					scheduleDetails.setProcess(100);
 				} else {
 					float ratio = 0;
@@ -223,8 +224,8 @@ public class RDBAnalyzeController {
 	 *         </code>
 	 */
 	@RequestMapping(value = "cance_job/{instance}/{scheduleID}", method = RequestMethod.GET)
-	public Result canceJob(@PathVariable String instance,@PathVariable String scheduleID) {
-		JSONObject result = rdbAnalyzeService.canceRDBAnalyze(instance,scheduleID);
+	public Result cancelJob(@PathVariable String instance, @PathVariable String scheduleID) {
+		JSONObject result = rdbAnalyzeService.cancelRDBAnalyze(instance,scheduleID);
 		return Result.successResult(result);
 	}
 
@@ -380,8 +381,6 @@ public class RDBAnalyzeController {
 		try {
 			Long group_id = Long.parseLong(groupId);
 			List<RDBAnalyzeResult> results = rdbAnalyzeResultService.selectList(group_id);
-		//	List<Cluster> clusters = clusterService.getAllClusterList();
-		//	results = rdbAnalyzeResultService.getAllAnalyzeResult(results, clusters);
 			return Result.successResult(results);
 		} catch (Exception e) {
 			LOG.error("get analyze result failed", e);

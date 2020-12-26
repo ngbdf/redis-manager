@@ -21,6 +21,7 @@
             <font v-else-if="scope.row.status === 'CANCELED'" color="999999">CANCELED</font>
             <font v-else-if="scope.row.status === 'NOT_START'" color="#FA7070">NOT_START</font>
             <font v-else-if="scope.row.status === 'ERROR'" color="#ff0000">ERROR</font>
+            <font v-else-if="scope.row.status === 'SAVE'" color="#FA7070">SAVE</font>
             <font v-else-if="scope.row.status === 'NOTINIT'" color="#FA7070">NOTINIT</font>
             <font v-else-if="scope.row.status === 'CHECKING'" color="#FA7070">CHECKING</font>
           </template>
@@ -83,7 +84,7 @@ export default {
         if (this.originalData.length > 0) {
           let count = 0
           for (let i = 0; i < this.originalData.length; i++) {
-            if (this.originalData[i].status === 'DONE') {
+            if (this.originalData[i].status === 'DONE' || this.originalData[i].status === 'ERROR') {
               count += 1
             }
             if (this.originalData[i].status === 'CANCELED') {

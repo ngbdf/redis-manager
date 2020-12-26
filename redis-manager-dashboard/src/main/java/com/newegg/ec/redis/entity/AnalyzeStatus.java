@@ -16,6 +16,11 @@ public enum AnalyzeStatus {
   NOTINIT,
 
   /**
+   * 未启用RDB的节点执行save命令，生成RDB文件
+   */
+  SAVE,
+
+  /**
    * 接收到主节点 init 指令，对接收到的配置内容进行检查中
    */
   CHECKING,
@@ -45,6 +50,9 @@ public enum AnalyzeStatus {
    */
   CANCELED,
 
+  /**
+   * 执行失败
+   */
   ERROR,
   
   NOT_START,

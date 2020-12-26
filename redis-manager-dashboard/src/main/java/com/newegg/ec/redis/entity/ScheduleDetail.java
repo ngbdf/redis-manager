@@ -1,5 +1,7 @@
 package com.newegg.ec.redis.entity;
 
+import java.util.Objects;
+
 /**
  * @author：Truman.P.Du
  * @createDate: 2018年4月13日 上午8:19:47
@@ -21,7 +23,6 @@ public class ScheduleDetail {
 	private int process = 0;
 
 	public ScheduleDetail() {
-
 	}
 
 	public ScheduleDetail(long scheduleID, String instance, boolean scheduleStatus, AnalyzeStatus status) {
@@ -78,5 +79,19 @@ public class ScheduleDetail {
 
 	public void setScheduleStatus(boolean scheduleStatus) {
 		this.scheduleStatus = scheduleStatus;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ScheduleDetail that = (ScheduleDetail) o;
+		return scheduleID == that.scheduleID &&
+				Objects.equals(instance, that.instance);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(scheduleID, instance);
 	}
 }
