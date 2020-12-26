@@ -99,7 +99,7 @@ export default {
         }, {
           label: 'TTL',
           sort: true,
-          prop: 'tTL',
+          prop: 'TTL',
           type: Number,
           formatter: this.formatterCount
         }, {

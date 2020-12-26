@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.util.TypeUtils;
 import com.newegg.ec.redis.dao.IRdbAnalyzeResult;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RDBAnalyze;
@@ -188,6 +189,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
         List<PrefixResult> prefixKeyList =  JSONObject.parseArray(result,PrefixResult.class);
         List<PrefixResult> prefixResultList = combinePrefixByType(prefixKeyList,type);
         List<PrefixResult> finalPrefixResultList = prefixResultList.stream().map(prefixResult -> setPrefixKey(prefixResult,true)).collect(Collectors.toList());
+        TypeUtils.compatibleWithJavaBean = true;
         return JSONObject.toJSONString(finalPrefixResultList, SerializerFeature.NotWriteDefaultValue);
     }
 
@@ -627,6 +629,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
     static class PrefixResult{
         private String prefixKey;
         private int noTTL = 0;
+
         private int TTL = 0 ;
         private long memorySize;
         private long keyCount;

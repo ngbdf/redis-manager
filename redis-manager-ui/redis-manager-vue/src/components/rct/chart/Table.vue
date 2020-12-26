@@ -71,7 +71,9 @@ export default {
       if(this.tableObj.columns.filter(c=>c=='noTTL')){
          this.tableData = this.tableData.sort(this.compareValue('noTTL','descending'));
       }
-     
+      if(this.tableObj.columns.filter(c=>c=='keyCount')){
+         this.tableData = this.tableData.sort(this.compareValue('keyCount','descending'));
+      }
       this.length = this.tableData.length
       this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
     },
@@ -82,6 +84,12 @@ export default {
     },
     compareValue (property, order) {
       return function (obj1, obj2) {
+        if(!obj2[property]){
+          obj2[property]= 0;
+        }
+          if(!obj1[property]){
+          obj1[property]= 0;
+        }
         if (order === 'ascending') {
           return parseInt(obj1[property]) - parseInt(obj2[property])
         }
