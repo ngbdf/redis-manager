@@ -7,5 +7,9 @@ export function formatBytes (bytes) {
 }
 
 export function formatterInput (value) {
-  return value.toString().replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,')
+  if (value) {
+    return value.toString().replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,')
+  } else {
+    return '0'
+  }
 };

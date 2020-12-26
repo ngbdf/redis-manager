@@ -172,30 +172,31 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
         String[] analyzerArr = new String[]{"TTLAnalyze","PrefixKeyByMemory","PrefixKeyByCount"};
         for (String analyzer :analyzerArr){
             String analyzerStr = dbResult.getOrDefault(analyzer,null);
-            map.putAll(combinePrefixKeyByType(analyzerStr,analyzer));
+            if(Objects.nonNull(analyzerStr)){
+                map.put(analyzer,combinePrefixKeyByType(analyzerStr,analyzer));
+            }
         }
-        return map;
+        dbResult.putAll(map);
+        return dbResult;
     }
 
-    private Map<String, String> combinePrefixKeyByType(String result,String type){
+    private String combinePrefixKeyByType(String result,String type){
         Map<String, String> map = new HashMap<>();
-       if(Objects.isNull(result)){
-           return map;
-       }
-       List<PrefixResult> prefixKeyList =  JSONObject.parseArray(result,PrefixResult.class);
-       List<PrefixResult> prefixResultList = combinePrefixByType(prefixKeyList,type);
-       List<PrefixResult> finalPrefixResultList = prefixResultList.stream().map(prefixResult -> setPrefixKey(prefixResult,true)).collect(Collectors.toList());
-       String prefixString = JSONObject.toJSONString(finalPrefixResultList, SerializerFeature.NotWriteDefaultValue);
-       map.put(type,prefixString);
-       return map;
+        if(Objects.isNull(result)){
+            return null;
+        }
+        List<PrefixResult> prefixKeyList =  JSONObject.parseArray(result,PrefixResult.class);
+        List<PrefixResult> prefixResultList = combinePrefixByType(prefixKeyList,type);
+        List<PrefixResult> finalPrefixResultList = prefixResultList.stream().map(prefixResult -> setPrefixKey(prefixResult,true)).collect(Collectors.toList());
+        return JSONObject.toJSONString(finalPrefixResultList, SerializerFeature.NotWriteDefaultValue);
     }
 
     private List<PrefixResult> combinePrefixByType(List<PrefixResult> prefixResultList,String type){
         Map<String,PrefixResult> combinedResult = new TreeMap<>();
         Map<String,PrefixResult> prefixResultMap = listToSortTreeMap(prefixResultList);
         prefixResultList = new ArrayList<>(prefixResultMap.values());
-       int i = 0;
-       while (i<prefixResultList.size()-1){
+        int i = 0;
+        while (i<prefixResultList.size()-1){
             PrefixResult result = prefixResultList.get(i);
             PrefixResult nextResult = prefixResultList.get(i+1);
             if(getPrefix(nextResult).startsWith(getPrefix(result))){
@@ -217,7 +218,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
             }else {
                 i = i+1;
             }
-           combinedResult.put(getPrefix(result),result);
+            combinedResult.put(getPrefix(result),result);
         }
 
         return new ArrayList<>(combinedResult.values());
@@ -263,31 +264,31 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
         return getAllKeyPrefixByResult(result.getResult());
     }
 
-	/**
-	 * get list keyPrefix
-	 * @param result result
-	 * @return List<String> keyPrefix
-	 */
-	private List<JSONObject> getAllKeyPrefixByResult(String result){
-		List<JSONObject> resultJsonObj = new ArrayList<>(500);
-		if(null == result || "".equals(result.trim())) {
-			return resultJsonObj;
-		}
-		JSONArray jsonArray = getJSONArrayFromResultByKey(result, IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT);
-		if(null == jsonArray) {
-			return resultJsonObj;
-		}
-		JSONObject oneRow;
-		JSONObject jsonObject;
-		for(Object obj : jsonArray) {
-			oneRow = (JSONObject) obj;
-			jsonObject = new JSONObject();
-			jsonObject.put("value", oneRow.getString("prefixKey"));
-			jsonObject.put("label", oneRow.getString("prefixKey"));
-			resultJsonObj.add(jsonObject);
-		}
-		return resultJsonObj;
-	}
+    /**
+     * get list keyPrefix
+     * @param result result
+     * @return List<String> keyPrefix
+     */
+    private List<JSONObject> getAllKeyPrefixByResult(String result){
+        List<JSONObject> resultJsonObj = new ArrayList<>(500);
+        if(null == result || "".equals(result.trim())) {
+            return resultJsonObj;
+        }
+        JSONArray jsonArray = getJSONArrayFromResultByKey(result, IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT);
+        if(null == jsonArray) {
+            return resultJsonObj;
+        }
+        JSONObject oneRow;
+        JSONObject jsonObject;
+        for(Object obj : jsonArray) {
+            oneRow = (JSONObject) obj;
+            jsonObject = new JSONObject();
+            jsonObject.put("value", oneRow.getString("prefixKey"));
+            jsonObject.put("label", oneRow.getString("prefixKey"));
+            resultJsonObj.add(jsonObject);
+        }
+        return resultJsonObj;
+    }
 
     private JSONArray getJsonArrayFromResult(Long analyzeResultId, String key) throws Exception {
         if (null == analyzeResultId) {
@@ -625,8 +626,8 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 
     static class PrefixResult{
         private String prefixKey;
-        private int noTTL;
-        private int TTL;
+        private int noTTL = 0;
+        private int TTL = 0 ;
         private long memorySize;
         private long keyCount;
         private String prefix;
