@@ -111,7 +111,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         Cluster cluster = rdbAnalyze.getCluster();
 
         String redisHost = cluster.getNodes().split(",")[0].split(":")[0];
-        String port = cluster.getNodes().split(",")[0].split(":")[1];
+        String redisPort = cluster.getNodes().split(",")[0].split(":")[1];
 
         // 集群中所有的host
         Map<String, String> clusterNodesIP = new HashMap<>();
@@ -127,9 +127,9 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             } else {
                 // 获取集群中有哪些节点进行分析
                 if (StringUtils.isNotBlank(cluster.getRedisPassword())) {
-                    redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(port)),cluster.getRedisPassword());
+                    redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(redisPort)),cluster.getRedisPassword());
                 } else {
-                    redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(port)),null);
+                    redisClient = RedisClientFactory.buildRedisClient(new RedisNode(redisHost,Integer.parseInt(redisPort)),null);
                 }
                 // 集群中是否指定节点进行分析
                 if(rdbAnalyze.getNodes() != null && !"-1".equalsIgnoreCase(rdbAnalyze.getNodes().get(0))){
@@ -165,6 +165,13 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         }
         long scheduleID = System.currentTimeMillis();
 
+        // 初始化进度状态
+        generateRule.forEach((host,ports) -> {
+            ports.forEach(port -> {
+                updateCurrentAnalyzerStatus(rdbAnalyze.getId(), scheduleID, host, port, 0,true, AnalyzeStatus.NOTINIT);
+            });
+        });
+
         List<AnalyzeInstance> analyzeInstances = EurekaUtil.getRegisterNodes();
         Map<String, AnalyzeInstance> analyzeInstancesMap = new HashMap<>(analyzeInstances.size());
         // 本次场景只会一个host一个AnalyzeInstance
@@ -193,22 +200,20 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                     && generateRule.containsKey(host)) {
 
                 Set<String> ports = generateRule.get(host);
-                ports.forEach(p -> {
+                ports.forEach(port -> {
                     Jedis jedis = null;
                     try {
-                        jedis = new Jedis(host, Integer.parseInt(p));
+                        jedis = new Jedis(host, Integer.parseInt(port));
                         if (StringUtils.isNotBlank(cluster.getRedisPassword())) {
                             jedis.auth(cluster.getRedisPassword());
                         }
                         List<String> configs = jedis.configGet("save");
                         // 如果没有配置RDB持久化策略，那么使用命令生成RDB文件
-                        if (configs != null && configs.size() == 2) {
-                            // 处理save为空场景
-                            if (StringUtils.isBlank(configs.get(1))) {
-                                rdbBgsave(jedis,host,p);
-                            }
-                        } else if (configs == null || configs.size() == 0) {
-                            rdbBgsave(jedis,host,p);
+                        if (configs == null || configs.size() == 0 ||
+                                (configs.size() == 2 && StringUtils.isBlank(configs.get(1)))) {
+                            // 调用save命令前设置执行状态为save
+                            updateCurrentAnalyzerStatus(rdbAnalyze.getId(), scheduleID, host, port, 0,true, AnalyzeStatus.SAVE);
+                            rdbBgsave(jedis,host,port);
                         }
                     } catch (Exception e) {
                         LOG.error("rdb generate error.", e);
@@ -221,67 +226,17 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             }
 
             // 如果某个服务器上没有分配到分析节点，则直接跳过
-//            if(!generateRule.containsKey(host)){
-//                continue;
-//            }
+            if(!generateRule.containsKey(host)){
+                continue;
+            }
 
-            AnalyzeInstance analyzeInstance = analyzeInstancesMap.get(host);
-
-            //String url = "http://" + host + ":" + analyzeInstance.getPort() + "/receivedSchedule";
-             String url = "http://127.0.0.1:8082/receivedSchedule";
-            ScheduleInfo scheduleInfo = new ScheduleInfo(scheduleID, rdbAnalyze.getDataPath(), rdbAnalyze.getPrefixes(),
-                    generateRule.get(host), analyzer);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Type", "application/json");
-            HttpEntity<ScheduleInfo> httpEntity = new HttpEntity<ScheduleInfo>(scheduleInfo, headers);
-            JSONObject scheduleResult = new JSONObject();
-            scheduleResult.put("host", host);
-            scheduleResult.put("ports", generateRule.get(host));
-            scheduleResult.put("scheduleID", scheduleID);
-            scheduleResult.put("analyzerTypes", analyzer);
-            scheduleResult.put("port", analyzeInstance.getPort());
-            try {
-                ResponseEntity<String> executeResult = restTemplate.postForEntity(url, httpEntity, String.class);
-                JSONObject responseMessage = JSONObject.parseObject(executeResult.getBody());
-
-                if (!responseMessage.getBooleanValue("checked")) {
-                    LOG.error("allocation {} scheduleJob response error. responseMessage:{}",
-                            analyzeInstance.toString(), responseMessage.toJSONString());
-                    deleteResult(rdbAnalyze,scheduleID);
-                    scheduleResult.put("status", Boolean.FALSE);
-                    responseResult.put("status", Boolean.FALSE);
-                    responseResult.put("message", "allocation " + analyzeInstance.getHost()
-                            + " scheduleJob response error:" + responseMessage.toJSONString());
-
-                    return responseResult;
-                } else {
-                    scheduleResult.put("status", Boolean.TRUE);
-                }
-
-            } catch (RestClientException e) {
-                LOG.error("allocation {} scheduleJob fail. ", analyzeInstance.toString(), e);
-                deleteResult(rdbAnalyze,scheduleID);
+            // 调用分析器执行任务， 如果执行失败则停止进行分析任务
+            if(!requestAnalyze(scheduleID, rdbAnalyze, analyzeInstancesMap.get(host), generateRule, analyzer)){
+                responseResult.put("status", Boolean.FALSE);
                 return responseResult;
             }
-
-            tempArray.add(scheduleResult);
         }
         AppCache.scheduleProcess.put(rdbAnalyze.getId(), scheduleID);
-        List<ScheduleDetail> scheduleDetails = new ArrayList<>();
-        for (int i = 0; i < tempArray.size(); i++) {
-            JSONObject json = tempArray.getJSONObject(i);
-            String host = json.getString("host");
-            boolean scheduleStatus = json.getBooleanValue("status");
-            @SuppressWarnings("unchecked")
-            Set<String> ports = (Set<String>) json.get("ports");
-            for (String instancePort : ports) {
-                String instance = host + ":" + instancePort;
-                ScheduleDetail scheduleDetail = new ScheduleDetail(scheduleID, instance, scheduleStatus,
-                        AnalyzeStatus.CHECKING);
-                scheduleDetails.add(scheduleDetail);
-            }
-        }
-        AppCache.scheduleDetailMap.put(rdbAnalyze.getId(), scheduleDetails);
 
         if (!config.isDevEnable()) {
             // 设置db数据量
@@ -289,6 +244,63 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         }
         return responseResult;
     }
+
+    private boolean requestAnalyze(long scheduleID, RDBAnalyze rdbAnalyze, AnalyzeInstance analyzeInstance,
+                                Map<String, Set<String>> generateRule, int[] analyzer){
+        // 执行任务分发
+        String host = analyzeInstance.getHost();
+        String url = "http://" + analyzeInstance.getHost() + ":" + analyzeInstance.getPort() + "/receivedSchedule";
+        //String url = "http://127.0.0.1:8082/receivedSchedule";
+        ScheduleInfo scheduleInfo = new ScheduleInfo(scheduleID, rdbAnalyze.getDataPath(), rdbAnalyze.getPrefixes(),
+                generateRule.get(host), analyzer);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        HttpEntity<ScheduleInfo> httpEntity = new HttpEntity<ScheduleInfo>(scheduleInfo, headers);
+        boolean status = Boolean.FALSE;
+        try {
+            ResponseEntity<String> executeResult = restTemplate.postForEntity(url, httpEntity, String.class);
+            JSONObject responseMessage = JSONObject.parseObject(executeResult.getBody());
+            if (!responseMessage.getBooleanValue("checked")) {
+                LOG.error("allocation {} scheduleJob response error. responseMessage:{}",
+                        analyzeInstance.toString(), responseMessage.toJSONString());
+                deleteResult(rdbAnalyze,scheduleID);
+            } else {
+                status = Boolean.TRUE;
+            }
+
+        } catch (Exception e) {
+            LOG.error("allocation {} scheduleJob fail. ", analyzeInstance.toString(), e);
+            deleteResult(rdbAnalyze,scheduleID);
+        }
+        // 更改页面进度显示状态
+        Set<String> ports = generateRule.get(host);
+        for (String port : ports) {
+            if(status){
+                updateCurrentAnalyzerStatus(rdbAnalyze.getId(), scheduleID, host, port, 0, status, AnalyzeStatus.CHECKING);
+            } else {
+                updateCurrentAnalyzerStatus(rdbAnalyze.getId(), scheduleID, host, port, 0, status, AnalyzeStatus.ERROR);
+            }
+        }
+        return status;
+    }
+
+    private void updateCurrentAnalyzerStatus(Long analyzeID, long scheduleID, String host, String port, int process,
+                                             boolean stats, AnalyzeStatus analyzeStatus) {
+        String instance = host + ":" + port;
+        ScheduleDetail scheduleDetail = new ScheduleDetail(scheduleID, instance, process, stats, analyzeStatus);
+        List<ScheduleDetail> scheduleDetails = AppCache.scheduleDetailMap.get(analyzeID);
+        if(scheduleDetails == null){
+            scheduleDetails = new ArrayList<>();
+            AppCache.scheduleDetailMap.put(analyzeID, scheduleDetails);
+        }
+        if(scheduleDetails.contains(scheduleDetail)){
+            int i = scheduleDetails.indexOf(scheduleDetail);
+            scheduleDetails.set(i, scheduleDetail);
+        }else {
+            scheduleDetails.add(scheduleDetail);
+        }
+    }
+
 
     // 将每个需要分析的redis实例的key数量写入到缓存中
     private void cacheDBSize(Map<String, Set<String>> generateRule){
