@@ -3,6 +3,7 @@ package com.newegg.ec.redis.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.newegg.ec.redis.dao.IRdbAnalyzeResult;
 import com.newegg.ec.redis.entity.Cluster;
 import com.newegg.ec.redis.entity.RDBAnalyze;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -113,7 +115,7 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
         return result;
     }
 
-    private RDBAnalyzeResult selectResultById(Long id) {
+    public RDBAnalyzeResult selectResultById(Long id) {
         if (null == id) {
             return null;
         }
@@ -148,7 +150,8 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
 
                 }
             }
-            String result = JSON.toJSONString(dbResult);
+            Map<String, String> finalDbResult = combinePrefixKey(dbResult);
+            String result = JSON.toJSONString(finalDbResult);
             RDBAnalyzeResult rdbAnalyzeResult = null;
             rdbAnalyzeResult = rdbAnalyzeResultMapper.selectByRedisIdAndSId(redisClusterId, scheduleId);
             rdbAnalyzeResult.setResult(result);
@@ -159,6 +162,95 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
             LOG.error("reportDataWriteToDb write to db error!", e);
         }
         return null;
+    }
+
+    public Map<String, String> combinePrefixKey(Map<String, String> dbResult){
+        Map<String, String> map = new HashMap<>();
+        if(CollectionUtils.isEmpty(dbResult)){
+            return map;
+        }
+        String[] analyzerArr = new String[]{"TTLAnalyze","PrefixKeyByMemory","PrefixKeyByCount"};
+        for (String analyzer :analyzerArr){
+            String analyzerStr = dbResult.getOrDefault(analyzer,null);
+            map.putAll(combinePrefixKeyByType(analyzerStr,analyzer));
+        }
+        return map;
+    }
+
+    private Map<String, String> combinePrefixKeyByType(String result,String type){
+        Map<String, String> map = new HashMap<>();
+       if(Objects.isNull(result)){
+           return map;
+       }
+       List<PrefixResult> prefixKeyList =  JSONObject.parseArray(result,PrefixResult.class);
+       List<PrefixResult> prefixResultList = combinePrefixByType(prefixKeyList,type);
+       List<PrefixResult> finalPrefixResultList = prefixResultList.stream().map(prefixResult -> setPrefixKey(prefixResult,true)).collect(Collectors.toList());
+       String prefixString = JSONObject.toJSONString(finalPrefixResultList, SerializerFeature.NotWriteDefaultValue);
+       map.put(type,prefixString);
+       return map;
+    }
+
+    private List<PrefixResult> combinePrefixByType(List<PrefixResult> prefixResultList,String type){
+        Map<String,PrefixResult> combinedResult = new TreeMap<>();
+        Map<String,PrefixResult> prefixResultMap = listToSortTreeMap(prefixResultList);
+        prefixResultList = new ArrayList<>(prefixResultMap.values());
+       int i = 0;
+       while (i<prefixResultList.size()-1){
+            PrefixResult result = prefixResultList.get(i);
+            PrefixResult nextResult = prefixResultList.get(i+1);
+            if(getPrefix(nextResult).startsWith(getPrefix(result))){
+                if("TTLAnalyze".equalsIgnoreCase(type)){
+                    int ttl = nextResult.getTTL()+result.getTTL();
+                    int noTTL = nextResult.getNoTTL()+result.getNoTTL();
+                    result.setTTL(ttl);
+                    result.setNoTTL(noTTL);
+                }
+                if("PrefixKeyByMemory".equalsIgnoreCase(type)){
+                    long memorySize = nextResult.getMemorySize()+result.getMemorySize();
+                    result.setMemorySize(memorySize);
+                }
+                if("PrefixKeyByCount".equalsIgnoreCase(type)){
+                    long keyCount = nextResult.getKeyCount()+result.getKeyCount();
+                    result.setKeyCount(keyCount);
+                }
+                prefixResultList.remove(nextResult);
+            }else {
+                i = i+1;
+            }
+           combinedResult.put(getPrefix(result),result);
+        }
+
+        return new ArrayList<>(combinedResult.values());
+    }
+
+
+    private Map<String,PrefixResult> listToSortTreeMap(List<PrefixResult> prefixResultList){
+        Map<String,PrefixResult> prefixResultMap = new TreeMap<>();
+        prefixResultList.forEach(prefixResult-> {
+            prefixResultMap.put(getPrefix(prefixResult), setPrefixKey(prefixResult,false));
+        });
+        return prefixResultMap;
+    }
+
+    private PrefixResult setPrefixKey(PrefixResult prefixResult,boolean addStart){
+        if (Objects.nonNull(prefixResult.getPrefixKey())) {
+            String prefix = prefixResult.getPrefixKey().replace("*", "");
+            prefix = addStart?prefix+"*":prefix;
+            prefixResult.setPrefixKey(prefix);
+        }
+        if (Objects.nonNull(prefixResult.getPrefix())) {
+            String prefix = prefixResult.getPrefix().replace("*", "");
+            prefix = addStart?prefix+"*":prefix;
+            prefixResult.setPrefix(prefix);
+        }
+        return prefixResult;
+    }
+
+    private String getPrefix(PrefixResult result){
+        if(Objects.isNull(result.getPrefixKey())){
+            return result.getPrefix().endsWith("*")?result.getPrefix().replace("\\*",""):result.getPrefix();
+        }
+        return result.getPrefixKey().endsWith("*")?result.getPrefixKey().replace("\\*",""):result.getPrefixKey();
     }
 
     /**
@@ -529,5 +621,62 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
             result.setClusterName(clusterName.get(result.getClusterId().intValue()));
         }
         return results;
+    }
+
+    static class PrefixResult{
+        private String prefixKey;
+        private int noTTL;
+        private int TTL;
+        private long memorySize;
+        private long keyCount;
+        private String prefix;
+
+        public String getPrefix() {
+            return prefix;
+        }
+
+        public void setPrefix(String prefix) {
+            this.prefix = prefix;
+        }
+
+        public String getPrefixKey() {
+            return prefixKey;
+        }
+
+        public void setPrefixKey(String prefixKey) {
+            this.prefixKey = prefixKey;
+        }
+
+        public int getNoTTL() {
+            return noTTL;
+        }
+
+        public void setNoTTL(int noTTL) {
+            this.noTTL = noTTL;
+        }
+
+        public int getTTL() {
+            return TTL;
+        }
+
+        public void setTTL(int TTL) {
+            this.TTL = TTL;
+        }
+
+        public long getMemorySize() {
+            return memorySize;
+        }
+
+        public void setMemorySize(long memorySize) {
+            this.memorySize = memorySize;
+        }
+
+        public long getKeyCount() {
+            return keyCount;
+        }
+
+        public void setKeyCount(long keyCount) {
+            this.keyCount = keyCount;
+        }
     }
 }
