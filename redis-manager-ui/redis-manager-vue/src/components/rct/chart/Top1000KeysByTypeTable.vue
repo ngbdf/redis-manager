@@ -49,6 +49,7 @@ export default {
           key: value.key
         }
       })
+      this.tableData = this.tableData.sort(this.compareValue('itemCount', 'descending'))
       this.pageData = this.tableData.slice((this.currentPage - 1) * this.pagesize, this.currentPage * this.pagesize)
     },
     compareValue (property, order) {
