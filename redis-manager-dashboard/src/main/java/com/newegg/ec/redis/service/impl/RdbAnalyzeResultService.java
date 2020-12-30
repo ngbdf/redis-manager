@@ -12,7 +12,6 @@ import com.newegg.ec.redis.entity.RDBAnalyzeResult;
 import com.newegg.ec.redis.entity.ReportData;
 import com.newegg.ec.redis.plugin.rct.cache.AppCache;
 import com.newegg.ec.redis.plugin.rct.report.IAnalyzeDataConverse;
-import com.newegg.ec.redis.plugin.rct.report.converseFactory.ReportDataConverseFacotry;
 import com.newegg.ec.redis.service.IRdbAnalyzeResultService;
 import com.newegg.ec.redis.util.ListSortUtil;
 import org.apache.commons.lang.StringUtils;
@@ -138,21 +137,22 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
      * @return
      */
     @Override
-    public RDBAnalyzeResult reportDataWriteToDb(RDBAnalyze rdbAnalyze, Map<String, Set<String>> data) {
+    public RDBAnalyzeResult reportDataWriteToDb(RDBAnalyze rdbAnalyze, Map<String, String> data) {
         try {
             Long scheduleId = AppCache.scheduleProcess.get(rdbAnalyze.getId());
             Long redisClusterId = rdbAnalyze.getClusterId();
             IAnalyzeDataConverse analyzeDataConverse = null;
-            Map<String, String> dbResult = new HashMap<>();
-            for (Map.Entry<String, Set<String>> entry : data.entrySet()) {
-                analyzeDataConverse = ReportDataConverseFacotry.getReportDataConverse(entry.getKey());
-                if (null != analyzeDataConverse) {
-                    dbResult.putAll(analyzeDataConverse.getMapJsonString(entry.getValue()));
-
-                }
-            }
-            Map<String, String> finalDbResult = combinePrefixKey(dbResult);
-            String result = JSON.toJSONString(finalDbResult);
+//            Map<String, String> dbResult = new HashMap<>();
+//            for (Map.Entry<String, Set<String>> entry : data.entrySet()) {
+//                System.out.println("key:"+entry.getKey());
+//                analyzeDataConverse = ReportDataConverseFacotry.getReportDataConverse(entry.getKey());
+//                if (null != analyzeDataConverse) {
+//                    dbResult.putAll(analyzeDataConverse.getMapJsonString(entry.getValue()));
+//
+//                }
+//            }
+//            Map<String, String> finalDbResult = combinePrefixKey(dbResult);
+            String result = JSON.toJSONString(data);
             RDBAnalyzeResult rdbAnalyzeResult = null;
             rdbAnalyzeResult = rdbAnalyzeResultMapper.selectByRedisIdAndSId(redisClusterId, scheduleId);
             rdbAnalyzeResult.setResult(result);

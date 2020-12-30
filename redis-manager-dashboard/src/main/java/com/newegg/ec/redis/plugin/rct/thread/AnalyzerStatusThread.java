@@ -9,6 +9,8 @@ import com.newegg.ec.redis.entity.*;
 
 import com.newegg.ec.redis.plugin.rct.cache.AppCache;
 import com.newegg.ec.redis.plugin.rct.report.EmailSendReport;
+import com.newegg.ec.redis.plugin.rct.report.IAnalyzeDataConverse;
+import com.newegg.ec.redis.plugin.rct.report.converseFactory.ReportDataConverseFacotry;
 import com.newegg.ec.redis.service.impl.RdbAnalyzeResultService;
 import com.newegg.ec.redis.service.impl.RdbAnalyzeService;
 import org.slf4j.Logger;
@@ -115,14 +117,24 @@ public class AnalyzerStatusThread implements Runnable {
 			}
 			try {
 				Map<String, ReportData> latestPrefixData = rdbAnalyzeResultService.getReportDataLatest(rdbAnalyze.getClusterId());
+				Map<String, String> dbResult = new HashMap<>();
+				IAnalyzeDataConverse analyzeDataConverse = null;
+				for (Map.Entry<String, Set<String>> entry : reportData.entrySet()) {
+					analyzeDataConverse = ReportDataConverseFacotry.getReportDataConverse(entry.getKey());
+					if (null != analyzeDataConverse) {
+						dbResult.putAll(analyzeDataConverse.getMapJsonString(entry.getValue()));
+
+					}
+				}
+				dbResult = rdbAnalyzeResultService.combinePrefixKey(dbResult);
 			    try {
-                    rdbAnalyzeResultService.reportDataWriteToDb(rdbAnalyze, reportData);
+                    rdbAnalyzeResultService.reportDataWriteToDb(rdbAnalyze, dbResult);
                 }catch (Exception e) {
                     LOG.error("reportDataWriteToDb has error.", e);
                 }
 				if(rdbAnalyze.isReport()) {
 					EmailSendReport emailSendReport = new EmailSendReport();
-					emailSendReport.sendEmailReport(rdbAnalyze, emailInfo, reportData, latestPrefixData);
+					emailSendReport.sendEmailReport(rdbAnalyze, emailInfo, dbResult, latestPrefixData);
 				}
 			} catch (Exception e) {
 				LOG.error("email report has error.", e);

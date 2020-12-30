@@ -89,15 +89,17 @@ public class TTLDataConverse implements IAnalyzeDataConverse {
                 jsonObject = JSON.parseObject(object);
                 prefix = jsonObject.getString("prefix");
                 reportData = reportDataHashMap.get(prefix);
+                long ttl = jsonObject.containsKey("TTL")?Long.parseLong(jsonObject.getString("TTL")): 0L;
+                long noTTL = jsonObject.containsKey("noTTL")?Long.parseLong(jsonObject.getString("noTTL")): 0L;
                 if(null == reportData) {
                     reportData = new ReportData();
-                    reportData.setCount(Long.parseLong(jsonObject.getString("noTTL")));
-                    reportData.setBytes(Long.parseLong(jsonObject.getString("TTL")));
+                    reportData.setCount(noTTL);
+                    reportData.setBytes(ttl);
                     reportData.setKey(prefix);
                 }
                 else {
-                    reportData.setCount(Long.parseLong(jsonObject.getString("noTTL")) + reportData.getCount());
-                    reportData.setBytes(Long.parseLong(jsonObject.getString("TTL")) + reportData.getBytes());
+                    reportData.setCount(noTTL + reportData.getCount());
+                    reportData.setBytes(ttl + reportData.getBytes());
                 }
                 reportDataHashMap.put(prefix, reportData);
             }

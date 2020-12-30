@@ -105,15 +105,17 @@ public class DataTypeDataConverse implements IAnalyzeDataConverse {
                 jsonObject = JSON.parseObject(object);
                 prefix = jsonObject.getString("dataType");
                 reportData = reportDataHashMap.get(prefix);
+                long itemCount = jsonObject.containsKey("itemCount")?Long.parseLong(jsonObject.getString("itemCount")):0L;
+                long bytes = jsonObject.containsKey("bytes")?Long.parseLong(jsonObject.getString("bytes")):0L;
                 if(null == reportData) {
                     reportData = new ReportData();
-                    reportData.setBytes(Long.parseLong(jsonObject.getString("bytes")));
-                    reportData.setCount(Long.parseLong(jsonObject.getString("itemCount")));
+                    reportData.setBytes(bytes);
+                    reportData.setCount(itemCount);
                     reportData.setKey(prefix);
                 }
                 else {
-                    reportData.setCount(Long.parseLong(jsonObject.getString("itemCount")) + reportData.getCount());
-                    reportData.setBytes(Long.parseLong(jsonObject.getString("bytes")) + reportData.getBytes());
+                    reportData.setCount(itemCount + reportData.getCount());
+                    reportData.setBytes(bytes + reportData.getBytes());
                 }
                 reportDataHashMap.put(prefix, reportData);
             }

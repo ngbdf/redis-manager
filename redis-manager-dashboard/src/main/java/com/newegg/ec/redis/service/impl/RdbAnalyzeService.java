@@ -113,10 +113,13 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         String redisHost = cluster.getNodes().split(",")[0].split(":")[0];
         String redisPort = cluster.getNodes().split(",")[0].split(":")[1];
 
+
         // 集群中所有的host
         Map<String, String> clusterNodesIP = new HashMap<>();
         // 最终需要分析的机器及端口
         Map<String, Set<String>> generateRule = new HashMap<>();
+
+
         try {
             if (config.isDevEnable()) {
                 clusterNodesIP.put(InetAddress.getLocalHost().getHostAddress(), config.getDevRDBPort());

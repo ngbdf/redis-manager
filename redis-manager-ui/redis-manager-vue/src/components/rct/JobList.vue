@@ -193,9 +193,12 @@ export default {
     //   this.analyseResults = res.data.data
     // },
     toTaskProgress (row) {
+      let cluster = JSON.stringify(JSON.parse(row.analyzeConfig).cluster)
+      let clusterInfo = JSON.parse(cluster)
+      let clusterId = clusterInfo.clusterId
       this.$router.push({
         name: 'TaskProgress',
-        params: { clusterId: row.clusterId, clusterName: row.clusterName }
+        params: { clusterId: clusterId, clusterName: row.clusterName }
       })
     },
     toReportDetail (row) {

@@ -101,17 +101,36 @@ public class PrefixDataConverse implements IAnalyzeDataConverse {
             ReportData reportData = null;
             for(String object : newSetData) {
                 jsonObject = JSON.parseObject(object);
-                prefix = jsonObject.getString("prefix");
+                if(jsonObject.containsKey("prefix")){
+                    prefix = jsonObject.getString("prefix");
+                }
+                if(jsonObject.containsKey("prefixKey")){
+                    prefix = jsonObject.getString("prefixKey");
+                }
                 reportData = reportDataHashMap.get(prefix);
+                long itemCount = 0L;
+                if(jsonObject.containsKey("itemCount")){
+                    itemCount = Long.parseLong(jsonObject.getString("itemCount"));
+                }
+                if(jsonObject.containsKey("keyCount")){
+                    itemCount = Long.parseLong(jsonObject.getString("keyCount"));
+                }
+                long bytes = 0L;
+                if(jsonObject.containsKey("bytes")){
+                    bytes = Long.parseLong(jsonObject.getString("bytes"));
+                }
+                if(jsonObject.containsKey("memorySize")){
+                    bytes = Long.parseLong(jsonObject.getString("memorySize"));
+                }
                 if(null == reportData) {
                     reportData = new ReportData();
-                    reportData.setCount(Long.parseLong(jsonObject.getString("itemCount")));
-                    reportData.setBytes(Long.parseLong(jsonObject.getString("bytes")));
+                    reportData.setCount(itemCount);
+                    reportData.setBytes(bytes);
                     reportData.setKey(prefix);
                 }
                 else {
-                    reportData.setCount(Long.parseLong(jsonObject.getString("itemCount")) + reportData.getCount());
-                    reportData.setBytes(Long.parseLong(jsonObject.getString("bytes")) + reportData.getBytes());
+                    reportData.setCount(itemCount+reportData.getCount());
+                    reportData.setBytes(bytes + reportData.getBytes());
                 }
                 reportDataHashMap.put(prefix, reportData);
             }

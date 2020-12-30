@@ -7,6 +7,8 @@ import com.newegg.ec.redis.plugin.rct.report.impl.PrefixDataConverse;
 import com.newegg.ec.redis.plugin.rct.report.impl.TTLDataConverse;
 import com.newegg.ec.redis.plugin.rct.report.impl.TopKeyDataConverse;
 
+import java.util.Objects;
+
 
 /**
  * @author kz37
@@ -15,6 +17,7 @@ import com.newegg.ec.redis.plugin.rct.report.impl.TopKeyDataConverse;
 public class ReportDataConverseFacotry {
 
 	public static IAnalyzeDataConverse getReportDataConverse(String analyzerType) {
+
 		int type = Integer.parseInt(analyzerType);
 
 		if (AnalyzerConstant.DATA_TYPE_ANALYZER == type) {
@@ -29,4 +32,20 @@ public class ReportDataConverseFacotry {
 			return null;
 		}
 	}
+
+	public static IAnalyzeDataConverse getReportDataConverseByString(String analyzerType) {
+
+		if (Objects.equals(IAnalyzeDataConverse.DATA_TYPE_ANALYZE,analyzerType)) {
+			return new DataTypeDataConverse();
+		} else if (Objects.equals(IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT,analyzerType) || Objects.equals(IAnalyzeDataConverse.PREFIX_KEY_BY_MEMORY,analyzerType)) {
+			return new PrefixDataConverse();
+		} else if (Objects.equals(IAnalyzeDataConverse.TOP_KEY_ANALYZE,analyzerType)) {
+			return new TopKeyDataConverse();
+		} else if (Objects.equals(IAnalyzeDataConverse.TTL_ANALYZE,analyzerType)) {
+			return new TTLDataConverse();
+		} else {
+			return null;
+		}
+	}
+
 }
