@@ -59,6 +59,7 @@ public class AnalyzerStatusThread implements Runnable {
 			LOG.warn("Analyze instances is empty.");
 			return;
 		}
+		Long scheduleID = res.containsKey("scheduleID") ? res.getLongValue("scheduleID") : 0L;
 		scheduleDetails = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
 		// 获取所有analyzer运行状态
 		while (AppCache.isNeedAnalyzeStastus(rdbAnalyze.getId())) {
@@ -77,6 +78,13 @@ public class AnalyzerStatusThread implements Runnable {
 					}
 				}
 			}
+			try {
+				// 每次循环休眠一次
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
 		}
 
 		AppCache.scheduleDetailMap.get(rdbAnalyze.getId()).forEach(s -> {
@@ -85,7 +93,6 @@ public class AnalyzerStatusThread implements Runnable {
 				return;
 			}
 		});
-
 
 		// 当所有analyzer运行完成，获取所有analyzer报表分析结果
 		if (AppCache.isAnalyzeComplete(rdbAnalyze)) {
@@ -116,7 +123,7 @@ public class AnalyzerStatusThread implements Runnable {
 				LOG.info(key+":"+temp.get(key));
 			}
 			try {
-				Map<String, ReportData> latestPrefixData = rdbAnalyzeResultService.getReportDataLatest(rdbAnalyze.getClusterId());
+				Map<String, ReportData> latestPrefixData = rdbAnalyzeResultService.getReportDataLatest(rdbAnalyze.getClusterId(), scheduleID);
 				Map<String, String> dbResult = new HashMap<>();
 				IAnalyzeDataConverse analyzeDataConverse = null;
 				for (Map.Entry<String, Set<String>> entry : reportData.entrySet()) {

@@ -167,7 +167,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             }
         }
         long scheduleID = System.currentTimeMillis();
-
+        responseResult.put("scheduleID", scheduleID);
         // 初始化进度状态
         generateRule.forEach((host,ports) -> {
             ports.forEach(port -> {
@@ -291,11 +291,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                                              boolean stats, AnalyzeStatus analyzeStatus) {
         String instance = host + ":" + port;
         ScheduleDetail scheduleDetail = new ScheduleDetail(scheduleID, instance, process, stats, analyzeStatus);
-        List<ScheduleDetail> scheduleDetails = AppCache.scheduleDetailMap.get(analyzeID);
-        if(scheduleDetails == null){
-            scheduleDetails = new ArrayList<>();
-            AppCache.scheduleDetailMap.put(analyzeID, scheduleDetails);
-        }
+        List<ScheduleDetail> scheduleDetails = AppCache.scheduleDetailMap.computeIfAbsent(analyzeID, k -> new ArrayList<>());
         if(scheduleDetails.contains(scheduleDetail)){
             int i = scheduleDetails.indexOf(scheduleDetail);
             scheduleDetails.set(i, scheduleDetail);

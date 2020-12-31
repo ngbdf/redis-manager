@@ -102,13 +102,13 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
      * @param clusterId cluster_id
      * @return RDBAnalyzeResult 不包含 cluster_id 和 scheduleId
      */
-    private RDBAnalyzeResult selectLatestResultByRID(Long clusterId) {
+    private RDBAnalyzeResult selectLatestResultByRID(Long clusterId, Long scheduleId) {
         if (null == clusterId) {
             return null;
         }
         RDBAnalyzeResult result = null;
         try {
-            result = rdbAnalyzeResultMapper.selectLatestResultByRedisInfoId(clusterId);
+            result = rdbAnalyzeResultMapper.selectLatestResultByRedisInfoId(clusterId, scheduleId);
         } catch (Exception e) {
             LOG.error("selectLatestResultByRedisInfoId failed!", e);
         }
@@ -546,11 +546,11 @@ public class RdbAnalyzeResultService implements IRdbAnalyzeResultService {
      * @return Map
      */
     @Override
-    public Map<String, ReportData> getReportDataLatest(Long clusterId) {
+    public Map<String, ReportData> getReportDataLatest(Long clusterId, Long scheduleId) {
         if (null == clusterId) {
             return null;
         }
-        RDBAnalyzeResult rdbAnalyzeResult = selectLatestResultByRID(clusterId);
+        RDBAnalyzeResult rdbAnalyzeResult = selectLatestResultByRID(clusterId, scheduleId);
         if (null == rdbAnalyzeResult) {
             return null;
         }

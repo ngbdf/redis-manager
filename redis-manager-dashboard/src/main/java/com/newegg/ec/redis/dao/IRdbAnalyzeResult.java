@@ -49,13 +49,13 @@ public interface IRdbAnalyzeResult {
      * @param cluster_id queryId
      * @return RDBAnalyzeResult
      */
-    @Select("select * from rdb_analyze_result where schedule_id=(select max(schedule_id) from rdb_analyze_result where cluster_id = #{cluster_id})")
+    @Select("select * from rdb_analyze_result where schedule_id=(select max(schedule_id) from rdb_analyze_result where cluster_id = #{cluster_id} AND schedule_id <> #{schedule_id})")
     @Results({ @Result(id = true, column = "id", property = "id"),
             @Result(column = "schedule_id", property = "scheduleId"),
             @Result(column = "cluster_id", property = "clusterId"),
             @Result(column = "result", property = "result"),
             @Result(column = "analyze_config", property = "analyzeConfig")})
-    RDBAnalyzeResult selectLatestResultByRedisInfoId(Long cluster_id);
+    RDBAnalyzeResult selectLatestResultByRedisInfoId(Long cluster_id, Long schedule_id);
 
     /**
      * query all result by redis_info_id
