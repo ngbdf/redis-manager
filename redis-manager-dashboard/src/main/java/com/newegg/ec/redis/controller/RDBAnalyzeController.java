@@ -200,6 +200,12 @@ public class RDBAnalyzeController {
 				return o1.getInstance().compareTo(o2.getInstance());
 			}
 		});
+		long doneCount = result.stream().filter(scheduleDetail1 -> ("DONE".equalsIgnoreCase(scheduleDetail1.getStatus().name())
+		|| "ERROR".equalsIgnoreCase(scheduleDetail1.getStatus().name()))
+		|| "CANCELED".equalsIgnoreCase(scheduleDetail1.getStatus().name())).count();
+		if(doneCount == result.size()){
+			AppCache.scheduleDetailMap.remove(rdbAnalyze.getId());
+		}
 		return Result.successResult(result);
 	}
 
