@@ -104,9 +104,6 @@ public class AnalyzerStatusThread implements Runnable {
 					LOG.error("get analyzer report has error.", e);
 				}
 			}
-			for(String key:temp.keySet()) {
-				LOG.info(key+":"+temp.get(key));
-			}
 			try {
 				Map<String, ReportData> latestPrefixData = rdbAnalyzeResultService.getReportDataLatest(rdbAnalyze.getClusterId(), scheduleID);
 				Map<String, String> dbResult = new HashMap<>();
@@ -115,7 +112,6 @@ public class AnalyzerStatusThread implements Runnable {
 					analyzeDataConverse = ReportDataConverseFacotry.getReportDataConverse(entry.getKey());
 					if (null != analyzeDataConverse) {
 						dbResult.putAll(analyzeDataConverse.getMapJsonString(entry.getValue()));
-
 					}
 				}
 				dbResult = rdbAnalyzeResultService.combinePrefixKey(dbResult);
