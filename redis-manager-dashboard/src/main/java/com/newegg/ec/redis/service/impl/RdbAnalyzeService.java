@@ -257,7 +257,9 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
 
                 if (!(AnalyzeStatus.DONE.equals(scheduleDetail.getStatus())
                         || AnalyzeStatus.CANCELED.equals(scheduleDetail.getStatus())
-                        || AnalyzeStatus.ERROR.equals(scheduleDetail.getStatus()))) {
+                        || AnalyzeStatus.ERROR.equals(scheduleDetail.getStatus())
+                        || AnalyzeStatus.NOTINIT.equals(scheduleDetail.getStatus())
+                        || AnalyzeStatus.SAVE.equals(scheduleDetail.getStatus()))) {
                     String instanceStr = scheduleDetail.getInstance();
                     if (analyzeInstance.getHost().equals(instanceStr.split(":")[0])) {
                         getAnalyzerStatusRest(analyzeId, analyzeInstance, scheduleDetails);
