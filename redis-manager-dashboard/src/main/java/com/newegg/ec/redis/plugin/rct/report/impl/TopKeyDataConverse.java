@@ -157,16 +157,18 @@ public class TopKeyDataConverse implements IAnalyzeDataConverse {
                 jsonObject = JSON.parseObject(object);
                 prefix = jsonObject.getString("key");
                 reportData = reportDataHashMap.get(prefix);
+                long itemCount = jsonObject.containsKey("itemCount")?Long.parseLong(jsonObject.getString("itemCount")):0L;
+                long bytes = jsonObject.containsKey("bytes")?Long.parseLong(jsonObject.getString("bytes")):0L;
                 if(null == reportData) {
                     reportData = new TopKeyReportData();
-                    reportData.setCount(Long.parseLong(jsonObject.getString("itemCount")));
-                    reportData.setBytes(Long.parseLong(jsonObject.getString("bytes")));
+                    reportData.setCount(itemCount);
+                    reportData.setBytes(bytes);
                     reportData.setKey(prefix);
                     reportData.setDataType(jsonObject.getString("dataType"));
                 }
                 else {
-                    reportData.setCount(Long.parseLong(jsonObject.getString("itemCount")) + reportData.getCount());
-                    reportData.setBytes(Long.parseLong(jsonObject.getString("bytes")) + reportData.getBytes());
+                    reportData.setCount(itemCount+ reportData.getCount());
+                    reportData.setBytes(bytes + reportData.getBytes());
                 }
                 reportDataHashMap.put(prefix, reportData);
             }

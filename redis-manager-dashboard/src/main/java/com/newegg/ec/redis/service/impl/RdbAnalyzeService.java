@@ -22,7 +22,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import redis.clients.jedis.Jedis;
 
@@ -113,10 +112,13 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         String redisHost = cluster.getNodes().split(",")[0].split(":")[0];
         String redisPort = cluster.getNodes().split(",")[0].split(":")[1];
 
+
         // 集群中所有的host
         Map<String, String> clusterNodesIP = new HashMap<>();
         // 最终需要分析的机器及端口
         Map<String, Set<String>> generateRule = new HashMap<>();
+
+
         try {
             if (config.isDevEnable()) {
                 clusterNodesIP.put(InetAddress.getLocalHost().getHostAddress(), config.getDevRDBPort());
@@ -164,7 +166,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             }
         }
         long scheduleID = System.currentTimeMillis();
-
+        responseResult.put("scheduleID", scheduleID);
         // 初始化进度状态
         generateRule.forEach((host,ports) -> {
             ports.forEach(port -> {
@@ -214,6 +216,8 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                             // 调用save命令前设置执行状态为save
                             updateCurrentAnalyzerStatus(rdbAnalyze.getId(), scheduleID, host, port, 0,true, AnalyzeStatus.SAVE);
                             rdbBgsave(jedis,host,port);
+                            // 获取分析节点状态
+                            queryAnalyzeStatus(rdbAnalyze.getId(), needAnalyzeInstances);
                         }
                     } catch (Exception e) {
                         LOG.error("rdb generate error.", e);
@@ -245,6 +249,86 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
         return responseResult;
     }
 
+    // 更新分析器状态
+    public void queryAnalyzeStatus(Long analyzeId, List<AnalyzeInstance> analyzeInstances){
+        List<ScheduleDetail> scheduleDetails = AppCache.scheduleDetailMap.get(analyzeId);
+        for (AnalyzeInstance analyzeInstance : analyzeInstances) {
+            for (ScheduleDetail scheduleDetail : scheduleDetails) {
+
+                if (!(AnalyzeStatus.DONE.equals(scheduleDetail.getStatus())
+                        || AnalyzeStatus.CANCELED.equals(scheduleDetail.getStatus())
+                        || AnalyzeStatus.ERROR.equals(scheduleDetail.getStatus()))) {
+                    String instanceStr = scheduleDetail.getInstance();
+                    if (analyzeInstance.getHost().equals(instanceStr.split(":")[0])) {
+                        getAnalyzerStatusRest(analyzeId, analyzeInstance, scheduleDetails);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // 获取分析器状态
+    private void getAnalyzerStatusRest(Long analyzeId,AnalyzeInstance instance,List<ScheduleDetail> scheduleDetails) {
+        if (null == instance) {
+            LOG.warn("analyzeInstance is null!");
+            return;
+        }
+        // String url = "http://127.0.0.1:8082/status";
+        String host = instance.getHost();
+
+        String url = "http://" + host + ":" + instance.getPort() + "/status";
+        try {
+            ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+            String str = responseEntity.getBody();
+            JSONObject result = JSONObject.parseObject(str);
+            if (null == result) {
+                LOG.warn("get status URL :" + url + " no response!");
+                return;
+            } else {
+                handleAnalyzerStatusMessage(analyzeId, host, result);
+            }
+
+        } catch (Exception e) {
+            AppCache.scheduleDetailMap.get(analyzeId).forEach(s -> {
+                if(s.getInstance().startsWith(host)){
+                    s.setStatus(AnalyzeStatus.ERROR);
+                }
+            });
+            LOG.error("getAnalyzerStatusRest failed!", e);
+        }
+    }
+
+    // 解析分析器返回信息
+    private void handleAnalyzerStatusMessage(Long analyzeId,String host, JSONObject message) {
+        String analyzeIP = message.getString("ip");
+        if (message.get("scheduleInfo") == null || "".equals(message.getString("scheduleInfo").trim())) {
+            return;
+        }
+        JSONObject scheduleInfo = message.getJSONObject("scheduleInfo");
+        Long scheduleID = scheduleInfo.getLong("scheduleID");
+        Map<String, Map<String, String>> rdbAnalyzeStatus = (Map<String, Map<String, String>>) message
+                .get("rdbAnalyzeStatus");
+
+        for (Entry<String, Map<String, String>> entry : rdbAnalyzeStatus.entrySet()) {
+            String port = entry.getKey();
+            if (entry.getValue() == null) {
+                continue;
+            }
+            Map<String, String> analyzeInfo = entry.getValue();
+
+            AnalyzeStatus status = AnalyzeStatus.fromString(analyzeInfo.get("status"));
+            String count = analyzeInfo.get("count");
+            String instance = analyzeIP + ":" + port;
+            if (count == null || count.equals("")) {
+                count = "0";
+            }
+
+            updateCurrentAnalyzerStatus(analyzeId, scheduleID, host, port, Integer.parseInt(count),true, status);
+        }
+    }
+
+    // 发送分析任务
     private boolean requestAnalyze(long scheduleID, RDBAnalyze rdbAnalyze, AnalyzeInstance analyzeInstance,
                                 Map<String, Set<String>> generateRule, int[] analyzer){
         // 执行任务分发
@@ -288,11 +372,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
                                              boolean stats, AnalyzeStatus analyzeStatus) {
         String instance = host + ":" + port;
         ScheduleDetail scheduleDetail = new ScheduleDetail(scheduleID, instance, process, stats, analyzeStatus);
-        List<ScheduleDetail> scheduleDetails = AppCache.scheduleDetailMap.get(analyzeID);
-        if(scheduleDetails == null){
-            scheduleDetails = new ArrayList<>();
-            AppCache.scheduleDetailMap.put(analyzeID, scheduleDetails);
-        }
+        List<ScheduleDetail> scheduleDetails = AppCache.scheduleDetailMap.computeIfAbsent(analyzeID, k -> new ArrayList<>());
         if(scheduleDetails.contains(scheduleDetail)){
             int i = scheduleDetails.indexOf(scheduleDetail);
             scheduleDetails.set(i, scheduleDetail);
@@ -300,7 +380,6 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
             scheduleDetails.add(scheduleDetail);
         }
     }
-
 
     // 将每个需要分析的redis实例的key数量写入到缓存中
     private void cacheDBSize(Map<String, Set<String>> generateRule){

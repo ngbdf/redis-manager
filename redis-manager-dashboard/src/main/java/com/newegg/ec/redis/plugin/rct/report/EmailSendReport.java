@@ -1,6 +1,9 @@
 package com.newegg.ec.redis.plugin.rct.report;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.newegg.ec.redis.config.RCTConfig;
 import com.newegg.ec.redis.entity.ExcelData;
 import com.newegg.ec.redis.entity.RDBAnalyze;
@@ -35,7 +38,7 @@ public class EmailSendReport {
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-    public void sendEmailReport(RDBAnalyze rdbAnalyze, RCTConfig.Email emailInfo, Map<String,Set<String>> reportData, Map<String, ReportData> latestPrefixData) {
+    public void sendEmailReport(RDBAnalyze rdbAnalyze, RCTConfig.Email emailInfo, Map<String,String> reportData, Map<String, ReportData> latestPrefixData) {
 
         File reportFile = null;
         try {
@@ -65,7 +68,8 @@ public class EmailSendReport {
             InternetAddress[] addresses = (InternetAddress[])list.toArray(new InternetAddress[list.size()]);
             mimeMessage.setRecipients(Message.RecipientType.TO, addresses);
             
-            String subject = rdbAnalyze.getClusterId()+" "+emailInfo.getSubject() +" "+ time;
+//            String subject = rdbAnalyze.getClusterId()+" "+emailInfo.getSubject() +" "+ time;
+            String subject = rdbAnalyze.getCluster().getClusterName()+" "+emailInfo.getSubject() +" "+ time;
             MimeBodyPart text = new MimeBodyPart();
             String emailText = "Hi all: \n \n The latest redis analysis report has been generated, see attachment. \n \n";
             text.setText(emailText);
@@ -90,18 +94,59 @@ public class EmailSendReport {
         }
     }
 
+
     /**
      *
      * @param reportData key: AnalyzerConstant, value: Set<String> :[{},{}]
      * @return Map key: sheetName, List<ExcelData>
      */
-    private Map<String, List<ExcelData>> getExcelDataMap(Map<String,Set<String>> reportData, Map<String, ReportData> latestPrefixData) {
+    private Map<String, List<ExcelData>> getExcelDataMap(Map<String,String> reportData, Map<String, ReportData> latestPrefixData) {
         Map<String, List<ExcelData>> mapResult = new HashMap<>();
         IAnalyzeDataConverse analyzeDataConverse = null;
-        for(Map.Entry<String, Set<String>> entry : reportData.entrySet()) {
-            analyzeDataConverse = ReportDataConverseFacotry.getReportDataConverse(entry.getKey());
+//        String prefixCount = reportData.getOrDefault(IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT,null);
+//        String prefixMemory = reportData.getOrDefault(IAnalyzeDataConverse.PREFIX_KEY_BY_MEMORY,null);
+//        List<String> prefix = new ArrayList<>();
+//        Map<String,String> map = new HashMap<>();
+//        if(Objects.nonNull(prefixCount)){
+//            JSONArray array = JSONObject.parseArray(prefixCount);
+//            for (int i = 0;i<array.size();i++){
+//                JSONObject object = array.getJSONObject(i);
+//                if(map.containsKey("prefixKey")){
+//
+//                }
+//                map.put(object.getString("prefixKey"), object.toJSONString());
+//            }
+//           prefix.addAll(new ArrayList<>(JSONObject.parseArray(prefixCount, String.class)));
+//        }
+//        if(Objects.nonNull(prefixMemory)){
+//            prefix.addAll(new ArrayList<>(JSONObject.parseArray(prefixMemory, String.class)));
+//        }
+//
+//
+//        reportData.remove(IAnalyzeDataConverse.PREFIX_KEY_BY_MEMORY);
+//        reportData.put(IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT,JSONObject.toJSONString(prefix));
+
+        for(Map.Entry<String,String> entry : reportData.entrySet()) {
+            analyzeDataConverse = ReportDataConverseFacotry.getReportDataConverseByString(entry.getKey());
             if(null != analyzeDataConverse) {
-                mapResult.putAll(analyzeDataConverse.getPrefixAnalyzerData(entry.getValue(), latestPrefixData));
+                List<String> list = new ArrayList<>();
+                if(Objects.equals(IAnalyzeDataConverse.TOP_KEY_ANALYZE,entry.getKey())){
+                    JSONObject object = JSONObject.parseObject(entry.getValue());
+                    for (String key:object.keySet()){
+                        list.addAll(new ArrayList<>(JSONObject.parseArray(object.getString(key), String.class)));
+                    }
+                    mapResult.putAll(analyzeDataConverse.getPrefixAnalyzerData(new HashSet<>(list), latestPrefixData));
+                }else if (Objects.equals(IAnalyzeDataConverse.PREFIX_KEY_BY_MEMORY,entry.getKey())){
+                    list.addAll(new ArrayList<>(JSONObject.parseArray(entry.getValue(), String.class)));
+                    mapResult.put(entry.getKey(),analyzeDataConverse.getPrefixAnalyzerData(new HashSet<>(list), latestPrefixData).getOrDefault(entry.getKey(),new ArrayList<>()));
+                }else if(Objects.equals(IAnalyzeDataConverse.PREFIX_KEY_BY_COUNT,entry.getKey())){
+                    list.addAll(new ArrayList<>(JSONObject.parseArray(entry.getValue(), String.class)));
+                    mapResult.put(entry.getKey(),analyzeDataConverse.getPrefixAnalyzerData(new HashSet<>(list), latestPrefixData).getOrDefault(entry.getKey(),new ArrayList<>()));
+                }else {
+                    list.addAll(new ArrayList<>(JSONObject.parseArray(entry.getValue(), String.class)));
+                    mapResult.putAll(analyzeDataConverse.getPrefixAnalyzerData(new HashSet<>(list), latestPrefixData));
+                }
+
             }
         }
         return mapResult;

@@ -3,12 +3,12 @@ package com.newegg.ec.redis.plugin.rct.thread;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
 import com.newegg.ec.redis.config.RCTConfig;
 import com.newegg.ec.redis.entity.*;
-
 import com.newegg.ec.redis.plugin.rct.cache.AppCache;
 import com.newegg.ec.redis.plugin.rct.report.EmailSendReport;
+import com.newegg.ec.redis.plugin.rct.report.IAnalyzeDataConverse;
+import com.newegg.ec.redis.plugin.rct.report.converseFactory.ReportDataConverseFacotry;
 import com.newegg.ec.redis.service.impl.RdbAnalyzeResultService;
 import com.newegg.ec.redis.service.impl.RdbAnalyzeService;
 import org.slf4j.Logger;
@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * @author：Truman.P.Du
@@ -57,24 +56,20 @@ public class AnalyzerStatusThread implements Runnable {
 			LOG.warn("Analyze instances is empty.");
 			return;
 		}
+		Long scheduleID = res.containsKey("scheduleID") ? res.getLongValue("scheduleID") : 0L;
 		scheduleDetails = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
 		// 获取所有analyzer运行状态
 		while (AppCache.isNeedAnalyzeStastus(rdbAnalyze.getId())) {
 
-			for (AnalyzeInstance analyzeInstance : analyzeInstances) {
-				for (ScheduleDetail scheduleDetail : scheduleDetails) {
-
-					if (!(AnalyzeStatus.DONE.equals(scheduleDetail.getStatus())
-							|| AnalyzeStatus.CANCELED.equals(scheduleDetail.getStatus())
-							|| AnalyzeStatus.ERROR.equals(scheduleDetail.getStatus()))) {
-						String instanceStr = scheduleDetail.getInstance();
-						if (analyzeInstance.getHost().equals(instanceStr.split(":")[0])) {
-							getAnalyzerStatusRest(analyzeInstance);
-							break;
-						}
-					}
-				}
+			// 更新分析器状态
+			rdbAnalyzeService.queryAnalyzeStatus(rdbAnalyze.getId(), analyzeInstances);
+			try {
+				// 每次循环休眠一次
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
+
 		}
 
 		AppCache.scheduleDetailMap.get(rdbAnalyze.getId()).forEach(s -> {
@@ -83,7 +78,6 @@ public class AnalyzerStatusThread implements Runnable {
 				return;
 			}
 		});
-
 
 		// 当所有analyzer运行完成，获取所有analyzer报表分析结果
 		if (AppCache.isAnalyzeComplete(rdbAnalyze)) {
@@ -114,15 +108,25 @@ public class AnalyzerStatusThread implements Runnable {
 				LOG.info(key+":"+temp.get(key));
 			}
 			try {
-				Map<String, ReportData> latestPrefixData = rdbAnalyzeResultService.getReportDataLatest(rdbAnalyze.getClusterId());
+				Map<String, ReportData> latestPrefixData = rdbAnalyzeResultService.getReportDataLatest(rdbAnalyze.getClusterId(), scheduleID);
+				Map<String, String> dbResult = new HashMap<>();
+				IAnalyzeDataConverse analyzeDataConverse = null;
+				for (Map.Entry<String, Set<String>> entry : reportData.entrySet()) {
+					analyzeDataConverse = ReportDataConverseFacotry.getReportDataConverse(entry.getKey());
+					if (null != analyzeDataConverse) {
+						dbResult.putAll(analyzeDataConverse.getMapJsonString(entry.getValue()));
+
+					}
+				}
+				dbResult = rdbAnalyzeResultService.combinePrefixKey(dbResult);
 			    try {
-                    rdbAnalyzeResultService.reportDataWriteToDb(rdbAnalyze, reportData);
+                    rdbAnalyzeResultService.reportDataWriteToDb(rdbAnalyze, dbResult);
                 }catch (Exception e) {
                     LOG.error("reportDataWriteToDb has error.", e);
                 }
 				if(rdbAnalyze.isReport()) {
 					EmailSendReport emailSendReport = new EmailSendReport();
-					emailSendReport.sendEmailReport(rdbAnalyze, emailInfo, reportData, latestPrefixData);
+					emailSendReport.sendEmailReport(rdbAnalyze, emailInfo, dbResult, latestPrefixData);
 				}
 			} catch (Exception e) {
 				LOG.error("email report has error.", e);
@@ -136,42 +140,6 @@ public class AnalyzerStatusThread implements Runnable {
 			}
 		}
 
-	}
-
-	private void getAnalyzerStatusRest(AnalyzeInstance instance) {
-		if (null == instance) {
-			LOG.warn("analyzeInstance is null!");
-			return;
-		}
-		// String url = "http://127.0.0.1:8082/status";
-		String host = instance.getHost();
-
-		String url = "http://" + host + ":" + instance.getPort() + "/status";
-		try {
-			ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
-			String str = responseEntity.getBody();
-			JSONObject result = JSONObject.parseObject(str);
-			if (null == result) {
-				LOG.warn("get status URL :" + url + " no response!");
-				return;
-			} else {
-				handleAnalyzerStatusMessage(result);
-			}
-
-		} catch (Exception e) {
-			scheduleDetails.forEach(s ->{
-				if(s.getInstance().startsWith(host)){
-					s.setStatus(AnalyzeStatus.ERROR);
-				}
-			});
-			AppCache.scheduleDetailMap.get(rdbAnalyze.getId()).forEach(s -> {
-				if(s.getInstance().startsWith(host)){
-					s.setStatus(AnalyzeStatus.ERROR);
-				}
-			});
-
-			LOG.error("getAnalyzerStatusRest failed!", e);
-		}
 	}
 
 	private Map<String, Set<String>> getAnalyzerReportRest(AnalyzeInstance instance) {
@@ -197,54 +165,6 @@ public class AnalyzerStatusThread implements Runnable {
 			LOG.error("getAnalyzerReportRest failed!", e);
 			return null;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private void handleAnalyzerStatusMessage(JSONObject message) {
-		String analyzeIP = message.getString("ip");
-		if (message.get("scheduleInfo") == null || "".equals(message.getString("scheduleInfo").trim())) {
-			return;
-		}
-		JSONObject scheduleInfo = message.getJSONObject("scheduleInfo");
-		Long scheduleID = scheduleInfo.getLong("scheduleID");
-		Map<String, Map<String, String>> rdbAnalyzeStatus = (Map<String, Map<String, String>>) message
-				.get("rdbAnalyzeStatus");
-		List<ScheduleDetail> scheduleDetails = new ArrayList<>();
-
-		Map<String, String> newScheduleDtailsInstance = new HashMap<>();
-
-		for (Entry<String, Map<String, String>> entry : rdbAnalyzeStatus.entrySet()) {
-			String port = entry.getKey();
-			if (entry.getValue() == null) {
-				continue;
-			}
-			Map<String, String> analyzeInfo = entry.getValue();
-
-			AnalyzeStatus status = AnalyzeStatus.fromString(analyzeInfo.get("status"));
-			String count = analyzeInfo.get("count");
-			String instance = analyzeIP + ":" + port;
-			if (count == null || count.equals("")) {
-				count = "0";
-			}
-			ScheduleDetail s = new ScheduleDetail(scheduleID, instance, Integer.parseInt(count), true, status);
-			scheduleDetails.add(s);
-			newScheduleDtailsInstance.put(instance, instance);
-		}
-		// 将新旧信息合并
-		List<ScheduleDetail> oldScheduleDetails = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
-		List<ScheduleDetail> oldNeedScheduleDetails = new ArrayList<>();
-
-		if (oldScheduleDetails != null && oldScheduleDetails.size() > 0) {
-			for (ScheduleDetail detail : oldScheduleDetails) {
-				if (newScheduleDtailsInstance.containsKey(detail.getInstance())) {
-					continue;
-				}
-				oldNeedScheduleDetails.add(detail);
-			}
-			scheduleDetails.addAll(oldNeedScheduleDetails);
-		}
-
-		AppCache.scheduleDetailMap.put(rdbAnalyze.getId(), scheduleDetails);
 	}
 
 	@SuppressWarnings("unchecked")

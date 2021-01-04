@@ -15,11 +15,11 @@ public interface IRdbAnalyzeResultService {
     void delete(Long id);
     void add(RDBAnalyzeResult rdbAnalyzeResult);
     List<RDBAnalyzeResult> selectList(Long groupId);
-    RDBAnalyzeResult reportDataWriteToDb(RDBAnalyze rdbAnalyze, Map<String, Set<String>> data);
+    RDBAnalyzeResult reportDataWriteToDb(RDBAnalyze rdbAnalyze, Map<String, String> data);
     Object getListStringFromResult(Long analyzeResultId, String key) throws Exception;
     JSONObject getPrefixLineByCountOrMem(Long analyzeResultId, String type, int top, String prefixKey);
     JSONArray getPrefixType(Long analyzeResultId) throws Exception;
-    Map<String, ReportData> getReportDataLatest(Long clusterId);
+    Map<String, ReportData> getReportDataLatest(Long clusterId, Long scheduleId);
     void createRdbAnalyzeResultTable();
     List<RDBAnalyzeResult> getAllAnalyzeResult(List<RDBAnalyzeResult> results, List<Cluster> clusters);
     List<RDBAnalyzeResult> selectAllRecentlyResultById(Long resultId);
