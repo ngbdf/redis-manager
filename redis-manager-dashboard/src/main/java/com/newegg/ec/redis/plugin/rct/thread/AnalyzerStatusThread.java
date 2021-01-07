@@ -46,17 +46,17 @@ public class AnalyzerStatusThread implements Runnable {
 	@Override
 	public void run() {
 		JSONObject res = rdbAnalyzeService.assignAnalyzeJob(rdbAnalyze);
-
-		if(res.containsKey("status") && !res.getBoolean("status")){
+		Long scheduleID =  res.getLongValue("scheduleID");
+		if(!res.getBoolean("status")){
 			LOG.warn("Assign job fail.");
+			// 执行失败，删除任务
+			AppCache.scheduleDetailMap.remove(rdbAnalyze.getId());
+			if(scheduleID != 0L){
+				rdbAnalyzeService.deleteResult(rdbAnalyze, scheduleID);
+			}
 			return;
 		}
 		this.analyzeInstances = (List<AnalyzeInstance>)res.get("needAnalyzeInstances");
-		if(analyzeInstances == null || analyzeInstances.isEmpty()){
-			LOG.warn("Analyze instances is empty.");
-			return;
-		}
-		Long scheduleID = res.containsKey("scheduleID") ? res.getLongValue("scheduleID") : 0L;
 		scheduleDetails = AppCache.scheduleDetailMap.get(rdbAnalyze.getId());
 		// 获取所有analyzer运行状态
 		while (AppCache.isNeedAnalyzeStastus(rdbAnalyze.getId())) {
