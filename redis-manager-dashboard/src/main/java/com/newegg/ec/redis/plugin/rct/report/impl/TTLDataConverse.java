@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author kz37
@@ -64,8 +65,10 @@ public class TTLDataConverse implements IAnalyzeDataConverse {
         }
         ExcelData excelData = new ExcelData();
         excelData.setStartColumn(0);
-        excelData.setTableData(sheetData);
+        List<List<String>> orderSheet =  sheetData.stream().sorted((o1, o2) -> Integer.parseInt(o2.get(2))-Integer.parseInt(o1.get(2))).collect(Collectors.toList());
+        excelData.setTableData(orderSheet);
         List<ExcelData> excelListData = new ArrayList<>();
+
         excelListData.add(excelData);
         resultMap.put(getSheetName(), excelListData);
         return resultMap;
