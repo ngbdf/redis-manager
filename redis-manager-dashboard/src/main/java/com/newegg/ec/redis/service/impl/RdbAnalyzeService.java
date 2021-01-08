@@ -94,6 +94,7 @@ public class RdbAnalyzeService implements IRdbAnalyzeService {
     // 执行RCT任务分发
     public JSONObject assignAnalyzeJob(RDBAnalyze rdbAnalyze){
         JSONObject responseResult = new JSONObject();
+        responseResult.put("status", Boolean.TRUE);
         int[] analyzer = null;
         if (rdbAnalyze.getAnalyzer().contains(",")) {
             String[] str = rdbAnalyze.getAnalyzer().split(",");

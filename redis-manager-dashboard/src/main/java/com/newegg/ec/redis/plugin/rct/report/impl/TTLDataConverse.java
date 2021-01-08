@@ -65,7 +65,7 @@ public class TTLDataConverse implements IAnalyzeDataConverse {
         }
         ExcelData excelData = new ExcelData();
         excelData.setStartColumn(0);
-        List<List<String>> orderSheet =  sheetData.stream().sorted((o1, o2) -> Integer.parseInt(o2.get(2))-Integer.parseInt(o1.get(2))).collect(Collectors.toList());
+        List<List<String>> orderSheet =  sheetData.stream().sorted((o1, o2) -> Integer.parseInt(o2.get(1))-Integer.parseInt(o1.get(1))).collect(Collectors.toList());
         excelData.setTableData(orderSheet);
         List<ExcelData> excelListData = new ArrayList<>();
 
