@@ -5,6 +5,7 @@ import com.newegg.ec.redis.entity.*;
 import com.newegg.ec.redis.util.RedisUtil;
 import com.newegg.ec.redis.util.SignUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
@@ -18,6 +19,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static com.newegg.ec.redis.client.RedisURI.MAX_ATTEMPTS;
 import static com.newegg.ec.redis.client.RedisURI.TIMEOUT;
 import static com.newegg.ec.redis.util.RedisUtil.*;
 
@@ -738,7 +740,12 @@ public class RedisClient implements IRedisClient {
         String redisUrl = cluster.getNodes().split(",")[0];
         String redisHost = redisUrl.split(":")[0];
         int redisPort = Integer.parseInt(redisUrl.split(":")[1]);
-        JedisCluster jedisCluster = new JedisCluster(new HostAndPort(redisHost,redisPort));
+        JedisCluster jedisCluster = null;
+        if (Strings.isNullOrEmpty(cluster.getRedisPassword())) {
+            jedisCluster = new JedisCluster(new HostAndPort(redisHost,redisPort));
+        } else {
+            jedisCluster = new JedisCluster(new HostAndPort(redisHost,redisPort), TIMEOUT, TIMEOUT, MAX_ATTEMPTS, cluster.getRedisPassword(), new GenericObjectPoolConfig());
+        }
         Map<String, JedisPool> nodes = jedisCluster.getClusterNodes();
         Map<String, String> clusterNodesIP = new HashMap<>();
         nodes.forEach((k, v) -> {
@@ -861,7 +868,12 @@ public class RedisClient implements IRedisClient {
         String redisUrl = cluster.getNodes().split(",")[0];
         String redisHost = redisUrl.split(":")[0];
         int redisPort = Integer.parseInt(redisUrl.split(":")[1]);
-        JedisCluster jedisCluster = new JedisCluster(new HostAndPort(redisHost,redisPort));
+        JedisCluster jedisCluster = null;
+        if (Strings.isNullOrEmpty(cluster.getRedisPassword())) {
+            jedisCluster = new JedisCluster(new HostAndPort(redisHost,redisPort));
+        } else {
+            jedisCluster = new JedisCluster(new HostAndPort(redisHost,redisPort), TIMEOUT, TIMEOUT, MAX_ATTEMPTS, cluster.getRedisPassword(), new GenericObjectPoolConfig());
+        }
         Map<String, JedisPool> nodes = jedisCluster.getClusterNodes();
         Map<String, List<String>> clusterNodes = new HashMap<>();
 
