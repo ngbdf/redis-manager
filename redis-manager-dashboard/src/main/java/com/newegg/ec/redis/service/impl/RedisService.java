@@ -583,7 +583,7 @@ public class RedisService implements IRedisService {
                 do {
                     keyList = sourceRedisClient.clusterGetKeysInSlot(slot, 50);
                     String[] keys = keyList.toArray(new String[0]);
-                    sourceRedisClient.migrate(sourceNode.getHost(), sourceNode.getPort(),
+                    sourceRedisClient.migrate(targetNode.getHost(), targetNode.getPort(),
                             0, 100000, MigrateParams.migrateParams().replace(), keys);
                 } while (!keyList.isEmpty());
             } catch (Exception e) {
